@@ -15,8 +15,6 @@ interface EnvironmentsSelectProps {
   compressed?: boolean;
   defaultValue?: string;
   onChange: (value: string) => void;
-  serviceName?: string;
-  transactionType?: string;
 }
 
 const allOption: EuiComboBoxOptionOption<string> = {
@@ -28,25 +26,24 @@ export function EnvironmentsSelect({
   compressed,
   defaultValue,
   onChange,
-  serviceName,
-  transactionType,
 }: EnvironmentsSelectProps) {
   const defaultOption =
     !defaultValue || defaultValue === ENVIRONMENT_ALL.value
       ? allOption
       : { label: defaultValue, value: defaultValue };
   const [selectedOptions, setSelectedOptions] = useState([defaultOption]);
+  const [searchValue, setSearchValue] = useState('');
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
         endpoint: 'GET /api/apm/suggestions/environments',
         params: {
-          query: { serviceName, transactionType },
+          query: { string: searchValue },
         },
       });
     },
-    [serviceName, transactionType],
+    [searchValue],
     { preservePreviousData: false }
   );
 
@@ -70,9 +67,11 @@ export function EnvironmentsSelect({
 
   return (
     <EuiComboBox
+      async={true}
       compressed={compressed}
       isLoading={status === FETCH_STATUS.LOADING}
       onChange={handleChange}
+      onSearchChange={setSearchValue}
       options={options}
       placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
         defaultMessage: 'Select environment',

@@ -15,12 +15,14 @@ export default function environmentsSuggestionTests({ getService }: FtrProviderC
     'environment suggestions when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      it('returns all environments', async () => {
-        const { body } = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/suggestions/environments',
-        });
+      describe('with an empty string parameter', () => {
+        it('returns all environments', async () => {
+          const { body } = await apmApiClient.readUser({
+            endpoint: 'GET /api/apm/suggestions/environments',
+            params: { query: { string: '' } },
+          });
 
-        expectSnapshot(body).toMatchInline(`
+          expectSnapshot(body).toMatchInline(`
           Object {
             "environments": Array [
               "production",
@@ -28,21 +30,24 @@ export default function environmentsSuggestionTests({ getService }: FtrProviderC
             ],
           }
         `);
+        });
       });
 
-      it('filters by service name and transaction type', async () => {
-        const { body } = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/suggestions/environments',
-          params: { query: { serviceName: 'opbeans-java', transactionType: 'request' } },
-        });
+      describe('with a string parameter', () => {
+        it('returns items matching the string parameter', async () => {
+          const { body } = await apmApiClient.readUser({
+            endpoint: 'GET /api/apm/suggestions/environments',
+            params: { query: { string: 'pr' } },
+          });
 
-        expectSnapshot(body).toMatchInline(`
+          expectSnapshot(body).toMatchInline(`
             Object {
               "environments": Array [
                 "production",
               ],
             }
           `);
+        });
       });
     }
   );

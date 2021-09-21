@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { getAllEnvironments } from '../lib/environments/get_all_environments';
+import { getEnvironmentSuggestions } from '../lib/environments/get_environment_suggestions';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceNames } from '../lib/settings/agent_configuration/get_service_names';
@@ -16,28 +16,26 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 const environmentsSuggestionsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/suggestions/environments',
   params: t.partial({
-    query: t.partial({ serviceName: t.string, transactionType: t.string }),
+    query: t.type({ string: t.string }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-
-    const { serviceName, transactionType } = params.query;
+    const { string } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
     });
 
-    const environments = await getAllEnvironments({
-      serviceName,
-      setup,
+    const environments = await getEnvironmentSuggestions({
       searchAggregatedTransactions,
-      transactionType,
+      setup,
+      string,
     });
 
-    return { environments };
+    return environments;
   },
 });
 
