@@ -274,12 +274,8 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       : aliasTargets.filter(({ targetSpace }) => spacesToAddSet.has(targetSpace));
     return { isSelectionChanged, spacesToAdd, spacesToRemove, aliasesToDisable };
   };
-  const {
-    isSelectionChanged,
-    spacesToAdd,
-    spacesToRemove,
-    aliasesToDisable,
-  } = getSelectionChanges();
+  const { isSelectionChanged, spacesToAdd, spacesToRemove, aliasesToDisable } =
+    getSelectionChanges();
 
   const [showAliasesToDisable, setShowAliasesToDisable] = useState(false);
   const [shareInProgress, setShareInProgress] = useState(false);

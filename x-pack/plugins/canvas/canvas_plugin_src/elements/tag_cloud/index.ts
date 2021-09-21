@@ -13,9 +13,9 @@ export const tagCloud: ElementFactory = () => ({
   help: 'Tagcloud visualization',
   icon: 'visTagCloud',
   expression: `filters
-  | demodata 
-  | head 150
-  | ply by="country" expression={math "count(country)" | as "Count"}
+  | demodata
+  | ply by="country" fn={math "count(country)" | as "Count"}
+  | filterrows fn={getCell "Count" | gte 10}
   | tagcloud metric={visdimension "Count"} bucket={visdimension "country"}
   | render`,
 });

@@ -75,9 +75,11 @@ describe('Tags', () => {
     );
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange(['test', 'case'].map((tag) => ({ label: tag })));
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange(['test', 'case'].map((tag) => ({ label: tag })));
     });
 
     expect(globalForm.getFormData()).toEqual({ tags: ['test', 'case'] });
