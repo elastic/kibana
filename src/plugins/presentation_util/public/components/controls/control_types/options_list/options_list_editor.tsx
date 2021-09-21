@@ -81,11 +81,10 @@ export const OptionsListEditor = ({
     })();
   }, [state.indexPattern, fetchFields]);
 
-  useEffect(() => setValidState(Boolean(state.field) && Boolean(state.indexPattern)), [
-    state.field,
-    setValidState,
-    state.indexPattern,
-  ]);
+  useEffect(
+    () => setValidState(Boolean(state.field) && Boolean(state.indexPattern)),
+    [state.field, setValidState, state.indexPattern]
+  );
 
   return (
     <>

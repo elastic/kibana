@@ -22,7 +22,7 @@ export const getControlsServiceStub = () => {
   );
 
   // cast to unknown because the stub cannot use the embeddable start contract to transform the EmbeddableFactoryDefinition into an EmbeddableFactory
-  const optionsListControlFactory = (optionsListFactoryStub as unknown) as InputControlFactory;
+  const optionsListControlFactory = optionsListFactoryStub as unknown as InputControlFactory;
   optionsListControlFactory.getDefaultInput = () => ({});
   controlsServiceStub.registerInputControlType(optionsListControlFactory);
   return controlsServiceStub;

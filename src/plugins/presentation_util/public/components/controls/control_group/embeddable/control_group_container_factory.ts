@@ -14,7 +14,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   Container,
   ContainerOutput,
@@ -27,6 +26,7 @@ import { ControlGroupInput } from '../../types';
 import { ControlGroupContainer } from './control_group_container';
 import { ControlsService } from '../../controls_service';
 import { PresentationOverlaysService } from '../../../../services/overlays';
+import { ControlGroupStrings } from '../control_group_strings';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   ControlGroupInput,
@@ -34,8 +34,8 @@ export type DashboardContainerFactory = EmbeddableFactory<
   ControlGroupContainer
 >;
 export class ControlGroupContainerFactory
-  implements
-    EmbeddableFactoryDefinition<ControlGroupInput, ContainerOutput, ControlGroupContainer> {
+  implements EmbeddableFactoryDefinition<ControlGroupInput, ContainerOutput, ControlGroupContainer>
+{
   public readonly isContainerType = true;
   public readonly type = CONTROL_GROUP_TYPE;
   public readonly controlsService: ControlsService;
@@ -52,9 +52,7 @@ export class ControlGroupContainerFactory
   public isEditable = async () => false;
 
   public readonly getDisplayName = () => {
-    return i18n.translate('dashboard.factory.displayName', {
-      defaultMessage: 'Dashboard',
-    });
+    return ControlGroupStrings.getEmbeddableTitle();
   };
 
   public getDefaultInput(): Partial<ControlGroupInput> {

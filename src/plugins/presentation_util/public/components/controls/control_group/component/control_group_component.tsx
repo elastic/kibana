@@ -70,10 +70,10 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const draggingIndex = useMemo(() => (draggingId ? controlIds.indexOf(draggingId) : -1), [
-    controlIds,
-    draggingId,
-  ]);
+  const draggingIndex = useMemo(
+    () => (draggingId ? controlIds.indexOf(draggingId) : -1),
+    [controlIds, draggingId]
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor),

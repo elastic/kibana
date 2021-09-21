@@ -9,6 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const ControlGroupStrings = {
+  getEmbeddableTitle: () =>
+    i18n.translate('presentationUtil.inputControls.controlGroup.title', {
+      defaultMessage: 'Control group',
+    }),
   floatingActions: {
     getEditButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.floatingActions.edit', {
