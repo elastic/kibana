@@ -27,6 +27,7 @@ export {
   PackagePolicySOAttributes,
   FullAgentPolicyInput,
   FullAgentPolicy,
+  FullAgentPolicyOutput,
   AgentPolicy,
   AgentPolicySOAttributes,
   NewAgentPolicy,
