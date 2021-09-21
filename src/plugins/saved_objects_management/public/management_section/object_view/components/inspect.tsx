@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { omit } from 'lodash';
@@ -26,9 +26,12 @@ const codeEditorAriaLabel = (title: string) =>
 const copyToClipboardLabel = i18n.translate('savedObjectsManagement.view.copyToClipboardLabel', {
   defaultMessage: 'Copy to clipboard',
 });
-export const Inspect = ({ object }: InspectProps) => {
+
+export const Inspect: FC<InspectProps> = ({ object }) => {
   const title = object.meta.title || 'saved object';
-  const objectAsJsonString = JSON.stringify(omit(object, 'meta'), null, 2);
+
+  const objectAsJsonString = useMemo(() => JSON.stringify(omit(object, 'meta'), null, 2), [object]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>

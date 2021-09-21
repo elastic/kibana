@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './saved_objects_edition_page.scss';
+
 import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
 import { RedirectAppLinks } from '../../../kibana_react/public';
 import { SavedObjectEdition } from './object_view';
+import './saved_objects_edition_page.scss';
 
 const SavedObjectsEditionPage = ({
   coreStart,
@@ -50,7 +51,7 @@ const SavedObjectsEditionPage = ({
   return (
     <RedirectAppLinks
       application={coreStart.application}
-      className={'savedObjectsManagementEditionPage'}
+      className="savedObjectsManagementEditionPage"
     >
       <SavedObjectEdition
         id={id}

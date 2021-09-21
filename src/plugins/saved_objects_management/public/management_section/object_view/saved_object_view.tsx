@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './saved_object_view.scss';
+
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -24,7 +24,7 @@ import {
 import { Header, Inspect, NotFoundErrors } from './components';
 import { bulkGetObjects } from '../../lib/bulk_get_objects';
 import { SavedObjectWithMetadata } from '../../types';
-
+import './saved_object_view.scss';
 export interface SavedObjectEditionProps {
   id: string;
   savedObjectType: string;

@@ -29,6 +29,8 @@ import {
   SavedObjectEditionState,
 } from './saved_object_view';
 
+const resolvePromises = () => new Promise((resolve) => process.nextTick(resolve));
+
 describe('SavedObjectEdition', () => {
   let defaultProps: SavedObjectEditionProps;
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -110,7 +112,7 @@ describe('SavedObjectEdition', () => {
     );
     const component = shallowRender();
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await resolvePromises();
     // Ensure the state changes are reflected
     component.update();
     expect(component).toMatchSnapshot();
@@ -127,7 +129,9 @@ describe('SavedObjectEdition', () => {
       ])
     );
     const component = shallowRender({ notFoundType: 'does_not_exist' });
-    await new Promise((resolve) => process.nextTick(resolve));
+
+    await resolvePromises();
+
     component.update();
 
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
@@ -136,7 +140,9 @@ describe('SavedObjectEdition', () => {
   it('should add danger toast when bulk get throws', async () => {
     bulkGetObjectsMock.mockImplementation(() => Promise.reject(new Error('fail')));
     const component = shallowRender({ notFoundType: 'does_not_exist' });
-    await new Promise((resolve) => process.nextTick(resolve));
+
+    await resolvePromises();
+
     component.update();
 
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
@@ -174,7 +180,9 @@ describe('SavedObjectEdition', () => {
     const component = shallowRender({
       capabilities: applications.capabilities,
     });
-    await new Promise((resolve) => process.nextTick(resolve));
+
+    await resolvePromises();
+
     component.update();
     const headerComponent = component.find('Header');
     expect(headerComponent.prop('canViewInApp')).toBe(true);
@@ -199,7 +207,9 @@ describe('SavedObjectEdition', () => {
     const component = shallowRender({
       capabilities: applications.capabilities,
     });
-    await new Promise((resolve) => process.nextTick(resolve));
+
+    await resolvePromises();
+
     component.update();
     const inspectComponent = component.find('Inspect');
     expect(inspectComponent).toEqual({});
@@ -246,7 +256,9 @@ describe('SavedObjectEdition', () => {
         savedObjectsClient: mockSavedObjectsClient,
         overlays,
       });
-      await new Promise((resolve) => process.nextTick(resolve));
+
+      await resolvePromises();
+
       component.update();
       component.instance().delete();
       expect(overlays.openConfirm).toHaveBeenCalledWith(
@@ -281,7 +293,9 @@ describe('SavedObjectEdition', () => {
         savedObjectsClient: mockSavedObjectsClient,
         overlays,
       });
-      await new Promise((resolve) => process.nextTick(resolve));
+
+      await resolvePromises();
+
       component.update();
       component.instance().delete();
       expect(overlays.openConfirm).toHaveBeenCalledTimes(1);
@@ -305,7 +319,9 @@ describe('SavedObjectEdition', () => {
       const component = shallowRender({
         capabilities: applications.capabilities,
       });
-      await new Promise((resolve) => process.nextTick(resolve));
+
+      await resolvePromises();
+
       component.update();
       expect(component.find('Header').prop('canDelete')).toBe(false);
     });

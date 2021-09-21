@@ -75,7 +75,6 @@ const SavedObjectsTablePage = ({
       spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]
   );
-
   return (
     <ContextWrapper>
       <SavedObjectsTable
@@ -93,16 +92,10 @@ const SavedObjectsTablePage = ({
         applications={coreStart.application}
         perPageConfig={itemsPerPage}
         goInspectObject={(savedObject) => {
-          const { editUrl } = savedObject.meta;
-          if (editUrl) {
-            coreStart.application.navigateToUrl(coreStart.http.basePath.prepend(`/app${editUrl}`));
-          } else {
-            coreStart.application.navigateToUrl(
-              coreStart.http.basePath.prepend(
-                `/app/management/kibana/objects/${savedObject.type}/${savedObject.id}`
-              )
-            );
-          }
+          const savedObjectEditUrl = savedObject.meta.editUrl
+            ? `/app${savedObject.meta.editUrl}`
+            : `/app/management/kibana/objects/${savedObject.type}/${savedObject.id}`;
+          coreStart.application.navigateToUrl(coreStart.http.basePath.prepend(savedObjectEditUrl));
         }}
         canGoInApp={(savedObject) => {
           const { inAppUrl } = savedObject.meta;
