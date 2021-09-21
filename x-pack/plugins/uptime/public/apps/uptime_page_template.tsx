@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPageHeaderProps } from '@elastic/eui';
-import { OVERVIEW_ROUTE } from '../../common/constants';
+import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsStart } from './plugin';
 import { useNoDataConfig } from './use_no_data_config';
@@ -44,21 +44,21 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
     return <EmptyStateError errors={[error]} />;
   }
 
+  const isMainRoute = path === OVERVIEW_ROUTE || path === CERTIFICATES_ROUTE;
+
   return (
-    <>
-      <div data-test-subj={noDataConfig ? 'data-missing' : undefined} />
-      <StyledPageTemplateComponent
-        pageHeader={pageHeader}
-        noDataConfig={path === OVERVIEW_ROUTE && !loading ? noDataConfig : undefined}
+    <StyledPageTemplateComponent
+      pageHeader={pageHeader}
+      noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
+      data-test-subj={noDataConfig ? 'uptime-data-missing' : 'uptime-has-data'}
+    >
+      {loading && isMainRoute && <EmptyStateLoading />}
+      <div
+        style={{ visibility: loading && isMainRoute ? 'hidden' : 'initial' }}
+        data-test-subj={noDataConfig ? 'data-missing' : undefined}
       >
-        {loading && path === OVERVIEW_ROUTE && <EmptyStateLoading />}
-        <div
-          style={{ visibility: loading && path === OVERVIEW_ROUTE ? 'hidden' : 'initial' }}
-          data-test-subj={noDataConfig ? 'data-missing' : undefined}
-        >
-          {children}
-        </div>
-      </StyledPageTemplateComponent>
-    </>
+        {children}
+      </div>
+    </StyledPageTemplateComponent>
   );
 };

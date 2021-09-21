@@ -13,6 +13,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime } = getPageObjects(['uptime']);
   const uptimeService = getService('uptime');
 
+  const { header } = getPageObjects(['header']);
+
   const es = getService('es');
 
   describe('certificates', function () {
@@ -23,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('go to certs page', async () => {
-        await uptimeService.common.waitUntilDataIsLoaded();
+        await header.waitUntilLoadingHasFinished();
         await uptimeService.cert.hasViewCertButton();
         await uptimeService.navigation.goToCertificates();
       });
@@ -43,7 +45,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can navigate to cert page', async () => {
-        await uptimeService.common.waitUntilDataIsLoaded();
         await uptimeService.cert.hasViewCertButton();
         await uptimeService.navigation.goToCertificates();
       });

@@ -57,7 +57,7 @@ export class UptimePageObject extends FtrService {
   }
 
   public async pageHasDataMissing() {
-    return await this.commonService.pageHasDataMissing();
+    await this.commonService.pageHasDataMissing();
   }
 
   public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
