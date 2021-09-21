@@ -11,6 +11,7 @@ import type {
   NewPackagePolicyInput,
 } from './package_policy';
 import type { NewAgentPolicy } from './agent_policy';
+import type { Output } from './output';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -29,3 +30,7 @@ export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespac
 }
 
 export type PreconfiguredPackage = Omit<PackagePolicyPackage, 'title'>;
+
+export interface PreconfiguredOutput extends Omit<Output, 'config_yaml'> {
+  config?: Record<string, unknown>;
+}

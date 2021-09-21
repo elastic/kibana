@@ -14,6 +14,8 @@ import {
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
   DEFAULT_PACKAGES,
 } from '../../constants';
+import type { PreconfiguredOutput } from '../../../common';
+import { outputType } from '../../../common';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
@@ -47,47 +49,94 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
   }
 );
 
-export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
+function validatePreconfiguredOutputs(outputs: PreconfiguredOutput[]) {
+  const acc = { names: new Set(), ids: new Set(), is_default: false };
+
+  for (const output of outputs) {
+    if (acc.names.has(output.name)) {
+      return 'preconfigured outputs need to have unique names.';
+    }
+    if (acc.ids.has(output.id)) {
+      return 'preconfigured outputs need to have unique ids.';
+    }
+    if (acc.is_default && output.is_default) {
+      return 'preconfigured outputs need to have only one default output.';
+    }
+
+    acc.ids.add(output.id);
+    acc.names.add(output.name);
+    acc.is_default = acc.is_default || output.is_default;
+  }
+}
+
+export const PreconfiguredOutputsSchema = schema.arrayOf(
   schema.object({
-    ...AgentPolicyBaseSchema,
-    namespace: schema.maybe(NamespaceSchema),
-    id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-    is_default: schema.maybe(schema.boolean()),
-    is_default_fleet_server: schema.maybe(schema.boolean()),
-    package_policies: schema.arrayOf(
-      schema.object({
-        name: schema.string(),
-        package: schema.object({
-          name: schema.string(),
-        }),
-        description: schema.maybe(schema.string()),
-        namespace: schema.maybe(NamespaceSchema),
-        inputs: schema.maybe(
-          schema.arrayOf(
-            schema.object({
-              type: schema.string(),
-              enabled: schema.maybe(schema.boolean()),
-              keep_enabled: schema.maybe(schema.boolean()),
-              vars: varsSchema,
-              streams: schema.maybe(
-                schema.arrayOf(
-                  schema.object({
-                    data_stream: schema.object({
-                      type: schema.maybe(schema.string()),
-                      dataset: schema.string(),
-                    }),
-                    enabled: schema.maybe(schema.boolean()),
-                    keep_enabled: schema.maybe(schema.boolean()),
-                    vars: varsSchema,
-                  })
-                )
-              ),
-            })
-          )
-        ),
-      })
-    ),
+    id: schema.string(),
+    is_default: schema.boolean({ defaultValue: false }),
+    name: schema.string(),
+    type: schema.oneOf([schema.literal(outputType.Elasticsearch)]),
+    hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
+    ca_sha256: schema.maybe(schema.string()),
+    config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   }),
+  {
+    defaultValue: [],
+    validate: validatePreconfiguredOutputs,
+  }
+);
+
+export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
+  schema.object(
+    {
+      ...AgentPolicyBaseSchema,
+      namespace: schema.maybe(NamespaceSchema),
+      id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+      is_default: schema.maybe(schema.boolean()),
+      is_default_fleet_server: schema.maybe(schema.boolean()),
+      data_output_id: schema.maybe(schema.string()),
+      monitoring_output_id: schema.maybe(schema.string()),
+      package_policies: schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          package: schema.object({
+            name: schema.string(),
+          }),
+          description: schema.maybe(schema.string()),
+          namespace: schema.maybe(NamespaceSchema),
+          inputs: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                type: schema.string(),
+                enabled: schema.maybe(schema.boolean()),
+                keep_enabled: schema.maybe(schema.boolean()),
+                vars: varsSchema,
+                streams: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      data_stream: schema.object({
+                        type: schema.maybe(schema.string()),
+                        dataset: schema.string(),
+                      }),
+                      enabled: schema.maybe(schema.boolean()),
+                      keep_enabled: schema.maybe(schema.boolean()),
+                      vars: varsSchema,
+                    })
+                  )
+                ),
+              })
+            )
+          ),
+        })
+      ),
+    },
+    {
+      validate: (policy) => {
+        if (policy.data_output_id !== policy.monitoring_output_id) {
+          return 'Currently Fleet only support one output per agent policy data_output_id should be the same as monitoring_output_id.';
+        }
+      },
+    }
+  ),
   {
     defaultValue: [DEFAULT_AGENT_POLICY, DEFAULT_FLEET_SERVER_AGENT_POLICY],
   }
