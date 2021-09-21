@@ -81,7 +81,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
           operationType: series.operationType,
           reportDefinitions: series.reportDefinitions ?? {},
           selectedMetricField: series.selectedMetricField,
-          color: series.color ?? ((theme.eui as unknown) as Record<string, string>)[color],
+          color: series.color ?? (theme.eui as unknown as Record<string, string>)[color],
         });
       }
     });
