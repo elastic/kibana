@@ -7,11 +7,13 @@
 
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
 import { ComponentProps } from '../../route_init';
 import { BeatsTemplate } from './beats_template';
 import { GlobalStateContext } from '../../global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+// @ts-ignore
 import { BeatsOverview } from '../../../components/beats/overview';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
@@ -21,6 +23,7 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
+  const [clusters, setClusters] = useState([] as any);
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
@@ -36,7 +39,7 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   });
 
   useEffect(() => {
-    if (clusters && clusters.length) {
+    if (clusters && clusters.length > 0) {
       generateBreadcrumbs(clusters[0].cluster_name, {
         inBeats: true,
       });

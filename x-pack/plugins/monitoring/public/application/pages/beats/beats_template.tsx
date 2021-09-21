@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { includes } from 'lodash';
 import { PageTemplate } from '../page_template';
 import { TabMenuItem, PageTemplateProps } from '../page_template';
 
