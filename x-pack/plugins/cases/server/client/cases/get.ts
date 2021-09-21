@@ -259,7 +259,7 @@ export const resolve = async (
     });
 
     await authorization.ensureAuthorized({
-      operation: Operations.getCase,
+      operation: Operations.resolveCase,
       entities: [
         {
           id: savedObject.id,

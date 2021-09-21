@@ -519,15 +519,8 @@ export const CaseView = React.memo(
     refreshRef,
     hideSyncAlerts,
   }: CaseViewProps) => {
-    const {
-      data,
-      resolveOutcome,
-      resolveAliasId,
-      isLoading,
-      isError,
-      fetchCase,
-      updateCase,
-    } = useGetCase(caseId, subCaseId);
+    const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
+      useGetCase(caseId, subCaseId);
     const { spaces: spacesApi, http } = useKibana().services;
 
     useEffect(() => {
