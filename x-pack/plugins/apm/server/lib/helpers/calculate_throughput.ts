@@ -7,7 +7,7 @@
 
 import { SetupTimeRange } from './setup_request';
 
-function getThroughputValue({
+function calculateThroughput({
   durationAsSeconds,
   unit,
   value,
@@ -21,14 +21,14 @@ function getThroughputValue({
   return value / duration;
 }
 
-export function calculateThroughput({
+export function calculateThroughputWithRange({
   start,
   end,
   value,
   unit = 'minute',
 }: SetupTimeRange & { value: number; unit?: ThroughputUnit }) {
   const durationAsSeconds = (end - start) / 1000;
-  return getThroughputValue({ durationAsSeconds, unit, value });
+  return calculateThroughput({ durationAsSeconds, unit, value });
 }
 
 export function calculateThroughputWithInterval({
@@ -40,7 +40,7 @@ export function calculateThroughputWithInterval({
   value: number;
   unit?: ThroughputUnit;
 }) {
-  return getThroughputValue({ durationAsSeconds, unit, value });
+  return calculateThroughput({ durationAsSeconds, unit, value });
 }
 
 export type ThroughputUnit = 'minute' | 'second';

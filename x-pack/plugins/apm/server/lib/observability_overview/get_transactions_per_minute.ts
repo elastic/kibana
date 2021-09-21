@@ -16,7 +16,7 @@ import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { calculateThroughput } from '../helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../helpers/calculate_throughput';
 
 export async function getTransactionsPerMinute({
   setup,
@@ -83,7 +83,7 @@ export async function getTransactionsPerMinute({
     ) || aggregations.transactionType.buckets[0];
 
   return {
-    value: calculateThroughput({
+    value: calculateThroughputWithRange({
       start,
       end,
       value: topTransactionTypeBucket?.doc_count || 0,
@@ -91,7 +91,11 @@ export async function getTransactionsPerMinute({
     timeseries:
       topTransactionTypeBucket?.timeseries.buckets.map((bucket) => ({
         x: bucket.key,
-        y: calculateThroughput({ start, end, value: bucket.doc_count }),
+        y: calculateThroughputWithRange({
+          start,
+          end,
+          value: bucket.doc_count,
+        }),
       })) || [],
   };
 }

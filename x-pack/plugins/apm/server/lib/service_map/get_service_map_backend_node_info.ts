@@ -16,7 +16,7 @@ import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { calculateThroughput } from '../helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../helpers/calculate_throughput';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 interface Options {
@@ -76,7 +76,7 @@ export function getServiceMapBackendNodeInfo({
 
     const avgErrorRate = errorCount / count;
     const avgTransactionDuration = latencySum / count;
-    const avgRequestsPerMinute = calculateThroughput({
+    const avgRequestsPerMinute = calculateThroughputWithRange({
       start,
       end,
       value: count,

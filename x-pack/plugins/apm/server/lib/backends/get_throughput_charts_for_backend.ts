@@ -12,7 +12,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { calculateThroughput } from '../helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../helpers/calculate_throughput';
 
 export async function getThroughputChartsForBackend({
   backendName,
@@ -71,7 +71,11 @@ export async function getThroughputChartsForBackend({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key + offsetInMs,
-        y: calculateThroughput({ start, end, value: bucket.doc_count }),
+        y: calculateThroughputWithRange({
+          start,
+          end,
+          value: bucket.doc_count,
+        }),
       };
     }) ?? []
   );
