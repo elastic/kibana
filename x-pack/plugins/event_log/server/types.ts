@@ -48,6 +48,12 @@ export interface IEventLogClient {
     options?: Partial<FindOptionsType>,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
+  aggregateEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    aggs: Record<string, estypes.AggregationsAggregationContainer>,
+    filter?: string
+  ): Promise<unknown>;
 }
 
 export interface IEventLogger {

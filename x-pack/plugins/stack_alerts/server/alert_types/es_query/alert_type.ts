@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { Logger } from 'src/core/server';
+import { random } from 'lodash';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
 import {
@@ -233,6 +234,8 @@ export function getAlertType(logger: Logger): AlertType<
 
     // apply the alert condition
     const conditionMet = compareFn(numMatches, params.threshold);
+
+    await new Promise<void>((done) => setTimeout(() => done(), random(25000, 120000)));
 
     if (conditionMet) {
       const humanFn = i18n.translate(

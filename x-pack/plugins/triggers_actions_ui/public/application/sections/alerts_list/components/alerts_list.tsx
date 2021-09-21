@@ -29,10 +29,25 @@ import {
   EuiToolTip,
   EuiTableSortingType,
   EuiButtonIcon,
+  EuiPanel,
 } from '@elastic/eui';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  CurveType,
+  Datum,
+  Fit,
+  LineSeries,
+  niceTimeFormatByDay,
+  Partition,
+  Settings,
+  timeFormatter,
+} from '@elastic/charts';
 import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
+import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd, AlertEdit } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -107,6 +122,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<AlertTableItem | null>(null);
+  const [ruleTypeCount, setRuleTypeCount] = useState<Datum[]>([]);
 
   const [sort, setSort] = useState<EuiTableSortingType<AlertTableItem>['sort']>({
     field: 'name',
@@ -221,6 +237,14 @@ export const AlertsList: React.FunctionComponent = () => {
           data: alertsResponse.data,
           totalItemCount: alertsResponse.total,
         });
+
+        const ruleTypeBreakdown = alertsResponse.aggregations?.ruleType?.buckets ?? [];
+        setRuleTypeCount(
+          ruleTypeBreakdown.map((bucket) => ({
+            value: bucket.doc_count,
+            label: getRuleTypeNameFromId(bucket.key),
+          }))
+        );
 
         if (!alertsResponse.data?.length && page.index > 0) {
           setPage({ ...page, index: 0 });
@@ -524,6 +548,8 @@ export const AlertsList: React.FunctionComponent = () => {
   const authorizedToCreateAnyAlerts = authorizedAlertTypes.some(
     (alertType) => alertType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
+  const getRuleTypeNameFromId = (ruleTypeId: string) =>
+    authorizedAlertTypes.find((type) => type.id === ruleTypeId)?.name ?? '';
 
   const getProducerFeatureName = (producer: string) => {
     return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
@@ -593,7 +619,7 @@ export const AlertsList: React.FunctionComponent = () => {
       )
     : false;
 
-  const table = (
+  const tableWithOverview = (
     <>
       <EuiFlexGroup gutterSize="s">
         {selectedIds.length > 0 && authorizedToModifySelectedAlerts && (
@@ -770,7 +796,28 @@ export const AlertsList: React.FunctionComponent = () => {
       </EuiFlexGroup>
       {/* Large to remain consistent with ActionsList table spacing */}
       <EuiSpacer size="l" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasBorder={true}>
+            <Chart size={{ height: 200, width: 200 }}>
+              <Settings theme={EUI_CHARTS_THEME_LIGHT.theme} />
+              <Partition
+                id="rule_types"
+                data={ruleTypeCount}
+                valueAccessor={(d: Datum) => d.value as number}
+                layers={[
+                  {
+                    groupByRollup: (d: Datum) => d.label,
+                    nodeLabel: (d: Datum) => d,
+                  },
+                ]}
+              />
+            </Chart>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
+      <EuiSpacer size="l" />
       <EuiBasicTable
         loading={alertsState.isLoading || alertTypesState.isLoading || isPerformingAction}
         /* Don't display alerts until we have the alert types initialized */
@@ -879,7 +926,7 @@ export const AlertsList: React.FunctionComponent = () => {
       />
       <EuiSpacer size="m" />
       {loadedItems.length || isFilterApplied ? (
-        table
+        tableWithOverview
       ) : alertTypesState.isLoading || alertsState.isLoading ? (
         <CenterJustifiedSpinner />
       ) : authorizedToCreateAnyAlerts ? (
