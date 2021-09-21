@@ -63,12 +63,14 @@ export const home = {
         rangeTo: t.string,
         kuery: t.string,
       }),
+      t.partial({
+        refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+        refreshInterval: t.string,
+      }),
     ]),
   }),
   defaults: {
     query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
     },

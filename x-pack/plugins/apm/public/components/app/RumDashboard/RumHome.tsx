@@ -11,13 +11,13 @@ import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
 import { WebApplicationSelect } from './Panels/WebApplicationSelect';
-import { DatePicker } from '../../shared/DatePicker';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 import { useHasRumData } from './hooks/useHasRumData';
+import { RumDatePicker } from './rum_datepicker';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'Dashboard',
@@ -68,7 +68,7 @@ export function RumHome() {
                   defaultMessage: 'Dashboard',
                 }),
                 rightSideItems: [
-                  <DatePicker />,
+                  <RumDatePicker />,
                   <div style={envStyle}>
                     <UxEnvironmentFilter />
                   </div>,
@@ -99,7 +99,7 @@ function PageHeader() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <DatePicker />
+          <RumDatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup wrap>

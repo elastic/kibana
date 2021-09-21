@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { RouteMatch } from './types';
 import { useRouter } from './use_router';
@@ -14,7 +14,11 @@ export function useMatchRoutes(path?: string): RouteMatch[] {
   const router = useRouter();
   const location = useLocation();
 
-  return typeof path === 'undefined'
-    ? router.matchRoutes(location)
-    : router.matchRoutes(path as never, location);
+  const routeMatches = useMemo(() => {
+    return typeof path === 'undefined'
+      ? router.matchRoutes(location)
+      : router.matchRoutes(path as never, location);
+  }, [path, router, location]);
+
+  return routeMatches;
 }

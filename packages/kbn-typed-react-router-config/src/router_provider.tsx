@@ -8,6 +8,7 @@
 import { History } from 'history';
 import React from 'react';
 import { Router as ReactRouter } from 'react-router-dom';
+import { RouteRenderer } from './route_renderer';
 import { Route, Router } from './types';
 import { RouterContextProvider } from './use_router';
 
@@ -22,7 +23,9 @@ export function RouterProvider({
 }) {
   return (
     <ReactRouter history={history}>
-      <RouterContextProvider router={router}>{children}</RouterContextProvider>
+      <RouterContextProvider router={router}>
+        <RouteRenderer />
+      </RouterContextProvider>
     </ReactRouter>
   );
 }
