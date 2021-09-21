@@ -38,7 +38,7 @@ export const MetricDetail = withMetricPageProviders(
     const nodeId = match.params.node;
     const nodeType = match.params.type as InventoryItemType;
     const inventoryModel = findInventoryModel(nodeType);
-    const { sourceId } = useContext(Source.Context);
+    const { sourceId, metricIndicesExist } = useContext(Source.Context);
 
     const {
       timeRange,
@@ -86,7 +86,7 @@ export const MetricDetail = withMetricPageProviders(
 
     if (metadataLoading && !filteredRequiredMetrics.length) {
       return (
-        <MetricsPageTemplate>
+        <MetricsPageTemplate hasData={metricIndicesExist}>
           <InfraLoadingPanel
             height="100vh"
             width="100%"

@@ -69,6 +69,7 @@ export const SnapshotPage = () => {
               defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
             >
               <MetricsPageTemplate
+                hasData={metricIndicesExist}
                 pageHeader={{
                   pageTitle: inventoryTitle,
                   rightSideItems: [<SavedViews />],
@@ -86,7 +87,7 @@ export const SnapshotPage = () => {
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
       ) : (
-        <MetricsPageTemplate data-test-subj="noMetricsIndicesPrompt" />
+        <MetricsPageTemplate hasData={metricIndicesExist} data-test-subj="noMetricsIndicesPrompt" />
       )}
     </EuiErrorBoundary>
   );

@@ -49,6 +49,7 @@ export const SourceConfigurationSettings = ({
     isLoading,
     isUninitialized,
     updateSourceConfiguration,
+    metricIndicesExist,
   } = useContext(Source.Context);
 
   const {
@@ -92,6 +93,7 @@ export const SourceConfigurationSettings = ({
 
   return (
     <MetricsPageTemplate
+      hasData={metricIndicesExist}
       pageHeader={{
         pageTitle: settingsTitle,
       }}
