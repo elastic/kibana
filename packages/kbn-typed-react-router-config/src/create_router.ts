@@ -207,7 +207,7 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       return reactRouterConfigsByRoute.get(route)!.path as string;
     },
     getRoutesToMatch: (path: string) => {
-      return (getRoutesToMatch(path) as unknown) as FlattenRoutesOf<TRoutes>;
+      return getRoutesToMatch(path) as unknown as FlattenRoutesOf<TRoutes>;
     },
   };
 }

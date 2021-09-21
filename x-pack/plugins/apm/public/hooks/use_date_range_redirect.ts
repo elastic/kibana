@@ -21,7 +21,8 @@ export function useDateRangeRedirect() {
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
 
-  const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+  const timePickerSharedState =
+    plugins.data.query.timefilter.timefilter.getTime();
 
   const isDateRangeSet = 'rangeFrom' in query && 'rangeTo' in query;
 
