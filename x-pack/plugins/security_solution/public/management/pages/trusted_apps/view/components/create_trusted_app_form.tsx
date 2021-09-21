@@ -472,7 +472,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             value={trustedApp.description}
             onChange={handleDomChangeEvents}
             fullWidth
-            compressed={isTrustedAppsByPolicyEnabled ? true : false}
+            compressed={isTrustedAppsByPolicyEnabled}
             maxLength={256}
             data-test-subj={getTestId('descriptionField')}
           />
