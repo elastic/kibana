@@ -7,15 +7,15 @@
 
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { TrustedApp } from '../../../common/endpoint/types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import { EndpointExceptionListItem, ListTemplate, TelemetryEvent } from './types';
+import { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
 import {
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
 } from './constants';
+import { TrustedApp } from '../../../common/endpoint/types';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -94,24 +94,41 @@ export function isPackagePolicyList(
 }
 
 /**
- * Maps Exception list item to parsable object
+ * Maps trusted application to shared telemetry object
  *
  * @param exceptionListItem
  * @returns collection of endpoint exceptions
  */
-export const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionListItemSchema) => {
+export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedApp) => {
+  return {
+    id: trustedApplication.id,
+    version: trustedApplication.version,
+    name: trustedApplication.name,
+    description: trustedApplication.description,
+    created_at: trustedApplication.created_at,
+    updated_at: trustedApplication.updated_at,
+    entries: trustedApplication.entries,
+    os: trustedApplication.os,
+  } as ExceptionListItem;
+};
+
+/**
+ * Maps endpoint lists to shared telemetry object
+ *
+ * @param exceptionListItem
+ * @returns collection of endpoint exceptions
+ */
+export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionListItemSchema) => {
   return {
     id: exceptionListItem.id,
     version: exceptionListItem._version || '',
     name: exceptionListItem.name,
     description: exceptionListItem.description,
     created_at: exceptionListItem.created_at,
-    created_by: exceptionListItem.created_by,
     updated_at: exceptionListItem.updated_at,
-    updated_by: exceptionListItem.updated_by,
     entries: exceptionListItem.entries,
     os_types: exceptionListItem.os_types,
-  } as EndpointExceptionListItem;
+  } as ExceptionListItem;
 };
 
 /**
@@ -121,10 +138,7 @@ export const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionLis
  * @param listType
  * @returns lists telemetry schema
  */
-export const templateExceptionList = (
-  listData: EndpointExceptionListItem[] | TrustedApp[],
-  listType: string
-) => {
+export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
   return listData.map((item) => {
     const template: ListTemplate = {
       trusted_application: [],

@@ -210,21 +210,20 @@ export interface GetEndpointListResponse {
   per_page: number;
   page: number;
   total: number;
-  data: EndpointExceptionListItem[];
+  data: ExceptionListItem[];
 }
 
 // Telemetry List types
 
-export interface EndpointExceptionListItem {
+export interface ExceptionListItem {
   id: string;
   version: string;
   name: string;
   description: string;
   created_at: string;
-  created_by: string;
   updated_at: string;
-  updated_by: string;
   entries: object;
+  os: string;
   os_types: object;
 }
 
