@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { mountWithIntl } from '@kbn/test/jest';
 import { EmailActionConnector } from '../types';
 import EmailActionConnectorFields from './email_connector';
 import * as hooks from './use_email_config';
@@ -34,8 +32,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
+        editActionConfig={() => { }}
+        editActionSecrets={() => { }}
         readOnly={false}
       />
     );
@@ -65,8 +63,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
+        editActionConfig={() => { }}
+        editActionSecrets={() => { }}
         readOnly={false}
       />
     );
@@ -98,8 +96,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
+        editActionConfig={() => { }}
+        editActionSecrets={() => { }}
         readOnly={false}
       />
     );
@@ -131,8 +129,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
+        editActionConfig={() => { }}
+        editActionSecrets={() => { }}
         readOnly={false}
       />
     );
@@ -164,8 +162,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
+        editActionConfig={() => { }}
+        editActionSecrets={() => { }}
         readOnly={false}
       />
     );
@@ -198,8 +196,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
+        editActionConfig={() => { }}
+        editActionSecrets={() => { }}
         readOnly={false}
       />
     );
@@ -222,8 +220,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
+        editActionConfig={() => { }}
+        editActionSecrets={() => { }}
         readOnly={false}
       />
     );
@@ -244,8 +242,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
+        editActionConfig={() => { }}
+        editActionSecrets={() => { }}
         readOnly={false}
       />
     );
@@ -267,8 +265,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
+        editActionConfig={() => { }}
+        editActionSecrets={() => { }}
         readOnly={false}
       />
     );
