@@ -56,7 +56,7 @@ import {
   registerPreconfigurationRoutes,
 } from './routes';
 
-import type { ExternalCallback } from './types';
+import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
   ESIndexPatternService,
   AgentService,
@@ -225,6 +225,20 @@ export class FleetPlugin
         },
       });
     }
+
+    core.http.registerRouteHandlerContext<FleetRequestHandlerContext, 'fleet'>(
+      'fleet',
+      (coreContext, request) => ({
+        epm: {
+          // Use a lazy getter to avoid constructing this client when not used by a request handler
+          get internalSoClient() {
+            return appContextService
+              .getSavedObjects()
+              .getScopedClient(request, { excludedWrappers: ['security'] });
+          },
+        },
+      })
+    );
 
     const router = core.http.createRouter();
 
