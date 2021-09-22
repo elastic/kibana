@@ -48,20 +48,6 @@ function usePrevious(value: PreviousLocationUrlState) {
   return ref.current;
 }
 
-const updateTimelineAtinitialization = (
-  urlKey: KeyUrlState,
-  newUrlStateString: string,
-  urlState: UrlState
-) => {
-  if (urlKey === CONSTANTS.timeline) {
-    const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
-    if (timeline != null && urlState.timeline.id === timeline.id) {
-      return false;
-    }
-  }
-  return true;
-};
-
 export const useUrlStateHooks = ({
   indexPattern,
   navTabs,
@@ -80,13 +66,13 @@ export const useUrlStateHooks = ({
 
   const handleInitialize = useCallback(
     (type: UrlStateType) => {
-      const urlStateToUpdate: UrlStateToRedux[] = [];
-      const statesToUpdate: ReplaceStateInLocation[] = [];
+      const urlStateUpdatesToStore: UrlStateToRedux[] = [];
+      const urlStateUpdatesToLocation: ReplaceStateInLocation[] = [];
 
       // Delete all query strings from URL when the page is security/administration (Manage menu group)
       if (isAdministration(type)) {
         ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
-          statesToUpdate.push({
+          urlStateUpdatesToLocation.push({
             urlStateToReplace: '',
             urlStateKey: urlKey,
           });
@@ -96,26 +82,26 @@ export const useUrlStateHooks = ({
           const newUrlStateString = getQueryStringKeyValue({ urlKey, search });
 
           if (!newUrlStateString) {
-            statesToUpdate.push({
+            urlStateUpdatesToLocation.push({
               urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
               urlStateKey: urlKey,
             });
           } else {
             // Updates the new URL query string.
-            const stateToUpdate = getFormatUrlStateString({
+            const stateToUpdate = getUpdateToFormatUrlStateString({
               isFirstPageLoad,
               newUrlStateString,
               updateTimerange: isDetectionsPages(pageName) || isFirstPageLoad,
               urlKey,
             });
 
+            if (stateToUpdate) {
+              urlStateUpdatesToLocation.push(stateToUpdate);
+            }
+
             const updatedUrlStateString = stateToUpdate
               ? encodeRisonUrlState(stateToUpdate.urlStateToReplace)
               : newUrlStateString;
-
-            if (stateToUpdate) {
-              statesToUpdate.push(stateToUpdate);
-            }
 
             if (
               // Update redux store with query string data on the first page load
@@ -123,8 +109,11 @@ export const useUrlStateHooks = ({
               // Update Redux store with data from the URL query string when navigating from a page to a detection page
               (isDetectionsPages(pageName) && updatedUrlStateString !== newUrlStateString)
             ) {
-              if (updateTimelineAtinitialization(urlKey, newUrlStateString, urlState)) {
-                urlStateToUpdate.push({
+              if (
+                urlKey !== CONSTANTS.timeline ||
+                !isTimelinePresentInUrlStateString(newUrlStateString, urlState.timeline)
+              ) {
+                urlStateUpdatesToStore.push({
                   urlKey,
                   newUrlStateString: updatedUrlStateString,
                 });
@@ -134,14 +123,14 @@ export const useUrlStateHooks = ({
         });
       }
 
-      replaceStatesInLocation(statesToUpdate, pathName, search, history);
+      replaceStatesInLocation(urlStateUpdatesToLocation, pathName, search, history);
 
       setInitialStateFromUrl({
         filterManager,
         indexPattern,
         pageName,
         savedQueries,
-        urlStateToUpdate,
+        urlStateToUpdate: urlStateUpdatesToStore,
       });
     },
     [
@@ -170,14 +159,14 @@ export const useUrlStateHooks = ({
     const type: UrlStateType = getUrlType(pageName);
 
     if (!deepEqual(urlState, prevProps.urlState) && !isFirstPageLoad && !isAdministration(type)) {
-      const statesToUpdate: ReplaceStateInLocation[] = ALL_URL_STATE_KEYS.map(
+      const urlStateUpdatesToLocation: ReplaceStateInLocation[] = ALL_URL_STATE_KEYS.map(
         (urlKey: KeyUrlState) => ({
           urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
           urlStateKey: urlKey,
         })
       );
 
-      replaceStatesInLocation(statesToUpdate, pathName, search, history);
+      replaceStatesInLocation(urlStateUpdatesToLocation, pathName, search, history);
     } else if (
       (isFirstPageLoad && pageName != null && pageName !== '') ||
       pathName !== prevProps.pathName
@@ -210,7 +199,7 @@ const getUrlStateKeyValue = (urlState: UrlState, urlKey: KeyUrlState) =>
 const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
   getParamFromQueryString(getQueryStringFromLocation(search), urlKey);
 
-export const getFormatUrlStateString = ({
+export const getUpdateToFormatUrlStateString = ({
   isFirstPageLoad,
   newUrlStateString,
   updateTimerange,
@@ -236,4 +225,9 @@ export const getFormatUrlStateString = ({
     }
   }
   return undefined;
+};
+
+const isTimelinePresentInUrlStateString = (urlStateString: string, timeline: TimelineUrl) => {
+  const timelineFromUrl = decodeRisonUrlState<TimelineUrl>(urlStateString);
+  return timelineFromUrl != null && timelineFromUrl.id === timeline.id;
 };
