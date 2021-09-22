@@ -53,9 +53,10 @@ function ColorRanges({
     [colorsRange]
   );
 
-  const setColorRanges = useCallback((value: RangeValues[]) => setValue('colorsRange', value), [
-    setValue,
-  ]);
+  const setColorRanges = useCallback(
+    (value: RangeValues[]) => setValue('colorsRange', value),
+    [setValue]
+  );
 
   return (
     <RangesParamEditor

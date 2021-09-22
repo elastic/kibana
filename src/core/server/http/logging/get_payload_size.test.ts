@@ -226,11 +226,11 @@ describe('getPayloadSize', () => {
     test('always provides content-length header if available', () => {
       const headers = { 'content-length': '123' };
       const result = getResponsePayloadBytes(
-        ({
+        {
           headers,
           variety: 'plain',
           source: 'abc',
-        } as unknown) as Response,
+        } as unknown as Response,
         logger
       );
       expect(result).toBe(123);
@@ -238,19 +238,19 @@ describe('getPayloadSize', () => {
 
     test('uses first value when hapi header is an array', () => {
       const headers = { 'content-length': ['123', '456'] };
-      const result = getResponsePayloadBytes(({ headers } as unknown) as Response, logger);
+      const result = getResponsePayloadBytes({ headers } as unknown as Response, logger);
       expect(result).toBe(123);
     });
 
     test('returns undefined if length is NaN', () => {
       const headers = { 'content-length': 'oops' };
-      const result = getResponsePayloadBytes(({ headers } as unknown) as Response, logger);
+      const result = getResponsePayloadBytes({ headers } as unknown as Response, logger);
       expect(result).toBeUndefined();
     });
   });
 
   test('defaults to undefined', () => {
-    const result = getResponsePayloadBytes(({} as unknown) as Response, logger);
+    const result = getResponsePayloadBytes({} as unknown as Response, logger);
     expect(result).toBeUndefined();
   });
 
@@ -262,10 +262,10 @@ describe('getPayloadSize', () => {
       },
     };
     const result = getResponsePayloadBytes(
-      ({
+      {
         variety: 'plain',
         source: payload.circular,
-      } as unknown) as Response,
+      } as unknown as Response,
       logger
     );
     expect(result).toBeUndefined();
@@ -279,10 +279,10 @@ describe('getPayloadSize', () => {
       },
     };
     getResponsePayloadBytes(
-      ({
+      {
         variety: 'plain',
         source: payload.circular,
-      } as unknown) as Response,
+      } as unknown as Response,
       logger
     );
     expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(

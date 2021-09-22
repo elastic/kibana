@@ -21,7 +21,8 @@ import { indexFieldsProvider } from './search_strategy/index_fields';
 import { SecurityPluginSetup } from '../../security/server';
 
 export class TimelinesPlugin
-  implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins> {
+  implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins>
+{
   private readonly logger: Logger;
   private security?: SecurityPluginSetup;
 

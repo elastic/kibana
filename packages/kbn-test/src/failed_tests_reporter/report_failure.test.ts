@@ -40,7 +40,7 @@ describe('createFailureIssue()', () => {
       this is the failure text
       \`\`\`
 
-      First failure: [Jenkins Build](https://build-url)
+      First failure: [CI Build](https://build-url)
 
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"some.classname\\",\\"test.name\\":\\"test name\\",\\"test.failCount\\":1}} -->",
             Array [
@@ -100,7 +100,7 @@ describe('updateFailureIssue()', () => {
         "calls": Array [
           Array [
             1234,
-            "New failure: [Jenkins Build](https://build-url)",
+            "New failure: [CI Build](https://build-url)",
           ],
         ],
         "results": Array [

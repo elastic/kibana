@@ -34,22 +34,22 @@ const createRequest = ({ type, id, force }: DeleteTestCase) => ({ type, id, forc
 
 export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('delete');
-  const expectResponseBody = (testCase: DeleteTestCase): ExpectResponseBody => async (
-    response: Record<string, any>
-  ) => {
-    if (testCase.failure === 403) {
-      await expectSavedObjectForbidden(testCase.type)(response);
-    } else {
-      // permitted
-      const object = response.body;
-      if (testCase.failure) {
-        await expectResponses.permitted(object, testCase);
+  const expectResponseBody =
+    (testCase: DeleteTestCase): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      if (testCase.failure === 403) {
+        await expectSavedObjectForbidden(testCase.type)(response);
       } else {
-        // the success response for `delete` is an empty object
-        expect(object).to.eql({});
+        // permitted
+        const object = response.body;
+        if (testCase.failure) {
+          await expectResponses.permitted(object, testCase);
+        } else {
+          // the success response for `delete` is an empty object
+          expect(object).to.eql({});
+        }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: DeleteTestCase | DeleteTestCase[],
     forbidden: boolean,
@@ -71,37 +71,35 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     }));
   };
 
-  const makeDeleteTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: DeleteTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeDeleteTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: DeleteTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const { type, id, force } = test.request;
-          await supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
-            .query({ ...(force && { force }) })
-            .auth(user?.username, user?.password)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const { type, id, force } = test.request;
+            await supertest
+              .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
+              .query({ ...(force && { force }) })
+              .auth(user?.username, user?.password)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeDeleteTest(describe);
   // @ts-ignore

@@ -59,9 +59,10 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   const [{ uiSettings }, { data: dataServices, share, uiActions }] = services;
   const { timefilter } = dataServices.query.timefilter;
 
-  const mlLocator = useMemo(() => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!, [
-    share,
-  ]);
+  const mlLocator = useMemo(
+    () => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!,
+    [share]
+  );
 
   const timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -82,7 +83,11 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     });
   }, [severity, selectedEntities]);
 
-  const { chartsData, isLoading: isExplorerLoading, error } = useAnomalyChartsInputResolver(
+  const {
+    chartsData,
+    isLoading: isExplorerLoading,
+    error,
+  } = useAnomalyChartsInputResolver(
     embeddableInput,
     onInputChange,
     refresh,
