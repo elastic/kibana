@@ -8,21 +8,18 @@
 import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Query, fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import { Query, Filter } from '@kbn/es-query';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DatavisualizerFieldTypeFilter } from './field_type_filter';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataView, TimeRange } from '../../../../../../../../src/plugins/data/common';
 import { JobFieldType } from '../../../../../common/types';
-import {
-  ErrorMessage,
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-} from '../../types/combined_query';
+import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_index.scss';
+import { createCombinedQuery } from '../../utils/saved_search_utils';
 interface Props {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   searchString: Query['query'];
   searchQuery: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
@@ -63,8 +60,10 @@ export const SearchPanel: FC<Props> = ({
 }) => {
   const {
     services: {
+      uiSettings,
       notifications: { toasts },
       data: {
+        query: queryManager,
         ui: { SearchBar },
       },
     },
@@ -75,7 +74,6 @@ export const SearchPanel: FC<Props> = ({
     query: searchString || '',
     language: searchQueryLanguage,
   });
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
   useEffect(() => {
     setSearchInput({
@@ -84,25 +82,27 @@ export const SearchPanel: FC<Props> = ({
     });
   }, [searchQueryLanguage, searchString]);
 
-  const searchHandler = (query?: Query) => {
-    if (!query) return;
-    let filterQuery;
+  const searchHandler = ({ query, filters }: { query?: Query; filters?: Filter[] }) => {
+    const mergedQuery = query ?? searchInput;
     try {
-      if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-        filterQuery = toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
-      } else if (query.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
-        filterQuery = luceneStringToDsl(query.query);
-      } else {
-        filterQuery = {};
+      if (filters) {
+        queryManager.filterManager.setFilters(filters);
       }
+
+      const combinedQuery = createCombinedQuery(
+        mergedQuery,
+        queryManager.filterManager.getFilters() ?? [],
+        indexPattern,
+        uiSettings
+      );
+
       setSearchParams({
-        searchQuery: filterQuery,
-        searchString: query.query,
-        queryLanguage: query.language as SearchQueryLanguage,
+        searchQuery: combinedQuery,
+        searchString: mergedQuery.query,
+        queryLanguage: mergedQuery.language as SearchQueryLanguage,
       });
     } catch (e) {
       console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
-      setErrorMessage({ query: query.query as string, message: e.message });
       toasts.addError(e, {
         title: i18n.translate('xpack.dataVisualizer.searchPanel.invalidSyntax', {
           defaultMessage: 'Invalid syntax',
@@ -126,7 +126,11 @@ export const SearchPanel: FC<Props> = ({
           showDatePicker={false}
           showQueryInput={true}
           query={searchInput}
-          onQuerySubmit={(params) => searchHandler(params.query)}
+          onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
+            searchHandler({ query: params.query })
+          }
+          // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
+          onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
           indexPatterns={[indexPattern]}
           placeholder={i18n.translate('xpack.dataVisualizer.searchPanel.queryBarPlaceholderText', {
             defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',

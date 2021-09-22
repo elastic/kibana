@@ -36,14 +36,14 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | Sa
 }
 
 export function createCombinedQuery(
-  query: Query,
-  filters: Filter[],
+  query?: Query,
+  filters?: Filter[],
   indexPattern?: DataView,
   uiSettings?: IUiSettingsClient
 ) {
-  let combinedQuery: any = getDefaultDatafeedQuery();
+  let combinedQuery: any = getDefaultQuery();
 
-  if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+  if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
       combinedQuery = toElasticsearchQuery(ast, indexPattern);
@@ -65,8 +65,8 @@ export function createCombinedQuery(
   } else {
     combinedQuery = buildEsQuery(
       indexPattern,
-      [query],
-      filters,
+      query ? [query] : [],
+      filters ? filters : [],
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
   }
@@ -142,6 +142,6 @@ const DEFAULT_QUERY = {
   },
 };
 
-export function getDefaultDatafeedQuery() {
+export function getDefaultQuery() {
   return cloneDeep(DEFAULT_QUERY);
 }
