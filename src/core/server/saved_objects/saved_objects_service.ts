@@ -145,6 +145,11 @@ export interface SavedObjectsServiceSetup {
    * ```
    */
   registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
+
+  /**
+   * Returns the default index used for saved objects.
+   */
+  getKibanaIndex: () => string;
 }
 
 /**
@@ -357,6 +362,7 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getTypeRegistry: () => this.typeRegistry,
+      getKibanaIndex: () => kibanaIndex,
     };
   }
 
