@@ -46,7 +46,7 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
       try {
         const {
           body: { nodes },
-        } = await ctx.core.elasticsearch.client.asInternalUser.nodes.info({
+        } = await ctx.core.elasticsearch.client.asCurrentUser.nodes.info({
           filter_path: `nodes.*.${NODE_ROLES}`,
         });
 
