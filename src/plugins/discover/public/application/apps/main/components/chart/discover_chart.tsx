@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
-import { TimechartHeader } from '../timechart_header';
 import { SavedSearch } from '../../../../../saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
@@ -25,7 +24,6 @@ import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { useChartPanels } from './use_chart_panels';
 
-const TimechartHeaderMemoized = memo(TimechartHeader);
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 
 export function DiscoverChart({
@@ -47,21 +45,21 @@ export function DiscoverChart({
   stateContainer: GetStateReturn;
   timefield?: string;
 }) {
-  const [areChartOptionVisible, setChartOptionsVisible] = useState(false);
+  const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
 
-  const { data, uiSettings: config } = services;
+  const { data } = services;
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
     moveFocus: false,
   });
 
   const onShowChartOptions = useCallback(() => {
-    setChartOptionsVisible(!areChartOptionVisible);
-  }, [areChartOptionVisible]);
+    setShowChartOptionsPopover(!showChartOptionsPopover);
+  }, [showChartOptionsPopover]);
 
   const closeChartOptions = useCallback(() => {
-    setChartOptionsVisible(false);
-  }, [setChartOptionsVisible]);
+    setShowChartOptionsPopover(false);
+  }, [setShowChartOptionsPopover]);
 
   useEffect(() => {
     if (chartRef.current.moveFocus && chartRef.current.element) {
@@ -90,16 +88,16 @@ export function DiscoverChart({
     savedSearchDataChart$,
     toggleHideChart,
     (interval) => stateContainer.setAppState({ interval }),
-    () => setChartOptionsVisible(false)
+    () => setShowChartOptionsPopover(false)
   );
 
   return (
     <EuiFlexGroup direction="column" alignItems="stretch" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false} className="dscResultCount">
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem
             grow={false}
-            className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
+            className="dscResultCount__title eui-textTruncate eui-textNoWrap"
           >
             <HitsCounter
               savedSearchData$={savedSearchDataTotalHits$}
@@ -107,20 +105,10 @@ export function DiscoverChart({
               onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
-          {!state.hideChart && (
-            <EuiFlexItem className="dscResultCount__actions">
-              <TimechartHeaderMemoized
-                data={data}
-                dateFormat={config.get('dateFormat')}
-                stateInterval={state.interval || ''}
-                savedSearchData$={savedSearchDataChart$}
-              />
-            </EuiFlexItem>
-          )}
           {timefield && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
               <EuiPopover
-                id="contextMenuExample"
+                id="dscChartOptions"
                 button={
                   <EuiButtonEmpty
                     size="xs"
@@ -133,7 +121,7 @@ export function DiscoverChart({
                     })}
                   </EuiButtonEmpty>
                 }
-                isOpen={areChartOptionVisible}
+                isOpen={showChartOptionsPopover}
                 closePopover={closeChartOptions}
                 panelPaddingSize="none"
                 anchorPosition="downLeft"

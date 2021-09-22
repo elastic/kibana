@@ -10,6 +10,7 @@ import moment, { unitOfTime } from 'moment-timezone';
 import React, { useCallback } from 'react';
 import { EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import dateMath from '@elastic/datemath';
 
 import {
   Axis,
@@ -92,6 +93,27 @@ export function DiscoverHistogram({
     [timefilterUpdateHandler]
   );
 
+  const { timefilter } = services.data.query.timefilter;
+
+  const { from, to } = timefilter.getTime();
+  const dateFormat = uiSettings.get('dateFormat');
+  const timeRange = {
+    from: dateMath.parse(from),
+    to: dateMath.parse(to, { roundUp: true }),
+  };
+  const toMoment = useCallback(
+    (datetime: moment.Moment | undefined) => {
+      if (!datetime) {
+        return '';
+      }
+      if (!dateFormat) {
+        return String(datetime);
+      }
+      return datetime.format(dateFormat);
+    },
+    [dateFormat]
+  );
+
   if (!chartData && fetchStatus === FetchStatus.LOADING) {
     return (
       <div className="dscChart__loading">
@@ -172,7 +194,7 @@ export function DiscoverHistogram({
       <Axis
         id="discover-histogram-bottom-axis"
         position={Position.Bottom}
-        title={chartData.xAxisLabel}
+        title={`${chartData.xAxisLabel} (${toMoment(timeRange.from)} - ${toMoment(timeRange.to)})`}
         tickFormat={formatXValue}
         ticks={10}
       />
