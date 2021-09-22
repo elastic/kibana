@@ -41,3 +41,7 @@ export async function loadRuleMonitoringSummary({
   );
   return rewriteBodyRes(res);
 }
+
+export async function loadRuleMonitoringOverview({ http }: { http: HttpSetup }): Promise<any> {
+  return await http.get(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/_monitoring_overview`);
+}

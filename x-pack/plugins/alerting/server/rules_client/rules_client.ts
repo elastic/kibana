@@ -7,7 +7,7 @@
 
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate, trim, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
 import {
@@ -607,16 +607,20 @@ export class RulesClient {
     const eventLogClient = await this.getEventLogClient();
 
     this.logger.debug(`getMonitoringOverview(): search the event log for rules ${ruleIds}`);
-    let overviewByRuleType: Record<string, estypes.AggregationsAggregate> | unknown;
+    let overview: Record<string, estypes.AggregationsAggregate> | unknown;
+    let alerts: Record<string, estypes.AggregationsAggregate> | unknown;
+    let errorReasons: Record<string, estypes.AggregationsAggregate> | unknown;
+    const errorMessages: Record<string, number> = {};
     try {
-      overviewByRuleType = await eventLogClient.aggregateEventsBySavedObjectIds(
+      const overviewResult = await eventLogClient.aggregateEventsBySavedObjectIds(
         'alert',
         ruleIds,
         {
-          ruleType: {
+          ruleTypeAvgDuration: {
             terms: {
               field: 'rule.category',
               size: 10,
+              order: { averageDuration: 'desc' },
             },
             aggs: {
               averageDuration: {
@@ -624,19 +628,94 @@ export class RulesClient {
                   field: 'event.duration',
                 },
               },
-              maxDuration: {
-                max: {
-                  field: 'event.duration',
-                },
-              },
+            },
+          },
+          ruleTypeAvgDelay: {
+            terms: {
+              field: 'rule.category',
+              size: 10,
+              order: { averageDelay: 'desc' },
+            },
+            aggs: {
               averageDelay: {
                 avg: {
                   field: 'kibana.task.schedule_delay',
                 },
               },
-              outcome: {
+            },
+          },
+          ruleTypeNumFailures: {
+            terms: {
+              field: 'rule.category',
+              size: 10,
+              order: { failures: 'desc' },
+            },
+            aggs: {
+              failures: {
+                filter: { term: { 'event.outcome': 'failure' } },
+                aggs: {
+                  failureStats: { value_count: { field: 'event.outcome' } },
+                },
+              },
+            },
+          },
+          ruleAvgDuration: {
+            terms: {
+              field: 'rule.id',
+              size: 10,
+              order: { averageDuration: 'desc' },
+            },
+            aggs: {
+              averageDuration: {
+                avg: {
+                  field: 'event.duration',
+                },
+              },
+              ruleName: {
                 terms: {
-                  field: 'event.outcome',
+                  field: 'rule.name',
+                  size: 1,
+                },
+              },
+            },
+          },
+          ruleAvgDelay: {
+            terms: {
+              field: 'rule.id',
+              size: 10,
+              order: { averageDelay: 'desc' },
+            },
+            aggs: {
+              averageDelay: {
+                avg: {
+                  field: 'kibana.task.schedule_delay',
+                },
+              },
+              ruleName: {
+                terms: {
+                  field: 'rule.name',
+                  size: 1,
+                },
+              },
+            },
+          },
+          ruleNumFailures: {
+            terms: {
+              field: 'rule.id',
+              size: 10,
+              order: { failures: 'desc' },
+            },
+            aggs: {
+              failures: {
+                filter: { term: { 'event.outcome': 'failure' } },
+                aggs: {
+                  failureStats: { value_count: { field: 'event.outcome' } },
+                },
+              },
+              ruleName: {
+                terms: {
+                  field: 'rule.name',
+                  size: 1,
                 },
               },
             },
@@ -644,6 +723,58 @@ export class RulesClient {
         },
         'event.provider:alerting AND event.action:execute'
       );
+      overview = overviewResult.aggregations;
+      const errorResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        ruleIds,
+        {
+          error: {
+            terms: {
+              field: 'event.reason',
+              size: 10,
+            },
+          },
+        },
+        'event.provider:alerting AND event.action:execute AND event.outcome:failure',
+        10000
+      );
+      errorReasons = errorResult.aggregations;
+
+      // parse out error messages and count them
+      // we do this because error messages are mapped as text fields so we can't aggregate on them
+      for (const d of errorResult.data) {
+        const msg: string | undefined = d?.error?.message;
+        if (msg) {
+          if (errorMessages.hasOwnProperty(msg)) {
+            errorMessages[msg]++;
+          } else {
+            errorMessages[msg] = 1;
+          }
+        }
+      }
+
+      const alertsResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        ruleIds,
+        {
+          overTime: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: '1h',
+            },
+            aggs: {
+              alerts: {
+                terms: {
+                  field: 'event.category',
+                  size: 100,
+                },
+              },
+            },
+          },
+        },
+        'event.provider:alerting AND event.action:new-instance'
+      );
+      alerts = alertsResult.aggregations;
     } catch (err) {
       this.logger.debug(
         `rulesClient.getAlertInstanceSummary(): error searching event log for rules ${ruleIds}: ${err.message}`
@@ -651,7 +782,12 @@ export class RulesClient {
     }
 
     return {
-      ...(overviewByRuleType ? { overviewByRuleType } : {}),
+      ...(overview ? { overview } : {}),
+      ...(alerts ? { alerts } : {}),
+      errors: {
+        ...(errorReasons ? { reasons: errorReasons } : {}),
+        ...(errorMessages ? { messages: errorMessages } : {}),
+      },
     };
   }
 

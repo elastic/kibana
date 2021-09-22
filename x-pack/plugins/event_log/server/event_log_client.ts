@@ -12,7 +12,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
-import { IEventLogClient } from './types';
+import { IEventLogClient, IValidatedEvent } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
@@ -109,8 +109,12 @@ export class EventLogClient implements IEventLogClient {
     type: string,
     ids: string[],
     aggs: Record<string, estypes.AggregationsAggregationContainer>,
-    filter?: string
-  ): Promise<Record<string, estypes.AggregationsAggregate> | undefined> {
+    filter?: string,
+    size?: number
+  ): Promise<{
+    aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
+    data: IValidatedEvent[];
+  }> {
     const space = await this.spacesService?.getActiveSpace(this.request);
     const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
 
@@ -124,6 +128,7 @@ export class EventLogClient implements IEventLogClient {
       ids,
       aggs,
       filter,
+      size,
     });
   }
 }

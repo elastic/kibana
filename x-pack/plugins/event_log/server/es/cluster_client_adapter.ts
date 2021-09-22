@@ -56,6 +56,7 @@ interface SummarizeOptionsEventsBySavedObjectFilter {
   type: string;
   ids: string[];
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  size?: number;
   filter?: string;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -559,8 +560,11 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
   public async summarizeEventsBySavedObjectIds<T>(
     summarizeOptions: SummarizeOptionsEventsBySavedObjectFilter
-  ): Promise<Record<string, estypes.AggregationsAggregate> | undefined> {
-    const { index, namespace, type, ids, aggs, filter } = summarizeOptions;
+  ): Promise<{
+    aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
+    data: IValidatedEvent[];
+  }> {
+    const { index, namespace, type, ids, aggs, filter, size } = summarizeOptions;
 
     const defaultNamespaceQuery = {
       bool: {
@@ -658,7 +662,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     });
 
     const body: estypes.SearchRequest['body'] = {
-      size: 0,
+      size: size ?? 0,
       query: {
         bool: {
           filter: dslFilterQuery,
@@ -670,12 +674,18 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
     try {
       const {
-        body: { aggregations },
+        body: {
+          hits: { hits },
+          aggregations,
+        },
       } = await esClient.search({
         index,
         body,
       });
-      return aggregations;
+      return {
+        aggregations,
+        data: hits.map((hit) => hit._source as IValidatedEvent),
+      };
     } catch (err) {
       throw new Error(
         `querying for Event Log saved objects summaries by ids "${ids}" failed with: ${err.message}`
