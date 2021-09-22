@@ -16594,7 +16594,6 @@
     "xpack.ml.jobsList.managementActions.stopDatafeedDescription": "停止数据馈送",
     "xpack.ml.jobsList.managementActions.stopDatafeedLabel": "停止数据馈送",
     "xpack.ml.jobsList.memoryStatusLabel": "内存状态",
-    "xpack.ml.jobsList.missingSavedObjectWarning.description": "一些作业缺少已保存对象，因此需要在{link}中进行同步。",
     "xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link": "Stack Management",
     "xpack.ml.jobsList.missingSavedObjectWarning.title": "需要同步 ML 作业",
     "xpack.ml.jobsList.multiJobActions.groupSelector.addButtonAriaLabel": "添加",

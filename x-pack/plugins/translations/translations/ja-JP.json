@@ -16361,7 +16361,6 @@
     "xpack.ml.jobsList.managementActions.stopDatafeedDescription": "データフィードを停止します",
     "xpack.ml.jobsList.managementActions.stopDatafeedLabel": "データフィードを停止します",
     "xpack.ml.jobsList.memoryStatusLabel": "メモリー状態",
-    "xpack.ml.jobsList.missingSavedObjectWarning.description": "一部のジョブには保存されたオブジェクトが見つからず、{link}で同期が必要です。",
     "xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link": "スタック管理",
     "xpack.ml.jobsList.missingSavedObjectWarning.title": "MLジョブ同期は必須です",
     "xpack.ml.jobsList.multiJobActions.groupSelector.addButtonAriaLabel": "追加",
