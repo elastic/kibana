@@ -189,7 +189,11 @@ export class VisualizeEmbeddable
     if (!adapters) return;
 
     return this.deps.start().plugins.inspector.open(adapters, {
-      title: this.getTitle(),
+      title:
+        this.getTitle() ||
+        i18n.translate('visualizations.embeddable.inspectorTitle', {
+          defaultMessage: 'Inspector',
+        }),
     });
   };
 
