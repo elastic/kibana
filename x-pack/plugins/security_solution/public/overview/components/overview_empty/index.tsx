@@ -22,11 +22,12 @@ const OverviewEmptyComponent: React.FC = () => {
   const { http, docLinks } = useKibana().services;
   const basePath = http.basePath.get();
   const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
+  const integrationsPathComponents = pagePathGetters.integrations_all({ category: 'security' });
 
   const agentAction: NoDataPageActionsProps = useMemo(
     () => ({
       elasticAgent: {
-        href: `${basePath}${pagePathGetters.integrations_all({ category: 'security' })}`,
+        href: `${basePath}${integrationsPathComponents[0]}${integrationsPathComponents[1]}`,
         description: i18n.translate(
           'xpack.securitySolution.pages.emptyPage.beatsCard.description',
           {
@@ -36,7 +37,7 @@ const OverviewEmptyComponent: React.FC = () => {
         ),
       },
     }),
-    [basePath]
+    [basePath, integrationsPathComponents]
   );
 
   const beatsAction: NoDataPageActionsProps = useMemo(
