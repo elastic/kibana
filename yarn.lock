@@ -5603,10 +5603,10 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node-forge@^0.10.4":
-  version "0.10.4"
-  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.10.4.tgz#f30025cc2da0177393b9deaefbf3b9edd55b807b"
-  integrity sha512-RpP7JCxlPA32n8FE0kjOpCsCrsX6VjiD0fjOCo4NwIn8IdcicHi4B2e+votWuOpOmwzUjMwRLqVIF95epGd5nA==
+"@types/node-forge@^0.10.5":
+  version "0.10.5"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.10.5.tgz#f79925c88202817a7ec0958c3a9d3a915d362b4f"
+  integrity sha512-P+Q+MPSDr0RgIzv5h0gJuJDCm1e4RaSu/EMJZTUS4ZzboWH2uX/T7TiqAAcEFTHzCKtgMRqCgTVTX9SD72fMTQ==
   dependencies:
     "@types/node" "*"
 
