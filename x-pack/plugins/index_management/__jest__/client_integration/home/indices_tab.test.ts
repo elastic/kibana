@@ -247,7 +247,7 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('should be able to close index', async () => {
-      const { find, actions, component } = testBed;
+      const { find, actions } = testBed;
 
       actions.clickManageContextMenuButton();
       const contextMenu = find('indexContextMenu');
@@ -259,14 +259,8 @@ describe('<IndexManagementHome />', () => {
         .childAt(0)
         .find('button[data-test-subj="indexTableContextMenuButton_closeindex"]');
 
-      await act(async () => {
-        closeIndexButton.simulate('click');
-        nextTick();
-      });
-      component.update();
-
-      // Request is second to last request because indices are reloaded after the close call.
-      const latestRequest = server.requests[server.requests.length - 2];
+      await closeIndexButton.simulate('click');
+      const latestRequest = server.requests[server.requests.length - 1];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
     });
   });
