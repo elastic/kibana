@@ -84,7 +84,7 @@ export const usePolicyTrustedAppsNotification = () => {
       text: i18n.translate(
         'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.text',
         {
-          defaultMessage: '{names} has been added to your trusted applications list.',
+          defaultMessage: '"{names}" has been added to your trusted applications list.',
           values: { names: updatedArtifacts.map((artifact) => artifact.data.name).join(', ') },
         }
       ),
