@@ -15,7 +15,8 @@ import {
 } from '../common';
 
 export class CustomIntegrationPlugin
-  implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart> {
+  implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
+{
   public setup(core: CoreSetup): CustomIntegrationsSetup {
     // Return methods that should be available to other plugins
     return {
