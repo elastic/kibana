@@ -14,6 +14,7 @@ interface PackageInfo {
   archiveChecksum: string;
   binaryChecksum: string;
   binaryRelativePath: string;
+  revision: number;
 }
 
 enum BaseUrl {
@@ -32,18 +33,7 @@ interface CommonPackageInfo extends PackageInfo {
 }
 
 export class ChromiumArchivePaths {
-  public readonly revision = '856583';
-
   public readonly packages: Array<CustomPackageInfo | CommonPackageInfo> = [
-    {
-      platform: 'darwin',
-      architecture: 'x64',
-      archiveFilename: 'chromium-d163fd7-darwin_x64.zip',
-      archiveChecksum: '19aa88bd59e2575816425bf72786c53f',
-      binaryChecksum: 'dfcd6e007214175997663c50c8d871ea',
-      binaryRelativePath: 'headless_shell-darwin_x64/headless_shell',
-      location: 'custom',
-    },
     {
       platform: 'linux',
       architecture: 'x64',
@@ -52,6 +42,7 @@ export class ChromiumArchivePaths {
       binaryChecksum: '99cfab472d516038b94ef86649e52871',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
+      revision: 856583, // FIXME: this is an older revision that is re-used from Puppeteer 8.0.0
     },
     {
       platform: 'linux',
@@ -61,16 +52,40 @@ export class ChromiumArchivePaths {
       binaryChecksum: '13baccf2e5c8385cb9d9588db6a9e2c2',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
+      revision: 856583, // FIXME: this is an older revision that is re-used from Puppeteer 8.0.0
     },
     {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '64999a384bfb6c96c50c4cb6810dbc05',
-      binaryChecksum: '13b8bbb4a12f9036b8cc3b57b3a71fec',
+      archiveChecksum: '861bb8b7b8406a6934a87d3cbbce61d9',
+      binaryChecksum: 'ffa0949471e1b9a57bc8f8633fca9c7b',
       binaryRelativePath: 'chrome-win\\chrome.exe',
       location: 'common',
       archivePath: 'Win',
+      revision: 901912,
+    },
+    {
+      platform: 'darwin',
+      architecture: 'x64',
+      archiveFilename: 'chrome-mac.zip',
+      archiveChecksum: '229fd88c73c5878940821875f77578e4',
+      binaryChecksum: 'b0e5ca009306b14e41527000139852e5',
+      binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+      location: 'common',
+      archivePath: 'Mac',
+      revision: 901912,
+    },
+    {
+      platform: 'darwin',
+      architecture: 'arm64',
+      archiveFilename: 'chrome-mac.zip',
+      archiveChecksum: 'ecf7aa509c8e2545989ebb9711e35384',
+      binaryChecksum: 'b5072b06ffd2d2af4fea7012914da09f',
+      binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+      location: 'common',
+      archivePath: 'Mac_Arm',
+      revision: 901913, // 901912 is not available for Mac_Arm. 901913 should be "close enough"
     },
   ];
 
@@ -78,11 +93,14 @@ export class ChromiumArchivePaths {
   public readonly archivesPath = path.resolve(__dirname, '../../../../../../.chromium');
 
   public find(platform: string, architecture: string) {
+    // We're downloading Chromium for both Mac x64 and Mac Arm,
+    // therefore we need to distinguish the download folder by architecture,
+    // because both downloads are "chrome-mac.zip".
     return this.packages.find((p) => p.platform === platform && p.architecture === architecture);
   }
 
   public resolvePath(p: PackageInfo) {
-    return path.resolve(this.archivesPath, p.archiveFilename);
+    return path.resolve(this.archivesPath, p.architecture, p.archiveFilename);
   }
 
   public getAllArchiveFilenames(): string[] {
@@ -91,9 +109,9 @@ export class ChromiumArchivePaths {
 
   public getDownloadUrl(p: CustomPackageInfo | CommonPackageInfo) {
     if (p.location === 'common') {
-      return `${BaseUrl.common}/${p.archivePath}/${this.revision}/${p.archiveFilename}`;
+      return `${BaseUrl.common}/${p.archivePath}/${p.revision}/${p.archiveFilename}`;
     }
-    return BaseUrl.custom + '/' + p.archiveFilename;
+    return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }
 
   public getBinaryPath(p: PackageInfo) {
