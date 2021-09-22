@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiTextColor, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import {
@@ -15,8 +13,11 @@ import {
   LEGACY_RULE_DETAILS,
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
+import { MonitoringConfig } from '../../types';
+import { Expression } from './expression';
+import { Props } from '../components/param_details_form/expression';
 
-export function createLegacyAlertTypes(): AlertTypeModel[] {
+export function createLegacyAlertTypes(config: MonitoringConfig): AlertTypeModel[] {
   return LEGACY_RULES.map((legacyAlert) => {
     return {
       id: legacyAlert,
@@ -25,17 +26,7 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
       documentationUrl(docLinks) {
         return `${docLinks.links.monitoring.alertsKibanaClusterAlerts}`;
       },
-      alertParamsExpression: () => (
-        <Fragment>
-          <EuiSpacer />
-          <EuiTextColor color="subdued">
-            {i18n.translate('xpack.monitoring.alerts.legacyAlert.expressionText', {
-              defaultMessage: 'There is nothing to configure.',
-            })}
-          </EuiTextColor>
-          <EuiSpacer />
-        </Fragment>
-      ),
+      alertParamsExpression: (props: Props) => <Expression {...props} config={config} />,
       defaultActionMessage: '{{context.internalFullMessage}}',
       validate: () => ({ errors: {} }),
       requiresAppContext: RULE_REQUIRES_APP_CONTEXT,

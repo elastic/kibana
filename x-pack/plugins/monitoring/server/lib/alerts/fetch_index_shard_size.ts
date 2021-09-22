@@ -35,7 +35,8 @@ export async function fetchIndexShardSize(
   index: string,
   threshold: number,
   shardIndexPatterns: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<IndexShardSizeStats[]> {
   const params = {
     index,
@@ -103,6 +104,15 @@ export async function fetchIndexShardSize(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.must.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const { body: response } = await esClient.search(params);
   // @ts-expect-error declare aggegations type explicitly

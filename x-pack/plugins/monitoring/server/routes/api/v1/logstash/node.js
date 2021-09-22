@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { getNodeInfo } from '../../../../lib/logstash/get_node_info';
 import { handleError } from '../../../../lib/errors';
 import { getMetrics } from '../../../../lib/details/get_metrics';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSets } from './metric_set_node';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 

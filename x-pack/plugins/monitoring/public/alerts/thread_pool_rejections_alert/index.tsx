@@ -13,6 +13,7 @@ import { Expression, Props } from '../components/param_details_form/expression';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { CommonAlertParamDetails } from '../../../common/types/alerts';
 import { RULE_REQUIRES_APP_CONTEXT } from '../../../common/constants';
+import { MonitoringConfig } from '../../types';
 
 interface ThreadPoolTypes {
   [key: string]: unknown;
@@ -26,7 +27,8 @@ interface ThreadPoolRejectionAlertDetails {
 
 export function createThreadPoolRejectionsAlertType(
   alertId: string,
-  threadPoolAlertDetails: ThreadPoolRejectionAlertDetails
+  threadPoolAlertDetails: ThreadPoolRejectionAlertDetails,
+  config: MonitoringConfig
 ): AlertTypeModel {
   return {
     id: alertId,
@@ -38,7 +40,7 @@ export function createThreadPoolRejectionsAlertType(
     alertParamsExpression: (props: Props) => (
       <>
         <EuiSpacer />
-        <Expression {...props} paramDetails={threadPoolAlertDetails.paramDetails} />
+        <Expression {...props} config={config} paramDetails={threadPoolAlertDetails.paramDetails} />
       </>
     ),
     validate: (inputValues: ThreadPoolTypes) => {
