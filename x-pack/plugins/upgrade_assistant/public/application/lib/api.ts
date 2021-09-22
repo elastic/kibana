@@ -181,7 +181,7 @@ export class ApiService {
     });
   }
 
-  public useLoadMLUpgradeMode() {
+  public useLoadMlUpgradeMode() {
     return this.useRequest<{
       mlUpgradeModeEnabled: boolean;
     }>({

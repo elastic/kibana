@@ -133,7 +133,7 @@ describe('Machine learning deprecation flyout', () => {
       expect(find('mlSnapshotDetails.upgradeSnapshotButton').text()).toEqual('Retry upgrade');
     });
 
-    it('Doesnt allow to take actions if ml_upgrade_mode is enabled', async () => {
+    it('Disables actions if ml_upgrade_mode is enabled', async () => {
       httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeModeEnabled: true });
 
       await act(async () => {

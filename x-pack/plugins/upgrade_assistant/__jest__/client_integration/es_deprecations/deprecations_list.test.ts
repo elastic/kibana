@@ -62,7 +62,7 @@ describe('ES deprecations table', () => {
     const mlDeprecation = esDeprecationsMockResponse.deprecations[0];
     const reindexDeprecation = esDeprecationsMockResponse.deprecations[3];
 
-    // Since upgradeStatusMockResponse includes ML and reindex actions (which require fetching status), there will be 3 requests made
+    // Since upgradeStatusMockResponse includes ML and reindex actions (which require fetching status), there will be 4 requests made
     expect(server.requests.length).toBe(totalRequests + 4);
     expect(server.requests[server.requests.length - 4].url).toBe(
       `${API_BASE_PATH}/es_deprecations`
@@ -74,6 +74,10 @@ describe('ES deprecations table', () => {
     );
     expect(server.requests[server.requests.length - 2].url).toBe(
       `${API_BASE_PATH}/reindex/${reindexDeprecation.index}`
+    );
+
+    expect(server.requests[server.requests.length - 1].url).toBe(
+      `${API_BASE_PATH}/ml_upgrade_mode`
     );
   });
 

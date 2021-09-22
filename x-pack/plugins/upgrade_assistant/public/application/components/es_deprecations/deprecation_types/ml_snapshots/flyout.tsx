@@ -114,7 +114,7 @@ const i18nTexts = {
           <EuiLink href={docsLink} target="_blank" data-test-subj="setUpgradeModeDocsLink">
             <FormattedMessage
               id="xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeModeEnabledDocsLink"
-              defaultMessage="Documentation"
+              defaultMessage="Learn more"
             />
           </EuiLink>
         ),

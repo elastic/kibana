@@ -176,7 +176,7 @@ describe('ML snapshots APIs', () => {
   });
 
   describe('GET /api/upgrade_assistant/ml_upgrade_mode', () => {
-    it('Knows how to retrieve ml upgrade mode', async () => {
+    it('Retrieves ml upgrade mode', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.info as jest.Mock
       ).mockResolvedValue({
