@@ -149,7 +149,7 @@ export const templateExceptionList = (listData: ExceptionListItem[], listType: s
     // cast exception list type to a TelemetryEvent for allowlist filtering
     const filteredListItem = copyAllowlistedFields(
       exceptionListEventFields,
-      item as unknown as TelemetryEvent
+      (item as unknown) as TelemetryEvent
     );
 
     if (listType === LIST_TRUSTED_APPLICATION) {
