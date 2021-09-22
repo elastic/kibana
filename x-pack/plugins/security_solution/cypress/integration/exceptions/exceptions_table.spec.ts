@@ -23,11 +23,9 @@ import {
   waitForPageWithoutDateRange,
 } from '../../tasks/login';
 import {
-  activatesRule,
   addsExceptionFromRuleSettings,
   goBackToAllRulesTable,
   goToExceptionsTab,
-  waitForTheRuleToBeExecuted,
 } from '../../tasks/rule_details';
 
 import { ALERTS_URL, EXCEPTIONS_URL } from '../../urls/navigation';
@@ -59,12 +57,9 @@ describe('Exceptions Table', () => {
 
     esArchiverLoad('auditbeat_for_exceptions');
 
-    activatesRule();
-
     // Add a detections exception list
     goToExceptionsTab();
     addsExceptionFromRuleSettings(getException());
-    waitForTheRuleToBeExecuted();
 
     // Create exception list not used by any rules
     createExceptionList(getExceptionList(), getExceptionList().list_id).as('exceptionListResponse');
@@ -116,7 +111,7 @@ describe('Exceptions Table', () => {
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
   });
 
-  it.skip('Exports exception list', function () {
+  it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
     waitForPageWithoutDateRange(EXCEPTIONS_URL);
