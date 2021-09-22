@@ -9,7 +9,7 @@
 import { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsPluginSetup {
-  registerCustomIntegration(customIntegration: CustomIntegration): void;
+  registerCustomIntegration(customIntegration: Omit<CustomIntegration, 'type'>): void;
   getAddableCustomIntegrations(): CustomIntegration[];
 }
 

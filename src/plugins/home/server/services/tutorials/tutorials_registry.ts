@@ -34,11 +34,10 @@ function registerTutorialWithCustomIntegrations(
   ) as Category[];
 
   customIntegrations.registerCustomIntegration({
-    name: tutorial.id,
-    id: tutorial.name,
+    name: tutorial.name,
+    id: tutorial.id,
     title: tutorial.name,
     categories: allowedCategories,
-    type: 'ui_link',
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
     icons: tutorial.euiIconType

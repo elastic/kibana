@@ -21,7 +21,10 @@ export class CustomIntegrationsPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.customIngegrationRegistry = new CustomIntegrationRegistry(this.logger);
+    this.customIngegrationRegistry = new CustomIntegrationRegistry(
+      this.logger,
+      initializerContext.env.mode.dev
+    );
   }
 
   public setup(core: CoreSetup) {
@@ -31,8 +34,11 @@ export class CustomIntegrationsPlugin
     defineRoutes(router, this.customIngegrationRegistry);
 
     return {
-      registerCustomIntegration: (integration: CustomIntegration) => {
-        this.customIngegrationRegistry.registerCustomIntegration(integration);
+      registerCustomIntegration: (integration: Omit<CustomIntegration, 'type'>) => {
+        this.customIngegrationRegistry.registerCustomIntegration({
+          type: 'ui_link',
+          ...integration,
+        });
       },
       getAddableCustomIntegrations: (): CustomIntegration[] => {
         return this.customIngegrationRegistry.getAddableCustomIntegrations();

@@ -16,10 +16,12 @@ function isAddable(integration: CustomIntegration) {
 export class CustomIntegrationRegistry {
   private readonly _integrations: CustomIntegration[];
   private readonly _logger: Logger;
+  private readonly _isDev: boolean;
 
-  constructor(logger: Logger) {
+  constructor(logger: Logger, isDev: boolean) {
     this._integrations = [];
     this._logger = logger;
+    this._isDev = isDev;
   }
 
   registerCustomIntegration(customIntegration: CustomIntegration) {
@@ -28,7 +30,12 @@ export class CustomIntegrationRegistry {
         return integration.name === customIntegration.name;
       })
     ) {
-      this._logger.error(`Integration with id=${customIntegration.name} already exists.`);
+      const message = `Integration with id=${customIntegration.name} already exists.`;
+      if (this._isDev) {
+        this._logger.debug(message);
+      } else {
+        this._logger.debug(message);
+      }
       return;
     }
 
