@@ -50,6 +50,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         defaultMessage: 'Create new pipeline',
       }),
       ...reactRouterNavigate(history, '/create'),
+      'data-test-subj': `createNewPipeline`,
     },
     /**
      * Create pipeline from CSV
@@ -59,6 +60,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         defaultMessage: 'Create new pipeline from CSV',
       }),
       ...reactRouterNavigate(history, '/csvCreate'),
+      'data-test-subj': `createPipelineFromCsv`,
     },
   ];
 

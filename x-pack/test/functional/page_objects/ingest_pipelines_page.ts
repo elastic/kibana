@@ -35,7 +35,9 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       processors?: string;
       onFailureProcessors?: string;
     }) {
-      await testSubjects.click('createPipelineButton');
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createNewPipeline');
+
       await testSubjects.exists('pipelineForm');
 
       await testSubjects.setValue('nameField > input', name);
