@@ -110,11 +110,11 @@ export function MachineLearningDataVisualizerTableProvider(
         if (!(await testSubjects.exists(this.detailsSelector(fieldName)))) {
           const selector = this.rowSelector(
             fieldName,
-            `dataVisualizerDetailsToggle-${fieldName}-arrowDown`
+            `dataVisualizerDetailsToggle-${fieldName}-arrowRight`
           );
           await testSubjects.click(selector);
           await testSubjects.existOrFail(
-            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowUp`),
+            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`),
             {
               timeout: 1000,
             }
@@ -128,10 +128,10 @@ export function MachineLearningDataVisualizerTableProvider(
       await retry.tryForTime(10000, async () => {
         if (await testSubjects.exists(this.detailsSelector(fieldName))) {
           await testSubjects.click(
-            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowUp`)
+            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`)
           );
           await testSubjects.existOrFail(
-            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`),
+            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowRight`),
             {
               timeout: 1000,
             }
