@@ -39,12 +39,13 @@ export const PolicyTrustedAppsList = memo(() => {
       history.push(
         getPolicyDetailsArtifactsListPath(policyId, {
           ...urlParams,
-          page_index: pageIndex,
+          // If user changed page size, then reset page index back to the first page
+          page_index: pageSize !== pagination.pageSize ? 0 : pageIndex,
           page_size: pageSize,
         })
       );
     },
-    [history, policyId, urlParams]
+    [history, pagination.pageSize, policyId, urlParams]
   );
 
   const handleExpandCollapse = useCallback<ArtifactCardGridProps['onExpandCollapse']>((change) => {

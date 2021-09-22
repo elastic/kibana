@@ -16,7 +16,7 @@ import {
   doesPolicyTrustedAppsListNeedUpdate,
   getCurrentArtifactsLocation,
   getCurrentPolicyAssignedTrustedAppsState,
-  getLastLoadedPolicyAssignedTrustedAppsState,
+  getLatestLoadedPolicyAssignedTrustedAppsState,
   isPolicyTrustedAppListLoading,
   policyIdFromParams,
 } from '../selectors';
@@ -87,7 +87,7 @@ const fetchPolicyTrustedAppsIfNeeded = async (
         type: 'assignedTrustedAppsListStateChanged',
         payload: createFailedResourceState<Immutable<PolicyAssignedTrustedApps>>(
           error as ServerApiError,
-          getLastLoadedPolicyAssignedTrustedAppsState(getState())
+          getLatestLoadedPolicyAssignedTrustedAppsState(getState())
         ),
       });
     }

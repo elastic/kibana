@@ -8,6 +8,7 @@
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
 import {
+  PolicyArtifactsState,
   PolicyAssignedTrustedApps,
   PolicyDetailsArtifactsPageLocation,
   PolicyDetailsSelector,
@@ -33,12 +34,13 @@ export const doesPolicyHaveTrustedApps = (
   };
 };
 
-export const getCurrentPolicyAssignedTrustedAppsState: PolicyDetailsSelector<PolicyAssignedTrustedApps> =
-  (state) => {
-    return state.artifacts.assignedList;
-  };
+export const getCurrentPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
+  PolicyArtifactsState['assignedList']
+> = (state) => {
+  return state.artifacts.assignedList;
+};
 
-export const getLastLoadedPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
+export const getLatestLoadedPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
   undefined | LoadedResourceState<PolicyAssignedTrustedApps>
 > = createSelector(getCurrentPolicyAssignedTrustedAppsState, (currentAssignedTrustedAppsState) => {
   return getLastLoadedResourceState(currentAssignedTrustedAppsState);
@@ -65,7 +67,7 @@ export const isPolicyTrustedAppListLoading: PolicyDetailsSelector<boolean> = cre
 
 export const getPolicyTrustedAppList: PolicyDetailsSelector<GetTrustedAppsListResponse['data']> =
   createSelector(
-    getLastLoadedPolicyAssignedTrustedAppsState,
+    getLatestLoadedPolicyAssignedTrustedAppsState,
     getCurrentArtifactsLocation,
     (assignedState, currentUrlLocation) => {
       return assignedState?.data.artifacts.data ?? [];
@@ -73,7 +75,7 @@ export const getPolicyTrustedAppList: PolicyDetailsSelector<GetTrustedAppsListRe
   );
 
 export const getPolicyTrustedAppsListPagination: PolicyDetailsSelector<Pagination> = createSelector(
-  getLastLoadedPolicyAssignedTrustedAppsState,
+  getLatestLoadedPolicyAssignedTrustedAppsState,
   (currentAssignedTrustedAppsState) => {
     const trustedAppsApiResponse = currentAssignedTrustedAppsState?.data.artifacts;
 
