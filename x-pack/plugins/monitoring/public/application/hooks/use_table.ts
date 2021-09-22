@@ -124,7 +124,7 @@ export function useTable(storageKey: string) {
       sorting,
       pagination,
       onTableChange,
-      fetchMoreData: async ({
+      fetchMoreData: ({
         page,
         sort,
         queryText,
