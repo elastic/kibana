@@ -12,7 +12,7 @@ import { SearchSource, SearchSourceDependencies, SortDirection } from './';
 import { AggConfigs, AggTypesRegistryStart } from '../../';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestResponder } from 'src/plugins/inspector/common';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, catchError } from 'rxjs/operators';
 import { Filter } from '@kbn/es-query';
 
 const getComputedFields = () => ({
@@ -1117,8 +1117,10 @@ describe('SearchSource', () => {
 
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);
+
         await searchSource
           .fetch$(options)
+          .pipe(catchError((e) => e))
           .toPromise()
           .catch(() => {});
 
