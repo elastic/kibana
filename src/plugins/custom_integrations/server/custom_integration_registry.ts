@@ -32,7 +32,7 @@ export class CustomIntegrationRegistry {
     ) {
       const message = `Integration with id=${customIntegration.name} already exists.`;
       if (this._isDev) {
-        this._logger.debug(message);
+        this._logger.error(message);
       } else {
         this._logger.debug(message);
       }
