@@ -54,19 +54,15 @@ export function ExpandedSeriesRow(seriesProps: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule />
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiFormRow label={FILTERS_LABEL} fullWidth>
-            <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
-          </EuiFormRow>
-        </EuiFlexItem>
+      <EuiFormRow label={FILTERS_LABEL} fullWidth>
+        <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
+      </EuiFormRow>
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow label={BREAKDOWNS_LABEL}>
             <Breakdowns {...seriesProps} />
           </EuiFormRow>
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
         {(hasOperationType || columnType === 'operation') && (
           <EuiFlexItem>
             <EuiFormRow label={OPERATION_LABEL}>
