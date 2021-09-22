@@ -23,6 +23,7 @@ import {
 } from '../../../common/types';
 import { versionService } from '../version';
 import { generateNewIndexName } from './index_settings';
+import { error as reindexingError } from './error';
 import { FlatSettings, FlatSettingsWithTypeName } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
@@ -244,24 +245,39 @@ export const reindexActionsFactory = (
     async getFlatSettings(indexName: string, withTypeName?: boolean) {
       let flatSettings;
 
-      if (versionService.getMajorVersion() === 7 && withTypeName) {
-        // On 7.x, we need to get index settings with mapping type
-        flatSettings = await esClient.indices.get<{
-          [indexName: string]: FlatSettingsWithTypeName;
-        }>({
-          index: indexName,
-          flat_settings: true,
-          // This @ts-ignore is needed on master since the flag is deprecated on >7.x
-          // @ts-ignore
-          include_type_name: true,
-        });
-      } else {
-        flatSettings = await esClient.indices.get<{
-          [indexName: string]: FlatSettings;
-        }>({
-          index: indexName,
-          flat_settings: true,
-        });
+      try {
+        if (versionService.getMajorVersion() === 7 && withTypeName) {
+          // On 7.x, we need to get index settings with mapping type
+          flatSettings = await esClient.indices.get<{
+            [indexName: string]: FlatSettingsWithTypeName;
+          }>({
+            index: indexName,
+            flat_settings: true,
+            // This @ts-ignore is needed on master since the flag is deprecated on >7.x
+            // @ts-ignore
+            include_type_name: true,
+          });
+        } else {
+          flatSettings = await esClient.indices.get<{
+            [indexName: string]: FlatSettings;
+          }>({
+            index: indexName,
+            flat_settings: true,
+          });
+        }
+      } catch (error) {
+        if (error.meta.body.status === 404) {
+          throw reindexingError.indexNotFound(`Index ${indexName} does not exist.`);
+        }
+        if (error.meta.body.status === 402) {
+          throw reindexingError.accessForbidden(
+            `You do not have adequate privileges to read ${indexName}`
+          );
+        }
+
+        // Otherwise throw with the original error so that the exception
+        // can be caught in an upper scope.
+        throw error;
       }
 
       if (!flatSettings.body[indexName]) {
