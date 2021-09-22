@@ -352,8 +352,14 @@ export class SearchInterceptor {
             );
           }),
           tap((response) => {
-            if (this.deps.session.isRestore() && response.isRestored === false) {
-              this.showRestoreWarning(this.deps.session.getSessionId());
+            const isSearchInScopeOfSession =
+              sessionId && sessionId === this.deps.session.getSessionId();
+            if (
+              isSearchInScopeOfSession &&
+              this.deps.session.isRestore() &&
+              response.isRestored === false
+            ) {
+              this.showRestoreWarning(sessionId);
             }
           }),
           finalize(() => {
