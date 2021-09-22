@@ -31,7 +31,8 @@ At a super high-level, Kibana is composed of **plugins**, **core**, and **Kibana
 
 **@kbn packages** provide static utilities that can be imported anywhere in Kibana.
 
-<DocCallOut title="Internal Developer FAQ: Should I put my code in a plugin or a package?" color="warning">
+<DocAccordion buttonContent="(Internal only) FAQ: Should I put my code in a plugin or a package?" color="warning">
+<DocCallOut color="warning">
 If it's stateful, it has to go in a plugin, but with stateless utilities, It Depends. Stateless code exported publicly from a plugin will increase the bundle size, however, the packages folder is far away from the plugins folder so having a part of your code in a plugin and the rest in a package may make it hard to find, leading to duplication.
 
 The Operations team hopes to resolve this conundrum by supporting co-located packages and plugins and automatically putting all stateless code inside a package. You can track this work by following [this issue](https://github.com/elastic/kibana/issues/112886).
@@ -39,8 +40,10 @@ The Operations team hopes to resolve this conundrum by supporting co-located pac
 Until then, consider whether it makes sense to logically separate the code, and consider the size of the exports, when determining whether you should put it in a package or a plugin.
 
 </DocCallOut>
+</DocAccordion>
 
-<DocCallOut title="What is the difference between services provided by plugins and those by Core?">
+<DocAccordion buttonContent="FAQ: What is the difference between services provided by plugins and those by Core?" color="warning">
+<DocCallOut >
 
 We try to put only the most stable and fundamental code into `Core`, while optional add-ons, applications, and solution-oriented functionality goes in a plugin. Unfortunately, we haven't done a great job of sticking to that. For example, notifications and toasts are core services, but data and search are plugin services.
 
@@ -50,7 +53,8 @@ Today it looks something like this.
 
 "Platform plugins" provide core-like functionality, just outside of core, and their public APIs tend to be more volatile. Other plugins may still expose shared services, but they are intended only for usage by a small subset of specific plugins, and may not be generic or "platform-like".
 
-<DocAccordion buttonContent="A bit of history">
+**A bit of history**
+
 When the Kibana platform and plugin infrastructure was built, we thought of two types of code: core services, and other plugin services. We planned to keep the most stable and fundamental code needed to build plugins inside core.
 
 In reality, we ended up with many platform-like services living outside of core, with no (short term) intention of moving them. We highly encourage plugin developers to use
@@ -69,11 +73,9 @@ every publicly exposed service", but in today's world, that wouldn't be a very a
 We recognize the need to better clarify the relationship between core functionality, platform-like plugin functionality, and functionality exposed by other plugins.
 It's something we will be working on!
 
-</DocAccordion>
-
 We will continue to focus on adding clarity around these types of services and what developers can expect from each.
 
-</DocCallOut>
+</DocCallOut></DocAccordion>
 
 ## Plugins
 
