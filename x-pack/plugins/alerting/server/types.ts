@@ -254,6 +254,11 @@ export interface AlertsConfigType {
   healthCheck: {
     interval: string;
   };
+  legacyTrackingPurposes: {
+    healthCheck: {
+      interval: string;
+    };
+  };
 }
 
 export interface AlertsConfigType {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ConfigDeprecation, AddConfigDeprecation } from 'kibana/server';
+import type { PublicMethodsOf, RecursiveReadonly } from '@kbn/utility-types';
 import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
 import { ActionsPlugin } from './plugin';
 import { configSchema, ActionsConfig, CustomHostSettings } from './config';
@@ -54,6 +55,48 @@ export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
 export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
 
+// Use a custom copy function here so we can perserve the telemetry provided for the deprecated config
+// See https://github.com/elastic/kibana/issues/112585#issuecomment-923715363
+function renameFromRootAndTrackDeprecatedUsage(
+  {
+    renameFromRoot,
+  }: {
+    renameFromRoot(oldKey: string, newKey: string): ConfigDeprecation;
+  },
+  oldPath: string,
+  newPath: string,
+  renamedNewPath?: string
+) {
+  return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    settings: RecursiveReadonly<Record<string, any>>,
+    fromPath: string,
+    addDeprecation: AddConfigDeprecation
+  ) => {
+    // const actions = get(settings, fromPath);
+    const value = get(settings, oldPath);
+    const renameFn = renameFromRoot(oldPath, newPath);
+
+    const result = renameFn(settings, fromPath, addDeprecation);
+
+    // If it is set, make sure we return custom logic to ensure the usage is tracked
+    if (value) {
+      const unsets = [];
+      const sets = [{ path: newPath, value }];
+      if (renamedNewPath) {
+        sets.push({ path: renamedNewPath, value });
+        unsets.push({ path: oldPath });
+      }
+      return {
+        set: sets,
+        unset: unsets,
+      };
+    }
+
+    return result;
+  };
+}
+
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   exposeToUsage: {
@@ -62,25 +105,11 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     proxyRejectUnauthorizedCertificates: true,
   },
   deprecations: ({ renameFromRoot, unused, rename }) => [
-    // Use a custom copy function here so we can perserve the telemetry provided for the deprecated config
-    // See https://github.com/elastic/kibana/issues/112585#issuecomment-923715363
-    (settings, fromPath, addDeprecation) => {
-      const fullOldPath = 'xpack.actions.whitelistedHosts';
-      const fullNewPath = 'xpack.actions.allowedHosts';
-      const actions = get(settings, fromPath);
-      const whitelistedHosts = actions?.whitelistedHosts;
-      const renameFn = renameFromRoot(fullOldPath, fullNewPath);
-      const result = renameFn(settings, fromPath, addDeprecation);
-
-      // If it is set, make sure we return custom logic to ensure the usage is tracked
-      if (whitelistedHosts) {
-        return {
-          set: [{ path: fullNewPath, value: whitelistedHosts }],
-        };
-      }
-
-      return result;
-    },
+    renameFromRootAndTrackDeprecatedUsage(
+      { renameFromRoot },
+      'xpack.actions.whitelistedHosts',
+      'xpack.actions.allowedHosts'
+    ),
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
       const customHostSettings = actions?.customHostSettings ?? [];

@@ -6,14 +6,14 @@
  */
 import { config } from './index';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { set } from '@elastic/safer-lodash-set';
 
 const CONFIG_PATH = 'xpack.actions';
 const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
   const deprecationMessages: string[] = [];
-  const _config = {
-    [CONFIG_PATH]: settings,
-  };
+  const _config = {};
+  set(_config, CONFIG_PATH, settings);
   const { config: migrated, changedPaths } = applyDeprecations(
     _config,
     deprecations.map((deprecation) => ({
@@ -54,7 +54,10 @@ describe('index', () => {
         'xpack.actions.whitelistedHosts',
         'xpack.actions.allowedHosts'
       );
-      expect(changedPaths).toStrictEqual({ set: ['xpack.actions.allowedHosts'], unset: [] });
+      expect(changedPaths).toStrictEqual({
+        set: ['xpack.actions.allowedHosts'],
+        unset: ['xpack.actions.whitelistedHosts'],
+      });
     });
   });
 });
