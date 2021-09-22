@@ -8,8 +8,8 @@
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
-import { ToolbarPopover } from '../shared_components';
-import { layerTypes } from '../../common';
+import { ToolbarPopover } from '../../shared_components';
+import { layerTypes } from '../../../common';
 
 describe('Axes Settings', () => {
   let props: AxisSettingsPopoverProps;
