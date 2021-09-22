@@ -59,6 +59,8 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getLeftJoinFields(): Promise<IField[]>;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
 
   /*
    * Vector layer avoids unnecessarily re-fetching source data.
@@ -120,6 +122,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async getLeftJoinFields(): Promise<IField[]> {
     return [];
+  }
+
+  getJoinsDisabledReason(): string | null {
+    return null;
   }
 
   async getGeoJsonWithMeta(

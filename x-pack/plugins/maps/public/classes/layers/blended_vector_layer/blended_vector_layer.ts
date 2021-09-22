@@ -33,7 +33,6 @@ import {
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
   StylePropertyOptions,
-  LayerDescriptor,
   Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
@@ -179,7 +178,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     mapColors: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = VectorLayer.createDescriptor(options, mapColors);
-    layerDescriptor.type = BlendedVectorLayer.type;
+    layerDescriptor.type = LAYER_TYPE.BLENDED_VECTOR;
     return layerDescriptor;
   }
 
@@ -256,7 +255,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return false;
   }
 
-  async cloneDescriptor(): Promise<LayerDescriptor> {
+  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
     const clonedDescriptor = await super.cloneDescriptor();
 
     // Use super getDisplayName instead of instance getDisplayName to avoid getting 'Clustered Clone of Clustered'

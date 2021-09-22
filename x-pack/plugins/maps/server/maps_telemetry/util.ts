@@ -10,6 +10,7 @@ import {
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
+  VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import {
   GRID_RESOLUTION,
@@ -265,8 +266,7 @@ export function getTermJoinsPerCluster(
 ): TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
   return getCountsByCluster(layerLists, (layerDescriptor: LayerDescriptor) => {
     return layerDescriptor.type === LAYER_TYPE.VECTOR &&
-      layerDescriptor.joins &&
-      layerDescriptor.joins.length
+      (layerDescriptor as VectorLayerDescriptor)?.joins?.length
       ? TELEMETRY_TERM_JOIN
       : null;
   });

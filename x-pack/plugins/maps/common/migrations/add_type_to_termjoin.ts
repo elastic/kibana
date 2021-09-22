@@ -6,8 +6,8 @@
  */
 
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
-import { JoinDescriptor, LayerDescriptor } from '../descriptor_types';
-import { LAYER_TYPE, SOURCE_TYPES } from '../constants';
+import { JoinDescriptor, LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
+import { SOURCE_TYPES } from '../constants';
 
 // enforce type property on joins. It's possible older saved-objects do not have this correctly filled in
 // e.g. sample-data was missing the right.type field.
@@ -24,14 +24,15 @@ export function addTypeToTermJoin({
   const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
 
   layerList.forEach((layer: LayerDescriptor) => {
-    if (layer.type !== LAYER_TYPE.VECTOR) {
+    if (!('joins' in layer)) {
       return;
     }
 
-    if (!layer.joins) {
+    const vectorLayer = layer as VectorLayerDescriptor;
+    if (!vectorLayer.joins) {
       return;
     }
-    layer.joins.forEach((join: JoinDescriptor) => {
+    vectorLayer.joins.forEach((join: JoinDescriptor) => {
       if (!join.right) {
         return;
       }

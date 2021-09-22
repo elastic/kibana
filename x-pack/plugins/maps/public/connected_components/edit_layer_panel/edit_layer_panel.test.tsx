@@ -64,6 +64,9 @@ const mockLayer = {
   showJoinEditor: () => {
     return true;
   },
+  canShowTooltip: () => {
+    return true;
+  },
   supportsElasticsearchFilters: () => {
     return false;
   },
