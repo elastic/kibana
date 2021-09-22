@@ -799,8 +799,10 @@ describe('utils', () => {
               username: 'elastic',
             },
             new_value:
-              // The connector id is  123
-              '{"pushed_at":"2021-02-03T17:45:29.400Z","pushed_by":{"username":"elastic","full_name":"Elastic","email":"elastic@elastic.co"},"connector_id":"123","connector_name":"ServiceNow SN","external_id":"external-id","external_title":"SIR0010037","external_url":"https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id"}',
+              // The connector id is 123
+              '{"pushed_at":"2021-02-03T17:45:29.400Z","pushed_by":{"username":"elastic","full_name":"Elastic","email":"elastic@elastic.co"},"connector_name":"ServiceNow SN","external_id":"external-id","external_title":"SIR0010037","external_url":"https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id"}',
+            new_val_connector_id: '123',
+            old_val_connector_id: null,
             old_value: null,
             action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
             case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
