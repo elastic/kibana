@@ -15,11 +15,11 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 
 interface Props {
   jobType?: JobType;
-  onSyncSuccess?: () => void;
+  onCloseFlyout?: () => void;
   forceRefresh?: boolean;
 }
 
-export const SavedObjectsWarning: FC<Props> = ({ jobType, onSyncSuccess, forceRefresh }) => {
+export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRefresh }) => {
   const {
     savedObjects: { initSavedObjects },
   } = useMlApiContext();
@@ -41,12 +41,12 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onSyncSuccess, forceRe
 
         const missingDatafeeds = datafeeds.length > 0 && jobType === 'anomaly-detector';
 
-        setShowWarning(missingJobs || missingDatafeeds);
+        setShowWarning(showSyncFlyout || missingJobs || missingDatafeeds);
       })
       .catch(() => {
         console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
       });
-  }, []);
+  }, [showSyncFlyout, setShowWarning]);
 
   useEffect(() => {
     mounted.current = true;
@@ -63,10 +63,16 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onSyncSuccess, forceRe
       checkStatus();
     }
     setShowSyncFlyout(false);
-    if (typeof onSyncSuccess === 'function') {
-      onSyncSuccess();
+    if (typeof onCloseFlyout === 'function') {
+      onCloseFlyout();
     }
-  }, [checkStatus, onSyncSuccess, setShowSyncFlyout]);
+  }, [checkStatus, onCloseFlyout, setShowSyncFlyout]);
+
+  useEffect(() => {
+    if (showWarning === false) {
+      setShowSyncFlyout(false);
+    }
+  }, [showWarning, setShowSyncFlyout]);
 
   return showWarning === false ? null : (
     <>

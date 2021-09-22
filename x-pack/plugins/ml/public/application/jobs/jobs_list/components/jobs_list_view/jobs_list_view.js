@@ -101,6 +101,7 @@ export class JobsListView extends Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.lastRefresh !== this.props.lastRefresh) {
+      this.setState({ isRefreshing: true });
       this.refreshJobSummaryList();
     }
   }
@@ -503,7 +504,7 @@ export class JobsListView extends Component {
           <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
           <SavedObjectsWarning
             jobType="anomaly-detector"
-            onSyncSuccess={this.onRefreshClick}
+            onCloseFlyout={this.onRefreshClick}
             forceRefresh={loading || isRefreshing}
           />
 

@@ -104,7 +104,7 @@ export const Page: FC = () => {
           <NodeAvailableWarning />
           <SavedObjectsWarning
             jobType="data-frame-analytics"
-            onSyncSuccess={refresh}
+            onCloseFlyout={refresh}
             forceRefresh={isLoading}
           />
           <UpgradeWarning />
