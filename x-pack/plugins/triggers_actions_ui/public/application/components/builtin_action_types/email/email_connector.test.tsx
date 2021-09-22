@@ -32,8 +32,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => { }}
-        editActionSecrets={() => { }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
         readOnly={false}
       />
     );
@@ -63,8 +63,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => { }}
-        editActionSecrets={() => { }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
         readOnly={false}
       />
     );
@@ -96,8 +96,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => { }}
-        editActionSecrets={() => { }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
         readOnly={false}
       />
     );
@@ -129,8 +129,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => { }}
-        editActionSecrets={() => { }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
         readOnly={false}
       />
     );
@@ -162,8 +162,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => { }}
-        editActionSecrets={() => { }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
         readOnly={false}
       />
     );
@@ -196,8 +196,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => { }}
-        editActionSecrets={() => { }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
         readOnly={false}
       />
     );
@@ -220,8 +220,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
-        editActionConfig={() => { }}
-        editActionSecrets={() => { }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
         readOnly={false}
       />
     );
@@ -242,8 +242,8 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
-        editActionConfig={() => { }}
-        editActionSecrets={() => { }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
         readOnly={false}
       />
     );
@@ -265,13 +265,12 @@ describe('EmailActionConnectorFields renders', () => {
       <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
-        editActionConfig={() => { }}
-        editActionSecrets={() => { }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
         readOnly={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
-
 });
