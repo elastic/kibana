@@ -97,12 +97,17 @@ export const useInitSourcerer = (
   );
 
   const { indexFieldsSearch } = useIndexFields(scopeId);
+  console.log('useIndexFields', scopeId);
   useIndexFields(SourcererScopeName.timeline);
   useEffect(() => {
     // recheck if the indices have data yet
-    dispatch(sourcererActions.setIndexFieldsSearch({ indexFieldsSearch, id: scopeId }));
+    console.log('are you stack overflowing?');
+    if (indexFieldsSearch != null) {
+      console.log('dispatch', { indexFieldsSearch, id: scopeId });
+      dispatch(sourcererActions.setIndexFieldsSearch({ indexFieldsSearch, id: scopeId }));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexFieldsSearch]);
+  }, []);
 
   useEffect(() => {
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
@@ -220,11 +225,10 @@ export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName
 
 export const getScopeFromPath = (
   pathname: string
-): SourcererScopeName.default | SourcererScopeName.detections => {
-  return matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${UEBA_PATH}/:id`],
+): SourcererScopeName.default | SourcererScopeName.detections =>
+  matchPath(pathname, {
+    path: [ALERTS_PATH, RULES_PATH, `${RULES_PATH}/:anything`, `${UEBA_PATH}/:id`],
     strict: false,
   }) == null
     ? SourcererScopeName.default
     : SourcererScopeName.detections;
-};

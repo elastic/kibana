@@ -263,6 +263,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                   patternList.includes(pattern)
                 );
                 const patternString = newSelectedPatterns.sort().join();
+                console.log('response', response);
                 dispatch(
                   sourcererActions.setSource({
                     id: sourcererScopeName,

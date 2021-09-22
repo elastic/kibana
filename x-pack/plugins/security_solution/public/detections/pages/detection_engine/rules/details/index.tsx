@@ -575,17 +575,24 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indicesExist, indexPattern, indexFieldsSearch } = useSourcererScope(
+  const { indicesExist, indexPattern, indexFieldsSearch, selectedDataViewId } = useSourcererScope(
     SourcererScopeName.detections
   );
   useEffect(() => {
     // recheck if the indices have data yet
     console.log('redoing search????', { indicesExist, indexFieldsSearch });
-    if (!indicesExist && indexFieldsSearch != null) {
-      indexFieldsSearch(SourcererScopeName.detections);
-      console.log('redoing search');
-      // TODO: Steph/sourcerer
-      // if details page loads and signal index does not exist, recheck
+    // if (!indicesExist && indexFieldsSearch != null) {
+    //
+    //   // TODO: Steph/sourcerer
+    //   // if details page loads and signal index does not exist, recheck
+    // }
+    for (let i = 0; i < 10; i++) {
+      setTimeout(() => {
+        if (!indicesExist && indexFieldsSearch != null) {
+          indexFieldsSearch(selectedDataViewId);
+          console.log('redoing search');
+        }
+      }, 3000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indicesExist, indexFieldsSearch]);

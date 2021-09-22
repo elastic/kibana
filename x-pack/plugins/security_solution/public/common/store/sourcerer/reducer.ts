@@ -25,16 +25,25 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     ...state,
     signalIndexName,
   }))
-  .case(setIndexFieldsSearch, (state, { indexFieldsSearch, id }) => ({
-    ...state,
-    sourcererScopes: {
+  .case(setIndexFieldsSearch, (state, { indexFieldsSearch, id }) => {
+    console.log('setIndexFieldsSearch', id, {
       ...state.sourcererScopes,
       [id]: {
         ...state.sourcererScopes[id],
         indexFieldsSearch,
       },
-    },
-  }))
+    });
+    return {
+      ...state,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        [id]: {
+          ...state.sourcererScopes[id],
+          indexFieldsSearch,
+        },
+      },
+    };
+  })
   // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted
   .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({
     ...state,
