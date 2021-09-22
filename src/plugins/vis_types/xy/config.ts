@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from 'src/core/server';
-import { configSchema, ConfigSchema } from '../config';
-import { VisTypePieServerPlugin } from './plugin';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  schema: configSchema,
-};
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});
 
-export const plugin = () => new VisTypePieServerPlugin();
+export type ConfigSchema = TypeOf<typeof configSchema>;
