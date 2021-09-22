@@ -8,10 +8,9 @@
 import {
   LogicMounter,
   mockHttpValues,
-  mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../../__mocks__/kea_logic';
-import '../../../__mocks__/engine_logic.mock';
+} from '../../../../../__mocks__/kea_logic';
+import '../../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 

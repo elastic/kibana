@@ -7,9 +7,9 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../../../shared/flash_messages';
-import { HttpLogic } from '../../../../shared/http';
-import { EngineLogic } from '../../engine';
+import { flashAPIErrors } from '../../../../../shared/flash_messages';
+import { HttpLogic } from '../../../../../shared/http';
+import { EngineLogic } from '../../../engine';
 
 export interface CurationsSettings {
   enabled: boolean;

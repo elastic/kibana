@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/react_router';
-import '../../../__mocks__/engine_logic.mock';
+import '../../../../../__mocks__/react_router';
+import '../../../../__mocks__/engine_logic.mock';
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -18,12 +18,12 @@ import { EuiButtonEmpty, EuiCallOut, EuiSwitch } from '@elastic/eui';
 
 import { mountWithIntl } from '@kbn/test/jest';
 
-import { Loading } from '../../../../shared/loading';
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
-import { DataPanel } from '../../data_panel';
-import { LogRetentionOptions } from '../../log_retention';
+import { Loading } from '../../../../../shared/loading';
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
+import { DataPanel } from '../../../data_panel';
+import { LogRetentionOptions } from '../../../log_retention';
 
-import { CurationsSettings } from './curations_settings';
+import { CurationsSettings } from '.';
 
 const MOCK_VALUES = {
   // CurationsSettingsLogic

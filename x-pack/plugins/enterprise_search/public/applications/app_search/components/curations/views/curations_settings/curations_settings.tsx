@@ -9,26 +9,18 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiSpacer, EuiSwitch, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { docLinks } from '../../../../shared/doc_links';
-import { LicensingLogic } from '../../../../shared/licensing';
-import { Loading } from '../../../../shared/loading';
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
-import { SETTINGS_PATH } from '../../../routes';
-import { DataPanel } from '../../data_panel';
-import { LogRetentionLogic, LogRetentionOptions } from '../../log_retention';
+import { docLinks } from '../../../../../shared/doc_links';
+import { LicensingLogic } from '../../../../../shared/licensing';
+import { Loading } from '../../../../../shared/loading';
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
+import { SETTINGS_PATH } from '../../../../routes';
+import { DataPanel } from '../../../data_panel';
+import { LogRetentionLogic, LogRetentionOptions } from '../../../log_retention';
 
 import { CurationsSettingsLogic } from './curations_settings_logic';
 
