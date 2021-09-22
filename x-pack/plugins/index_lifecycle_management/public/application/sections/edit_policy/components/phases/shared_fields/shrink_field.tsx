@@ -85,6 +85,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
           <EuiSpacer />
           <UseField
             path={path}
+            key={path}
             component={NumericField}
             componentProps={{
               fullWidth: false,
