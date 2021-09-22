@@ -150,7 +150,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IFieldType",
                 "text": "IFieldType"
               }
@@ -192,7 +192,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IIndexPattern",
                 "text": "IIndexPattern"
               },

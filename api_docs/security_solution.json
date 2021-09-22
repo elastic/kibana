@@ -21010,6 +21010,52 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.SavedTimelineWithSavedObjectId",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedTimelineWithSavedObjectId",
+        "description": [],
+        "signature": [
+          "{ columns?: { aggregatable?: boolean | null | undefined; category?: string | null | undefined; columnHeaderType?: string | null | undefined; description?: string | null | undefined; example?: string | null | undefined; indexes?: string[] | null | undefined; id?: string | null | undefined; name?: string | null | undefined; placeholder?: string | null | undefined; searchable?: boolean | null | undefined; type?: string | null | undefined; }[] | null | undefined; dataProviders?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; and?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; }[] | null | undefined; type?: ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.DataProviderType",
+            "text": "DataProviderType"
+          },
+          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RowRendererId",
+            "text": "RowRendererId"
+          },
+          "[] | null | undefined; favorite?: { keySearch?: string | null | undefined; favoriteDate?: number | null | undefined; fullName?: string | null | undefined; userName?: string | null | undefined; }[] | null | undefined; filters?: { exists?: string | null | undefined; meta?: { alias?: string | null | undefined; controlledBy?: string | null | undefined; disabled?: boolean | null | undefined; field?: string | null | undefined; formattedValue?: string | null | undefined; index?: string | null | undefined; key?: string | null | undefined; negate?: boolean | null | undefined; params?: string | null | undefined; type?: string | null | undefined; value?: string | null | undefined; } | null | undefined; match_all?: string | null | undefined; missing?: string | null | undefined; query?: string | null | undefined; range?: string | null | undefined; script?: string | null | undefined; }[] | null | undefined; indexNames?: string[] | null | undefined; kqlMode?: string | null | undefined; kqlQuery?: { filterQuery?: { kuery?: { kind?: string | null | undefined; expression?: string | null | undefined; } | null | undefined; serializedQuery?: string | null | undefined; } | null | undefined; } | null | undefined; title?: string | null | undefined; templateTimelineId?: string | null | undefined; templateTimelineVersion?: number | null | undefined; timelineType?: ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.TimelineType",
+            "text": "TimelineType"
+          },
+          " | null | undefined; dateRange?: { start?: string | number | null | undefined; end?: string | number | null | undefined; } | null | undefined; savedQueryId?: string | null | undefined; sort?: { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; } | { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; }[] | null | undefined; status?: ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.TimelineStatus",
+            "text": "TimelineStatus"
+          },
+          " | null | undefined; created?: number | null | undefined; createdBy?: string | null | undefined; updated?: number | null | undefined; updatedBy?: string | null | undefined; } & { savedObjectId?: string | null | undefined; }"
+        ],
+        "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.SearchHit",
         "type": "Type",
         "tags": [],
@@ -22633,6 +22679,54 @@
             "text": "TimelineType"
           },
           " | null"
+        ],
+        "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.TimelineWithoutExternalRefs",
+        "type": "Type",
+        "tags": [],
+        "label": "TimelineWithoutExternalRefs",
+        "description": [
+          "\nThis type represents a timeline type stored in a saved object that does not include any fields that reference\nother saved objects."
+        ],
+        "signature": [
+          "{ status?: ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.TimelineStatus",
+            "text": "TimelineStatus"
+          },
+          " | null | undefined; columns?: { aggregatable?: boolean | null | undefined; category?: string | null | undefined; columnHeaderType?: string | null | undefined; description?: string | null | undefined; example?: string | null | undefined; indexes?: string[] | null | undefined; id?: string | null | undefined; name?: string | null | undefined; placeholder?: string | null | undefined; searchable?: boolean | null | undefined; type?: string | null | undefined; }[] | null | undefined; description?: string | null | undefined; filters?: { exists?: string | null | undefined; meta?: { alias?: string | null | undefined; controlledBy?: string | null | undefined; disabled?: boolean | null | undefined; field?: string | null | undefined; formattedValue?: string | null | undefined; index?: string | null | undefined; key?: string | null | undefined; negate?: boolean | null | undefined; params?: string | null | undefined; type?: string | null | undefined; value?: string | null | undefined; } | null | undefined; match_all?: string | null | undefined; missing?: string | null | undefined; query?: string | null | undefined; range?: string | null | undefined; script?: string | null | undefined; }[] | null | undefined; title?: string | null | undefined; sort?: { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; } | { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; }[] | null | undefined; dateRange?: { start?: string | number | null | undefined; end?: string | number | null | undefined; } | null | undefined; createdBy?: string | null | undefined; updatedBy?: string | null | undefined; created?: number | null | undefined; updated?: number | null | undefined; dataProviders?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; and?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; }[] | null | undefined; type?: ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.DataProviderType",
+            "text": "DataProviderType"
+          },
+          " | null | undefined; }[] | null | undefined; excludedRowRendererIds?: ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RowRendererId",
+            "text": "RowRendererId"
+          },
+          "[] | null | undefined; kqlQuery?: { filterQuery?: { kuery?: { kind?: string | null | undefined; expression?: string | null | undefined; } | null | undefined; serializedQuery?: string | null | undefined; } | null | undefined; } | null | undefined; indexNames?: string[] | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; favorite?: { keySearch?: string | null | undefined; favoriteDate?: number | null | undefined; fullName?: string | null | undefined; userName?: string | null | undefined; }[] | null | undefined; kqlMode?: string | null | undefined; templateTimelineId?: string | null | undefined; templateTimelineVersion?: number | null | undefined; timelineType?: ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.TimelineType",
+            "text": "TimelineType"
+          },
+          " | null | undefined; }"
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
         "deprecated": false,
@@ -24931,6 +25025,79 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.MatrixHistogramTypeToAggName",
+        "type": "Object",
+        "tags": [],
+        "label": "MatrixHistogramTypeToAggName",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.MatrixHistogramTypeToAggName.MatrixHistogramType.alerts",
+            "type": "string",
+            "tags": [],
+            "label": "[MatrixHistogramType.alerts]",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.MatrixHistogramTypeToAggName.MatrixHistogramType.anomalies",
+            "type": "string",
+            "tags": [],
+            "label": "[MatrixHistogramType.anomalies]",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.MatrixHistogramTypeToAggName.MatrixHistogramType.authentications",
+            "type": "string",
+            "tags": [],
+            "label": "[MatrixHistogramType.authentications]",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.MatrixHistogramTypeToAggName.MatrixHistogramType.authenticationsEntities",
+            "type": "string",
+            "tags": [],
+            "label": "[MatrixHistogramType.authenticationsEntities]",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.MatrixHistogramTypeToAggName.MatrixHistogramType.dns",
+            "type": "string",
+            "tags": [],
+            "label": "[MatrixHistogramType.dns]",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.MatrixHistogramTypeToAggName.MatrixHistogramType.events",
+            "type": "string",
+            "tags": [],
+            "label": "[MatrixHistogramType.events]",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

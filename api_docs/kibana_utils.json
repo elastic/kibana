@@ -7222,6 +7222,94 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-server.mergeMigrationFunctionMaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeMigrationFunctionMaps",
+        "description": [],
+        "signature": [
+          "(obj1: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ", obj2: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ") => { [x: string]: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunction",
+            "text": "MigrateFunction"
+          },
+          "<any, any>; } & ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.mergeMigrationFunctionMaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj1",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.mergeMigrationFunctionMaps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "obj2",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-server.reportServerError",
         "type": "Function",
         "tags": [],

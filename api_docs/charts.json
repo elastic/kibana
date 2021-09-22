@@ -1700,12 +1700,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.PaletteOutput.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"palette\""
+              "\"palette\" | \"system_palette\""
             ],
             "path": "src/plugins/charts/common/palette.ts",
             "deprecated": false
@@ -2864,12 +2864,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-server.PaletteOutput.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"palette\""
+              "\"palette\" | \"system_palette\""
             ],
             "path": "src/plugins/charts/common/palette.ts",
             "deprecated": false
@@ -3044,7 +3044,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<unknown>, ",
+          "<{ [key: string]: unknown; }>, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -3304,12 +3304,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-common.PaletteOutput.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"palette\""
+              "\"palette\" | \"system_palette\""
             ],
             "path": "src/plugins/charts/common/palette.ts",
             "deprecated": false

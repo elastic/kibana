@@ -750,24 +750,7 @@
         ],
         "path": "src/core/public/plugins/plugin.ts",
         "deprecated": true,
-        "references": [
-          {
-            "plugin": "visTypeTable",
-            "path": "src/plugins/vis_types/table/public/plugin.ts"
-          },
-          {
-            "plugin": "visTypeTable",
-            "path": "src/plugins/vis_types/table/public/plugin.ts"
-          },
-          {
-            "plugin": "visTypeTable",
-            "path": "src/plugins/vis_types/table/target/types/public/plugin.d.ts"
-          },
-          {
-            "plugin": "visTypeTable",
-            "path": "src/plugins/vis_types/table/target/types/public/plugin.d.ts"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "core",
@@ -1620,7 +1603,7 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly settings: string; readonly apm: { readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; }; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly autocompleteChanges: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; }>; readonly ecs: { readonly guide: string; }; }"
+              "{ readonly settings: string; readonly apm: { readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; }; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly autocompleteChanges: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Readonly<{ guide: string; infrastructureThreshold: string; logsThreshold: string; metricsThreshold: string; monitorStatus: string; monitorUptime: string; tlsCertificate: string; uptimeDurationAnomaly: string; }>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; }>; readonly ecs: { readonly guide: string; }; }"
             ],
             "path": "src/core/public/doc_links/doc_links_service.ts",
             "deprecated": false
@@ -4664,6 +4647,86 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-public.SavedObjectsBulkResolveObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkResolveObject",
+        "description": [
+          "\n"
+        ],
+        "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsBulkResolveObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsBulkResolveObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.SavedObjectsBulkResolveResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkResolveResponse",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBulkResolveResponse",
+            "text": "SavedObjectsBulkResolveResponse"
+          },
+          "<T>"
+        ],
+        "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsBulkResolveResponse.resolved_objects",
+            "type": "Array",
+            "tags": [],
+            "label": "resolved_objects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsResolveResponse",
+                "text": "SavedObjectsResolveResponse"
+              },
+              "<T>[]"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.SavedObjectsCollectMultiNamespaceReferencesResponse",
         "type": "Interface",
         "tags": [],
@@ -7566,6 +7629,94 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.EventLoopDelaysMonitor",
+        "type": "Class",
+        "tags": [],
+        "label": "EventLoopDelaysMonitor",
+        "description": [],
+        "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EventLoopDelaysMonitor.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nCreating a new instance from EventLoopDelaysMonitor will\nautomatically start tracking event loop delays."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EventLoopDelaysMonitor.collect",
+            "type": "Function",
+            "tags": [],
+            "label": "collect",
+            "description": [
+              "\nCollect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay\nthe histogram calculations start from the last time `reset` was called or this\nEventLoopDelaysMonitor instance was created."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IntervalHistogram",
+                "text": "IntervalHistogram"
+              }
+            ],
+            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EventLoopDelaysMonitor.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [
+              "\nResets the collected histogram data."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EventLoopDelaysMonitor.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [
+              "\nDisables updating the interval timer for collecting new data points."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [],
@@ -10160,6 +10311,30 @@
                 "section": "def-server.SavedObjectsBulkResponse",
                 "text": "SavedObjectsBulkResponse"
               },
+              "<T>>; bulkResolve: <T = unknown>(objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveObject",
+                "text": "SavedObjectsBulkResolveObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveResponse",
+                "text": "SavedObjectsBulkResolveResponse"
+              },
               "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "core",
@@ -12340,6 +12515,104 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.IntervalHistogram",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntervalHistogram",
+        "description": [
+          "\nan IntervalHistogram object that samples and reports the event loop delay over time.\nThe delays will be reported in nanoseconds.\n"
+        ],
+        "path": "src/core/server/metrics/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IntervalHistogram.fromTimestamp",
+            "type": "string",
+            "tags": [],
+            "label": "fromTimestamp",
+            "description": [],
+            "path": "src/core/server/metrics/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IntervalHistogram.lastUpdatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "lastUpdatedAt",
+            "description": [],
+            "path": "src/core/server/metrics/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IntervalHistogram.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "src/core/server/metrics/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IntervalHistogram.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "src/core/server/metrics/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IntervalHistogram.mean",
+            "type": "number",
+            "tags": [],
+            "label": "mean",
+            "description": [],
+            "path": "src/core/server/metrics/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IntervalHistogram.exceeds",
+            "type": "number",
+            "tags": [],
+            "label": "exceeds",
+            "description": [],
+            "path": "src/core/server/metrics/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IntervalHistogram.stddev",
+            "type": "number",
+            "tags": [],
+            "label": "stddev",
+            "description": [],
+            "path": "src/core/server/metrics/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IntervalHistogram.percentiles",
+            "type": "Object",
+            "tags": [],
+            "label": "percentiles",
+            "description": [],
+            "signature": [
+              "{ 50: number; 75: number; 95: number; 99: number; }"
+            ],
+            "path": "src/core/server/metrics/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.IRenderOptions",
         "type": "Interface",
         "tags": [],
@@ -13460,10 +13733,12 @@
             "parentPluginId": "core",
             "id": "def-server.OpsMetrics.process",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "process",
             "description": [
-              "Process related metrics"
+              "\nProcess related metrics."
             ],
             "signature": [
               {
@@ -13473,6 +13748,38 @@
                 "section": "def-server.OpsProcessMetrics",
                 "text": "OpsProcessMetrics"
               }
+            ],
+            "path": "src/core/server/metrics/types.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/plugins/monitoring/server/kibana_monitoring/bulk_uploader.ts"
+              },
+              {
+                "plugin": "kibanaUsageCollection",
+                "path": "src/plugins/kibana_usage_collection/server/collectors/ops_stats/ops_stats_collector.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.OpsMetrics.processes",
+            "type": "Array",
+            "tags": [],
+            "label": "processes",
+            "description": [
+              "Process related metrics. Reports an array of objects for each kibana pid."
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.OpsProcessMetrics",
+                "text": "OpsProcessMetrics"
+              },
+              "[]"
             ],
             "path": "src/core/server/metrics/types.ts",
             "deprecated": false
@@ -13701,6 +14008,18 @@
         "children": [
           {
             "parentPluginId": "core",
+            "id": "def-server.OpsProcessMetrics.pid",
+            "type": "number",
+            "tags": [],
+            "label": "pid",
+            "description": [
+              "pid of the kibana process"
+            ],
+            "path": "src/core/server/metrics/collectors/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.OpsProcessMetrics.memory",
             "type": "Object",
             "tags": [],
@@ -13721,19 +14040,28 @@
             "tags": [],
             "label": "event_loop_delay",
             "description": [
-              "node event loop delay"
+              "mean event loop delay since last collection"
             ],
             "path": "src/core/server/metrics/collectors/types.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.OpsProcessMetrics.pid",
-            "type": "number",
+            "id": "def-server.OpsProcessMetrics.event_loop_delay_histogram",
+            "type": "Object",
             "tags": [],
-            "label": "pid",
+            "label": "event_loop_delay_histogram",
             "description": [
-              "pid of the kibana process"
+              "node event loop delay histogram since last collection"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IntervalHistogram",
+                "text": "IntervalHistogram"
+              }
             ],
             "path": "src/core/server/metrics/collectors/types.ts",
             "deprecated": false
@@ -14718,7 +15046,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; typeRegistry: Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; typeRegistry: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -14742,7 +15070,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; getExporter: (client: Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; getExporter: (client: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -14750,7 +15078,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -14766,7 +15094,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -15935,7 +16263,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => ",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -15963,7 +16291,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "path": "src/core/server/ui_settings/types.ts",
                 "deprecated": false,

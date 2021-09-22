@@ -211,6 +211,30 @@
                 "section": "def-server.SavedObjectsBulkResponse",
                 "text": "SavedObjectsBulkResponse"
               },
+              "<T>>; bulkResolve: <T = unknown>(objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveObject",
+                "text": "SavedObjectsBulkResolveObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveResponse",
+                "text": "SavedObjectsBulkResolveResponse"
+              },
               "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "core",
