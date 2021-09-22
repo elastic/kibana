@@ -240,9 +240,7 @@ export class IndexActionsContextMenu extends Component {
       }
     });
     items.forEach((item) => {
-      item['data-test-subj'] = `indexTableContextMenuButton_${item.name
-        .replace(/\s/g, '')
-        .toLowerCase()}`;
+      item['data-test-subj'] = 'indexTableContextMenuButton';
     });
     const panelTree = {
       id: 0,

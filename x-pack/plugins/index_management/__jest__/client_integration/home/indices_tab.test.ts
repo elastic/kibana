@@ -257,7 +257,8 @@ describe('<IndexManagementHome />', () => {
         .childAt(0)
         .childAt(1)
         .childAt(0)
-        .find('button[data-test-subj="indexTableContextMenuButton_closeindex"]');
+        .find('button[data-test-subj="indexTableContextMenuButton"]')
+        .at(0);
 
       await closeIndexButton.simulate('click');
       const latestRequest = server.requests[server.requests.length - 1];
