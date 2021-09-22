@@ -351,7 +351,7 @@ export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
 export const SOURCE_CONFIG_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.config.link',
   {
-    defaultMessage: 'Edit content source connector settings',
+    defaultMessage: 'Edit connector settings',
   }
 );
 
