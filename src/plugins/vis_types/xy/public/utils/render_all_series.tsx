@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-
 import {
   AreaSeries,
   CurveType,
@@ -20,18 +19,16 @@ import {
   ColorVariant,
   LabelOverflowConstraint,
 } from '@elastic/charts';
-
 import { DatatableRow } from '../../../../expressions/public';
-import { METRIC_TYPES } from '../../../../data/public';
-
 import { ChartType } from '../../common';
-import { SeriesParam, VisConfig } from '../types';
+import { AxisMode, ChartMode, InterpolationMode, SeriesParam, VisConfig } from '../types';
+import { isValidSeriesForDimension } from './accessors';
 
 /**
  * Matches vislib curve to elastic charts
  * @param type curve type
  */
-const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType => {
+const getCurveType = (type?: InterpolationMode): CurveType => {
   switch (type) {
     case 'cardinal':
       return CurveType.CURVE_MONOTONE_X;
@@ -82,26 +79,20 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspects = aspects.y.filter(({ aggId, aggType, accessor }) => {
-        if (
-          aggType === METRIC_TYPES.PERCENTILES ||
-          aggType === METRIC_TYPES.PERCENTILE_RANKS ||
-          aggType === METRIC_TYPES.STD_DEV
-        ) {
-          return aggId?.includes(paramId) && accessor !== null;
-        } else {
-          return aggId === paramId && accessor !== null;
-        }
-      });
+      const yAspects = aspects.y.filter(({ id, accessor }) =>
+        isValidSeriesForDimension(paramId)({ id, accessor })
+      );
+
       if (!show || !yAspects.length) {
         return null;
       }
-      const yAccessors = yAspects.map((aspect) => aspect.accessor) as string[];
+
+      const yAccessors: string[] = yAspects.map((aspect) => aspect.accessor ?? '');
 
       const id = `${type}-${yAccessors[0]}`;
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
-      const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
-      const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
+      const isStacked = mode === ChartMode.Stacked || yAxisScale?.mode === AxisMode.Percentage;
+      const stackMode = yAxisScale?.mode === AxisMode.Normal ? undefined : yAxisScale?.mode;
       // needed to seperate stacked and non-stacked bars into unique pseudo groups
       const pseudoGroupId = isStacked ? `__pseudo_stacked_group-${groupId}__` : groupId;
       // set domain of stacked groups to use actual groupId not pseudo groupdId
@@ -144,7 +135,6 @@ export const renderAllSeries = (
         case ChartType.Area:
         case ChartType.Line:
           const markSizeAccessor = showCircles ? aspects.z?.accessor ?? undefined : undefined;
-
           return (
             <AreaSeries
               key={id}

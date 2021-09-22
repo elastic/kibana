@@ -78,8 +78,7 @@ const yAspects = [
     format: {
       id: 'number',
     },
-    aggType: 'count',
-    aggId: '1',
+    id: '1',
     params: {},
   },
 ];
@@ -92,8 +91,7 @@ const myltipleYAspects = [
     format: {
       id: 'number',
     },
-    aggType: 'count',
-    aggId: '1',
+    id: '1',
     params: {},
   },
   {
@@ -106,8 +104,7 @@ const myltipleYAspects = [
         pattern: '$0,0.[00]',
       },
     },
-    aggType: 'avg',
-    aggId: '4',
+    id: '4',
     params: {},
   },
 ];

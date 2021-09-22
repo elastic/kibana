@@ -289,7 +289,6 @@ export const sampleAreaVis = {
           },
         },
         label: 'order_date per 12 hours',
-        aggType: 'date_histogram',
       },
       y: [
         {
@@ -306,7 +305,6 @@ export const sampleAreaVis = {
           },
           params: {},
           label: 'Sum of total_quantity',
-          aggType: 'sum',
         },
       ],
       series: [
@@ -322,7 +320,6 @@ export const sampleAreaVis = {
           },
           params: {},
           label: 'category.keyword: Descending',
-          aggType: 'terms',
         },
       ],
     },

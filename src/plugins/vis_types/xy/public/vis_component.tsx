@@ -71,7 +71,7 @@ export type VisComponentType = typeof VisComponent;
 
 const VisComponent = (props: VisComponentProps) => {
   const [showLegend, setShowLegend] = useState<boolean>(() => {
-    // TODO: Check when this bwc can safely be removed
+    // @TODO: Check when this bwc can safely be removed
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
@@ -210,21 +210,22 @@ const VisComponent = (props: VisComponentProps) => {
 
   const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
+
   const xDomain =
     config.xAxis.scale.type === ScaleType.Ordinal ? undefined : getXDomain(config.aspects.x.params);
-  const hasBars = visParams.seriesParams.some(
-    ({ type, data: { id: paramId } }) =>
-      type === ChartType.Histogram &&
-      config.aspects.y.find(({ aggId }) => aggId === paramId) !== undefined
-  );
+
+  const hasBars = visParams.seriesParams.some(({ type }) => type === ChartType.Histogram);
+
   const adjustedXDomain =
     config.xAxis.scale.type === ScaleType.Ordinal
       ? undefined
       : getAdjustedDomain(visData.rows, config.aspects.x, timeZone, xDomain, hasBars);
+
   const legendPosition = useMemo(
     () => config.legend.position ?? Position.Right,
     [config.legend.position]
   );
+
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
@@ -280,6 +281,7 @@ const VisComponent = (props: VisComponentProps) => {
       palettesRegistry,
     ]
   );
+
   const xAccessor = getXAccessor(config.aspects.x);
 
   const splitSeriesAccessors = useMemo(
@@ -290,10 +292,10 @@ const VisComponent = (props: VisComponentProps) => {
     [config.aspects.series]
   );
   const splitChartColumnAccessor = config.aspects.splitColumn
-    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitColumn)
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitColumn)
     : undefined;
   const splitChartRowAccessor = config.aspects.splitRow
-    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitRow)
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitRow)
     : undefined;
 
   const renderSeries = useMemo(

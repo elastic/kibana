@@ -17,8 +17,7 @@ export const aspects = {
         pattern: 'YYYY-MM-DD HH:mm',
       },
     },
-    aggType: 'date_histogram',
-    aggId: '3',
+    id: '3',
     params: {
       date: true,
       intervalESUnit: 'h',
@@ -35,8 +34,7 @@ export const aspects = {
       format: {
         id: 'number',
       },
-      aggType: 'count',
-      aggId: '1',
+      id: '1',
       params: {},
     },
   ],
@@ -53,8 +51,7 @@ export const aspectsWithSplitColumn = {
         pattern: 'YYYY-MM-DD HH:mm',
       },
     },
-    aggType: 'date_histogram',
-    aggId: '3',
+    id: '3',
     params: {
       date: true,
       intervalESUnit: 'h',
@@ -71,8 +68,7 @@ export const aspectsWithSplitColumn = {
       format: {
         id: 'number',
       },
-      aggType: 'count',
-      aggId: '1',
+      id: '1',
       params: {},
     },
   ],
@@ -88,8 +84,7 @@ export const aspectsWithSplitColumn = {
         missingBucketLabel: 'Missing',
       },
     },
-    aggType: 'terms',
-    aggId: '4',
+    id: '4',
     params: {},
   },
 };
@@ -105,8 +100,7 @@ export const aspectsWithSplitRow = {
         pattern: 'YYYY-MM-DD HH:mm',
       },
     },
-    aggType: 'date_histogram',
-    aggId: '3',
+    id: '3',
     params: {
       date: true,
       intervalESUnit: 'h',
@@ -123,8 +117,7 @@ export const aspectsWithSplitRow = {
       format: {
         id: 'number',
       },
-      aggType: 'count',
-      aggId: '1',
+      id: '1',
       params: {},
     },
   ],
@@ -140,8 +133,7 @@ export const aspectsWithSplitRow = {
         missingBucketLabel: 'Missing',
       },
     },
-    aggType: 'terms',
-    aggId: '4',
+    id: '4',
     params: {},
   },
 };

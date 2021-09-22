@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { identity, isNil } from 'lodash';
-
+import { isNil } from 'lodash';
 import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
-
 import { LabelRotation } from '../../../../charts/public';
-import { BUCKET_TYPES } from '../../../../data/public';
-
 import {
   Aspect,
   CategoryAxis,
@@ -27,13 +23,15 @@ import {
   YScaleType,
   SeriesParam,
 } from '../types';
+import { isSimpleField } from '../utils/accessors';
 
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
   { categoryLines, valueAxis }: Grid,
-  { params, format, formatter, title: fallbackTitle = '', aggType }: Aspect,
+  { params, format, formatter, title: fallbackTitle = '', accessor }: Aspect,
   seriesParams: SeriesParam[],
-  isDateHistogram = false
+  isDateHistogram = false,
+  shouldApplyFormatter = false
 ): AxisConfig<S> {
   const isCategoryAxis = type === AxisType.Category;
   // Hide unassigned axis, not supported in elastic charts
@@ -50,9 +48,10 @@ export function getAxis<S extends XScaleType | YScaleType>(
     : {
         show: valueAxis === axis.id,
       };
-  // Date range formatter applied on xAccessor
-  const tickFormatter =
-    aggType === BUCKET_TYPES.DATE_RANGE || aggType === BUCKET_TYPES.RANGE ? identity : formatter;
+
+  const tickFormatter: TickFormatter = (v) =>
+    isSimpleField(format) || shouldApplyFormatter ? formatter?.(v) ?? v : v;
+
   const ticks: TickOptions = {
     formatter: tickFormatter,
     labelFormatter: getLabelFormatter(labels.truncate, tickFormatter),
@@ -61,6 +60,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
     showOverlappingLabels: !labels.filter,
     showDuplicates: !labels.filter,
   };
+
   const scale = getScale<S>(axisScale, params, format, isCategoryAxis);
   const title = axisTitle.text || fallbackTitle;
   const fallbackRotation =
@@ -76,7 +76,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
     scale,
     style: getAxisStyle(ticks, title, fallbackRotation),
     domain: getAxisDomain(scale, isCategoryAxis),
-    integersOnly: aggType === 'count',
+    integersOnly: params?.integersOnly ?? false,
   };
 }
 

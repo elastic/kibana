@@ -29,13 +29,12 @@ export interface Column {
 
 export interface Aspect {
   accessor: Column['id'];
-  aggType: string | null;
-  aggId: string | null;
   column?: Dimension['accessor'];
   title: Column['name'];
   format?: Dimension['format'];
   formatter?: TickFormatter;
   params: Dimension['params'];
+  id?: Dimension['id'];
 }
 
 export interface Aspects {

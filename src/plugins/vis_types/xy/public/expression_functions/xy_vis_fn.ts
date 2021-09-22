@@ -16,6 +16,7 @@ import type {
 import { prepareLogTable, Dimension } from '../../../../visualizations/public';
 import type { ChartType } from '../../common';
 import type { VisParams, XYVisConfig } from '../types';
+import { isValidSeriesForDimension } from '../utils/accessors';
 
 export const visName = 'xy_vis';
 export interface RenderValue {
@@ -153,6 +154,12 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
           'Flag to indicate old vislib visualizations. Used for backwards compatibility including colors',
       }),
     },
+    enableHistogramMode: {
+      types: ['boolean'],
+      help: i18n.translate('visTypeXy.function.args.enableHistogramMode.help', {
+        defaultMessage: 'Flag to enable histogram mode',
+      }),
+    },
     detailedTooltip: {
       types: ['boolean'],
       help: i18n.translate('visTypeXy.function.args.detailedTooltip.help', {
@@ -255,10 +262,16 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         categoryLines: args.gridCategoryLines,
         valueAxis: args.gridValueAxis,
       },
-      seriesParams: args.seriesParams.map((seriesParam) => ({
-        ...seriesParam,
-        type: seriesParam.seriesParamType,
-      })),
+      seriesParams: args.seriesParams.map((seriesParam) => {
+        const matchedSeries = args.yDimension.filter(({ id, accessor }) =>
+          isValidSeriesForDimension(seriesParam.data.id)({ id, accessor })
+        );
+        return {
+          ...seriesParam,
+          show: matchedSeries.length > 0,
+          type: seriesParam.seriesParamType,
+        };
+      }),
       radiusRatio: args.radiusRatio,
       times: args.times,
       isVislibVis: args.isVislibVis,
@@ -269,6 +282,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       },
       fillOpacity: args.fillOpacity,
       fittingFunction: args.fittingFunction,
+      enableHistogramMode: args.enableHistogramMode,
       dimensions: {
         x: args.xDimension,
         y: args.yDimension,

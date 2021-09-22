@@ -9,12 +9,12 @@
 import { ScaleContinuousType } from '@elastic/charts';
 
 import { Datatable } from '../../../../expressions/public';
-import { BUCKET_TYPES } from '../../../../data/public';
-import { DateHistogramParams } from '../../../../visualizations/public';
-
+import { KBN_FIELD_TYPES } from '../../../../data/public';
 import {
   Aspect,
   AxisConfig,
+  AxisMode,
+  ChartMode,
   SeriesParam,
   VisConfig,
   VisParams,
@@ -42,23 +42,28 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     fillOpacity,
   } = params;
   const aspects = getAspects(table.columns, params.dimensions);
+  const yAxes = params.valueAxes.map((a) =>
+    // shouldApplyFormatter = true, because no formatter was applied to this axis values before
+    // and will be not applied in the future
+    getAxis<YScaleType>(a, params.grid, aspects.y[0], params.seriesParams, false, true)
+  );
+
+  const enableHistogramMode =
+    (params.enableHistogramMode ?? false) &&
+    shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
+
+  const timeChartFieldTypes: string[] = [KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.DATE_RANGE];
+  const isTimeChart = timeChartFieldTypes.includes(aspects.x.format?.id ?? '');
+
   const xAxis = getAxis<XScaleType>(
     params.categoryAxes[0],
     params.grid,
     aspects.x,
     params.seriesParams,
-    params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM
+    aspects.x.format?.id === KBN_FIELD_TYPES.DATE
   );
+
   const tooltip = getTooltip(aspects, params);
-  const yAxes = params.valueAxes.map((a) =>
-    // uses first y aspect in array for formatting axis
-    getAxis<YScaleType>(a, params.grid, aspects.y[0], params.seriesParams)
-  );
-  const enableHistogramMode =
-    (params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM ||
-      params.dimensions.x?.aggType === BUCKET_TYPES.HISTOGRAM) &&
-    shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
-  const isTimeChart = (aspects.x.params as DateHistogramParams).date ?? false;
 
   return {
     // NOTE: downscale ratio to match current vislib implementation
@@ -94,11 +99,7 @@ const shouldEnableHistogramMode = (
   yAspects: Aspect[],
   yAxes: Array<AxisConfig<ScaleContinuousType>>
 ): boolean => {
-  const bars = seriesParams.filter(({ type, data: { id: paramId } }) => {
-    return (
-      type === ChartType.Histogram && yAspects.find(({ aggId }) => aggId === paramId) !== undefined
-    );
-  });
+  const bars = seriesParams.filter(({ type }) => type === ChartType.Histogram);
 
   const groupIds = [
     ...bars.reduce<Set<string>>((acc, { valueAxis: groupId, mode }) => {
@@ -114,6 +115,6 @@ const shouldEnableHistogramMode = (
   return bars.every(({ valueAxis: groupId, mode }) => {
     const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
 
-    return mode === 'stacked' || yAxisScale?.mode === 'percentage';
+    return mode === ChartMode.Stacked || yAxisScale?.mode === AxisMode.Percentage;
   });
 };
