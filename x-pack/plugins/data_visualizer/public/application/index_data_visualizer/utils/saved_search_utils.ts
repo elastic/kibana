@@ -8,55 +8,128 @@
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
 import {
-  buildEsQuery,
-  buildQueryFromFilters,
-  decorateQuery,
   fromKueryExpression,
-  luceneStringToDsl,
   toElasticsearchQuery,
+  buildQueryFromFilters,
+  buildEsQuery,
+  Query,
+  Filter,
 } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
-import { SavedSearchSavedObject } from '../../../../common/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
+import { DataView } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
-import { getEsQueryConfig, Query } from '../../../../../../../src/plugins/data/public';
+import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
-export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
-  const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
-  return JSON.parse(search.searchSourceJSON) as {
-    query: Query;
-    filter: any[];
-  };
+export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | SavedSearch) {
+  const search = isSavedSearchSavedObject(savedSearch)
+    ? savedSearch?.attributes?.kibanaSavedObjectMeta
+    : // @ts-expect-error kibanaSavedObjectMeta does exist
+      savedSearch?.kibanaSavedObjectMeta;
+
+  return typeof search?.searchSourceJSON === 'string'
+    ? (JSON.parse(search.searchSourceJSON) as {
+        query: Query;
+        filter: any[];
+      })
+    : undefined;
+}
+
+export function createCombinedQuery(
+  query: Query,
+  filters: Filter[],
+  indexPattern?: DataView,
+  uiSettings?: IUiSettingsClient
+) {
+  let combinedQuery: any = getDefaultDatafeedQuery();
+
+  if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+    const ast = fromKueryExpression(query.query);
+    if (query.query !== '') {
+      combinedQuery = toElasticsearchQuery(ast, indexPattern);
+    }
+    const filterQuery = buildQueryFromFilters(filters, indexPattern);
+
+    if (Array.isArray(combinedQuery.bool.filter) === false) {
+      combinedQuery.bool.filter =
+        combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
+    }
+
+    if (Array.isArray(combinedQuery.bool.must_not) === false) {
+      combinedQuery.bool.must_not =
+        combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
+    }
+
+    combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
+    combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
+  } else {
+    combinedQuery = buildEsQuery(
+      indexPattern,
+      [query],
+      filters,
+      uiSettings ? getEsQueryConfig(uiSettings) : undefined
+    );
+  }
+  return combinedQuery;
 }
 
 /**
- * Extract query data from the saved search object.
+ * Extract query data from the saved search object
+ * and merge with query data and filters
  */
-export function extractSearchData(
-  savedSearch: SavedSearchSavedObject | null,
-  currentIndexPattern: IndexPattern,
-  queryStringOptions: Record<string, any> | string
-) {
-  if (!savedSearch) {
-    return undefined;
+export function extractSearchData({
+  indexPattern,
+  uiSettings,
+  savedSearch,
+  query,
+  filters,
+}: {
+  indexPattern: DataView;
+  uiSettings: IUiSettingsClient;
+  savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
+  query?: Query;
+  filters?: Filter[];
+}) {
+  if (!indexPattern || !savedSearch) return;
+
+  const savedSearchData = getQueryFromSavedSearch(savedSearch);
+  const userQuery = query;
+  const userFilters = filters;
+
+  // If no saved search available, use user's query and filters
+  if (!savedSearchData && userQuery) {
+    const combinedQuery = createCombinedQuery(
+      userQuery,
+      Array.isArray(userFilters) ? userFilters : [],
+      indexPattern,
+      uiSettings
+    );
+
+    return {
+      searchQuery: combinedQuery,
+      searchString: userQuery.query,
+      queryLanguage: userQuery.language as SearchQueryLanguage,
+    };
   }
 
-  const { query: extractedQuery } = getQueryFromSavedSearch(savedSearch);
-  const queryLanguage = extractedQuery.language as SearchQueryLanguage;
-  const qryString = extractedQuery.query;
-  let qry;
-  if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-    const ast = fromKueryExpression(qryString);
-    qry = toElasticsearchQuery(ast, currentIndexPattern);
-  } else {
-    qry = luceneStringToDsl(qryString);
-    decorateQuery(qry, queryStringOptions);
+  // If saved search available, merge saved search with latest user query or filters differ from extracted saved search data
+  if (savedSearchData) {
+    const currentQuery = userQuery ?? savedSearchData?.query;
+    const currentFilters = userFilters ?? savedSearchData?.filter;
+
+    const combinedQuery = createCombinedQuery(
+      currentQuery,
+      Array.isArray(currentFilters) ? currentFilters : [],
+      indexPattern,
+      uiSettings
+    );
+
+    return {
+      searchQuery: combinedQuery,
+      searchString: currentQuery.query,
+      queryLanguage: currentQuery.language as SearchQueryLanguage,
+    };
   }
-  return {
-    searchQuery: qry,
-    searchString: qryString,
-    queryLanguage,
-  };
 }
 
 const DEFAULT_QUERY = {
@@ -71,62 +144,4 @@ const DEFAULT_QUERY = {
 
 export function getDefaultDatafeedQuery() {
   return cloneDeep(DEFAULT_QUERY);
-}
-
-export function createSearchItems(
-  kibanaConfig: IUiSettingsClient,
-  indexPattern: IndexPattern | undefined,
-  savedSearch: SavedSearchSavedObject | null
-) {
-  // query is only used by the data visualizer as it needs
-  // a lucene query_string.
-  // Using a blank query will cause match_all:{} to be used
-  // when passed through luceneStringToDsl
-  let query: Query = {
-    query: '',
-    language: 'lucene',
-  };
-
-  let combinedQuery: estypes.QueryDslQueryContainer = getDefaultDatafeedQuery();
-  if (savedSearch !== null) {
-    const data = getQueryFromSavedSearch(savedSearch);
-
-    query = data.query;
-    const filter = data.filter;
-
-    const filters = Array.isArray(filter) ? filter : [];
-
-    if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-      const ast = fromKueryExpression(query.query);
-      if (query.query !== '') {
-        combinedQuery = toElasticsearchQuery(ast, indexPattern);
-      }
-      const filterQuery = buildQueryFromFilters(filters, indexPattern);
-
-      if (!combinedQuery.bool) {
-        throw new Error('Missing bool on query');
-      }
-
-      if (!Array.isArray(combinedQuery.bool.filter)) {
-        combinedQuery.bool.filter =
-          combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
-      }
-
-      if (!Array.isArray(combinedQuery.bool.must_not)) {
-        combinedQuery.bool.must_not =
-          combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
-      }
-
-      combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
-      combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
-    } else {
-      const esQueryConfigs = getEsQueryConfig(kibanaConfig);
-      combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
-    }
-  }
-
-  return {
-    query,
-    combinedQuery,
-  };
 }

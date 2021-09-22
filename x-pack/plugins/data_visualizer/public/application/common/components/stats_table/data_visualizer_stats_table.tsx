@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   CENTER_ALIGNMENT,
   EuiBasicTableColumn,
   EuiButtonIcon,
-  EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
@@ -19,13 +18,13 @@ import {
   HorizontalAlignment,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
+  EuiResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import { throttle } from 'lodash';
 import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
-import { FieldTypeIcon } from '../field_type_icon';
 import { DocumentStat } from './components/field_data_row/document_stats';
-import { DistinctValues } from './components/field_data_row/distinct_values';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
 
 import { useTableSettings } from './use_table_settings';
@@ -37,6 +36,9 @@ import {
 } from './types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
+import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
+import { calculateTableColumnsDimensions, getKibanaFieldType } from './utils';
+import { DistinctValues } from './components/field_data_row/distinct_values';
 
 const FIELD_NAME = 'fieldName';
 
@@ -49,6 +51,9 @@ interface DataVisualizerTableProps<T> {
   updatePageState: (update: DataVisualizerTableState) => void;
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
   extendedColumns?: Array<EuiBasicTableColumn<T>>;
+  showPreviewByDefault?: boolean;
+  /** Callback to receive any updates when table or page state is changed **/
+  onChange?: (update: Partial<DataVisualizerTableState>) => void;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -57,6 +62,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   updatePageState,
   getItemIdToExpandedRowMap,
   extendedColumns,
+  showPreviewByDefault,
+  onChange,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, toggleExpandAll] = useState<boolean>(false);
@@ -66,14 +73,28 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     pageState,
     updatePageState
   );
-  const showDistributions: boolean =
-    ('showDistributions' in pageState && pageState.showDistributions) ?? true;
-  const toggleShowDistribution = () => {
-    updatePageState({
-      ...pageState,
-      showDistributions: !showDistributions,
-    });
-  };
+  const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
+  const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
+
+  const [tableWidth, setTableWidth] = useState<number>(1400);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const resizeHandler = useCallback(
+    throttle((e: { width: number; height: number }) => {
+      // When window or table is resized,
+      // update the column widths and other settings accordingly
+      setTableWidth(e.width);
+      setDimensions(calculateTableColumnsDimensions(e.width));
+    }, 500),
+    [tableWidth]
+  );
+
+  const toggleShowDistribution = useCallback(() => {
+    setShowDistributions(!showDistributions);
+    if (onChange) {
+      onChange({ showDistributions: !showDistributions });
+    }
+  }, [onChange, showDistributions]);
 
   function toggleDetails(item: DataVisualizerTableItem) {
     if (item.fieldName === undefined) return;
@@ -105,16 +126,16 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
                   defaultMessage: 'Collapse details for all fields',
                 })
           }
-          iconType={expandAll ? 'arrowUp' : 'arrowDown'}
+          iconType={expandAll ? 'arrowDown' : 'arrowRight'}
         />
       ),
       align: RIGHT_ALIGNMENT,
-      width: '40px',
+      width: dimensions.expander,
       isExpander: true,
       render: (item: DataVisualizerTableItem) => {
         const displayName = item.displayName ?? item.fieldName;
         if (item.fieldName === undefined) return null;
-        const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
+        const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowDown' : 'arrowRight';
         return (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
@@ -145,9 +166,9 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Type',
         }),
         render: (fieldType: JobFieldType) => {
-          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} needsAria={true} />;
+          return <FieldIcon type={getKibanaFieldType(fieldType)} label={fieldType} />;
         },
-        width: '75px',
+        width: dimensions.type,
         sortable: true,
         align: CENTER_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnType',
@@ -163,8 +184,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           const displayName = item.displayName ?? item.fieldName;
 
           return (
-            <EuiText size="s">
-              <b data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>{displayName}</b>
+            <EuiText size="xs" data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>
+              {displayName}
             </EuiText>
           );
         },
@@ -177,56 +198,65 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Documents (%)',
         }),
         render: (value: number | undefined, item: DataVisualizerTableItem) => (
-          <DocumentStat config={item} />
+          <DocumentStat config={item} showIcon={dimensions.showIcon} />
         ),
         sortable: (item: DataVisualizerTableItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDocumentsCount',
+        width: dimensions.docCount,
       },
       {
         field: 'stats.cardinality',
         name: i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
           defaultMessage: 'Distinct values',
         }),
-        render: (cardinality?: number) => <DistinctValues cardinality={cardinality} />,
+        render: (cardinality: number | undefined) => (
+          <DistinctValues cardinality={cardinality} showIcon={dimensions.showIcon} />
+        ),
+
         sortable: true,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
+        width: dimensions.distinctValues,
       },
       {
         name: (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <EuiIcon type={'visBarVertical'} style={{ paddingRight: 4 }} />
+          <div className={'columnHeaderTitle'}>
+            {dimensions.showIcon ? (
+              <EuiIcon type={'visBarVertical'} className={'columnHeaderIcon'} />
+            ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
             })}
-            <EuiToolTip
-              content={
-                !showDistributions
-                  ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsTooltip', {
-                      defaultMessage: 'Show distributions',
-                    })
-                  : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsTooltip', {
-                      defaultMessage: 'Hide distributions',
-                    })
-              }
-            >
-              <EuiButtonIcon
-                style={{ marginLeft: 4 }}
-                size={'s'}
-                iconType={showDistributions ? 'eye' : 'eyeClosed'}
-                onClick={() => toggleShowDistribution()}
-                aria-label={
+            {
+              <EuiToolTip
+                content={
                   !showDistributions
-                    ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
+                    ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsTooltip', {
                         defaultMessage: 'Show distributions',
                       })
-                    : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsAriaLabel', {
+                    : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsTooltip', {
                         defaultMessage: 'Hide distributions',
                       })
                 }
-              />
-            </EuiToolTip>
+              >
+                <EuiButtonIcon
+                  style={{ marginLeft: 4 }}
+                  size={'s'}
+                  iconType={!showDistributions ? 'eye' : 'eyeClosed'}
+                  onClick={() => toggleShowDistribution()}
+                  aria-label={
+                    showDistributions
+                      ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
+                          defaultMessage: 'Show distributions',
+                        })
+                      : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsAriaLabel', {
+                          defaultMessage: 'Hide distributions',
+                        })
+                  }
+                />
+              </EuiToolTip>
+            }
           </div>
         ),
         render: (item: DataVisualizerTableItem) => {
@@ -252,13 +282,14 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
           return null;
         },
+        width: dimensions.distributions,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistribution',
       },
     ];
     return extendedColumns ? [...baseColumns, ...extendedColumns] : baseColumns;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expandAll, showDistributions, updatePageState, extendedColumns]);
+  }, [expandAll, showDistributions, updatePageState, extendedColumns, dimensions.breakPoint]);
 
   const itemIdToExpandedRowMap = useMemo(() => {
     let itemIds = expandedRowItemIds;
@@ -270,23 +301,27 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   }, [expandAll, items, expandedRowItemIds]);
 
   return (
-    <EuiFlexItem data-test-subj="dataVisualizerTableContainer">
-      <EuiInMemoryTable<T>
-        className={'dataVisualizer'}
-        items={items}
-        itemId={FIELD_NAME}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        isExpandable={true}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        isSelectable={false}
-        onTableChange={onTableChange}
-        data-test-subj={'dataVisualizerTable'}
-        rowProps={(item) => ({
-          'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
-        })}
-      />
-    </EuiFlexItem>
+    <EuiResizeObserver onResize={resizeHandler}>
+      {(resizeRef) => (
+        <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
+          <EuiInMemoryTable<T>
+            className={'dataVisualizer'}
+            items={items}
+            itemId={FIELD_NAME}
+            columns={columns}
+            pagination={pagination}
+            sorting={sorting}
+            isExpandable={true}
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            isSelectable={false}
+            onTableChange={onTableChange}
+            data-test-subj={'dataVisualizerTable'}
+            rowProps={(item) => ({
+              'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
+            })}
+          />
+        </div>
+      )}
+    </EuiResizeObserver>
   );
 };

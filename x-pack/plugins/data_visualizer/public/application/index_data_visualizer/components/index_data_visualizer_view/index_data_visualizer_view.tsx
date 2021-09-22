@@ -24,11 +24,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
 import {
-  IndexPatternField,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
   Query,
-  IndexPattern,
 } from '../../../../../../../../src/plugins/data/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -69,6 +67,7 @@ import { extractSearchData } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
+import { DataViewField, DataView } from '../../../../../../../../src/plugins/data/common';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -85,7 +84,7 @@ const defaultSearchQuery = {
   match_all: {},
 };
 
-function getDefaultPageState(): DataVisualizerPageState {
+export function getDefaultPageState(): DataVisualizerPageState {
   return {
     overallStats: {
       totalCount: 0,
@@ -103,25 +102,27 @@ function getDefaultPageState(): DataVisualizerPageState {
     documentCountStats: undefined,
   };
 }
-export const getDefaultDataVisualizerListState =
-  (): Required<DataVisualizerIndexBasedAppState> => ({
-    pageIndex: 0,
-    pageSize: 10,
-    sortField: 'fieldName',
-    sortDirection: 'asc',
-    visibleFieldTypes: [],
-    visibleFieldNames: [],
-    samplerShardSize: 5000,
-    searchString: '',
-    searchQuery: defaultSearchQuery,
-    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
-    showDistributions: true,
-    showAllFields: false,
-    showEmptyFields: false,
-  });
+export const getDefaultDataVisualizerListState = (
+  overrides?: Partial<DataVisualizerIndexBasedAppState>
+): Required<DataVisualizerIndexBasedAppState> => ({
+  pageIndex: 0,
+  pageSize: 25,
+  sortField: 'fieldName',
+  sortDirection: 'asc',
+  visibleFieldTypes: [],
+  visibleFieldNames: [],
+  samplerShardSize: 5000,
+  searchString: '',
+  searchQuery: defaultSearchQuery,
+  searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+  showDistributions: true,
+  showAllFields: false,
+  showEmptyFields: false,
+  ...overrides,
+});
 
 export interface IndexDataVisualizerViewProps {
-  currentIndexPattern: IndexPattern;
+  currentIndexPattern: DataView;
   currentSavedSearch: SavedSearchSavedObject | null;
   additionalLinks?: ResultLink[];
 }
@@ -208,7 +209,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     }
   }, [currentIndexPattern, toasts]);
 
-  const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
+  const indexPatternFields: DataViewField[] = currentIndexPattern.fields;
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
@@ -227,11 +228,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const defaults = getDefaultPageState();
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const searchData = extractSearchData(
-      currentSavedSearch,
-      currentIndexPattern,
-      uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS)
-    );
+    const searchData = extractSearchData({
+      indexPattern: currentIndexPattern,
+      uiSettings,
+      savedSearch: currentSavedSearch,
+    });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       return {
@@ -862,8 +863,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiSpacer size={'m'} />
-
                   <SearchPanel
                     indexPattern={currentIndexPattern}
                     searchString={searchString}

@@ -56,10 +56,6 @@
     overflow: hidden;
   }
 
-  .fieldDataCard__codeContent {
-    @include euiCodeFont;
-  }
-
   .fieldDataCard__geoContent {
     z-index: auto;
     flex: 1;

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiCallOut, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +26,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
 
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerTextContent'}>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false} className="dataVisualizerTextContent">
         {numExamples > 0 && <ExamplesList examples={examples} />}
         {numExamples === 0 && (
           <Fragment>

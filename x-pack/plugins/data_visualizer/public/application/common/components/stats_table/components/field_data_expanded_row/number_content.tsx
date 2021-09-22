@@ -6,7 +6,13 @@
  */
 
 import React, { FC, ReactNode, useEffect, useState } from 'react';
-import { EuiBasicTable, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexItem,
+  EuiText,
+  HorizontalAlignment,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -21,8 +27,9 @@ import { TopValues } from '../../../top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
-const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
+const METRIC_DISTRIBUTION_CHART_WIDTH = 260;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
 
 interface SummaryTableItem {
@@ -83,7 +90,8 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
     {
       name: '',
       render: (summaryItem: { display: ReactNode }) => summaryItem.display,
-      width: '75px',
+      width: '25px',
+      align: RIGHT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'value',
@@ -101,7 +109,10 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerNumberContent'}>
       <DocumentStatsTable config={config} />
-      <EuiFlexItem className={'dataVisualizerSummaryTableWrapper'}>
+      <ExpandedRowPanel
+        className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}
+        grow={1}
+      >
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
           className={'dataVisualizerSummaryTable'}
@@ -111,13 +122,17 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           tableCaption={summaryTableTitle}
           data-test-subj={'dataVisualizerNumberSummaryTable'}
         />
-      </EuiFlexItem>
+      </ExpandedRowPanel>
 
       {stats && (
         <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" compressed={true} />
       )}
       {distribution && (
-        <EuiFlexItem data-test-subj={'dataVisualizerFieldDataMetricDistribution'}>
+        <ExpandedRowPanel
+          dataTestSubj={'dataVisualizerFieldDataMetricDistribution'}
+          className="dataVisualizerPanelWrapper"
+          grow={false}
+        >
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage
@@ -136,7 +151,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs">
+            <EuiText size="xs" textAlign={'center'}>
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel"
                 defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
@@ -147,7 +162,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
               />
             </EuiText>
           </EuiFlexItem>
-        </EuiFlexItem>
+        </ExpandedRowPanel>
       )}
     </ExpandedRowContent>
   );

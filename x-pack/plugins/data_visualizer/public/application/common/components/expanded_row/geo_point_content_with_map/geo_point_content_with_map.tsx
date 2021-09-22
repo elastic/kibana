@@ -6,8 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../../src/plugins/data/common';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
@@ -17,10 +16,11 @@ import { useDataVisualizerKibana } from '../../../../kibana_context';
 import { JOB_FIELD_TYPES } from '../../../../../../common';
 import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '../../../../../../../maps/common';
 import { EmbeddedMapComponent } from '../../embedded_map';
+import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
 export const GeoPointContentWithMap: FC<{
   config: FieldVisConfig;
-  indexPattern: IndexPattern | undefined;
+  indexPattern: DataView | undefined;
   combinedQuery: CombinedQuery;
 }> = ({ config, indexPattern, combinedQuery }) => {
   const { stats } = config;
@@ -63,13 +63,13 @@ export const GeoPointContentWithMap: FC<{
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
-
-      <EuiFlexItem style={{ maxWidth: '50%' }}>
-        <ExamplesList examples={stats.examples} />
-      </EuiFlexItem>
-      <EuiFlexItem className={'dataVisualizerMapWrapper'}>
+      <ExamplesList examples={stats.examples} />
+      <ExpandedRowPanel
+        className={'dataVisualizerPanelWrapper dataVisualizerMapWrapper'}
+        grow={true}
+      >
         <EmbeddedMapComponent layerList={layerList} />
-      </EuiFlexItem>
+      </ExpandedRowPanel>
     </ExpandedRowContent>
   );
 };

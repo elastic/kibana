@@ -10,7 +10,7 @@ import { useCallback, useMemo } from 'react';
 
 import { DataVisualizerTableState } from '../../../../../common';
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 interface UseTableSettingsReturnValue<T> {
   onTableChange: EuiBasicTableProps<T>['onChange'];

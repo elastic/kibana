@@ -25,7 +25,7 @@ interface Props {
 
 export const getDefaultDataVisualizerListState = (): DataVisualizerTableState => ({
   pageIndex: 0,
-  pageSize: 10,
+  pageSize: 25,
   sortField: 'fieldName',
   sortDirection: 'asc',
   visibleFieldTypes: [],

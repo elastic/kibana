@@ -6,14 +6,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -21,6 +14,7 @@ import classNames from 'classnames';
 import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { FieldVisStats } from '../../../../../common/types';
+import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
 interface Props {
   stats: FieldVisStats | undefined;
@@ -44,7 +38,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
     stats;
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
   return (
-    <EuiFlexItem data-test-subj={'dataVisualizerFieldDataTopValues'}>
+    <ExpandedRowPanel
+      dataTestSubj={'dataVisualizerFieldDataTopValues'}
+      className={classNames('dataVisualizerPanelWrapper', compressed ? 'compressed' : undefined)}
+    >
       <ExpandedRowFieldHeader>
         <FormattedMessage
           id="xpack.dataVisualizer.dataGrid.field.topValuesLabel"
@@ -54,49 +51,32 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
 
       <div
         data-test-subj="dataVisualizerFieldDataTopValuesContent"
-        className={'fieldDataTopValuesContainer'}
+        className={classNames('fieldDataTopValuesContainer', 'dataVisualizerTopValuesWrapper')}
       >
         {Array.isArray(topValues) &&
           topValues.map((value) => (
             <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
-              <EuiFlexItem
-                grow={false}
-                className={classNames(
-                  'eui-textTruncate',
-                  'topValuesValueLabelContainer',
-                  `topValuesValueLabelContainer--${compressed === true ? 'small' : 'large'}`
-                )}
-              >
-                <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
-                  <EuiText size="xs" textAlign={'right'} color="subdued">
-                    {kibanaFieldFormat(value.key, fieldFormat)}
-                  </EuiText>
-                </EuiToolTip>
-              </EuiFlexItem>
               <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
                 <EuiProgress
                   value={value.doc_count}
                   max={progressBarMax}
                   color={barColor}
-                  size="m"
+                  size="xs"
+                  label={kibanaFieldFormat(value.key, fieldFormat)}
+                  className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
+                  valueText={
+                    progressBarMax !== undefined
+                      ? getPercentLabel(value.doc_count, progressBarMax)
+                      : undefined
+                  }
                 />
               </EuiFlexItem>
-              {progressBarMax !== undefined && (
-                <EuiFlexItem
-                  grow={false}
-                  className={classNames('eui-textTruncate', 'topValuesPercentLabelContainer')}
-                >
-                  <EuiText size="xs" textAlign="left" color="subdued">
-                    {getPercentLabel(value.doc_count, progressBarMax)}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           ))}
         {isTopValuesSampled === true && (
           <Fragment>
             <EuiSpacer size="xs" />
-            <EuiText size="xs" textAlign={'left'}>
+            <EuiText size="xs" textAlign={'center'}>
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription"
                 defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
@@ -108,6 +88,6 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
           </Fragment>
         )}
       </div>
-    </EuiFlexItem>
+    </ExpandedRowPanel>
   );
 };

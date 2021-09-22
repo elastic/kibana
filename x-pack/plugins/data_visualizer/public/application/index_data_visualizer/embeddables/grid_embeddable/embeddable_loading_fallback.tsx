@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
 import React from 'react';
 
-export const ExpandedRowFieldHeader = ({ children }: { children: React.ReactNode }) => (
-  <EuiText
-    size="xs"
-    color={'subdued'}
-    className={'fieldDataCard__valuesTitle'}
-    textAlign={'center'}
-  >
-    {children}
-  </EuiText>
-);
+import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+
+export const EmbeddableLoading = () => {
+  return (
+    <EuiText textAlign="center">
+      <EuiSpacer size="l" />
+      <EuiLoadingSpinner size="l" />
+      <EuiSpacer size="l" />
+    </EuiText>
+  );
+};
