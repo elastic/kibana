@@ -500,6 +500,14 @@ export const CaseComponent = React.memo<CaseComponentProps>(
   }
 );
 
+export const CaseViewLoading = () => (
+  <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
+    </EuiFlexItem>
+  </MyEuiFlexGroup>
+);
+
 export const CaseView = React.memo(
   ({
     allCasesNavigation,
@@ -566,11 +574,7 @@ export const CaseView = React.memo(
     return isError ? (
       <DoesNotExist allCasesNavigation={allCasesNavigation} caseId={caseId} />
     ) : isLoading ? (
-      <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
-        </EuiFlexItem>
-      </MyEuiFlexGroup>
+      <CaseViewLoading />
     ) : (
       data && (
         <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
@@ -603,6 +607,7 @@ export const CaseView = React.memo(
 );
 
 CaseComponent.displayName = 'CaseComponent';
+CaseViewLoading.displayName = 'CaseViewLoading';
 CaseView.displayName = 'CaseView';
 
 // eslint-disable-next-line import/no-default-export

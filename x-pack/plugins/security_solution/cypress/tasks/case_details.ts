@@ -8,8 +8,6 @@
 import { TIMELINE_TITLE } from '../screens/timeline';
 import {
   CASE_ACTIONS_BTN,
-  CASE_CONFLICT_CALL_OUT_DISMISS,
-  CASE_CONFLICT_CALL_OUT_REDIRECT,
   CASE_DETAILS_TIMELINE_LINK_MARKDOWN,
   DELETE_CASE_BTN,
   DELETE_CASE_CONFIRMATION_BTN,
@@ -24,12 +22,4 @@ export const deleteCase = () => {
 export const openCaseTimeline = () => {
   cy.get(CASE_DETAILS_TIMELINE_LINK_MARKDOWN).click();
   cy.get(TIMELINE_TITLE).should('exist');
-};
-
-export const dismissConflict = () => {
-  cy.get(CASE_CONFLICT_CALL_OUT_DISMISS).click();
-};
-
-export const redirectConflict = () => {
-  cy.get(CASE_CONFLICT_CALL_OUT_REDIRECT).click();
 };

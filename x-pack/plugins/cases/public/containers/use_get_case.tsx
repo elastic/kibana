@@ -97,7 +97,7 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
         const response: ResolvedCase = subCaseId
           ? {
               case: await getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal),
-              outcome: 'exactMatch',
+              outcome: 'exactMatch', // sub-cases are not resolved, forced to exactMatch always
             }
           : await resolveCase(caseId, true, abortCtrlRef.current.signal);
 
