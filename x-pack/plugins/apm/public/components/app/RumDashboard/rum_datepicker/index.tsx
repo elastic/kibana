@@ -15,9 +15,9 @@ export function RumDatePicker() {
     refreshTimeRange,
   } = useUxUrlParams();
 
-  const { redirect } = useDateRangeRedirect();
+  const { redirect, isDateRangeSet } = useDateRangeRedirect();
 
-  if (!rangeFrom || !rangeTo) {
+  if (!isDateRangeSet) {
     redirect();
   }
 
