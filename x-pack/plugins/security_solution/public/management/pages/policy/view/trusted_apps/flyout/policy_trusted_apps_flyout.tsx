@@ -96,10 +96,9 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
   const searchWarningMessage = useMemo(
     () => (
       <>
-        <EuiSpacer size="m" />
         <EuiCallOut
           color="warning"
-          size="m"
+          size="s"
           heading="h4"
           title={i18n.translate(
             'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.searchWarning.title',
@@ -116,6 +115,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             }
           )}
         </EuiCallOut>
+        <EuiSpacer size="m" />
       </>
     ),
     []
@@ -157,6 +157,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {(availableArtifactsList?.totalItemsCount || 0) > 2 ? searchWarningMessage : null}
         <SearchExceptions
           defaultValue={location.filter}
           onSearch={handleOnSearch}
@@ -167,7 +168,6 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             }
           )}
         />
-        {(availableArtifactsList?.totalItemsCount || 0) > 100 ? searchWarningMessage : null}
         <EuiSpacer size="m" />
 
         {canShowPolicyArtifactsList ? (
