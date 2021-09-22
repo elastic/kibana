@@ -6,7 +6,8 @@
  */
 
 import { isFunction, get } from 'lodash';
-import type { MonitoringConfig } from '../config';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { MonitoringConfig } from '../server/config';
 
 type Config = Partial<MonitoringConfig> & {
   get?: (key: string) => any;
