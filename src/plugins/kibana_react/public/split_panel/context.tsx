@@ -12,7 +12,7 @@ import { PanelRegistry } from './registry';
 const PanelContext = createContext({ registry: new PanelRegistry() });
 
 interface ContextProps {
-  children: any;
+  children: JSX.Element;
   registry: PanelRegistry;
 }
 
