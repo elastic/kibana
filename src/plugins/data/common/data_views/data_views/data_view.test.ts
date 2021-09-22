@@ -18,7 +18,7 @@ import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { FieldFormat } from '../../../../field_formats/common';
 import { RuntimeField } from '../types';
 import { stubLogstashFields } from '../field.stub';
-import { stubbedSavedObjectIndexPattern } from '../index_pattern.stub';
+import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
 class MockFieldFormatter {}
 

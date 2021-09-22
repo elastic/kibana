@@ -11,7 +11,7 @@ import { DataViewsService, DataView } from '.';
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
-import { stubbedSavedObjectIndexPattern } from '../index_pattern.stub';
+import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
