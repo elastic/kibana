@@ -1623,4 +1623,87 @@ describe('IndexPattern Data Source', () => {
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
     });
   });
+
+  describe('#initializeDimension', () => {
+    it('should return the same state if no static value is passed', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      expect(
+        indexPatternDatasource.initializeDimension!(state, 'first', {
+          columnId: 'newStatic',
+          label: 'MyNewColumn',
+          groupId: 'a',
+          dataType: 'number',
+        })
+      ).toBe(state);
+    });
+
+    it('should add a new static value column if a static value is passed', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      expect(
+        indexPatternDatasource.initializeDimension!(state, 'first', {
+          columnId: 'newStatic',
+          label: 'MyNewColumn',
+          groupId: 'a',
+          dataType: 'number',
+          staticValue: 0, // use a falsy value to check also this corner case
+        })
+      ).toEqual({
+        ...state,
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {},
+            columnOrder: ['metric', 'newStatic'],
+            columns: {
+              ...state.layers.first.columns,
+              newStatic: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Static value: 0',
+                operationType: 'static_value',
+                params: { value: 0 },
+                references: [],
+                scale: 'ratio',
+              },
+            },
+          },
+        },
+      });
+    });
+  });
 });
