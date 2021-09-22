@@ -148,7 +148,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
         });
       } catch (error) {
         notifications.toasts.addError(error, {
-          title: toMountPoint(
+          title: (
             <FormattedMessage
               id="xpack.fleet.integrations.keepPoliciesUpToDateError"
               defaultMessage="Error saving integration settings for {title}"
