@@ -61,6 +61,26 @@ export const getUpdateArtifactsIsFailed = (state: Immutable<PolicyDetailsState>)
 export const getUpdateArtifactsLoaded = (state: Immutable<PolicyDetailsState>): boolean => {
   return isLoadedResourceState(state.artifacts.trustedAppsToUpdate);
 };
+
+/**
+ * Returns true if there is data available even if the search didn't returned it.
+ */
+export const getAvailableArtifactsListExist = (state: Immutable<PolicyDetailsState>): boolean => {
+  return (
+    isLoadedResourceState(state.artifacts.availableListEntriesExist) &&
+    state.artifacts.availableListEntriesExist.data
+  );
+};
+
+/**
+ * Returns true if there is data available even if the search didn't returned it.
+ */
+export const getAvailableArtifactsListExistIsLoading = (
+  state: Immutable<PolicyDetailsState>
+): boolean => {
+  return isLoadingResourceState(state.artifacts.availableListEntriesExist);
+};
+
 /**
  * Returns artifacts to be updated
  */

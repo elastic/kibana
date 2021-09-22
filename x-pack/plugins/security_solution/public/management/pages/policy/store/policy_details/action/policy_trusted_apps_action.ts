@@ -25,7 +25,13 @@ export interface PolicyArtifactsUpdateTrustedAppsChanged {
   payload: AsyncResourceState<PostTrustedAppCreateResponse[]>;
 }
 
+export interface PolicyArtifactsAvailableListExistDataChanged {
+  type: 'policyArtifactsAvailableListExistDataChanged';
+  payload: AsyncResourceState<boolean>;
+}
+
 export type PolicyDetailsAction =
   | PolicyArtifactsAvailableListPageDataChanged
   | PolicyArtifactsUpdateTrustedApps
-  | PolicyArtifactsUpdateTrustedAppsChanged;
+  | PolicyArtifactsUpdateTrustedAppsChanged
+  | PolicyArtifactsAvailableListExistDataChanged;

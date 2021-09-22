@@ -34,5 +34,15 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
     };
   }
 
+  if (action.type === 'policyArtifactsAvailableListExistDataChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        availableListEntriesExist: action.payload,
+      },
+    };
+  }
+
   return state;
 };

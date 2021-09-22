@@ -31,6 +31,8 @@ import {
   getAvailableArtifactsListIsLoading,
   getUpdateArtifactsIsLoading,
   getUpdateArtifactsLoaded,
+  getAvailableArtifactsListExist,
+  getAvailableArtifactsListExistIsLoading,
 } from '../../../store/policy_details/selectors';
 import {
   usePolicyDetailsNavigateCallback,
@@ -52,6 +54,10 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
   );
   const isUpdateArtifactsLoading = usePolicyDetailsSelector(getUpdateArtifactsIsLoading);
   const isUpdateArtifactsLoaded = usePolicyDetailsSelector(getUpdateArtifactsLoaded);
+  const isAvailableArtifactsListExist = usePolicyDetailsSelector(getAvailableArtifactsListExist);
+  const isAvailableArtifactsListExistLoading = usePolicyDetailsSelector(
+    getAvailableArtifactsListExistIsLoading
+  );
 
   const policyName = policyItem?.name ?? '';
 
@@ -114,6 +120,23 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
     []
   );
 
+  const canShowPolicyArtifactsList = useMemo(
+    () =>
+      isAvailableArtifactsListExistLoading ||
+      isAvailableArtifactsListLoading ||
+      !isEmpty(availableArtifactsList?.items),
+    [
+      availableArtifactsList?.items,
+      isAvailableArtifactsListExistLoading,
+      isAvailableArtifactsListLoading,
+    ]
+  );
+
+  const entriesExists = useMemo(
+    () => isEmpty(availableArtifactsList?.items) && isAvailableArtifactsListExist,
+    [availableArtifactsList?.items, isAvailableArtifactsListExist]
+  );
+
   return (
     <EuiFlyout onClose={handleListFlyoutClose}>
       <EuiFlyoutHeader hasBorder>
@@ -145,12 +168,19 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
         />
         {(availableArtifactsList?.totalItemsCount || 0) > 100 ? searchWarningMessage : null}
         <EuiSpacer size="m" />
-        <PolicyArtifactsList
-          artifacts={availableArtifactsList}
-          defaultSelectedArtifactIds={[]}
-          isListLoading={isAvailableArtifactsListLoading}
-          selectedArtifactsUpdated={(artifactIds) => setSelectedArtifactIds(artifactIds)}
-        />
+
+        {canShowPolicyArtifactsList ? (
+          <PolicyArtifactsList
+            artifacts={availableArtifactsList}
+            defaultSelectedArtifactIds={[]}
+            isListLoading={isAvailableArtifactsListLoading || isAvailableArtifactsListExistLoading}
+            selectedArtifactsUpdated={(artifactIds) => setSelectedArtifactIds(artifactIds)}
+          />
+        ) : entriesExists ? (
+          'There are results outside the query' // TODO: to be done
+        ) : (
+          'There are no available trusted apps' // TODO: to be done
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

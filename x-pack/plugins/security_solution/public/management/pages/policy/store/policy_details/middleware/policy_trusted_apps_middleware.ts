@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { PolicyDetailsState, MiddlewareRunner } from '../../../types';
 import {
   policyIdFromParams,
@@ -27,6 +28,40 @@ import {
 import { parseQueryFilterToKQL } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
 import { PolicyDetailsAction } from '../action';
+
+const checkIfThereAreAvailableTrustedApps = async (
+  store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const state = store.getState();
+  const policyId = policyIdFromParams(state);
+
+  store.dispatch({
+    type: 'policyArtifactsAvailableListExistDataChanged',
+    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+  });
+  try {
+    const trustedApps = await trustedAppsService.getTrustedAppsList({
+      page: 1,
+      per_page: 100,
+      kuery: `(not exception-list-agnostic.attributes.tags:"policy:${policyId}") AND (not exception-list-agnostic.attributes.tags:"policy:all")`,
+    });
+
+    store.dispatch({
+      type: 'policyArtifactsAvailableListExistDataChanged',
+      payload: createLoadedResourceState(!isEmpty(trustedApps.data)),
+    });
+  } catch (err) {
+    store.dispatch({
+      type: 'policyArtifactsAvailableListExistDataChanged',
+      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+      // @ts-ignore
+      payload: createFailedResourceState(err.body ?? err),
+    });
+  }
+};
 
 const searchTrustedApps = async (
   store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
@@ -72,6 +107,10 @@ const searchTrustedApps = async (
         includedPolicies: policyId,
       }),
     });
+
+    if (isEmpty(trustedApps.data)) {
+      checkIfThereAreAvailableTrustedApps(store, trustedAppsService);
+    }
   } catch (err) {
     store.dispatch({
       type: 'policyArtifactsAvailableListPageDataChanged',
@@ -103,12 +142,12 @@ const updateTrustedApps = async (
   });
 
   try {
-    const updatedTrustedApps = [];
+    const trustedAppsUpdateActions = [];
 
     for (const entry of availavleArtifacts.items) {
       if (trustedAppsIds.includes(entry.id)) {
         const policies = entry.effectScope.type === 'policy' ? entry.effectScope.policies : [];
-        const trustedApp = await trustedAppsService.updateTrustedApp({ id: entry.id }, {
+        const trustedApp = trustedAppsService.updateTrustedApp({ id: entry.id }, {
           effectScope: { type: 'policy', policies: [...policies, policyId] },
           name: entry.name,
           entries: entry.entries,
@@ -116,9 +155,11 @@ const updateTrustedApps = async (
           description: entry.description,
           version: entry.version,
         } as PostTrustedAppCreateRequest);
-        updatedTrustedApps.push(trustedApp);
+        trustedAppsUpdateActions.push(trustedApp);
       }
     }
+
+    const updatedTrustedApps = await Promise.all(trustedAppsUpdateActions);
     store.dispatch({
       type: 'policyArtifactsUpdateTrustedAppsChanged',
       payload: createLoadedResourceState(updatedTrustedApps),
