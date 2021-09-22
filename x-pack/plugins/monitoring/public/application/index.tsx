@@ -18,6 +18,7 @@ import { GlobalStateProvider } from './global_state_context';
 import { ExternalConfigContext, ExternalConfig } from './external_config_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
+import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { BeatsOverviewPage } from './pages/beats/overview';
 import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
@@ -55,7 +56,7 @@ const MonitoringApp: React.FC<{
             <BreadcrumbContainer.Provider history={history}>
               <Router history={history}>
                 <Switch>
-                  <Route path="/no-data" component={NoData} />
+                  <Route path="/no-data" component={NoDataPage} />
                   <Route path="/loading" component={LoadingPage} />
                   <RouteInit
                     path="/license"
@@ -106,10 +107,6 @@ const MonitoringApp: React.FC<{
       </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
-};
-
-const NoData: React.FC<{}> = () => {
-  return <div>No data page</div>;
 };
 
 const Home: React.FC<{}> = () => {
