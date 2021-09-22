@@ -18,6 +18,15 @@ import { SearchRequest } from '..';
 export function handleResponse(request: SearchRequest, response: IKibanaSearchResponse) {
   const { rawResponse, warning } = response;
   if (warning) {
+    // suppress deprecation warning not actionable by the user
+    if (
+      warning.includes(
+        '[ignore_throttled] parameter is deprecated because frozen indices have been deprecated'
+      )
+    ) {
+      return response;
+    }
+
     getNotifications().toasts.addWarning({
       title: i18n.translate('data.search.searchSource.fetch.warningMessage', {
         defaultMessage: 'Warning: {warning}',
