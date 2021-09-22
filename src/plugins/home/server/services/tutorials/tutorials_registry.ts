@@ -25,11 +25,13 @@ function registerTutorialWithCustomIntegrations(
   provider: TutorialProvider
 ) {
   const tutorial = provider(emptyContext);
-  const allowedCategories: Category[] = (tutorial.integrationBrowserCategories
-    ? tutorial.integrationBrowserCategories.filter((category) => {
-        return CATEGORY_DISPLAY.hasOwnProperty(category);
-      })
-    : []) as Category[];
+  const allowedCategories: Category[] = (
+    tutorial.integrationBrowserCategories
+      ? tutorial.integrationBrowserCategories.filter((category) => {
+          return CATEGORY_DISPLAY.hasOwnProperty(category);
+        })
+      : []
+  ) as Category[];
 
   customIntegrations.registerCustomIntegration({
     name: tutorial.id,

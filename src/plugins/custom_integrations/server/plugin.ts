@@ -14,7 +14,8 @@ import { CustomIntegrationRegistry } from './custom_integration_registry';
 import { defineRoutes } from './routes/define_routes';
 
 export class CustomIntegrationsPlugin
-  implements Plugin<CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart> {
+  implements Plugin<CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart>
+{
   private readonly logger: Logger;
   private readonly customIngegrationRegistry: CustomIntegrationRegistry;
 

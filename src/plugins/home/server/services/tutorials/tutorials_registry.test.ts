@@ -19,6 +19,7 @@ import {
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
+import expect from '../../../../../../packages/kbn-expect';
 
 const INVALID_TUTORIAL: TutorialSchema = {
   id: 'test',
@@ -66,7 +67,7 @@ const VALID_TUTORIAL: TutorialSchema = {
 const invalidTutorialProvider = INVALID_TUTORIAL;
 const validTutorialProvider = VALID_TUTORIAL;
 
-const mockCustomIntegrationsPluginSetup = ({} as unknown) as CustomIntegrationsPluginSetup;
+const mockCustomIntegrationsPluginSetup = {} as unknown as CustomIntegrationsPluginSetup;
 
 describe('TutorialsRegistry', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;

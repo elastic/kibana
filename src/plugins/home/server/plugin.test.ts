@@ -10,7 +10,7 @@ import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.te
 import { HomeServerPlugin, HomeServerPluginSetupDependencies } from './plugin';
 import { coreMock, httpServiceMock } from '../../../core/server/mocks';
 
-const homeServerPluginSetupDependenciesMock = ({} as unknown) as HomeServerPluginSetupDependencies;
+const homeServerPluginSetupDependenciesMock = {} as unknown as HomeServerPluginSetupDependencies;
 describe('HomeServerPlugin', () => {
   beforeEach(() => {
     registryForTutorialsMock.setup.mockClear();

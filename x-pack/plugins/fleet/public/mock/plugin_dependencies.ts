@@ -20,7 +20,7 @@ export const createSetupDepsMock = (): MockedFleetSetupDeps => {
     data: dataPluginMock.createSetupContract(),
     home: homePluginMock.createSetupContract(),
     // @ts-expect-error
-    customIntegrations: ({} as unknown) as CustomIntegrationsSetup,
+    customIntegrations: {} as unknown as CustomIntegrationsSetup,
   };
 };
 

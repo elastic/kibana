@@ -60,7 +60,7 @@ export const EmptyList = (props: Args) => (
 export const List = (props: Args) => (
   <PackageListGrid
     list={
-      ([
+      [
         {
           title: 'Package One',
           description: 'Not Installed Description',
@@ -130,7 +130,7 @@ export const List = (props: Args) => (
           status: 'installed',
           savedObject,
         },
-      ] as unknown) as IntegrationCardItem[]
+      ] as unknown as IntegrationCardItem[]
     }
     onSearchChange={action('onSearchChange')}
     setSelectedCategory={action('setSelectedCategory')}

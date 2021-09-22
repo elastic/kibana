@@ -227,9 +227,8 @@ const InstalledPackages: React.FC = memo(() => {
     />
   );
 
-  const cards = (selectedCategory === 'updates_available'
-    ? updatablePackages
-    : allInstalledPackages
+  const cards = (
+    selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages
   ).map((item) => {
     return mapToCard(getAbsolutePath, getHref, item);
   });
@@ -289,10 +288,8 @@ const AvailablePackages: React.FC = memo(() => {
     [allCategoryPackagesRes]
   );
 
-  const {
-    loading: isLoadingAddableCustomIntegrations,
-    value: addableCustomIntegrations,
-  } = useGetAddableCustomIntegrations();
+  const { loading: isLoadingAddableCustomIntegrations, value: addableCustomIntegrations } =
+    useGetAddableCustomIntegrations();
   const filteredAddableIntegrations = addableCustomIntegrations
     ? addableCustomIntegrations.filter((integration: CustomIntegration) => {
         if (!selectedCategory) {
