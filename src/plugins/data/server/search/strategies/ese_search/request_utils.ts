@@ -23,7 +23,7 @@ export async function getIgnoreThrottled(
   uiSettingsClient: IUiSettingsClient
 ): Promise<Pick<Search, 'ignore_throttled'>> {
   const includeFrozen = await uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
-  return { ignore_throttled: !includeFrozen };
+  return includeFrozen ? { ignore_throttled: false } : {};
 }
 
 /**
