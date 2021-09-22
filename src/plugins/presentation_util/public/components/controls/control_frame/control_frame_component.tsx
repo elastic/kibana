@@ -16,9 +16,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { ControlGroupContainer } from '../control_group/control_group_container';
-import { ControlGroupStrings } from '../control_group/control_group_strings';
 import { useChildEmbeddable } from '../hooks/use_child_embeddable';
 import { ControlStyle } from '../types';
+import { ControlFrameStrings } from './control_frame_strings';
 
 export interface ControlFrameProps {
   container: ControlGroupContainer;
@@ -61,17 +61,17 @@ export const ControlFrame = ({
         'controlFrame--floatingActions-oneLine': !usingTwoLineLayout,
       })}
     >
-      <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
+      <EuiToolTip content={ControlFrameStrings.floatingActions.getEditButtonTitle()}>
         <EuiButtonIcon
-          aria-label={ControlGroupStrings.floatingActions.getEditButtonTitle()}
+          aria-label={ControlFrameStrings.floatingActions.getEditButtonTitle()}
           iconType="pencil"
           onClick={onEdit}
           color="text"
         />
       </EuiToolTip>
-      <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
+      <EuiToolTip content={ControlFrameStrings.floatingActions.getRemoveButtonTitle()}>
         <EuiButtonIcon
-          aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
+          aria-label={ControlFrameStrings.floatingActions.getRemoveButtonTitle()}
           onClick={onRemove}
           iconType="cross"
           color="danger"

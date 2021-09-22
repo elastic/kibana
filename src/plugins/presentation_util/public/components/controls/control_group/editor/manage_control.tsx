@@ -111,7 +111,7 @@ export const ManageControlComponent = ({
                 removeControl();
               }}
             >
-              {ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
+              {ControlGroupStrings.management.getDeleteButtonTitle()}
             </EuiButton>
           )}
         </EuiForm>

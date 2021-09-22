@@ -6,18 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlyout } from '@elastic/eui';
+import { EuiConfirmModal, EuiFlyout } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
-import { MountPoint, OverlayFlyoutOpenOptions, OverlayRef } from '../../../../../core/public';
+import {
+  MountPoint,
+  OverlayFlyoutOpenOptions,
+  OverlayModalConfirmOptions,
+  OverlayRef,
+} from '../../../../../core/public';
 import { MountWrapper } from '../../../../../core/public/utils';
 import { PluginServiceFactory } from '../create';
 import { PresentationOverlaysService } from '../overlays';
 
 type OverlaysServiceFactory = PluginServiceFactory<PresentationOverlaysService>;
 
-class FlyoutRef implements OverlayRef {
+/**
+ * This code is a storybook stub version of src/core/public/overlays/overlay_service.ts
+ * Eventually, core services should have simple storybook representations, but until that happens
+ * it is necessary to recreate their functionality here.
+ */
+class GenericOverlayRef implements OverlayRef {
   public readonly onClose: Promise<void>;
   private closeSubject = new Subject<void>();
 
@@ -35,13 +45,23 @@ class FlyoutRef implements OverlayRef {
 }
 
 export const overlaysServiceFactory: OverlaysServiceFactory = () => {
-  const targetDomElement = document.createElement('div');
-  let activeFlyout: FlyoutRef | null;
+  const flyoutDomElement = document.createElement('div');
+  const modalDomElement = document.createElement('div');
+  let activeFlyout: OverlayRef | null;
+  let activeModal: OverlayRef | null;
 
-  const cleanupDom = () => {
-    if (targetDomElement != null) {
-      unmountComponentAtNode(targetDomElement);
-      targetDomElement.innerHTML = '';
+  const cleanupModal = () => {
+    if (modalDomElement != null) {
+      unmountComponentAtNode(modalDomElement);
+      modalDomElement.innerHTML = '';
+    }
+    activeModal = null;
+  };
+
+  const cleanupFlyout = () => {
+    if (flyoutDomElement != null) {
+      unmountComponentAtNode(flyoutDomElement);
+      flyoutDomElement.innerHTML = '';
     }
     activeFlyout = null;
   };
@@ -50,14 +70,14 @@ export const overlaysServiceFactory: OverlaysServiceFactory = () => {
     openFlyout: (mount: MountPoint, options?: OverlayFlyoutOpenOptions) => {
       if (activeFlyout) {
         activeFlyout.close();
-        cleanupDom();
+        cleanupFlyout();
       }
 
-      const flyout = new FlyoutRef();
+      const flyout = new GenericOverlayRef();
 
       flyout.onClose.then(() => {
         if (activeFlyout === flyout) {
-          cleanupDom();
+          cleanupFlyout();
         }
       });
 
@@ -75,10 +95,53 @@ export const overlaysServiceFactory: OverlaysServiceFactory = () => {
         <EuiFlyout onClose={onCloseFlyout}>
           <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
         </EuiFlyout>,
-        targetDomElement
+        flyoutDomElement
       );
 
       return flyout;
+    },
+    openConfirm: (message: MountPoint | string, options?: OverlayModalConfirmOptions) => {
+      if (activeModal) {
+        activeModal.close();
+        cleanupModal();
+      }
+
+      return new Promise((resolve, reject) => {
+        let resolved = false;
+        const closeModal = (confirmed: boolean) => {
+          resolved = true;
+          modal.close();
+          resolve(confirmed);
+        };
+
+        const modal = new GenericOverlayRef();
+        modal.onClose.then(() => {
+          if (activeModal === modal) {
+            cleanupModal();
+          }
+          // modal.close can be called when opening a new modal/confirm, so we need to resolve the promise in that case.
+          if (!resolved) {
+            closeModal(false);
+          }
+        });
+        activeModal = modal;
+
+        const props = {
+          ...options,
+          children:
+            typeof message === 'string' ? (
+              message
+            ) : (
+              <MountWrapper mount={message} className="kbnOverlayMountWrapper" />
+            ),
+          onCancel: () => closeModal(false),
+          onConfirm: () => closeModal(true),
+          cancelButtonText: options?.cancelButtonText || '', // stub default cancel text
+          confirmButtonText: options?.confirmButtonText || '', // stub default confirm text
+        };
+
+        render(<EuiConfirmModal {...props} />, modalDomElement);
+      });
     },
   };
 };

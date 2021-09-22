@@ -29,6 +29,9 @@ import { toMountPoint } from '../../../../../kibana_react/public';
 import { ControlGroup } from './component/control_group_component';
 import { PresentationOverlaysService } from '../../../services/overlays';
 import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_WIDTH } from './control_group_constants';
+import { ManageControlGroup } from './editor/manage_control_group_component';
+import { OverlayRef } from '../../../../../../core/public';
+import { ControlGroupStrings } from './control_group_strings';
 
 export class ControlGroupContainer extends Container<InputControlInput, ControlGroupInput> {
   public readonly type = CONTROL_GROUP_TYPE;
@@ -38,11 +41,11 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
   constructor(
     initialInput: ControlGroupInput,
     private readonly controlsService: ControlsService,
-    private readonly openFlyout: PresentationOverlaysService['openFlyout'],
+    private readonly overlays: PresentationOverlaysService,
     parent?: Container
   ) {
     super(initialInput, { embeddableLoaded: {} }, controlsService.getControlFactory, parent);
-    this.openFlyout = openFlyout;
+    this.overlays = overlays;
     this.controlsService = controlsService;
   }
 
@@ -75,7 +78,23 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
     const initialInputPromise = new Promise<Omit<InputControlInput, 'id'>>((resolve, reject) => {
       let inputToReturn: Partial<InputControlInput> = {};
 
-      const flyoutInstance = this.openFlyout(
+      const onCancel = (ref: OverlayRef) => {
+        this.overlays
+          .openConfirm(ControlGroupStrings.management.discardNewControl.getSubtitle(), {
+            confirmButtonText: ControlGroupStrings.management.discardNewControl.getConfirm(),
+            cancelButtonText: ControlGroupStrings.management.discardNewControl.getCancel(),
+            title: ControlGroupStrings.management.discardNewControl.getTitle(),
+            buttonColor: 'danger',
+          })
+          .then((confirmed) => {
+            if (confirmed) {
+              reject();
+              ref.close();
+            }
+          });
+      };
+
+      const flyoutInstance = this.overlays.openFlyout(
         toMountPoint(
           <ManageControlComponent
             width={this.nextControlWidth}
@@ -90,17 +109,11 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
               resolve(inputToReturn);
               flyoutInstance.close();
             }}
-            onCancel={() => {
-              reject();
-              flyoutInstance.close();
-            }}
+            onCancel={() => onCancel(flyoutInstance)}
           />
         ),
         {
-          onClose: (flyout) => {
-            reject();
-            flyout.close();
-          },
+          onClose: (flyout) => onCancel(flyout),
         }
       );
     });
@@ -120,8 +133,31 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
     if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
 
     const initialExplicitInput = cloneDeep(panel.explicitInput);
+    const initialWidth = panel.width;
 
-    const flyoutInstance = this.openFlyout(
+    const onCancel = (ref: OverlayRef) => {
+      this.overlays
+        .openConfirm(ControlGroupStrings.management.discardChanges.getSubtitle(), {
+          confirmButtonText: ControlGroupStrings.management.discardChanges.getConfirm(),
+          cancelButtonText: ControlGroupStrings.management.discardChanges.getCancel(),
+          title: ControlGroupStrings.management.discardChanges.getTitle(),
+          buttonColor: 'danger',
+        })
+        .then((confirmed) => {
+          if (confirmed) {
+            embeddable.updateInput(initialExplicitInput);
+            this.updateInput({
+              panels: {
+                ...this.getInput().panels,
+                [embeddableId]: { ...this.getInput().panels[embeddableId], width: initialWidth },
+              },
+            });
+            ref.close();
+          }
+        });
+    };
+
+    const flyoutInstance = this.overlays.openFlyout(
       toMountPoint(
         <ManageControlComponent
           width={panel.width}
@@ -132,10 +168,7 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
             onChange: (partialInput) => embeddable.updateInput(partialInput),
             initialInput: embeddable.getInput(),
           })}
-          onCancel={() => {
-            embeddable.updateInput(initialExplicitInput);
-            flyoutInstance.close();
-          }}
+          onCancel={() => onCancel(flyoutInstance)}
           onSave={() => flyoutInstance.close()}
           updateWidth={(newWidth) =>
             this.updateInput({
@@ -148,18 +181,44 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
         />
       ),
       {
-        onClose: (flyout) => {
-          embeddable.updateInput(initialExplicitInput);
-          flyout.close();
-        },
+        onClose: (flyout) => onCancel(flyout),
       }
     );
   };
 
-  public render(dom: HTMLElement) {
-    ReactDOM.render(
-      <ControlGroup controlGroupContainer={this} openFlyout={this.openFlyout} />,
-      dom
+  public editControlGroup = () => {
+    const flyoutInstance = this.overlays.openFlyout(
+      toMountPoint(
+        <ManageControlGroup
+          controlStyle={this.getInput().controlStyle}
+          setControlStyle={(newStyle) => this.updateInput({ controlStyle: newStyle })}
+          deleteAllEmbeddables={() => {
+            this.overlays
+              .openConfirm(ControlGroupStrings.management.deleteAllControls.getSubtitle(), {
+                confirmButtonText: ControlGroupStrings.management.deleteAllControls.getConfirm(),
+                cancelButtonText: ControlGroupStrings.management.deleteAllControls.getCancel(),
+                title: ControlGroupStrings.management.deleteAllControls.getTitle(),
+                buttonColor: 'danger',
+              })
+              .then((confirmed) => {
+                if (confirmed) {
+                  Object.keys(this.getInput().panels).forEach((id) => this.removeEmbeddable(id));
+                  flyoutInstance.close();
+                }
+              });
+          }}
+          setAllPanelWidths={(newWidth) => {
+            const newPanels = cloneDeep(this.getInput().panels);
+            Object.values(newPanels).forEach((panel) => (panel.width = newWidth));
+            this.updateInput({ panels: { ...newPanels, ...newPanels } });
+          }}
+          panels={this.getInput().panels}
+        />
+      )
     );
+  };
+
+  public render(dom: HTMLElement) {
+    ReactDOM.render(<ControlGroup controlGroupContainer={this} />, dom);
   }
 }

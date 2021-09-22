@@ -24,13 +24,13 @@ const ControlGroupStoryComponent = () => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   providers.overlays.start({});
-  const openFlyout = providers.overlays.getService().openFlyout;
+  const overlays = providers.overlays.getService();
 
   const controlsServiceStub = getControlsServiceStub();
 
   useEffect(() => {
     (async () => {
-      const factory = new ControlGroupContainerFactory(controlsServiceStub, openFlyout);
+      const factory = new ControlGroupContainerFactory(controlsServiceStub, overlays);
       const controlGroupContainerEmbeddable = await factory.create({
         inheritParentState: {
           useQuery: false,
@@ -45,7 +45,7 @@ const ControlGroupStoryComponent = () => {
         controlGroupContainerEmbeddable.render(embeddableRoot.current);
       }
     })();
-  }, [embeddableRoot, controlsServiceStub, openFlyout]);
+  }, [embeddableRoot, controlsServiceStub, overlays]);
 
   return <div ref={embeddableRoot} />;
 };

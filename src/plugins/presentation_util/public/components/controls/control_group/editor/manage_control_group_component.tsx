@@ -18,31 +18,28 @@ import {
   EuiTitle,
   EuiFlyoutBody,
   EuiSpacer,
-  EuiToolTip,
-  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { ControlsPanels } from '../types';
 import { ControlStyle, ControlWidth } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { toMountPoint } from '../../../../../../kibana_react/public';
-import { PresentationOverlaysService } from '../../../../services/overlays';
 import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
 
 interface ManageControlGroupProps {
   panels: ControlsPanels;
   controlStyle: ControlStyle;
+  deleteAllEmbeddables: () => void;
   setControlStyle: (style: ControlStyle) => void;
   setAllPanelWidths: (newWidth: ControlWidth) => void;
-  openFlyout: PresentationOverlaysService['openFlyout'];
 }
 
-const ManageControlGroupFlyout = ({
+export const ManageControlGroup = ({
   panels,
   controlStyle,
   setControlStyle,
   setAllPanelWidths,
-}: Omit<ManageControlGroupProps, 'openFlyout'>) => {
+  deleteAllEmbeddables,
+}: ManageControlGroupProps) => {
   const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>(controlStyle);
   const [selectedWidth, setSelectedWidth] = useState<ControlWidth>();
 
@@ -100,43 +97,18 @@ const ManageControlGroupFlyout = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="trash" color="danger" aria-label={'delete-all'} size="s">
+            <EuiButtonEmpty
+              onClick={deleteAllEmbeddables}
+              aria-label={'delete-all'}
+              iconType="trash"
+              color="danger"
+              size="s"
+            >
               {ControlGroupStrings.management.getDeleteAllButtonTitle()}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>
     </>
-  );
-};
-
-export const ManageControlGroupComponent = ({
-  setAllPanelWidths,
-  setControlStyle,
-  controlStyle,
-  openFlyout,
-  panels,
-}: ManageControlGroupProps) => {
-  return (
-    <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
-      <EuiButtonIcon
-        aria-label={ControlGroupStrings.management.getManageButtonTitle()}
-        iconType="gear"
-        color="text"
-        data-test-subj="inputControlsSortingButton"
-        onClick={() => {
-          openFlyout(
-            toMountPoint(
-              <ManageControlGroupFlyout
-                panels={panels}
-                controlStyle={controlStyle}
-                setControlStyle={setControlStyle}
-                setAllPanelWidths={setAllPanelWidths}
-              />
-            )
-          );
-        }}
-      />
-    </EuiToolTip>
   );
 };

@@ -32,17 +32,14 @@ import {
 
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupContainer } from '../control_group_container';
-import { PresentationOverlaysService } from '../../../../services/overlays';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
-import { ManageControlGroupComponent } from '../editor/manage_control_group_component';
 import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
 
 interface ControlGroupProps {
-  openFlyout: PresentationOverlaysService['openFlyout'];
   controlGroupContainer: ControlGroupContainer;
 }
 
-export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroupProps) => {
+export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
   const [controlIds, setControlIds] = useState<string[]>([]);
 
   // sync controlIds every time input panels change
@@ -135,19 +132,15 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
           <EuiFlexItem>
-            <ManageControlGroupComponent
-              openFlyout={openFlyout}
-              controlStyle={controlGroupContainer.getInput().controlStyle}
-              setControlStyle={(newStyle) =>
-                controlGroupContainer.updateInput({ controlStyle: newStyle })
-              }
-              setAllPanelWidths={(newWidth) => {
-                const newPanels = cloneDeep(controlGroupContainer.getInput().panels);
-                Object.values(newPanels).forEach((panel) => (panel.width = newWidth));
-                controlGroupContainer.updateInput({ panels: { ...newPanels, ...newPanels } });
-              }}
-              panels={controlGroupContainer.getInput().panels}
-            />
+            <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
+              <EuiButtonIcon
+                aria-label={ControlGroupStrings.management.getManageButtonTitle()}
+                iconType="gear"
+                color="text"
+                data-test-subj="inputControlsSortingButton"
+                onClick={controlGroupContainer.editControlGroup}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>

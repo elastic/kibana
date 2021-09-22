@@ -39,13 +39,10 @@ export class ControlGroupContainerFactory
   public readonly isContainerType = true;
   public readonly type = CONTROL_GROUP_TYPE;
   public readonly controlsService: ControlsService;
-  private readonly openFlyout: PresentationOverlaysService['openFlyout'];
+  private readonly overlays: PresentationOverlaysService;
 
-  constructor(
-    controlsService: ControlsService,
-    openFlyout: PresentationOverlaysService['openFlyout']
-  ) {
-    this.openFlyout = openFlyout;
+  constructor(controlsService: ControlsService, overlays: PresentationOverlaysService) {
+    this.overlays = overlays;
     this.controlsService = controlsService;
   }
 
@@ -70,6 +67,6 @@ export class ControlGroupContainerFactory
     initialInput: ControlGroupInput,
     parent?: Container
   ): Promise<ControlGroupContainer | ErrorEmbeddable> => {
-    return new ControlGroupContainer(initialInput, this.controlsService, this.openFlyout, parent);
+    return new ControlGroupContainer(initialInput, this.controlsService, this.overlays, parent);
   };
 }

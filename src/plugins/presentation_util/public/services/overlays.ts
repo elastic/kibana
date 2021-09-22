@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { MountPoint, OverlayFlyoutOpenOptions, OverlayRef } from '../../../../core/public';
+import {
+  MountPoint,
+  OverlayFlyoutOpenOptions,
+  OverlayModalConfirmOptions,
+  OverlayRef,
+} from '../../../../core/public';
 
 export interface PresentationOverlaysService {
   openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+  openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions): Promise<boolean>;
 }
