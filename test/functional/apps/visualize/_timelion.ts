@@ -280,6 +280,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               '.es(index=logstash-*, timefield=@timestamp, split=',
               'timelionCodeEditor'
             );
+            // wait for split fields to load
+            await common.sleep(300);
             const suggestions = await timelion.getSuggestionItemsText();
 
             expect(suggestions.length).not.to.eql(0);
