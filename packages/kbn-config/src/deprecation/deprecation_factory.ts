@@ -98,7 +98,7 @@ const _rename = (
       title: getDeprecationTitle(fullOldPath),
       message: i18n.translate('kbnConfig.deprecations.conflictSettingMessage', {
         defaultMessage:
-          'Setting "${fullOldPath}" has been replaced by "${fullNewPath}". However, both keys are present. Ignoring "${fullOldPath}"',
+          'Setting "{fullOldPath}" has been replaced by "{fullNewPath}". However, both keys are present. Ignoring "${fullOldPath}"',
         values: { fullOldPath, fullNewPath },
       }),
       correctiveActions: {
