@@ -12,6 +12,10 @@ import { BucketSpanEstimatorData } from '../../../common/types/job_service';
 
 import { estimateBucketSpanFactory } from './bucket_span_estimator';
 
+jest.mock('../../lib/log', () => ({
+  mlLog: { warn: jest.fn() },
+}));
+
 const callAs = {
   search: () => Promise.resolve({ body: {} }),
   cluster: { getSettings: () => Promise.resolve({ body: {} }) },

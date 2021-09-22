@@ -41,7 +41,7 @@ function prepareTest(messages) {
   };
   const kibana = {
     services: {
-      notifications: { toasts: { addDanger: jest.fn() } },
+      notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
     },
   };
 
