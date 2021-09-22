@@ -167,7 +167,6 @@ class TimeseriesVisualization extends Component {
     } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
-
     const mainAxisGroupId = this.yAxisIdGenerator('main_group');
 
     const seriesModel = model.series.filter((s) => !s.hidden).map((s) => cloneDeep(s));
