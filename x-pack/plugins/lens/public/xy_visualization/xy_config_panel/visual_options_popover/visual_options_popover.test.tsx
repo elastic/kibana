@@ -8,14 +8,14 @@
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { Position } from '@elastic/charts';
-import type { FramePublicAPI } from '../../types';
-import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { State } from '../types';
-import { VisualOptionsPopover } from './visual_options_popover';
-import { ToolbarPopover } from '../../shared_components';
+import type { FramePublicAPI } from '../../../types';
+import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
+import { State } from '../../types';
+import { VisualOptionsPopover } from '.';
+import { ToolbarPopover } from '../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { FillOpacityOption } from './fill_opacity_option';
-import { layerTypes } from '../../../common';
+import { layerTypes } from '../../../../common';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;
