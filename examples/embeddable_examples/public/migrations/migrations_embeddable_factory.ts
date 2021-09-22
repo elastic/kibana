@@ -27,7 +27,8 @@ export type SimpleEmbeddableInput = EmbeddableInput & {
 
 export type SimpleEmbeddableFactory = EmbeddableFactory;
 export class SimpleEmbeddableFactoryDefinition
-  implements EmbeddableFactoryDefinition<SimpleEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<SimpleEmbeddableInput>
+{
   public readonly type = SIMPLE_EMBEDDABLE;
 
   // we need to provide migration function every time we change the interface of our state

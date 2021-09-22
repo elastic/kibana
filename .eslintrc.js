@@ -1492,7 +1492,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1502,7 +1502,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/plugins/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },

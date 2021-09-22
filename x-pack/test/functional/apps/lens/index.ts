@@ -26,9 +26,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
+      this.tags(['ciGroup3', 'skipFirefox']);
+      loadTestFile(require.resolve('./smokescreen'));
+    });
+
+    describe('', function () {
       this.tags(['ciGroup4', 'skipFirefox']);
 
-      loadTestFile(require.resolve('./smokescreen'));
       loadTestFile(require.resolve('./add_to_dashboard'));
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./runtime_fields'));

@@ -6,10 +6,12 @@
  */
 
 import { registerTestBed } from '@kbn/test/jest';
-import { UnwrapPromise } from '@kbn/utility-types';
+import type { SerializableRecord, UnwrapPromise } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { ListingProps as Props, ReportListing } from '.';
 import type { NotificationsSetup } from '../../../../../src/core/public';
 import {
   applicationServiceMock,
@@ -18,12 +20,11 @@ import {
 } from '../../../../../src/core/public/mocks';
 import type { LocatorPublic, SharePluginSetup } from '../../../../../src/plugins/share/public';
 import type { ILicense } from '../../../licensing/public';
-import { IlmPolicyMigrationStatus, ReportApiJSON } from '../../common/types';
+import type { IlmPolicyMigrationStatus, ReportApiJSON } from '../../common/types';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { Job } from '../lib/job';
 import { InternalApiClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
 import { KibanaContextProvider } from '../shared_imports';
-import { ListingProps as Props, ReportListing } from '.';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -207,10 +208,10 @@ const mockJobs: ReportApiJSON[] = [
 ];
 
 const reportingAPIClient = {
-  list: () => Promise.resolve(mockJobs.map((j) => new Job(j))),
-  total: () => Promise.resolve(18),
+  list: jest.fn(() => Promise.resolve(mockJobs.map((j) => new Job(j)))),
+  total: jest.fn(() => Promise.resolve(18)),
   migrateReportingIndicesIlmPolicy: jest.fn(),
-} as any;
+} as unknown as DeeplyMockedKeys<ReportingAPIClient>;
 
 const validCheck = {
   check: () => ({
@@ -220,8 +221,8 @@ const validCheck = {
 };
 
 const license$ = {
-  subscribe: (handler: any) => {
-    return handler(validCheck);
+  subscribe: (handler: unknown) => {
+    return (handler as Function)(validCheck);
   },
 } as Observable<ILicense>;
 
@@ -239,7 +240,7 @@ const mockPollConfig = {
 describe('ReportListing', () => {
   let httpService: ReturnType<typeof httpServiceMock.createSetupContract>;
   let applicationService: ReturnType<typeof applicationServiceMock.createStartContract>;
-  let ilmLocator: undefined | LocatorPublic<any>;
+  let ilmLocator: undefined | LocatorPublic<SerializableRecord>;
   let urlService: SharePluginSetup['url'];
   let testBed: UnwrapPromise<ReturnType<typeof setup>>;
   let toasts: NotificationsSetup['toasts'];
@@ -301,15 +302,15 @@ describe('ReportListing', () => {
       navLinks: {},
       management: { data: { index_lifecycle_management: true } },
     };
-    ilmLocator = ({
+    ilmLocator = {
       getUrl: jest.fn(),
-    } as unknown) as LocatorPublic<any>;
+    } as unknown as LocatorPublic<SerializableRecord>;
 
-    urlService = ({
+    urlService = {
       locators: {
         get: () => ilmLocator,
       },
-    } as unknown) as SharePluginSetup['url'];
+    } as unknown as SharePluginSetup['url'];
     await runSetup();
   });
 
@@ -329,7 +330,7 @@ describe('ReportListing', () => {
       subscribe: jest.fn().mockReturnValue({
         unsubscribe: unsubscribeMock,
       }),
-    } as any;
+    } as unknown as Observable<ILicense>;
 
     await runSetup({ license$: subMock });
 
@@ -342,15 +343,15 @@ describe('ReportListing', () => {
   describe('ILM policy', () => {
     beforeEach(async () => {
       httpService = httpServiceMock.createSetupContract();
-      ilmLocator = ({
+      ilmLocator = {
         getUrl: jest.fn(),
-      } as unknown) as LocatorPublic<any>;
+      } as unknown as LocatorPublic<SerializableRecord>;
 
-      urlService = ({
+      urlService = {
         locators: {
           get: () => ilmLocator,
         },
-      } as unknown) as SharePluginSetup['url'];
+      } as unknown as SharePluginSetup['url'];
 
       await runSetup();
     });

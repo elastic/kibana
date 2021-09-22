@@ -10,26 +10,26 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, AppMountParameters } from 'kibana/public';
 import { StartDependencies } from './plugin';
 
-export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
-  element,
-}: AppMountParameters) => {
-  const [core, plugins] = await coreSetup.getStartServices();
-  const { App } = await import('./app');
+export const mount =
+  (coreSetup: CoreSetup<StartDependencies>) =>
+  async ({ element }: AppMountParameters) => {
+    const [core, plugins] = await coreSetup.getStartServices();
+    const { App } = await import('./app');
 
-  const deps = {
-    core,
-    plugins,
+    const deps = {
+      core,
+      plugins,
+    };
+
+    const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
+
+    const i18nCore = core.i18n;
+
+    const reactElement = (
+      <i18nCore.Context>
+        <App {...deps} defaultIndexPattern={defaultIndexPattern} />
+      </i18nCore.Context>
+    );
+    render(reactElement, element);
+    return () => unmountComponentAtNode(element);
   };
-
-  const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
-
-  const i18nCore = core.i18n;
-
-  const reactElement = (
-    <i18nCore.Context>
-      <App {...deps} defaultIndexPattern={defaultIndexPattern} />
-    </i18nCore.Context>
-  );
-  render(reactElement, element);
-  return () => unmountComponentAtNode(element);
-};

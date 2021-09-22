@@ -20,8 +20,10 @@ import { TestsSelectionControl } from './tests_selection_control';
 import { isPopulatedObject } from '../../../common';
 import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
 import { BetaBadge } from '../beta_badge';
+import { isDefined } from '../../../common/types/guards';
 
-export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
+export type MlAnomalyAlertTriggerProps =
+  AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
 const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,
@@ -48,11 +50,10 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   );
 
   const onAlertParamChange = useCallback(
-    <T extends keyof MlAnomalyDetectionJobsHealthRuleParams>(param: T) => (
-      update: MlAnomalyDetectionJobsHealthRuleParams[T]
-    ) => {
-      setAlertParams(param, update);
-    },
+    <T extends keyof MlAnomalyDetectionJobsHealthRuleParams>(param: T) =>
+      (update: MlAnomalyDetectionJobsHealthRuleParams[T]) => {
+        setAlertParams(param, update);
+      },
     []
   );
 
@@ -78,6 +79,19 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
                 defaultMessage: 'Jobs',
               }),
               options: jobs.map((v) => ({ label: v.job_id })),
+            },
+            {
+              label: i18n.translate('xpack.ml.jobSelector.groupOptionsLabel', {
+                defaultMessage: 'Groups',
+              }),
+              options: [
+                ...new Set(
+                  jobs
+                    .map((v) => v.groups)
+                    .flat()
+                    .filter((v) => isDefined(v) && !alertParams.includeJobs.groupIds?.includes(v))
+                ),
+              ].map((v) => ({ label: v! })),
             },
           ]);
         });

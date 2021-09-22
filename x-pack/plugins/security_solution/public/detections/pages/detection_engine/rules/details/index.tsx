@@ -178,7 +178,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventId
   );
   const updatedAt = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
+    (state) =>
+      (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).updated
+  );
+  const isAlertsLoading = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -202,10 +206,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       signalIndexName,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
@@ -285,6 +287,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [hasIndexRead]);
 
+  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
+
   const title = useMemo(
     () => (
       <>
@@ -347,7 +351,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
-      const timelineId = TimelineId.detectionsPage;
+      const timelineId = TimelineId.detectionsRulesDetailsPage;
       clearEventsLoading!({ id: timelineId });
       clearEventsDeleted!({ id: timelineId });
       clearSelected!({ id: timelineId });
@@ -399,10 +403,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [ruleId, filters, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
-  const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
-    alertDefaultFilters,
-    filters,
-  ]);
+  const alertMergedFilters = useMemo(
+    () => [...alertDefaultFilters, ...filters],
+    [alertDefaultFilters, filters]
+  );
 
   const tabs = useMemo(
     () => (
@@ -772,10 +776,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    {timelinesUi.getLastUpdated({
-                      updatedAt: updatedAt || 0,
-                      showUpdating: loading,
-                    })}
+                    {updatedAt &&
+                      timelinesUi.getLastUpdated({
+                        updatedAt: updatedAt || Date.now(),
+                        showUpdating,
+                      })}
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />

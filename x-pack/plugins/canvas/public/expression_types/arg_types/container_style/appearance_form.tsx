@@ -49,15 +49,14 @@ export const AppearanceForm: FunctionComponent<Props> = ({
     padding = padding.replace('px', '');
   }
 
-  const namedChange = (name: keyof Arguments) => (
-    ev: ChangeEvent<HTMLSelectElement | HTMLInputElement>
-  ) => {
-    if (name === 'padding') {
-      return onChange(name, `${ev.target.value}px`);
-    }
+  const namedChange =
+    (name: keyof Arguments) => (ev: ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+      if (name === 'padding') {
+        return onChange(name, `${ev.target.value}px`);
+      }
 
-    onChange(name, ev.target.value);
-  };
+      onChange(name, ev.target.value);
+    };
 
   return (
     <EuiFlexGroup gutterSize="s" justify-content="spaceBetween">

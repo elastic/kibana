@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { OverlayStart, HttpStart, IBasePath } from 'src/core/public';
+import { HttpStart, IBasePath } from 'src/core/public';
 import {
   IndexPatternsContract,
   IndexPattern,
@@ -43,7 +43,6 @@ import {
   processImportResponse,
   ProcessedImportResponse,
 } from '../../../lib';
-import { ISavedObjectsManagementServiceRegistry } from '../../../services';
 import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
 import { OverwriteModal } from './overwrite_modal';
 import { ImportModeControl, ImportMode } from './import_mode_control';
@@ -53,22 +52,17 @@ const CREATE_NEW_COPIES_DEFAULT = false;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export interface FlyoutProps {
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   allowedTypes: string[];
   close: () => void;
   done: () => void;
   newIndexPatternUrl: string;
   indexPatterns: IndexPatternsContract;
-  overlays: OverlayStart;
   http: HttpStart;
   basePath: IBasePath;
   search: DataPublicPluginStart['search'];
 }
 
 export interface FlyoutState {
-  conflictedIndexPatterns?: any[];
-  conflictedSavedObjectsLinkedToSavedSearches?: any[];
-  conflictedSearchDocs?: any[];
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
   unmatchedReferencesTablePagination: { pageIndex: number; pageSize: number };
   failedImports?: ProcessedImportResponse['failedImports'];
@@ -105,9 +99,6 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     super(props);
 
     this.state = {
-      conflictedIndexPatterns: undefined,
-      conflictedSavedObjectsLinkedToSavedSearches: undefined,
-      conflictedSearchDocs: undefined,
       unmatchedReferences: undefined,
       unmatchedReferencesTablePagination: {
         pageIndex: 0,

@@ -22,7 +22,9 @@ function collectDeprecations(
       deprecation,
       path,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
