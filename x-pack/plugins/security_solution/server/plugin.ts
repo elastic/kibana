@@ -174,7 +174,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.setupPlugins = plugins;
 
     const config = this.config;
-    const globalConfig = this.context.config.legacy.get();
 
     const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
     initSavedObjects(core.savedObjects);
@@ -188,7 +187,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     initUsageCollectors({
       core,
-      kibanaIndex: globalConfig.kibana.index,
+      kibanaIndex: core.savedObjects.getKibanaIndex(),
       signalsIndex: config.signalsIndex,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
