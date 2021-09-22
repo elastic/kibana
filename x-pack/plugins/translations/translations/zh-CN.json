@@ -17877,7 +17877,6 @@
     "xpack.monitoring.alerts.kibanaVersionMismatch.label": "Kibana 版本不匹配",
     "xpack.monitoring.alerts.kibanaVersionMismatch.shortAction": "确认所有实例具有相同的版本。",
     "xpack.monitoring.alerts.kibanaVersionMismatch.ui.firingMessage": "在此集群中正运行着多个 Kibana 版本 ({versions})。",
-    "xpack.monitoring.alerts.legacyAlert.expressionText": "没有可配置的内容。",
     "xpack.monitoring.alerts.licenseExpiration.action": "请更新您的许可证。",
     "xpack.monitoring.alerts.licenseExpiration.actionVariables.clusterName": "许可证所属的集群。",
     "xpack.monitoring.alerts.licenseExpiration.actionVariables.expiredDate": "许可证过期日期。",

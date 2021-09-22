@@ -17602,7 +17602,6 @@
     "xpack.monitoring.alerts.kibanaVersionMismatch.label": "Kibana バージョン不一致",
     "xpack.monitoring.alerts.kibanaVersionMismatch.shortAction": "すべてのインスタンスのバージョンが同じことを確認してください。",
     "xpack.monitoring.alerts.kibanaVersionMismatch.ui.firingMessage": "このクラスターでは、複数のバージョンの Kibana（{versions}）が実行されています。",
-    "xpack.monitoring.alerts.legacyAlert.expressionText": "構成するものがありません。",
     "xpack.monitoring.alerts.licenseExpiration.action": "ライセンスを更新してください。",
     "xpack.monitoring.alerts.licenseExpiration.actionVariables.clusterName": "ライセンスが属しているクラスター。",
     "xpack.monitoring.alerts.licenseExpiration.actionVariables.expiredDate": "ライセンスの有効期限。",
