@@ -58,7 +58,6 @@ import { DetectionEngineHeaderPage } from '../../../../components/detection_engi
 import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
-import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import {
@@ -575,21 +574,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indicesExist, indexPattern, indexFieldsSearch, selectedDataViewId } = useSourcererScope(
-    SourcererScopeName.detections
-  );
-  useEffect(() => {
-    // recheck if the indices have data yet
-    console.log('redoing search????', { indicesExist, indexFieldsSearch });
-    // TODO: Steph/sourcerer
-    // if details page loads and signal index does not exist, recheck
-    setTimeout(() => {
-      if (!indicesExist && indexFieldsSearch != null) {
-        indexFieldsSearch(selectedDataViewId);
-        console.log('redoing search');
-      }
-    }, 10000);
-  }, [indicesExist, indexFieldsSearch, selectedDataViewId]);
+  const { indexPattern } = useSourcererScope(SourcererScopeName.detections);
 
   const exceptionLists = useMemo((): {
     lists: ExceptionListIdentifiers[];
@@ -662,7 +647,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {/* {indicesExist ? (*/}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -840,13 +824,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
-      {/* // ) : (*/}
-      {/* //   <SecuritySolutionPageWrapper>*/}
-      {/* //     <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />*/}
-      {/*//*/}
-      {/* //     <OverviewEmpty />*/}
-      {/* //   </SecuritySolutionPageWrapper>*/}
-      {/* // )}*/}
 
       <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>

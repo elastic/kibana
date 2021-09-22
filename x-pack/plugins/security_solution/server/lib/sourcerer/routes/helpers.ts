@@ -6,24 +6,21 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import get from 'lodash/get';
 
 export const findExistingIndices = async (
   indices: string[],
-  esClient: ElasticsearchClient,
-  signalIndexName?: string
+  esClient: ElasticsearchClient
 ): Promise<boolean[]> =>
   Promise.all(
     indices
       .map(async (index) => {
-        if (signalIndexName === index) {
-          return true;
-        }
-        const searchResponse = await esClient.search({
+        const searchResponse = await esClient.fieldCaps({
           index,
-          body: { query: { match_all: {} }, size: 0 },
+          fields: '@timestamp',
+          ignore_unavailable: true,
+          allow_no_indices: false,
         });
-        return get(searchResponse, 'body.hits.total.value', 0) > 0;
+        return searchResponse.body.indices.length > 0;
       })
       .map((p) => p.catch((e) => false))
   );

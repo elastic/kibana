@@ -22,7 +22,7 @@ interface SourcererDataView {
   kibanaDataViews: KibanaDataView[];
 }
 
-// TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted
+// TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted and signals index is ALWAYS string
 export const postSourcererDataView = async ({
   body,
   signal,

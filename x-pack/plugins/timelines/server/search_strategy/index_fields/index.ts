@@ -9,6 +9,7 @@ import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
+import { getIndexExists } from '@kbn/securitysolution-es-utils';
 import {
   IndexPatternsFetcher,
   ISearchStrategy,
@@ -24,6 +25,9 @@ import {
   BeatFields,
 } from '../../../common/search_strategy/index_fields';
 import { StartPlugins } from '../../types';
+
+const apmIndexPattern = 'apm-*-transaction*';
+const apmDataStreamsPattern = 'traces-apm*';
 
 export const indexFieldsProvider = (
   getStartServices: StartServicesAccessor<StartPlugins>
@@ -49,11 +53,21 @@ export const findExistingIndices = async (
   Promise.all(
     indices
       .map(async (index) => {
-        const searchResponse = await esClient.search({
+        if ([apmIndexPattern, apmDataStreamsPattern].includes(index)) {
+          const searchResponse = await esClient.search({
+            index,
+            body: { query: { match_all: {} }, size: 0 },
+          });
+          return get(searchResponse, 'body.hits.total.value', 0) > 0;
+        }
+        const searchResponse = await esClient.fieldCaps({
           index,
-          body: { query: { match_all: {} }, size: 0 },
+          fields: '@timestamp',
+          ignore_unavailable: true,
+          allow_no_indices: false,
         });
-        return get(searchResponse, 'body.hits.total.value', 0) > 0;
+        return searchResponse.body.indices.length > 0;
+        // return get(searchResponse, 'body.hits.total.value', 0) > 0;
       })
       .map((p) => p.catch((e) => false))
   );

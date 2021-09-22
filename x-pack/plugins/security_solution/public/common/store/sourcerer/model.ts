@@ -30,7 +30,6 @@ export interface ManageScope {
   id: SourcererScopeName;
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
-  indexFieldsSearch?: (s: string) => void;
   loading: boolean;
   // Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
   runtimeMappings: MappingRuntimeFields;

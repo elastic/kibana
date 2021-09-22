@@ -96,22 +96,12 @@ export const useInitSourcerer = (
     [addError, dispatch, defaultDataView.title]
   );
 
-  const { indexFieldsSearch } = useIndexFields(scopeId);
-  console.log('useIndexFields', scopeId);
+  useIndexFields(scopeId);
   useIndexFields(SourcererScopeName.timeline);
-  useEffect(() => {
-    // recheck if the indices have data yet
-    console.log('are you stack overflowing?');
-    if (indexFieldsSearch != null) {
-      console.log('dispatch', { indexFieldsSearch, id: scopeId });
-      dispatch(sourcererActions.setIndexFieldsSearch({ indexFieldsSearch, id: scopeId }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
-      // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted
+      // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted and signals index is ALWAYS string
       // update signal name also updates sourcerer
       updateSourcererDataView(signalIndexName);
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
