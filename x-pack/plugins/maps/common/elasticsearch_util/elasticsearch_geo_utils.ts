@@ -224,7 +224,7 @@ export function convertESShapeToGeojsonGeometry(value: ESGeometry): Geometry {
       );
       throw new Error(errorMessage);
   }
-  return (geoJson as unknown) as Geometry;
+  return geoJson as unknown as Geometry;
 }
 
 function convertWKTStringToGeojson(value: string): Geometry {
@@ -265,7 +265,7 @@ export function geoShapeToGeometry(
     value.type === GEO_JSON_TYPE.GEOMETRY_COLLECTION ||
     value.type === 'geometrycollection'
   ) {
-    const geometryCollection = (value as unknown) as { geometries: ESGeometry[] };
+    const geometryCollection = value as unknown as { geometries: ESGeometry[] };
     for (let i = 0; i < geometryCollection.geometries.length; i++) {
       geoShapeToGeometry(geometryCollection.geometries[i], accumulator);
     }

@@ -20,7 +20,7 @@ const context = createContext<Partial<SpacesReactContextValue<Partial<CoreStart>
 export const useSpaces = <
   Services extends Partial<CoreStart>
 >(): SpacesReactContextValue<Services> =>
-  useContext((context as unknown) as React.Context<SpacesReactContextValue<Services>>);
+  useContext(context as unknown as React.Context<SpacesReactContextValue<Services>>);
 
 export const createSpacesReactContext = <Services extends Partial<CoreStart>>(
   services: Services,
@@ -38,6 +38,6 @@ export const createSpacesReactContext = <Services extends Partial<CoreStart>>(
   return {
     value,
     Provider,
-    Consumer: (context.Consumer as unknown) as React.Consumer<SpacesReactContextValue<Services>>,
+    Consumer: context.Consumer as unknown as React.Consumer<SpacesReactContextValue<Services>>,
   };
 };

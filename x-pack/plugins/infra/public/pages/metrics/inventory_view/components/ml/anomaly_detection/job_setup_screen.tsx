@@ -80,9 +80,10 @@ export const JobSetupScreen = (props: Props) => {
     }
   }, [props.jobType, k.jobSummaries, h.jobSummaries]);
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
-    createDerivedIndexPattern,
-  ]);
+  const derivedIndexPattern = useMemo(
+    () => createDerivedIndexPattern(),
+    [createDerivedIndexPattern]
+  );
 
   const updateStart = useCallback((date: Moment) => {
     setStartDate(date);

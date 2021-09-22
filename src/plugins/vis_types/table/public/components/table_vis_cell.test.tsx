@@ -15,13 +15,13 @@ import { FormattedColumns } from '../types';
 describe('table vis cell', () => {
   it('should return a cell component with data in scope', () => {
     const rows = [{ first: 1, second: 2 }];
-    const formattedColumns = ({
+    const formattedColumns = {
       second: {
         formatter: {
           convert: jest.fn(),
         },
       },
-    } as unknown) as FormattedColumns;
+    } as unknown as FormattedColumns;
     const Cell = createTableVisCell(rows, formattedColumns);
     const cellProps = {
       rowIndex: 0,
