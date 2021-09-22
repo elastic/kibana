@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { join } from 'path';
 import { SavedObject } from 'kibana/server';
+import supertest from 'supertest';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,
@@ -29,15 +30,16 @@ import {
   CaseUserActionAttributes,
   CASE_COMMENT_SAVED_OBJECT,
   CasePostRequest,
+  CaseUserActionResponse,
 } from '../../../../../../plugins/cases/common';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestService = getService('supertest');
   const es = getService('es');
 
   describe('import and export cases', () => {
-    const actionsRemover = new ActionsRemover(supertest);
+    const actionsRemover = new ActionsRemover(supertestService);
 
     afterEach(async () => {
       await deleteAllCaseItems(es);
@@ -46,14 +48,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('exports a case with its associated user actions and comments', async () => {
       const caseRequest = getPostCaseRequest();
-      const postedCase = await createCase(supertest, caseRequest);
+      const postedCase = await createCase(supertestService, caseRequest);
       await createComment({
-        supertest,
+        supertest: supertestService,
         caseId: postedCase.id,
         params: postCommentUserReq,
       });
 
-      const { text } = await supertest
+      const { text } = await supertestService
         .post(`/api/saved_objects/_export`)
         .send({
           type: ['cases'],
@@ -72,7 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('imports a case with a comment and user actions', async () => {
-      await supertest
+      await supertestService
         .post('/api/saved_objects/_import')
         .query({ overwrite: true })
         .attach(
@@ -85,12 +87,12 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      const findResponse = await findCases({ supertest, query: {} });
+      const findResponse = await findCases({ supertest: supertestService, query: {} });
       expect(findResponse.total).to.eql(1);
       expect(findResponse.cases[0].title).to.eql('A case to export');
       expect(findResponse.cases[0].description).to.eql('a description');
 
-      const { body: commentsResponse }: { body: CommentsResponse } = await supertest
+      const { body: commentsResponse }: { body: CommentsResponse } = await supertestService
         .get(`${CASES_URL}/${findResponse.cases[0].id}/comments/_find`)
         .send()
         .expect(200);
@@ -99,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(comment.comment).to.eql('A comment for my case');
 
       const userActions = await getCaseUserActions({
-        supertest,
+        supertest: supertestService,
         caseID: findResponse.cases[0].id,
       });
 
@@ -118,7 +120,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('imports a case with a connector', async () => {
-      await supertest
+      await supertestService
         .post('/api/saved_objects/_import')
         .query({ overwrite: true })
         .attach(
@@ -133,35 +135,56 @@ export default ({ getService }: FtrProviderContext): void => {
 
       actionsRemover.add('default', '1cd34740-06ad-11ec-babc-0b08808e8e01', 'action', 'actions');
 
-      const findResponse = await findCases({ supertest, query: {} });
-      expect(findResponse.total).to.eql(1);
-      expect(findResponse.cases[0].title).to.eql('A case with a connector');
-      expect(findResponse.cases[0].description).to.eql('super description');
+      await expectImportToHaveOneCase(supertestService);
 
       const userActions = await getCaseUserActions({
-        supertest,
-        caseID: findResponse.cases[0].id,
+        supertest: supertestService,
+        caseID: '2e85c3f0-06ad-11ec-babc-0b08808e8e01',
       });
-
       expect(userActions).to.have.length(3);
-      expect(userActions[0].action).to.eql('create');
-      expect(includesAllCreateCaseActionFields(userActions[0].action_field)).to.eql(true);
 
-      expect(userActions[1].action).to.eql('push-to-service');
-      expect(userActions[1].action_field).to.eql(['pushed']);
-      expect(userActions[1].old_value).to.eql(null);
-
-      const parsedPushNewValue = JSON.parse(userActions[1].new_value!);
-      expect(parsedPushNewValue.connector_name).to.eql('A jira connector');
-      expect(parsedPushNewValue.connector_id).to.eql('1cd34740-06ad-11ec-babc-0b08808e8e01');
-
-      expect(userActions[2].action).to.eql('update');
-      expect(userActions[2].action_field).to.eql(['connector']);
-
-      const parsedUpdateNewValue = JSON.parse(userActions[2].new_value!);
-      expect(parsedUpdateNewValue.id).to.eql('none');
+      expectImportToHaveCreateCaseUserAction(userActions[0]);
+      expectImportToHavePushUserAction(userActions[1]);
+      expectImportToHaveUpdateConnector(userActions[2]);
     });
   });
+};
+
+const expectImportToHaveOneCase = async (supertestService: supertest.SuperTest<supertest.Test>) => {
+  const findResponse = await findCases({ supertest: supertestService, query: {} });
+  expect(findResponse.total).to.eql(1);
+  expect(findResponse.cases[0].title).to.eql('A case with a connector');
+  expect(findResponse.cases[0].description).to.eql('super description');
+};
+
+const expectImportToHaveCreateCaseUserAction = (userAction: CaseUserActionResponse) => {
+  expect(userAction.action).to.eql('create');
+  expect(includesAllCreateCaseActionFields(userAction.action_field)).to.eql(true);
+};
+
+const expectImportToHavePushUserAction = (userAction: CaseUserActionResponse) => {
+  expect(userAction.action).to.eql('push-to-service');
+  expect(userAction.action_field).to.eql(['pushed']);
+  expect(userAction.old_value).to.eql(null);
+
+  const parsedPushNewValue = JSON.parse(userAction.new_value!);
+  expect(parsedPushNewValue.connector_name).to.eql('A jira connector');
+  expect(parsedPushNewValue).to.not.have.property('connector_id');
+  expect(userAction.new_val_connector_id).to.eql('1cd34740-06ad-11ec-babc-0b08808e8e01');
+};
+
+const expectImportToHaveUpdateConnector = (userAction: CaseUserActionResponse) => {
+  expect(userAction.action).to.eql('update');
+  expect(userAction.action_field).to.eql(['connector']);
+
+  const parsedUpdateNewValue = JSON.parse(userAction.new_value!);
+  expect(parsedUpdateNewValue).to.not.have.property('id');
+  // the new val connector id is null because it is the none connector
+  expect(userAction.new_val_connector_id).to.eql(null);
+
+  const parsedUpdateOldValue = JSON.parse(userAction.old_value!);
+  expect(parsedUpdateOldValue).to.not.have.property('id');
+  expect(userAction.old_val_connector_id).to.eql('1cd34740-06ad-11ec-babc-0b08808e8e01');
 };
 
 const ndjsonToObject = (input: string) => {
