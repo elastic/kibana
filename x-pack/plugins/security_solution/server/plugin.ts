@@ -67,7 +67,7 @@ import {
   APP_ID,
   SERVER_APP_ID,
   SIGNALS_ID,
-  NOTIFICATIONS_ID,
+  __DO_NOT_USE__NOTIFICATIONS_ID,
   QUERY_RULE_TYPE_ID,
   DEFAULT_SPACE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -104,6 +104,10 @@ import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
+// eslint-disable-next-line no-restricted-imports
+import { __DO_NOT_USE__rulesNotificationAlertType } from './lib/detection_engine/notifications/do_not_use_rules_notification_alert_type';
+// eslint-disable-next-line no-restricted-imports
+import { __DO_NOT_USE__isNotificationAlertExecutor } from './lib/detection_engine/notifications/do_not_use_types';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -296,7 +300,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     ];
     const ruleTypes = [
       SIGNALS_ID,
-      NOTIFICATIONS_ID,
+      __DO_NOT_USE__NOTIFICATIONS_ID,
       ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
@@ -315,9 +319,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         experimentalFeatures,
         ruleDataService: plugins.ruleRegistry.ruleDataService,
       });
+      const ruleNotificationType = __DO_NOT_USE__rulesNotificationAlertType({
+        logger: this.logger,
+      });
 
       if (isAlertExecutor(signalRuleType)) {
         this.setupPlugins.alerting.registerType(signalRuleType);
+      }
+
+      if (__DO_NOT_USE__isNotificationAlertExecutor(ruleNotificationType)) {
+        this.setupPlugins.alerting.registerType(ruleNotificationType);
       }
     }
 

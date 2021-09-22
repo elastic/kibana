@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { SavedObjectAttributes } from 'kibana/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
@@ -15,7 +17,7 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
  * @deprecated
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IRuleActionsAttributes extends Record<string, any> {
+export interface __DO_NOT_USE__IRuleActionsAttributes extends Record<string, any> {
   ruleAlertId: string;
   actions: RuleAlertAction[];
   ruleThrottle: string;
@@ -28,6 +30,16 @@ export interface IRuleActionsAttributes extends Record<string, any> {
  * needed then it will be safe to remove this saved object and all its migrations.
  * @deprecated
  */
-export interface IRuleActionsAttributesSavedObjectAttributes
-  extends IRuleActionsAttributes,
+export interface __DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes
+  extends __DO_NOT_USE__IRuleActionsAttributes,
     SavedObjectAttributes {}
+
+/**
+ * @deprecated Remove this once
+ */
+export interface __DO_NOT_USE__RuleActions {
+  id: string;
+  actions: RuleAlertAction[];
+  ruleThrottle: string;
+  alertThrottle: string | null;
+}

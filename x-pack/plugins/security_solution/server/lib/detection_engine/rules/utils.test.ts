@@ -278,72 +278,87 @@ describe('utils', () => {
   describe('#transformFromAlertThrottle', () => {
     test('muteAll returns "NOTIFICATION_THROTTLE_NO_ACTIONS" even with notifyWhen set and actions has an array element', () => {
       expect(
-        transformFromAlertThrottle({
-          muteAll: true,
-          notifyWhen: 'onActiveAlert',
-          actions: [
-            {
-              group: 'group',
-              id: 'id-123',
-              actionTypeId: 'id-456',
-              params: {},
-            },
-          ],
-        } as SanitizedAlert<RuleParams>)
+        transformFromAlertThrottle(
+          {
+            muteAll: true,
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'group',
+                id: 'id-123',
+                actionTypeId: 'id-456',
+                params: {},
+              },
+            ],
+          } as SanitizedAlert<RuleParams>,
+          undefined
+        )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
     });
 
     test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if actions is an empty array and we do not have a throttle', () => {
       expect(
-        transformFromAlertThrottle({
-          muteAll: false,
-          notifyWhen: 'onActiveAlert',
-          actions: [],
-        } as unknown as SanitizedAlert<RuleParams>)
+        transformFromAlertThrottle(
+          {
+            muteAll: false,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+          } as unknown as SanitizedAlert<RuleParams>,
+          undefined
+        )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
     });
 
     test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if actions is an empty array and we have a throttle', () => {
       expect(
-        transformFromAlertThrottle({
-          muteAll: false,
-          notifyWhen: 'onThrottleInterval',
-          actions: [],
-          throttle: '1d',
-        } as unknown as SanitizedAlert<RuleParams>)
+        transformFromAlertThrottle(
+          {
+            muteAll: false,
+            notifyWhen: 'onThrottleInterval',
+            actions: [],
+            throttle: '1d',
+          } as unknown as SanitizedAlert<RuleParams>,
+          undefined
+        )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
     });
 
     test('it returns "NOTIFICATION_THROTTLE_RULE" if "notifyWhen" is set, muteAll is false and we have an actions array', () => {
       expect(
-        transformFromAlertThrottle({
-          muteAll: false,
-          notifyWhen: 'onActiveAlert',
-          actions: [
-            {
-              group: 'group',
-              id: 'id-123',
-              actionTypeId: 'id-456',
-              params: {},
-            },
-          ],
-        } as SanitizedAlert<RuleParams>)
+        transformFromAlertThrottle(
+          {
+            muteAll: false,
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'group',
+                id: 'id-123',
+                actionTypeId: 'id-456',
+                params: {},
+              },
+            ],
+          } as SanitizedAlert<RuleParams>,
+          undefined
+        )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
     });
 
     test('it returns "NOTIFICATION_THROTTLE_RULE" if "notifyWhen" and "throttle" are not set, but we have an actions array', () => {
       expect(
-        transformFromAlertThrottle({
-          muteAll: false,
-          actions: [
-            {
-              group: 'group',
-              id: 'id-123',
-              actionTypeId: 'id-456',
-              params: {},
-            },
-          ],
-        } as SanitizedAlert<RuleParams>)
+        transformFromAlertThrottle(
+          {
+            muteAll: false,
+            actions: [
+              {
+                group: 'group',
+                id: 'id-123',
+                actionTypeId: 'id-456',
+                params: {},
+              },
+            ],
+          } as SanitizedAlert<RuleParams>,
+          undefined
+        )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
     });
   });

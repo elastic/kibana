@@ -33,6 +33,8 @@ import {
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert } from '../../../../../../alerting/common';
+// eslint-disable-next-line no-restricted-imports
+import { __DO_NOT_USE__RulesActionsSavedObject } from '../../rule_actions/do_not_use_get_rule_actions_saved_object';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -114,7 +116,8 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
 
 export const transformFindAlerts = (
   findResults: FindResult<RuleParams>,
-  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined }
+  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined },
+  ruleActions: Record<string, __DO_NOT_USE__RulesActionsSavedObject | undefined>
 ): {
   page: number;
   perPage: number;
@@ -128,7 +131,7 @@ export const transformFindAlerts = (
     data: findResults.data.map((alert) => {
       const statuses = ruleStatuses[alert.id];
       const status = statuses ? statuses[0] : undefined;
-      return internalRuleToAPIResponse(alert, status);
+      return internalRuleToAPIResponse(alert, status, ruleActions[alert.id]);
     }),
   };
 };
