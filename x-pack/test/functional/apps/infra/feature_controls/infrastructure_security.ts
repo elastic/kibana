@@ -169,7 +169,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('~infrastructureViewSetupInstructionsButton');
+          await testSubjects.existOrFail('~noDataPage');
           await testSubjects.missingOrFail('~configureSourceButton');
         });
 
