@@ -34,7 +34,6 @@ jest.mock('../../../containers/details/index', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
 jest.mock('../body/events/index', () => ({
-  // eslint-disable-next-line react/display-name
   Events: () => <></>,
 }));
 

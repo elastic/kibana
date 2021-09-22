@@ -116,7 +116,6 @@ const EventRenderedViewComponent = ({
         name: ActionTitle,
         truncateText: false,
         hideForMobile: false,
-        // eslint-disable-next-line react/display-name
         render: (name: unknown, item: unknown) => {
           const alertId = get(item, '_id');
           const rowIndex = events.findIndex((evt) => evt._id === alertId);
@@ -149,7 +148,6 @@ const EventRenderedViewComponent = ({
         }),
         truncateText: false,
         hideForMobile: false,
-        // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
           const timestamp = get(item, `ecs.timestamp`);
           return <PreferenceFormattedDate value={timestamp} />;
@@ -162,7 +160,6 @@ const EventRenderedViewComponent = ({
         }),
         truncateText: false,
         hideForMobile: false,
-        // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
           const ruleName = get(item, `ecs.signal.rule.name`); /* `ecs.${ALERT_RULE_NAME}`*/
           const ruleId = get(item, `ecs.signal.rule.id`); /* `ecs.${ALERT_RULE_ID}`*/
@@ -176,7 +173,6 @@ const EventRenderedViewComponent = ({
         }),
         truncateText: false,
         hideForMobile: false,
-        // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
           const ecsData = get(item, 'ecs');
           const reason = get(item, `ecs.signal.reason`); /* `ecs.${ALERT_REASON}`*/

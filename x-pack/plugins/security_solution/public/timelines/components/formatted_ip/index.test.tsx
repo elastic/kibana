@@ -40,7 +40,6 @@ jest.mock('../../../common/components/drag_and_drop/draggable_wrapper', () => {
   const original = jest.requireActual('../../../common/components/drag_and_drop/draggable_wrapper');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     DraggableWrapper: () => <div data-test-subj="DraggableWrapper" />,
   };
 });

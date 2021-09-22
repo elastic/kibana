@@ -61,7 +61,6 @@ const rowRenderers: RowRenderer[] = [
   {
     id: RowRendererId.alerts,
     isInstance: (ecs) => ecs === validEcs,
-    // eslint-disable-next-line react/display-name
     renderRow: () => <span data-test-subj="test-row-render" />,
   },
 ];
