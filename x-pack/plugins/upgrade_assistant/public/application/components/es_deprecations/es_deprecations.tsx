@@ -16,9 +16,8 @@ import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_ES_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
+import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { EsDeprecationsTable } from './es_deprecations_table';
-import { EsDeprecationErrors } from './es_deprecation_errors';
-import { NoDeprecationsPrompt, DeprecationCount } from '../shared';
 
 const getDeprecationCountByLevel = (deprecations: EnrichedDeprecationInfo[]) => {
   const criticalDeprecations: EnrichedDeprecationInfo[] = [];
@@ -74,7 +73,12 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   }, []);
 
   if (error) {
-    return <EsDeprecationErrors error={error} />;
+    return (
+      <DeprecationsPageLoadingError
+        deprecationSource="Elasticsearch"
+        message={getEsDeprecationError(error).message}
+      />
+    );
   }
 
   if (isLoading) {

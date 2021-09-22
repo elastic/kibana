@@ -16,7 +16,8 @@ import { SetupDependencies, StartDependencies, AppDependencies } from './types';
 import { Config } from '../common/config';
 
 export class UpgradeAssistantUIPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   constructor(private ctx: PluginInitializerContext) {}
   setup(
     coreSetup: CoreSetup<StartDependencies>,

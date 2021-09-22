@@ -34,11 +34,11 @@ const registerTest = ({
   title?: string;
   passed?: boolean;
 }) => {
-  const test = ({
+  const test = {
     file: __filename,
     fullTitle: () => title,
     isPassed: () => passed,
-  } as unknown) as Test;
+  } as unknown as Test;
 
   parent.tests.push(test);
   test.parent = parent;

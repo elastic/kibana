@@ -37,13 +37,8 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
     services: { api },
   } = useAppContext();
 
-  const {
-    isInitialRequest,
-    isLoading,
-    error,
-    data,
-    resendRequest,
-  } = api.useLoadCloudBackupStatus();
+  const { isInitialRequest, isLoading, error, data, resendRequest } =
+    api.useLoadCloudBackupStatus();
 
   // Tell overview whether the step is complete or not.
   useEffect(() => {

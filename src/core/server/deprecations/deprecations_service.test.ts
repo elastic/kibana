@@ -93,9 +93,10 @@ describe('DeprecationsService', () => {
       expect(deprecationsFactory.getRegistry).toBeCalledTimes(1);
       expect(deprecationsFactory.getRegistry).toBeCalledWith('testDomain');
       expect(deprecationsRegistry.registerDeprecations).toBeCalledTimes(1);
-      const configDeprecations = await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
-        getDeprecationsContext
-      );
+      const configDeprecations =
+        await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+          getDeprecationsContext
+        );
       expect(configDeprecations).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -136,9 +137,10 @@ describe('DeprecationsService', () => {
       deprecationsFactory.getRegistry.mockReturnValue(deprecationsRegistry);
       deprecationsService['registerConfigDeprecationsInfo'](deprecationsFactory);
 
-      const configDeprecations = await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
-        getDeprecationsContext
-      );
+      const configDeprecations =
+        await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+          getDeprecationsContext
+        );
       expect(configDeprecations[0].level).toBe('warning');
     });
   });

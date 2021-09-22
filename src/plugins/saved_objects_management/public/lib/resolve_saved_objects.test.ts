@@ -57,7 +57,7 @@ describe('resolveSavedObjects', () => {
         },
       ];
 
-      const indexPatterns = ({
+      const indexPatterns = {
         get: async () => {
           return {
             create: () => '2',
@@ -69,9 +69,9 @@ describe('resolveSavedObjects', () => {
         cache: {
           clear: () => {},
         },
-      } as unknown) as IndexPatternsContract;
+      } as unknown as IndexPatternsContract;
 
-      const services = ([
+      const services = [
         {
           type: 'search',
           get: async () => {
@@ -111,7 +111,7 @@ describe('resolveSavedObjects', () => {
             };
           },
         },
-      ] as unknown) as SavedObjectLoader[];
+      ] as unknown as SavedObjectLoader[];
 
       const overwriteAll = false;
 
@@ -149,7 +149,7 @@ describe('resolveSavedObjects', () => {
         },
       ];
 
-      const indexPatterns = ({
+      const indexPatterns = {
         get: async () => {
           return {
             create: () => '2',
@@ -161,9 +161,9 @@ describe('resolveSavedObjects', () => {
         cache: {
           clear: () => {},
         },
-      } as unknown) as IndexPatternsContract;
+      } as unknown as IndexPatternsContract;
 
-      const services = ([
+      const services = [
         {
           type: 'search',
           get: async () => {
@@ -204,7 +204,7 @@ describe('resolveSavedObjects', () => {
             };
           },
         },
-      ] as unknown) as SavedObjectLoader[];
+      ] as unknown as SavedObjectLoader[];
 
       const overwriteAll = false;
 
@@ -229,9 +229,9 @@ describe('resolveSavedObjects', () => {
       const search = dataPluginMock.createStartContract().search;
 
       dependencies = {
-        indexPatterns: ({
+        indexPatterns: {
           get: (id: string) => Promise.resolve({ id }),
-        } as unknown) as IndexPatternsContract,
+        } as unknown as IndexPatternsContract,
         search,
       };
     });
@@ -239,7 +239,7 @@ describe('resolveSavedObjects', () => {
     it('should resave resolutions', async () => {
       const save = jest.fn();
 
-      const conflictedIndexPatterns = ([
+      const conflictedIndexPatterns = [
         {
           obj: {
             save,
@@ -268,7 +268,7 @@ describe('resolveSavedObjects', () => {
             },
           },
         },
-      ] as unknown) as Array<{ obj: SavedObject; doc: any }>;
+      ] as unknown as Array<{ obj: SavedObject; doc: any }>;
 
       const resolutions = [
         {
@@ -301,7 +301,7 @@ describe('resolveSavedObjects', () => {
     it('should resolve filter index conflicts', async () => {
       const save = jest.fn();
 
-      const conflictedIndexPatterns = ([
+      const conflictedIndexPatterns = [
         {
           obj: {
             save,
@@ -331,7 +331,7 @@ describe('resolveSavedObjects', () => {
             },
           },
         },
-      ] as unknown) as Array<{ obj: SavedObject; doc: any }>;
+      ] as unknown as Array<{ obj: SavedObject; doc: any }>;
 
       const resolutions = [
         {

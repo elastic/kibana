@@ -63,9 +63,8 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const {
     services: { api },
   } = useAppContext();
-  const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
-    checkpoint
-  );
+  const { data, error, isLoading, resendRequest, isInitialRequest } =
+    api.getDeprecationLogsCount(checkpoint);
 
   const logsCount = data?.count || 0;
   const hasLogs = logsCount > 0;
