@@ -104,7 +104,7 @@ export const i18nTexts = {
     maxPrimaryShardSizeUnitsLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.maximumPrimaryShardSizeAriaLabel',
       {
-        defaultMessage: 'Maximum primary shard size units',
+        defaultMessage: 'Maximum shard size units',
       }
     ),
     errors: {
