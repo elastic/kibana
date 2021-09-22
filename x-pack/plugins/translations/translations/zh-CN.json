@@ -10327,7 +10327,6 @@
     "xpack.enterpriseSearch.workplaceSearch.sources.additionalConfig.heading": "需要其他配置",
     "xpack.enterpriseSearch.workplaceSearch.sources.applicationLinkTitles.github": "GitHub 开发者门户",
     "xpack.enterpriseSearch.workplaceSearch.sources.baseUrlTitles.github": "GitHub Enterprise URL",
-    "xpack.enterpriseSearch.workplaceSearch.sources.config.description": "编辑要更改的内容源连接器设置。",
     "xpack.enterpriseSearch.workplaceSearch.sources.config.link": "编辑内容源连接器设置",
     "xpack.enterpriseSearch.workplaceSearch.sources.config.title": "内容源配置",
     "xpack.enterpriseSearch.workplaceSearch.sources.configuration.title": "配置",
