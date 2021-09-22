@@ -33,15 +33,11 @@ export function TransactionLink() {
             path: {
               transactionId,
             },
-            query: {
-              start: rangeFrom,
-              end: rangeTo,
-            },
           },
         });
       }
     },
-    [transactionId, rangeFrom, rangeTo]
+    [transactionId]
   );
   if (transactionId && status === FETCH_STATUS.SUCCESS) {
     if (data.transaction) {

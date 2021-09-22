@@ -29,6 +29,28 @@ export type SetupUX = Setup & {
   uiFilters: UxUIFilters;
 };
 
+interface SetupRequestParams {
+  query: {
+    _inspect?: boolean;
+
+    /**
+     * Timestamp in ms since epoch
+     */
+    start?: number;
+
+    /**
+     * Timestamp in ms since epoch
+     */
+    end?: number;
+  };
+}
+
+type SetupUXRequestParams = Omit<SetupRequestParams, 'query'> & {
+  query: SetupRequestParams['query'] & {
+    uiFilters?: string;
+  };
+};
+
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
   maxPercentile: t.string,
@@ -315,7 +337,9 @@ function decodeUiFilters(
   }
 }
 
-async function setupUXRequest(resources: APMRouteHandlerResources) {
+async function setupUXRequest<TParams extends SetupUXRequestParams>(
+  resources: APMRouteHandlerResources & { params: TParams }
+) {
   const setup = await setupRequest(resources);
   return {
     ...setup,
