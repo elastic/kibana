@@ -39,7 +39,6 @@ class TimeseriesVisualization extends Component {
   dateFormat = this.props.getConfig('dateFormat');
 
   yAxisIdGenerator = htmlIdGenerator('yaxis');
-  mainAxisGroupId = this.yAxisIdGenerator('main_group');
 
   xAxisFormatter = (interval) => {
     const formatter = createIntervalBasedFormatter(
@@ -169,6 +168,8 @@ class TimeseriesVisualization extends Component {
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
 
+    const mainAxisGroupId = this.yAxisIdGenerator('main_group');
+
     const seriesModel = model.series.filter((s) => !s.hidden).map((s) => cloneDeep(s));
 
     const mainAxisScaleType = TimeseriesVisualization.getAxisScaleType(model);
@@ -181,12 +182,11 @@ class TimeseriesVisualization extends Component {
     seriesModel.forEach((seriesGroup) => {
       const isStackedWithinSeries = seriesGroup.stacked === STACKED_OPTIONS.STACKED_WITHIN_SERIES;
       const hasSeparateAxis = Boolean(seriesGroup.separate_axis);
-      const groupId =
-        hasSeparateAxis || isStackedWithinSeries ? seriesGroup.id : this.mainAxisGroupId;
+      const groupId = hasSeparateAxis || isStackedWithinSeries ? seriesGroup.id : mainAxisGroupId;
       const domain = hasSeparateAxis
         ? TimeseriesVisualization.getYAxisDomain(seriesGroup)
         : undefined;
-      const isCustomDomain = groupId !== this.mainAxisGroupId;
+      const isCustomDomain = groupId !== mainAxisGroupId;
 
       const seriesGroupTickFormatter =
         seriesGroup.formatter === DATA_FORMATTERS.DEFAULT
@@ -244,7 +244,7 @@ class TimeseriesVisualization extends Component {
         TimeseriesVisualization.addYAxis(yAxis, {
           tickFormatter,
           id: this.yAxisIdGenerator('main'),
-          groupId: this.mainAxisGroupId,
+          groupId: mainAxisGroupId,
           position: model.axis_position,
           domain: mainAxisDomain,
         });
