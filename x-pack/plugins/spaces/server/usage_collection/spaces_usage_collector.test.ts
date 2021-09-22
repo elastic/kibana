@@ -7,10 +7,7 @@
 
 import * as Rx from 'rxjs';
 
-import {
-  elasticsearchServiceMock,
-  pluginInitializerContextConfigMock,
-} from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { createCollectorFetchContextMock } from '../../../../../src/plugins/usage_collection/server/mocks';
 import type { KibanaFeature } from '../../../features/server';
@@ -53,6 +50,7 @@ function setup({
     constructor({ fetch }: any) {
       this.fetch = fetch;
     }
+
     // to make typescript happy
     public fakeFetchUsage() {
       return this.fetch;
@@ -121,7 +119,7 @@ describe('error handling', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
+      kibanaIndex: '.kibana',
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -145,7 +143,7 @@ describe('with a basic license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex: '.kibana-tests',
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -204,7 +202,7 @@ describe('with no license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex: '.kibana',
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -245,7 +243,7 @@ describe('with platinum license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex: '.kibana',
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
