@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function savedObjectsManagementApp({ loadTestFile }: FtrProviderContext) {
   describe('saved objects management', function savedObjectsManagementAppTestSuite() {
     this.tags('ciGroup7');
-    loadTestFile(require.resolve('./edit_saved_object'));
+    loadTestFile(require.resolve('./inspect_saved_objects'));
     loadTestFile(require.resolve('./show_relationships'));
   });
 }
