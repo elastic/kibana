@@ -9,7 +9,7 @@
 import { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsSetup {
-  getAddableCustomIntegrations: () => Promise<CustomIntegration[]>;
+  getAppendCustomIntegrations: () => Promise<CustomIntegration[]>;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomIntegrationsStart {}

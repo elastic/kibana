@@ -10,7 +10,7 @@ import { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsPluginSetup {
   registerCustomIntegration(customIntegration: Omit<CustomIntegration, 'type'>): void;
-  getAddableCustomIntegrations(): CustomIntegration[];
+  getAppendCustomIntegrations(): CustomIntegration[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

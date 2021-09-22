@@ -20,7 +20,7 @@ export function defineRoutes(
       validate: false,
     },
     async (context, request, response) => {
-      const integrations = customIntegrationsRegistry.getAddableCustomIntegrations();
+      const integrations = customIntegrationsRegistry.getAppendCustomIntegrations();
       return response.ok({
         body: integrations,
       });

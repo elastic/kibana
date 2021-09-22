@@ -16,7 +16,7 @@ export class CustomIntegrationPlugin
   public setup(core: CoreSetup): CustomIntegrationsSetup {
     // Return methods that should be available to other plugins
     return {
-      async getAddableCustomIntegrations(): Promise<CustomIntegration[]> {
+      async getAppendCustomIntegrations(): Promise<CustomIntegration[]> {
         return core.http.get(ROUTES_ADDABLECUSTOMINTEGRATIONS);
       },
     } as CustomIntegrationsSetup;

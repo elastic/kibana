@@ -40,8 +40,8 @@ export class CustomIntegrationsPlugin
           ...integration,
         });
       },
-      getAddableCustomIntegrations: (): CustomIntegration[] => {
-        return this.customIngegrationRegistry.getAddableCustomIntegrations();
+      getAppendCustomIntegrations: (): CustomIntegration[] => {
+        return this.customIngegrationRegistry.getAppendCustomIntegrations();
       },
     } as CustomIntegrationsPluginSetup;
   }

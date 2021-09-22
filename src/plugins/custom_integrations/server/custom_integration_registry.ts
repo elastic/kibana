@@ -42,7 +42,7 @@ export class CustomIntegrationRegistry {
     this._integrations.push(customIntegration);
   }
 
-  getAddableCustomIntegrations(): CustomIntegration[] {
+  getAppendCustomIntegrations(): CustomIntegration[] {
     return this._integrations.filter(isAddable);
   }
 }

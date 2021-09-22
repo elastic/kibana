@@ -26,7 +26,7 @@ import { useRequest, sendRequest } from './use_request';
 
 export function useGetAddableCustomIntegrations() {
   const customIntegrations = getCustomIntegrations();
-  return useAsync(customIntegrations.getAddableCustomIntegrations, []);
+  return useAsync(customIntegrations.getAppendCustomIntegrations, []);
 }
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
