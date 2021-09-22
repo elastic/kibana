@@ -19,7 +19,6 @@ import {
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
-import expect from '../../../../../../packages/kbn-expect';
 
 const INVALID_TUTORIAL: TutorialSchema = {
   id: 'test',
