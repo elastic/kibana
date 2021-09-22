@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
+export const UI_SETTINGS = {
+  MAX_BUCKETS_SETTING: 'metrics:max_buckets',
+  ALLOW_STRING_INDICES: 'metrics:allowStringIndices',
+};
 export const INDEXES_SEPARATOR = ',';
 export const AUTO_INTERVAL = 'auto';
 export const ROUTES = {
