@@ -14,18 +14,20 @@ const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => 
   const _config = {
     [CONFIG_PATH]: settings,
   };
-  const { config: migrated } = applyDeprecations(
+  const { config: migrated, changedPaths } = applyDeprecations(
     _config,
     deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
     })),
     () =>
-      ({ message }) =>
-        deprecationMessages.push(message)
+      ({ message }) => {
+        deprecationMessages.push(message);
+      }
   );
   return {
     messages: deprecationMessages,
+    changedPaths,
     migrated,
   };
 };
@@ -39,6 +41,20 @@ describe('index', () => {
           "\\"xpack.actions.enabled\\" is deprecated. The ability to disable this plugin will be removed in 8.0.0.",
         ]
       `);
+    });
+
+    it('should perform a custom set on deprecated and removed configs', () => {
+      jest.spyOn(configDeprecationFactory, 'renameFromRoot');
+
+      const { changedPaths } = applyStackAlertDeprecations({
+        whitelistedHosts: ['smtp.gmail.com'],
+      });
+
+      expect(configDeprecationFactory.renameFromRoot).toHaveBeenCalledWith(
+        'xpack.actions.whitelistedHosts',
+        'xpack.actions.allowedHosts'
+      );
+      expect(changedPaths).toStrictEqual({ set: ['xpack.actions.allowedHosts'], unset: [] });
     });
   });
 });

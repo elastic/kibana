@@ -103,7 +103,7 @@ export function registerStatsRoute({
         if (shouldGetUsage) {
           const collectorsReady = await collectorSet.areAllCollectorsReady();
           if (!collectorsReady) {
-            return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
+            // return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
           }
         }
 

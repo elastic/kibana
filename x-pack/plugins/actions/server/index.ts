@@ -61,7 +61,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     rejectUnauthorized: true,
     proxyRejectUnauthorizedCertificates: true,
   },
-  deprecations: ({ renameFromRoot, unused }) => [
+  deprecations: ({ renameFromRoot, unused, rename }) => [
     // Use a custom copy function here so we can perserve the telemetry provided for the deprecated config
     // See https://github.com/elastic/kibana/issues/112585#issuecomment-923715363
     (settings, fromPath, addDeprecation) => {
@@ -69,19 +69,17 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       const fullNewPath = 'xpack.actions.allowedHosts';
       const actions = get(settings, fromPath);
       const whitelistedHosts = actions?.whitelistedHosts;
+      const renameFn = renameFromRoot(fullOldPath, fullNewPath);
+      const result = renameFn(settings, fromPath, addDeprecation);
+
+      // If it is set, make sure we return custom logic to ensure the usage is tracked
       if (whitelistedHosts) {
-        addDeprecation({
-          message: `Setting "${fullOldPath}" has been replaced by "${fullNewPath}"`,
-          correctiveActions: {
-            manualSteps: [
-              `Replace "${fullOldPath}" with "${fullNewPath}" in the Kibana config file, CLI flag, or environment variable (in Docker only).`,
-            ],
-          },
-        });
         return {
           set: [{ path: fullNewPath, value: whitelistedHosts }],
         };
       }
+
+      return result;
     },
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
