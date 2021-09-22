@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import { SECURITY_SOLUTION_OWNER } from '../../common';
 import {
   AssociationType,
+  AttributesTypeUser,
   CaseResponse,
   CommentAttributes,
   CommentRequest,
@@ -25,6 +26,7 @@ import {
   transformComments,
   flattenCommentSavedObjects,
   flattenCommentSavedObject,
+  isCommentSavedObjectTypeUser,
 } from './utils';
 
 interface CommentReference {
@@ -861,6 +863,18 @@ describe('common utils', () => {
           ]),
         })
       ).toEqual(2);
+    });
+  });
+
+  describe('isCommentSavedObjectTypeUser', () => {
+    it('returns false when the saved object is not a user comment', () => {
+      expect(
+        isCommentSavedObjectTypeUser({ attributes: {} } as SavedObject<AttributesTypeUser>)
+      ).toBeFalsy();
+    });
+
+    it('returns true when the saved object is a user comment', () => {
+      expect(isCommentSavedObjectTypeUser(mockCaseComments[0])).toBeTruthy();
     });
   });
 });

@@ -322,7 +322,7 @@ export function createAlertUpdateRequest({
 export const isCommentSavedObjectTypeUser = (
   comment: SavedObject<CommentAttributes>
 ): comment is SavedObject<AttributesTypeUser> => {
-  return AttributesTypeUserRt.is(comment);
+  return AttributesTypeUserRt.is(comment.attributes);
 };
 
 /**

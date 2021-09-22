@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: remove this
+/* eslint-disable max-classes-per-file */
+
 import { SavedObject, SavedObjectReference } from 'kibana/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import { CommentRequestUserType } from '../../../../common';
@@ -82,3 +85,44 @@ export const getOrUpdateLensReferences = (
  * Do that for both lens and timeline, then add newRefs together and return it
  *
  */
+
+interface ReferenceExtractor {
+  extractReferences(stringToParse?: string): SavedObjectReference[];
+}
+
+class LensReferenceExtractor implements ReferenceExtractor {
+  constructor(
+    private readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory']
+  ) {}
+
+  extractReferences(markdownString?: string): SavedObjectReference[] {
+    const extractor = this.lensEmbeddableFactory().extract;
+    if (!extractor || !markdownString) {
+      return [];
+    }
+
+    const parsedComment = parseCommentString(markdownString);
+    const lensVisualizations = getLensVisualizations(parsedComment.children);
+    const flattenRefs = flatMap(
+      lensVisualizations,
+      (lensObject) => extractor(lensObject)?.references ?? []
+    );
+
+    const uniqRefs = uniqWith(
+      flattenRefs,
+      (refA, refB) => refA.type === refB.type && refA.id === refB.id && refA.name === refB.name
+    );
+
+    return uniqRefs;
+  }
+}
+
+class TimelineReferenceExtractor implements ReferenceExtractor {
+  extractReferences(markdownString?: string): SavedObjectReference[] {
+    if (!markdownString) {
+      return [];
+    }
+
+    const parsedComment = parseCommentString(markdownString);
+  }
+}

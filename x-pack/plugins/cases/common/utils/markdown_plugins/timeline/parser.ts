@@ -9,7 +9,7 @@ import { Plugin } from 'unified';
 import { RemarkTokenizer } from '@elastic/eui';
 import * as i18n from './translations';
 
-export const ID = 'timeline';
+export const TIMELINE_ID = 'timeline';
 const PREFIX = '[';
 
 export const TimelineParser: Plugin = function () {
@@ -69,7 +69,7 @@ export const TimelineParser: Plugin = function () {
     const match = `[${timelineTitle}](${timelineUrl})`;
 
     return eat(match)({
-      type: ID,
+      type: TIMELINE_ID,
       match,
     });
   };
@@ -79,5 +79,5 @@ export const TimelineParser: Plugin = function () {
   };
 
   tokenizers.timeline = tokenizeTimeline;
-  methods.splice(methods.indexOf('url'), 0, ID);
+  methods.splice(methods.indexOf('url'), 0, TIMELINE_ID);
 };
