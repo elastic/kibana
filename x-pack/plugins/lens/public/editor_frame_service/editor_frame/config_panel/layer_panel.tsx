@@ -57,6 +57,7 @@ export function LayerPanel(
     onRemoveLayer: () => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
+    onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -88,10 +89,10 @@ export function LayerPanel(
   }, [activeVisualization.id]);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const registerLayerRef = useCallback((el) => registerNewLayerRef(layerId, el), [
-    layerId,
-    registerNewLayerRef,
-  ]);
+  const registerLayerRef = useCallback(
+    (el) => registerNewLayerRef(layerId, el),
+    [layerId, registerNewLayerRef]
+  );
 
   const layerVisualizationConfigProps = {
     layerId,
@@ -124,7 +125,11 @@ export function LayerPanel(
     dateRange,
   };
 
-  const { groups, supportStaticValue } = useMemo(
+  const {
+    groups,
+    supportStaticValue,
+    supportFieldFormat = true,
+  } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -166,7 +171,7 @@ export function LayerPanel(
         columnId,
         groupId,
         layerId: targetLayerId,
-      } = (targetItem as unknown) as DraggedOperation;
+      } = targetItem as unknown as DraggedOperation;
       if (dropType === 'reorder' || dropType === 'field_replace' || dropType === 'field_add') {
         setNextFocusedButtonId(droppedItem.id);
       } else {
@@ -227,13 +232,25 @@ export function LayerPanel(
   const isDimensionPanelOpen = Boolean(activeId);
 
   const updateDataLayerState = useCallback(
-    (newState: unknown, { isDimensionComplete = true }: { isDimensionComplete?: boolean } = {}) => {
+    (
+      newState: unknown,
+      {
+        isDimensionComplete = true,
+        // this flag is a hack to force a sync render where it was planned an async/setTimeout state update
+        // TODO: revisit this once we get rid of updateDatasourceAsync upstream
+        forceRender = false,
+      }: { isDimensionComplete?: boolean; forceRender?: boolean } = {}
+    ) => {
       if (!activeGroup || !activeId) {
         return;
       }
       if (allAccessors.includes(activeId)) {
         if (isDimensionComplete) {
-          updateDatasourceAsync(datasourceId, newState);
+          if (forceRender) {
+            updateDatasource(datasourceId, newState);
+          } else {
+            updateDatasourceAsync(datasourceId, newState);
+          }
         } else {
           // The datasource can indicate that the previously-valid column is no longer
           // complete, which clears the visualization. This keeps the flyout open and reuses
@@ -263,7 +280,11 @@ export function LayerPanel(
         );
         setActiveDimension({ ...activeDimension, isNew: false });
       } else {
-        updateDatasourceAsync(datasourceId, newState);
+        if (forceRender) {
+          updateDatasource(datasourceId, newState);
+        } else {
+          updateDatasourceAsync(datasourceId, newState);
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -295,11 +316,10 @@ export function LayerPanel(
           hasBorder
           hasShadow
         >
-          <section className="lnsLayerPanel__layerHeader">
+          <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
                 <LayerSettings
-                  layerId={layerId}
                   layerConfigProps={{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
@@ -354,7 +374,7 @@ export function LayerPanel(
                 }}
               />
             )}
-          </section>
+          </header>
 
           {groups.map((group, groupIndex) => {
             const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
@@ -460,6 +480,8 @@ export function LayerPanel(
                                   columnId: accessorConfig.columnId,
                                   groupId: group.groupId,
                                   filterOperations: group.filterOperations,
+                                  invalid: group.invalid,
+                                  invalidMessage: group.invalidMessage,
                                 }}
                               />
                             </DimensionButton>
@@ -478,6 +500,7 @@ export function LayerPanel(
                       layerDatasource={layerDatasource}
                       layerDatasourceDropProps={layerDatasourceDropProps}
                       onClick={(id) => {
+                        props.onEmptyDimensionAdd(id, group);
                         setActiveDimension({
                           activeGroup: group,
                           activeId: id,
@@ -538,6 +561,8 @@ export function LayerPanel(
                   toggleFullscreen,
                   isFullscreen,
                   setState: updateDataLayerState,
+                  supportStaticValue: Boolean(supportStaticValue),
+                  supportFieldFormat: Boolean(supportFieldFormat),
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 }}
               />

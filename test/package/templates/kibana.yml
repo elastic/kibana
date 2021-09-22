@@ -9,7 +9,7 @@ logging:
   appenders:
     file:
       type: file
-      fileName: kibana.log
+      fileName: /var/log/kibana/kibana.log
       layout:
         type: json
   root:

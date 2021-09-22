@@ -603,9 +603,11 @@ describe('editor_frame', () => {
         instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
       });
       await act(async () => {
-        (document.querySelector(
-          '[data-test-subj="datasource-switch-testDatasource2"]'
-        ) as HTMLButtonElement).click();
+        (
+          document.querySelector(
+            '[data-test-subj="datasource-switch-testDatasource2"]'
+          ) as HTMLButtonElement
+        ).click();
       });
       instance.update();
       expect(mockDatasource2.initialize).toHaveBeenCalled();
@@ -618,9 +620,11 @@ describe('editor_frame', () => {
       instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
 
       await act(async () => {
-        (document.querySelector(
-          '[data-test-subj="datasource-switch-testDatasource2"]'
-        ) as HTMLButtonElement).click();
+        (
+          document.querySelector(
+            '[data-test-subj="datasource-switch-testDatasource2"]'
+          ) as HTMLButtonElement
+        ).click();
       });
 
       expect(mockDatasource2.renderDataPanel).toHaveBeenCalledWith(

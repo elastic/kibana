@@ -12,7 +12,6 @@ import { FIELD_FORMAT_IDS } from '../../../../src/plugins/field_formats/common';
 import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings', 'common']);
@@ -32,13 +31,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test_field_formatters',
         'test_logstash_reader',
       ]);
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
     });
 
     after(async function afterAll() {
-      await PageObjects.settings.navigateTo();
-      await esArchiver.emptyKibanaIndex();
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     describe('set and change field formatter', function describeIndexTests() {
@@ -493,9 +491,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 (
                   await Promise.all(
                     (
-                      await (await testSubjects.find('editorSelectedFormatId')).findAllByTagName(
-                        'option'
-                      )
+                      await (
+                        await testSubjects.find('editorSelectedFormatId')
+                      ).findAllByTagName('option')
                     ).map((option) => option.getAttribute('value'))
                   )
                 ).filter(Boolean)

@@ -502,12 +502,32 @@ export class VisualBuilderPageObject extends FtrService {
     return await annotationTooltipDetails.getVisibleText();
   }
 
+  public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
+    const isPopoverOpened = await this.testSubjects.exists(
+      'switchIndexPatternSelectionModePopoverContent'
+    );
+    if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
+      await this.testSubjects.click('switchIndexPatternSelectionModePopoverButton');
+    }
+  }
+
   public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
-    await this.testSubjects.click('switchIndexPatternSelectionModePopover');
+    await this.toggleIndexPatternSelectionModePopover(true);
     await this.testSubjects.setEuiSwitch(
       'switchIndexPatternSelectionMode',
       useKibanaIndices ? 'check' : 'uncheck'
     );
+    await this.toggleIndexPatternSelectionModePopover(false);
+  }
+
+  public async checkIndexPatternSelectionModeSwitchIsEnabled() {
+    await this.toggleIndexPatternSelectionModePopover(true);
+    let isEnabled;
+    await this.testSubjects.retry.tryForTime(2000, async () => {
+      isEnabled = await this.testSubjects.isEnabled('switchIndexPatternSelectionMode');
+    });
+    await this.toggleIndexPatternSelectionModePopover(false);
+    return isEnabled;
   }
 
   public async setIndexPatternValue(value: string, useKibanaIndices?: boolean) {
@@ -872,5 +892,15 @@ export class VisualBuilderPageObject extends FtrService {
   public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
     const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
     return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
+  }
+
+  public async getVisualizeError() {
+    const visError = await this.testSubjects.find(`visualization-error`);
+    const errorSpans = await visError.findAllByClassName('euiText--extraSmall');
+    return await errorSpans[0].getVisibleText();
+  }
+
+  public async checkInvalidAggComponentIsPresent() {
+    await this.testSubjects.existOrFail(`invalid_agg`);
   }
 }

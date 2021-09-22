@@ -28,7 +28,7 @@ describe('OpsMetricsCollector', () => {
   describe('#collect', () => {
     it('gathers metrics from the underlying collectors', async () => {
       mockOsCollector.collect.mockResolvedValue('osMetrics');
-      mockProcessCollector.collect.mockResolvedValue('processMetrics');
+      mockProcessCollector.collect.mockResolvedValue(['processMetrics']);
       mockServerCollector.collect.mockResolvedValue({
         requests: 'serverRequestsMetrics',
         response_times: 'serverTimingMetrics',
@@ -43,6 +43,7 @@ describe('OpsMetricsCollector', () => {
       expect(metrics).toEqual({
         collected_at: expect.any(Date),
         process: 'processMetrics',
+        processes: ['processMetrics'],
         os: 'osMetrics',
         requests: 'serverRequestsMetrics',
         response_times: 'serverTimingMetrics',

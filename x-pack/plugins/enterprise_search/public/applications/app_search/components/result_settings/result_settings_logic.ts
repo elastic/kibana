@@ -321,26 +321,25 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
 
         actions.saving();
 
-        let response;
         try {
-          response = await http.put(url, {
+          const response = await http.put(url, {
             body: JSON.stringify({
               result_fields: values.reducedServerResultFields,
             }),
           });
+
+          actions.initializeResultFields(response.result_fields, values.schema);
+          flashSuccessToast(
+            i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
+              {
+                defaultMessage: 'Result settings were saved',
+              }
+            )
+          );
         } catch (e) {
           flashAPIErrors(e);
         }
-
-        actions.initializeResultFields(response.result_fields, values.schema);
-        flashSuccessToast(
-          i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
-            {
-              defaultMessage: 'Result settings were saved',
-            }
-          )
-        );
       }
     },
   }),
