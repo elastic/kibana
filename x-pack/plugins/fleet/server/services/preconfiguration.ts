@@ -21,6 +21,7 @@ import type {
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 
 import {
+  AUTO_UPDATE_PACKAGES,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
 } from '../constants';
@@ -33,7 +34,7 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { overridePackageInputs } from './package_policy';
+import { overridePackageInputs, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 
 interface PreconfigurationResult {
@@ -228,6 +229,17 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       }
     }
   }
+
+  // Upgrade package policies for any packages designated as AUTO_UPDATE
+  const policyIdsToUpgrade = await packagePolicyService.listIds(soClient, {
+    page: 1,
+    perPage: 10000,
+    kuery: `ingest-package-policies.package.name:${AUTO_UPDATE_PACKAGES.map(
+      ({ name }) => name
+    ).join(' or ')}`,
+  });
+
+  await packagePolicyService.upgrade(soClient, esClient, policyIdsToUpgrade.items);
 
   return {
     policies: fulfilledPolicies.map((p) =>
