@@ -14,9 +14,9 @@ export const plugin = (ctx: PluginInitializerContext) => {
 };
 
 export const config: PluginConfigDescriptor<Config> = {
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: configSchema,
   exposeToBrowser: {
-    enabled: true,
     readonly: true,
   },
 };

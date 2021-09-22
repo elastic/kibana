@@ -16,6 +16,7 @@ const configSchema = schema.object({
 export type SavedObjectsTaggingConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<SavedObjectsTaggingConfigType> = {
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: configSchema,
   exposeToBrowser: {
     cache_refresh_interval: true,

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { OsqueryPlugin } from './plugin';
-import { ConfigSchema } from './config';
+import { ConfigSchema, ConfigType } from './config';
 
-export const config = {
+export const config: PluginConfigDescriptor<ConfigType> = {
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: ConfigSchema,
   exposeToBrowser: {
     enabled: true,

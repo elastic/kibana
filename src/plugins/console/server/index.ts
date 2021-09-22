@@ -16,6 +16,6 @@ export { ConsoleSetup, ConsoleStart } from './types';
 export const plugin = (ctx: PluginInitializerContext) => new ConsoleServerPlugin(ctx);
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ unused }) => [unused('ssl')],
+  deprecations: ({ deprecate, unused, rename }) => [deprecate('enabled', '8.0.0'), unused('ssl')],
   schema: configSchema,
 };

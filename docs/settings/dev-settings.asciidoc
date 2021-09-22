@@ -13,6 +13,7 @@ They are enabled by default.
 ==== Grok Debugger settings
 
 `xpack.grokdebugger.enabled` {ess-icon}::
+deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
 Set to `true` to enable the <<xpack-grokdebugger,Grok Debugger>>. Defaults to `true`.
 
 
@@ -21,6 +22,7 @@ Set to `true` to enable the <<xpack-grokdebugger,Grok Debugger>>. Defaults to `t
 ==== {searchprofiler} settings
 
 `xpack.searchprofiler.enabled`::
+deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
 Set to `true` to enable the <<xpack-profiler,{searchprofiler}>>. Defaults to `true`.
 
 [float]
@@ -28,4 +30,5 @@ Set to `true` to enable the <<xpack-profiler,{searchprofiler}>>. Defaults to `tr
 ==== Painless Lab settings
 
 `xpack.painless_lab.enabled`::
+deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
 When set to `true`, enables the <<painlesslab, Painless Lab>>. Defaults to `true`.

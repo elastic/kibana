@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from 'src/core/server';
-import { configSchema, ConfigSchema } from '../config';
-import { VisTypePieServerPlugin } from './plugin';
+import { Plugin } from 'src/core/server';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  schema: configSchema,
-};
+export class VisTypeXYServerPlugin implements Plugin {
+  public setup() {
+    return {};
+  }
 
-export const plugin = () => new VisTypePieServerPlugin();
+  public start() {
+    return {};
+  }
+}
