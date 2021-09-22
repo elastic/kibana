@@ -27,6 +27,7 @@ import {
   KBN_FIELD_TYPES,
   UI_SETTINGS,
   Query,
+  generateFilters,
 } from '../../../../../../../../src/plugins/data/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -130,7 +131,7 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { docLinks, notifications, uiSettings } = services;
+  const { docLinks, notifications, uiSettings, data } = services;
   const { toasts } = notifications;
 
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
@@ -305,6 +306,20 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
+
+  const onAddFilter = useCallback(
+    (field: DataViewField | string, values: string, operation: '+' | '-') => {
+      const newFilters = generateFilters(
+        data.query.filterManager,
+        field,
+        values,
+        operation,
+        String(currentIndexPattern.id)
+      );
+      return data.query.filterManager.addFilters(newFilters);
+    },
+    [currentIndexPattern.id, data.query.filterManager]
+  );
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -752,13 +767,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               item={item}
               indexPattern={currentIndexPattern}
               combinedQuery={{ searchQueryLanguage, searchString }}
+              onAddFilter={onAddFilter}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentIndexPattern, searchQueryLanguage, searchString]
+    [currentIndexPattern, searchQueryLanguage, searchString, onAddFilter]
   );
 
   // Some actions open up fly-out or popup
@@ -878,6 +894,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     visibleFieldNames={visibleFieldNames}
                     setVisibleFieldNames={setVisibleFieldNames}
                     showEmptyFields={showEmptyFields}
+                    onAddFilter={onAddFilter}
                   />
                   <EuiSpacer size={'l'} />
                   <FieldCountPanel

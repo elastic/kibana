@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Query } from '../../../../../../../src/plugins/data/common/query';
+export { Query } from '@kbn/es-query';
 import { SearchQueryLanguage } from './combined_query';
 
 export interface ListingPageUrlState {
