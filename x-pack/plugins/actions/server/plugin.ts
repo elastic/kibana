@@ -96,19 +96,25 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
+
   isPreconfiguredConnector(connectorId: string): boolean;
 }
 
 export interface PluginStartContract {
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
+
   isActionExecutable(
     actionId: string,
     actionTypeId: string,
     options?: { notifyUsage: boolean }
   ): boolean;
+
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
+
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
+
   preconfiguredActions: PreConfiguredAction[];
+
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
     actionId: string,
@@ -127,6 +133,7 @@ export interface ActionsPluginsSetup {
   features: FeaturesPluginSetup;
   spaces?: SpacesPluginSetup;
 }
+
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
@@ -153,7 +160,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private isESOCanEncrypt?: boolean;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
-  private readonly kibanaIndexConfig: { kibana: { index: string } };
+  private kibanaIndex?: string;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -163,13 +170,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     );
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
-    this.kibanaIndexConfig = initContext.config.legacy.get();
   }
 
   public setup(
     core: CoreSetup<ActionsPluginsStart>,
     plugins: ActionsPluginsSetup
   ): PluginSetupContract {
+    this.kibanaIndex = core.savedObjects.getKibanaIndex();
+
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
@@ -252,15 +260,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
       'actions',
-      this.createRouteHandlerContext(core, this.kibanaIndexConfig.kibana.index)
+      this.createRouteHandlerContext(core, this.kibanaIndex)
     );
     if (usageCollection) {
-      initializeActionsTelemetry(
-        this.telemetryLogger,
-        plugins.taskManager,
-        core,
-        this.kibanaIndexConfig.kibana.index
-      );
+      initializeActionsTelemetry(this.telemetryLogger, plugins.taskManager, core, this.kibanaIndex);
     }
 
     // Usage counter for telemetry
@@ -280,7 +283,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger: this.logger,
         coreStartServices: core.getStartServices(),
         config: this.actionsConfig.cleanupFailedExecutionsTask,
-        kibanaIndex: this.kibanaIndexConfig.kibana.index,
+        kibanaIndex: this.kibanaIndex,
         taskManagerIndex: plugins.taskManager.index,
       });
     }
@@ -312,7 +315,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionExecutor,
       actionTypeRegistry,
       taskRunnerFactory,
-      kibanaIndexConfig,
+      kibanaIndex,
       isESOCanEncrypt,
       preconfiguredActions,
       instantiateAuthorization,
@@ -340,12 +343,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         request
       );
 
-      const kibanaIndex = kibanaIndexConfig.kibana.index;
-
       return new ActionsClient({
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
-        defaultKibanaIndex: kibanaIndex,
+        defaultKibanaIndex: kibanaIndex!,
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         preconfiguredActions,
         request,
