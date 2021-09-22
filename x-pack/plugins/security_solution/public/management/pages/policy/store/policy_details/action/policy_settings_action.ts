@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ILicense } from '../../../../../../../licensing/common/types';
-import { GetAgentStatusResponse } from '../../../../../../../fleet/common/types/rest_spec';
-import { PolicyData, UIPolicyConfig } from '../../../../../../common/endpoint/types';
-import { ServerApiError } from '../../../../../common/types';
-import { PolicyDetailsState } from '../../types';
+import { ILicense } from '../../../../../../../../licensing/common/types';
+import { GetAgentStatusResponse } from '../../../../../../../../fleet/common/types/rest_spec';
+import { PolicyData, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { ServerApiError } from '../../../../../../common/types';
+import { PolicyDetailsState } from '../../../types';
 
 export interface ServerReturnedPolicyDetailsData {
   type: 'serverReturnedPolicyDetailsData';
@@ -69,7 +69,7 @@ export interface LicenseChanged {
   payload: ILicense;
 }
 
-export type PolicyDetailsAction =
+export type PolicySettingsAction =
   | ServerReturnedPolicyDetailsData
   | UserClickedPolicyDetailsSaveButton
   | ServerReturnedPolicyDetailsAgentSummaryData
