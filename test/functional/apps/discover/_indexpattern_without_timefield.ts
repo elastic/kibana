@@ -74,9 +74,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Navigating back
       await browser.goBack();
       await retry.waitFor(
-        'index pattern to have been switched',
+        'index pattern to have been switched back to "without-timefield"',
         async () =>
-          (await testSubjects.getVisibleText('indexPattern-switcher')) === 'without-timefield'
+          (await testSubjects.getVisibleText('indexPattern-switch-link')) === 'without-timefield'
       );
 
       if (await PageObjects.timePicker.timePickerExists()) {
