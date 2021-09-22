@@ -54,7 +54,19 @@ export function toPreviewExpression(
   return toExpression(
     {
       ...state,
-      layers: state.layers.map((layer) => ({ ...layer, hide: true })),
+      layers: state.layers.map((layer) =>
+        layer.layerType === layerTypes.DATA
+          ? { ...layer, hide: true }
+          : // cap the threshold line to 1px
+            {
+              ...layer,
+              hide: true,
+              yConfig: layer.yConfig?.map(({ lineWidth, ...config }) => ({
+                ...config,
+                lineWidth: 1,
+              })),
+            }
+      ),
       // hide legend for preview
       legend: {
         ...state.legend,
