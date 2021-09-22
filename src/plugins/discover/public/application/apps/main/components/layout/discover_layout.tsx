@@ -75,7 +75,7 @@ export function DiscoverLayout({
   }, [dataState.fetchStatus]);
 
   const timeField = useMemo(() => {
-    return indexPattern.type === 'rollup' ? indexPattern.timeFieldName : undefined;
+    return indexPattern.type !== 'rollup' ? indexPattern.timeFieldName : undefined;
   }, [indexPattern]);
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
