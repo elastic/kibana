@@ -23,7 +23,7 @@ export class XpackLegacyPlugin implements Plugin {
 
   public setup(core: CoreSetup, { usageCollection }: SetupPluginDeps) {
     const router = core.http.createRouter();
-    const globalConfig = this.initContext.config.legacy.get();
+    const kibanaIndex = core.savedObjects.getKibanaIndex();
     const serverInfo = core.http.getServerInfo();
 
     registerSettingsRoute({
@@ -31,7 +31,7 @@ export class XpackLegacyPlugin implements Plugin {
       usageCollection,
       overallStatus$: core.status.overall$,
       config: {
-        kibanaIndex: globalConfig.kibana.index,
+        kibanaIndex,
         kibanaVersion: this.initContext.env.packageInfo.version,
         uuid: this.initContext.env.instanceUuid,
         server: serverInfo,
