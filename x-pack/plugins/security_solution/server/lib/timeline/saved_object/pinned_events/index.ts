@@ -13,7 +13,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../../../security/common/model';
-import { defaultDataViewRef, UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import {
   PinnedEventSavedObject,
   PinnedEventSavedObjectRuntimeType,
