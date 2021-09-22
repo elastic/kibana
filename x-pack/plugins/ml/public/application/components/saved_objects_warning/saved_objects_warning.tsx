@@ -88,7 +88,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onSyncSuccess, forceRe
           />
           {canCreateJob ? (
             <FormattedMessage
-              id="xpack.ml.jobsList.missingSavedObjectWarning.description"
+              id="xpack.ml.jobsList.missingSavedObjectWarning.link"
               defaultMessage=" {link}"
               values={{
                 link: (
@@ -103,7 +103,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onSyncSuccess, forceRe
             />
           ) : (
             <FormattedMessage
-              id="xpack.ml.jobsList.missingSavedObjectWarning.description"
+              id="xpack.ml.jobsList.missingSavedObjectWarning.noPermission"
               defaultMessage="Go to Stack Management to synchronize your jobs."
             />
           )}
