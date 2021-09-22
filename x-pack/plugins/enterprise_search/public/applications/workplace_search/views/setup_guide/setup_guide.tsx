@@ -40,7 +40,7 @@ export const SetupGuide: React.FC = () => {
             'Getting started with Workplace Search - a guide to show you how to get Workplace Search up and running',
         })}
         width="1280"
-        height-="720"
+        height="720"
       />
 
       <EuiTitle size="s">
