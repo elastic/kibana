@@ -9,6 +9,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import semverLt from 'semver/functions/lt';
+import { uniq } from 'lodash';
 
 import {
   EuiCallOut,
@@ -34,7 +35,11 @@ import {
   sendUpdatePackage,
   useStartServices,
 } from '../../../../../hooks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  AUTO_UPDATE_PACKAGES,
+  DEFAULT_PACKAGES,
+} from '../../../../../constants';
 
 import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
@@ -103,6 +108,14 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
 
   const { notifications } = useStartServices();
 
+  const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
+    const packages = [...DEFAULT_PACKAGES, ...AUTO_UPDATE_PACKAGES];
+
+    const packageNames = uniq(packages.map((pkg) => pkg.name));
+
+    return packageNames.includes(name);
+  }, [name]);
+
   const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
     keepPoliciesUpToDate ?? false
   );
@@ -131,13 +144,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                 values={{ title }}
               />
             )
-          ),
-          text: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.packageUpdateSuccessDescription"
-              defaultMessage="Successfully updated {title} and upgraded policies"
-              values={{ title }}
-            />
           ),
         });
       } catch (error) {
@@ -266,30 +272,33 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   </tr>
                 </tbody>
               </table>
-
-              <EuiSwitch
-                label={i18n.translate(
-                  'xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateLabel',
-                  { defaultMessage: 'Keep integration policies up to date automatically' }
-                )}
-                checked={keepPoliciesUpToDateSwitchValue}
-                onChange={handleKeepPoliciesUpToDateSwitchChange}
-              />
-              <EuiSpacer size="s" />
-              <EuiText color="subdued" size="xs">
-                <EuiFlexGroup alignItems="center" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="iInCircle" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateDescription"
-                      defaultMessage="When enabled, Fleet will attempt to upgrade and deploy integration policies automatically"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiText>
-              <EuiSpacer size="l" />
+              {shouldShowKeepPoliciesUpToDateSwitch && (
+                <>
+                  <EuiSwitch
+                    label={i18n.translate(
+                      'xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateLabel',
+                      { defaultMessage: 'Keep integration policies up to date automatically' }
+                    )}
+                    checked={keepPoliciesUpToDateSwitchValue}
+                    onChange={handleKeepPoliciesUpToDateSwitchChange}
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiText color="subdued" size="xs">
+                    <EuiFlexGroup alignItems="center" gutterSize="none">
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="iInCircle" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <FormattedMessage
+                          id="xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateDescription"
+                          defaultMessage="When enabled, Fleet will attempt to upgrade and deploy integration policies automatically"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiText>
+                  <EuiSpacer size="l" />
+                </>
+              )}
 
               {(updateAvailable || isUpgradingPackagePolicies) && (
                 <>
