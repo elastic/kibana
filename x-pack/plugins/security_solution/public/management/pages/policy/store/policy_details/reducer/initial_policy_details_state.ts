@@ -35,5 +35,6 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
       filter: '',
     },
     availableList: createUninitialisedResourceState(),
+    assignedList: createUninitialisedResourceState(),
   },
 });

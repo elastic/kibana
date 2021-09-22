@@ -12,19 +12,34 @@ import {
   LinkToApp,
   LinkToAppProps,
 } from '../../../../../../../common/components/endpoint/link_to_app';
+import { useAppUrl } from '../../../../../../../common/lib/kibana';
 
 const LinkLabel = styled.span`
   display: inline-block;
   padding-right: ${(props) => props.theme.eui.paddingSizes.s};
 `;
 
-export const LinkWithIcon: FC<LinkToAppProps> = memo(({ children, ...props }) => {
+type ComponentProps = LinkToAppProps & {
+  size: 'm' | 'l';
+};
+
+export const LinkWithIcon: FC<ComponentProps> = memo(({ children, ...props }) => {
   return (
     <LinkToApp {...props}>
-      <LinkLabel>{children}</LinkLabel>
-      <EuiIcon type="popout" />
+      <LinkLabel size={props.size}>{children}</LinkLabel>
+      <EuiIcon type={props.size === 'm' ? 'arrowRight' : 'popout'} />
     </LinkToApp>
   );
 });
 
 LinkWithIcon.displayName = 'LinkWithIcon';
+
+export const ShowLink = memo(() => {
+  const { getAppUrl } = useAppUrl();
+  return (
+    <LinkWithIcon href={getAppUrl({ appId: 'one', path: '/one' })} size="l">
+      {'hello'}
+    </LinkWithIcon>
+  );
+});
+ShowLink.displayName = 'hello';

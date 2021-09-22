@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-// TODO: defined trusted apps actions (code below only here to silence TS)
-export type PolicyTrustedAppsAction =
-  | {
-      type: 'a';
-    }
-  | { type: 'b' };
+import { Action } from 'redux';
+import { PolicyArtifactsState } from '../../../types';
+
+export interface AssignedTrustedAppsListStateChanged
+  extends Action<'assignedTrustedAppsListStateChanged'> {
+  payload: PolicyArtifactsState['assignedList'];
+}
+
+/**
+ * All of the possible actions for Trusted Apps under the Policy Details store
+ */
+export type PolicyTrustedAppsAction = AssignedTrustedAppsListStateChanged;

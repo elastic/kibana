@@ -13,6 +13,7 @@ import {
 } from '../artifact_entry_card';
 import { PaginatedContent as _PaginatedContent, PaginatedContentProps } from '../paginated_content';
 import { GridHeader } from './components/grid_header';
+import { MaybeImmutable } from '../../../../common/endpoint/types';
 
 type ArtifactsPaginatedContentProps = PaginatedContentProps<
   AnyArtifact,
@@ -27,11 +28,13 @@ export type ArtifactCardGridProps = Omit<
   ArtifactsPaginatedContentProps,
   'ItemComponent' | 'itemComponentProps' | 'items' | 'onChange'
 > & {
-  items: AnyArtifact[];
+  items: MaybeImmutable<AnyArtifact[]>;
 
   onPageChange: ArtifactsPaginatedContentProps['onChange'];
 
-  onExpandCollapse: (/* TODO:PT defined structure for props */) => void;
+  onExpandCollapse: (
+    /* TODO:PT defined structure for props */ changes: Record<string, string>
+  ) => void;
 
   /**
    * Callback to provide additional props for the `ArtifactEntryCollapsableCard`

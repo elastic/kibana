@@ -57,7 +57,7 @@ export const PolicyTrustedAppsList = memo(() => {
   return (
     <>
       <ArtifactCardGrid
-        items={trustedAppItems}
+        items={trustedAppItems.data}
         onPageChange={handlePageChange}
         onExpandCollapse={handleExpandCollapse}
         cardComponentProps={provideCardProps}

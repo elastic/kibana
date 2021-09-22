@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { PolicyDetailsState } from '../../../types';
+import { createSelector } from 'reselect';
+import {
+  PolicyDetailsArtifactsPageLocation,
+  PolicyDetailsSelector,
+  PolicyDetailsState,
+} from '../../../types';
 import { GetTrustedAppsListResponse } from '../../../../../../../common/endpoint/types';
-
-export const isOnTrustedAppsArtifactsView = (state: PolicyDetailsState): boolean => {
-  return true;
-};
+import { getCurrentArtifactsLocation } from './policy_common_selectors';
+import {
+  getLastLoadedResourceState,
+  isLoadedResourceState,
+  isLoadingResourceState,
+} from '../../../../../state';
 
 export const doesPolicyHaveTrustedApps = (
   state: PolicyDetailsState
@@ -22,15 +29,43 @@ export const doesPolicyHaveTrustedApps = (
   };
 };
 
-export const isPolicyTrustedAppListLoading = (): boolean => {
-  return false;
+export const getPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
+  PolicyDetailsState['artifacts']['assignedList']
+> = (state) => {
+  return state.artifacts.assignedList;
 };
 
-export const getPolicyTrustedAppList = (): GetTrustedAppsListResponse => {
-  return {
-    data: [],
-    page: 1,
-    total: 100,
-    per_page: 20,
-  };
-};
+export const doesPolicyTrustedAppsListNeedUpdate: PolicyDetailsSelector<boolean> = createSelector(
+  getPolicyAssignedTrustedAppsState,
+  getCurrentArtifactsLocation,
+  (assignedListState, locationData) => {
+    return (
+      !isLoadedResourceState(assignedListState) ||
+      (isLoadedResourceState(assignedListState) &&
+        (Object.keys(locationData) as Array<keyof PolicyDetailsArtifactsPageLocation>).some(
+          (key) => assignedListState.data.location[key] !== locationData[key]
+        ))
+    );
+  }
+);
+
+export const isPolicyTrustedAppListLoading: PolicyDetailsSelector<boolean> = createSelector(
+  getPolicyAssignedTrustedAppsState,
+  (assignedState) => isLoadingResourceState(assignedState)
+);
+
+export const getPolicyTrustedAppList: PolicyDetailsSelector<GetTrustedAppsListResponse> =
+  createSelector(
+    getPolicyAssignedTrustedAppsState,
+    getCurrentArtifactsLocation,
+    (assignedState, currentUrlLocation) => {
+      return (
+        getLastLoadedResourceState(assignedState)?.data.artifacts ?? {
+          data: [],
+          page: currentUrlLocation.page_index,
+          total: 0,
+          per_page: currentUrlLocation.page_size,
+        }
+      );
+    }
+  );

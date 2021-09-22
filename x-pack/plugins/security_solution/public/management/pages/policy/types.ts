@@ -14,56 +14,40 @@ import {
   PolicyData,
   UIPolicyConfig,
   MaybeImmutable,
+  GetTrustedAppsListResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
   GetAgentStatusResponse,
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
-  GetPackagesResponse,
   UpdatePackagePolicyResponse,
 } from '../../../../../fleet/common';
 import { AsyncResourceState } from '../../state';
 import { TrustedAppsListData } from '../trusted_apps/state';
 import { ImmutableMiddlewareAPI } from '../../../common/store';
 import { AppAction } from '../../../common/store/actions';
+import { TrustedAppsService } from '../trusted_apps/service';
+
+export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 
 /**
  * Function that runs Policy Details middleware
  */
 export type MiddlewareRunner = (
-  coreStart: CoreStart,
-  store: ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>,
+  constext: MiddlewareRunnerContext,
+  store: PolicyDetailsStore,
   action: MaybeImmutable<AppAction>
 ) => Promise<void>;
 
-/**
- * Policy list store state
- */
-export interface PolicyListState {
-  /** Array of policy items  */
-  policyItems: PolicyData[];
-  /** Information about the latest endpoint package */
-  endpointPackageInfo?: GetPackagesResponse['response'][0];
-  /** API error if loading data failed */
-  apiError?: ServerApiError;
-  /** total number of policies */
-  total: number;
-  /** Number of policies per page */
-  pageSize: number;
-  /** page number (zero based) */
-  pageIndex: number;
-  /** data is being retrieved from server */
-  isLoading: boolean;
-  /** current location information */
-  location?: Immutable<AppLocation>;
-  /** policy is being deleted */
-  isDeleting: boolean;
-  /** Deletion status */
-  deleteStatus?: boolean;
-  /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: GetAgentStatusResponse['results'];
+export interface MiddlewareRunnerContext {
+  coreStart: CoreStart;
+  trustedAppsService: TrustedAppsService;
 }
+
+export type PolicyDetailsSelector<T = unknown> = (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<T>;
 
 /**
  * Policy details store state
@@ -89,6 +73,11 @@ export interface PolicyDetailsState {
   license?: ILicense;
 }
 
+export interface PolicyAssignedTrustedApps {
+  location: PolicyDetailsArtifactsPageLocation;
+  artifacts: GetTrustedAppsListResponse;
+}
+
 /**
  * Policy artifacts store state
  */
@@ -97,6 +86,8 @@ export interface PolicyArtifactsState {
   location: PolicyDetailsArtifactsPageLocation;
   /** A list of artifacts can be linked to the policy  */
   availableList: AsyncResourceState<TrustedAppsListData>;
+  /** List of artifacts currently assigned to the policy (body specific and global) */
+  assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
 }
 
 export enum OS {
