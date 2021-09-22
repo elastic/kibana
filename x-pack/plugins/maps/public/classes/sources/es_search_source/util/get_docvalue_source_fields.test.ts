@@ -19,7 +19,7 @@ function createMockIndexPattern(fields: IndexPatternField[]): IndexPattern {
     },
   };
 
-  return (indexPattern as unknown) as IndexPattern;
+  return indexPattern as unknown as IndexPattern;
 }
 
 describe('getDocValueAndSourceFields', () => {

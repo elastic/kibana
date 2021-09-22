@@ -86,14 +86,8 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
       const nextFields = [];
-      const {
-        hasChanges,
-        nextStyleDescriptor,
-      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
-        nextFields,
-        previousFields,
-        mapColors
-      );
+      const { hasChanges, nextStyleDescriptor } =
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {
@@ -119,14 +113,8 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
           supportsAutoDomain: false,
         }),
       ];
-      const {
-        hasChanges,
-        nextStyleDescriptor,
-      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
-        nextFields,
-        previousFields,
-        mapColors
-      );
+      const { hasChanges, nextStyleDescriptor } =
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
         options: {
@@ -142,14 +130,8 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
       const nextFields = [new MockField({ fieldName: 'someOtherField', dataType: 'number' })];
-      const {
-        hasChanges,
-        nextStyleDescriptor,
-      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
-        nextFields,
-        previousFields,
-        mapColors
-      );
+      const { hasChanges, nextStyleDescriptor } =
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {

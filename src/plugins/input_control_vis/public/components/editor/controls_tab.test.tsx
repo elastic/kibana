@@ -19,9 +19,9 @@ const indexPatternsMock = {
 let props: ControlsTabProps;
 
 beforeEach(() => {
-  props = ({
+  props = {
     deps: getDepsMock(),
-    vis: ({
+    vis: {
       API: {
         indexPatterns: indexPatternsMock,
       },
@@ -33,7 +33,7 @@ beforeEach(() => {
         requiresSearch: false,
         hidden: false,
       },
-    } as unknown) as Vis,
+    } as unknown as Vis,
     stateParams: {
       controls: [
         {
@@ -65,7 +65,7 @@ beforeEach(() => {
     },
     setValue: jest.fn(),
     intl: null as any,
-  } as unknown) as ControlsTabProps;
+  } as unknown as ControlsTabProps;
 });
 
 test('renders ControlsTab', () => {

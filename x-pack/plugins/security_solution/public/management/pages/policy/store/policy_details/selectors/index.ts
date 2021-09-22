@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './policy_settings';
-export * from './trusted_apps';
+export * from './policy_settings_selectors';
+export * from './trusted_apps_selectors';
