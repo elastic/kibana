@@ -108,6 +108,7 @@ describe('TutorialsRegistry', () => {
       testProvider = ({}) => validTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
 
+      // @ts-expect-error
       expect(mockCustomIntegrationsPluginSetup.registerCustomIntegration.mock.calls).toEqual([
         [
           {
