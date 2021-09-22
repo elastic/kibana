@@ -30,8 +30,14 @@ export interface PolicyArtifactsAvailableListExistDataChanged {
   payload: AsyncResourceState<boolean>;
 }
 
-export type PolicyDetailsAction =
+export interface PolicyArtifactsAvailableListPageDataFilter {
+  type: 'policyArtifactsAvailableListPageDataFilter';
+  payload: { filter: string };
+}
+
+export type PolicyTrustedAppsAction =
   | PolicyArtifactsAvailableListPageDataChanged
   | PolicyArtifactsUpdateTrustedApps
   | PolicyArtifactsUpdateTrustedAppsChanged
-  | PolicyArtifactsAvailableListExistDataChanged;
+  | PolicyArtifactsAvailableListExistDataChanged
+  | PolicyArtifactsAvailableListPageDataFilter;
