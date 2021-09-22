@@ -71,9 +71,9 @@ export async function getTotalCount(
   );
   if (preconfiguredActions && preconfiguredActions.length) {
     for (const preconfiguredAction of preconfiguredActions) {
-      countByType[preconfiguredAction.actionTypeId] =
-        countByType[preconfiguredAction.actionTypeId] || 0;
-      countByType[preconfiguredAction.actionTypeId]++;
+      const actionTypeId = replaceFirstAndLastDotSymbols(preconfiguredAction.actionTypeId);
+      countByType[actionTypeId] = countByType[actionTypeId] || 0;
+      countByType[actionTypeId]++;
     }
   }
   return {
@@ -281,7 +281,8 @@ export async function getInUseTotalCount(
     actionTypeId: string;
     actionRef: string;
   }> = preconfiguredActionsAggs ? Object.values(preconfiguredActionsAggs?.actionRefs) : [];
-  for (const { actionRef, actionTypeId } of preconfiguredActionsRefs) {
+  for (const { actionRef, actionTypeId: rawActionTypeId } of preconfiguredActionsRefs) {
+    const actionTypeId = replaceFirstAndLastDotSymbols(rawActionTypeId);
     countByActionTypeId[actionTypeId] = countByActionTypeId[actionTypeId] || 0;
     countByActionTypeId[actionTypeId]++;
     if (actionRef === `preconfigured:${AlertHistoryEsIndexConnectorId}`) {

@@ -228,7 +228,7 @@ Object {
 Object {
   "countByAlertHistoryConnectorType": 1,
   "countByType": Object {
-    ".index": 1,
+    "__index": 1,
     "__server-log": 1,
     "__slack": 1,
   },
@@ -332,6 +332,13 @@ Object {
         isPreconfigured: true,
         secrets: {},
       },
+      {
+        id: 'anotherServerLog',
+        actionTypeId: '.server-log',
+        name: 'test',
+        isPreconfigured: true,
+        secrets: {},
+      },
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -339,13 +346,13 @@ Object {
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
   "countByType": Object {
-    ".test": 1,
     "__index": 1,
-    "__server-log": 1,
+    "__server-log": 2,
+    "__test": 1,
     "another.type__": 1,
     "some.type": 1,
   },
-  "countTotal": 5,
+  "countTotal": 6,
 }
 `);
   });
@@ -359,15 +366,19 @@ Object {
           refs: {
             actionRefIds: {
               value: {
-                connectorIds: { '1': 'action-0', '123': 'action-0' },
-                total: 2,
+                connectorIds: {
+                  '1': 'action-0',
+                  '123': 'action-1',
+                  '456': 'action-2',
+                },
+                total: 3,
               },
             },
           },
           preconfigured_actions: {
             preconfiguredActionRefIds: {
               value: {
-                total: 2,
+                total: 3,
                 actionRefs: {
                   'preconfigured:preconfigured-alert-history-es-index': {
                     actionRef: 'preconfigured:preconfigured-alert-history-es-index',
@@ -375,6 +386,10 @@ Object {
                   },
                   'preconfigured:cloud_email': {
                     actionRef: 'preconfigured:cloud_email',
+                    actionTypeId: '.email',
+                  },
+                  'preconfigured:cloud_email2': {
+                    actionRef: 'preconfigured:cloud_email2',
                     actionTypeId: '.email',
                   },
                 },
@@ -390,13 +405,19 @@ Object {
         {
           id: '1',
           attributes: {
-            actionTypeId: 'action-0',
+            actionTypeId: '.server-log',
           },
         },
         {
           id: '123',
           attributes: {
             actionTypeId: '.slack',
+          },
+        },
+        {
+          id: '456',
+          attributes: {
+            actionTypeId: '.email',
           },
         },
       ],
@@ -410,12 +431,12 @@ Object {
 Object {
   "countByAlertHistoryConnectorType": 1,
   "countByType": Object {
-    ".email": 1,
-    ".index": 1,
+    "__email": 3,
+    "__index": 1,
+    "__server-log": 1,
     "__slack": 1,
-    "action-0": 1,
   },
-  "countTotal": 4,
+  "countTotal": 6,
 }
 `);
   });
