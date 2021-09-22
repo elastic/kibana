@@ -10226,7 +10226,6 @@
     "xpack.enterpriseSearch.workplaceSearch.sources.additionalConfig.heading": "追加の構成が必要",
     "xpack.enterpriseSearch.workplaceSearch.sources.applicationLinkTitles.github": "GitHub開発者ポータル",
     "xpack.enterpriseSearch.workplaceSearch.sources.baseUrlTitles.github": "GitHub Enterprise URL",
-    "xpack.enterpriseSearch.workplaceSearch.sources.config.description": "変更するコンテンツソースコネクター設定を編集します。",
     "xpack.enterpriseSearch.workplaceSearch.sources.config.link": "コンテンツソースコネクター設定を編集",
     "xpack.enterpriseSearch.workplaceSearch.sources.config.title": "コンテンツソース構成",
     "xpack.enterpriseSearch.workplaceSearch.sources.configuration.title": "構成",
