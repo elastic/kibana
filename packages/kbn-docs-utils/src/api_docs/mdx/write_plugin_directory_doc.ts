@@ -83,11 +83,13 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
 
-**Total plugin count**: ${totalStats.pluginCnt} 
-**Plugins with a public API**: ${totalStats.pluginCntWithPublicApi} 
-**Number of teams maintaining plugins**: ${totalStats.teamCnt} 
+### Overall stats
 
-## Public API health stats
+| Plugin Count | Plugins with a <br /> public API | Number of teams | 
+|--------------|----------|------------------------|
+| ${totalStats.pluginCnt} | ${totalStats.pluginCntWithPublicApi} | ${totalStats.teamCnt} |
+
+### Public API health stats
 
 | API Count | Any Count | Missing comments | Missing exports | 
 |--------------|----------|-----------------|--------|
@@ -97,7 +99,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 ## Plugin Directory
 
-| Plugin name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | No<br />comments | No<br />exports | 
+| Plugin name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports | 
 |--------------|----------------|-----------|--------------|----------|---------------|--------|
 ${Object.keys(pluginApiMap)
   .sort()
