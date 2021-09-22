@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HttpServiceSetup, RequestHandlerContext, StartServicesAccessor } from 'kibana/server';
+import { HttpServiceSetup, StartServicesAccessor } from 'kibana/server';
 import { IndexPatternsFetcher } from './fetcher';
 import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
