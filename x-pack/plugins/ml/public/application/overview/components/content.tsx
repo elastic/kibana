@@ -15,6 +15,7 @@ interface Props {
   createAnalyticsJobDisabled: boolean;
   setAdLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
   setDfaLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
+  refreshCount: number;
 }
 
 // Fetch jobs and determine what to show
@@ -23,6 +24,7 @@ export const OverviewContent: FC<Props> = ({
   createAnalyticsJobDisabled,
   setAdLazyJobCount,
   setDfaLazyJobCount,
+  refreshCount,
 }) => (
   <EuiFlexItem grow={3}>
     <EuiFlexGroup direction="column">
@@ -30,12 +32,14 @@ export const OverviewContent: FC<Props> = ({
         <AnomalyDetectionPanel
           jobCreationDisabled={createAnomalyDetectionJobDisabled}
           setLazyJobCount={setAdLazyJobCount}
+          refreshCount={refreshCount}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <AnalyticsPanel
           jobCreationDisabled={createAnalyticsJobDisabled}
           setLazyJobCount={setDfaLazyJobCount}
+          refreshCount={refreshCount}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

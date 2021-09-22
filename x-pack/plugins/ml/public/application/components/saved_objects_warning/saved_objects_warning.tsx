@@ -56,7 +56,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onSyncSuccess, forceRe
     return () => {
       mounted.current = false;
     };
-  }, [forceRefresh]);
+  }, [forceRefresh, mounted]);
 
   const onClose = useCallback(() => {
     if (forceRefresh === undefined) {
@@ -66,7 +66,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onSyncSuccess, forceRe
     if (typeof onSyncSuccess === 'function') {
       onSyncSuccess();
     }
-  }, []);
+  }, [checkStatus, onSyncSuccess, setShowSyncFlyout]);
 
   return showWarning === false ? null : (
     <>
