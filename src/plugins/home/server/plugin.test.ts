@@ -9,23 +9,29 @@
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
 import { HomeServerPlugin, HomeServerPluginSetupDependencies } from './plugin';
 import { coreMock, httpServiceMock } from '../../../core/server/mocks';
+import { customIntegrationsMock } from '../../custom_integrations/server/mocks';
 
-const homeServerPluginSetupDependenciesMock = {} as unknown as HomeServerPluginSetupDependencies;
 describe('HomeServerPlugin', () => {
+  let homeServerPluginSetupDependenciesMock: HomeServerPluginSetupDependencies;
+  let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
+
   beforeEach(() => {
     registryForTutorialsMock.setup.mockClear();
     registryForTutorialsMock.start.mockClear();
     registryForSampleDataMock.setup.mockClear();
     registryForSampleDataMock.start.mockClear();
+
+    homeServerPluginSetupDependenciesMock = {
+      customIntegrations: customIntegrationsMock.createSetup(),
+    };
+    mockCoreSetup = coreMock.createSetup();
   });
 
   describe('setup', () => {
-    let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
     let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
     let routerMock: ReturnType<typeof httpServiceMock.createRouter>;
 
     beforeEach(() => {
-      mockCoreSetup = coreMock.createSetup();
       routerMock = httpServiceMock.createRouter();
       mockCoreSetup.http.createRouter.mockReturnValue(routerMock);
       initContext = coreMock.createPluginInitializerContext();
@@ -70,7 +76,9 @@ describe('HomeServerPlugin', () => {
   describe('start', () => {
     const initContext = coreMock.createPluginInitializerContext();
     test('is defined', () => {
-      const start = new HomeServerPlugin(initContext).start();
+      const plugin = new HomeServerPlugin(initContext);
+      plugin.setup(mockCoreSetup, homeServerPluginSetupDependenciesMock); // setup() must always be called before start()
+      const start = plugin.start();
       expect(start).toBeDefined();
       expect(start).toHaveProperty('tutorials');
       expect(start).toHaveProperty('sampleData');

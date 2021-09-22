@@ -48,7 +48,7 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
 
   public start(): HomeServerPluginStart {
     if (!this.customIntegrations) {
-      throw new Error('Canot start home server. CustomIntegrations plugin missing.');
+      throw new Error('Cannot start home server. CustomIntegrations plugin missing.');
     }
     return {
       tutorials: { ...this.tutorialsRegistry.start() },
