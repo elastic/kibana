@@ -36,7 +36,8 @@ export class SampleDataRegistry {
 
   public setup(core: CoreSetup, usageCollections: UsageCollectionSetup | undefined) {
     if (usageCollections) {
-      makeSampleDataUsageCollector(usageCollections, this.initContext);
+      const kibanaIndex = core.savedObjects.getKibanaIndex();
+      makeSampleDataUsageCollector(usageCollections, kibanaIndex);
     }
     const usageTracker = usage(
       core.getStartServices().then(([coreStart]) => coreStart.savedObjects),
