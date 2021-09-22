@@ -64,5 +64,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Median of bytes',
       ]);
     });
+
+    it('should add a new group to the threshold layer when a right axis is enabled', async () => {
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+        keepOpen: true,
+      });
+
+      await PageObjects.lens.changeAxisSide('right');
+
+      await PageObjects.lens.closeDimensionEditor();
+
+      await testSubjects.existOrFail('lnsXY_yThresholdRightPanel > lns-empty-dimension');
+
+      // style it enabling the fill
+      await testSubjects.click('lnsXY_yThresholdLeftPanel > lns-dimensionTrigger');
+      await testSubjects.click('lnsXY_fill_below');
+      await PageObjects.lens.closeDimensionEditor();
+
+      // drag and drop it to the left axis
+      await PageObjects.lens.dragDimensionToDimension(
+        'lnsXY_yThresholdLeftPanel > lns-dimensionTrigger',
+        'lnsXY_yThresholdRightPanel > lns-empty-dimension'
+      );
+
+      await testSubjects.click('lnsXY_yThresholdRightPanel > lns-dimensionTrigger');
+      expect(
+        await find.existsByCssSelector('[data-test-subj="lnsXY_fill_below"][class$="isSelected"]')
+      ).to.be(true);
+    });
   });
 }
