@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from './data_view';
+import { DataView } from './data_view';
 import { DataViewSpec } from '../types';
 import { FieldFormatsStartCommon } from '../../../../field_formats/common';
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 
 /**
- * Create a custom stub index pattern. Use it in your unit tests where an {@link IndexPattern} expected.
+ * Create a custom stub index pattern. Use it in your unit tests where an {@link DataView} expected.
  * @param spec - Serialized index pattern object
  * @param opts - Specify index pattern options
  * @param deps - Optionally provide dependencies, you can provide a custom field formats implementation, by default a dummy mock is used
  *
- * @returns - an {@link IndexPattern} instance
+ * @returns - an {@link DataView} instance
  *
  *
  * @example
@@ -32,7 +32,7 @@ import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
  *
  * ```
  */
-export const createStubIndexPattern = ({
+export const createStubDataView = ({
   spec,
   opts,
   deps,
@@ -45,12 +45,10 @@ export const createStubIndexPattern = ({
   deps?: {
     fieldFormats?: FieldFormatsStartCommon;
   };
-}): IndexPattern => {
-  const indexPattern = new IndexPattern({
+}): DataView =>
+  new DataView({
     spec,
     metaFields: opts?.metaFields ?? ['_id', '_type', '_source'],
     shortDotsEnable: opts?.shortDotsEnable,
     fieldFormats: deps?.fieldFormats ?? fieldFormatsMock,
   });
-  return indexPattern;
-};

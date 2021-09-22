@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPattern } from '../..';
+import { Plugin } from 'src/core/server';
 
-export const isDefault = (indexPattern: IIndexPattern) => {
-  // Default index patterns don't have `type` defined.
-  return !indexPattern.type;
-};
+export class VisTypeXYServerPlugin implements Plugin {
+  public setup() {
+    return {};
+  }
+
+  public start() {
+    return {};
+  }
+}

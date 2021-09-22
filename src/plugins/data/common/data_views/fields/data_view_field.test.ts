@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternField } from './index_pattern_field';
+import { IndexPatternField } from './data_view_field';
 import { IndexPattern } from '..';
 import { KBN_FIELD_TYPES } from '../../../common';
 import { FieldSpec, RuntimeField } from '../types';
