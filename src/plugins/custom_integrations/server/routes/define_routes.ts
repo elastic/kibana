@@ -8,10 +8,7 @@
 
 import { IRouter } from 'src/core/server';
 import { CustomIntegrationRegistry } from '../custom_integration_registry';
-import {
-  ROUTES_ADDABLECUSTOMINTEGRATIONS,
-  ROUTES_REPLACEABLECUSTOMINMTEGRATIONS,
-} from '../../common';
+import { ROUTES_ADDABLECUSTOMINTEGRATIONS } from '../../common';
 
 export function defineRoutes(
   router: IRouter,
@@ -24,19 +21,6 @@ export function defineRoutes(
     },
     async (context, request, response) => {
       const integrations = customIntegrationsRegistry.getAddableCustomIntegrations();
-      return response.ok({
-        body: integrations,
-      });
-    }
-  );
-
-  router.get(
-    {
-      path: ROUTES_REPLACEABLECUSTOMINMTEGRATIONS,
-      validate: false,
-    },
-    async (context, request, response) => {
-      const integrations = customIntegrationsRegistry.getReplaceableCustomIntegrations();
       return response.ok({
         body: integrations,
       });

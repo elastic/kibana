@@ -58,8 +58,6 @@ export interface CustomIntegration {
   icons: Array<{ src: string; type: string }>;
   categories: Category[];
   shipper: string;
-  eprPackageOverlap?: string;
 }
 
 export const ROUTES_ADDABLECUSTOMINTEGRATIONS = `/api/${PLUGIN_ID}/addableCustomIntegrations`;
-export const ROUTES_REPLACEABLECUSTOMINMTEGRATIONS = `/api/${PLUGIN_ID}/replaceableCustomIntegrations`;

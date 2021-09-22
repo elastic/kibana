@@ -8,11 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
-import {
-  CustomIntegration,
-  ROUTES_ADDABLECUSTOMINTEGRATIONS,
-  ROUTES_REPLACEABLECUSTOMINMTEGRATIONS,
-} from '../common';
+import { CustomIntegration, ROUTES_ADDABLECUSTOMINTEGRATIONS } from '../common';
 
 export class CustomIntegrationPlugin
   implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
@@ -22,9 +18,6 @@ export class CustomIntegrationPlugin
     return {
       async getAddableCustomIntegrations(): Promise<CustomIntegration[]> {
         return core.http.get(ROUTES_ADDABLECUSTOMINTEGRATIONS);
-      },
-      async getReplaceableCustomIntegrations(): Promise<CustomIntegration[]> {
-        return core.http.get(ROUTES_REPLACEABLECUSTOMINMTEGRATIONS);
       },
     } as CustomIntegrationsSetup;
   }

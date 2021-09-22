@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { schema } from '@kbn/config-schema';
 import { PluginInitializerContext } from '../../../core/server';
 import { CustomIntegrationsPlugin } from './plugin';
 
@@ -19,3 +20,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
 
 export type { Category, CategoryCount, CustomIntegration } from '../common';
+
+export const config = {
+  schema: schema.object({}),
+};

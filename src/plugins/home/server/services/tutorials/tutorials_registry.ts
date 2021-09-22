@@ -49,7 +49,6 @@ function registerTutorialWithCustomIntegrations(
           },
         ]
       : [],
-    eprPackageOverlap: tutorial.eprPackageOverlap,
     shipper: 'tutorial',
     isBeta: false,
   });

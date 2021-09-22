@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegration, CategoryCount } from '../common';
+import { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsPluginSetup {
   registerCustomIntegration(customIntegration: CustomIntegration): void;
   getAddableCustomIntegrations(): CustomIntegration[];
-  getAddableCategories(): CategoryCount[];
-  getReplaceableCustomIntegrations(): CustomIntegration[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

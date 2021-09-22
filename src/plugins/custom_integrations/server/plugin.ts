@@ -9,7 +9,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
 
 import { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
-import { CustomIntegration, CategoryCount } from '../common';
+import { CustomIntegration } from '../common';
 import { CustomIntegrationRegistry } from './custom_integration_registry';
 import { defineRoutes } from './routes/define_routes';
 
@@ -36,13 +36,6 @@ export class CustomIntegrationsPlugin
       },
       getAddableCustomIntegrations: (): CustomIntegration[] => {
         return this.customIngegrationRegistry.getAddableCustomIntegrations();
-      },
-
-      getAddableCategories: (): CategoryCount[] => {
-        return this.customIngegrationRegistry.getAddableCategories();
-      },
-      getReplaceableCustomIntegrations: (): CustomIntegration[] => {
-        return this.customIngegrationRegistry.getReplaceableCustomIntegrations();
       },
     } as CustomIntegrationsPluginSetup;
   }

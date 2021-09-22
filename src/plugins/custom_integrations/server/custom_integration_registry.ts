@@ -7,7 +7,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { CustomIntegration, CategoryCount, Category } from '../common';
+import { CustomIntegration } from '../common';
 
 function isAddable(integration: CustomIntegration) {
   return integration.categories.length;
@@ -37,38 +37,5 @@ export class CustomIntegrationRegistry {
 
   getAddableCustomIntegrations(): CustomIntegration[] {
     return this._integrations.filter(isAddable);
-  }
-
-  getReplaceableCustomIntegrations(): CustomIntegration[] {
-    return this._integrations.filter(
-      (integration) => typeof integration.eprPackageOverlap !== 'undefined'
-    );
-  }
-
-  getAddableCategories(): CategoryCount[] {
-    const categories: Map<Category, number> = new Map<Category, number>();
-    for (let i = 0; i < this._integrations.length; i++) {
-      if (!isAddable(this._integrations[i])) {
-        continue;
-      }
-      for (let j = 0; j < this._integrations[i].categories.length; j++) {
-        const category = this._integrations[i].categories[j];
-        if (categories.has(category)) {
-          // @ts-ignore
-          categories.set(category, categories.get(category) + 1);
-        } else {
-          categories.set(category, 1);
-        }
-      }
-    }
-
-    const list: CategoryCount[] = [];
-    categories.forEach((value, key) => {
-      list.push({
-        count: value,
-        id: key,
-      });
-    });
-    return list;
   }
 }
