@@ -8,7 +8,7 @@
 
 import { CONTAINS_SPACES_KEY, ILLEGAL_CHARACTERS_KEY, ILLEGAL_CHARACTERS_VISIBLE } from './types';
 
-import { validateDataView } from './validate_index_pattern';
+import { validateDataView } from './validate_data_view';
 
 describe('Index Pattern Utils', () => {
   describe('Validation', () => {

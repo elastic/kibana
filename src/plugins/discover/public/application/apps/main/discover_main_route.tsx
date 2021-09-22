@@ -59,7 +59,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     const savedSearchId = id;
 
     async function loadDefaultOrCurrentIndexPattern(usedSavedSearch: SavedSearch) {
-      await data.indexPatterns.ensureDefaultIndexPattern();
+      await data.indexPatterns.ensureDefaultDataView();
       const { appStateContainer } = getState({ history, uiSettings: config });
       const { index } = appStateContainer.getState();
       const ip = await loadIndexPattern(index || '', data.indexPatterns, config);

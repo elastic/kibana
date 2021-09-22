@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { http } from './index_patterns_api_client.test.mock';
-import { IndexPatternsApiClient } from './index_patterns_api_client';
+import { http } from './data_views_api_client.test.mock';
+import { DataViewsApiClient } from './data_views_api_client';
 
 describe('IndexPatternsApiClient', () => {
   let fetchSpy: jest.SpyInstance;
-  let indexPatternsApiClient: IndexPatternsApiClient;
+  let indexPatternsApiClient: DataViewsApiClient;
 
   beforeEach(() => {
     fetchSpy = jest.spyOn(http, 'fetch').mockImplementation(() => Promise.resolve({}));
-    indexPatternsApiClient = new IndexPatternsApiClient(http);
+    indexPatternsApiClient = new DataViewsApiClient(http);
   });
 
   test('uses the right URI to fetch fields for time patterns', async function () {

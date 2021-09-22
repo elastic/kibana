@@ -10,15 +10,15 @@ import { CoreSetup } from 'kibana/public';
 import { FieldFormatsStartCommon } from '../../../../field_formats/common';
 import { getFieldFormatsRegistry } from '../../../../field_formats/public/mocks';
 import * as commonStubs from '../../../common/stubs';
-import { IndexPattern, IndexPatternSpec } from '../../../common';
+import { DataView, DataViewSpec } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 /**
- * Create a custom stub index pattern. Use it in your unit tests where an {@link IndexPattern} expected.
+ * Create a custom stub index pattern. Use it in your unit tests where an {@link DataView} expected.
  * @param spec - Serialized index pattern object
  * @param opts - Specify index pattern options
  * @param deps - Optionally provide dependencies, you can provide a custom field formats implementation, by default client side registry with real formatters implementation is used
  *
- * @returns - an {@link IndexPattern} instance
+ * @returns - an {@link DataView} instance
  *
  * @remark - This is a client side version, a browser-agnostic version is available in {@link commonStubs | common}.
  * The main difference is that client side version by default uses client side field formats service, where common version uses a dummy field formats mock.
@@ -35,12 +35,12 @@ import { coreMock } from '../../../../../core/public/mocks';
  *
  * ```
  */
-export const createStubIndexPattern = ({
+export const createStubDataView = ({
   spec,
   opts,
   deps,
 }: {
-  spec: IndexPatternSpec;
+  spec: DataViewSpec;
   opts?: {
     shortDotsEnable?: boolean;
     metaFields?: string[];
@@ -49,8 +49,8 @@ export const createStubIndexPattern = ({
     fieldFormats?: FieldFormatsStartCommon;
     core?: CoreSetup;
   };
-}): IndexPattern => {
-  return commonStubs.createStubIndexPattern({
+}): DataView => {
+  return commonStubs.createStubDataView({
     spec,
     opts,
     deps: {

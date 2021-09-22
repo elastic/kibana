@@ -10,13 +10,13 @@ import { HttpSetup } from 'src/core/public';
 import { DataViewMissingIndices } from '../../../common/data_views/lib';
 import {
   GetFieldsOptions,
-  IIndexPatternsApiClient,
+  IDataViewsApiClient,
   GetFieldsOptionsTimePattern,
 } from '../../../common/data_views/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
-export class IndexPatternsApiClient implements IIndexPatternsApiClient {
+export class DataViewsApiClient implements IDataViewsApiClient {
   private http: HttpSetup;
 
   constructor(http: HttpSetup) {

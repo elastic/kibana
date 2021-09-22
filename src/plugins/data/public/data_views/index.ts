@@ -12,7 +12,6 @@ export {
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   validateDataView,
-  isDefault,
 } from '../../common/data_views/lib';
 export { flattenHitWrapper, formatHitProvider, onRedirectNoIndexPattern } from './data_views';
 
@@ -22,7 +21,7 @@ export {
   IndexPatternsService,
   IndexPatternsContract,
   IndexPattern,
-  IndexPatternsApiClient,
+  DataViewsApiClient,
   DataViewsService,
   DataViewsContract,
   DataView,
