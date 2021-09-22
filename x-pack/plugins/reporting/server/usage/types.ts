@@ -15,49 +15,47 @@ export interface SizePercentiles {
   '99.0': number | null;
 }
 
+interface DocCount {
+  doc_count: number;
+}
+
 interface SizeStats {
   sizes?: { values: SizePercentiles };
 }
 
-export interface KeyCountBucket extends SizeStats {
+export interface KeyCountBucket extends DocCount, SizeStats {
   key: string;
-  doc_count: number;
-  isDeprecated?: {
-    doc_count: number;
-  };
+  isDeprecated?: DocCount;
 }
 
 export interface AggregationBuckets {
   buckets: KeyCountBucket[];
 }
 
-export interface StatusByAppBucket {
+export interface StatusByAppBucket extends DocCount {
   key: string;
-  doc_count: number;
   jobTypes: {
-    buckets: Array<{
-      doc_count: number;
-      key: string;
-      appNames: AggregationBuckets;
-    }>;
+    buckets: Array<
+      {
+        key: string;
+        appNames: AggregationBuckets;
+      } & DocCount
+    >;
   };
 }
 
-export interface AggregationResultBuckets extends SizeStats {
+export interface AggregationResultBuckets extends DocCount, SizeStats {
   jobTypes?: AggregationBuckets;
   layoutTypes: {
-    doc_count: number;
     pdf?: AggregationBuckets;
-  };
+  } & DocCount;
   objectTypes: {
-    doc_count: number;
     pdf?: AggregationBuckets;
-  };
+  } & DocCount;
   statusTypes: AggregationBuckets;
   statusByApp: {
     buckets: StatusByAppBucket[];
   };
-  doc_count: number;
 }
 
 export interface SearchResponse {
