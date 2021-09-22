@@ -76,7 +76,8 @@ const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
 };
 
 export class CoreUsageDataService
-  implements CoreService<InternalCoreUsageDataSetup, CoreUsageDataStart> {
+  implements CoreService<InternalCoreUsageDataSetup, CoreUsageDataStart>
+{
   private logger: Logger;
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
