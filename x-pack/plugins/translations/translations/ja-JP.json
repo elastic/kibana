@@ -10825,7 +10825,6 @@
     "xpack.fleet.epm.updateAvailableTooltip": "更新が利用可能です",
     "xpack.fleet.epm.usedByLabel": "エージェントポリシー",
     "xpack.fleet.epm.versionLabel": "バージョン",
-    "xpack.fleet.epmList.allFilterLinkText": "すべて",
     "xpack.fleet.epmList.allPackagesFilterLinkText": "すべて",
     "xpack.fleet.epmList.allTitle": "カテゴリで参照",
     "xpack.fleet.epmList.installedTitle": "インストールされている統合",

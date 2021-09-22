@@ -6,7 +6,6 @@
  */
 
 import { useStartServices } from '../../../hooks/use_core';
-import { PLUGIN_ID } from '../../../constants';
 import { epmRouteService } from '../../../services';
 import type { PackageSpecIcon, PackageSpecScreenshot, RegistryImage } from '../../../../common';
 
