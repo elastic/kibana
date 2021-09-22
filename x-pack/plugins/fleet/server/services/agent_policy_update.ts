@@ -13,7 +13,7 @@ import { unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
-const fakeRequest = ({
+const fakeRequest = {
   headers: {},
   getBasePath: () => '',
   path: '/',
@@ -26,7 +26,7 @@ const fakeRequest = ({
       url: '/',
     },
   },
-} as unknown) as KibanaRequest;
+} as unknown as KibanaRequest;
 
 export async function agentPolicyUpdateEventHandler(
   soClient: SavedObjectsClientContract,

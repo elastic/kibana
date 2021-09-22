@@ -50,7 +50,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
         show: valueAxis === axis.id,
       };
 
-  const tickFormatter = (v: any) =>
+  const tickFormatter: TickFormatter = (v) =>
     isSimpleField(format) || shouldApplyFormatter ? formatter?.(v) ?? v : v;
 
   const ticks: TickOptions = {
@@ -131,14 +131,16 @@ function getScale<S extends XScaleType | YScaleType>(
   isCategoryAxis: boolean,
   isHistogram: boolean = false
 ): ScaleConfig<S> {
-  const type = (isCategoryAxis
-    ? getScaleType(
-        scale,
-        format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
-        'date' in params,
-        isHistogram
-      )
-    : getScaleType(scale, true)) as S;
+  const type = (
+    isCategoryAxis
+      ? getScaleType(
+          scale,
+          format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
+          'date' in params,
+          isHistogram
+        )
+      : getScaleType(scale, true)
+  ) as S;
 
   return {
     ...scale,

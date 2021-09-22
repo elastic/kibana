@@ -13,9 +13,9 @@ describe('usage_collection', () => {
   let usageCollection: jest.Mocked<UsageCollectionSetup>;
 
   beforeEach(() => {
-    usageCollection = ({
+    usageCollection = {
       reportUiCounter: jest.fn(),
-    } as unknown) as jest.Mocked<UsageCollectionSetup>;
+    } as unknown as jest.Mocked<UsageCollectionSetup>;
   });
 
   afterEach(() => {

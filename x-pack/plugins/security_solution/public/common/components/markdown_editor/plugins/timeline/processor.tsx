@@ -18,11 +18,10 @@ export const TimelineMarkDownRendererComponent: React.FC<
   }
 > = ({ id, title, graphEventId }) => {
   const handleTimelineClick = useTimelineClick();
-  const onClickTimeline = useCallback(() => handleTimelineClick(id ?? '', graphEventId), [
-    id,
-    graphEventId,
-    handleTimelineClick,
-  ]);
+  const onClickTimeline = useCallback(
+    () => handleTimelineClick(id ?? '', graphEventId),
+    [id, graphEventId, handleTimelineClick]
+  );
   return (
     <EuiToolTip content={i18n.TIMELINE_ID(id ?? '')}>
       <EuiLink onClick={onClickTimeline} data-test-subj={`markdown-timeline-link-${id}`}>

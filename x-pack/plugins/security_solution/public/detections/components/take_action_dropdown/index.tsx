@@ -86,9 +86,10 @@ export const TakeActionDropdownComponent = React.memo(
       [detailsData]
     );
 
-    const alertIds = useMemo(() => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]), [
-      actionsData.eventId,
-    ]);
+    const alertIds = useMemo(
+      () => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]),
+      [actionsData.eventId]
+    );
     const isEvent = actionsData.eventKind === 'event';
 
     const togglePopoverHandler = useCallback(() => {

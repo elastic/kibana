@@ -177,10 +177,9 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const xAgg = dimensions.x ? getColumnByAccessor(responseAggs, dimensions.x?.accessor) : null;
 
-  const enableHistogramMode = ([
-    BUCKET_TYPES.HISTOGRAM,
-    BUCKET_TYPES.DATE_HISTOGRAM,
-  ] as string[]).includes(xAgg?.type?.name ?? '');
+  const enableHistogramMode = (
+    [BUCKET_TYPES.HISTOGRAM, BUCKET_TYPES.DATE_HISTOGRAM] as string[]
+  ).includes(xAgg?.type?.name ?? '');
 
   const xDomain: XDomainPreArgs = {};
   if (dimensions.x && !dimensions.x.params) {
