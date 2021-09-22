@@ -90,24 +90,26 @@ export function ruleMonitoringSummaryFromEventLog(
         continue;
       }
 
-      const currentExecutionSummary = summary.executions[summary.executions.length - 1];
-      const instanceId = event?.kibana?.alerting?.instance_id;
-      if (instanceId === undefined) continue;
+      if (summary.executions.length > 0) {
+        const currentExecutionSummary = summary.executions[summary.executions.length - 1];
+        const instanceId = event?.kibana?.alerting?.instance_id;
+        if (instanceId === undefined) continue;
 
-      switch (action) {
-        case EVENT_LOG_ACTIONS.newInstance:
-          currentExecutionSummary.num_new_alerts++;
-          currentExecutionSummary.new_alert_ids.push(instanceId);
-          break;
-        case EVENT_LOG_ACTIONS.activeInstance:
-          currentExecutionSummary.num_active_alerts++;
-          currentExecutionSummary.active_alert_ids.push(instanceId);
-          break;
-        case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
-        case EVENT_LOG_ACTIONS.recoveredInstance:
-          currentExecutionSummary.num_recovered_alerts++;
-          currentExecutionSummary.recovered_alert_ids.push(instanceId);
-          break;
+        switch (action) {
+          case EVENT_LOG_ACTIONS.newInstance:
+            currentExecutionSummary.num_new_alerts++;
+            currentExecutionSummary.new_alert_ids.push(instanceId);
+            break;
+          case EVENT_LOG_ACTIONS.activeInstance:
+            currentExecutionSummary.num_active_alerts++;
+            currentExecutionSummary.active_alert_ids.push(instanceId);
+            break;
+          case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
+          case EVENT_LOG_ACTIONS.recoveredInstance:
+            currentExecutionSummary.num_recovered_alerts++;
+            currentExecutionSummary.recovered_alert_ids.push(instanceId);
+            break;
+        }
       }
     } else if (provider === 'actions') {
       if (action === EVENT_LOG_ACTIONS.execute) {

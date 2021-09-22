@@ -145,12 +145,12 @@ export function RuleMonitoringSummary({
         <EuiFlexItem grow={1}>
           <EuiPanel hasBorder={true} grow={false}>
             <EuiStat
-              title={ruleMonitoringSummary.num_successful_executions.toString()}
+              title={(ruleMonitoringSummary.num_successful_executions ?? 0).toString()}
               description="# Successful Executions"
             />
             <EuiSpacer size="s" />
             <EuiStat
-              title={ruleMonitoringSummary.num_failed_executions.toString()}
+              title={(ruleMonitoringSummary.num_failed_executions ?? 0).toString()}
               description="# Failed Executions"
             />
           </EuiPanel>
@@ -170,7 +170,10 @@ export function RuleMonitoringSummary({
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel hasBorder={true} grow={false}>
-            <EuiStat title={ruleMonitoringSummary.num_alerts.toString()} description="# Alerts" />
+            <EuiStat
+              title={(ruleMonitoringSummary.num_alerts ?? 0).toString()}
+              description="# Alerts"
+            />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={4}>
@@ -313,7 +316,7 @@ export function RuleMonitoringSummary({
               <EuiFlexItem>
                 <EuiPanel hasBorder={true}>
                   <EuiStat
-                    title={formatNanoseconds(ruleMonitoringSummary.avg_duration.toString())}
+                    title={formatNanoseconds((ruleMonitoringSummary.avg_duration ?? 0).toString())}
                     description="Average execution duration"
                   />
                   <EuiSpacer size="l" />
@@ -373,7 +376,7 @@ export function RuleMonitoringSummary({
               <EuiFlexItem>
                 <EuiPanel hasBorder={true}>
                   <EuiStat
-                    title={formatNanoseconds(ruleMonitoringSummary.avg_delay.toString())}
+                    title={formatNanoseconds((ruleMonitoringSummary.avg_delay ?? 0).toString())}
                     description="Average execution delay"
                   />
                   <EuiSpacer size="l" />
@@ -557,7 +560,9 @@ export function RuleMonitoringSummary({
               <EuiFlexItem>
                 <EuiPanel hasBorder={true}>
                   <EuiStat
-                    title={formatNanoseconds(ruleMonitoringSummary.avg_action_duration.toString())}
+                    title={formatNanoseconds(
+                      (ruleMonitoringSummary.avg_action_duration ?? 0).toString()
+                    )}
                     description="Average action duration"
                   />
                   <EuiSpacer size="l" />
@@ -596,7 +601,10 @@ export function RuleMonitoringSummary({
                       yAccessors={[1]}
                       data={ruleMonitoringSummary.actions
                         .reverse()
-                        .map((action) => [action.start, ruleMonitoringSummary.avg_action_duration])}
+                        .map((action) => [
+                          action.start,
+                          ruleMonitoringSummary.avg_action_duration ?? 0,
+                        ])}
                       curve={CurveType.CURVE_NATURAL}
                     />
                     <Axis
@@ -617,7 +625,9 @@ export function RuleMonitoringSummary({
               <EuiFlexItem>
                 <EuiPanel hasBorder={true}>
                   <EuiStat
-                    title={formatNanoseconds(ruleMonitoringSummary.avg_action_delay.toString())}
+                    title={formatNanoseconds(
+                      (ruleMonitoringSummary.avg_action_delay ?? 0).toString()
+                    )}
                     description="Average action delay"
                   />
                   <EuiSpacer size="l" />
@@ -656,7 +666,10 @@ export function RuleMonitoringSummary({
                       yAccessors={[1]}
                       data={ruleMonitoringSummary.actions
                         .reverse()
-                        .map((action) => [action.start, ruleMonitoringSummary.avg_action_delay])}
+                        .map((action) => [
+                          action.start,
+                          ruleMonitoringSummary.avg_action_delay ?? 0,
+                        ])}
                       curve={CurveType.CURVE_NATURAL}
                     />
                     <Axis

@@ -62,7 +62,7 @@ export const alertType: AlertType<
   }) {
     const count = (state.count ?? 0) + 1;
 
-    await new Promise<void>((done) => setTimeout(() => done(), random(10000, 25000)));
+    await new Promise<void>((done) => setTimeout(() => done(), instances * random(10000, 25000)));
     range(random(instances))
       .map(() => uuid.v4())
       .forEach((id: string) => {

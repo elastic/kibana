@@ -9,11 +9,12 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 
 export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
-import { IEvent } from '../generated/schemas';
+import { IEvent, IValidatedEvent } from '../generated/schemas';
 import { FindOptionsType } from './event_log_client';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 export { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
+import { estypes } from '@elastic/elasticsearch';
 
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
 
@@ -52,8 +53,12 @@ export interface IEventLogClient {
     type: string,
     ids: string[],
     aggs: Record<string, estypes.AggregationsAggregationContainer>,
-    filter?: string
-  ): Promise<unknown>;
+    filter?: string,
+    size?: number
+  ): Promise<{
+    aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
+    data: IValidatedEvent[];
+  }>;
 }
 
 export interface IEventLogger {

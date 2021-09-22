@@ -8,9 +8,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
-import { capitalize, sortBy } from 'lodash';
+import { capitalize, sortBy, uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
+import moment, { Duration } from 'moment';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -30,6 +31,11 @@ import {
   EuiTableSortingType,
   EuiButtonIcon,
   EuiPanel,
+  EuiTitle,
+  EuiListGroup,
+  EuiListGroupItem,
+  formatDate,
+  dateFormatAliases,
 } from '@elastic/eui';
 import {
   Axis,
@@ -63,6 +69,7 @@ import {
   disableAlert,
   enableAlert,
   deleteAlerts,
+  loadRuleMonitoringOverview,
 } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -97,6 +104,37 @@ interface AlertState {
   totalItemCount: number;
 }
 
+const ONE_MILLISECOND_AS_NANOSECONDS = 1000000;
+const ONE_SECOND = 1000;
+const ONE_MINUTE = 60000;
+const ONE_HOUR = 3600000;
+
+const milliseconds = (duration: moment.Duration): string =>
+  Number.isInteger(duration.milliseconds())
+    ? `${duration.milliseconds()}ms`
+    : `${duration.milliseconds().toFixed(2)}ms`; // nanosecond precision
+const seconds = (duration: moment.Duration): string => `${duration.seconds().toFixed(2)}s`;
+const minutes = (duration: moment.Duration): string =>
+  `${duration.minutes()}m ${seconds(duration)}`;
+const hours = (duration: moment.Duration): string => `${duration.hours()}h ${minutes(duration)}`;
+
+function formatNanoseconds(nanos: string) {
+  const totalNanoseconds = Number(nanos);
+
+  const duration = moment.duration(totalNanoseconds / ONE_MILLISECOND_AS_NANOSECONDS);
+  const totalMs = duration.asMilliseconds();
+
+  if (totalMs < ONE_SECOND) {
+    return milliseconds(duration);
+  } else if (totalMs < ONE_MINUTE) {
+    return seconds(duration);
+  } else if (totalMs < ONE_HOUR) {
+    return minutes(duration);
+  } else {
+    return hours(duration);
+  }
+}
+
 export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
@@ -122,7 +160,18 @@ export const AlertsList: React.FunctionComponent = () => {
   const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<AlertTableItem | null>(null);
+
   const [ruleTypeCount, setRuleTypeCount] = useState<Datum[]>([]);
+  const [ruleTypeAvgDuration, setRuleTypeAvgDuration] = useState<any[]>([]);
+  const [ruleTypeAvgDelay, setRuleTypeAvgDelay] = useState<any[]>([]);
+  const [ruleTypeNumFailures, setRuleTypeNumFailures] = useState<any[]>([]);
+  const [ruleAvgDuration, setRuleAvgDuration] = useState<any[]>([]);
+  const [ruleAvgDelay, setRuleAvgDelay] = useState<any[]>([]);
+  const [ruleNumFailures, setRuleNumFailures] = useState<any[]>([]);
+  const [errorReasonCount, setErrorReasonCount] = useState<Datum[]>([]);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
+  const [alertCountByRuleType, setAlertCountByRuleType] = useState<any[]>([]);
+  const [ruleTypes, setRuleTypes] = useState<string[]>([]);
 
   const [sort, setSort] = useState<EuiTableSortingType<AlertTableItem>['sort']>({
     field: 'name',
@@ -232,6 +281,7 @@ export const AlertsList: React.FunctionComponent = () => {
           sort,
         });
         await loadAlertAggs();
+        await loadMonitoring();
         setAlertsState({
           isLoading: false,
           data: alertsResponse.data,
@@ -281,6 +331,102 @@ export const AlertsList: React.FunctionComponent = () => {
           'xpack.triggersActionsUI.sections.alertsList.unableToLoadRuleStatusInfoMessage',
           {
             defaultMessage: 'Unable to load rule status info',
+          }
+        ),
+      });
+    }
+  }
+
+  async function loadMonitoring() {
+    try {
+      const monitoring = await loadRuleMonitoringOverview({
+        http,
+      });
+      let data = monitoring?.overview?.ruleTypeAvgDuration?.buckets ?? [];
+      setRuleTypeAvgDuration(
+        data.map((d: any) => ({
+          key: `${getRuleTypeNameFromId(d.key)} rule type`,
+          value: d?.averageDuration?.value ?? 0,
+        }))
+      );
+      data = monitoring?.overview?.ruleTypeAvgDelay?.buckets ?? [];
+      setRuleTypeAvgDelay(
+        data.map((d: any) => ({
+          key: `${getRuleTypeNameFromId(d.key)} rule type`,
+          value: d?.averageDelay?.value ?? 0,
+        }))
+      );
+      data = monitoring?.overview?.ruleTypeNumFailures?.buckets ?? [];
+      setRuleTypeNumFailures(
+        data
+          .filter((d: any) => d?.failures?.failureStats?.value !== 0)
+          .map((d: any) => ({
+            key: `${getRuleTypeNameFromId(d.key)} rule type`,
+            value: d?.failures?.failureStats?.value ?? 0,
+          }))
+      );
+
+      data = monitoring?.overview?.ruleAvgDuration?.buckets ?? [];
+      setRuleAvgDuration(
+        data.map((d: any) => ({
+          key: `${d?.ruleName?.buckets[0]?.key} rule`,
+          value: d?.averageDuration?.value ?? 0,
+        }))
+      );
+      data = monitoring?.overview?.ruleAvgDelay?.buckets ?? [];
+      setRuleAvgDelay(
+        data.map((d: any) => ({
+          key: `${d?.ruleName?.buckets[0]?.key} rule`,
+          value: d?.averageDelay?.value ?? 0,
+        }))
+      );
+      data = monitoring?.overview?.ruleNumFailures?.buckets ?? [];
+      setRuleNumFailures(
+        data
+          .filter((d: any) => d?.failures?.failureStats?.value !== 0)
+          .map((d: any) => ({
+            key: `${d?.ruleName?.buckets[0]?.key} rule`,
+            id: d?.key,
+            value: d?.failures?.failureStats?.value ?? 0,
+          }))
+      );
+      data = monitoring?.errors?.reasons?.error?.buckets ?? [];
+      setErrorReasonCount(
+        data.map((bucket: any) => ({
+          value: bucket.doc_count,
+          label: bucket.key,
+        }))
+      );
+      data = monitoring?.errors?.messages ?? {};
+      setErrorMessages(Object.keys(data));
+
+      data = monitoring?.alerts?.overTime?.buckets ?? [];
+      let rTypes: string[] = [];
+      const parsedAlertData = data.map((d: any) => {
+        const alertData = d?.alerts?.buckets ?? [];
+        const values = alertData.reduce(
+          (acc: any, item: any) => ({
+            ...acc,
+            [item.key]: item.doc_count,
+          }),
+          {}
+        );
+        rTypes = rTypes.concat(Object.keys(values));
+        return {
+          ...values,
+          key: d.key_as_string,
+        };
+      });
+      console.log(parsedAlertData);
+      console.log(uniq(rTypes));
+      setAlertCountByRuleType(parsedAlertData);
+      setRuleTypes(uniq(rTypes));
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.alertsList.unableToLoadRuleStatusInfoMessage',
+          {
+            defaultMessage: 'Unable to load rule monitoring info',
           }
         ),
       });
@@ -797,9 +943,12 @@ export const AlertsList: React.FunctionComponent = () => {
       {/* Large to remain consistent with ActionsList table spacing */}
       <EuiSpacer size="l" />
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={2}>
           <EuiPanel hasBorder={true}>
-            <Chart size={{ height: 200, width: 200 }}>
+            <EuiTitle size="s">
+              <h3>Rules by type</h3>
+            </EuiTitle>
+            <Chart size={{ height: 200, width: 400 }}>
               <Settings theme={EUI_CHARTS_THEME_LIGHT.theme} />
               <Partition
                 id="rule_types"
@@ -813,10 +962,314 @@ export const AlertsList: React.FunctionComponent = () => {
                 ]}
               />
             </Chart>
+            <EuiSpacer size="l" />
+            <Chart size={{ height: 200 }}>
+              <Settings
+                theme={EUI_CHARTS_THEME_LIGHT.theme}
+                showLegend={true}
+                legendPosition="right"
+              />
+              <BarSeries
+                id="hi"
+                name={getRuleTypeNameFromId('AlertingExample')}
+                data={alertCountByRuleType}
+                xScaleType="time"
+                xAccessor="key"
+                yAccessors={['AlertingExample']}
+                yScaleType="linear"
+              />
+              {/* {ruleTypes.map((ruleType: string, index: number) => {
+                console.log(ruleType);
+                return (
+                  <BarSeries
+                    id={`r_${index}`}
+                    name={getRuleTypeNameFromId(ruleType)}
+                    data={alertCountByRuleType}
+                    xScaleType="time"
+                    xAccessor={'key'}
+                    yAccessors={[ruleType]}
+                    yScaleType="linear"
+                  />
+                );
+              })} */}
+              <Axis
+                title={formatDate(Date.now(), dateFormatAliases.date)}
+                id="bottom-axis"
+                position="bottom"
+                tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+              />
+              <Axis id="left-axis" position="left" showGridLines tickFormat={(d) => d} />
+            </Chart>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder={true}>
+            <EuiTitle size="s">
+              <h3>Average Execution Time</h3>
+            </EuiTitle>
+            <EuiTitle size="xs">
+              <h4>By rule type</h4>
+            </EuiTitle>
+            <EuiBasicTable
+              items={ruleTypeAvgDuration}
+              rowProps={() => ({
+                'data-test-subj': 'action-row',
+              })}
+              cellProps={() => ({
+                'data-test-subj': 'cell',
+              })}
+              columns={[
+                {
+                  field: 'key',
+                  name: '',
+                  sortable: true,
+                  truncateText: true,
+                  render: (value: string) => {
+                    return <span>{value}</span>;
+                  },
+                },
+                {
+                  field: 'value',
+                  name: '',
+                  render: (value: string) => {
+                    return <span>{formatNanoseconds(value)}</span>;
+                  },
+                  sortable: true,
+                },
+              ]}
+              tableLayout="fixed"
+              className="executionSummaryList"
+            />
+            <EuiSpacer size="l" />
+            <EuiTitle size="xs">
+              <h4>By rule</h4>
+            </EuiTitle>
+            <EuiBasicTable
+              items={ruleAvgDuration}
+              rowProps={() => ({
+                'data-test-subj': 'action-row',
+              })}
+              cellProps={() => ({
+                'data-test-subj': 'cell',
+              })}
+              columns={[
+                {
+                  field: 'key',
+                  name: '',
+                  sortable: true,
+                  truncateText: true,
+                  render: (value: string) => {
+                    return <span>{value}</span>;
+                  },
+                },
+                {
+                  field: 'value',
+                  name: '',
+                  render: (value: string) => {
+                    return <span>{formatNanoseconds(value)}</span>;
+                  },
+                  sortable: true,
+                },
+              ]}
+              tableLayout="fixed"
+              className="executionSummaryList"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder={true}>
+            <EuiTitle size="s">
+              <h3>Average Delay</h3>
+            </EuiTitle>
+            <EuiTitle size="xs">
+              <h4>By rule type</h4>
+            </EuiTitle>
+            <EuiBasicTable
+              items={ruleTypeAvgDelay}
+              rowProps={() => ({
+                'data-test-subj': 'action-row',
+              })}
+              cellProps={() => ({
+                'data-test-subj': 'cell',
+              })}
+              columns={[
+                {
+                  field: 'key',
+                  name: '',
+                  sortable: true,
+                  truncateText: true,
+                  render: (value: string) => {
+                    return <span>{value}</span>;
+                  },
+                },
+                {
+                  field: 'value',
+                  name: '',
+                  render: (value: string) => {
+                    return <span>{formatNanoseconds(value)}</span>;
+                  },
+                  sortable: true,
+                },
+              ]}
+              tableLayout="fixed"
+              className="executionSummaryList"
+            />
+            <EuiSpacer size="l" />
+            <EuiTitle size="xs">
+              <h4>By rule</h4>
+            </EuiTitle>
+            <EuiBasicTable
+              items={ruleAvgDelay}
+              rowProps={() => ({
+                'data-test-subj': 'action-row',
+              })}
+              cellProps={() => ({
+                'data-test-subj': 'cell',
+              })}
+              columns={[
+                {
+                  field: 'key',
+                  name: '',
+                  sortable: true,
+                  truncateText: true,
+                  render: (value: string) => {
+                    return <span>{value}</span>;
+                  },
+                },
+                {
+                  field: 'value',
+                  name: '',
+                  render: (value: string) => {
+                    return <span>{formatNanoseconds(value)}</span>;
+                  },
+                  sortable: true,
+                },
+              ]}
+              tableLayout="fixed"
+              className="executionSummaryList"
+            />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-
+      <EuiSpacer size="l" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasBorder={true}>
+            <EuiTitle size="s">
+              <h3>Errors</h3>
+            </EuiTitle>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={2}>
+                <EuiTitle size="xs">
+                  <h4># Failures by rule type</h4>
+                </EuiTitle>
+                <EuiBasicTable
+                  items={ruleTypeNumFailures}
+                  rowProps={() => ({
+                    'data-test-subj': 'action-row',
+                  })}
+                  cellProps={() => ({
+                    'data-test-subj': 'cell',
+                  })}
+                  columns={[
+                    {
+                      field: 'key',
+                      name: '',
+                      sortable: true,
+                      truncateText: true,
+                      render: (value: string) => {
+                        return <span>{value}</span>;
+                      },
+                    },
+                    {
+                      field: 'value',
+                      name: '',
+                      render: (value: string) => {
+                        return <span>{value}</span>;
+                      },
+                      sortable: true,
+                    },
+                  ]}
+                  tableLayout="fixed"
+                  className="executionSummaryList"
+                />
+                <EuiSpacer size="l" />
+                <EuiTitle size="xs">
+                  <h4># Failures by rule</h4>
+                </EuiTitle>
+                <EuiBasicTable
+                  items={ruleNumFailures}
+                  rowProps={() => ({
+                    'data-test-subj': 'action-row',
+                  })}
+                  cellProps={() => ({
+                    'data-test-subj': 'cell',
+                  })}
+                  columns={[
+                    {
+                      field: 'key',
+                      name: '',
+                      sortable: true,
+                      truncateText: true,
+                      render: (value: string, item: any) => {
+                        return (
+                          <EuiLink
+                            title={value}
+                            onClick={() => {
+                              history.push(routeToRuleDetails.replace(`:ruleId`, item.id));
+                            }}
+                          >
+                            {value}
+                          </EuiLink>
+                        );
+                      },
+                    },
+                    {
+                      field: 'value',
+                      name: '',
+                      render: (value: string) => {
+                        return <span>{value}</span>;
+                      },
+                      sortable: true,
+                    },
+                  ]}
+                  tableLayout="fixed"
+                  className="executionSummaryList"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiTitle size="xs">
+                  <h4>Error messages</h4>
+                </EuiTitle>
+                <EuiListGroup showToolTips>
+                  {errorMessages.map((message: string) => (
+                    <EuiListGroupItem onClick={() => {}} label={message} />
+                  ))}
+                </EuiListGroup>
+                <EuiSpacer size="l" />
+                <EuiTitle size="xs">
+                  <h4>Error reasons</h4>
+                </EuiTitle>
+                <Chart size={{ height: 200, width: 200 }}>
+                  <Settings theme={EUI_CHARTS_THEME_LIGHT.theme} />
+                  <Partition
+                    id="error_reasons"
+                    data={errorReasonCount}
+                    valueAccessor={(d: Datum) => d.value as number}
+                    layers={[
+                      {
+                        groupByRollup: (d: Datum) => d.label,
+                        nodeLabel: (d: Datum) => d,
+                      },
+                    ]}
+                  />
+                </Chart>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiBasicTable
         loading={alertsState.isLoading || alertTypesState.isLoading || isPerformingAction}
