@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash/fp';
 import {
   EuiButton,
   EuiTitle,
@@ -61,6 +62,10 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
   useEffect(() => {
     if (isUpdateArtifactsLoaded) {
       handleListFlyoutClose();
+      dispatch({
+        type: 'policyArtifactsUpdateTrustedAppsChanged',
+        payload: { type: 'UninitialisedResourceState' },
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUpdateArtifactsLoaded]);
@@ -71,9 +76,15 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
       payload: { trustedAppIds: selectedArtifactIds },
     });
   }, [dispatch, selectedArtifactIds]);
-  const handleOnSearch = usePolicyDetailsNavigateCallback((filter) => ({
-    filter,
-  }));
+  const handleOnSearch = useCallback(
+    (filter) => {
+      dispatch({
+        type: 'policyArtifactsAvailableListPageDataFilter',
+        payload: { filter },
+      });
+    },
+    [dispatch]
+  );
 
   const searchWarningMessage = useMemo(
     () => (
@@ -160,6 +171,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
               fill
               onClick={handleOnConfirmAction}
               isLoading={isUpdateArtifactsLoading}
+              disabled={isEmpty(selectedArtifactIds)}
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.confirm"

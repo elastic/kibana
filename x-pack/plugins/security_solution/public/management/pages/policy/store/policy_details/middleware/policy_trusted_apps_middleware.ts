@@ -30,10 +30,10 @@ import { PolicyDetailsAction } from '../action';
 
 const searchTrustedApps = async (
   store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
-  trustedAppsService: TrustedAppsService
+  trustedAppsService: TrustedAppsService,
+  filter?: string
 ) => {
   const state = store.getState();
-  const location = getCurrentArtifactsLocation(state);
   const policyId = policyIdFromParams(state);
 
   store.dispatch({
@@ -48,8 +48,10 @@ const searchTrustedApps = async (
       `(not exception-list-agnostic.attributes.tags:"policy:${policyId}") AND (not exception-list-agnostic.attributes.tags:"policy:all")`,
     ];
 
-    const filterKuery = parseQueryFilterToKQL(location.filter, SEARCHABLE_FIELDS) || undefined;
-    if (filterKuery) kuery.push(filterKuery);
+    if (filter) {
+      const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
+      if (filterKuery) kuery.push(filterKuery);
+    }
 
     const trustedApps = await trustedAppsService.getTrustedAppsList({
       page: 1,
@@ -65,7 +67,7 @@ const searchTrustedApps = async (
         pageSize: 100,
         totalItemsCount: trustedApps.total,
         timestamp: Date.now(),
-        filter: location.filter,
+        filter: filter || '',
         excludedPolicies: '',
         includedPolicies: policyId,
       }),
@@ -151,5 +153,11 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
     getCurrentArtifactsLocation(state).show === 'list'
   ) {
     await updateTrustedApps(store, trustedAppsService, action.payload.trustedAppIds);
+  } else if (
+    action.type === 'policyArtifactsAvailableListPageDataFilter' &&
+    isOnPolicyTrustedAppsPage(state) &&
+    getCurrentArtifactsLocation(state).show === 'list'
+  ) {
+    await searchTrustedApps(store, trustedAppsService, action.payload.filter);
   }
 };
