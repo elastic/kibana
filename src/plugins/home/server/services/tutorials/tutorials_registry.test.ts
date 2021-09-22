@@ -19,6 +19,7 @@ import {
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
+import { customIntegrationsMock } from '../../../../custom_integrations/server/mocks';
 
 const INVALID_TUTORIAL: TutorialSchema = {
   id: 'test',
@@ -66,12 +67,15 @@ const VALID_TUTORIAL: TutorialSchema = {
 const invalidTutorialProvider = INVALID_TUTORIAL;
 const validTutorialProvider = VALID_TUTORIAL;
 
-const mockCustomIntegrationsPluginSetup = {} as unknown as CustomIntegrationsPluginSetup;
-
 describe('TutorialsRegistry', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let testProvider: TutorialProvider;
   let testScopedTutorialContextFactory: ScopedTutorialContextFactory;
+  let mockCustomIntegrationsPluginSetup: MockedKeys<CustomIntegrationsPluginSetup>;
+
+  beforeEach(() => {
+    mockCustomIntegrationsPluginSetup = customIntegrationsMock.createSetup();
+  });
 
   describe('GET /api/kibana/home/tutorials', () => {
     beforeEach(() => {
@@ -103,6 +107,27 @@ describe('TutorialsRegistry', () => {
       const setup = new TutorialsRegistry().setup(mockCoreSetup, mockCustomIntegrationsPluginSetup);
       testProvider = ({}) => validTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
+
+      expect(mockCustomIntegrationsPluginSetup.registerCustomIntegration.mock.calls).toEqual([
+        [
+          {
+            name: 'new tutorial provider',
+            id: 'test',
+            title: 'new tutorial provider',
+            categories: [],
+            uiInternalPath: '/app/home#/tutorial/test',
+            description: 'short description',
+            icons: [
+              {
+                src: 'alert',
+                type: 'eui',
+              },
+            ],
+            shipper: 'tutorial',
+            isBeta: false,
+          },
+        ],
+      ]);
     });
 
     test('addScopedTutorialContextFactory throws when given a scopedTutorialContextFactory that is not a function', () => {
