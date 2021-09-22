@@ -11,21 +11,22 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '../../../../../task_manager/server';
 import {
   batchTelemetryRecords,
   getPreviousEpMetaTaskTimestamp,
   isPackagePolicyList,
-} from './helpers';
-import { TelemetryEventsSender } from './sender';
-import { PolicyData } from '../../../common/endpoint/types';
-import { FLEET_ENDPOINT_PACKAGE } from '../../../../fleet/common';
+} from '../helpers';
+import { TelemetryEventsSender } from '../sender';
+import { PolicyData } from '../../../../common/endpoint/types';
+import { FLEET_ENDPOINT_PACKAGE } from '../../../../../fleet/common';
 import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
   EndpointPolicyResponseDocument,
-} from './types';
-import { TELEMETRY_CHANNEL_ENDPOINT_META } from './constants';
+} from '../types';
+import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
+import { TelemetryReceiver } from '../receiver';
 
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '5m',
@@ -53,14 +54,17 @@ const EmptyFleetAgentResponse = {
 export class TelemetryEndpointTask {
   private readonly logger: Logger;
   private readonly sender: TelemetryEventsSender;
+  private readonly receiver: TelemetryReceiver;
 
   constructor(
     logger: Logger,
     taskManager: TaskManagerSetupContract,
-    sender: TelemetryEventsSender
+    sender: TelemetryEventsSender,
+    receiver: TelemetryReceiver
   ) {
     this.logger = logger;
     this.sender = sender;
+    this.receiver = receiver;
 
     taskManager.registerTaskDefinitions({
       [TelemetryEndpointTaskConstants.TYPE]: {
@@ -121,9 +125,9 @@ export class TelemetryEndpointTask {
 
   private async fetchEndpointData(executeFrom: string, executeTo: string) {
     const [fleetAgentsResponse, epMetricsResponse, policyResponse] = await Promise.allSettled([
-      this.sender.fetchFleetAgents(),
-      this.sender.fetchEndpointMetrics(executeFrom, executeTo),
-      this.sender.fetchEndpointPolicyResponses(executeFrom, executeTo),
+      this.receiver.fetchFleetAgents(),
+      this.receiver.fetchEndpointMetrics(executeFrom, executeTo),
+      this.receiver.fetchEndpointPolicyResponses(executeFrom, executeTo),
     ]);
 
     return {
@@ -213,7 +217,7 @@ export class TelemetryEndpointTask {
     const endpointPolicyCache = new Map<string, PolicyData>();
     for (const policyInfo of fleetAgents.values()) {
       if (policyInfo !== null && policyInfo !== undefined && !endpointPolicyCache.has(policyInfo)) {
-        const agentPolicy = await this.sender.fetchPolicyConfigs(policyInfo);
+        const agentPolicy = await this.receiver.fetchPolicyConfigs(policyInfo);
         const packagePolicies = agentPolicy?.package_policies;
 
         if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
