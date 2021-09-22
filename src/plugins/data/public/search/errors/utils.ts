@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ErrorCause } from '@elastic/elasticsearch/api/types';
 import type { FailedShard, Reason } from './types';
 import { KibanaServerError } from '../../../../kibana_utils/common';
 
@@ -15,8 +15,9 @@ export function getFailedShards(err: KibanaServerError<any>): FailedShard | unde
   return failedShards ? failedShards[0] : undefined;
 }
 
-function getNestedCause(err: KibanaServerError<any>): Reason {
-  const { type, reason, caused_by: causedBy } = err.attributes || err;
+function getNestedCause(err: KibanaServerError | ErrorCause): Reason {
+  const attr = ((err as KibanaServerError).attributes || err) as ErrorCause;
+  const { type, reason, caused_by: causedBy } = attr;
   if (causedBy) {
     return getNestedCause(causedBy);
   }
