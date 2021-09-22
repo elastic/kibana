@@ -694,8 +694,6 @@ For information about the {kib} 7.14.0 release, review the following information
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.14.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-102263]]
 .Changes audit event terminology
@@ -751,8 +749,6 @@ For more information, refer to {kibana-pull}99078[#99078].
 *Impact* +
 When you upgrade to 7.14.0, {kib} automatically reflects the changes. No action is needed.
 ====    
-
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecations-7.14.0]]
@@ -1456,8 +1452,6 @@ You should export the used index patterns separately.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.13.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-97206]]
 .Remove Elastic Agent routes and related services
@@ -1493,8 +1487,6 @@ The *Explore underlying data* context menu on dashboards is now disabled by defa
 *Impact* +
 To enable the *Explore underlying data* context menu, set `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled` to `true` in kibana.yml. 
 ====
-
-// end::notable-breaking-changes[]
 
 
 [float]
@@ -2026,8 +2018,6 @@ For information about the {kib} 7.12.0 release, review the following information
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.12.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-89632]]
 .Removes geo threshold alert type
@@ -2070,8 +2060,6 @@ To display the cluster data in *Discover*, load documents directly from `_source
 
 . Go to `discover:searchFieldsFromSource`, then select *On*.
 ====
-
-// end::notable-breaking-changes[]
 
 [float]
 [[known-issues-v7.12.0]]
@@ -2622,8 +2610,6 @@ Breaking changes can prevent your application from optimal operation and perform
 
 // The following section is re-used in the Installation and Upgrade Guide
 
-// tag::notable-breaking-changes[]
-
 
 [discrete]
 [[ingestManager_renamed_fleet]]
@@ -2661,8 +2647,6 @@ which drops support for glibc `2.12`-based operating systems.
 *Impact*: Supported versions of {kib} are not impacted. You can no longer run {kib} on older operating systems that require glibc `2.12` (for example, CentOS 6). Refer to our https://www.elastic.co/support/matrix[support matrix] for a list of currently supported operating systems.
 
 *via https://github.com/elastic/kibana/pull/83425[#83425]*
-
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecation-v7.11.0]]
@@ -3170,8 +3154,6 @@ Breaking changes can prevent your application from optimal operation and perform
 
 // The following section is re-used in the Installation and Upgrade Guide
 
-// tag::notable-breaking-changes[]
-
 
 [discrete]
 [[breaking_kibana_legacy_plugins]]
@@ -3207,7 +3189,6 @@ more information about this property.
 
 *via https://github.com/elastic/kibana/pull/73805[#73805]*
 
-// end::notable-breaking-changes[]
 
 [discrete]
 [[general-plugin-API-changes-7-10]]
@@ -4542,8 +4523,6 @@ Breaking changes can prevent your application from optimal operation and perform
 
 // The following section is re-used in the Installation and Upgrade Guide
 
-// tag::notable-breaking-changes[]
-
 [float]
 [[breaking_kibana_keystore]]
 ===== `kibana.keystore` moved from the data folder to the config folder
@@ -4554,8 +4533,6 @@ package distributions. If a pre-existing keystore exists in the data directory,
 that path will continue to be used.
 
 *via https://github.com/elastic/kibana/pull/57856[#57856]*
-
-// end::notable-breaking-changes[]
 
 [float]
 [[general-plugin-API-changes-79]]
@@ -5643,8 +5620,6 @@ Breaking changes can prevent your application from optimal operation and perform
 // The following section is re-used in the Installation and Upgrade Guide
 
 
-// tag::notable-breaking-changes[]
-
 [float]
 [[user-facing-changes-78]]
 ==== Breaking changes for users
@@ -5682,8 +5657,6 @@ This fixes the Back button when navigating between dashboards using drilldowns.
 *via https://github.com/elastic/kibana/pull/62415[#62415]*
 ====
 
-
-// end::notable-breaking-changes[]
 
 
 [float]
@@ -6505,9 +6478,6 @@ For information about the Kibana 7.7.0 release, review the following information
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.7.0, review the breaking changes, then mitigate the impact to your application.
 
 // The following section is re-used in the Installation and Upgrade Guide
-// tag::notable-breaking-changes[]
-
-// end::notable-breaking-changes[]
 
 [float]
 ==== Breaking changes for users
