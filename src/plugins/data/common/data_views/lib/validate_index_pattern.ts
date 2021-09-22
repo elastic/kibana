@@ -24,7 +24,7 @@ function findIllegalCharacters(indexPattern: string): string[] {
 }
 
 export function validateDataView(indexPattern: string) {
-  const errors: Record<string, any> = {};
+  const errors: { [ILLEGAL_CHARACTERS_KEY]?: string[]; [CONTAINS_SPACES_KEY]?: boolean } = {};
 
   const illegalCharacters = findIllegalCharacters(indexPattern);
 
