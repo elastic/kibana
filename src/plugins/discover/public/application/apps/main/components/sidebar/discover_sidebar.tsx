@@ -37,7 +37,7 @@ import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
-import { DISCOVER_VIEW_MODE } from '../view_mode_toggle';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -78,7 +78,7 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   /**
    * Discover view mode
    */
-  discoverViewMode: DISCOVER_VIEW_MODE;
+  viewMode: VIEW_MODE;
 }
 
 export function DiscoverSidebarComponent({
@@ -102,7 +102,7 @@ export function DiscoverSidebarComponent({
   setFieldEditorRef,
   closeFlyout,
   editField,
-  discoverViewMode,
+  viewMode,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
@@ -208,10 +208,7 @@ export function DiscoverSidebarComponent({
     return result;
   }, [fields]);
 
-  const showFieldStats = useMemo(
-    () => discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
-    [discoverViewMode]
-  );
+  const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
 
   const calculateMultiFields = () => {
     if (!useNewFieldsApi || !fields) {

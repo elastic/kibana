@@ -17,7 +17,7 @@ import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
-import { DISCOVER_VIEW_MODE, DocumentViewModeToggle } from '../view_mode_toggle';
+import { VIEW_MODE, DocumentViewModeToggle } from '../view_mode_toggle';
 
 const TimechartHeaderMemoized = memo(TimechartHeader);
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
@@ -30,7 +30,7 @@ export function DiscoverChart({
   state,
   stateContainer,
   timefield,
-  discoverViewMode,
+  viewMode,
   setDiscoverViewMode,
 }: {
   resetSavedSearch: () => void;
@@ -41,8 +41,8 @@ export function DiscoverChart({
   state: AppState;
   stateContainer: GetStateReturn;
   timefield?: string;
-  discoverViewMode: DISCOVER_VIEW_MODE;
-  setDiscoverViewMode: (discoverViewMode: DISCOVER_VIEW_MODE) => void;
+  viewMode: VIEW_MODE;
+  setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) {
   const { data, uiSettings: config } = services;
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
@@ -127,10 +127,7 @@ export function DiscoverChart({
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
-          <DocumentViewModeToggle
-            discoverViewMode={discoverViewMode}
-            setDiscoverViewMode={setDiscoverViewMode}
-          />
+          <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
         </EuiFlexGroup>
       </EuiFlexItem>
 

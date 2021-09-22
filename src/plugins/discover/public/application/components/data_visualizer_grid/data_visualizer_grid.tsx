@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { DataView, Query } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
@@ -43,26 +42,26 @@ export interface DiscoverDataVisualizerGridProps {
    */
   indexPattern: DataView;
   /**
-   * Saved search description
-   */
-  searchDescription?: string;
-  /**
-   * Saved search title
-   */
-  searchTitle?: string;
-  /**
    * Discover plugin services
    */
   services: DiscoverServices;
+  /**
+   * Optional saved search
+   */
   savedSearch?: SavedSearch;
+  /**
+   * Optional query to update the table content
+   */
   query?: Query;
+  /**
+   * Filters query to update the table content
+   */
   filters?: Filter[];
+  /**
+   * stateContainer to access and update app state preferences like to show preview or not
+   */
   stateContainer?: GetStateReturn;
 }
-
-export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
-  return <EuiDataGrid {...props} />;
-});
 
 export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
   const { services, indexPattern, savedSearch, query, columns, filters, stateContainer } = props;
@@ -123,7 +122,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   useEffect(() => {
     let unmounted = false;
     const loadEmbeddable = async () => {
-      if (services?.embeddable) {
+      if (services.embeddable) {
         const factory = services.embeddable.getEmbeddableFactory<
           DataVisualizerGridEmbeddableInput,
           DataVisualizerGridEmbeddableOutput
@@ -148,7 +147,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
       unmounted = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [services?.embeddable, showPreviewByDefault]);
+  }, [services.embeddable, showPreviewByDefault]);
 
   // We can only render after embeddable has already initialized
   useEffect(() => {

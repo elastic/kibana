@@ -35,7 +35,7 @@ import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
 import { handleSourceColumnState } from '../../../helpers/state_helpers';
-import { DISCOVER_VIEW_MODE } from '../components/view_mode_toggle';
+import { VIEW_MODE } from '../components/view_mode_toggle';
 
 export interface AppState {
   /**
@@ -77,7 +77,7 @@ export interface AppState {
   /**
    * Table view: Documents vs Field Statistics
    */
-  discoverViewMode?: DISCOVER_VIEW_MODE;
+  viewMode?: VIEW_MODE;
   /**
    * Hide mini distribution/preview charts when in Field Statistics mode
    */

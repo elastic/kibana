@@ -51,8 +51,8 @@ export async function persistSavedSearch(
     savedSearch.hideChart = state.hideChart;
   }
 
-  if (state.discoverViewMode) {
-    savedSearch.discoverViewMode = state.discoverViewMode;
+  if (state.viewMode) {
+    savedSearch.viewMode = state.viewMode;
   }
 
   if (state.hideAggregatedPreview) {

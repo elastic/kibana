@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { StartServicesAccessor } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'kibana/public';
 import {
@@ -42,9 +41,13 @@ export class DataVisualizerGridEmbeddableFactory
     return false;
   }
 
+  public canCreateNew() {
+    return false;
+  }
+
   public getDisplayName() {
     return i18n.translate('xpack.dataVisualizer.index.components.grid.displayName', {
-      defaultMessage: 'Data Visualizer Grid',
+      defaultMessage: 'Data visualizer grid',
     });
   }
 

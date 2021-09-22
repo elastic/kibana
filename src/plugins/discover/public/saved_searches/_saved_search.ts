@@ -14,7 +14,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
     public static mapping = {
       title: 'text',
       description: 'text',
-      discoverViewMode: 'keyword',
+      viewMode: 'keyword',
       hideChart: 'boolean',
       hideAggregatedPreview: 'boolean',
       hits: 'integer',
@@ -37,7 +37,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
         mapping: {
           title: 'text',
           description: 'text',
-          discoverViewMode: 'keyword',
+          viewMode: 'keyword',
           hideChart: 'boolean',
           hideAggregatedPreview: 'boolean',
           hits: 'integer',

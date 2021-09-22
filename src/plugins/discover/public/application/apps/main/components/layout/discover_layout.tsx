@@ -44,7 +44,7 @@ import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../../types';
 import { useDataState } from '../../utils/use_data_state';
 import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
-import { DISCOVER_VIEW_MODE } from '../view_mode_toggle';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -73,14 +73,11 @@ export function DiscoverLayout({
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
-  const discoverViewMode = useMemo(
-    () => state.discoverViewMode ?? DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
-    [state.discoverViewMode]
-  );
+  const viewMode = useMemo(() => state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL, [state.viewMode]);
 
   const setDiscoverViewMode = useCallback(
-    (mode: DISCOVER_VIEW_MODE) => {
-      stateContainer.setAppState({ discoverViewMode: mode });
+    (mode: VIEW_MODE) => {
+      stateContainer.setAppState({ viewMode: mode });
     },
     [stateContainer]
   );
@@ -202,7 +199,7 @@ export function DiscoverLayout({
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
-              discoverViewMode={discoverViewMode}
+              viewMode={viewMode}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
@@ -269,12 +266,12 @@ export function DiscoverLayout({
                       services={services}
                       stateContainer={stateContainer}
                       timefield={timeField}
-                      discoverViewMode={discoverViewMode}
+                      viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />
-                  {discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL ? (
+                  {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
                     <DiscoverDocuments
                       documents$={savedSearchData$.documents$}
                       expandedDoc={expandedDoc}
@@ -292,8 +289,6 @@ export function DiscoverLayout({
                       savedSearch={savedSearch}
                       services={services}
                       indexPattern={indexPattern}
-                      searchDescription={savedSearch.description}
-                      searchTitle={savedSearch.lastSavedTitle}
                       query={state.query}
                       filters={state.filters}
                       columns={columns}

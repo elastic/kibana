@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export enum DISCOVER_VIEW_MODE {
+export enum VIEW_MODE {
   DOCUMENT_LEVEL = 'documents',
-  FIELD_LEVEL = 'fields',
+  AGGREGATED_LEVEL = 'aggregated',
 }

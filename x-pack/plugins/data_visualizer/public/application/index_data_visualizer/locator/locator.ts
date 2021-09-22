@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import { SerializableRecord } from '@kbn/utility-types';

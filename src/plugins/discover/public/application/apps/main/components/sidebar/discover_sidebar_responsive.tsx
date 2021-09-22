@@ -37,7 +37,7 @@ import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../services/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
-import { DISCOVER_VIEW_MODE } from '../view_mode_toggle';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -110,7 +110,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Discover view mode
    */
-  discoverViewMode: DISCOVER_VIEW_MODE;
+  viewMode: VIEW_MODE;
 }
 
 /**

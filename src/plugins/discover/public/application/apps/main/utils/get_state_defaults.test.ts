@@ -26,7 +26,6 @@ describe('getStateDefaults', () => {
         "columns": Array [
           "default_column",
         ],
-        "discoverViewMode": "discoverViewOptionDocument",
         "filters": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
@@ -39,6 +38,7 @@ describe('getStateDefaults', () => {
             "desc",
           ],
         ],
+        "viewMode": undefined,
       }
     `);
   });
@@ -56,7 +56,6 @@ describe('getStateDefaults', () => {
         "columns": Array [
           "default_column",
         ],
-        "discoverViewMode": "discoverViewOptionDocument",
         "filters": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
@@ -64,6 +63,7 @@ describe('getStateDefaults', () => {
         "interval": "auto",
         "query": undefined,
         "sort": Array [],
+        "viewMode": undefined,
       }
     `);
   });
