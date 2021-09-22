@@ -295,6 +295,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [inspect, loading, refetch, setQuery]);
   const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
 
+  // Clear checkbox selection when new events are fetched
+  useEffect(() => {
+    dispatch(tGridActions.clearSelected({ id }));
+    dispatch(
+      tGridActions.setTGridSelectAll({
+        id,
+        selectAll: false,
+      })
+    );
+  }, [nonDeletedEvents, dispatch, id]);
+
   return (
     <InspectButtonContainer>
       <StyledEuiPanel
@@ -338,30 +349,31 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     >
                       <ScrollableFlexItem grow={1}>
                         <StatefulBody
-                          hasAlertsCrud={hasAlertsCrud}
                           activePage={pageInfo.activePage}
                           browserFields={browserFields}
                           bulkActions={bulkActions}
-                          filterQuery={filterQuery}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
+                          filterQuery={filterQuery}
+                          filters={filters}
+                          filterStatus={filterStatus}
+                          hasAlertsCrud={hasAlertsCrud}
                           id={id}
+                          indexNames={indexNames}
                           isEventViewer={true}
                           itemsPerPageOptions={itemsPerPageOptions}
+                          leadingControlColumns={leadingControlColumns}
                           loadPage={loadPage}
                           onRuleChange={onRuleChange}
                           pageSize={itemsPerPage}
+                          refetch={refetch}
                           renderCellValue={renderCellValue}
                           rowRenderers={rowRenderers}
-                          tabType={TimelineTabs.query}
                           tableView={tableView}
+                          tabType={TimelineTabs.query}
                           totalItems={totalCountMinusDeleted}
-                          unit={unit}
-                          filterStatus={filterStatus}
-                          leadingControlColumns={leadingControlColumns}
                           trailingControlColumns={trailingControlColumns}
-                          refetch={refetch}
-                          indexNames={indexNames}
+                          unit={unit}
                         />
                       </ScrollableFlexItem>
                     </FullWidthFlexGroup>

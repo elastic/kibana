@@ -1,27 +1,207 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check out the <<release-notes, release notes>>.
 
-* {kibana-ref-all}/7.11/whats-new.html[7.11]
-* {kibana-ref-all}/7.10/whats-new.html[7.10]
-* {kibana-ref-all}/7.9/whats-new.html[7.9]
-* {kibana-ref-all}/7.8/whats-new.html[7.8]
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-For the full list of changes in {minor-version}, refer to the <<release-notes>>.
+Other versions: {kibana-ref-all}/7.14/whats-new.html[7.14] | {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] | 
+{kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | 
+{kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] | {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | 
+{kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2] | {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | 
+{kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+[[home-page-7.15]]
+=== Simplified home page
+
+Check out our simplified home page, which has a new design that helps you get to the solutions and your data faster.  
+
+In the solutions section, the previously titled *{kib}* group has been renamed *Analytics*, and we've given equal prominence to each solution card, in addition to reducing and simplifying the descriptions.
+
+In the *Add data* section, we’ve reduced and simplified the available actions to the primary *Add your data* action, and secondary *Try sample data* action.
+
+[role="screenshot"]
+image:images/whats-new_home-page.png[Home page]
+
+[float]
+[[visualizations-7-15]]
+=== Dashboard and visualizations&mdash;Heatmap color options, flexible legend options, and more
+
+[float]
+[[heatmap-color-options]]
+==== Heatmap color options
+
+In the drag-and-drop visualization editor, you can now apply color pallettes and custom colors to heatmaps, and fine tune the opacity of individual colors.
+
+[role="screenshot"]
+image:images/whats-new_heatmap-colors.png[Heatmap color options]
+
+[float]
+[[flexible-legend-options]]
+==== Flexible legend options
+
+We've added more options to customize the legends in the drag-and-drop visualization editor, *TSVB*, and the *Aggregation Based* area, line, bar, and pie charts. 
+
+You can choose to view, or not to view, the full name of your data series by enabling legend text truncation. When enabled, you can control the exact number of lines before truncation to make sure your legend isn't cutting off the important part of your data labels.  
+
+[role="screenshot"]
+image:images/whats-new_viz-legend-options.png[Legend menu options for truncating text]
+
+In the drag-and-drop visualization editor, you can save panel space by choosing to embed the legend in the visualization. 
+
+[role="screenshot"]
+image:images/whats-new_embed-legend.png[Drag-and-drop editor visualization with embedded legend]
+
+[float]
+[[synchronized-cursor-hover]]
+==== Synchronized cursor hover
+
+When your dashboard contains time series panels, hovering on one panel also hovers on the same time period as the other panels, regardless of the index pattern. 
+
+When your dashboard contains non-time series panels, hovering on one value now highlights the same value on the other panels, as long as the data is from the same index pattern.
+
+[role="screenshot"]
+image:images/whats-new_Dashboard_synchronized-cursor-hover.gif[Synchronized cursor hover in dashboard panels]
+
+Synchronized cursor hover is supported in the following visualization editors:
+
+* Drag-and-drop *Lens* editor
+
+* *TSVB*
+
+* *Aggregation based* area, line, and bar charts
+
+* *Timelion*
+
+[float]
+[[inspect-multiple-requests]]
+==== Inspect multiple requests for multiple layers
+
+The drag-and-drop *Lens* visualization editor now supports *Inspect*, which allows you to view the data in visualizations that contain multiple index patterns.
+
+[float]
+[[more-axes-configuration-options]]
+==== More axis configuration options
+
+In the drag-and-drop visualization editor, you can now orient your axis. While it's better to rotate your visualization to improve readability, axis orientation can help when you need the extra space on the horizontal axis.
+
+[float]
+[[percentile-aggregation-series-and-colors]]
+==== Percentile aggregation series and colors
+
+In *TSVB*, you can now visualize multiple percentiles as their own sereies, and apply a color to each series to easily distinguish between them.
+
+[float]
+[[maps-7-15]]
+=== Maps&mdash;highlight single layers, tooltip feedback, and more
+
+*Maps* now has the ability to highlight a single layer with the *Show this layer only* action. 
+
+[role="screenshot"]
+image:images/whats-new_highlight-single-layer.gif[Highlight a single layer in Maps]
+
+[float]
+[[maps-7-15-tooltip-feedbacj]]
+==== Choropleth layer tooltip feedback
+
+Choropleth layers now provide you with tooltip feedback for errors when you join data to a layer. The tooltip feedback is helpful for underlying configuration issues in the term-join, or when there are inconsistencies in the underlying data.
+
+[role="screenshot"]
+image:images/whats-new_tooltip-feedback.png[Tooltip feedback in Maps choropleth layers]
+
+[float]
+[[maps-7-15-dynamically-retrieved-data-indicator]]
+==== Indicator for dynamically retrieved data
+
+To help you determine if the data incrementally refreshes as you pan and zoom, the layer-entry in the table of contents now indicates when the layer data is dynamically retrieved based on the current extent of the map.
+
+[role="screenshot"]
+image:images/whats-new_Maps_layer-indicator.png[Indicator for when the layer data is dynamically retrieved]
+
+[float]
+[[discover-7-15]]
+=== Improved relevant results screen in Discover 
+
+*Discover* now includes an improved *No results match your search criteria* screen with clear next steps and guidance on how you can get relevant results faster.
+
+[role="screenshot"]
+image:images/whats-new_discover-no-results.png[No results message in Discover]
+
+[float]
+[[machine-learning-7-15]]
+=== Machine Learning
+
+[float]
+[[operational-alerts-anomaly-jobs]]
+==== Operational alerts for {anomaly-jobs}
+
+The new {anomaly-job} alert monitors the job health and notifies when an 
+operational issue is detected. Four types of checks can be enabled: datafeed is 
+not started, model memory limit has been hit, the job is experiencing delayed 
+data, and errors in job messages.
+
+[role="screenshot"]
+image:images/whats-new_op-alert-ad-job.png[Anomaly detection job health alert create rule editor]
+
+[float]
+[[import-export-ml-jobs]]
+==== Importing and exporting {ml} jobs
+
+To copy jobs more easily across clusters, you can now import and export jobs in 
+**{stack-manage-app} > {ml-app} Jobs**. The exported file contains configuration 
+details for {dfanalytics} jobs or {anomaly-jobs} and {dfeeds}. For more 
+information, refer to {ml-docs}/move-jobs.html[Export and import {ml} jobs].
+
+[role="screenshot"]
+image:images/whats-new_export-jobs.png[Export ml job editor]
+
+[float]
+[[stack-management-7-15]]
+=== Stack management
+
+[float]
+[[index-lifecycle-policies-7-15]]
+==== View affected index templates
+
+Multiple index templates can refer to the same index lifecycle policy. This makes editing an index lifecycle policy an uncertain process -- how do you know which index templates will be affected by a change? Now you can answer this question by reviewing a list of the affected index templates directly in the *Index Lifecycle Policies* app. Whenever you edit a policy, you’ll know exactly which index templates will be affected.
+
+[role="screenshot"]
+image:images/whats-new_index-lifecycle-policies.png[A list of affected index templates in the *Index Lifecycle Policies* app]
+
+[float]
+[[runtime-fields-7-15]]
+==== Preview runtime field scripts
+
+Getting your Painless script just right doesn’t always happen on the first try. The new *Preview* pane in the *Create field* editor provides a real-time preview, and improved error handling to make it easier to troubleshoot as scripts get more complex. Now you can evaluate your script against multiple documents, and browse the available fields without leaving the editor.
+
+[role="screenshot"]
+image:images/whats-new_runtime-fields_preview-pane.png[Preview pane in the runtime fields *Create field* editor]
+
+[float]
+[[osquery-manager-7-15]]
+=== beta[] Osquery Manager&mdash;Access controls, standardized scheduled query results, and more 
+
+[float]
+[[access-controls]]
+==== Access controls
+
+7.15.0 gives security teams more control over who can access Osquery and view results. Previously, only superusers could use Osquery, but now you can grant any users access to sensitive Osquery data, and specify run, save, and scheduled query privileges.
+
+[float]
+[[standardized-scheduled-query-results-with-ecs]]
+==== Standardized scheduled query results with ECS
+
+When defining scheduled queries, you can now map query results to ECS fields to standardize your Osquery data for use across detections, machine learning, and any other areas that rely on ECS-compliant data. With standardized scheduled query results, you greatly increase the value of the queries you run by making the results more readily usable across the Elastic Stack.
+
+[float]
+[[scheduled-query-status-at-a-glance]]
+==== Scheduled query status at a glance
+Scheduled query groups now show the status of individual queries within a group, enabling you to understand at a glance if there are results to review or issues to address. Surfacing this information can also help you tune the queries you’re running. For example, you can identify queries that run too frequently or errors you need to resolve.
 
 // end::notable-highlights[]
