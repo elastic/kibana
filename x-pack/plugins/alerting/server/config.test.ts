@@ -19,6 +19,15 @@ describe('config validation', () => {
           "interval": "5m",
           "removalDelay": "1h",
         },
+        "legacyTrackingPurposes": Object {
+          "healthCheck": Object {
+            "interval": "60m",
+          },
+          "invalidateApiKeysTask": Object {
+            "interval": "5m",
+            "removalDelay": "1h",
+          },
+        },
         "maxEphemeralActionsPerAlert": 10,
       }
     `);

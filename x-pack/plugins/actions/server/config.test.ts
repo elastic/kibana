@@ -41,9 +41,6 @@ describe('config validation', () => {
         "proxyRejectUnauthorizedCertificates": true,
         "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
-        "whitelistedHosts": Array [
-          "*",
-        ],
       }
     `);
   });
@@ -94,9 +91,6 @@ describe('config validation', () => {
         "proxyRejectUnauthorizedCertificates": false,
         "rejectUnauthorized": false,
         "responseTimeout": "PT1M",
-        "whitelistedHosts": Array [
-          "*",
-        ],
       }
     `);
   });
@@ -218,9 +212,6 @@ describe('config validation', () => {
           "proxyVerificationMode": "none",
           "verificationMode": "none",
         },
-        "whitelistedHosts": Array [
-          "*",
-        ],
       }
     `);
   });
