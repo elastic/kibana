@@ -169,7 +169,7 @@ export class DocLinksService {
           ilmSearchableSnapshot: `${ELASTICSEARCH_DOCS}ilm-searchable-snapshot.html`,
           ilmSetPriority: `${ELASTICSEARCH_DOCS}ilm-set-priority.html`,
           ilmShrink: `${ELASTICSEARCH_DOCS}ilm-shrink.html`,
-          ilmWaitForSnapshot: `ilm-wait-for-snapshot.htmlilm-wait-for-snapshot.html`,
+          ilmWaitForSnapshot: `${ELASTICSEARCH_DOCS}ilm-wait-for-snapshot.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           indexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#index-modules-settings`,
           indexTemplates: `${ELASTICSEARCH_DOCS}index-templates.html`,
