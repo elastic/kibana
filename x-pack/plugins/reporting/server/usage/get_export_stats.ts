@@ -13,7 +13,6 @@ const jobTypeIsDeprecated = (jobType: string) => DEPRECATED_JOB_TYPES.includes(j
 const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> = {
   total: 0,
   deprecated: 0,
-  sizes: undefined,
   app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
   layout: { canvas: 0, print: 0, preserve_layout: 0 },
 };
