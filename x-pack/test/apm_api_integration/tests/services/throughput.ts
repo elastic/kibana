@@ -89,10 +89,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ).toMatchInline(`"2021-08-03T06:50:00.000Z"`);
         });
 
+        it('has the correct first value', () => {
+          expectSnapshot(first(throughputResponse.currentPeriod)?.y).toMatchInline(`4`);
+        });
+
         it('has the correct end date', () => {
           expectSnapshot(
             new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
           ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
+        });
+
+        it('has the correct last value', () => {
+          expectSnapshot(last(throughputResponse.currentPeriod)?.y).toMatchInline(`0`);
         });
 
         it('has the correct number of buckets', () => {

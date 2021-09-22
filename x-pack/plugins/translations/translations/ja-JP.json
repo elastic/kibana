@@ -6747,7 +6747,6 @@
     "xpack.apm.errorsTable.occurrencesColumnLabel": "オカレンス",
     "xpack.apm.errorsTable.typeColumnLabel": "型",
     "xpack.apm.errorsTable.unhandledLabel": "未対応",
-    "xpack.apm.exactTransactionRateLabel": "{value} { unit, select, minute {tpm} other {tps} }",
     "xpack.apm.failedTransactionsCorrelations.licenseCheckText": "失敗したトランザクションの相関関係機能を使用するには、Elastic Platinumライセンスのサブスクリプションが必要です。",
     "xpack.apm.featureRegistry.apmFeatureName": "APMおよびユーザーエクスペリエンス",
     "xpack.apm.featureRegistry.manageAlertsName": "アラート",

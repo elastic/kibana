@@ -6799,7 +6799,6 @@
     "xpack.apm.errorsTable.occurrencesColumnLabel": "发生次数",
     "xpack.apm.errorsTable.typeColumnLabel": "类型",
     "xpack.apm.errorsTable.unhandledLabel": "未处理",
-    "xpack.apm.exactTransactionRateLabel": "{value} { unit, select, minute {tpm} other {tps} }",
     "xpack.apm.failedTransactionsCorrelations.licenseCheckText": "要使用失败事务相关性功能，必须订阅 Elastic 白金级许可证。",
     "xpack.apm.featureRegistry.apmFeatureName": "APM 和用户体验",
     "xpack.apm.featureRegistry.manageAlertsName": "告警",
