@@ -13,6 +13,10 @@ $controlMinWidth: $euiSize * 14;
 .controlFrame--cloneWrapper {
   width: max-content;
 
+  .euiFormLabel {
+    padding-bottom: $euiSizeXS;
+  }
+
   &-small {
     width: $smallControl;
   }
@@ -23,6 +27,10 @@ $controlMinWidth: $euiSize * 14;
 
   &-large {
     width: $largeControl;
+  }
+
+  &-twoLine {
+    margin-top: -$euiSize * 1.25;
   }
 
   .euiFormLabel, div {

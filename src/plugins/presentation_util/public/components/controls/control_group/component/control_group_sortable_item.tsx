@@ -139,16 +139,17 @@ export const ControlClone = ({
   width: ControlWidth;
 }) => {
   const embeddable = useChildEmbeddable({ embeddableId, container });
-
+  const layout = container.getInput().controlStyle;
   return (
     <EuiFlexItem
       className={classNames('controlFrame--cloneWrapper', {
         'controlFrame--cloneWrapper-small': width === 'small',
         'controlFrame--cloneWrapper-medium': width === 'medium',
         'controlFrame--cloneWrapper-large': width === 'large',
+        'controlFrame--cloneWrapper-twoLine': layout === 'twoLine',
       })}
     >
-      {container.getInput().controlStyle === 'twoLine' ? (
+      {layout === 'twoLine' ? (
         <EuiFormLabel>{embeddable?.getInput().title}</EuiFormLabel>
       ) : undefined}
       <EuiFlexGroup gutterSize="none" className={'controlFrame--draggable'}>
