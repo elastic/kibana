@@ -11,6 +11,15 @@ import { getExportTypesHandler } from './get_export_type_handler';
 import { FeatureAvailabilityMap } from './types';
 
 let featureMap: FeatureAvailabilityMap;
+const sizesAggResponse = {
+  '1.0': 5093470.0,
+  '5.0': 5093470.0,
+  '25.0': 5093470.0,
+  '50.0': 8514532.0,
+  '75.0': 1.1935594e7,
+  '95.0': 1.1935594e7,
+  '99.0': 1.1935594e7,
+};
 
 beforeEach(() => {
   featureMap = { PNG: true, csv: true, csv_searchsource: true, printable_pdf: true };
@@ -67,18 +76,18 @@ test('Model of job status and status-by-pdf-app', () => {
 test('Model of jobTypes', () => {
   const result = getExportStats(
     {
-      PNG: { available: true, total: 3, sizes: { max: 999, min: 333, avg: 666 } },
+      PNG: { available: true, total: 3, sizes: sizesAggResponse },
       printable_pdf: {
         available: true,
         total: 3,
-        sizes: { max: 999, min: 333, avg: 666 },
+        sizes: sizesAggResponse,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
         layout: { preserve_layout: 3, print: 0 },
       },
       csv_searchsource: {
         available: true,
         total: 3,
-        sizes: { max: 999, min: 333, avg: 666 },
+        sizes: sizesAggResponse,
       },
     },
     featureMap,
@@ -101,9 +110,13 @@ test('Model of jobTypes', () => {
         "print": 0,
       },
       "output_size": Object {
-        "avg": 666,
-        "max": 999,
-        "min": 333,
+        "1.0": 5093470,
+        "25.0": 5093470,
+        "5.0": 5093470,
+        "50.0": 8514532,
+        "75.0": 11935594,
+        "95.0": 11935594,
+        "99.0": 11935594,
       },
       "total": 3,
     }
@@ -123,11 +136,7 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     }
   `);
@@ -147,9 +156,13 @@ test('Model of jobTypes', () => {
         "print": 0,
       },
       "output_size": Object {
-        "avg": 666,
-        "max": 999,
-        "min": 333,
+        "1.0": 5093470,
+        "25.0": 5093470,
+        "5.0": 5093470,
+        "50.0": 8514532,
+        "75.0": 11935594,
+        "95.0": 11935594,
+        "99.0": 11935594,
       },
       "total": 3,
     }
@@ -170,9 +183,13 @@ test('Model of jobTypes', () => {
         "print": 0,
       },
       "output_size": Object {
-        "avg": 666,
-        "max": 999,
-        "min": 333,
+        "1.0": 5093470,
+        "25.0": 5093470,
+        "5.0": 5093470,
+        "50.0": 8514532,
+        "75.0": 11935594,
+        "95.0": 11935594,
+        "99.0": 11935594,
       },
       "total": 3,
     }
@@ -186,7 +203,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         available: true,
         total: 15,
         deprecated: 5,
-        sizes: { min: 111, max: 333, avg: 222 },
+        sizes: sizesAggResponse,
       },
     },
     featureMap,
@@ -208,9 +225,13 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         "print": 0,
       },
       "output_size": Object {
-        "avg": 222,
-        "max": 333,
-        "min": 111,
+        "1.0": 5093470,
+        "25.0": 5093470,
+        "5.0": 5093470,
+        "50.0": 8514532,
+        "75.0": 11935594,
+        "95.0": 11935594,
+        "99.0": 11935594,
       },
       "total": 15,
     }
@@ -224,7 +245,7 @@ test('CSV counts, provides all jobs implicitly deprecated due to jobtype', () =>
         available: true,
         total: 15,
         deprecated: 0,
-        sizes: { min: 111, max: 333, avg: 222 },
+        sizes: sizesAggResponse,
       },
     },
     featureMap,
@@ -246,9 +267,13 @@ test('CSV counts, provides all jobs implicitly deprecated due to jobtype', () =>
         "print": 0,
       },
       "output_size": Object {
-        "avg": 222,
-        "max": 333,
-        "min": 111,
+        "1.0": 5093470,
+        "25.0": 5093470,
+        "5.0": 5093470,
+        "50.0": 8514532,
+        "75.0": 11935594,
+        "95.0": 11935594,
+        "99.0": 11935594,
       },
       "total": 15,
     }

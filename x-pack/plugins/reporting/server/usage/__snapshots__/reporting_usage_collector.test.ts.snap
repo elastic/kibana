@@ -37,14 +37,26 @@ Object {
           "type": "long",
         },
       },
-      "output_size": Object {
-        "avg": Object {
+      "sizes": Object {
+        "1.0": Object {
           "type": "long",
         },
-        "max": Object {
+        "25.0": Object {
           "type": "long",
         },
-        "min": Object {
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
           "type": "long",
         },
       },
@@ -84,14 +96,26 @@ Object {
           "type": "long",
         },
       },
-      "output_size": Object {
-        "avg": Object {
+      "sizes": Object {
+        "1.0": Object {
           "type": "long",
         },
-        "max": Object {
+        "25.0": Object {
           "type": "long",
         },
-        "min": Object {
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
           "type": "long",
         },
       },
@@ -140,14 +164,26 @@ Object {
           "type": "long",
         },
       },
-      "output_size": Object {
-        "avg": Object {
+      "sizes": Object {
+        "1.0": Object {
           "type": "long",
         },
-        "max": Object {
+        "25.0": Object {
           "type": "long",
         },
-        "min": Object {
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
           "type": "long",
         },
       },
@@ -187,14 +223,26 @@ Object {
           "type": "long",
         },
       },
-      "output_size": Object {
-        "avg": Object {
+      "sizes": Object {
+        "1.0": Object {
           "type": "long",
         },
-        "max": Object {
+        "25.0": Object {
           "type": "long",
         },
-        "min": Object {
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
           "type": "long",
         },
       },
@@ -234,14 +282,26 @@ Object {
           "type": "long",
         },
       },
-      "output_size": Object {
-        "avg": Object {
+      "sizes": Object {
+        "1.0": Object {
           "type": "long",
         },
-        "max": Object {
+        "25.0": Object {
           "type": "long",
         },
-        "min": Object {
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
           "type": "long",
         },
       },
@@ -285,14 +345,26 @@ Object {
             "type": "long",
           },
         },
-        "output_size": Object {
-          "avg": Object {
+        "sizes": Object {
+          "1.0": Object {
             "type": "long",
           },
-          "max": Object {
+          "25.0": Object {
             "type": "long",
           },
-          "min": Object {
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
             "type": "long",
           },
         },
@@ -332,14 +404,26 @@ Object {
             "type": "long",
           },
         },
-        "output_size": Object {
-          "avg": Object {
+        "sizes": Object {
+          "1.0": Object {
             "type": "long",
           },
-          "max": Object {
+          "25.0": Object {
             "type": "long",
           },
-          "min": Object {
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
             "type": "long",
           },
         },
@@ -382,14 +466,26 @@ Object {
             "type": "long",
           },
         },
-        "output_size": Object {
-          "avg": Object {
+        "sizes": Object {
+          "1.0": Object {
             "type": "long",
           },
-          "max": Object {
+          "25.0": Object {
             "type": "long",
           },
-          "min": Object {
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
             "type": "long",
           },
         },
@@ -429,14 +525,26 @@ Object {
             "type": "long",
           },
         },
-        "output_size": Object {
-          "avg": Object {
+        "sizes": Object {
+          "1.0": Object {
             "type": "long",
           },
-          "max": Object {
+          "25.0": Object {
             "type": "long",
           },
-          "min": Object {
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
             "type": "long",
           },
         },
@@ -476,14 +584,26 @@ Object {
             "type": "long",
           },
         },
-        "output_size": Object {
-          "avg": Object {
+        "sizes": Object {
+          "1.0": Object {
             "type": "long",
           },
-          "max": Object {
+          "25.0": Object {
             "type": "long",
           },
-          "min": Object {
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
             "type": "long",
           },
         },
@@ -492,13 +612,25 @@ Object {
         },
       },
       "output_size": Object {
-        "avg": Object {
+        "1.0": Object {
           "type": "long",
         },
-        "max": Object {
+        "25.0": Object {
           "type": "long",
         },
-        "min": Object {
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
           "type": "long",
         },
       },
@@ -534,14 +666,26 @@ Object {
             "type": "long",
           },
         },
-        "output_size": Object {
-          "avg": Object {
+        "sizes": Object {
+          "1.0": Object {
             "type": "long",
           },
-          "max": Object {
+          "25.0": Object {
             "type": "long",
           },
-          "min": Object {
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
             "type": "long",
           },
         },
@@ -581,14 +725,26 @@ Object {
             "type": "long",
           },
         },
-        "output_size": Object {
-          "avg": Object {
+        "sizes": Object {
+          "1.0": Object {
             "type": "long",
           },
-          "max": Object {
+          "25.0": Object {
             "type": "long",
           },
-          "min": Object {
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
             "type": "long",
           },
         },
@@ -1117,13 +1273,25 @@ Object {
       },
     },
     "output_size": Object {
-      "avg": Object {
+      "1.0": Object {
         "type": "long",
       },
-      "max": Object {
+      "25.0": Object {
         "type": "long",
       },
-      "min": Object {
+      "5.0": Object {
+        "type": "long",
+      },
+      "50.0": Object {
+        "type": "long",
+      },
+      "75.0": Object {
+        "type": "long",
+      },
+      "95.0": Object {
+        "type": "long",
+      },
+      "99.0": Object {
         "type": "long",
       },
     },
@@ -1159,14 +1327,26 @@ Object {
           "type": "long",
         },
       },
-      "output_size": Object {
-        "avg": Object {
+      "sizes": Object {
+        "1.0": Object {
           "type": "long",
         },
-        "max": Object {
+        "25.0": Object {
           "type": "long",
         },
-        "min": Object {
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
           "type": "long",
         },
       },
@@ -1206,14 +1386,26 @@ Object {
           "type": "long",
         },
       },
-      "output_size": Object {
-        "avg": Object {
+      "sizes": Object {
+        "1.0": Object {
           "type": "long",
         },
-        "max": Object {
+        "25.0": Object {
           "type": "long",
         },
-        "min": Object {
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
           "type": "long",
         },
       },
@@ -1761,11 +1953,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "PNGV2": Object {
@@ -1782,11 +1970,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "_all": 9,
@@ -1806,11 +1990,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "output_size": undefined,
     "total": 4,
   },
   "csv_searchsource": Object {
@@ -1827,11 +2007,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "output_size": undefined,
     "total": 5,
   },
   "csv_searchsource_immediate": Object {
@@ -1848,11 +2024,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "enabled": true,
@@ -1871,11 +2043,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "PNGV2": Object {
@@ -1892,11 +2060,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "_all": 9,
@@ -1914,11 +2078,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "output_size": undefined,
       "total": 4,
     },
     "csv_searchsource": Object {
@@ -1935,11 +2095,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "output_size": undefined,
       "total": 5,
     },
     "csv_searchsource_immediate": Object {
@@ -1956,18 +2112,10 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -1982,11 +2130,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "printable_pdf_v2": Object {
@@ -2003,11 +2147,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "status": Object {
@@ -2025,11 +2165,7 @@ Object {
       },
     },
   },
-  "output_size": Object {
-    "avg": null,
-    "max": null,
-    "min": null,
-  },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2044,11 +2180,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "printable_pdf_v2": Object {
@@ -2065,11 +2197,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "status": Object {
@@ -2105,11 +2233,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "PNGV2": Object {
@@ -2126,11 +2250,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "_all": 0,
@@ -2150,11 +2270,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "csv_searchsource": Object {
@@ -2171,11 +2287,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "csv_searchsource_immediate": Object {
@@ -2192,11 +2304,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "enabled": true,
@@ -2215,11 +2323,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "PNGV2": Object {
@@ -2236,11 +2340,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "_all": 0,
@@ -2258,11 +2358,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "csv_searchsource": Object {
@@ -2279,11 +2375,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "csv_searchsource_immediate": Object {
@@ -2300,18 +2392,10 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2326,11 +2410,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "printable_pdf_v2": Object {
@@ -2347,11 +2427,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "status": Object {
@@ -2360,11 +2436,7 @@ Object {
     },
     "statuses": Object {},
   },
-  "output_size": Object {
-    "avg": null,
-    "max": null,
-    "min": null,
-  },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2379,11 +2451,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "printable_pdf_v2": Object {
@@ -2400,11 +2468,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "status": Object {
@@ -2431,11 +2495,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "output_size": undefined,
     "total": 1,
   },
   "PNGV2": Object {
@@ -2452,11 +2512,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "_all": 4,
@@ -2476,11 +2532,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "output_size": undefined,
     "total": 1,
   },
   "csv_searchsource": Object {
@@ -2497,11 +2549,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "csv_searchsource_immediate": Object {
@@ -2518,11 +2566,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "enabled": true,
@@ -2541,11 +2585,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "output_size": undefined,
       "total": 1,
     },
     "PNGV2": Object {
@@ -2562,11 +2602,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "_all": 4,
@@ -2584,11 +2620,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "output_size": undefined,
       "total": 1,
     },
     "csv_searchsource": Object {
@@ -2605,11 +2637,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "csv_searchsource_immediate": Object {
@@ -2626,18 +2654,10 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
         "canvas workpad": 1,
@@ -2652,11 +2672,7 @@ Object {
         "preserve_layout": 2,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "output_size": undefined,
       "total": 2,
     },
     "printable_pdf_v2": Object {
@@ -2673,11 +2689,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "status": Object {
@@ -2697,11 +2709,7 @@ Object {
       },
     },
   },
-  "output_size": Object {
-    "avg": null,
-    "max": null,
-    "min": null,
-  },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 1,
@@ -2716,11 +2724,7 @@ Object {
       "preserve_layout": 2,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "output_size": undefined,
     "total": 2,
   },
   "printable_pdf_v2": Object {
@@ -2737,11 +2741,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "status": Object {
@@ -2779,11 +2779,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": 37748,
-      "max": 37748,
-      "min": 37748,
-    },
+    "output_size": undefined,
     "total": 1,
   },
   "PNGV2": Object {
@@ -2800,11 +2796,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "_all": 11,
@@ -2824,11 +2816,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": 231,
-      "max": 231,
-      "min": 231,
-    },
+    "output_size": undefined,
     "total": 1,
   },
   "csv_searchsource": Object {
@@ -2845,11 +2833,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": 3684.6666666666665,
-      "max": 7557,
-      "min": 204,
-    },
+    "output_size": undefined,
     "total": 3,
   },
   "csv_searchsource_immediate": Object {
@@ -2866,11 +2850,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "enabled": true,
@@ -2889,11 +2869,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "PNGV2": Object {
@@ -2910,11 +2886,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "_all": 0,
@@ -2932,11 +2904,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "csv_searchsource": Object {
@@ -2953,11 +2921,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "csv_searchsource_immediate": Object {
@@ -2974,18 +2938,10 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -3000,11 +2956,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "printable_pdf_v2": Object {
@@ -3021,11 +2973,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
-        "avg": null,
-        "max": null,
-        "min": null,
-      },
+      "sizes": undefined,
       "total": 0,
     },
     "status": Object {
@@ -3034,11 +2982,7 @@ Object {
     },
     "statuses": Object {},
   },
-  "output_size": Object {
-    "avg": 365084.75,
-    "max": 1713303,
-    "min": 204,
-  },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -3053,11 +2997,7 @@ Object {
       "preserve_layout": 5,
       "print": 1,
     },
-    "output_size": Object {
-      "avg": 957215,
-      "max": 1713303,
-      "min": 43226,
-    },
+    "output_size": undefined,
     "total": 6,
   },
   "printable_pdf_v2": Object {
@@ -3074,11 +3014,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": Object {
-      "avg": null,
-      "max": null,
-      "min": null,
-    },
+    "sizes": undefined,
     "total": 0,
   },
   "status": Object {
