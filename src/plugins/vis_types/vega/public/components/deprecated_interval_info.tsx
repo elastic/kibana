@@ -40,9 +40,9 @@ export const DeprecatedHistogramIntervalInfo = () => (
 );
 
 export const shouldShowDeprecatedHistogramIntervalInfo = (spec: VegaSpec) => {
-  const data = Array.isArray(spec.data) ? spec.data : [spec.data];
+  const data = Array.isArray(spec.data) ? spec?.data : [spec.data];
 
-  return data.some((dataItem) => {
+  return data.some((dataItem = {}) => {
     const aggs = dataItem.url?.body?.aggs ?? {};
 
     return Object.keys(aggs).some((key) => {
