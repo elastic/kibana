@@ -59,7 +59,7 @@ import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/target_types/react';
+import { I18nProvider } from '@kbn/i18n/react';
 
 declare global {
   interface Window {
