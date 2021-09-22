@@ -102,12 +102,8 @@ class AppComponent extends Component<AppProps, AppState> {
   }
 
   render() {
-    const {
-      isFetchingPermissions,
-      fetchPermissionError,
-      hasPermission,
-      missingClusterPrivileges,
-    } = this.state;
+    const { isFetchingPermissions, fetchPermissionError, hasPermission, missingClusterPrivileges } =
+      this.state;
 
     if (isFetchingPermissions) {
       return (

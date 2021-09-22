@@ -57,12 +57,15 @@ export const fetchTransactionDurationHistogramRangeSteps = async (
     );
   }
 
-  const min = (resp.body.aggregations
-    .transaction_duration_min as estypes.AggregationsValueAggregate).value;
+  const min = (
+    resp.body.aggregations
+      .transaction_duration_min as estypes.AggregationsValueAggregate
+  ).value;
   const max =
-    (resp.body.aggregations
-      .transaction_duration_max as estypes.AggregationsValueAggregate).value *
-    2;
+    (
+      resp.body.aggregations
+        .transaction_duration_max as estypes.AggregationsValueAggregate
+    ).value * 2;
 
   return getHistogramRangeSteps(min, max, steps);
 };

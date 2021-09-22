@@ -10,10 +10,7 @@ import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { EntryItem } from './entry_item';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { IndexPattern } from 'src/plugins/data/public';
 
 jest.mock('../../../common/lib/kibana');
@@ -81,9 +78,11 @@ describe('EntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(0).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'machine.os' }]);
+    (
+      wrapper.find(EuiComboBox).at(0).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
@@ -126,9 +125,11 @@ describe('EntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'is not' }]);
+    (
+      wrapper.find(EuiComboBox).at(1).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { id: '123', field: 'ip', type: 'mapping', value: '' },
