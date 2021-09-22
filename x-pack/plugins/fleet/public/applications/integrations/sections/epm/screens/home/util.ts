@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type {
+  CustomIntegration,
+  Category,
+} from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { CategoryFacet } from './category_facets';
 
@@ -13,26 +16,35 @@ export function mergeAndReplaceCategoryCounts(
   eprCounts: CategoryFacet[],
   addableIntegrations: CustomIntegration[]
 ): CategoryFacet[] {
+  const merged: CategoryFacet[] = [];
+
+  const addIfMissing = (category: string, count: number) => {
+    const match = merged.find((c) => {
+      return c.id === category;
+    });
+
+    if (match) {
+      match.count += count;
+    } else {
+      merged.push({
+        id: category as Category,
+        count,
+      });
+    }
+  };
+
+  eprCounts.forEach((facet) => {
+    addIfMissing(facet.id, facet.count);
+  });
   addableIntegrations.forEach((integration) => {
     integration.categories.forEach((cat) => {
-      const match = eprCounts.find((c) => {
-        return c.id === cat;
-      });
-
-      if (match) {
-        match.count += 1;
-      } else {
-        eprCounts.push({
-          id: cat,
-          count: 1,
-        });
-      }
+      addIfMissing(cat, 1);
     });
   });
 
-  eprCounts.sort((a, b) => {
+  merged.sort((a, b) => {
     return a.id.localeCompare(b.id);
   });
 
-  return eprCounts;
+  return merged;
 }
