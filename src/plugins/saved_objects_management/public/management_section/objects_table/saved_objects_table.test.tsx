@@ -28,7 +28,6 @@ import {
   applicationServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { serviceRegistryMock } from '../../services/service_registry.mock';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
 import {
@@ -122,7 +121,6 @@ describe('SavedObjectsTable', () => {
 
     defaultProps = {
       allowedTypes,
-      serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),
       columnRegistry: columnServiceMock.createStart(),
       savedObjectsClient: savedObjects.client,
@@ -159,7 +157,6 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MySearch`,
             icon: 'search',
-            editUrl: '/management/kibana/objects/savedSearches/2',
             inAppUrl: {
               path: '/discover/2',
               uiCapabilitiesPath: 'discover.show',
@@ -172,7 +169,6 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyDashboard`,
             icon: 'dashboardApp',
-            editUrl: '/management/kibana/objects/savedDashboards/3',
             inAppUrl: {
               path: '/dashboard/3',
               uiCapabilitiesPath: 'dashboard.show',
@@ -185,7 +181,6 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyViz`,
             icon: 'visualizeApp',
-            editUrl: '/management/kibana/objects/savedVisualizations/4',
             inAppUrl: {
               path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
