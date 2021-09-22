@@ -244,7 +244,6 @@ export const Library: React.FC = () => {
           <Result
             {...{
               ...props,
-              showResultPosition: true,
               resultPosition: 3,
               result: {
                 ...props.result,

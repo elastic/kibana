@@ -9,6 +9,8 @@ import React from 'react';
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { ResultActions } from './result_actions';
 import { ResultHeaderItem } from './result_header_item';
 import { ResultMeta, ResultAction } from './types';
@@ -21,12 +23,10 @@ interface Props {
   resultMeta: ResultMeta;
   actions: ResultAction[];
   documentLink?: string;
-  showResultPosition?: boolean;
   resultPosition?: number;
 }
 
 export const ResultHeader: React.FC<Props> = ({
-  showResultPosition,
   showScore,
   resultMeta,
   isMetaEngine,
@@ -43,9 +43,17 @@ export const ResultHeader: React.FC<Props> = ({
         responsive={false}
         wrap
       >
-        {showResultPosition && resultPosition && (
+        {resultPosition && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">#{resultPosition}</EuiBadge>
+            <EuiBadge color="hollow">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.result.resultPositionLabel"
+                defaultMessage="#{resultPosition}"
+                values={{
+                  resultPosition,
+                }}
+              />
+            </EuiBadge>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow>
