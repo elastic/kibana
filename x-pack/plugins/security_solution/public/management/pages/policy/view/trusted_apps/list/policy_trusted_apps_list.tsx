@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, Pagination } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
 import {
   ArtifactCardGrid,
   ArtifactCardGridProps,
@@ -14,20 +15,37 @@ import {
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   doesPolicyHaveTrustedApps,
+  getCurrentArtifactsLocation,
   getPolicyTrustedAppList,
+  getPolicyTrustedAppsListPagination,
   isPolicyTrustedAppListLoading,
+  policyIdFromParams,
 } from '../../../store/policy_details/selectors';
+import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 
 export const PolicyTrustedAppsList = memo(() => {
+  const history = useHistory();
+  const policyId = usePolicyDetailsSelector(policyIdFromParams);
   const hasTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
   const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
   const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
+  const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
+  const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
 
   // TODO:PT show load errors if any
 
-  const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>((page) => {
-    // FIXME:PT implement callback
-  }, []);
+  const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
+    ({ pageIndex, pageSize }) => {
+      history.push(
+        getPolicyDetailsArtifactsListPath(policyId, {
+          ...urlParams,
+          page_index: pageIndex,
+          page_size: pageSize,
+        })
+      );
+    },
+    [history, policyId, urlParams]
+  );
 
   const handleExpandCollapse = useCallback<ArtifactCardGridProps['onExpandCollapse']>((change) => {
     // FIXME:PT implement callback
@@ -57,11 +75,12 @@ export const PolicyTrustedAppsList = memo(() => {
   return (
     <>
       <ArtifactCardGrid
-        items={trustedAppItems.data}
+        items={trustedAppItems}
         onPageChange={handlePageChange}
         onExpandCollapse={handleExpandCollapse}
         cardComponentProps={provideCardProps}
         loading={isLoading}
+        pagination={pagination as Pagination}
       />
     </>
   );

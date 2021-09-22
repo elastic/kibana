@@ -15,7 +15,8 @@ import { isOnPolicyTrustedAppsView } from '../selectors/policy_common_selectors'
 import {
   doesPolicyTrustedAppsListNeedUpdate,
   getCurrentArtifactsLocation,
-  getPolicyAssignedTrustedAppsState,
+  getCurrentPolicyAssignedTrustedAppsState,
+  getLastLoadedPolicyAssignedTrustedAppsState,
   isPolicyTrustedAppListLoading,
   policyIdFromParams,
 } from '../selectors';
@@ -23,7 +24,6 @@ import {
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
-  getLastLoadedResourceState,
 } from '../../../../../state';
 import { ServerApiError } from '../../../../../../common/types';
 import { Immutable } from '../../../../../../../common/endpoint/types';
@@ -61,7 +61,7 @@ const fetchPolicyTrustedAppsIfNeeded = async (
     dispatch({
       type: 'assignedTrustedAppsListStateChanged',
       // @ts-ignore will be fixed when AsyncResourceState is refactored (#830)
-      payload: createLoadingResourceState(getPolicyAssignedTrustedAppsState(state)),
+      payload: createLoadingResourceState(getCurrentPolicyAssignedTrustedAppsState(state)),
     });
 
     try {
@@ -87,9 +87,7 @@ const fetchPolicyTrustedAppsIfNeeded = async (
         type: 'assignedTrustedAppsListStateChanged',
         payload: createFailedResourceState<Immutable<PolicyAssignedTrustedApps>>(
           error as ServerApiError,
-          getLastLoadedResourceState<Immutable<PolicyAssignedTrustedApps>, ServerApiError>(
-            getPolicyAssignedTrustedAppsState(getState())
-          )
+          getLastLoadedPolicyAssignedTrustedAppsState(getState())
         ),
       });
     }

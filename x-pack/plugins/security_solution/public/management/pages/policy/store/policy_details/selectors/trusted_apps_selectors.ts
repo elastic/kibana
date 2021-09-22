@@ -6,7 +6,9 @@
  */
 
 import { createSelector } from 'reselect';
+import { Pagination } from '@elastic/eui';
 import {
+  PolicyAssignedTrustedApps,
   PolicyDetailsArtifactsPageLocation,
   PolicyDetailsSelector,
   PolicyDetailsState,
@@ -17,7 +19,9 @@ import {
   getLastLoadedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
+  LoadedResourceState,
 } from '../../../../../state';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../../common/constants';
 
 export const doesPolicyHaveTrustedApps = (
   state: PolicyDetailsState
@@ -29,14 +33,19 @@ export const doesPolicyHaveTrustedApps = (
   };
 };
 
-export const getPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
-  PolicyDetailsState['artifacts']['assignedList']
-> = (state) => {
-  return state.artifacts.assignedList;
-};
+export const getCurrentPolicyAssignedTrustedAppsState: PolicyDetailsSelector<PolicyAssignedTrustedApps> =
+  (state) => {
+    return state.artifacts.assignedList;
+  };
+
+export const getLastLoadedPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
+  undefined | LoadedResourceState<PolicyAssignedTrustedApps>
+> = createSelector(getCurrentPolicyAssignedTrustedAppsState, (currentAssignedTrustedAppsState) => {
+  return getLastLoadedResourceState(currentAssignedTrustedAppsState);
+});
 
 export const doesPolicyTrustedAppsListNeedUpdate: PolicyDetailsSelector<boolean> = createSelector(
-  getPolicyAssignedTrustedAppsState,
+  getCurrentPolicyAssignedTrustedAppsState,
   getCurrentArtifactsLocation,
   (assignedListState, locationData) => {
     return (
@@ -50,22 +59,30 @@ export const doesPolicyTrustedAppsListNeedUpdate: PolicyDetailsSelector<boolean>
 );
 
 export const isPolicyTrustedAppListLoading: PolicyDetailsSelector<boolean> = createSelector(
-  getPolicyAssignedTrustedAppsState,
+  getCurrentPolicyAssignedTrustedAppsState,
   (assignedState) => isLoadingResourceState(assignedState)
 );
 
-export const getPolicyTrustedAppList: PolicyDetailsSelector<GetTrustedAppsListResponse> =
+export const getPolicyTrustedAppList: PolicyDetailsSelector<GetTrustedAppsListResponse['data']> =
   createSelector(
-    getPolicyAssignedTrustedAppsState,
+    getLastLoadedPolicyAssignedTrustedAppsState,
     getCurrentArtifactsLocation,
     (assignedState, currentUrlLocation) => {
-      return (
-        getLastLoadedResourceState(assignedState)?.data.artifacts ?? {
-          data: [],
-          page: currentUrlLocation.page_index,
-          total: 0,
-          per_page: currentUrlLocation.page_size,
-        }
-      );
+      return assignedState?.data.artifacts.data ?? [];
     }
   );
+
+export const getPolicyTrustedAppsListPagination: PolicyDetailsSelector<Pagination> = createSelector(
+  getLastLoadedPolicyAssignedTrustedAppsState,
+  (currentAssignedTrustedAppsState) => {
+    const trustedAppsApiResponse = currentAssignedTrustedAppsState?.data.artifacts;
+
+    return {
+      // Trusted apps api is `1` based for page - need to subtract here for `Pagination` component
+      pageIndex: trustedAppsApiResponse?.page ? trustedAppsApiResponse.page - 1 : 0,
+      pageSize: trustedAppsApiResponse?.per_page ?? MANAGEMENT_PAGE_SIZE_OPTIONS[0],
+      totalItemCount: trustedAppsApiResponse?.total || 0,
+      pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+    };
+  }
+);
