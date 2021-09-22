@@ -77,10 +77,10 @@ It's useful for visualizing unexpected increases, decreases, or irregular patter
 [TIP]
 ====
 HTTP **transactions** from the HTTP server perspective do not consider a `4xx` status code (client error) as a failure
-because the failure was caused by the caller, not the HTTP server. Thus, there will be no increase in failed transaction rate.
+because the failure was caused by the caller, not the HTTP server. Thus, `event.outcome=success` and there will be no increase in failed transaction rate.
 
 HTTP **spans** from the client perspective however, are considered failures if the HTTP status code is ≥ 400.
-These spans will increase the failed transaction rate.
+These spans will set `event.outcome=failure` and increase the failed transaction rate.
 
 If there is no HTTP status, both transactions and spans are considered successful unless an error is reported.
 ====

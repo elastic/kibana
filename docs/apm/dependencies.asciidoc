@@ -13,7 +13,7 @@ like with a database or third-party service.
 image::apm/images/dependencies.png[Dependencies view in the APM app in Kibana]
 
 Many application issues are caused by slow or unresponsive downstream dependencies.
-And because a single, slow dependency can greatly impact the end-user experience,
+And because a single, slow dependency can significantly impact the end-user experience,
 it's important to be able to quickly identify these problems and determine the root cause.
 
 Select a dependency to see detailed latency, throughput, and failed transaction rate metrics.
