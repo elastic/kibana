@@ -125,31 +125,25 @@ const _unused = (
   };
 };
 
-const rename = (
-  oldKey: string,
-  newKey: string,
-  details?: Partial<DeprecatedConfigDetails>
-): ConfigDeprecation => (config, rootPath, addDeprecation) =>
-  _rename(config, rootPath, addDeprecation, oldKey, newKey, details);
+const rename =
+  (oldKey: string, newKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _rename(config, rootPath, addDeprecation, oldKey, newKey, details);
 
-const renameFromRoot = (
-  oldKey: string,
-  newKey: string,
-  details?: Partial<DeprecatedConfigDetails>
-): ConfigDeprecation => (config, rootPath, addDeprecation) =>
-  _rename(config, '', addDeprecation, oldKey, newKey, details);
+const renameFromRoot =
+  (oldKey: string, newKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _rename(config, '', addDeprecation, oldKey, newKey, details);
 
-const unused = (
-  unusedKey: string,
-  details?: Partial<DeprecatedConfigDetails>
-): ConfigDeprecation => (config, rootPath, addDeprecation) =>
-  _unused(config, rootPath, addDeprecation, unusedKey, details);
+const unused =
+  (unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _unused(config, rootPath, addDeprecation, unusedKey, details);
 
-const unusedFromRoot = (
-  unusedKey: string,
-  details?: Partial<DeprecatedConfigDetails>
-): ConfigDeprecation => (config, rootPath, addDeprecation) =>
-  _unused(config, '', addDeprecation, unusedKey, details);
+const unusedFromRoot =
+  (unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _unused(config, '', addDeprecation, unusedKey, details);
 
 const getPath = (rootPath: string, subPath: string) =>
   rootPath !== '' ? `${rootPath}.${subPath}` : subPath;

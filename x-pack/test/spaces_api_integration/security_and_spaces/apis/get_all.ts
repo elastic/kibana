@@ -15,12 +15,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const {
-    getAllTest,
-    createExpectResults,
-    createExpectAllPurposesResults,
-    expectRbacForbidden,
-  } = getAllTestSuiteFactory(esArchiver, supertestWithoutAuth);
+  const { getAllTest, createExpectResults, createExpectAllPurposesResults, expectRbacForbidden } =
+    getAllTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   // these are used to determine expected results for tests where the `include_authorized_purposes` option is enabled
   const authorizedAll = {

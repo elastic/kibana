@@ -17,7 +17,7 @@ import type { HomeServerPluginSetup } from '../../../../home/server';
 import type { ConfigObservable } from '../types';
 
 describe('registerVegaUsageCollector', () => {
-  const mockDeps = { home: ({} as unknown) as HomeServerPluginSetup };
+  const mockDeps = { home: {} as unknown as HomeServerPluginSetup };
   const mockConfig = {} as ConfigObservable;
 
   test('makes a usage collector and registers it`', () => {

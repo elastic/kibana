@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverServices } from '../../../../../build_services';
-import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../data/common';
 
 export interface DiscoverIndexPatternManagementProps {
   /**
@@ -35,7 +35,8 @@ export interface DiscoverIndexPatternManagementProps {
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
   const { indexPatternFieldEditor, core } = props.services;
   const { useNewFieldsApi, selectedIndexPattern, editField } = props;
-  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission =
+    indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
 

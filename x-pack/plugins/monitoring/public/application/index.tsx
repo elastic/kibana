@@ -18,7 +18,11 @@ import { GlobalStateProvider } from './global_state_context';
 import { ExternalConfigContext, ExternalConfig } from './external_config_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
-import { MonitoringTimeContainer } from './pages/use_monitoring_time';
+import { NoDataPage } from './pages/no_data';
+import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
+import { CODE_PATH_ELASTICSEARCH } from '../../common/constants';
+import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
+import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
 export const renderApp = (
   core: CoreStart,
@@ -48,45 +52,51 @@ const MonitoringApp: React.FC<{
       <ExternalConfigContext.Provider value={externalConfig}>
         <GlobalStateProvider query={plugins.data.query} toasts={core.notifications.toasts}>
           <MonitoringTimeContainer.Provider>
-            <Router history={history}>
-              <Switch>
-                <Route path="/no-data" component={NoData} />
-                <Route path="/loading" component={LoadingPage} />
-                <RouteInit
-                  path="/license"
-                  component={LicensePage}
-                  codePaths={['all']}
-                  fetchAllClusters={false}
-                />
-                <RouteInit
-                  path="/home"
-                  component={Home}
-                  codePaths={['all']}
-                  fetchAllClusters={false}
-                />
-                <RouteInit
-                  path="/overview"
-                  component={ClusterOverview}
-                  codePaths={['all']}
-                  fetchAllClusters={false}
-                />
-                <Redirect
-                  to={{
-                    pathname: '/loading',
-                    search: history.location.search,
-                  }}
-                />
-              </Switch>
-            </Router>
+            <BreadcrumbContainer.Provider history={history}>
+              <Router history={history}>
+                <Switch>
+                  <Route path="/no-data" component={NoDataPage} />
+                  <Route path="/loading" component={LoadingPage} />
+                  <RouteInit
+                    path="/license"
+                    component={LicensePage}
+                    codePaths={['all']}
+                    fetchAllClusters={false}
+                  />
+                  <RouteInit
+                    path="/home"
+                    component={Home}
+                    codePaths={['all']}
+                    fetchAllClusters={false}
+                  />
+                  <RouteInit
+                    path="/overview"
+                    component={ClusterOverview}
+                    codePaths={['all']}
+                    fetchAllClusters={false}
+                  />
+
+                  {/* ElasticSearch Views */}
+                  <RouteInit
+                    path="/elasticsearch"
+                    component={ElasticsearchOverviewPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+                  <Redirect
+                    to={{
+                      pathname: '/loading',
+                      search: history.location.search,
+                    }}
+                  />
+                </Switch>
+              </Router>
+            </BreadcrumbContainer.Provider>
           </MonitoringTimeContainer.Provider>
         </GlobalStateProvider>
       </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
-};
-
-const NoData: React.FC<{}> = () => {
-  return <div>No data page</div>;
 };
 
 const Home: React.FC<{}> = () => {
