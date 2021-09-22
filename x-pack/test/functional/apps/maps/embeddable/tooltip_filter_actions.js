@@ -62,6 +62,11 @@ export default function ({ getPageObjects, getService }) {
         const hasJoinFilter = await filterBar.hasFilter('runtime_shape_name', 'charlie');
         expect(hasJoinFilter).to.be(true);
       });
+
+      after(async () => {
+        // Remove all filters so that when loading the dashboard again, the geo shape is still present. Related to #64861
+        await filterBar.removeAllFilters();
+      });
     });
 
     describe('panel actions', () => {
