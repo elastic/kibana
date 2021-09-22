@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard data-shared attributes', () => {
     let originalTitles: string[] = [];
+    let originalAccessibleTitles: string[] = [];
 
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
@@ -28,13 +29,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.dashboard.switchToEditMode();
-      originalTitles = await PageObjects.dashboard.getPanelTitles();
+      originalTitles = await PageObjects.dashboard.getVisiblePanelTitles();
+      originalAccessibleTitles = await PageObjects.dashboard.getPanelTitles();
     });
 
     it('should be able to hide all panel titles', async () => {
       await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
-        const titles = await PageObjects.dashboard.getPanelTitles();
+        const titles = await PageObjects.dashboard.getVisiblePanelTitles();
         expect(titles[0]).to.eql('');
       });
     });
@@ -42,8 +44,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should be able to unhide all panel titles', async () => {
       await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
-        const titles = await PageObjects.dashboard.getPanelTitles();
+        const titles = await PageObjects.dashboard.getVisiblePanelTitles();
         expect(titles[0]).to.eql(originalTitles[0]);
+      });
+    });
+
+    it('should always present accessible labels', async () => {
+      await PageObjects.dashboard.checkHideTitle();
+      await retry.try(async () => {
+        const titles = await PageObjects.dashboard.getPanelTitles();
+        expect(titles[0]).to.eql(originalAccessibleTitles[0]);
       });
     });
   });

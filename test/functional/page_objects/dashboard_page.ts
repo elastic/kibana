@@ -516,6 +516,20 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
+  public async getVisiblePanelTitles() {
+    this.log.debug('visible in getPanelTitles');
+    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle');
+    return await Promise.all(
+      titleObjects.map(async (title) =>
+        (
+          await title.findByCssSelector(
+            '* :not(.euiScreenReaderOnly, .euiScreenReaderOnly--showOnFocus)'
+          )
+        ).getVisibleText()
+      )
+    );
+  }
+
   public async getPanelDimensions() {
     const panels = await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
     return await Promise.all(

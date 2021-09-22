@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardReplacePanel.replaceEmbeddable(replacedSearch, 'search');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      const panelTitles = await PageObjects.dashboard.getPanelTitles();
+      const panelTitles = await PageObjects.dashboard.getVisiblePanelTitles();
       expect(panelTitles.length).to.be(2);
       expect(panelTitles[0]).to.be(replacedSearch);
     });
