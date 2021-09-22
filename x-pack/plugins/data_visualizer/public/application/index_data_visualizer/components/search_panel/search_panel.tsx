@@ -12,7 +12,11 @@ import { Query, Filter } from '@kbn/es-query';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DatavisualizerFieldTypeFilter } from './field_type_filter';
-import { DataView, TimeRange } from '../../../../../../../../src/plugins/data/common';
+import {
+  DataView,
+  DataViewField,
+  TimeRange,
+} from '../../../../../../../../src/plugins/data/common';
 import { JobFieldType } from '../../../../../common/types';
 import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
@@ -41,6 +45,7 @@ interface Props {
     queryLanguage: SearchQueryLanguage;
   }): void;
   showEmptyFields: boolean;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export const SearchPanel: FC<Props> = ({
@@ -68,7 +73,6 @@ export const SearchPanel: FC<Props> = ({
       },
     },
   } = useDataVisualizerKibana();
-
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
     query: searchString || '',
@@ -80,7 +84,12 @@ export const SearchPanel: FC<Props> = ({
       query: searchString || '',
       language: searchQueryLanguage,
     });
-  }, [searchQueryLanguage, searchString]);
+
+    return () => {
+      // Reset previously added filters when moving away from the page
+      queryManager.filterManager.removeAll();
+    };
+  }, [searchQueryLanguage, searchString, queryManager.filterManager]);
 
   const searchHandler = ({ query, filters }: { query?: Query; filters?: Filter[] }) => {
     const mergedQuery = query ?? searchInput;
@@ -129,6 +138,7 @@ export const SearchPanel: FC<Props> = ({
           onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
             searchHandler({ query: params.query })
           }
+          // filters={queryManager.filterManager.getFilters()}
           // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
           indexPatterns={[indexPattern]}

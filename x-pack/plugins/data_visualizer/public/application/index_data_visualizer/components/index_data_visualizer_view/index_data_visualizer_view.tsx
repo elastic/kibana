@@ -64,7 +64,7 @@ import { DatePickerWrapper } from '../../../common/components/date_picker_wrappe
 import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
-import { extractSearchData } from '../../utils/saved_search_utils';
+import { createCombinedQuery, extractSearchData } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
@@ -251,24 +251,27 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSavedSearch, currentIndexPattern, dataVisualizerListState]);
 
-  const setSearchParams = (searchParams: {
-    searchQuery: Query['query'];
-    searchString: Query['query'];
-    queryLanguage: SearchQueryLanguage;
-  }) => {
-    // When the user loads saved search and then clear or modify the query
-    // we should remove the saved search and replace it with the index pattern id
-    if (currentSavedSearch !== null) {
-      setCurrentSavedSearch(null);
-    }
+  const setSearchParams = useCallback(
+    (searchParams: {
+      searchQuery: Query['query'];
+      searchString: Query['query'];
+      queryLanguage: SearchQueryLanguage;
+    }) => {
+      // When the user loads saved search and then clear or modify the query
+      // we should remove the saved search and replace it with the index pattern id
+      if (currentSavedSearch !== null) {
+        setCurrentSavedSearch(null);
+      }
 
-    setDataVisualizerListState({
-      ...dataVisualizerListState,
-      searchQuery: searchParams.searchQuery,
-      searchString: searchParams.searchString,
-      searchQueryLanguage: searchParams.queryLanguage,
-    });
-  };
+      setDataVisualizerListState({
+        ...dataVisualizerListState,
+        searchQuery: searchParams.searchQuery,
+        searchString: searchParams.searchString,
+        searchQueryLanguage: searchParams.queryLanguage,
+      });
+    },
+    [currentSavedSearch, dataVisualizerListState, setDataVisualizerListState]
+  );
 
   const samplerShardSize =
     dataVisualizerListState.samplerShardSize ?? restorableDefaults.samplerShardSize;
@@ -316,9 +319,40 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         operation,
         String(currentIndexPattern.id)
       );
-      return data.query.filterManager.addFilters(newFilters);
+      if (newFilters) {
+        data.query.filterManager.addFilters(newFilters);
+      }
+
+      // Merge current query with new filters
+      const mergedQuery = {
+        query: searchString || '',
+        language: searchQueryLanguage,
+      };
+
+      const combinedQuery = createCombinedQuery(
+        {
+          query: searchString || '',
+          language: searchQueryLanguage,
+        },
+        data.query.filterManager.getFilters() ?? [],
+        currentIndexPattern,
+        uiSettings
+      );
+
+      setSearchParams({
+        searchQuery: combinedQuery,
+        searchString: mergedQuery.query,
+        queryLanguage: mergedQuery.language as SearchQueryLanguage,
+      });
     },
-    [currentIndexPattern.id, data.query.filterManager]
+    [
+      currentIndexPattern,
+      data.query.filterManager,
+      searchQueryLanguage,
+      searchString,
+      setSearchParams,
+      uiSettings,
+    ]
   );
 
   useEffect(() => {
