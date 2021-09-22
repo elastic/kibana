@@ -17,22 +17,34 @@ import { appContextService } from '../..';
 export async function removeOldAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  oldVersion: string;
+  currentVersion: string;
 }) {
-  const { savedObjectsClient, pkgName, oldVersion } = options;
+  const { savedObjectsClient, pkgName, currentVersion } = options;
 
-  // check if old version has assets
-  const assets = await savedObjectsClient.find<PackageAssetReference>({
+  // find all assets of older versions
+  const aggs = {
+    versions: { terms: { field: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version` } },
+  };
+  const oldVersionsAgg = (await savedObjectsClient.find<PackageAssetReference>({
     type: ASSETS_SAVED_OBJECT_TYPE,
-    filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${oldVersion}`,
-    // how to query if more than one page?
-    perPage: 100,
-    fields: ['id'],
-  });
-  const refs = assets.saved_objects.map(
-    (obj) => ({ id: obj.id, type: ASSETS_SAVED_OBJECT_TYPE } as PackageAssetReference)
-  );
+    filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version<${currentVersion}`,
+    aggs,
+    page: 0,
+    perPage: 0,
+  })) as any;
 
+  const oldVersions = oldVersionsAgg.aggregations.versions.buckets.map((obj) => obj.key);
+
+  for (const oldVersion of oldVersions) {
+    await removeAssetsFromVersion(savedObjectsClient, pkgName, oldVersion);
+  }
+}
+
+async function removeAssetsFromVersion(
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  oldVersion: string
+) {
   // check if any policies are using this package version
   const { total } = await packagePolicyService.list(savedObjectsClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version:${oldVersion}`,
@@ -47,5 +59,20 @@ export async function removeOldAssets(options: {
     return;
   }
 
-  await removeArchiveEntries({ savedObjectsClient, refs });
+  // check if old version has assets
+  const finder = await savedObjectsClient.createPointInTimeFinder({
+    type: ASSETS_SAVED_OBJECT_TYPE,
+    filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${oldVersion}`,
+    perPage: 1000,
+    fields: ['id'],
+  });
+
+  for await (const assets of finder.find()) {
+    const refs = assets.saved_objects.map(
+      (obj) => ({ id: obj.id, type: ASSETS_SAVED_OBJECT_TYPE } as PackageAssetReference)
+    );
+
+    await removeArchiveEntries({ savedObjectsClient, refs });
+  }
+  await finder.close();
 }

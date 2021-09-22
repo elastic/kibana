@@ -38,6 +38,7 @@ import { isUnremovablePackage, getInstallation, getInstallationObject } from './
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
+import { removeOldAssets } from './cleanup';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -267,7 +268,12 @@ async function installPackageFromRegistry({
       installType,
       installSource: 'registry',
     })
-      .then((assets) => {
+      .then(async (assets) => {
+        await removeOldAssets({
+          savedObjectsClient,
+          pkgName: packageInfo.name,
+          currentVersion: packageInfo.version,
+        });
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {

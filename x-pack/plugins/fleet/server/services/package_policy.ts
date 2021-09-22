@@ -291,6 +291,8 @@ class PackagePolicyService {
     }));
   }
 
+  i = 0;
+
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
@@ -578,8 +580,8 @@ class PackagePolicyService {
         });
         await removeOldAssets({
           savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          oldVersion: packagePolicy.package.version,
+          pkgName: packageInfo.name,
+          currentVersion: packageInfo.version,
         });
       } catch (error) {
         result.push({
