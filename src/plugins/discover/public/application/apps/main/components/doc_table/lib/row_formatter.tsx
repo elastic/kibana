@@ -11,6 +11,8 @@ import type { IndexPattern } from 'src/plugins/data/common';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';
 import { getServices } from '../../../../../../kibana_services';
 
+import './row_formatter.scss';
+
 interface Props {
   defPairs: Array<[string, unknown]>;
 }
@@ -21,6 +23,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
         <Fragment key={idx}>
           <dt>{pair[0]}:</dt>
           <dd
+            className="rowFormatter__value"
             // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
             dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
           />{' '}
@@ -73,7 +76,7 @@ export const formatTopLevelObject = (
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const formatter = field
       ? indexPattern.getFormatterForField(field)
-      : { convert: (v: string, ...rest: unknown[]) => String(v) };
+      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     if (!values.map) return;
     const formatted = values
       .map((val: unknown) =>

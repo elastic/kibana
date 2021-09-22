@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -28,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function deleteAlerts(alertIds: string[]) {
-    alertIds.forEach(async (alertId: string) => {
+    await asyncForEach(alertIds, async (alertId: string) => {
       await supertest
         .delete(`/api/alerting/rule/${alertId}`)
         .set('kbn-xsrf', 'foo')

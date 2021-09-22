@@ -132,7 +132,7 @@ describe('useAnomalyChartsInputResolver', () => {
       ]);
     });
 
-    services = ([
+    services = [
       coreStartMock,
       mlStartMock,
       {
@@ -140,7 +140,7 @@ describe('useAnomalyChartsInputResolver', () => {
         anomalyExplorerService: anomalyExplorerChartsServiceMock,
         mlResultsService: createMlResultsServiceMock(),
       },
-    ] as unknown) as EmbeddableAnomalyChartsContainerProps['services'];
+    ] as unknown as EmbeddableAnomalyChartsContainerProps['services'];
 
     onInputChange = jest.fn();
   });
