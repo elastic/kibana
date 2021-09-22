@@ -43,13 +43,13 @@ export const StepDetailsTimeField: FC<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.transform.stepDetailsForm.indexPatternTimeFieldLabel"
-          defaultMessage="Time field for Kibana index pattern"
+          id="xpack.transform.stepDetailsForm.dataViewTimeFieldLabel"
+          defaultMessage="Time field for Kibana data view"
         />
       }
       helpText={
         <FormattedMessage
-          id="xpack.transform.stepDetailsForm.indexPatternTimeFieldHelpText"
+          id="xpack.transform.stepDetailsForm.dataViewTimeFieldHelpText"
           defaultMessage="Select a primary time field for use with the global time filter."
         />
       }
