@@ -69,6 +69,7 @@ import { DataVisualizerIndexPatternManagement } from '../index_pattern_managemen
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
 import { DataViewField, DataView } from '../../../../../../../../src/plugins/data/common';
+import './_index.scss';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -861,17 +862,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         <EuiPageBody>
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiPageContentHeader>
+              <EuiPageContentHeader className="dataVisualizerPageHeader">
                 <EuiPageContentHeaderSection>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <EuiTitle size="l">
+                  <div className="dataViewTitleHeader">
+                    <EuiTitle>
                       <h1>{currentIndexPattern.title}</h1>
                     </EuiTitle>
                     <DataVisualizerIndexPatternManagement
@@ -881,23 +875,26 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   </div>
                 </EuiPageContentHeaderSection>
 
-                <EuiPageContentHeaderSection data-test-subj="dataVisualizerTimeRangeSelectorSection">
-                  <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-                    {currentIndexPattern.timeFieldName !== undefined && (
-                      <EuiFlexItem grow={false}>
-                        <FullTimeRangeSelector
-                          indexPattern={currentIndexPattern}
-                          query={undefined}
-                          disabled={false}
-                          timefilter={timefilter}
-                        />
-                      </EuiFlexItem>
-                    )}
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="flexEnd"
+                  gutterSize="s"
+                  data-test-subj="dataVisualizerTimeRangeSelectorSection"
+                >
+                  {currentIndexPattern.timeFieldName !== undefined && (
                     <EuiFlexItem grow={false}>
-                      <DatePickerWrapper />
+                      <FullTimeRangeSelector
+                        indexPattern={currentIndexPattern}
+                        query={undefined}
+                        disabled={false}
+                        timefilter={timefilter}
+                      />
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPageContentHeaderSection>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <DatePickerWrapper />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiPageContentHeader>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -931,7 +928,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     showEmptyFields={showEmptyFields}
                     onAddFilter={onAddFilter}
                   />
-                  <EuiSpacer size={'l'} />
+                  <EuiSpacer size={'m'} />
                   <FieldCountPanel
                     showEmptyFields={showEmptyFields}
                     toggleShowEmptyFields={toggleShowEmptyFields}

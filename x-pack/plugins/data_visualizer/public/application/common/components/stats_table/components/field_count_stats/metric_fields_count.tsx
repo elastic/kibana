@@ -32,6 +32,7 @@ export const MetricFieldsCount: FC<MetricFieldsCountProps> = ({ metricsStats }) 
           alignItems="center"
           className="dataVisualizerFieldCountContainer"
           data-test-subj="dataVisualizerMetricFieldsSummary"
+          responsive={false}
         >
           <EuiFlexItem grow={false}>
             <EuiText>

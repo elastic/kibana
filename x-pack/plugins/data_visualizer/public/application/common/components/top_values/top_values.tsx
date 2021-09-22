@@ -18,11 +18,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { FieldVisStats } from '../../../../../common/types';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
-import { i18n } from '../../../../../../../../../../../../../private/var/tmp/_bazel_quynhnguyen/bd5cc7ce3740c1abb2c63a2609d8bb9f/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
 import { DataViewField } from '../../../../../../../../src/plugins/data/common/data_views/fields';
 
 interface Props {

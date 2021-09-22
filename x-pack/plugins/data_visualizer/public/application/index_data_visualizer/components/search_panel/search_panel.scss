@@ -10,4 +10,11 @@
   .dvSearchBar {
     min-width:  #{'max(100%, 500px)'};
   }
+  .dvSearchPanelControls {
+    padding: 0;
+  }
+  // prevent margin -16 which scrunches the filter bar
+  .globalFilterGroup__wrapper-isVisible {
+    margin: 0 !important;
+  }
 }

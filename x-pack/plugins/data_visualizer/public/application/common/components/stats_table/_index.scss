@@ -18,77 +18,78 @@ $panelWidthL:     #{'max(40%, 450px)'};
   }
 }
 
-.dataVisualizer {
+@include euiBreakpoint('m', 'l', 'xl') {
+  .dataVisualizerTable {
 
-  .columnHeaderTitle {
-    display: flex;
-    align-items: center;
-  }
-
-  .columnHeaderIcon {
-    padding-right: $euiSizeXS;
-  }
-
-  .euiTableRow > .euiTableRowCell {
-    border-bottom: 0;
-    border-top: $euiBorderThin;
-
-  }
-
-  .euiTableCellContent {
-    padding: 4px;
-  }
-
-  .euiTableRow-isExpandedRow {
-
-    .euiTableRowCell {
-      background-color: $euiColorEmptyShade !important;
-      border-top: 0;
-      border-bottom: $euiBorderThin;
-      &:hover {
-        background-color: $euiColorEmptyShade !important;
-      }
+    .columnHeaderTitle {
+      display: flex;
+      align-items: center;
     }
-  }
 
-  .dataVisualizerSummaryTable {
+    .columnHeaderIcon {
+      padding-right: $euiSizeXS;
+    }
+
     .euiTableRow > .euiTableRowCell {
       border-bottom: 0;
+      border-top: $euiBorderThin;
+
     }
-    .euiTableHeaderCell {
-      display: none;
+
+    .euiTableCellContent {
+      padding: 4px;
     }
-  }
 
-  .dataVisualizerSummaryTableWrapper {
-    min-width: $panelWidthS;
-    max-width: $panelWidthS;
-  }
+    .euiTableRow-isExpandedRow {
 
-  .dataVisualizerTopValuesWrapper {
-    min-width: $panelWidthS;
-  }
+      .euiTableRowCell {
+        background-color: $euiColorEmptyShade !important;
+        border-top: 0;
+        border-bottom: $euiBorderThin;
+        &:hover {
+          background-color: $euiColorEmptyShade !important;
+        }
+      }
+    }
 
-  .dataVisualizerUniformPanel {
-    min-width: $panelWidthS;
-    max-width: $panelWidthS;
-  }
+    .dataVisualizerSummaryTable {
+      .euiTableRow > .euiTableRowCell {
+        border-bottom: 0;
+      }
+      .euiTableHeaderCell {
+        display: none;
+      }
+    }
 
-  .dataVisualizerPanelWrapper {
-    margin: $euiSizeXS $euiSizeM $euiSizeM 0;
-    &.compressed {
-      width: $panelWidthS;
+    .dataVisualizerSummaryTableWrapper {
+      min-width: $panelWidthS;
+      max-width: $panelWidthS;
+    }
+
+    .dataVisualizerTopValuesWrapper {
       min-width: fit-content;
     }
-  }
 
-  .dataVisualizerMapWrapper {
-    height: $euiSize * 15; //240px
-    min-width: $panelWidthL;
-  }
+    .dataVisualizerUniformPanel {
+      min-width: $panelWidthS;
+      max-width: $panelWidthS;
+    }
 
-  .dataVisualizerTextContent {
-    min-width: $panelWidthS;
-  }
+    .dataVisualizerPanelWrapper {
+      margin: $euiSizeXS $euiSizeM $euiSizeM 0;
+      &.compressed {
+        width: $panelWidthS;
+        min-width: fit-content;
+      }
+    }
 
+    .dataVisualizerMapWrapper {
+      height: $euiSize * 15; //240px
+      min-width: $panelWidthL;
+    }
+
+    .dataVisualizerTextContent {
+      min-width: $panelWidthS;
+    }
+  }
 }

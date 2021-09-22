@@ -126,6 +126,7 @@ export const SearchPanel: FC<Props> = ({
       alignItems="flexStart"
       data-test-subj="dataVisualizerSearchPanel"
       className={'dvSearchPanel'}
+      responsive={false}
     >
       <EuiFlexItem grow={9} className={'dvSearchBar'}>
         <SearchBar

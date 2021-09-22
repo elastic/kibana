@@ -111,7 +111,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   const columns = useMemo(() => {
     const expanderColumn: EuiTableComputedColumnType<DataVisualizerTableItem> = {
-      name: (
+      name: dimensions.showIcon ? (
         <EuiButtonIcon
           data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
             expandAll ? 'expanded' : 'collapsed'
@@ -128,7 +128,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           }
           iconType={expandAll ? 'arrowDown' : 'arrowRight'}
         />
-      ),
+      ) : null,
       align: RIGHT_ALIGNMENT,
       width: dimensions.expander,
       isExpander: true,
@@ -305,7 +305,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       {(resizeRef) => (
         <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
           <EuiInMemoryTable<T>
-            className={'dataVisualizer'}
+            className={'dataVisualizerTable'}
             items={items}
             itemId={FIELD_NAME}
             columns={columns}
