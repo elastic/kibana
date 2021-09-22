@@ -49,6 +49,7 @@ const createLocator = <T extends SerializableRecord = SerializableRecord>(): jes
 > => ({
   getLocation: jest.fn(),
   getUrl: jest.fn(),
+  getRedirectUrl: jest.fn(),
   useUrl: jest.fn(),
   navigate: jest.fn(),
   extract: jest.fn(),

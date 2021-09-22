@@ -441,10 +441,10 @@ export const PRIVATE_HEADER_DESCRIPTION = i18n.translate(
   }
 );
 
-export const PRIVATE_SHARED_SOURCES_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.title',
+export const PRIVATE_ORG_SOURCES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.privateOrg.header.title',
   {
-    defaultMessage: 'Shared content sources',
+    defaultMessage: 'Organizational content sources',
   }
 );
 
@@ -454,15 +454,15 @@ export const PRIVATE_EMPTY_TITLE = i18n.translate(
     defaultMessage: 'You have no private sources',
   }
 );
-export const SHARED_EMPTY_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.shared.empty.title',
+export const ORG_SOURCES_EMPTY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.empty.title',
   {
     defaultMessage: 'No content source available',
   }
 );
 
-export const SHARED_EMPTY_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.shared.empty.description',
+export const ORG_SOURCES_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.empty.description',
   {
     defaultMessage:
       'Once content sources are shared with you, they will be displayed here, and available via the search experience.',
@@ -519,8 +519,8 @@ export const UNDERSTAND_BUTTON = i18n.translate(
   }
 );
 
-export const PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.privateDashboard.readOnlyMode.warning',
+export const PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.personalDashboard.readOnlyMode.warning',
   {
     defaultMessage:
       'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',

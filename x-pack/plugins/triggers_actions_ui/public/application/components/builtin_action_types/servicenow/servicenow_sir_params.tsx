@@ -43,10 +43,10 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as ServiceNowSIRActionParams['subActionParams']),
+      } as unknown as ServiceNowSIRActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 

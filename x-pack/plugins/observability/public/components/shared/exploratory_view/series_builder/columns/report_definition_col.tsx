@@ -36,13 +36,8 @@ export function ReportDefinitionCol({
 
   const { reportDefinitions: selectedReportDefinitions = {}, selectedMetricField } = series ?? {};
 
-  const {
-    definitionFields,
-    defaultSeriesType,
-    hasOperationType,
-    yAxisColumns,
-    metricOptions,
-  } = seriesConfig;
+  const { definitionFields, defaultSeriesType, hasOperationType, yAxisColumns, metricOptions } =
+    seriesConfig;
 
   const onChange = (field: string, value?: string[]) => {
     if (!value?.[0]) {
