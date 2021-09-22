@@ -20,7 +20,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
-  const bucketSize = '60s';
+  const intervalString = '60s';
+  const bucketSize = 60;
 
   registry.when(
     'Observability overview when data is not loaded',
@@ -29,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
           const response = await supertest.get(
-            `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
+            `/api/apm/observability_overview?start=${start}&end=${end}&intervalString=${intervalString}&bucketSize=${bucketSize}`
           );
           expect(response.status).to.be(200);
 
@@ -46,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('returns the service count and transaction coordinates', async () => {
         const response = await supertest.get(
-          `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
+          `/api/apm/observability_overview?start=${start}&end=${end}&intervalString=${intervalString}&bucketSize=${bucketSize}`
         );
         expect(response.status).to.be(200);
 
@@ -71,23 +72,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {
               "x": "2021-08-03T06:50:00.000Z",
-              "y": 1.7,
+              "y": 51,
             },
             Object {
               "x": "2021-08-03T06:51:00.000Z",
-              "y": 2.06666666666667,
+              "y": 62,
             },
             Object {
               "x": "2021-08-03T06:52:00.000Z",
-              "y": 1.86666666666667,
+              "y": 56,
             },
             Object {
               "x": "2021-08-03T06:53:00.000Z",
-              "y": 1.66666666666667,
+              "y": 50,
             },
             Object {
               "x": "2021-08-03T06:54:00.000Z",
-              "y": 2.56666666666667,
+              "y": 77,
             },
           ]
         `);

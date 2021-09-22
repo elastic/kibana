@@ -17,10 +17,7 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { Setup } from '../helpers/setup_request';
-import {
-  calculateThroughputWithInterval,
-  ThroughputUnit,
-} from '../helpers/calculate_throughput';
+import { calculateThroughputWithInterval } from '../helpers/calculate_throughput';
 
 interface Options {
   environment: string;
@@ -33,7 +30,6 @@ interface Options {
   end: number;
   intervalString: string;
   bucketSize: number;
-  throughputUnit: ThroughputUnit;
 }
 
 export async function getThroughput({
@@ -47,7 +43,6 @@ export async function getThroughput({
   end,
   intervalString,
   bucketSize,
-  throughputUnit,
 }: Options) {
   const { apmEventClient } = setup;
 
@@ -98,7 +93,6 @@ export async function getThroughput({
         y: calculateThroughputWithInterval({
           durationAsSeconds: bucketSize,
           value: bucket.doc_count,
-          unit: throughputUnit,
         }),
       };
     }) ?? []
