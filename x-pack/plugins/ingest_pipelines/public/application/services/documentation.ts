@@ -25,16 +25,16 @@ export class DocumentationService {
     const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
 
     this.esDocBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
-    this.ingestNodeUrl = `${links.ingest.pipelines}`;
-    this.processorsUrl = `${links.ingest.processors}`;
-    this.handlingFailureUrl = `${links.ingest.pipelineFailure}`;
-    this.putPipelineApiUrl = `${links.apis.createPipeline}`;
-    this.simulatePipelineApiUrl = `${links.apis.simulatePipeline}`;
-    this.enrichDataUrl = `${links.ingest.enrich}`;
-    this.enrichDataUrl = `${links.ingest.geoMatch}`;
-    this.dissectKeyModifiersUrl = `${links.ingest.dissectKeyModifiers}`;
-    this.classificationUrl = `${links.ingest.inferenceClassification}`;
-    this.regressionUrl = `${links.ingest.inferenceRegression}`;
+    this.ingestNodeUrl = links.ingest.pipelines;
+    this.processorsUrl = links.ingest.processors;
+    this.handlingFailureUrl = links.ingest.pipelineFailure;
+    this.putPipelineApiUrl = links.apis.createPipeline;
+    this.simulatePipelineApiUrl = links.apis.simulatePipeline;
+    this.enrichDataUrl = links.ingest.enrich;
+    this.geoMatchUrl = links.ingest.geoMatch;
+    this.dissectKeyModifiersUrl = links.ingest.dissectKeyModifiers;
+    this.classificationUrl = links.ingest.inferenceClassification;
+    this.regressionUrl = links.ingest.inferenceRegression;
   }
 
   public getEsDocsBasePath() {
