@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import * as Rx from 'rxjs';
+import { first } from 'rxjs/operators';
 import type { CoreSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
 import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
@@ -23,6 +24,7 @@ import type { LicensingPluginSetup } from '../../../licensing/public';
 import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../common/constants';
 import type { JobParamsDownloadCSV } from '../../server/export_types/csv_searchsource_immediate/types';
 import { checkLicense } from '../lib/license_check';
+import type { ReportingPublicPluginStartDendencies } from '../plugin';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -36,7 +38,7 @@ interface ActionContext {
 
 interface Params {
   core: CoreSetup;
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
+  startServices$: Rx.Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
   license$: LicensingPluginSetup['license$'];
   usesUiCapabilities: boolean;
 }
@@ -48,10 +50,13 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   private licenseHasDownloadCsv: boolean = false;
   private capabilityHasDownloadCsv: boolean = false;
   private core: CoreSetup;
+  private startServices$: Params['startServices$'];
 
   constructor({ core, startServices$, license$, usesUiCapabilities }: Params) {
     this.isDownloading = false;
     this.core = core;
+
+    this.startServices$ = startServices$;
 
     license$.subscribe((license) => {
       const results = license.check('reporting', 'basic');
@@ -60,7 +65,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     });
 
     if (usesUiCapabilities) {
-      startServices$.subscribe(([{ application }]) => {
+      this.startServices$.subscribe(([{ application }]) => {
         this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
       });
     } else {
@@ -79,11 +84,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
+    const [{ uiSettings }, { data }] = await this.startServices$.pipe(first()).toPromise();
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(
       savedSearch.searchSource,
-      savedSearch, // TODO: get unsaved state (using embeddale.searchScope): https://github.com/elastic/kibana/issues/43977
-      this.core.uiSettings
+      savedSearch, // TODO: get unsaved state (using embeddable.searchScope): https://github.com/elastic/kibana/issues/43977
+      { uiSettings, data }
     );
   }
 
