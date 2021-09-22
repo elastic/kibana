@@ -51,6 +51,8 @@ export const useRiskyHostsDashboardLinks = (
             }))
           );
         }
+      } else {
+        setListItemsWithLinks(listItems);
       }
     };
     createLinks();
