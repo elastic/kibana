@@ -6,7 +6,6 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { TypeOf } from '@kbn/config-schema';
@@ -202,19 +201,19 @@ export class SecurityPlugin
       spaces,
     }: PluginSetupDependencies
   ) {
-    this.configSubscription = combineLatest([
-      this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
+    this.kibanaIndexName = core.savedObjects.getKibanaIndex();
+    this.configSubscription = this.initializerContext.config
+      .create<TypeOf<typeof ConfigSchema>>()
+      .pipe(
         map((rawConfig) =>
           createConfig(rawConfig, this.initializerContext.logger.get('config'), {
             isTLSEnabled: core.http.getServerInfo().protocol === 'https',
           })
         )
-      ),
-      this.initializerContext.config.legacy.globalConfig$,
-    ]).subscribe(([config, { kibana }]) => {
-      this.config = config;
-      this.kibanaIndexName = kibana.index;
-    });
+      )
+      .subscribe((config) => {
+        this.config = config;
+      });
 
     const config = this.getConfig();
     const kibanaIndexName = this.getKibanaIndexName();
