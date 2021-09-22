@@ -111,24 +111,25 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   const columns = useMemo(() => {
     const expanderColumn: EuiTableComputedColumnType<DataVisualizerTableItem> = {
-      name: dimensions.showIcon ? (
-        <EuiButtonIcon
-          data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
-            expandAll ? 'expanded' : 'collapsed'
-          }`}
-          onClick={() => toggleExpandAll(!expandAll)}
-          aria-label={
-            !expandAll
-              ? i18n.translate('xpack.dataVisualizer.dataGrid.expandDetailsForAllAriaLabel', {
-                  defaultMessage: 'Expand details for all fields',
-                })
-              : i18n.translate('xpack.dataVisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
-                  defaultMessage: 'Collapse details for all fields',
-                })
-          }
-          iconType={expandAll ? 'arrowDown' : 'arrowRight'}
-        />
-      ) : null,
+      name:
+        dimensions.breakPoint !== 'xs' && dimensions.breakPoint !== 's' ? (
+          <EuiButtonIcon
+            data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
+              expandAll ? 'expanded' : 'collapsed'
+            }`}
+            onClick={() => toggleExpandAll(!expandAll)}
+            aria-label={
+              !expandAll
+                ? i18n.translate('xpack.dataVisualizer.dataGrid.expandDetailsForAllAriaLabel', {
+                    defaultMessage: 'Expand details for all fields',
+                  })
+                : i18n.translate('xpack.dataVisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
+                    defaultMessage: 'Collapse details for all fields',
+                  })
+            }
+            iconType={expandAll ? 'arrowDown' : 'arrowRight'}
+          />
+        ) : null,
       align: RIGHT_ALIGNMENT,
       width: dimensions.expander,
       isExpander: true,

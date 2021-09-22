@@ -7,7 +7,9 @@ $panelWidthL:     #{'max(40%, 450px)'};
 
 .dataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
-  width: 100%;
+  // Width is subtracting the left padding
+  // to ensure the content wraps correctly
+  width: calc(100% - #{$euiSize * 2});
 
   .fieldDataCard__valuesTitle {
     text-transform: uppercase;
@@ -79,13 +81,11 @@ $panelWidthL:     #{'max(40%, 450px)'};
       margin: $euiSizeXS $euiSizeM $euiSizeM 0;
       &.compressed {
         width: $panelWidthS;
-        min-width: fit-content;
       }
     }
 
     .dataVisualizerMapWrapper {
       height: $euiSize * 15; //240px
-      min-width: $panelWidthL;
     }
 
     .dataVisualizerTextContent {

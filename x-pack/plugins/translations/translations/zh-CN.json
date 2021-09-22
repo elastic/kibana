@@ -9151,7 +9151,6 @@
     "xpack.dataVisualizer.removeCombinedFieldsLabel": "移除组合字段",
     "xpack.dataVisualizer.searchPanel.allFieldsLabel": "所有字段",
     "xpack.dataVisualizer.searchPanel.allOptionLabel": "搜索全部",
-    "xpack.dataVisualizer.searchPanel.invalidKuerySyntaxErrorMessageQueryBar": "无效查询",
     "xpack.dataVisualizer.searchPanel.numberFieldsLabel": "字段数目",
     "xpack.dataVisualizer.searchPanel.ofFieldsTotal": "，共 {totalCount} 个",
     "xpack.dataVisualizer.searchPanel.queryBarPlaceholder": "选择较小的样例大小将减少查询运行时间和集群上的负载。",
