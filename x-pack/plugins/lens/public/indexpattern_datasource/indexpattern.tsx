@@ -44,7 +44,7 @@ import {
 
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages } from './operations';
+import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -188,6 +188,27 @@ export function getIndexPatternDatasource({
           layer: prevState.layers[layerId],
           columnId,
           indexPattern,
+        }),
+      });
+    },
+
+    initializeDimension(state, layerId, { columnId, groupId, label, dataType, staticValue }) {
+      const indexPattern = state.indexPatterns[state.layers[layerId]?.indexPatternId];
+      if (staticValue == null) {
+        return state;
+      }
+      return mergeLayer({
+        state,
+        layerId,
+        newLayer: insertNewColumn({
+          layer: state.layers[layerId],
+          op: 'static_value',
+          columnId,
+          field: undefined,
+          indexPattern,
+          visualizationGroups: [],
+          initialParams: { params: { value: staticValue } },
+          targetGroup: groupId,
         }),
       });
     },
@@ -404,9 +425,14 @@ export function getIndexPatternDatasource({
         },
       };
     },
-    getDatasourceSuggestionsForField(state, draggedField) {
+    getDatasourceSuggestionsForField(state, draggedField, filterLayers) {
       return isDraggedField(draggedField)
-        ? getDatasourceSuggestionsForField(state, draggedField.indexPatternId, draggedField.field)
+        ? getDatasourceSuggestionsForField(
+            state,
+            draggedField.indexPatternId,
+            draggedField.field,
+            filterLayers
+          )
         : [];
     },
     getDatasourceSuggestionsFromCurrentState,

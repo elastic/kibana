@@ -163,10 +163,8 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         usageStatsClient.incrementResolveCopySavedObjectsErrors({ headers, createNewCopies })
       );
 
-      const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-        startServices.savedObjects,
-        request
-      );
+      const resolveCopySavedObjectsToSpacesConflicts =
+        resolveCopySavedObjectsToSpacesConflictsFactory(startServices.savedObjects, request);
       const sourceSpaceId = getSpacesService().getSpaceId(request);
       const resolveConflictsResponse = await resolveCopySavedObjectsToSpacesConflicts(
         sourceSpaceId,

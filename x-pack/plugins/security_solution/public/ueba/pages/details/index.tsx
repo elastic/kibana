@@ -63,9 +63,10 @@ const UebaDetailsComponent: React.FC<UebaDetailsProps> = ({ detailName, uebaDeta
   const { globalFullScreen } = useGlobalFullScreen();
 
   const kibana = useKibana();
-  const uebaDetailsPageFilters: Filter[] = useMemo(() => getUebaDetailsPageFilters(detailName), [
-    detailName,
-  ]);
+  const uebaDetailsPageFilters: Filter[] = useMemo(
+    () => getUebaDetailsPageFilters(detailName),
+    [detailName]
+  );
   const getFilters = () => [...uebaDetailsPageFilters, ...filters];
 
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope(
