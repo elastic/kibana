@@ -13,7 +13,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
-import { KibanaConfigType } from '../../../kibana_config';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
@@ -41,7 +40,7 @@ export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
   soMigrationsConfig: SavedObjectsMigrationConfigType;
-  kibanaConfig: KibanaConfigType;
+  kibanaIndex: string;
   kibanaVersion: string;
   logger: Logger;
   migrationsRetryDelay?: number;
@@ -61,7 +60,7 @@ export interface KibanaMigratorStatus {
 export class KibanaMigrator {
   private readonly client: ElasticsearchClient;
   private readonly documentMigrator: VersionedTransformer;
-  private readonly kibanaConfig: KibanaConfigType;
+  private readonly kibanaIndex: string;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
@@ -83,14 +82,14 @@ export class KibanaMigrator {
   constructor({
     client,
     typeRegistry,
-    kibanaConfig,
+    kibanaIndex,
     soMigrationsConfig,
     kibanaVersion,
     logger,
     migrationsRetryDelay,
   }: KibanaMigratorOptions) {
     this.client = client;
-    this.kibanaConfig = kibanaConfig;
+    this.kibanaIndex = kibanaIndex;
     this.soMigrationsConfig = soMigrationsConfig;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
@@ -156,9 +155,8 @@ export class KibanaMigrator {
   }
 
   private runMigrationsInternal() {
-    const kibanaIndexName = this.kibanaConfig.index;
     const indexMap = createIndexMap({
-      kibanaIndexName,
+      kibanaIndexName: this.kibanaIndex,
       indexMap: this.mappingProperties,
       registry: this.typeRegistry,
     });
@@ -212,7 +210,7 @@ export class KibanaMigrator {
           serializer: this.serializer,
           // Only necessary for the migrator of the kibana index.
           obsoleteIndexTemplatePattern:
-            index === kibanaIndexName ? 'kibana_index_template*' : undefined,
+            index === this.kibanaIndex ? 'kibana_index_template*' : undefined,
           convertToAliasScript: indexMap[index].script,
         });
       }

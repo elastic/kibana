@@ -12,7 +12,6 @@ import { estypes } from '@elastic/elasticsearch';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
-import type { KibanaConfigType } from '../../kibana_config';
 import type { SavedObjectConfig } from '../saved_objects_config';
 import { SavedObjectsType } from 'kibana/server';
 
@@ -31,7 +30,7 @@ describe('unknown saved object types deprecation', () => {
 
   let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
   let esClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
-  let kibanaConfig: KibanaConfigType;
+  const kibanaIndex = '.kibana';
   let savedObjectsConfig: SavedObjectConfig;
 
   beforeEach(() => {
@@ -43,11 +42,6 @@ describe('unknown saved object types deprecation', () => {
       { name: 'bar' },
     ] as SavedObjectsType[]);
     getIndexForTypeMock.mockImplementation(({ type }: { type: string }) => `${type}-index`);
-
-    kibanaConfig = {
-      index: '.kibana',
-      enabled: true,
-    };
 
     savedObjectsConfig = {
       migration: {
@@ -72,7 +66,7 @@ describe('unknown saved object types deprecation', () => {
         savedObjectsConfig,
         esClient,
         typeRegistry,
-        kibanaConfig,
+        kibanaIndex,
         kibanaVersion,
       });
 
@@ -99,7 +93,7 @@ describe('unknown saved object types deprecation', () => {
         savedObjectsConfig,
         esClient,
         typeRegistry,
-        kibanaConfig,
+        kibanaIndex,
         kibanaVersion,
       });
 
@@ -115,7 +109,7 @@ describe('unknown saved object types deprecation', () => {
         savedObjectsConfig,
         esClient,
         typeRegistry,
-        kibanaConfig,
+        kibanaIndex,
         kibanaVersion,
       });
 
@@ -144,7 +138,7 @@ describe('unknown saved object types deprecation', () => {
         savedObjectsConfig,
         esClient,
         typeRegistry,
-        kibanaConfig,
+        kibanaIndex,
         kibanaVersion,
       });
 
