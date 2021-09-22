@@ -91,7 +91,7 @@ export function extractSearchData({
   savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
   query?: Query;
   filters?: Filter[];
-  filterManager: FilterManager;
+  filterManager?: FilterManager;
 }) {
   if (!indexPattern || !savedSearch) return;
 
@@ -119,7 +119,8 @@ export function extractSearchData({
   if (savedSearchData) {
     const currentQuery = userQuery ?? savedSearchData?.query;
     const currentFilters = userFilters ?? savedSearchData?.filter;
-    filterManager.setFilters(currentFilters);
+
+    if (filterManager) filterManager.setFilters(currentFilters);
 
     const combinedQuery = createCombinedQuery(
       currentQuery,

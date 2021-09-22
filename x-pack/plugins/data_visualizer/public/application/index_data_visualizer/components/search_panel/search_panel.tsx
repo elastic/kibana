@@ -138,7 +138,6 @@ export const SearchPanel: FC<Props> = ({
           onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
             searchHandler({ query: params.query })
           }
-          // filters={queryManager.filterManager.getFilters()}
           // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
           indexPatterns={[indexPattern]}
@@ -147,6 +146,7 @@ export const SearchPanel: FC<Props> = ({
           })}
           displayStyle={'inPage'}
           isClearable={true}
+          customSubmitButton={<div />}
         />
       </EuiFlexItem>
 
