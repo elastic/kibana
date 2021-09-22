@@ -27,9 +27,8 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();
-  const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } = useTable(
-    'elasticsearch.nodes'
-  );
+  const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } =
+    useTable('elasticsearch.nodes');
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
