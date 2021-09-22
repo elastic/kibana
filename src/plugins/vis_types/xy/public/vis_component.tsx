@@ -286,15 +286,15 @@ const VisComponent = (props: VisComponentProps) => {
   const splitSeriesAccessors = useMemo(
     () =>
       config.aspects.series
-        ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
+        ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)))
         : [],
     [config.aspects.series]
   );
   const splitChartColumnAccessor = config.aspects.splitColumn
-    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitColumn)
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitColumn)
     : undefined;
   const splitChartRowAccessor = config.aspects.splitRow
-    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitRow)
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitRow)
     : undefined;
 
   const renderSeries = useMemo(

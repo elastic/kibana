@@ -55,7 +55,7 @@ export const applyFormatterIfComplexField = (aspect: Aspect, value: unknown) =>
  * @param isComplex - forces to be functional/complex accessor
  */
 export const getComplexAccessor =
-  (fieldName: string) =>
+  (fieldName: string, shouldApplyFormatter: boolean = false) =>
   (aspect: Aspect, index?: number): AccessorFn | undefined => {
     // SHARD_DELAY is used only for dev purpose and need to handle separately.
     if (aspect.accessor === null || aspect.accessor === undefined || aspect.title === SHARD_DELAY) {
@@ -73,7 +73,7 @@ export const getComplexAccessor =
       // What about simple values, formatting them at this step is breaking the logic of intervals (xDomain).
       // If the value will be formatted on this step, it will be rendered without any respect to the passed bounds
       // and the chart will render not all the range, but only the part of range, which contains data.
-      return applyFormatterIfComplexField(aspect, v);
+      return (shouldApplyFormatter ? applyFormatter : applyFormatterIfComplexField)(aspect, v);
     };
     fn.fieldName = getFieldName(fieldName, index);
 
