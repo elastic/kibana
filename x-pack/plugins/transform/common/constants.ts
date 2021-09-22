@@ -124,7 +124,7 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
     description: i18n.translate(
       'xpack.transform.alertTypes.transformHealth.notStartedCheckDescription',
       {
-        defaultMessage: 'Get alerted if the transform is not started or indexing any data.',
+        defaultMessage: 'Get alerts when the transform is not started or is not indexing data.',
       }
     ),
   },
