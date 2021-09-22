@@ -233,6 +233,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       indexPattern: currentIndexPattern,
       uiSettings,
       savedSearch: currentSavedSearch,
+      filterManager: data.query.filterManager,
     });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
@@ -249,7 +250,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSavedSearch, currentIndexPattern, dataVisualizerListState]);
+  }, [currentSavedSearch, currentIndexPattern, dataVisualizerListState, data.query]);
 
   const setSearchParams = useCallback(
     (searchParams: {

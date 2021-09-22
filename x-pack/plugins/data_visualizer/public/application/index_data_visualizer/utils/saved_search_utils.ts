@@ -20,6 +20,7 @@ import { DataView } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | SavedSearch) {
   const search = isSavedSearchSavedObject(savedSearch)
@@ -83,12 +84,14 @@ export function extractSearchData({
   savedSearch,
   query,
   filters,
+  filterManager,
 }: {
   indexPattern: DataView;
   uiSettings: IUiSettingsClient;
   savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
   query?: Query;
   filters?: Filter[];
+  filterManager: FilterManager;
 }) {
   if (!indexPattern || !savedSearch) return;
 
@@ -116,6 +119,7 @@ export function extractSearchData({
   if (savedSearchData) {
     const currentQuery = userQuery ?? savedSearchData?.query;
     const currentFilters = userFilters ?? savedSearchData?.filter;
+    filterManager.setFilters(currentFilters);
 
     const combinedQuery = createCombinedQuery(
       currentQuery,
