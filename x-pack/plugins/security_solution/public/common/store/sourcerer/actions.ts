@@ -20,6 +20,11 @@ export const setSource = actionCreator<{
 export const setSignalIndexName =
   actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
 
+export const setIndexFieldsSearch =
+  actionCreator<{ indexFieldsSearch: (s: string) => void; id: SourcererScopeName }>(
+    'SET_INDEX_FIELDS_SEARCH'
+  );
+
 // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted
 export const setSourcererDataViews = actionCreator<{
   defaultDataView: KibanaDataView;

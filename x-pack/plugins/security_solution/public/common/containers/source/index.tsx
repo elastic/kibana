@@ -329,4 +329,5 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewId]);
+  return { indexFieldsSearch };
 };

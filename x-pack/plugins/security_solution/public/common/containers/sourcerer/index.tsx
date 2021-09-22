@@ -96,8 +96,13 @@ export const useInitSourcerer = (
     [addError, dispatch, defaultDataView.title]
   );
 
-  useIndexFields(scopeId);
+  const { indexFieldsSearch } = useIndexFields(scopeId);
   useIndexFields(SourcererScopeName.timeline);
+  useEffect(() => {
+    // recheck if the indices have data yet
+    dispatch(sourcererActions.setIndexFieldsSearch({ indexFieldsSearch, id: scopeId }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexFieldsSearch]);
 
   useEffect(() => {
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {

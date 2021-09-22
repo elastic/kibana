@@ -13,6 +13,7 @@ import {
   setSelectedDataView,
   setSignalIndexName,
   setSource,
+  setIndexFieldsSearch,
 } from './actions';
 import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
@@ -23,6 +24,16 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
   .case(setSignalIndexName, (state, { signalIndexName }) => ({
     ...state,
     signalIndexName,
+  }))
+  .case(setIndexFieldsSearch, (state, { indexFieldsSearch, id }) => ({
+    ...state,
+    sourcererScopes: {
+      ...state.sourcererScopes,
+      [id]: {
+        ...state.sourcererScopes[id],
+        indexFieldsSearch,
+      },
+    },
   }))
   // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted
   .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({

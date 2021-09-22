@@ -7,13 +7,13 @@
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { DocValueFields } from '../../../../common/search_strategy/common';
 import {
   BrowserFields,
+  DocValueFields,
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_PATTERN,
-} from '../../../../common/search_strategy/index_fields';
+} from '../../../../../timelines/common';
 
 export type ErrorModel = Error[];
 
@@ -30,6 +30,7 @@ export interface ManageScope {
   id: SourcererScopeName;
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
+  indexFieldsSearch?: (s: string) => void;
   loading: boolean;
   // Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
   runtimeMappings: MappingRuntimeFields;

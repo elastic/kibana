@@ -576,15 +576,20 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
+  const { indicesExist, indexPattern, indexFieldsSearch } = useSourcererScope(
+    SourcererScopeName.detections
+  );
   useEffect(() => {
     // recheck if the indices have data yet
-    if (!indicesExist) {
+    console.log('redoing search????', { indicesExist, indexFieldsSearch });
+    if (!indicesExist && indexFieldsSearch != null) {
+      indexFieldsSearch(SourcererScopeName.detections);
+      console.log('redoing search');
       // TODO: Steph/sourcerer
       // if details page loads and signal index does not exist, recheck
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [indicesExist, indexFieldsSearch]);
 
   const exceptionLists = useMemo((): {
     lists: ExceptionListIdentifiers[];
