@@ -282,7 +282,6 @@ export class DocLinksService {
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
-          configureSettings: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/configure-settings.html`,
           infrastructureThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/infrastructure-threshold-alert.html`,
           logsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/logs-threshold-alert.html`,
           metricsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/metrics-threshold-alert.html`,
