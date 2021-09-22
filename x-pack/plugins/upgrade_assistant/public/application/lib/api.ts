@@ -7,7 +7,7 @@
 
 import { HttpSetup } from 'src/core/public';
 
-import { ESUpgradeStatus, CloudBackupStatus } from '../../../common/types';
+import { ESUpgradeStatus, CloudBackupStatus, ResponseError } from '../../../common/types';
 import {
   API_BASE_PATH,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
@@ -15,26 +15,22 @@ import {
 } from '../../../common/constants';
 import {
   UseRequestConfig,
+  ResponseInterceptor,
   SendRequestConfig,
   SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';
 
-export interface ResponseError {
-  statusCode: number;
-  message: string | Error;
-  attributes?: Record<string, any>;
-}
-
 export class ApiService {
   private client: HttpSetup | undefined;
+  private responseInterceptors: ResponseInterceptor[] = [];
 
   private useRequest<R = any, E = ResponseError>(config: UseRequestConfig) {
     if (!this.client) {
       throw new Error('API service has not be initialized.');
     }
-    return _useRequest<R, E>(this.client, config);
+    return _useRequest<R, ResponseError>(this.client, config);
   }
 
   private sendRequest<D = any, E = ResponseError>(
@@ -50,11 +46,16 @@ export class ApiService {
     this.client = httpClient;
   }
 
+  public addResponseInterceptor(interceptor: ResponseInterceptor): void {
+    this.responseInterceptors.push(interceptor);
+  }
+
   public useLoadCloudBackupStatus() {
     return this.useRequest<CloudBackupStatus>({
       path: `${API_BASE_PATH}/cloud_backup_status`,
       method: 'get',
       pollIntervalMs: CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
+      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -62,6 +63,7 @@ export class ApiService {
     return this.useRequest<ESUpgradeStatus>({
       path: `${API_BASE_PATH}/es_deprecations`,
       method: 'get',
+      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -82,6 +84,7 @@ export class ApiService {
     }>({
       path: `${API_BASE_PATH}/deprecation_logging`,
       method: 'get',
+      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -90,6 +93,7 @@ export class ApiService {
       path: `${API_BASE_PATH}/deprecation_logging`,
       method: 'put',
       body: JSON.stringify(loggingData),
+      responseInterceptors: this.responseInterceptors,
     });
 
     return result;
@@ -103,6 +107,7 @@ export class ApiService {
       method: 'get',
       query: { from },
       pollIntervalMs: DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
+      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -113,6 +118,7 @@ export class ApiService {
       body: {
         settings: JSON.stringify(settings),
       },
+      responseInterceptors: this.responseInterceptors,
     });
 
     return result;
@@ -123,6 +129,7 @@ export class ApiService {
       path: `${API_BASE_PATH}/ml_snapshots`,
       method: 'post',
       body,
+      responseInterceptors: this.responseInterceptors,
     });
 
     return result;
@@ -132,6 +139,7 @@ export class ApiService {
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/ml_snapshots/${jobId}/${snapshotId}`,
       method: 'delete',
+      responseInterceptors: this.responseInterceptors,
     });
 
     return result;
@@ -147,6 +155,17 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/ml_snapshots/${jobId}/${snapshotId}`,
       method: 'get',
+      responseInterceptors: this.responseInterceptors,
+    });
+  }
+
+  public useLoadMlUpgradeMode() {
+    return this.useRequest<{
+      mlUpgradeModeEnabled: boolean;
+    }>({
+      path: `${API_BASE_PATH}/ml_upgrade_mode`,
+      method: 'get',
+      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -164,6 +183,7 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}`,
       method: 'get',
+      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -171,6 +191,7 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}`,
       method: 'post',
+      responseInterceptors: this.responseInterceptors,
     });
   }
 
@@ -178,15 +199,7 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}/cancel`,
       method: 'post',
-    });
-  }
-
-  public useLoadMlUpgradeMode() {
-    return this.useRequest<{
-      mlUpgradeModeEnabled: boolean;
-    }>({
-      path: `${API_BASE_PATH}/ml_upgrade_mode`,
-      method: 'get',
+      responseInterceptors: this.responseInterceptors,
     });
   }
 }

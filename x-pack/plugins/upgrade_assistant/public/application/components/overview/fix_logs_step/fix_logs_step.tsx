@@ -107,6 +107,12 @@ const FixLogsStep: FunctionComponent<Props> = ({
   privilegesMissing,
 }) => {
   const {
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
+
+  const {
     isDeprecationLogIndexingEnabled,
     onlyDeprecationLogWritingEnabled,
     isLoading,
@@ -116,12 +122,6 @@ const FixLogsStep: FunctionComponent<Props> = ({
     resendRequest,
     toggleLogging,
   } = useDeprecationLogging();
-
-  const {
-    services: {
-      core: { docLinks },
-    },
-  } = useAppContext();
 
   const [checkpoint, setCheckpoint] = useState(loadLogsCheckpoint());
 

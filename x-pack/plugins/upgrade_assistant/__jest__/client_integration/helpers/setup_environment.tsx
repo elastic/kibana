@@ -18,7 +18,7 @@ import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { GlobalFlyout } from '../../../public/shared_imports';
-import { AppDependencies } from '../../../public/types';
+import { AppContextDependencies } from '../../../public/types';
 import { getAppContextMock } from './app_context.mock';
 import { init as initHttpRequests } from './http_requests';
 
@@ -39,7 +39,7 @@ export const WithAppDependencies =
     apiService.setup(mockHttpClient as unknown as HttpSetup);
     breadcrumbService.setup(() => '');
 
-    const appContextMock = getAppContextMock() as unknown as AppDependencies;
+    const appContextMock = getAppContextMock() as unknown as AppContextDependencies;
 
     return (
       <AuthorizationContext.Provider

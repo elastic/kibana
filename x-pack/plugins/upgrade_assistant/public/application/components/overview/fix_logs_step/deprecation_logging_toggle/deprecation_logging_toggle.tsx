@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ResponseError } from '../../../../lib/api';
+import { ResponseError } from '../../../../../../common/types';
 import { DeprecationLoggingPreviewProps } from '../../../types';
 
 import './_deprecation_logging_toggle.scss';
