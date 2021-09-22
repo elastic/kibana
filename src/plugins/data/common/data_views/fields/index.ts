@@ -15,4 +15,4 @@ export {
   getFieldSubtypeNested,
 } from './utils';
 export * from './field_list';
-export * from './index_pattern_field';
+export * from './data_view_field';
