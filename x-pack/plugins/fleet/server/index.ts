@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
-import { PreconfiguredPackagesSchema, PreconfiguredAgentPoliciesSchema } from './types';
+import {
+  PreconfiguredPackagesSchema,
+  PreconfiguredAgentPoliciesSchema,
+  PreconfiguredOutputsSchema,
+} from './types';
 
 import { FleetPlugin } from './plugin';
 
@@ -114,6 +118,7 @@ export const config: PluginConfigDescriptor = {
     }),
     packages: PreconfiguredPackagesSchema,
     agentPolicies: PreconfiguredAgentPoliciesSchema,
+    outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
   }),
 };
