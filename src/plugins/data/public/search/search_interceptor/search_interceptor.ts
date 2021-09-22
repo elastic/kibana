@@ -352,7 +352,7 @@ export class SearchInterceptor {
             );
           }),
           tap((response) => {
-            const isSearchInScopeOfSession = sessionId === this.deps.session.getSessionId();
+            const isSearchInScopeOfSession = sessionId  && sessionId === this.deps.session.getSessionId();
             if (
               isSearchInScopeOfSession &&
               this.deps.session.isRestore() &&
