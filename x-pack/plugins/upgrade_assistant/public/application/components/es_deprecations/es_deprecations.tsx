@@ -16,6 +16,7 @@ import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_ES_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
+import { getEsDeprecationError } from '../../lib/get_es_deprecation_error';
 import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { EsDeprecationsTable } from './es_deprecations_table';
 
