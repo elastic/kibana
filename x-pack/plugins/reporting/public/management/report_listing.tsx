@@ -144,9 +144,11 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   private licenseHandler = (license: ILicense) => {
-    const { enableLinks, showLinks, message: badLicenseMessage } = checkLicense(
-      license.check('reporting', 'basic')
-    );
+    const {
+      enableLinks,
+      showLinks,
+      message: badLicenseMessage,
+    } = checkLicense(license.check('reporting', 'basic'));
 
     this.setState({
       enableLinks,

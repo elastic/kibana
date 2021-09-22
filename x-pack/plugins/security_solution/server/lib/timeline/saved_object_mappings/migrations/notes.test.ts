@@ -28,7 +28,7 @@ describe('notes migrations', () => {
       const migratedDoc = migrateNoteTimelineIdToReferences({
         id: '1',
         type: 'awesome',
-        attributes: ({ awesome: 'yes', timelineId: '123' } as unknown) as TimelineId,
+        attributes: { awesome: 'yes', timelineId: '123' } as unknown as TimelineId,
       });
 
       expect(migratedDoc.attributes).toEqual({ awesome: 'yes' });

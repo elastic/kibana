@@ -26,9 +26,9 @@ jest.mock('../../lib/crypto', () => ({
 }));
 
 const getMockContext = () =>
-  (({
+  ({
     core: coreMock.createRequestHandlerContext(),
-  } as unknown) as ReportingRequestHandlerContext);
+  } as unknown as ReportingRequestHandlerContext);
 
 const getMockRequest = () =>
   ({
@@ -37,11 +37,11 @@ const getMockRequest = () =>
   } as KibanaRequest);
 
 const getMockResponseFactory = () =>
-  (({
+  ({
     ...httpServerMock.createResponseFactory(),
     forbidden: (obj: unknown) => obj,
     unauthorized: (obj: unknown) => obj,
-  } as unknown) as KibanaResponseFactory);
+  } as unknown as KibanaResponseFactory);
 
 const mockLogger = createMockLevelLogger();
 
@@ -64,13 +64,13 @@ describe('Handle request to generate', () => {
   beforeEach(async () => {
     reportingCore = await createMockReportingCore(createMockConfigSchema({}));
     reportingCore.getStore = () =>
-      Promise.resolve(({
+      Promise.resolve({
         addReport: jest
           .fn()
           .mockImplementation(
             (report) => new Report({ ...report, _index: '.reporting-foo-index-234' })
           ),
-      } as unknown) as ReportingStore);
+      } as unknown as ReportingStore);
     mockRequest = getMockRequest();
 
     mockResponseFactory = getMockResponseFactory();
@@ -140,7 +140,7 @@ describe('Handle request to generate', () => {
     });
 
     test('provides a default kibana version field for older POST URLs', async () => {
-      ((mockJobParams as unknown) as { version?: string }).version = undefined;
+      (mockJobParams as unknown as { version?: string }).version = undefined;
       const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);
 
       const { _id, created_at: _created_at, ...snapObj } = report;
@@ -170,10 +170,10 @@ describe('Handle request to generate', () => {
   });
 
   test('generates the download path', async () => {
-    const response = ((await requestHandler.handleGenerateRequest(
+    const response = (await requestHandler.handleGenerateRequest(
       'csv',
       mockJobParams
-    )) as unknown) as { body: { job: ReportApiJSON } };
+    )) as unknown as { body: { job: ReportApiJSON } };
     const { id, created_at: _created_at, ...snapObj } = response.body.job;
     expect(snapObj).toMatchInlineSnapshot(`
       Object {
