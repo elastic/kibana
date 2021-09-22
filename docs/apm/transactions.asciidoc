@@ -171,7 +171,7 @@ image::apm/images/apm-logs-tab.png[APM logs tab]
 ==== Correlations
 
 Correlations surface attributes of your data that are potentially correlated with high-latency or erroneous transactions.
-To learn more, see <<correlations-hover>>.
+To learn more, see <<correlations>>.
 
 [role="screenshot"]
 image::apm/images/correlations-hover.png[APM lattency correlations]
