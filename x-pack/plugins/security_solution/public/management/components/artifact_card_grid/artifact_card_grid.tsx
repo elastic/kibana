@@ -32,9 +32,7 @@ export type ArtifactCardGridProps = Omit<
 
   onPageChange: ArtifactsPaginatedContentProps['onChange'];
 
-  onExpandCollapse: (
-    /* TODO:PT defined structure for props */ changes: Record<string, string>
-  ) => void;
+  onExpandCollapse: (changes: { expanded: MaybeImmutable<AnyArtifact[]> }) => void;
 
   /**
    * Callback to provide additional props for the `ArtifactEntryCollapsableCard`

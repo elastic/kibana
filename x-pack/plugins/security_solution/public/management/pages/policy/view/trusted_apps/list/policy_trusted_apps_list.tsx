@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiLoadingSpinner, Pagination } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import {
@@ -22,6 +22,7 @@ import {
   policyIdFromParams,
 } from '../../../store/policy_details/selectors';
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
+import { TrustedApp } from '../../../../../../../common/endpoint/types';
 
 export const PolicyTrustedAppsList = memo(() => {
   const history = useHistory();
@@ -31,6 +32,8 @@ export const PolicyTrustedAppsList = memo(() => {
   const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
   const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+
+  const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
 
   // TODO:PT show load errors if any
 
@@ -52,13 +55,22 @@ export const PolicyTrustedAppsList = memo(() => {
     // FIXME:PT implement callback
   }, []);
 
-  const provideCardProps = useCallback(() => {
-    // FIXME:PT implement callback
+  const provideCardProps = useCallback(
+    (item: TrustedApp) => {
+      // FIXME:PT implement callback
 
-    return {
-      actions: [{ children: 'one' }, { children: 'two' }],
-    };
-  }, []);
+      return {
+        expanded: Boolean(isCardExpanded[item.id]),
+        actions: [{ children: 'one' }, { children: 'two' }],
+      };
+    },
+    [isCardExpanded]
+  );
+
+  // Anytime a new set of data (trusted apps) is retrieved, reset the card expand state
+  useEffect(() => {
+    setCardExpanded({});
+  }, [trustedAppItems]);
 
   if (hasTrustedApps.loading) {
     return (
