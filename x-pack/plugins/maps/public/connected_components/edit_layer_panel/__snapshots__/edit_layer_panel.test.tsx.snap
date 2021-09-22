@@ -101,9 +101,10 @@ exports[`EditLayerPanel is rendered 1`] = `
               "renderSourceSettingsEditor": [Function],
               "showJoinEditor": [Function],
               "supportsElasticsearchFilters": [Function],
+              "supportsFitToBounds": [Function],
             }
           }
-          supportsFitToBounds={false}
+          supportsFitToBounds={true}
         />
         <div>
           mockSourceSettings
@@ -120,6 +121,7 @@ exports[`EditLayerPanel is rendered 1`] = `
                 "renderSourceSettingsEditor": [Function],
                 "showJoinEditor": [Function],
                 "supportsElasticsearchFilters": [Function],
+                "supportsFitToBounds": [Function],
               }
             }
             layerDisplayName="layer 1"
