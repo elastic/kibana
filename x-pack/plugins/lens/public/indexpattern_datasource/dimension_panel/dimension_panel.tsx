@@ -16,7 +16,7 @@ import { IndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
-import type { DateRange } from '../../../common';
+import { DateRange, layerTypes } from '../../../common';
 import { getOperationSupportMatrix } from './operation_support';
 
 export type IndexPatternDimensionTriggerProps =
@@ -49,11 +49,11 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
-  const { columnId, uniqueLabel } = props;
+  const { columnId, uniqueLabel, invalid, invalidMessage } = props;
 
   const currentColumnHasErrors = useMemo(
-    () => isColumnInvalid(layer, columnId, currentIndexPattern),
-    [layer, columnId, currentIndexPattern]
+    () => invalid || isColumnInvalid(layer, columnId, currentIndexPattern),
+    [layer, columnId, currentIndexPattern, invalid]
   );
 
   const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] ?? null;
@@ -67,15 +67,17 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     return (
       <EuiToolTip
         content={
-          <p>
-            {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
-              defaultMessage: 'Invalid configuration.',
-            })}
-            <br />
-            {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
-              defaultMessage: 'Click for more details.',
-            })}
-          </p>
+          invalidMessage ?? (
+            <p>
+              {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+                defaultMessage: 'Invalid configuration.',
+              })}
+              <br />
+              {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+                defaultMessage: 'Click for more details.',
+              })}
+            </p>
+          )
         }
         anchorClassName="eui-displayBlock"
       >
@@ -127,6 +129,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   return (
     <DimensionEditor
       {...props}
+      layerType={props.layerType || layerTypes.DATA}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}
       operationSupportMatrix={operationSupportMatrix}
