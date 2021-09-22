@@ -23,6 +23,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import {
   policyDetails,
@@ -177,7 +178,14 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             selectedArtifactsUpdated={(artifactIds) => setSelectedArtifactIds(artifactIds)}
           />
         ) : entriesExists ? (
-          'There are results outside the query' // TODO: to be done
+          <EuiEmptyPrompt
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noResults"
+                defaultMessage="No items found"
+              />
+            }
+          />
         ) : (
           'There are no available trusted apps' // TODO: to be done
         )}
@@ -208,7 +216,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
                 defaultMessage="Assing to {policyName}"
                 values={{
                   policyName: `${policyName.substring(0, 20)}${
-                    policyName.length > 30 ? '...' : ''
+                    policyName.length > 20 ? '...' : ''
                   }`,
                 }}
               />
