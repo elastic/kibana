@@ -5,6 +5,32 @@
  * 2.0.
  */
 
-export const isOnTrustedAppsView = () => {
+import { PolicyDetailsState } from '../../../types';
+import { GetTrustedAppsListResponse } from '../../../../../../../common/endpoint/types';
+
+export const isOnTrustedAppsArtifactsView = (state: PolicyDetailsState): boolean => {
   return true;
+};
+
+export const doesPolicyHaveTrustedApps = (
+  state: PolicyDetailsState
+): { loading: boolean; hasTrustedApps: boolean } => {
+  // TODO: implement empty state (task #1645)
+  return {
+    loading: false,
+    hasTrustedApps: true,
+  };
+};
+
+export const isPolicyTrustedAppListLoading = (): boolean => {
+  return false;
+};
+
+export const getPolicyTrustedAppList = (): GetTrustedAppsListResponse => {
+  return {
+    data: [],
+    page: 1,
+    total: 100,
+    per_page: 20,
+  };
 };

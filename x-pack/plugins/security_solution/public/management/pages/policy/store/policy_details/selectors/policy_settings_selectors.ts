@@ -11,7 +11,6 @@ import { ILicense } from '../../../../../../../../licensing/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
 import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../../../types';
 import {
-  GetTrustedAppsListResponse,
   Immutable,
   NewPolicyData,
   PolicyConfig,
@@ -269,34 +268,3 @@ export const agentStatusSummary = (state: PolicyDetailsState) => state.agentStat
 
 /** Status for an update to the policy */
 export const updateStatus = (state: PolicyDetailsState) => state.updateStatus;
-
-// --------------------------------
-// Trusted app tab view
-// --------------------------------
-
-export const isOnTrustedAppsArtifactsView = (state: PolicyDetailsState): boolean => {
-  return true;
-};
-
-export const doesPolicyHaveTrustedApps = (
-  state: PolicyDetailsState
-): { loading: boolean; hasTrustedApps: boolean } => {
-  // TODO: implement empty state (task #1645)
-  return {
-    loading: false,
-    hasTrustedApps: true,
-  };
-};
-
-export const isPolicyTrustedAppListLoading = (): boolean => {
-  return false;
-};
-
-export const getPolicyTrustedAppList = (): GetTrustedAppsListResponse => {
-  return {
-    data: [],
-    page: 1,
-    total: 100,
-    per_page: 20,
-  };
-};
