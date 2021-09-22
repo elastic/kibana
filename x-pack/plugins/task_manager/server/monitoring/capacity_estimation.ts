@@ -61,10 +61,8 @@ export function estimateCapacity(
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
   } = capacityStats.runtime.value.execution.persistence;
   const { overdue, capacity_requirements: capacityRequirements } = workload;
-  const {
-    poll_interval: pollInterval,
-    max_workers: maxWorkers,
-  } = capacityStats.configuration.value;
+  const { poll_interval: pollInterval, max_workers: maxWorkers } =
+    capacityStats.configuration.value;
 
   /**
    * On average, how many polling cycles does it take to execute a task?
@@ -203,10 +201,12 @@ export function estimateCapacity(
           minutes_to_drain_overdue:
             overdue / (assumedKibanaInstances * averageCapacityUsedByPersistedTasksPerKibana),
           avg_recurring_required_throughput_per_minute: averageRecurringRequiredPerMinute,
-          avg_recurring_required_throughput_per_minute_per_kibana: assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
+          avg_recurring_required_throughput_per_minute_per_kibana:
+            assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
           avg_required_throughput_per_minute:
             assumedRequiredThroughputPerMinutePerKibana * assumedKibanaInstances,
-          avg_required_throughput_per_minute_per_kibana: assumedRequiredThroughputPerMinutePerKibana,
+          avg_required_throughput_per_minute_per_kibana:
+            assumedRequiredThroughputPerMinutePerKibana,
         },
         Math.ceil
       ),
@@ -214,8 +214,10 @@ export function estimateCapacity(
         {
           provisioned_kibana: minRequiredKibanaInstances,
           min_required_kibana: minRequiredKibanaInstancesForRecurringTasks,
-          avg_recurring_required_throughput_per_minute_per_kibana: averageRecurringRequiredPerMinutePerKibana,
-          avg_required_throughput_per_minute_per_kibana: averageRequiredThroughputPerMinutePerKibana,
+          avg_recurring_required_throughput_per_minute_per_kibana:
+            averageRecurringRequiredPerMinutePerKibana,
+          avg_required_throughput_per_minute_per_kibana:
+            averageRequiredThroughputPerMinutePerKibana,
         },
         Math.ceil
       ),

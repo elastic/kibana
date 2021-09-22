@@ -69,8 +69,8 @@ interface SecuritySolutionPageWrapperProps {
   onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> = React.memo(
-  ({ children, onAppLeave }) => {
+export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> =
+  React.memo(({ children, onAppLeave }) => {
     const solutionNav = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
@@ -111,5 +111,4 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     ) : (
       <OverviewEmpty />
     );
-  }
-);
+  });

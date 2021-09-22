@@ -78,9 +78,11 @@ describe('EntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(0).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'machine.os' }]);
+    (
+      wrapper.find(EuiComboBox).at(0).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
@@ -123,9 +125,11 @@ describe('EntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'is not' }]);
+    (
+      wrapper.find(EuiComboBox).at(1).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { id: '123', field: 'ip', type: 'mapping', value: '' },

@@ -83,9 +83,7 @@ describe('executeActionRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.execute.mockResolvedValueOnce(
-      (null as unknown) as ActionTypeExecutorResult<void>
-    );
+    actionsClient.execute.mockResolvedValueOnce(null as unknown as ActionTypeExecutorResult<void>);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },

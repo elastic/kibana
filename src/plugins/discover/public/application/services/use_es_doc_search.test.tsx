@@ -37,9 +37,9 @@ jest.mock('../../kibana_services', () => ({
 
 describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody given useNewFieldsApi is false', () => {
-    const indexPattern = ({
+    const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
     const actual = buildSearchBody('1', indexPattern, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -62,9 +62,9 @@ describe('Test of <Doc /> helper / hook', () => {
   });
 
   test('buildSearchBody useNewFieldsApi is true', () => {
-    const indexPattern = ({
+    const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
     const actual = buildSearchBody('1', indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -92,9 +92,9 @@ describe('Test of <Doc /> helper / hook', () => {
   });
 
   test('buildSearchBody with requestSource', () => {
-    const indexPattern = ({
+    const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
     const actual = buildSearchBody('1', indexPattern, true, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -123,7 +123,7 @@ describe('Test of <Doc /> helper / hook', () => {
   });
 
   test('buildSearchBody with runtime fields', () => {
-    const indexPattern = ({
+    const indexPattern = {
       getComputedFields: () => ({
         storedFields: [],
         scriptFields: [],
@@ -137,7 +137,7 @@ describe('Test of <Doc /> helper / hook', () => {
           },
         },
       }),
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
     const actual = buildSearchBody('1', indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -176,15 +176,15 @@ describe('Test of <Doc /> helper / hook', () => {
       getComputedFields: () => [],
     };
     const getMock = jest.fn(() => Promise.resolve(indexPattern));
-    const indexPatternService = ({
+    const indexPatternService = {
       get: getMock,
-    } as unknown) as IndexPattern;
-    const props = ({
+    } as unknown as IndexPattern;
+    const props = {
       id: '1',
       index: 'index1',
       indexPatternId: 'xyz',
       indexPatternService,
-    } as unknown) as DocProps;
+    } as unknown as DocProps;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let hook: any;
     await act(async () => {
