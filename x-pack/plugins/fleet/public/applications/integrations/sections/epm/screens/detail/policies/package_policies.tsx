@@ -13,12 +13,10 @@ import type {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import {
-  EuiButtonIcon,
   EuiBasicTable,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   EuiText,
   EuiButton,
   EuiSpacer,
