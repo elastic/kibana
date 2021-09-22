@@ -234,10 +234,10 @@ export class LensPlugin {
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
-    const ensureDefaultIndexPattern = async () => {
+    const ensureDefaultDataView = async () => {
       // make sure a default index pattern exists
       // if not, the page will be redirected to management and visualize won't be rendered
-      await startServices().plugins.data.indexPatterns.ensureDefaultIndexPattern();
+      await startServices().plugins.data.indexPatterns.ensureDefaultDataView();
     };
 
     core.application.register({
@@ -262,7 +262,7 @@ export class LensPlugin {
         const frameStart = this.editorFrameService!.start(coreStart, deps);
 
         this.stopReportManager = stopReportManager;
-        await ensureDefaultIndexPattern();
+        await ensureDefaultDataView();
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart, deps),
