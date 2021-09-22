@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationMap } from 'kibana/server';
-import { migrateTimelineIdToReferences } from './utils';
-
-export const notesMigrations: SavedObjectMigrationMap = {
-  '7.16.0': migrateTimelineIdToReferences,
-};
+export interface TimelineId {
+  timelineId?: string | null;
+}

@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { timelinesMigrations } from './timelines';
-export { notesMigrations } from './notes';
+import { SavedObjectMigrationMap } from 'kibana/server';
+import { migrateTimelineIdToReferences } from './utils';
+
+export const pinnedEventsMigrations: SavedObjectMigrationMap = {
+  '7.16.0': migrateTimelineIdToReferences,
+};
