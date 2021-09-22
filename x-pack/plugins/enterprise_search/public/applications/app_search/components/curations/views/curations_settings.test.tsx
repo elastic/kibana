@@ -14,12 +14,13 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiCallOut, EuiSwitch } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiSwitch } from '@elastic/eui';
 
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { Loading } from '../../../../shared/loading';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { DataPanel } from '../../data_panel';
 import { LogRetentionOptions } from '../../log_retention';
 
 import { CurationsSettings } from './curations_settings';
@@ -38,6 +39,8 @@ const MOCK_VALUES = {
       enabled: true,
     },
   },
+  // LicensingLogic
+  hasPlatinumLicense: true,
 };
 
 const MOCK_ACTIONS = {
@@ -159,5 +162,17 @@ describe('CurationsSettings', () => {
     const wrapper = shallow(<CurationsSettings />);
 
     expect(wrapper.is(Loading)).toBe(true);
+  });
+
+  it('shows a CTA to upgrade your license when the user does not have a platinum license', () => {
+    setMockValues({
+      ...MOCK_VALUES,
+      hasPlatinumLicense: false,
+    });
+    const wrapper = shallow(<CurationsSettings />);
+
+    expect(wrapper.is(DataPanel)).toBe(true);
+    expect(wrapper.prop('action').props.to).toEqual('/app/management/stack/license_management');
+    expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual('/license-management.html');
   });
 });
