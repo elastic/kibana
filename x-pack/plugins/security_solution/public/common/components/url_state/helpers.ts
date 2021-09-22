@@ -201,7 +201,7 @@ export const updateTimerangeUrl = (
 
 export const isQueryStateEmpty = (queryState: ValueUrlState | null, urlKey: KeyUrlState) =>
   queryState === null ||
-  (urlKey === CONSTANTS.appQuery && (queryState as Query).query === '') ||
+  (urlKey === CONSTANTS.appQuery && isEmpty((queryState as Query).query)) ||
   (urlKey === CONSTANTS.filters && isEmpty(queryState)) ||
   (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');
 
