@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
-    "name": "platform",
-    "githubTeam": ""
+    "name": "Fleet",
+    "githubTeam": "fleet"
   },
-  "description": "test",
+  "description": "Add custom data integrations so they can be displayed in the Fleet integrations app",
   "ui": true,
   "server": true,
   "extraPublicDirs": [
