@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPageHeaderProps } from '@elastic/eui';
-import { OVERVIEW_ROUTE } from '../../common/constants';
+import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsStart } from './plugin';
 import { useNoDataConfig } from './use_no_data_config';
@@ -44,16 +44,18 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
     return <EmptyStateError errors={[error]} />;
   }
 
+  const isMainRoute = path === OVERVIEW_ROUTE || path === CERTIFICATES_ROUTE;
+
   return (
     <>
       <StyledPageTemplateComponent
         pageHeader={pageHeader}
         data-test-subj={noDataConfig ? 'data-missing' : undefined}
-        noDataConfig={path === OVERVIEW_ROUTE && !loading ? noDataConfig : undefined}
+        noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
       >
-        {loading && path === OVERVIEW_ROUTE && <EmptyStateLoading />}
+        {loading && isMainRoute && <EmptyStateLoading />}
         <div
-          style={{ visibility: loading && path === OVERVIEW_ROUTE ? 'hidden' : 'initial' }}
+          style={{ visibility: loading && isMainRoute ? 'hidden' : 'initial' }}
           data-test-subj={noDataConfig ? 'data-missing' : undefined}
         >
           {children}
