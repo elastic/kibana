@@ -23,11 +23,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import {
-  esFilters,
-  IndexPatternField,
-  indexPatterns as indexPatternsUtils,
-} from '../../../../../../../data/public';
+import { esFilters, IndexPatternField } from '../../../../../../../data/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
@@ -79,7 +75,7 @@ export function DiscoverLayout({
   }, [dataState.fetchStatus]);
 
   const timeField = useMemo(() => {
-    return indexPatternsUtils.isDefault(indexPattern) ? indexPattern.timeFieldName : undefined;
+    return indexPattern.type === 'rollup' ? indexPattern.timeFieldName : undefined;
   }, [indexPattern]);
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
