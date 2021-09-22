@@ -94,11 +94,19 @@ export const getLegendText = (
 
   if (chartData.type === 'boolean') {
     return (
-      <table className="dataGridChart__legendBoolean">
+      <table>
         <tbody>
           <tr>
-            {chartData.data[0] !== undefined && <td>{chartData.data[0].key_as_string}</td>}
-            {chartData.data[1] !== undefined && <td>{chartData.data[1].key_as_string}</td>}
+            {chartData.data[0] !== undefined && (
+              <td className="dataGridChart__legendBoolean">
+                {chartData.data[0].key_as_string?.slice(0, 1) ?? ''}
+              </td>
+            )}
+            {chartData.data[1] !== undefined && (
+              <td className="dataGridChart__legendBoolean">
+                {chartData.data[1].key_as_string?.slice(0, 1) ?? ''}
+              </td>
+            )}
           </tr>
         </tbody>
       </table>
