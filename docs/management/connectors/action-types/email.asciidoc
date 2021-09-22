@@ -91,7 +91,7 @@ Message::       The message text of the email. Markdown format is supported.
 [[configuring-email]]
 ==== Configuring email accounts for well-known services
 
-The email connector can send email using many popular SMTP email services.
+The email connector can send email using many popular SMTP email services and Microsoft Exchange Graph API.
 
 For more information about configuring the email connector to work with different email systems, refer to:
 
@@ -216,13 +216,11 @@ Exchange:
 [source,text]
 --------------------------------------------------
 config:
-    host: <your exchange server>
-    port: 465
-    secure: true
+    clientId: <your exchange server>
+    tenantId: 465
     from: <email address of service account> <1>
 secrets:
-    user: <email address of service account> <2>
-    password: <password>
+    clientSecret: <email address of service account> <2>
 --------------------------------------------------
 <1> Some organizations configure Exchange to validate that the `from` field is a
     valid local email account.
