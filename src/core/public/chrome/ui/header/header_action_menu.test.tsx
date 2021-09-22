@@ -41,17 +41,17 @@ describe('HeaderActionMenu', () => {
     });
   };
 
-  const createMountPoint = (id: string, content: string = id): MountPoint => (
-    root
-  ): MockedUnmount => {
-    const container = document.createElement('DIV');
-    // eslint-disable-next-line no-unsanitized/property
-    container.innerHTML = content;
-    root.appendChild(container);
-    const unmount = jest.fn(() => container.remove());
-    unmounts[id] = unmount;
-    return unmount;
-  };
+  const createMountPoint =
+    (id: string, content: string = id): MountPoint =>
+    (root): MockedUnmount => {
+      const container = document.createElement('DIV');
+      // eslint-disable-next-line no-unsanitized/property
+      container.innerHTML = content;
+      root.appendChild(container);
+      const unmount = jest.fn(() => container.remove());
+      unmounts[id] = unmount;
+      return unmount;
+    };
 
   it('mounts the current value of the provided observable', async () => {
     component = mount(<HeaderActionMenu actionMenu$={menuMount$} />);

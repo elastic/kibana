@@ -42,10 +42,10 @@ export const getPersisted = async ({
     const result = await attributeService.unwrapAttributes(initialInput);
     if (!result) {
       return {
-        doc: ({
+        doc: {
           ...initialInput,
           type: LENS_EMBEDDABLE_TYPE,
-        } as unknown) as Document,
+        } as unknown as Document,
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
@@ -149,7 +149,7 @@ export function loadInitial(
             datasourceMap,
             datasourceStates,
             visualizationMap,
-            activeVisualizationId: Object.keys(visualizationMap)[0] || null,
+            activeVisualization: visualizationMap?.[Object.keys(visualizationMap)[0]] || null,
             visualizationState: null,
             visualizeTriggerFieldContext: initialContext,
           });

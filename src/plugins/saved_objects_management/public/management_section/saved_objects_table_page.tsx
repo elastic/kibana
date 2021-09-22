@@ -75,13 +75,11 @@ const SavedObjectsTablePage = ({
       spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]
   );
-
   return (
     <ContextWrapper>
       <SavedObjectsTable
         initialQuery={initialQuery}
         allowedTypes={allowedTypes}
-        serviceRegistry={serviceRegistry}
         actionRegistry={actionRegistry}
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
@@ -94,12 +92,10 @@ const SavedObjectsTablePage = ({
         applications={coreStart.application}
         perPageConfig={itemsPerPage}
         goInspectObject={(savedObject) => {
-          const { editUrl } = savedObject.meta;
-          if (editUrl) {
-            return coreStart.application.navigateToUrl(
-              coreStart.http.basePath.prepend(`/app${editUrl}`)
-            );
-          }
+          const savedObjectEditUrl = savedObject.meta.editUrl
+            ? `/app${savedObject.meta.editUrl}`
+            : `/app/management/kibana/objects/${savedObject.type}/${savedObject.id}`;
+          coreStart.application.navigateToUrl(coreStart.http.basePath.prepend(savedObjectEditUrl));
         }}
         canGoInApp={(savedObject) => {
           const { inAppUrl } = savedObject.meta;
