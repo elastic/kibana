@@ -1506,7 +1506,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/plugins/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },
