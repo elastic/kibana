@@ -289,7 +289,7 @@ export class DataViewsService {
       indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+        this.onNotification({ title: err.message, color: 'danger', iconType: 'alert' });
       }
 
       this.onError(err, {
@@ -334,7 +334,7 @@ export class DataViewsService {
       return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+        this.onNotification({ title: err.message, color: 'danger', iconType: 'alert' });
         return {};
       }
 
@@ -475,7 +475,7 @@ export class DataViewsService {
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification({
-          title: (err as any).message,
+          title: err.message,
           color: 'danger',
           iconType: 'alert',
         });
