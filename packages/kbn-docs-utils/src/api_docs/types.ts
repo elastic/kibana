@@ -226,3 +226,8 @@ export interface ApiStats {
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
 }
+
+export type PluginMetaInfo = ApiStats & {
+  owner: { name: string; githubTeam?: string };
+  description?: string;
+};
