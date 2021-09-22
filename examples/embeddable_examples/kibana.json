@@ -9,7 +9,7 @@
     "githubTeam": "kibana-app-services"
   },
   "description": "Example app that shows how to register custom embeddables",
-  "requiredPlugins": ["embeddable", "uiActions", "savedObjects", "dashboard"],
+  "requiredPlugins": ["embeddable", "uiActions", "savedObjects", "dashboard", "kibanaUtils"],
   "optionalPlugins": [],
   "extraPublicDirs": ["public/todo", "public/hello_world", "public/todo/todo_ref_embeddable"],
   "requiredBundles": ["kibanaReact"]
