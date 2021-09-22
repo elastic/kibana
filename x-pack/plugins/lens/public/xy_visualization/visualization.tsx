@@ -422,7 +422,7 @@ export const getXyVisualization = ({
     return state.layers[0].palette;
   },
 
-  setDimension({ prevState, layerId, columnId, groupId }) {
+  setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
@@ -441,12 +441,21 @@ export const getXyVisualization = ({
     if (newLayer.layerType === layerTypes.THRESHOLD) {
       newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
       const hasYConfig = newLayer.yConfig?.some(({ forAccessor }) => forAccessor === columnId);
+      const previousYConfig = previousColumn
+        ? newLayer.yConfig?.find(({ forAccessor }) => forAccessor === previousColumn)
+        : false;
       if (!hasYConfig) {
         newLayer.yConfig = [
           ...(newLayer.yConfig || []),
           // TODO: move this
           // add a default config if none is available
           {
+            icon: undefined,
+            lineStyle: 'solid',
+            lineWidth: 1,
+            // override with previous styling,
+            ...previousYConfig,
+            // but keep the new group & id config
             forAccessor: columnId,
             axisMode:
               groupId === 'xThreshold'
@@ -454,9 +463,6 @@ export const getXyVisualization = ({
                 : groupId === 'yThresholdRight'
                 ? 'right'
                 : 'left',
-            icon: undefined,
-            lineStyle: 'solid',
-            lineWidth: 1,
           },
         ];
       }

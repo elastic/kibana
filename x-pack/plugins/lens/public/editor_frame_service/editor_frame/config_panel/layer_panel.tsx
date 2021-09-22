@@ -193,12 +193,19 @@ export function LayerPanel(
         dropType,
       });
       if (dropResult) {
+        let previousColumn =
+          typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
+
+        // make it inherit only for moving, not for duplicate
+        if (!previousColumn) {
+          previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
+        }
         const newVisState = setDimension({
           columnId,
           groupId,
           layerId: targetLayerId,
           prevState: props.visualizationState,
-          previousColumn: typeof droppedItem.column === 'string' ? droppedItem.column : undefined,
+          previousColumn,
           frame: framePublicAPI,
         });
 
