@@ -6,12 +6,10 @@
  */
 
 import {
-  SharedGlobalConfig,
   ElasticsearchClient,
   SavedObjectsErrorHelpers,
   Logger,
 } from '../../../../../src/core/server';
-import { BehaviorSubject } from 'rxjs';
 import { fetchProvider } from './fetch';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
@@ -21,17 +19,13 @@ describe('fetchProvider', () => {
   let mockLogger: Logger;
 
   beforeEach(async () => {
-    const config$ = new BehaviorSubject<SharedGlobalConfig>({
-      kibana: {
-        index: '123',
-      },
-    } as any);
+    const kibanaIndex = '123';
     mockLogger = {
       warn: jest.fn(),
       debug: jest.fn(),
     } as any;
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    fetchFn = fetchProvider(config$, mockLogger);
+    fetchFn = fetchProvider(kibanaIndex, mockLogger);
   });
 
   test('returns when ES returns no results', async () => {
