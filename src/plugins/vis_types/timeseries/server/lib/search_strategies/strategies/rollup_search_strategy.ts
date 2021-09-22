@@ -20,7 +20,7 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { MAX_BUCKETS_SETTING } from '../../../../common/constants';
+import { UI_SETTINGS } from '../../../../common/constants';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');
@@ -75,7 +75,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
 
         capabilities = new RollupSearchCapabilities(
           {
-            maxBucketsLimit: await uiSettings.get(MAX_BUCKETS_SETTING),
+            maxBucketsLimit: await uiSettings.get(UI_SETTINGS.MAX_BUCKETS_SETTING),
             panel: req.body.panels ? req.body.panels[0] : null,
           },
           fieldsCapabilities,
