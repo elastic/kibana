@@ -75,19 +75,6 @@ export const getComplexAccessor =
       // and the chart will render not all the range, but only the part of range, which contains data.
       return applyFormatterIfComplexField(aspect, v);
     };
-
-    const fn: AccessorFn = (d) => {
-      const v = d[accessor];
-      if (v === undefined) {
-        return;
-      }
-      // Because of the specific logic of chart, it cannot compare complex values to display,
-      // thats why it is necessary to apply formatters before its comparison while rendering.
-      // What about simple values, formatting them at this step is breaking the logic of intervals (xDomain).
-      // If the value will be formatted on this step, it will be rendered without any respect to the passed bounds
-      // and the chart will render not all the range, but only the part of range, which contains data.
-      return applyFormatterIfComplexField(aspect, v);
-    };
     fn.fieldName = getFieldName(fieldName, index);
 
     return fn;
