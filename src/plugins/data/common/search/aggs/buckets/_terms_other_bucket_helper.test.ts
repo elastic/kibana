@@ -377,6 +377,86 @@ describe('Terms Agg Other bucket helper', () => {
       }
     });
 
+    test('correctly builds query for nested terms agg with one disabled', () => {
+      const oneDisabledNestedTerms = {
+        aggs: [
+          {
+            id: '2',
+            type: BUCKET_TYPES.TERMS,
+            enabled: false,
+            params: {
+              field: {
+                name: 'machine.os.raw',
+                indexPattern,
+                filterable: true,
+              },
+              size: 2,
+              otherBucket: false,
+              missingBucket: true,
+            },
+          },
+          {
+            id: '1',
+            type: BUCKET_TYPES.TERMS,
+            params: {
+              field: {
+                name: 'geo.src',
+                indexPattern,
+                filterable: true,
+              },
+              size: 2,
+              otherBucket: true,
+              missingBucket: false,
+            },
+          },
+        ],
+      };
+      const aggConfigs = getAggConfigs(oneDisabledNestedTerms.aggs);
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[1] as IBucketAggConfig,
+        singleTermResponse
+      );
+      const expectedResponse = {
+        'other-filter': {
+          aggs: undefined,
+          filters: {
+            filters: {
+              '': {
+                bool: {
+                  filter: [
+                    {
+                      exists: {
+                        field: 'geo.src',
+                      },
+                    },
+                  ],
+                  must: [],
+                  must_not: [
+                    {
+                      match_phrase: {
+                        'geo.src': 'ios',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        'geo.src': 'win xp',
+                      },
+                    },
+                  ],
+                  should: [],
+                },
+              },
+            },
+          },
+        },
+      };
+      expect(agg).toBeDefined();
+      if (agg) {
+        expect(agg()).toEqual(expectedResponse);
+      }
+    });
+
     test('does not build query if sum_other_doc_count is 0 (exhaustive terms)', () => {
       const aggConfigs = getAggConfigs(nestedTerm.aggs);
       expect(
