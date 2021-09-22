@@ -83,8 +83,8 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.eql({
         datafeedsAdded: { [adJobId2]: { success: true, type: 'anomaly-detector' } },
         datafeedsRemoved: { [adJobId3]: { success: true, type: 'anomaly-detector' } },
-        savedObjectsCreated: { [adJobIdES]: { success: true } },
-        savedObjectsDeleted: { [adJobId1]: { success: true } },
+        savedObjectsCreated: { [adJobIdES]: { success: true, type: 'anomaly-detector' } },
+        savedObjectsDeleted: { [adJobId1]: { success: true, type: 'anomaly-detector' } },
       });
     });
 
