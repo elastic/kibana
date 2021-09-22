@@ -9,8 +9,13 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiSwitch, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiSwitch, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { Loading } from '../../../../shared/loading';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { SETTINGS_PATH } from '../../../routes';
+import { LogRetentionLogic, LogRetentionOptions } from '../../log_retention';
 
 import { CurationsSettingsLogic } from './curations_settings_logic';
 
@@ -23,9 +28,17 @@ export const CurationsSettings: React.FC = () => {
     CurationsSettingsLogic
   );
 
+  const { isLogRetentionUpdating, logRetention } = useValues(LogRetentionLogic);
+  const { fetchLogRetention } = useActions(LogRetentionLogic);
+
+  const analyticsDisabled = !logRetention?.[LogRetentionOptions.Analytics].enabled;
+
   useEffect(() => {
     loadCurationsSettings();
+    fetchLogRetention();
   }, []);
+
+  if (dataLoading || isLogRetentionUpdating) return <Loading />;
 
   return (
     <>
@@ -39,6 +52,37 @@ export const CurationsSettings: React.FC = () => {
           )}
         </h2>
       </EuiTitle>
+      <EuiSpacer />
+      {analyticsDisabled && (
+        <>
+          <EuiCallOut
+            iconType="iInCircle"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.curations.settings.analyticsDisabledCalloutTitle',
+              {
+                defaultMessage: 'Analytics are disabled',
+              }
+            )}
+          >
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.curations.settings.analyticsDisabledCalloutDescription',
+                {
+                  defaultMessage:
+                    'Automated curations require analytics to be enabled on your account.',
+                }
+              )}
+            </p>
+            <EuiButtonTo fill size="s" to={SETTINGS_PATH}>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.curations.settings.manageAnalyticsButtonLabel',
+                { defaultMessage: 'Manage analytics' }
+              )}
+            </EuiButtonTo>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       <EuiText>
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.curations.settings.automatedCurationsDescription',
@@ -56,7 +100,7 @@ export const CurationsSettings: React.FC = () => {
           }
         )}
         checked={enabled}
-        disabled={dataLoading}
+        disabled={analyticsDisabled}
         onChange={toggleCurationsEnabled}
       />
       <EuiSwitch
@@ -67,7 +111,7 @@ export const CurationsSettings: React.FC = () => {
           }
         )}
         checked={mode === 'automated'}
-        disabled={dataLoading}
+        disabled={analyticsDisabled}
         onChange={toggleCurationsMode}
       />
     </>

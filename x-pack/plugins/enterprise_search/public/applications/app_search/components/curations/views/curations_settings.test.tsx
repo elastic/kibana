@@ -14,24 +14,39 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiSwitch } from '@elastic/eui';
+import { EuiCallOut, EuiSwitch } from '@elastic/eui';
 
 import { mountWithIntl } from '@kbn/test/jest';
+
+import { Loading } from '../../../../shared/loading';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { LogRetentionOptions } from '../../log_retention';
 
 import { CurationsSettings } from './curations_settings';
 
 const MOCK_VALUES = {
+  // CurationsSettingsLogic
   dataLoading: false,
   curationsSettings: {
     enabled: true,
     mode: 'automatic',
   },
+  // LogRetentionLogic
+  isLogRetentionUpdating: false,
+  logRetention: {
+    [LogRetentionOptions.Analytics]: {
+      enabled: true,
+    },
+  },
 };
 
 const MOCK_ACTIONS = {
+  // CurationsSettingsLogic
   loadCurationsSettings: jest.fn(),
   toggleCurationsEnabled: jest.fn(),
   toggleCurationsMode: jest.fn(),
+  // LogRetentionLogic
+  fetchLogRetention: jest.fn(),
 };
 
 describe('CurationsSettings', () => {
@@ -40,11 +55,12 @@ describe('CurationsSettings', () => {
     setMockActions(MOCK_ACTIONS);
   });
 
-  it('loads curations settings on load', () => {
+  it('loads curations and log retention settings on load', () => {
     setMockValues(MOCK_VALUES);
     mountWithIntl(<CurationsSettings />);
 
-    expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(1);
+    expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalled();
+    expect(MOCK_ACTIONS.fetchLogRetention).toHaveBeenCalled();
   });
 
   it('contains a switch to toggle curations settings', () => {
@@ -93,25 +109,55 @@ describe('CurationsSettings', () => {
     expect(MOCK_ACTIONS.toggleCurationsMode).toHaveBeenCalled();
   });
 
-  it('disable both switches when data is loading', () => {
+  it('enables form elements and hides the callout when analytics retention is enabled', () => {
+    setMockValues({
+      ...MOCK_VALUES,
+      logRetention: {
+        [LogRetentionOptions.Analytics]: {
+          enabled: true,
+        },
+      },
+    });
+    const wrapper = shallow(<CurationsSettings />);
+
+    expect(wrapper.find(EuiSwitch).at(0).prop('disabled')).toBe(false);
+    expect(wrapper.find(EuiSwitch).at(1).prop('disabled')).toBe(false);
+    expect(wrapper.find(EuiCallOut)).toHaveLength(0);
+  });
+
+  it('display a callout and disables form elements when analytics retention is disabled', () => {
+    setMockValues({
+      ...MOCK_VALUES,
+      logRetention: {
+        [LogRetentionOptions.Analytics]: {
+          enabled: false,
+        },
+      },
+    });
+    const wrapper = shallow(<CurationsSettings />);
+
+    expect(wrapper.find(EuiSwitch).at(0).prop('disabled')).toBe(true);
+    expect(wrapper.find(EuiSwitch).at(1).prop('disabled')).toBe(true);
+    expect(wrapper.find(EuiCallOut).dive().find(EuiButtonTo).prop('to')).toEqual('/settings');
+  });
+
+  it('returns a loading state when curations data is loading', () => {
     setMockValues({
       ...MOCK_VALUES,
       dataLoading: true,
     });
     const wrapper = shallow(<CurationsSettings />);
 
-    expect(wrapper.find(EuiSwitch).at(0).prop('disabled')).toBe(true);
-    expect(wrapper.find(EuiSwitch).at(1).prop('disabled')).toBe(true);
+    expect(wrapper.is(Loading)).toBe(true);
   });
 
-  it('enables both switches when data is done loading', () => {
+  it('returns a loading state when log retention data is loading', () => {
     setMockValues({
       ...MOCK_VALUES,
-      dataLoading: false,
+      isLogRetentionUpdating: true,
     });
     const wrapper = shallow(<CurationsSettings />);
 
-    expect(wrapper.find(EuiSwitch).at(0).prop('disabled')).toBe(false);
-    expect(wrapper.find(EuiSwitch).at(1).prop('disabled')).toBe(false);
+    expect(wrapper.is(Loading)).toBe(true);
   });
 });
