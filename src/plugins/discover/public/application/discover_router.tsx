@@ -24,29 +24,31 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
   };
   return (
     <KibanaContextProvider services={services}>
-      <Router history={history} data-test-subj="discover-react-router">
-        <Switch>
-          <Route
-            path="/context/:indexPatternId/:id"
-            children={<ContextAppRoute services={services} />}
-          />
-          <Route
-            path="/doc/:indexPattern/:index/:type"
-            render={(props) => (
-              <Redirect
-                to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
-              />
-            )}
-          />
-          <Route
-            path="/doc/:indexPatternId/:index"
-            children={<SingleDocRoute services={services} />}
-          />
-          <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
-          <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
-          <NotFoundRoute services={services} />
-        </Switch>
-      </Router>
+      <services.presentationUtil.ContextProvider>
+        <Router history={history} data-test-subj="discover-react-router">
+          <Switch>
+            <Route
+              path="/context/:indexPatternId/:id"
+              children={<ContextAppRoute services={services} />}
+            />
+            <Route
+              path="/doc/:indexPattern/:index/:type"
+              render={(props) => (
+                <Redirect
+                  to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
+                />
+              )}
+            />
+            <Route
+              path="/doc/:indexPatternId/:index"
+              children={<SingleDocRoute services={services} />}
+            />
+            <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
+            <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
+            <NotFoundRoute services={services} />
+          </Switch>
+        </Router>
+      </services.presentationUtil.ContextProvider>
     </KibanaContextProvider>
   );
 };

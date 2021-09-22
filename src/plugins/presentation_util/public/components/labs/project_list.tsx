@@ -32,6 +32,8 @@ const EmptyList = ({ solutions }: { solutions?: SolutionName[] }) => {
         title = strings.getNoProjectsInSolutionMessage('Dashboard');
       case 'canvas':
         title = strings.getNoProjectsInSolutionMessage('Canvas');
+      case 'discover':
+        title = strings.getNoProjectsInSolutionMessage('Discover');
     }
   }
   return <EuiCallOut title={title} />;

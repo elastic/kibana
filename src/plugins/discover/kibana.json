@@ -13,7 +13,8 @@
     "navigation",
     "uiActions",
     "savedObjects",
-    "indexPatternFieldEditor"
+    "indexPatternFieldEditor",
+    "presentationUtil"
   ],
   "optionalPlugins": ["home", "share", "usageCollection"],
   "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "fieldFormats"],

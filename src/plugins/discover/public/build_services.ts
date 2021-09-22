@@ -36,6 +36,7 @@ import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { PresentationUtilPluginStart } from '../../presentation_util/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -51,6 +52,7 @@ export interface DiscoverServices {
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
   share?: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
@@ -94,6 +96,7 @@ export function buildServices(
       branch: context.env.packageInfo.branch,
     },
     navigation: plugins.navigation,
+    presentationUtil: plugins.presentationUtil,
     share: plugins.share,
     kibanaLegacy: plugins.kibanaLegacy,
     urlForwarding: plugins.urlForwarding,

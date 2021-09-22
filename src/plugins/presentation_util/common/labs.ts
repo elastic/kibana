@@ -13,7 +13,7 @@ export const DEFER_BELOW_FOLD = `${LABS_PROJECT_PREFIX}dashboard:deferBelowFold`
 
 export const projectIDs = [DEFER_BELOW_FOLD] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
-export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
+export const solutionNames = ['canvas', 'dashboard', 'presentation', 'discover'] as const;
 
 /**
  * This is a list of active Labs Projects for the Presentation Team.  It is the "source of truth" for all projects

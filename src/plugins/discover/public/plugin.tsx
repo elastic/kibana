@@ -58,7 +58,8 @@ import { DiscoverAppLocatorDefinition, DiscoverAppLocator } from './locator';
 import { SearchEmbeddableFactory } from './application/embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
-import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
+import { PresentationUtilPluginStart } from '../../presentation_util/public';
+import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
 import { DeferredSpinner } from './shared';
 
 declare module '../../share/public' {
@@ -188,6 +189,7 @@ export interface DiscoverStartPlugins {
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 /**
