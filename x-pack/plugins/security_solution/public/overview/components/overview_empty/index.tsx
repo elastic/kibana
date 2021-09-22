@@ -8,7 +8,8 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../common/lib/kibana';
-import { ADD_INTEGRATION_PATH, ADD_DATA_PATH } from '../../../../common/constants';
+import { ADD_DATA_PATH } from '../../../../common/constants';
+import { pagePathGetters } from '../../../../../fleet/public';
 import { SOLUTION_NAME } from '../../../../public/common/translations';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
@@ -25,7 +26,7 @@ const OverviewEmptyComponent: React.FC = () => {
   const agentAction: NoDataPageActionsProps = useMemo(
     () => ({
       elasticAgent: {
-        href: `${basePath}${ADD_INTEGRATION_PATH}`,
+        href: `${basePath}${pagePathGetters.integrations_all({ category: 'security' })}`,
         description: i18n.translate(
           'xpack.securitySolution.pages.emptyPage.beatsCard.description',
           {
