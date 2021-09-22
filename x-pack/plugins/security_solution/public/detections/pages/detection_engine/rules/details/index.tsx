@@ -581,21 +581,15 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   useEffect(() => {
     // recheck if the indices have data yet
     console.log('redoing search????', { indicesExist, indexFieldsSearch });
-    // if (!indicesExist && indexFieldsSearch != null) {
-    //
-    //   // TODO: Steph/sourcerer
-    //   // if details page loads and signal index does not exist, recheck
-    // }
-    for (let i = 0; i < 10; i++) {
-      setTimeout(() => {
-        if (!indicesExist && indexFieldsSearch != null) {
-          indexFieldsSearch(selectedDataViewId);
-          console.log('redoing search');
-        }
-      }, 3000);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indicesExist, indexFieldsSearch]);
+    // TODO: Steph/sourcerer
+    // if details page loads and signal index does not exist, recheck
+    setTimeout(() => {
+      if (!indicesExist && indexFieldsSearch != null) {
+        indexFieldsSearch(selectedDataViewId);
+        console.log('redoing search');
+      }
+    }, 10000);
+  }, [indicesExist, indexFieldsSearch, selectedDataViewId]);
 
   const exceptionLists = useMemo((): {
     lists: ExceptionListIdentifiers[];
@@ -668,191 +662,191 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist ? (
-        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
-          <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar id="global" indexPattern={indexPattern} />
-          </FiltersGlobal>
+      {/* {indicesExist ? (*/}
+      <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
+        <EuiWindowEvent event="resize" handler={noop} />
+        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <SiemSearchBar id="global" indexPattern={indexPattern} />
+        </FiltersGlobal>
 
-          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <Display show={!globalFullScreen}>
-              <DetectionEngineHeaderPage
-                backOptions={{
-                  path: getRulesUrl(),
-                  text: i18n.BACK_TO_RULES,
-                  pageId: SecurityPageName.rules,
-                  dataTestSubj: 'ruleDetailsBackToAllRules',
-                }}
-                border
-                subtitle={subTitle}
-                subtitle2={
-                  <>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
-                      <EuiFlexItem grow={false}>
-                        {statusI18n.STATUS}
-                        {':'}
-                      </EuiFlexItem>
-                      {ruleStatusInfo}
+        <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
+          <Display show={!globalFullScreen}>
+            <DetectionEngineHeaderPage
+              backOptions={{
+                path: getRulesUrl(),
+                text: i18n.BACK_TO_RULES,
+                pageId: SecurityPageName.rules,
+                dataTestSubj: 'ruleDetailsBackToAllRules',
+              }}
+              border
+              subtitle={subTitle}
+              subtitle2={
+                <>
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
+                    <EuiFlexItem grow={false}>
+                      {statusI18n.STATUS}
+                      {':'}
+                    </EuiFlexItem>
+                    {ruleStatusInfo}
+                  </EuiFlexGroup>
+                </>
+              }
+              title={title}
+              badgeOptions={badgeOptions}
+            >
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    position="top"
+                    content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
+                  >
+                    <EuiFlexGroup>
+                      <RuleSwitch
+                        id={rule?.id ?? '-1'}
+                        isDisabled={
+                          !isExistingRule ||
+                          !canEditRuleWithActions(rule, hasActionsPrivileges) ||
+                          !userHasPermissions(canUserCRUD) ||
+                          (!hasMlPermissions && !rule?.enabled)
+                        }
+                        enabled={isExistingRule && (rule?.enabled ?? false)}
+                        onChange={handleOnChangeEnabledRule}
+                      />
+                      <EuiFlexItem>{i18n.ACTIVATE_RULE}</EuiFlexItem>
                     </EuiFlexGroup>
-                  </>
-                }
-                title={title}
-                badgeOptions={badgeOptions}
-              >
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      position="top"
-                      content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
-                    >
-                      <EuiFlexGroup>
-                        <RuleSwitch
-                          id={rule?.id ?? '-1'}
-                          isDisabled={
-                            !isExistingRule ||
-                            !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                            !userHasPermissions(canUserCRUD) ||
-                            (!hasMlPermissions && !rule?.enabled)
-                          }
-                          enabled={isExistingRule && (rule?.enabled ?? false)}
-                          onChange={handleOnChangeEnabledRule}
-                        />
-                        <EuiFlexItem>{i18n.ACTIVATE_RULE}</EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>{editRule}</EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <RuleActionsOverflow
-                          rule={rule}
-                          userHasPermissions={isExistingRule && userHasPermissions(canUserCRUD)}
-                          canDuplicateRuleWithActions={canEditRuleWithActions(
-                            rule,
-                            hasActionsPrivileges
-                          )}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </DetectionEngineHeaderPage>
-              {ruleError}
-              <EuiSpacer />
-              <EuiFlexGroup>
-                <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
-                  <StepAboutRuleToggleDetails
-                    loading={isLoading}
-                    stepData={aboutRuleData}
-                    stepDataDetails={modifiedAboutRuleDetailsData}
-                  />
+                  </EuiToolTip>
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={1}>
-                  <EuiFlexGroup direction="column">
-                    <EuiFlexItem component="section" grow={1}>
-                      <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                        {defineRuleData != null && (
-                          <StepDefineRule
-                            descriptionColumns="singleSplit"
-                            isReadOnlyView={true}
-                            isLoading={false}
-                            defaultValues={defineRuleData}
-                          />
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>{editRule}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <RuleActionsOverflow
+                        rule={rule}
+                        userHasPermissions={isExistingRule && userHasPermissions(canUserCRUD)}
+                        canDuplicateRuleWithActions={canEditRuleWithActions(
+                          rule,
+                          hasActionsPrivileges
                         )}
-                      </StepPanel>
-                    </EuiFlexItem>
-                    <EuiSpacer />
-                    <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
-                      <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                        {scheduleRuleData != null && (
-                          <StepScheduleRule
-                            descriptionColumns="singleSplit"
-                            isReadOnlyView={true}
-                            isLoading={false}
-                            defaultValues={scheduleRuleData}
-                          />
-                        )}
-                      </StepPanel>
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiSpacer />
-              {tabs}
-              <EuiSpacer />
-            </Display>
-            {ruleDetailTab === RuleDetailTabs.alerts && hasIndexRead && (
-              <>
-                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                  <EuiFlexItem grow={false}>
-                    <AlertsTableFilterGroup
-                      status={filterGroup}
-                      onFilterGroupChanged={onFilterGroupChangedCallback}
-                    />
+            </DetectionEngineHeaderPage>
+            {ruleError}
+            <EuiSpacer />
+            <EuiFlexGroup>
+              <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
+                <StepAboutRuleToggleDetails
+                  loading={isLoading}
+                  stepData={aboutRuleData}
+                  stepDataDetails={modifiedAboutRuleDetailsData}
+                />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={1}>
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem component="section" grow={1}>
+                    <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                      {defineRuleData != null && (
+                        <StepDefineRule
+                          descriptionColumns="singleSplit"
+                          isReadOnlyView={true}
+                          isLoading={false}
+                          defaultValues={defineRuleData}
+                        />
+                      )}
+                    </StepPanel>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {updatedAt &&
-                      timelinesUi.getLastUpdated({
-                        updatedAt: updatedAt || Date.now(),
-                        showUpdating,
-                      })}
+                  <EuiSpacer />
+                  <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
+                    <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                      {scheduleRuleData != null && (
+                        <StepScheduleRule
+                          descriptionColumns="singleSplit"
+                          isReadOnlyView={true}
+                          isLoading={false}
+                          defaultValues={scheduleRuleData}
+                        />
+                      )}
+                    </StepPanel>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiSpacer size="l" />
-                <Display show={!globalFullScreen}>
-                  <AlertsHistogramPanel
-                    filters={alertMergedFilters}
-                    query={query}
-                    signalIndexName={signalIndexName}
-                    defaultStackByOption={defaultRuleStackByOption}
-                    updateDateRange={updateDateRangeCallback}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            {tabs}
+            <EuiSpacer />
+          </Display>
+          {ruleDetailTab === RuleDetailTabs.alerts && hasIndexRead && (
+            <>
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <AlertsTableFilterGroup
+                    status={filterGroup}
+                    onFilterGroupChanged={onFilterGroupChangedCallback}
                   />
-                  <EuiSpacer />
-                </Display>
-                {ruleId != null && (
-                  <AlertsTable
-                    filterGroup={filterGroup}
-                    timelineId={TimelineId.detectionsRulesDetailsPage}
-                    defaultFilters={alertsTableDefaultFilters}
-                    hasIndexWrite={hasIndexWrite ?? false}
-                    hasIndexMaintenance={hasIndexMaintenance ?? false}
-                    from={from}
-                    loading={loading}
-                    showBuildingBlockAlerts={showBuildingBlockAlerts}
-                    showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-                    onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-                    onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
-                    onRuleChange={refreshRule}
-                    to={to}
-                  />
-                )}
-              </>
-            )}
-            {ruleDetailTab === RuleDetailTabs.exceptions && (
-              <ExceptionsViewer
-                ruleId={ruleId ?? ''}
-                ruleName={rule?.name ?? ''}
-                ruleIndices={ruleIndices}
-                availableListTypes={exceptionLists.allowedExceptionListTypes}
-                commentsAccordionId={'ruleDetailsTabExceptions'}
-                exceptionListsMeta={exceptionLists.lists}
-                onRuleChange={refreshRule}
-              />
-            )}
-            {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
-          </SecuritySolutionPageWrapper>
-        </StyledFullHeightContainer>
-      ) : (
-        <SecuritySolutionPageWrapper>
-          <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-
-          <OverviewEmpty />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {updatedAt &&
+                    timelinesUi.getLastUpdated({
+                      updatedAt: updatedAt || Date.now(),
+                      showUpdating,
+                    })}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="l" />
+              <Display show={!globalFullScreen}>
+                <AlertsHistogramPanel
+                  filters={alertMergedFilters}
+                  query={query}
+                  signalIndexName={signalIndexName}
+                  defaultStackByOption={defaultRuleStackByOption}
+                  updateDateRange={updateDateRangeCallback}
+                />
+                <EuiSpacer />
+              </Display>
+              {ruleId != null && (
+                <AlertsTable
+                  filterGroup={filterGroup}
+                  timelineId={TimelineId.detectionsRulesDetailsPage}
+                  defaultFilters={alertsTableDefaultFilters}
+                  hasIndexWrite={hasIndexWrite ?? false}
+                  hasIndexMaintenance={hasIndexMaintenance ?? false}
+                  from={from}
+                  loading={loading}
+                  showBuildingBlockAlerts={showBuildingBlockAlerts}
+                  showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+                  onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+                  onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
+                  onRuleChange={refreshRule}
+                  to={to}
+                />
+              )}
+            </>
+          )}
+          {ruleDetailTab === RuleDetailTabs.exceptions && (
+            <ExceptionsViewer
+              ruleId={ruleId ?? ''}
+              ruleName={rule?.name ?? ''}
+              ruleIndices={ruleIndices}
+              availableListTypes={exceptionLists.allowedExceptionListTypes}
+              commentsAccordionId={'ruleDetailsTabExceptions'}
+              exceptionListsMeta={exceptionLists.lists}
+              onRuleChange={refreshRule}
+            />
+          )}
+          {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
         </SecuritySolutionPageWrapper>
-      )}
+      </StyledFullHeightContainer>
+      {/* // ) : (*/}
+      {/* //   <SecuritySolutionPageWrapper>*/}
+      {/* //     <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />*/}
+      {/*//*/}
+      {/* //     <OverviewEmpty />*/}
+      {/* //   </SecuritySolutionPageWrapper>*/}
+      {/* // )}*/}
 
       <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>
