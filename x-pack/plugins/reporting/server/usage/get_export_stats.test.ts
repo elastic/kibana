@@ -67,18 +67,18 @@ test('Model of job status and status-by-pdf-app', () => {
 test('Model of jobTypes', () => {
   const result = getExportStats(
     {
-      PNG: { available: true, total: 3, output_size: { max: 999, min: 333, avg: 666 } },
+      PNG: { available: true, total: 3, sizes: { max: 999, min: 333, avg: 666 } },
       printable_pdf: {
         available: true,
         total: 3,
-        output_size: { max: 999, min: 333, avg: 666 },
+        sizes: { max: 999, min: 333, avg: 666 },
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
         layout: { preserve_layout: 3, print: 0 },
       },
       csv_searchsource: {
         available: true,
         total: 3,
-        output_size: { max: 999, min: 333, avg: 666 },
+        sizes: { max: 999, min: 333, avg: 666 },
       },
     },
     featureMap,
@@ -186,7 +186,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         available: true,
         total: 15,
         deprecated: 5,
-        output_size: { min: 111, max: 333, avg: 222 },
+        sizes: { min: 111, max: 333, avg: 222 },
       },
     },
     featureMap,
@@ -224,7 +224,7 @@ test('CSV counts, provides all jobs implicitly deprecated due to jobtype', () =>
         available: true,
         total: 15,
         deprecated: 0,
-        output_size: { min: 111, max: 333, avg: 222 },
+        sizes: { min: 111, max: 333, avg: 222 },
       },
     },
     featureMap,

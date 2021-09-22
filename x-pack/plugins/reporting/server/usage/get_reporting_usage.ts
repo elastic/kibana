@@ -34,10 +34,8 @@ const OBJECT_TYPES_FIELD = 'meta.objectType.keyword';
 const STATUS_TYPES_KEY = 'statusTypes';
 const STATUS_BY_APP_KEY = 'statusByApp';
 const STATUS_TYPES_FIELD = 'status';
-const OUTPUT_SIZE_MIN_KEY = 'sizeMin';
-const OUTPUT_SIZE_MAX_KEY = 'sizeMax';
-const OUTPUT_SIZE_AVG_KEY = 'sizeAvg';
-const OUTPUT_SIZE_FIELD = 'output.size';
+const OUTPUT_SIZES_KEY = 'sizes';
+const OUTPUT_SIZES_FIELD = 'output.size';
 
 const DEFAULT_TERMS_SIZE = 10;
 const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
@@ -71,16 +69,12 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
 function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
-    const { key, doc_count: count, isDeprecated, sizeMax, sizeMin, sizeAvg } = bucket;
+    const { key, doc_count: count, isDeprecated, sizes } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
     const total: Omit<AvailableTotal, 'available'> = {
       total: count,
       deprecated: deprecatedCount,
-      output_size: {
-        max: sizeMax?.value ?? null,
-        min: sizeMin?.value ?? null,
-        avg: sizeAvg?.value ?? null,
-      },
+      sizes: sizes?.values,
     };
     return { ...accum, [key]: total };
   }, {} as JobTypes);
@@ -111,11 +105,7 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
     _all: all,
     status: statusTypes,
     statuses: statusByApp,
-    output_size: {
-      max: get(aggs[OUTPUT_SIZE_MAX_KEY], 'value') ?? null,
-      min: get(aggs[OUTPUT_SIZE_MIN_KEY], 'value') ?? null,
-      avg: get(aggs[OUTPUT_SIZE_AVG_KEY], 'value') ?? null,
-    },
+    output_size: get(aggs[OUTPUT_SIZES_KEY], 'values') ?? undefined,
     ...jobTypes,
   };
 }
@@ -155,19 +145,6 @@ export async function getReportingUsage(
   exportTypesRegistry: ExportTypesRegistry
 ): Promise<ReportingUsageType> {
   const reportingIndex = config.get('index');
-
-  const outputSizeAggs = {
-    [OUTPUT_SIZE_MIN_KEY]: {
-      min: { field: OUTPUT_SIZE_FIELD },
-    },
-    [OUTPUT_SIZE_MAX_KEY]: {
-      max: { field: OUTPUT_SIZE_FIELD },
-    },
-    [OUTPUT_SIZE_AVG_KEY]: {
-      avg: { field: OUTPUT_SIZE_FIELD },
-    },
-  };
-
   const params = {
     index: `${reportingIndex}-*`,
     filterPath: 'aggregations.*.buckets',
@@ -186,7 +163,9 @@ export async function getReportingUsage(
               terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
               aggs: {
                 isDeprecated: { filter: { term: { [OBJECT_TYPE_DEPRECATED_KEY]: true } } },
-                ...outputSizeAggs,
+                [OUTPUT_SIZES_KEY]: {
+                  percentiles: { field: OUTPUT_SIZES_FIELD },
+                },
               },
             },
 
@@ -212,7 +191,9 @@ export async function getReportingUsage(
               filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
               aggs: { pdf: { terms: { field: LAYOUT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } } },
             },
-            ...outputSizeAggs,
+            [OUTPUT_SIZES_KEY]: {
+              percentiles: { field: OUTPUT_SIZES_FIELD },
+            },
           },
         },
       },

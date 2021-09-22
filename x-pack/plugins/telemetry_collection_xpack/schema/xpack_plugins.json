@@ -4051,15 +4051,27 @@
             "deprecated": {
               "type": "long"
             },
-            "output_size": {
+            "sizes": {
               "properties": {
-                "max": {
+                "1.0": {
                   "type": "long"
                 },
-                "min": {
+                "5.0": {
                   "type": "long"
                 },
-                "avg": {
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
                   "type": "long"
                 }
               }
@@ -4106,15 +4118,27 @@
             "deprecated": {
               "type": "long"
             },
-            "output_size": {
+            "sizes": {
               "properties": {
-                "max": {
+                "1.0": {
                   "type": "long"
                 },
-                "min": {
+                "5.0": {
                   "type": "long"
                 },
-                "avg": {
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
                   "type": "long"
                 }
               }
@@ -4161,15 +4185,27 @@
             "deprecated": {
               "type": "long"
             },
-            "output_size": {
+            "sizes": {
               "properties": {
-                "max": {
+                "1.0": {
                   "type": "long"
                 },
-                "min": {
+                "5.0": {
                   "type": "long"
                 },
-                "avg": {
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
                   "type": "long"
                 }
               }
@@ -4216,15 +4252,27 @@
             "deprecated": {
               "type": "long"
             },
-            "output_size": {
+            "sizes": {
               "properties": {
-                "max": {
+                "1.0": {
                   "type": "long"
                 },
-                "min": {
+                "5.0": {
                   "type": "long"
                 },
-                "avg": {
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
                   "type": "long"
                 }
               }
@@ -4271,15 +4319,27 @@
             "deprecated": {
               "type": "long"
             },
-            "output_size": {
+            "sizes": {
               "properties": {
-                "max": {
+                "1.0": {
                   "type": "long"
                 },
-                "min": {
+                "5.0": {
                   "type": "long"
                 },
-                "avg": {
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
                   "type": "long"
                 }
               }
@@ -4326,15 +4386,27 @@
             "deprecated": {
               "type": "long"
             },
-            "output_size": {
+            "sizes": {
               "properties": {
-                "max": {
+                "1.0": {
                   "type": "long"
                 },
-                "min": {
+                "5.0": {
                   "type": "long"
                 },
-                "avg": {
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
                   "type": "long"
                 }
               }
@@ -4381,15 +4453,27 @@
             "deprecated": {
               "type": "long"
             },
-            "output_size": {
+            "sizes": {
               "properties": {
-                "max": {
+                "1.0": {
                   "type": "long"
                 },
-                "min": {
+                "5.0": {
                   "type": "long"
                 },
-                "avg": {
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
                   "type": "long"
                 }
               }
@@ -5033,13 +5117,25 @@
         },
         "output_size": {
           "properties": {
-            "max": {
+            "1.0": {
               "type": "long"
             },
-            "min": {
+            "5.0": {
               "type": "long"
             },
-            "avg": {
+            "25.0": {
+              "type": "long"
+            },
+            "50.0": {
+              "type": "long"
+            },
+            "75.0": {
+              "type": "long"
+            },
+            "95.0": {
+              "type": "long"
+            },
+            "99.0": {
               "type": "long"
             }
           }
@@ -5066,15 +5162,27 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "output_size": {
+                "sizes": {
                   "properties": {
-                    "max": {
+                    "1.0": {
                       "type": "long"
                     },
-                    "min": {
+                    "5.0": {
                       "type": "long"
                     },
-                    "avg": {
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
                       "type": "long"
                     }
                   }
@@ -5121,15 +5229,27 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "output_size": {
+                "sizes": {
                   "properties": {
-                    "max": {
+                    "1.0": {
                       "type": "long"
                     },
-                    "min": {
+                    "5.0": {
                       "type": "long"
                     },
-                    "avg": {
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
                       "type": "long"
                     }
                   }
@@ -5176,15 +5296,27 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "output_size": {
+                "sizes": {
                   "properties": {
-                    "max": {
+                    "1.0": {
                       "type": "long"
                     },
-                    "min": {
+                    "5.0": {
                       "type": "long"
                     },
-                    "avg": {
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
                       "type": "long"
                     }
                   }
@@ -5231,15 +5363,27 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "output_size": {
+                "sizes": {
                   "properties": {
-                    "max": {
+                    "1.0": {
                       "type": "long"
                     },
-                    "min": {
+                    "5.0": {
                       "type": "long"
                     },
-                    "avg": {
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
                       "type": "long"
                     }
                   }
@@ -5286,15 +5430,27 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "output_size": {
+                "sizes": {
                   "properties": {
-                    "max": {
+                    "1.0": {
                       "type": "long"
                     },
-                    "min": {
+                    "5.0": {
                       "type": "long"
                     },
-                    "avg": {
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
                       "type": "long"
                     }
                   }
@@ -5341,15 +5497,27 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "output_size": {
+                "sizes": {
                   "properties": {
-                    "max": {
+                    "1.0": {
                       "type": "long"
                     },
-                    "min": {
+                    "5.0": {
                       "type": "long"
                     },
-                    "avg": {
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
                       "type": "long"
                     }
                   }
@@ -5396,15 +5564,27 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "output_size": {
+                "sizes": {
                   "properties": {
-                    "max": {
+                    "1.0": {
                       "type": "long"
                     },
-                    "min": {
+                    "5.0": {
                       "type": "long"
                     },
-                    "avg": {
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
                       "type": "long"
                     }
                   }
@@ -6048,13 +6228,25 @@
             },
             "output_size": {
               "properties": {
-                "max": {
+                "1.0": {
                   "type": "long"
                 },
-                "min": {
+                "5.0": {
                   "type": "long"
                 },
-                "avg": {
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
                   "type": "long"
                 }
               }

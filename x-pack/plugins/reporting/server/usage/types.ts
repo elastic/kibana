@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+export interface SizePercentiles {
+  '1.0': number | null;
+  '5.0': number | null;
+  '25.0': number | null;
+  '50.0': number | null;
+  '75.0': number | null;
+  '95.0': number | null;
+  '99.0': number | null;
+}
+
 interface SizeStats {
-  sizeMin?: { value: number | null };
-  sizeMax?: { value: number | null };
-  sizeAvg?: { value: number | null };
+  sizes?: { values: SizePercentiles };
 }
 
 export interface KeyCountBucket extends SizeStats {
@@ -63,17 +71,11 @@ export interface SearchResponse {
   };
 }
 
-export interface SizeMetrics {
-  max: number | null;
-  min: number | null;
-  avg: number | null;
-}
-
 export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
-  output_size: SizeMetrics;
+  sizes?: SizePercentiles;
   app?: {
     search?: number;
     dashboard?: number;
@@ -124,7 +126,7 @@ export type RangeStats = JobTypes & {
   _all: number;
   status: StatusCounts;
   statuses?: StatusByAppCounts;
-  output_size: SizeMetrics;
+  output_size?: SizePercentiles;
 };
 
 export type ReportingUsageType = RangeStats & {
