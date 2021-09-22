@@ -28,6 +28,7 @@ import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
 import { EventFiltersPageLocation } from '../pages/event_filters/types';
 import { HostIsolationExceptionsPageLocation } from '../pages/host_isolation_exceptions/types';
+import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -162,6 +163,25 @@ const normalizeTrustedAppsPageLocation = (
   }
 };
 
+const normalizePolicyDetailsArtifactsListPageLocation = (
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+): Partial<PolicyDetailsArtifactsPageLocation> => {
+  if (location) {
+    return {
+      ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
+        ? { page_index: location.page_index }
+        : {}),
+      ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { page_size: location.page_size }
+        : {}),
+      ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
+      ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+    };
+  } else {
+    return {};
+  }
+};
+
 const normalizeEventFiltersPageLocation = (
   location?: Partial<EventFiltersPageLocation>
 ): Partial<EventFiltersPageLocation> => {
@@ -276,6 +296,34 @@ export const getTrustedAppsListPath = (location?: Partial<TrustedAppsListPageLoc
 
   return `${path}${appendSearch(
     querystring.stringify(normalizeTrustedAppsPageLocation(location))
+  )}`;
+};
+
+export const extractPolicyDetailsArtifactsListPageLocation = (
+  query: querystring.ParsedUrlQuery
+): PolicyDetailsArtifactsPageLocation => {
+  const showParamValue = extractFirstParamValue(
+    query,
+    'show'
+  ) as PolicyDetailsArtifactsPageLocation['show'];
+
+  return {
+    ...extractListPaginationParams(query),
+    show: showParamValue && 'list' === showParamValue ? showParamValue : undefined,
+  };
+};
+
+export const getPolicyDetailsArtifactsListPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  });
+
+  return `${path}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
   )}`;
 };
 

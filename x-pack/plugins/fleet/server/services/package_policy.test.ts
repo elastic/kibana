@@ -14,19 +14,25 @@ import {
 import type { SavedObjectsClient, SavedObjectsUpdateResponse } from 'src/core/server';
 import type { KibanaRequest } from 'kibana/server';
 
-import type { PackageInfo, PackagePolicySOAttributes, AgentPolicySOAttributes } from '../types';
+import type {
+  PackageInfo,
+  PackagePolicySOAttributes,
+  AgentPolicySOAttributes,
+  PostPackagePolicyDeleteCallback,
+  RegistryDataStream,
+  PackagePolicyInputStream,
+} from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
+
 import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } from '..';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
-
-import type { PostPackagePolicyDeleteCallback } from '../types';
 
 import type { DeletePackagePoliciesResponse } from '../../common';
 
 import { IngestManagerError } from '../errors';
 
-import { packagePolicyService } from './package_policy';
+import { packagePolicyService, _applyIndexPrivileges } from './package_policy';
 import { appContextService } from './app_context';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
@@ -1067,5 +1073,121 @@ describe('Package policy service', () => {
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
     });
+  });
+});
+
+describe('_applyIndexPrivileges()', () => {
+  function createPackageStream(indexPrivileges?: string[]): RegistryDataStream {
+    const stream: RegistryDataStream = {
+      type: '',
+      dataset: '',
+      title: '',
+      release: '',
+      package: '',
+      path: '',
+    };
+
+    if (indexPrivileges) {
+      stream.elasticsearch = {
+        privileges: {
+          indices: indexPrivileges,
+        },
+      };
+    }
+
+    return stream;
+  }
+
+  function createInputStream(
+    opts: Partial<PackagePolicyInputStream> = {}
+  ): PackagePolicyInputStream {
+    return {
+      id: '',
+      enabled: true,
+      data_stream: {
+        dataset: '',
+        type: '',
+      },
+      ...opts,
+    };
+  }
+
+  beforeAll(async () => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  it('should do nothing if packageStream has no privileges', () => {
+    const packageStream = createPackageStream();
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should not apply privileges if all privileges are forbidden', () => {
+    const forbiddenPrivileges = ['write', 'delete', 'delete_index', 'all'];
+    const packageStream = createPackageStream(forbiddenPrivileges);
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should not apply privileges if all privileges are unrecognized', () => {
+    const unrecognizedPrivileges = ['idnotexist', 'invalidperm'];
+    const packageStream = createPackageStream(unrecognizedPrivileges);
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should apply privileges if all privileges are valid', () => {
+    const validPrivileges = [
+      'auto_configure',
+      'create_doc',
+      'maintenance',
+      'monitor',
+      'read',
+      'read_cross_cluster',
+    ];
+
+    const packageStream = createPackageStream(validPrivileges);
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          privileges: {
+            indices: validPrivileges,
+          },
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
+  });
+
+  it('should only apply valid privileges when there is a  mix of valid and invalid', () => {
+    const mixedPrivileges = ['auto_configure', 'read_cross_cluster', 'idontexist', 'delete'];
+
+    const packageStream = createPackageStream(mixedPrivileges);
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          privileges: {
+            indices: ['auto_configure', 'read_cross_cluster'],
+          },
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
   });
 });

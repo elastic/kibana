@@ -293,6 +293,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [inspect, loading, refetch, setQuery]);
   const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
 
+  // Clear checkbox selection when new events are fetched
+  useEffect(() => {
+    dispatch(tGridActions.clearSelected({ id }));
+    dispatch(
+      tGridActions.setTGridSelectAll({
+        id,
+        selectAll: false,
+      })
+    );
+  }, [nonDeletedEvents, dispatch, id]);
+
   return (
     <InspectButtonContainer>
       <StyledEuiPanel
