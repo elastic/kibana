@@ -41,12 +41,17 @@ describe('OverviewEmpty', () => {
       (useUserPrivileges as jest.Mock).mockReset();
     });
 
-    /** TODO: Need help fixing tests because of nested props */
-    it.skip('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
-        elasticAgent: {
-          url: 'ingestUrl',
+    it('render with correct actions ', () => {
+      expect(wrapper.find('[data-test-subj="empty-page"]').prop('noDataConfig')).toEqual({
+        actions: {
+          elasticAgent: {
+            description:
+              'Use Elastic Agent to collect security events and protect your endpoints from threats. Manage your agents in Fleet and add integrations with a single click.',
+            href: '/app/integrations/browse/security',
+          },
         },
+        docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
+        solution: 'Security',
       });
     });
   });
@@ -60,12 +65,15 @@ describe('OverviewEmpty', () => {
       wrapper = shallow(<OverviewEmpty />);
     });
 
-    /** TODO: Need help fixing tests because of nested props */
-    it.skip('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
-        beats: {
-          url: '/app/home#/tutorial_directory/security',
+    it('render with correct actions ', () => {
+      expect(wrapper.find('[data-test-subj="empty-page"]').prop('noDataConfig')).toEqual({
+        actions: {
+          beats: {
+            href: '/app/home#/tutorial_directory/security',
+          },
         },
+        docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
+        solution: 'Security',
       });
     });
   });
