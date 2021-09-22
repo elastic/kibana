@@ -48,6 +48,7 @@ export class HomePageObject extends FtrService {
       await this.testSubjects.click(`addSampleDataSet${id}`);
       await this._waitForSampleDataLoadingAction(id);
     }
+    await this.common.sleep(2000);
   }
 
   async removeSampleDataSet(id: string) {
