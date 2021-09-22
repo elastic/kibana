@@ -27,11 +27,11 @@ export const CurationsRouter: React.FC = () => {
       <Route exact path={ENGINE_CURATIONS_NEW_PATH}>
         <CurationCreation />
       </Route>
+      <Route exact path={ENGINE_CURATION_SUGGESTION_PATH}>
+        <CurationSuggestion />
+      </Route>
       <Route path={ENGINE_CURATION_PATH}>
         <Curation />
-      </Route>
-      <Route path={ENGINE_CURATION_SUGGESTION_PATH}>
-        <CurationSuggestion />
       </Route>
     </Switch>
   );
