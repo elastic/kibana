@@ -125,7 +125,7 @@ The legacy area, line, and charts library are deprecated in 7.15.0. In 7.16.0, s
 *Impact* +
 When you upgrade, {kib} uses the new charts library by default, which includes improved performance, color palettes, fill capacity, and more. 
 
-If you have changed the default https://www.elastic.co/guide/en/kibana/current/advanced-options.html#visualization-visualize-chartslibrary[Advanced Settings], you must disable the legacy charts library to use the new charts library:
+If you have changed the default {kibana-ref}/advanced-options.html#visualization-visualize-chartslibrary[Advanced Settings], you must disable the legacy charts library to use the new charts library:
 
 . Open the main menu, then click *Stack Management > Advanced Settings*.
 
