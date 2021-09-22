@@ -41,7 +41,7 @@ const stringOperation = () => ({ dataType: 'string', isBucketed: true });
 
 // Only one of each type is needed
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
-  sum: ({
+  sum: {
     type: 'sum',
     input: 'field',
     buildColumn: buildGenericColumn('sum'),
@@ -52,15 +52,15 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       signature: 'field: string',
       description: 'description',
     },
-  } as unknown) as GenericOperationDefinition,
-  count: ({
+  } as unknown as GenericOperationDefinition,
+  count: {
     type: 'count',
     input: 'field',
     buildColumn: buildGenericColumn('count'),
     getPossibleOperationForField: (field: IndexPatternField) =>
       field.name === 'Records' ? numericOperation() : null,
-  } as unknown) as GenericOperationDefinition,
-  last_value: ({
+  } as unknown as GenericOperationDefinition,
+  last_value: {
     type: 'last_value',
     input: 'field',
     buildColumn: buildGenericColumn('last_value'),
@@ -68,8 +68,8 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       dataType: field.type,
       isBucketed: false,
     }),
-  } as unknown) as GenericOperationDefinition,
-  moving_average: ({
+  } as unknown as GenericOperationDefinition,
+  moving_average: {
     type: 'moving_average',
     input: 'fullReference',
     requiredReferences: [
@@ -82,18 +82,18 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     operationParams: [{ name: 'window', type: 'number', required: true }],
     buildColumn: buildGenericColumn('moving_average'),
     getPossibleOperation: numericOperation,
-  } as unknown) as GenericOperationDefinition,
-  cumulative_sum: ({
+  } as unknown as GenericOperationDefinition,
+  cumulative_sum: {
     type: 'cumulative_sum',
     input: 'fullReference',
     buildColumn: buildGenericColumn('cumulative_sum'),
     getPossibleOperation: numericOperation,
-  } as unknown) as GenericOperationDefinition,
-  terms: ({
+  } as unknown as GenericOperationDefinition,
+  terms: {
     type: 'terms',
     input: 'field',
     getPossibleOperationForField: stringOperation,
-  } as unknown) as GenericOperationDefinition,
+  } as unknown as GenericOperationDefinition,
 };
 
 describe('math completion', () => {

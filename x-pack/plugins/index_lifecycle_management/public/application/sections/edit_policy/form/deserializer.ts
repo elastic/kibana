@@ -14,29 +14,29 @@ import { getDefaultRepository } from '../lib';
 import { FormInternal } from '../types';
 import { CLOUD_DEFAULT_REPO } from '../constants';
 
-export const createDeserializer = (isCloudEnabled: boolean) => (
-  policy: SerializedPolicy
-): FormInternal => {
-  const {
-    phases: { hot, warm, cold, frozen, delete: deletePhase },
-  } = policy;
+export const createDeserializer =
+  (isCloudEnabled: boolean) =>
+  (policy: SerializedPolicy): FormInternal => {
+    const {
+      phases: { hot, warm, cold, frozen, delete: deletePhase },
+    } = policy;
 
-  let defaultRepository = getDefaultRepository([
-    hot?.actions.searchable_snapshot,
-    cold?.actions.searchable_snapshot,
-    frozen?.actions.searchable_snapshot,
-  ]);
+    let defaultRepository = getDefaultRepository([
+      hot?.actions.searchable_snapshot,
+      cold?.actions.searchable_snapshot,
+      frozen?.actions.searchable_snapshot,
+    ]);
 
-  if (!defaultRepository && isCloudEnabled) {
-    defaultRepository = CLOUD_DEFAULT_REPO;
-  }
+    if (!defaultRepository && isCloudEnabled) {
+      defaultRepository = CLOUD_DEFAULT_REPO;
+    }
 
-  const _meta: FormInternal['_meta'] = {
-    hot: {
-      isUsingDefaultRollover: isUsingDefaultRollover(policy),
-      customRollover: {
-        enabled: Boolean(hot?.actions?.rollover),
-      },
+    const _meta: FormInternal['_meta'] = {
+      hot: {
+        isUsingDefaultRollover: isUsingDefaultRollover(policy),
+        customRollover: {
+          enabled: Boolean(hot?.actions?.rollover),
+        },
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
       readonlyEnabled: Boolean(hot?.actions?.readonly),
       shrink: { isUsingShardSize: Boolean(hot?.actions.shrink?.max_primary_shard_size) },
@@ -72,34 +72,33 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
     },
   };
 
-  return produce<FormInternal>(
-    {
-      ...policy,
-      _meta,
-    },
-    (draft: FormInternal) => {
-      if (draft.phases.hot?.actions?.rollover) {
-        if (draft.phases.hot.actions.rollover.max_size) {
-          const maxSize = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_size);
-          draft.phases.hot.actions.rollover.max_size = maxSize.size;
-          draft._meta.hot.customRollover.maxStorageSizeUnit = maxSize.units;
-        }
+    return produce<FormInternal>(
+      {
+        ...policy,
+        _meta,
+      },
+      (draft: FormInternal) => {
+        if (draft.phases.hot?.actions?.rollover) {
+          if (draft.phases.hot.actions.rollover.max_size) {
+            const maxSize = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_size);
+            draft.phases.hot.actions.rollover.max_size = maxSize.size;
+            draft._meta.hot.customRollover.maxStorageSizeUnit = maxSize.units;
+          }
 
-        if (draft.phases.hot.actions.rollover.max_primary_shard_size) {
-          const maxPrimaryShardSize = splitSizeAndUnits(
-            draft.phases.hot.actions.rollover.max_primary_shard_size
-          );
-          draft.phases.hot.actions.rollover.max_primary_shard_size = maxPrimaryShardSize.size;
-          draft._meta.hot.customRollover.maxPrimaryShardSizeUnit = maxPrimaryShardSize.units;
-        }
+          if (draft.phases.hot.actions.rollover.max_primary_shard_size) {
+            const maxPrimaryShardSize = splitSizeAndUnits(
+              draft.phases.hot.actions.rollover.max_primary_shard_size
+            );
+            draft.phases.hot.actions.rollover.max_primary_shard_size = maxPrimaryShardSize.size;
+            draft._meta.hot.customRollover.maxPrimaryShardSizeUnit = maxPrimaryShardSize.units;
+          }
 
-        if (draft.phases.hot.actions.rollover.max_age) {
-          const maxAge = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_age);
-          draft.phases.hot.actions.rollover.max_age = maxAge.size;
-          draft._meta.hot.customRollover.maxAgeUnit = maxAge.units;
+          if (draft.phases.hot.actions.rollover.max_age) {
+            const maxAge = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_age);
+            draft.phases.hot.actions.rollover.max_age = maxAge.size;
+            draft._meta.hot.customRollover.maxAgeUnit = maxAge.units;
+          }
         }
-      }
-
       if (draft.phases.hot?.actions.shrink?.max_primary_shard_size) {
         const primaryShardSize = splitSizeAndUnits(
           draft.phases.hot.actions.shrink.max_primary_shard_size!
@@ -115,10 +114,11 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
           });
         }
 
-        if (draft.phases.warm.min_age) {
-          const minAge = splitSizeAndUnits(draft.phases.warm.min_age);
-          draft.phases.warm.min_age = minAge.size;
-          draft._meta.warm.minAgeUnit = minAge.units;
+          if (draft.phases.warm.min_age) {
+            const minAge = splitSizeAndUnits(draft.phases.warm.min_age);
+            draft.phases.warm.min_age = minAge.size;
+            draft._meta.warm.minAgeUnit = minAge.units;
+          }
         }
 
         if (draft.phases.warm.actions.shrink?.max_primary_shard_size) {
@@ -130,35 +130,35 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
         }
       }
 
-      if (draft.phases.cold) {
-        if (draft.phases.cold.actions?.allocate?.require) {
-          Object.entries(draft.phases.cold.actions.allocate.require).forEach((entry) => {
-            draft._meta.cold.allocationNodeAttribute = entry.join(':');
-          });
+        if (draft.phases.cold) {
+          if (draft.phases.cold.actions?.allocate?.require) {
+            Object.entries(draft.phases.cold.actions.allocate.require).forEach((entry) => {
+              draft._meta.cold.allocationNodeAttribute = entry.join(':');
+            });
+          }
+
+          if (draft.phases.cold.min_age) {
+            const minAge = splitSizeAndUnits(draft.phases.cold.min_age);
+            draft.phases.cold.min_age = minAge.size;
+            draft._meta.cold.minAgeUnit = minAge.units;
+          }
         }
 
-        if (draft.phases.cold.min_age) {
-          const minAge = splitSizeAndUnits(draft.phases.cold.min_age);
-          draft.phases.cold.min_age = minAge.size;
-          draft._meta.cold.minAgeUnit = minAge.units;
+        if (draft.phases.frozen) {
+          if (draft.phases.frozen.min_age) {
+            const minAge = splitSizeAndUnits(draft.phases.frozen.min_age);
+            draft.phases.frozen.min_age = minAge.size;
+            draft._meta.frozen.minAgeUnit = minAge.units;
+          }
         }
-      }
 
-      if (draft.phases.frozen) {
-        if (draft.phases.frozen.min_age) {
-          const minAge = splitSizeAndUnits(draft.phases.frozen.min_age);
-          draft.phases.frozen.min_age = minAge.size;
-          draft._meta.frozen.minAgeUnit = minAge.units;
+        if (draft.phases.delete) {
+          if (draft.phases.delete.min_age) {
+            const minAge = splitSizeAndUnits(draft.phases.delete.min_age);
+            draft.phases.delete.min_age = minAge.size;
+            draft._meta.delete.minAgeUnit = minAge.units;
+          }
         }
       }
-
-      if (draft.phases.delete) {
-        if (draft.phases.delete.min_age) {
-          const minAge = splitSizeAndUnits(draft.phases.delete.min_age);
-          draft.phases.delete.min_age = minAge.size;
-          draft._meta.delete.minAgeUnit = minAge.units;
-        }
-      }
-    }
-  );
-};
+    );
+  };
