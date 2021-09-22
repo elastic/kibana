@@ -225,7 +225,6 @@ const VisComponent = (props: VisComponentProps) => {
     () => config.legend.position ?? Position.Right,
     [config.legend.position]
   );
-
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
