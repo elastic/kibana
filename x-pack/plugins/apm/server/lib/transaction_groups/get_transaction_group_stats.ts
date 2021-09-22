@@ -5,50 +5,133 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { estypes } from '@elastic/elasticsearch';
-import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
+import {
+  PARENT_ID,
+  TRANSACTION_TYPE,
+  TRANSACTION_ROOT,
+  TRANSACTION_NAME,
+  SERVICE_NAME,
+} from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
+import { Key, TopTraceOptions, TransactionGroupSetup } from './fetcher';
 import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 
 interface MetricParams {
-  request: TransactionGroupRequestBase;
+  topTraceOptions: TopTraceOptions;
   setup: TransactionGroupSetup;
-  searchAggregatedTransactions: boolean;
 }
 
-type BucketKey = Record<string, string>;
-
-function mergeRequestWithAggs<
-  TRequestBase extends TransactionGroupRequestBase,
+function getParams<
   TAggregationMap extends Record<
     string,
     estypes.AggregationsAggregationContainer
   >
->(request: TRequestBase, aggs: TAggregationMap) {
-  return merge({}, request, {
+>({
+  topTraceOptions,
+  setup,
+  aggs,
+}: {
+  topTraceOptions: TopTraceOptions;
+  setup: TransactionGroupSetup;
+  aggs: TAggregationMap;
+}) {
+  const { start, end } = setup;
+
+  const {
+    searchAggregatedTransactions,
+    environment,
+    kuery,
+    transactionName,
+  } = topTraceOptions;
+
+  const transactionNameFilter = transactionName
+    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
+    : [];
+
+  return {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
     body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...transactionNameFilter,
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...(searchAggregatedTransactions
+              ? [
+                  {
+                    term: {
+                      [TRANSACTION_ROOT]: true,
+                    },
+                  },
+                ]
+              : []),
+          ] as QueryDslQueryContainer[],
+          must_not: [
+            ...(!searchAggregatedTransactions
+              ? [
+                  {
+                    exists: {
+                      field: PARENT_ID,
+                    },
+                  },
+                ]
+              : []),
+          ],
+        },
+      },
       aggs: {
         transaction_groups: {
           aggs,
+          composite: {
+            sources: asMutableArray([
+              { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
+              {
+                [TRANSACTION_NAME]: {
+                  terms: { field: TRANSACTION_NAME },
+                },
+              },
+            ] as const),
+            // traces overview is hardcoded to 10000
+            size: 10000,
+          },
         },
       },
     },
-  });
+  };
 }
 
-export async function getAverages({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
-  const params = mergeRequestWithAggs(request, {
-    avg: {
+export async function getAverages({ topTraceOptions, setup }: MetricParams) {
+  const params = getParams({
+    topTraceOptions,
+    setup,
+    aggs: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        avg: {
+          field: getTransactionDurationFieldForAggregatedTransactions(
+            topTraceOptions.searchAggregatedTransactions
+          ),
+        },
       },
     },
   });
@@ -62,24 +145,28 @@ export async function getAverages({
     response.aggregations?.transaction_groups.buckets ?? []
   ).map((bucket) => {
     return {
-      key: bucket.key as BucketKey,
+      key: bucket.key as Key,
       avg: bucket.avg.value,
     };
   });
 }
 
-export async function getCounts({ request, setup }: MetricParams) {
-  const params = mergeRequestWithAggs(request, {
-    transaction_type: {
-      top_metrics: {
-        sort: {
-          '@timestamp': 'desc' as const,
+export async function getCounts({ topTraceOptions, setup }: MetricParams) {
+  const params = getParams({
+    topTraceOptions,
+    setup,
+    aggs: {
+      transaction_type: {
+        top_metrics: {
+          sort: {
+            '@timestamp': 'desc' as const,
+          },
+          metrics: [
+            {
+              field: TRANSACTION_TYPE,
+            } as const,
+          ],
         },
-        metrics: [
-          {
-            field: TRANSACTION_TYPE,
-          } as const,
-        ],
       },
     },
   });
@@ -93,7 +180,7 @@ export async function getCounts({ request, setup }: MetricParams) {
     response.aggregations?.transaction_groups.buckets ?? []
   ).map((bucket) => {
     return {
-      key: bucket.key as BucketKey,
+      key: bucket.key as Key,
       count: bucket.doc_count,
       transactionType: bucket.transaction_type.top[0].metrics[
         TRANSACTION_TYPE
@@ -102,17 +189,17 @@ export async function getCounts({ request, setup }: MetricParams) {
   });
 }
 
-export async function getSums({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
-  const params = mergeRequestWithAggs(request, {
-    sum: {
+export async function getSums({ topTraceOptions, setup }: MetricParams) {
+  const params = getParams({
+    topTraceOptions,
+    setup,
+    aggs: {
       sum: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        sum: {
+          field: getTransactionDurationFieldForAggregatedTransactions(
+            topTraceOptions.searchAggregatedTransactions
+          ),
+        },
       },
     },
   });
@@ -126,7 +213,7 @@ export async function getSums({
     response.aggregations?.transaction_groups.buckets ?? []
   ).map((bucket) => {
     return {
-      key: bucket.key as BucketKey,
+      key: bucket.key as Key,
       sum: bucket.sum.value,
     };
   });

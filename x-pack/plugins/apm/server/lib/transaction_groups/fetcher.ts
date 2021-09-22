@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { sortBy } from 'lodash';
 import moment from 'moment';
-import { Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import {
-  PARENT_ID,
   SERVICE_NAME,
   TRANSACTION_NAME,
-  TRANSACTION_ROOT,
 } from '../../../common/elasticsearch_fieldnames';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { environmentQuery } from '../../../common/utils/environment_query';
+
 import { joinByKey } from '../../../common/utils/join_by_key';
 import { withApmSpan } from '../../utils/with_apm_span';
-import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
 
@@ -35,7 +25,7 @@ export interface TopTraceOptions {
   searchAggregatedTransactions: boolean;
 }
 
-type Key = Record<'service.name' | 'transaction.name', string>;
+export type Key = Record<'service.name' | 'transaction.name', string>;
 
 export interface TransactionGroup {
   key: Key;
@@ -48,90 +38,6 @@ export interface TransactionGroup {
 }
 
 export type ESResponse = Promise<{ items: TransactionGroup[] }>;
-
-export type TransactionGroupRequestBase = ReturnType<typeof getRequest> & {
-  body: {
-    aggs: {
-      transaction_groups: Unionize<Pick<AggregationOptionsByType, 'composite'>>;
-    };
-  };
-};
-
-function getRequest(
-  topTraceOptions: TopTraceOptions,
-  setup: TransactionGroupSetup
-) {
-  const { start, end } = setup;
-
-  const { searchAggregatedTransactions, environment, kuery, transactionName } =
-    topTraceOptions;
-
-  const transactionNameFilter = transactionName
-    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
-    : [];
-
-  return {
-    apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...transactionNameFilter,
-            ...getDocumentTypeFilterForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...(searchAggregatedTransactions
-              ? [
-                  {
-                    term: {
-                      [TRANSACTION_ROOT]: true,
-                    },
-                  },
-                ]
-              : []),
-          ] as QueryDslQueryContainer[],
-          must_not: [
-            ...(!searchAggregatedTransactions
-              ? [
-                  {
-                    exists: {
-                      field: PARENT_ID,
-                    },
-                  },
-                ]
-              : []),
-          ],
-        },
-      },
-      aggs: {
-        transaction_groups: {
-          composite: {
-            sources: asMutableArray([
-              { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
-              {
-                [TRANSACTION_NAME]: {
-                  terms: { field: TRANSACTION_NAME },
-                },
-              },
-            ] as const),
-            // traces overview is hardcoded to 10000
-            size: 10000,
-          },
-        },
-      },
-    },
-  };
-}
 
 export type TransactionGroupSetup = Setup & SetupTimeRange;
 
@@ -176,19 +82,10 @@ export function topTransactionGroupsFetcher(
   setup: TransactionGroupSetup
 ): Promise<{ items: TransactionGroup[] }> {
   return withApmSpan('get_top_traces', async () => {
-    const request = getRequest(topTraceOptions, setup);
-
-    const params = {
-      request,
-      setup,
-      searchAggregatedTransactions:
-        topTraceOptions.searchAggregatedTransactions,
-    };
-
     const [counts, averages, sums] = await Promise.all([
-      getCounts(params),
-      getAverages(params),
-      getSums(params),
+      getCounts({ topTraceOptions, setup }),
+      getAverages({ topTraceOptions, setup }),
+      getSums({ topTraceOptions, setup }),
     ]);
 
     const stats = [...averages, ...counts, ...sums];

@@ -32,6 +32,7 @@ export async function getHasAggregatedTransactions({
       apm: {
         events: [ProcessorEvent.metric],
       },
+      size: 0,
       body: {
         query: {
           bool: {

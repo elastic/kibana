@@ -41,6 +41,7 @@ Object {
       },
     },
   },
+  "size": 0,
   "terminateAfter": 1,
 }
 `;
@@ -74,6 +75,7 @@ Object {
       },
     },
   },
+  "size": 0,
   "terminateAfter": 1,
 }
 `;
@@ -110,6 +112,7 @@ Array [
           },
         },
       },
+      "size": 0,
       "terminateAfter": 1,
     },
   ],
