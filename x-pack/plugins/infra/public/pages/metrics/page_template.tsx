@@ -18,6 +18,7 @@ interface MetricsPageTemplateProps extends LazyObservabilityPageTemplateProps {
 
 export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
   hasData = true,
+  'data-test-subj': _dataTestSubj,
   ...pageTemplateProps
 }) => {
   const {
@@ -55,5 +56,11 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
         docsLink: docLinks.links.observability.guide,
       };
 
-  return <PageTemplate noDataConfig={noDataConfig} {...pageTemplateProps} />;
+  return (
+    <PageTemplate
+      data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
+      noDataConfig={noDataConfig}
+      {...pageTemplateProps}
+    />
+  );
 };

@@ -20,6 +20,7 @@ interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProps {
 
 export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
   hasData = true,
+  'data-test-subj': _dataTestSubj,
   ...pageTemplateProps
 }) => {
   const {
@@ -55,5 +56,11 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
         docsLink: docLinks.links.observability.guide,
       };
 
-  return <PageTemplate noDataConfig={noDataConfig} {...pageTemplateProps} />;
+  return (
+    <PageTemplate
+      data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
+      noDataConfig={noDataConfig}
+      {...pageTemplateProps}
+    />
+  );
 };

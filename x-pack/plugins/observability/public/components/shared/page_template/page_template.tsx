@@ -121,6 +121,7 @@ export function ObservabilityPageTemplate({
   return (
     <KibanaPageTemplate
       restrictWidth={false}
+      data-test-subj={'TEST'}
       {...pageTemplateProps}
       solutionNav={
         showSolutionNav

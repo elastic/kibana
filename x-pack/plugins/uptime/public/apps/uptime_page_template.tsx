@@ -46,9 +46,9 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
 
   return (
     <>
-      <div data-test-subj={noDataConfig ? 'data-missing' : undefined} />
       <StyledPageTemplateComponent
         pageHeader={pageHeader}
+        data-test-subj={noDataConfig ? 'data-missing' : undefined}
         noDataConfig={path === OVERVIEW_ROUTE && !loading ? noDataConfig : undefined}
       >
         {loading && path === OVERVIEW_ROUTE && <EmptyStateLoading />}
