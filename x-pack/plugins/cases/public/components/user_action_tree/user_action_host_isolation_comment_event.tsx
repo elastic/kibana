@@ -44,7 +44,7 @@ const HostIsolationCommentEventComponent: React.FC<Props> = ({
       <LinkAnchor
         onClick={onLinkClick}
         href={endpointDetailsHref}
-        data-test-subj={`endpointDetails-activity-log-link-${endpoints[0].endpointId}`}
+        data-test-subj={`actions-link-${endpoints[0].endpointId}`}
       >
         {endpoints[0].hostname}
       </LinkAnchor>

@@ -21,7 +21,6 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
 const ContentWrapper = styled(EuiFlexGroup)`
   height: 100%;
   margin: 0 auto;
-  max-width: 800px;
 `;
 
 export const FleetServerRequirementPage = () => {

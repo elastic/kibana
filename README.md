@@ -31,7 +31,7 @@ You might want to build Kibana locally to contribute some code, test out the lat
 out an open PR:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) will help you get Kibana up and running.
-- If you would like to contribute code, please follow our [STYLEGUIDE.md](STYLEGUIDE.md).
+- If you would like to contribute code, please follow our [STYLEGUIDE.mdx](STYLEGUIDE.mdx).
 - For all other questions, check out the [FAQ.md](FAQ.md) and
 [wiki](https://github.com/elastic/kibana/wiki).
 

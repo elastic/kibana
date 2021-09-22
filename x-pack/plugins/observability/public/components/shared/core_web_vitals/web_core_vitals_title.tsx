@@ -47,6 +47,11 @@ export function WebCoreVitalsTitle({
   const closePopover = () => setIsPopoverOpen(false);
   const closeBrowserPopover = () => setIsBrowserPopoverOpen(false);
 
+  const helpAriaLabel = i18n.translate(
+    'xpack.observability.ux.dashboard.webCoreVitals.helpAriaLabel',
+    { defaultMessage: 'help' }
+  );
+
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
@@ -57,6 +62,7 @@ export function WebCoreVitalsTitle({
               isOpen={isPopoverOpen}
               button={
                 <EuiButtonIcon
+                  aria-label={helpAriaLabel}
                   onClick={() => setIsPopoverOpen(true)}
                   color={'text'}
                   iconType={'questionInCircle'}
@@ -99,6 +105,7 @@ export function WebCoreVitalsTitle({
                 isOpen={isBrowserPopoverOpen}
                 button={
                   <EuiButtonIcon
+                    aria-label={helpAriaLabel}
                     onClick={() => setIsBrowserPopoverOpen(true)}
                     color={'text'}
                     iconType={'questionInCircle'}

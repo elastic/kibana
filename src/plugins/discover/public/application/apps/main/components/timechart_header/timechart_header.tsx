@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import dateMath from '@elastic/datemath';
 import './timechart_header.scss';
 import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search';
+import { useDataState } from '../../utils/use_data_state';
 
 export interface TimechartBucketInterval {
   scaled?: boolean;
@@ -32,10 +34,7 @@ export interface TimechartHeaderProps {
    * Format of date to be displayed
    */
   dateFormat?: string;
-  /**
-   * Interval for the buckets of the recent request
-   */
-  bucketInterval?: TimechartBucketInterval;
+
   data: DataPublicPluginStart;
   /**
    * Interval Options
@@ -49,17 +48,23 @@ export interface TimechartHeaderProps {
    * selected interval
    */
   stateInterval: string;
+
+  savedSearchData$: DataCharts$;
 }
 
 export function TimechartHeader({
-  bucketInterval,
   dateFormat,
-  data,
+  data: dataPluginStart,
   options,
   onChangeInterval,
   stateInterval,
+  savedSearchData$,
 }: TimechartHeaderProps) {
-  const { timefilter } = data.query.timefilter;
+  const { timefilter } = dataPluginStart.query.timefilter;
+
+  const data: DataChartsMessage = useDataState(savedSearchData$);
+
+  const { bucketInterval } = data;
   const { from, to } = timefilter.getTime();
   const timeRange = {
     from: dateMath.parse(from),

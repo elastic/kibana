@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { serviceNowConnector } from '../../objects/case';
+import { getServiceNowConnector } from '../../objects/case';
 
 import { SERVICE_NOW_MAPPING, TOASTER } from '../../screens/configure_cases';
 
@@ -77,7 +77,7 @@ describe('Cases connectors', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToEditExternalConnection();
     openAddNewConnectorOption();
-    addServiceNowConnector(serviceNowConnector);
+    addServiceNowConnector(getServiceNowConnector());
 
     cy.wait('@createConnector').then(({ response }) => {
       cy.wrap(response!.statusCode).should('eql', 200);

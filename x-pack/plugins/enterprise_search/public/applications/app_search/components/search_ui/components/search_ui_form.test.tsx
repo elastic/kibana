@@ -39,6 +39,7 @@ describe('SearchUIForm', () => {
     onSortFieldsChange: jest.fn(),
     onTitleFieldChange: jest.fn(),
     onUrlFieldChange: jest.fn(),
+    onThumbnailFieldChange: jest.fn(),
   };
 
   beforeAll(() => {
@@ -52,6 +53,7 @@ describe('SearchUIForm', () => {
     expect(wrapper.find('[data-test-subj="selectFilters"]').exists()).toBe(true);
     expect(wrapper.find('[data-test-subj="selectSort"]').exists()).toBe(true);
     expect(wrapper.find('[data-test-subj="selectUrl"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="selectThumbnail"]').exists()).toBe(true);
   });
 
   describe('title field', () => {
@@ -104,6 +106,35 @@ describe('SearchUIForm', () => {
     it('updates active field in state on focus', () => {
       subject().simulate('focus');
       expect(actions.onActiveFieldChange).toHaveBeenCalledWith(ActiveField.Url);
+    });
+
+    it('removes active field in state on blur', () => {
+      subject().simulate('blur');
+      expect(actions.onActiveFieldChange).toHaveBeenCalledWith(ActiveField.None);
+    });
+  });
+
+  describe('thumbnail field', () => {
+    beforeEach(() => jest.clearAllMocks());
+    const subject = () => shallow(<SearchUIForm />).find('[data-test-subj="selectThumbnail"]');
+
+    it('renders with its value set from state', () => {
+      setMockValues({
+        ...values,
+        thumbnailField: 'foo',
+      });
+
+      expect(subject().prop('value')).toBe('foo');
+    });
+
+    it('updates state with new value when changed', () => {
+      subject().simulate('change', { target: { value: 'foo' } });
+      expect(actions.onThumbnailFieldChange).toHaveBeenCalledWith('foo');
+    });
+
+    it('updates active field in state on focus', () => {
+      subject().simulate('focus');
+      expect(actions.onActiveFieldChange).toHaveBeenCalledWith(ActiveField.Thumb);
     });
 
     it('removes active field in state on blur', () => {

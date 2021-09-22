@@ -53,10 +53,12 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
         compressed
         name="value"
         value={value as number}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
       />
     );
-  } else if (type === 'boolean') {
+  }
+
+  if (type === 'boolean') {
     return (
       <EuiButtonGroup
         name="value"

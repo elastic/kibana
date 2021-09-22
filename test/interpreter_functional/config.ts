@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   return {
+    rootTags: ['runOutsideOfCiGroups'],
     testFiles: [require.resolve('./test_suites/run_pipeline')],
     services: functionalConfig.get('services'),
     pageObjects: functionalConfig.get('pageObjects'),

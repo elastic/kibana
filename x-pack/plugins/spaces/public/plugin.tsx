@@ -9,26 +9,21 @@ import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
-import type { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
-import type { SpacesApi, SpacesOssPluginSetup } from 'src/plugins/spaces_oss/public';
 
 import type { FeaturesPluginStart } from '../../features/public';
 import { AdvancedSettingsService } from './advanced_settings';
-import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
 import { initSpacesNavControl } from './nav_control';
-import { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space';
 import { spaceSelectorApp } from './space_selector';
 import { SpacesManager } from './spaces_manager';
+import type { SpacesApi } from './types';
 import { getUiApi } from './ui_api';
 
 export interface PluginsSetup {
-  spacesOss: SpacesOssPluginSetup;
   advancedSettings?: AdvancedSettingsSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
-  savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
 export interface PluginsStart {
@@ -84,26 +79,11 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
-    if (plugins.savedObjectsManagement) {
-      const shareSavedObjectsToSpaceService = new ShareSavedObjectsToSpaceService();
-      shareSavedObjectsToSpaceService.setup({
-        savedObjectsManagementSetup: plugins.savedObjectsManagement,
-        spacesApiUi: this.spacesApi.ui,
-      });
-      const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
-      copySavedObjectsToSpaceService.setup({
-        savedObjectsManagementSetup: plugins.savedObjectsManagement,
-        getStartServices: core.getStartServices,
-      });
-    }
-
     spaceSelectorApp.create({
       getStartServices: core.getStartServices,
       application: core.application,
       spacesManager: this.spacesManager,
     });
-
-    plugins.spacesOss.registerSpacesApi(this.spacesApi);
 
     return {};
   }

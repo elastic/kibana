@@ -14,19 +14,7 @@ import type {
   FileBasedUnknownFieldVisConfig,
 } from '../stats_table/types/field_vis_config';
 import { FieldTypeIcon } from '../field_type_icon';
-import { JOB_FIELD_TYPES } from '../../../../../common';
-
-const JOB_FIELD_TYPES_OPTIONS = {
-  [JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },
-  [JOB_FIELD_TYPES.DATE]: { name: 'Date', icon: 'tokenDate' },
-  [JOB_FIELD_TYPES.GEO_POINT]: { name: 'Geo point', icon: 'tokenGeo' },
-  [JOB_FIELD_TYPES.GEO_SHAPE]: { name: 'Geo shape', icon: 'tokenGeo' },
-  [JOB_FIELD_TYPES.IP]: { name: 'IP address', icon: 'tokenIP' },
-  [JOB_FIELD_TYPES.KEYWORD]: { name: 'Keyword', icon: 'tokenKeyword' },
-  [JOB_FIELD_TYPES.NUMBER]: { name: 'Number', icon: 'tokenNumber' },
-  [JOB_FIELD_TYPES.TEXT]: { name: 'Text', icon: 'tokenString' },
-  [JOB_FIELD_TYPES.UNKNOWN]: { name: 'Unknown' },
-};
+import { JOB_FIELD_TYPES_OPTIONS } from '../../../../../common';
 
 interface Props {
   fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>;

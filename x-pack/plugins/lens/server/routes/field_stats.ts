@@ -8,7 +8,7 @@ import { errors, estypes } from '@elastic/elasticsearch';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
-import { IFieldType } from 'src/plugins/data/common';
+import type { IndexPatternField } from 'src/plugins/data/common';
 import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/common';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
@@ -79,6 +79,14 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           },
         };
 
+        const runtimeMappings = indexPattern.fields
+          .filter((f) => f.runtimeField)
+          .reduce((acc, f) => {
+            if (!f.runtimeField) return acc;
+            acc[f.name] = f.runtimeField;
+            return acc;
+          }, {} as Record<string, estypes.MappingRuntimeField>);
+
         const search = async (aggs: Record<string, estypes.AggregationsAggregationContainer>) => {
           const { body: result } = await requestClient.search({
             index: indexPattern.title,
@@ -86,7 +94,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             body: {
               query,
               aggs,
-              runtime_mappings: field.runtimeField ? { [fieldName]: field.runtimeField } : {},
+              runtime_mappings: runtimeMappings,
             },
             size: 0,
           });
@@ -138,7 +146,7 @@ export async function getNumberHistogram(
   aggSearchWithBody: (
     aggs: Record<string, estypes.AggregationsAggregationContainer>
   ) => Promise<unknown>,
-  field: IFieldType,
+  field: IndexPatternField,
   useTopHits = true
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
@@ -247,7 +255,7 @@ export async function getNumberHistogram(
 
 export async function getStringSamples(
   aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
-  field: IFieldType,
+  field: IndexPatternField,
   size = 10
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
@@ -287,7 +295,7 @@ export async function getStringSamples(
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
   aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
-  field: IFieldType,
+  field: IndexPatternField,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse> {
   const fromDate = DateMath.parse(range.fromDate);
@@ -329,7 +337,7 @@ export async function getDateHistogram(
   };
 }
 
-function getFieldRef(field: IFieldType) {
+function getFieldRef(field: IndexPatternField) {
   return field.scripted
     ? {
         script: {

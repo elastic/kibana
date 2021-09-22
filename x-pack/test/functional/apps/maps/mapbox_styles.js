@@ -6,6 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  KBN_IS_TILE_COMPLETE,
+  KBN_METADATA_FEATURE,
+} from '../../../../plugins/maps/common/constants';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
@@ -40,7 +44,7 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
-          ['!=', ['get', '__kbn_too_many_features__'], true],
+          ['!=', ['get', '__kbn_metadata_feature__'], true],
           ['!=', ['get', '__kbn_is_centroid_feature__'], true],
           ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
@@ -121,7 +125,7 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
-          ['!=', ['get', '__kbn_too_many_features__'], true],
+          ['!=', ['get', '__kbn_metadata_feature__'], true],
           ['!=', ['get', '__kbn_is_centroid_feature__'], true],
           ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']],
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
@@ -198,7 +202,7 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
-          ['!=', ['get', '__kbn_too_many_features__'], true],
+          ['!=', ['get', '__kbn_metadata_feature__'], true],
           ['!=', ['get', '__kbn_is_centroid_feature__'], true],
           [
             'any',
@@ -218,13 +222,18 @@ export default function ({ getPageObjects, getService }) {
       const layer = mapboxStyle.layers.find((mbLayer) => {
         return mbLayer.id === 'n1t6f_toomanyfeatures';
       });
+
       expect(layer).to.eql({
         id: 'n1t6f_toomanyfeatures',
         type: 'fill',
         source: 'n1t6f',
         minzoom: 0,
         maxzoom: 24,
-        filter: ['==', ['get', '__kbn_too_many_features__'], true],
+        filter: [
+          'all',
+          ['==', ['get', KBN_METADATA_FEATURE], true],
+          ['==', ['get', KBN_IS_TILE_COMPLETE], false],
+        ],
         layout: { visibility: 'visible' },
         paint: { 'fill-pattern': '__kbn_too_many_features_image_id__', 'fill-opacity': 0.75 },
       });

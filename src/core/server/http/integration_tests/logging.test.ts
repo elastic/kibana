@@ -27,7 +27,11 @@ describe('request logging', () => {
   describe('http server response logging', () => {
     describe('configuration', () => {
       it('does not log with a default config', async () => {
-        const root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+        const root = kbnTestServer.createRoot({
+          plugins: { initialize: false },
+          elasticsearch: { skipStartupConnectionCheck: true },
+        });
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -68,7 +72,9 @@ describe('request logging', () => {
           plugins: {
             initialize: false,
           },
+          elasticsearch: { skipStartupConnectionCheck: true },
         });
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -114,6 +120,7 @@ describe('request logging', () => {
         plugins: {
           initialize: false,
         },
+        elasticsearch: { skipStartupConnectionCheck: true },
       };
 
       beforeEach(() => {
@@ -125,6 +132,7 @@ describe('request logging', () => {
       });
 
       it('handles a GET request', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -147,6 +155,7 @@ describe('request logging', () => {
       });
 
       it('handles a POST request', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http.createRouter('/').post(
@@ -178,6 +187,7 @@ describe('request logging', () => {
       });
 
       it('handles an error response', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -198,6 +208,7 @@ describe('request logging', () => {
       });
 
       it('handles query strings', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -216,6 +227,7 @@ describe('request logging', () => {
       });
 
       it('correctly calculates response payload', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -234,6 +246,7 @@ describe('request logging', () => {
 
       describe('handles request/response headers', () => {
         it('includes request/response headers in log entry', async () => {
+          await root.preboot();
           const { http } = await root.setup();
 
           http
@@ -252,6 +265,7 @@ describe('request logging', () => {
         });
 
         it('filters sensitive request headers by default', async () => {
+          await root.preboot();
           const { http } = await root.setup();
 
           http.createRouter('/').post(
@@ -318,7 +332,9 @@ describe('request logging', () => {
             plugins: {
               initialize: false,
             },
+            elasticsearch: { skipStartupConnectionCheck: true },
           });
+          await root.preboot();
           const { http } = await root.setup();
 
           http.createRouter('/').post(
@@ -351,6 +367,7 @@ describe('request logging', () => {
         });
 
         it('filters sensitive response headers by defaut', async () => {
+          await root.preboot();
           const { http } = await root.setup();
 
           http.createRouter('/').post(
@@ -415,7 +432,9 @@ describe('request logging', () => {
             plugins: {
               initialize: false,
             },
+            elasticsearch: { skipStartupConnectionCheck: true },
           });
+          await root.preboot();
           const { http } = await root.setup();
 
           http.createRouter('/').post(
@@ -449,6 +468,7 @@ describe('request logging', () => {
       });
 
       it('handles user agent', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http

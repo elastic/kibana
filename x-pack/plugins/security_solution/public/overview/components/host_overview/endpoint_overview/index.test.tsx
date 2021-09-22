@@ -71,7 +71,8 @@ describe('EndpointOverview Component', () => {
     expect(findData.at(3).text()).toEqual('HealthyIsolated');
   });
 
-  test.each([
+  // FIXME: un-skip once pending isolation status are supported again
+  test.skip.each([
     ['isolate', 'Isolating'],
     ['unisolate', 'Releasing'],
   ])('it shows pending %s status', (action, expectedLabel) => {

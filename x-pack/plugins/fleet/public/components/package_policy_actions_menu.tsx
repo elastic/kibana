@@ -10,7 +10,7 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AgentPolicy, PackagePolicy } from '../types';
+import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 
 import { useAgentPolicyRefresh, useCapabilities, useLink } from '../hooks';
 
@@ -21,13 +21,24 @@ import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
-  packagePolicy: PackagePolicy;
+  packagePolicy: InMemoryPackagePolicy;
   viewDataStep?: EuiStepProps;
-}> = ({ agentPolicy, packagePolicy, viewDataStep }) => {
+  showAddAgent?: boolean;
+  defaultIsOpen?: boolean;
+  upgradePackagePolicyHref: string;
+}> = ({
+  agentPolicy,
+  packagePolicy,
+  viewDataStep,
+  showAddAgent,
+  upgradePackagePolicyHref,
+  defaultIsOpen = false,
+}) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const refreshAgentPolicy = useAgentPolicyRefresh();
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -46,16 +57,23 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="plusInCircle"
-      onClick={() => setIsEnrollmentFlyoutOpen(true)}
-      key="addAgent"
-    >
-      <FormattedMessage
-        id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-        defaultMessage="Add Agent"
-      />
-    </EuiContextMenuItem>,
+    ...(showAddAgent
+      ? [
+          <EuiContextMenuItem
+            icon="plusInCircle"
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              setIsEnrollmentFlyoutOpen(true);
+            }}
+            key="addAgent"
+          >
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
+              defaultMessage="Add Agent"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       disabled={!hasWriteCapabilities}
       icon="pencil"
@@ -68,6 +86,17 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"
         defaultMessage="Edit integration"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      disabled={!packagePolicy.hasUpgrade}
+      icon="refresh"
+      href={upgradePackagePolicyHref}
+      key="packagePolicyUpgrade"
+    >
+      <FormattedMessage
+        id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
+        defaultMessage="Upgrade integration policy"
       />
     </EuiContextMenuItem>,
     // FIXME: implement Copy package policy action
@@ -88,7 +117,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               disabled={!hasWriteCapabilities}
               icon="trash"
               onClick={() => {
-                deletePackagePoliciesPrompt([packagePolicy.id], refreshAgentPolicy);
+                deletePackagePoliciesPrompt([packagePolicy.id], () => {
+                  setIsActionsMenuOpen(false);
+                  refreshAgentPolicy();
+                });
               }}
             >
               <FormattedMessage
@@ -112,7 +144,11 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           />
         </EuiPortal>
       )}
-      <ContextMenuActions items={menuItems} />
+      <ContextMenuActions
+        isOpen={isActionsMenuOpen}
+        items={menuItems}
+        onChange={(open) => setIsActionsMenuOpen(open)}
+      />
     </>
   );
 };

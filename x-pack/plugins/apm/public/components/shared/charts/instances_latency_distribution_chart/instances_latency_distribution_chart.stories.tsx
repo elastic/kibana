@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import {
   InstancesLatencyDistributionChart,
@@ -16,13 +15,6 @@ import {
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart',
   component: InstancesLatencyDistributionChart,
-  decorators: [
-    (Story: ComponentType) => (
-      <EuiThemeProvider>
-        <Story />
-      </EuiThemeProvider>
-    ),
-  ],
 };
 
 export function Example({ items }: InstancesLatencyDistributionChartProps) {

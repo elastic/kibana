@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternFieldBase } from '@kbn/es-query';
 import type {
   CreateExceptionListItemSchema,
   Entry,
@@ -23,23 +24,22 @@ import {
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
 
-import type { OperatorOption } from '../autocomplete_operators/types';
-
-/**
- * @deprecated Use the one from core once it is in its own package which will be from:
- * Original import was // import { IFieldType } from '../../../../../../../src/plugins/data/common';
- */
-type IFieldType = any;
+export interface OperatorOption {
+  message: string;
+  value: string;
+  operator: OperatorEnum;
+  type: OperatorTypeEnum;
+}
 
 export interface FormattedBuilderEntry {
   id: string;
-  field: IFieldType | undefined;
+  field: IndexPatternFieldBase | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;
   nested: 'parent' | 'child' | undefined;
   entryIndex: number;
   parent: { parent: BuilderEntryNested; parentIndex: number } | undefined;
-  correspondingKeywordField: IFieldType | undefined;
+  correspondingKeywordField: IndexPatternFieldBase | undefined;
 }
 
 export interface EmptyEntry {

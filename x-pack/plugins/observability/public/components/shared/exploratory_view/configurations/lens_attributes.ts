@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
+import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
 import {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -28,9 +29,8 @@ import {
   CardinalityIndexPatternColumn,
 } from '../../../../../../lens/public';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
-import { ExistsFilter, IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
-  FieldLabels,
   FILTER_RECORDS,
   USE_BREAK_DOWN_COLUMN,
   TERMS_COLUMN,
@@ -111,7 +111,8 @@ export class LensAttributes {
       if (operationType) {
         seriesConfig.yAxisColumns.forEach((yAxisColumn) => {
           if (typeof yAxisColumn.operationType !== undefined) {
-            yAxisColumn.operationType = operationType as FieldBasedIndexPatternColumn['operationType'];
+            yAxisColumn.operationType =
+              operationType as FieldBasedIndexPatternColumn['operationType'];
           }
         });
       }
@@ -125,17 +126,19 @@ export class LensAttributes {
   getBreakdownColumn({
     sourceField,
     layerId,
+    labels,
     indexPattern,
   }: {
     sourceField: string;
     layerId: string;
+    labels: Record<string, string>;
     indexPattern: IndexPattern;
   }): TermsIndexPatternColumn {
     const fieldMeta = indexPattern.getFieldByName(sourceField);
 
     return {
       sourceField,
-      label: `Top values of ${FieldLabels[sourceField]}`,
+      label: `Top values of ${labels[sourceField]}`,
       dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',
@@ -304,6 +307,7 @@ export class LensAttributes {
         layerId,
         indexPattern: layerConfig.indexPattern,
         sourceField: layerConfig.breakdown || layerConfig.seriesConfig.breakdownFields[0],
+        labels: layerConfig.seriesConfig.labels,
       });
     }
 
@@ -327,14 +331,8 @@ export class LensAttributes {
     layerConfig: LayerConfig;
     colIndex?: number;
   }) {
-    const {
-      fieldMeta,
-      columnType,
-      fieldName,
-      columnLabel,
-      timeScale,
-      columnFilters,
-    } = this.getFieldMeta(sourceField, layerConfig);
+    const { fieldMeta, columnType, fieldName, columnLabel, timeScale, columnFilters } =
+      this.getFieldMeta(sourceField, layerConfig);
 
     const { type: fieldType } = fieldMeta ?? {};
 
@@ -344,7 +342,7 @@ export class LensAttributes {
 
     if (fieldName === RECORDS_FIELD || columnType === FILTER_RECORDS) {
       return this.getRecordsColumn(
-        columnLabel || label,
+        label || columnLabel,
         colIndex !== undefined ? columnFilters?.[colIndex] : undefined,
         timeScale
       );
@@ -433,6 +431,8 @@ export class LensAttributes {
     if (yAxisColumns.length === 1) {
       return lensColumns;
     }
+
+    // starting from 1 index since 0 column is used as main column
     for (let i = 1; i < yAxisColumns.length; i++) {
       const { sourceField, operationType, label } = yAxisColumns[i];
 
@@ -491,7 +491,7 @@ export class LensAttributes {
       if (qFilter.query?.bool?.should) {
         const values: string[] = [];
         let fieldName = '';
-        qFilter.query?.bool.should.forEach((ft: PersistableFilter['query']['match_phrase']) => {
+        qFilter.query?.bool.should.forEach((ft: any) => {
           if (ft.match_phrase) {
             fieldName = Object.keys(ft.match_phrase)[0];
             values.push(ft.match_phrase[fieldName]);
@@ -508,8 +508,8 @@ export class LensAttributes {
       }
       const existFilter = filter as ExistsFilter;
 
-      if (existFilter.exists) {
-        const fieldName = existFilter.exists.field;
+      if (isExistsFilter(existFilter)) {
+        const fieldName = existFilter.exists?.field;
         const kql = `${fieldName} : *`;
         if (baseFilters.length > 0) {
           baseFilters += ` and ${kql}`;
@@ -555,16 +555,21 @@ export class LensAttributes {
     const layerConfigs = this.layerConfigs;
 
     layerConfigs.forEach((layerConfig, index) => {
-      const { breakdown } = layerConfig;
+      const { breakdown, seriesConfig } = layerConfig;
 
       const layerId = `layer${index}`;
       const columnFilter = this.getLayerFilters(layerConfig, layerConfigs.length);
       const timeShift = this.getTimeShift(this.layerConfigs[0], layerConfig, index);
       const mainYAxis = this.getMainYAxis(layerConfig, layerId, columnFilter);
+
+      const { sourceField } = seriesConfig.xAxisColumn;
+
       layers[layerId] = {
         columnOrder: [
           `x-axis-column-${layerId}`,
-          ...(breakdown ? [`breakdown-column-${layerId}`] : []),
+          ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN
+            ? [`breakdown-column-${layerId}`]
+            : []),
           `y-axis-column-${layerId}`,
           ...Object.keys(this.getChildYAxises(layerConfig, layerId, columnFilter)),
         ],
@@ -576,13 +581,14 @@ export class LensAttributes {
             filter: { query: columnFilter, language: 'kuery' },
             ...(timeShift ? { timeShift } : {}),
           },
-          ...(breakdown && breakdown !== USE_BREAK_DOWN_COLUMN
+          ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN
             ? // do nothing since this will be used a x axis source
               {
                 [`breakdown-column-${layerId}`]: this.getBreakdownColumn({
                   layerId,
                   sourceField: breakdown,
                   indexPattern: layerConfig.indexPattern,
+                  labels: layerConfig.seriesConfig.labels,
                 }),
               }
             : {}),
@@ -611,13 +617,17 @@ export class LensAttributes {
           ...Object.keys(this.getChildYAxises(layerConfig)),
         ],
         layerId: `layer${index}`,
+        layerType: 'data',
         seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
         palette: layerConfig.seriesConfig.palette,
         yConfig: layerConfig.seriesConfig.yConfig || [
           { forAccessor: `y-axis-column-layer${index}` },
         ],
         xAccessor: `x-axis-column-layer${index}`,
-        ...(layerConfig.breakdown ? { splitAccessor: `breakdown-column-layer${index}` } : {}),
+        ...(layerConfig.breakdown &&
+        layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
+          ? { splitAccessor: `breakdown-column-layer${index}` }
+          : {}),
       })),
       ...(this.layerConfigs[0].seriesConfig.yTitle
         ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useCallback } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -21,6 +21,9 @@ export const DatasetFilter: React.FunctionComponent<{
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
+
+  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), [setIsOpen]);
+  const closePopover = useCallback(() => setIsOpen(false), [setIsOpen]);
 
   useEffect(() => {
     const fetchValues = async () => {
@@ -48,7 +51,7 @@ export const DatasetFilter: React.FunctionComponent<{
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          onClick={() => setIsOpen(true)}
+          onClick={togglePopover}
           isSelected={isOpen}
           isLoading={isLoading}
           numFilters={datasetValues.length}
@@ -61,7 +64,7 @@ export const DatasetFilter: React.FunctionComponent<{
         </EuiFilterButton>
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
     >
       {datasetValues.map((dataset) => (

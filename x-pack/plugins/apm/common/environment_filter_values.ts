@@ -7,9 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { SERVICE_ENVIRONMENT } from './elasticsearch_fieldnames';
+import { Environment } from './environment_rt';
 
-const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
-const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
+const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
+const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;
 
 export function getEnvironmentLabel(environment: string) {
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
@@ -59,7 +60,7 @@ export function getNextEnvironmentUrlParam({
   currentEnvironmentUrlParam,
 }: {
   requestedEnvironment?: string;
-  currentEnvironmentUrlParam?: string;
+  currentEnvironmentUrlParam: Environment;
 }) {
   const normalizedRequestedEnvironment =
     requestedEnvironment || ENVIRONMENT_NOT_DEFINED.value;
@@ -67,7 +68,7 @@ export function getNextEnvironmentUrlParam({
     currentEnvironmentUrlParam || ENVIRONMENT_ALL.value;
 
   if (normalizedRequestedEnvironment === normalizedQueryEnvironment) {
-    return currentEnvironmentUrlParam;
+    return currentEnvironmentUrlParam || ENVIRONMENT_ALL.value;
   }
 
   return ENVIRONMENT_ALL.value;

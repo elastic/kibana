@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, MutableRefObject } from 'react';
 import {
   EuiEmptyPrompt,
   EuiLoadingContent,
@@ -40,6 +40,7 @@ interface CasesTableProps {
   selection: EuiTableSelectionType<Case>;
   showActions: boolean;
   sorting: EuiBasicTableProps<Case>['sorting'];
+  tableRef: MutableRefObject<_EuiBasicTable | undefined>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
   userCanCrud: boolean;
 }
@@ -92,6 +93,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   selection,
   showActions,
   sorting,
+  tableRef,
   tableRowProps,
   userCanCrud,
 }) =>
@@ -110,6 +112,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         refreshCases={refreshCases}
       />
       <BasicTable
+        className={classnames({ isSelectorView })}
         columns={columns}
         data-test-subj="cases-table"
         isSelectable={showActions}
@@ -141,10 +144,10 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         }
         onChange={onChange}
         pagination={pagination}
+        ref={tableRef}
         rowProps={tableRowProps}
         selection={showActions ? selection : undefined}
         sorting={sorting}
-        className={classnames({ isSelectorView })}
       />
     </Div>
   );

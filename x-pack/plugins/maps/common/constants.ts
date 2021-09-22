@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
 export const EMS_APP_NAME = 'kibana';
-export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
 export const EMS_FILES_API_PATH = 'ems/files';
@@ -44,13 +43,17 @@ export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
 export const GET_MATCHING_INDEXES_PATH = `/${GIS_API_PATH}/getMatchingIndexes`;
+export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
 // Identifies vector tile "too many features" feature.
 // "too many features" feature is a box showing area that contains too many features for single ES search response
-export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
+export const KBN_METADATA_FEATURE = '__kbn_metadata_feature__';
+export const KBN_FEATURE_COUNT = '__kbn_feature_count__';
+export const KBN_IS_TILE_COMPLETE = '__kbn_is_tile_complete__';
+export const KBN_VECTOR_SHAPE_TYPE_COUNTS = '__kbn_vector_shape_type_counts__';
 export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
@@ -88,7 +91,6 @@ export enum SOURCE_TYPES {
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
-  REGIONMAP_FILE = 'REGIONMAP_FILE',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
   TABLE_SOURCE = 'TABLE_SOURCE',
@@ -127,7 +129,7 @@ export enum ES_GEO_FIELD_TYPE {
   GEO_SHAPE = 'geo_shape',
 }
 
-// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IFieldType.type is compared to value
+// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IndexPatternField.type is compared to value
 export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
 export enum ES_SPATIAL_RELATIONS {
@@ -307,7 +309,7 @@ export type RawValue = string | string[] | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
 
-export const INDEX_META_DATA_CREATED_BY = 'maps-drawing-data-ingest';
+export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 

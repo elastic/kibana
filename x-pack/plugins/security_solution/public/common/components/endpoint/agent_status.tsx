@@ -20,7 +20,7 @@ export const AgentStatus = React.memo(({ hostStatus }: { hostStatus: HostStatus 
     >
       <FormattedMessage
         id="xpack.securitySolution.endpoint.list.hostStatusValue"
-        defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
+        defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} unenrolled {Unenrolled} other {Unhealthy}}"
         values={{ hostStatus }}
       />
     </EuiBadge>

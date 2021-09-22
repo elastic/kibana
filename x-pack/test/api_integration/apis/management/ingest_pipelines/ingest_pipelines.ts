@@ -15,13 +15,8 @@ const API_BASE_PATH = '/api/ingest_pipelines';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const {
-    createPipeline,
-    deletePipeline,
-    cleanupPipelines,
-    createIndex,
-    deleteIndex,
-  } = registerEsHelpers(getService);
+  const { createPipeline, deletePipeline, cleanupPipelines, createIndex, deleteIndex } =
+    registerEsHelpers(getService);
 
   describe('Pipelines', function () {
     after(async () => {
@@ -204,7 +199,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           statusCode: 404,
           error: 'Not Found',
-          message: 'Response Error',
+          message: '{}',
           attributes: {},
         });
       });
@@ -494,7 +489,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.eql({
           error: 'Not Found',
-          message: 'Response Error',
+          message: '{"_index":"test_index","_id":"2","found":false}',
           statusCode: 404,
           attributes: {},
         });

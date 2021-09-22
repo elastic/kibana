@@ -10,6 +10,7 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -21,7 +22,12 @@ import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
 import { getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
+import {
+  MigrateFunctionsObject,
+  migrateToLatest,
+  PersistableStateService,
+  VersionedState,
+} from '../../../kibana_utils/common';
 import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
@@ -78,7 +84,8 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 }
 
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
-  implements PersistableStateService<ExpressionAstExpression> {
+  implements PersistableStateService<ExpressionAstExpression>
+{
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
@@ -198,7 +205,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
         // if any of arguments are expressions we should migrate those first
         link.arguments = mapValues(fnArgs, (asts, argName) => {
           return asts.map((arg) => {
-            if (typeof arg === 'object') {
+            if (arg && typeof arg === 'object') {
               return this.walkAst(arg, action);
             }
             return arg;
@@ -231,7 +238,8 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const newAst = this.walkAst(cloneDeep(ast), (fn, link) => {
       const { state, references } = fn.extract(link.arguments);
       link.arguments = state;
-      allReferences.push(...references.map((r) => ({ ...r, name: `l${linkId++}_${r.name}` })));
+      allReferences.push(...references.map((r) => ({ ...r, name: `l${linkId}_${r.name}` })));
+      linkId = linkId + 1;
     });
     return { state: newAst, references: allReferences };
   }
@@ -244,7 +252,28 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return telemetryData;
   }
 
-  public migrate(ast: SerializableState, version: string) {
+  public getAllMigrations() {
+    const uniqueVersions = new Set(
+      Object.values(this.getFunctions())
+        .map((fn) => Object.keys(fn.migrations))
+        .flat(1)
+    );
+
+    const migrations: MigrateFunctionsObject = {};
+    uniqueVersions.forEach((version) => {
+      migrations[version] = (state) => ({
+        ...this.migrate(state, version),
+      });
+    });
+
+    return migrations;
+  }
+
+  public migrateToLatest(state: VersionedState) {
+    return migrateToLatest(this.getAllMigrations(), state) as ExpressionAstExpression;
+  }
+
+  private migrate(ast: SerializableRecord, version: string) {
     return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
       if (!fn.migrations[version]) return link;
       const updatedAst = fn.migrations[version](link) as ExpressionAstFunction;

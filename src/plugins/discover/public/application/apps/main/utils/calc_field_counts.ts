@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from '../../../../kibana_services';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 
 /**
@@ -15,9 +15,12 @@ import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
  */
 export function calcFieldCounts(
   counts = {} as Record<string, number>,
-  rows: ElasticSearchHit[],
-  indexPattern: IndexPattern
+  rows?: ElasticSearchHit[],
+  indexPattern?: IndexPattern
 ) {
+  if (!rows || !indexPattern) {
+    return {};
+  }
   for (const hit of rows) {
     const fields = Object.keys(indexPattern.flattenHit(hit));
     for (const fieldName of fields) {

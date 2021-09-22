@@ -44,6 +44,7 @@ const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient()
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
+const ephemeralExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditServiceMock.create().asScoped(request);
 
@@ -77,8 +78,9 @@ beforeEach(() => {
     preconfiguredActions: [],
     actionExecutor,
     executionEnqueuer,
+    ephemeralExecutionEnqueuer,
     request,
-    authorization: (authorization as unknown) as ActionsAuthorization,
+    authorization: authorization as unknown as ActionsAuthorization,
     auditLogger,
   });
 });
@@ -453,8 +455,9 @@ describe('create()', () => {
       preconfiguredActions: [],
       actionExecutor,
       executionEnqueuer,
+      ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
     });
 
     const savedObjectCreateResult = {
@@ -553,8 +556,9 @@ describe('get()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -608,8 +612,9 @@ describe('get()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -724,8 +729,9 @@ describe('get()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
+      ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -793,8 +799,9 @@ describe('getAll()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -930,8 +937,9 @@ describe('getAll()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
+      ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -1005,8 +1013,9 @@ describe('getBulk()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -1136,8 +1145,9 @@ describe('getBulk()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
+      ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -1811,5 +1821,67 @@ describe('isActionTypeEnabled()', () => {
     expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
       notifyUsage: true,
     });
+  });
+});
+
+describe('isPreconfigured()', () => {
+  test('should return true if connector id is in list of preconfigured connectors', () => {
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
+
+    expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
+  });
+
+  test('should return false if connector id is not in list of preconfigured connectors', () => {
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
+
+    expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);
   });
 });

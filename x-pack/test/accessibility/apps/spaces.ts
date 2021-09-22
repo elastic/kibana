@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// a11y tests for spaces, space selection and spacce creation and feature controls
+// a11y tests for spaces, space selection and space creation and feature controls
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -46,34 +46,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test for click on create space page', async () => {
       await PageObjects.spaceSelector.clickCreateSpace();
-      await a11y.testAppSnapshot();
-    });
-
-    it('a11y test for for customize space card', async () => {
       await PageObjects.spaceSelector.clickEnterSpaceName();
       await PageObjects.spaceSelector.addSpaceName('space_a');
-      await PageObjects.spaceSelector.clickCustomizeSpaceAvatar('space_a');
       await a11y.testAppSnapshot();
-      await browser.pressKeys(browser.keys.ESCAPE);
     });
 
     // EUI issue - https://github.com/elastic/eui/issues/3999
-    it.skip('a11y test for color picker', async () => {
+    it('a11y test for color picker', async () => {
       await PageObjects.spaceSelector.clickColorPicker();
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
-    });
-
-    it('a11y test for customize and reset space URL identifier', async () => {
-      await PageObjects.spaceSelector.clickOnCustomizeURL();
-      await a11y.testAppSnapshot();
-      await PageObjects.spaceSelector.clickOnCustomizeURL();
-      await a11y.testAppSnapshot();
-    });
-
-    it('a11y test for describe space text space', async () => {
-      await PageObjects.spaceSelector.clickOnDescriptionOfSpace();
-      await a11y.testAppSnapshot();
     });
 
     it('a11y test for toggling an entire feature category', async () => {

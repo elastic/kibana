@@ -60,6 +60,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
   });
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
+  clusterSourceDescriptor.applyForceRefresh = documentSource.getApplyForceRefresh();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,
@@ -184,9 +185,9 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
   private readonly _isClustered: boolean;
   private readonly _clusterSource: ESGeoGridSource;
-  private readonly _clusterStyle: IVectorStyle;
+  private readonly _clusterStyle: VectorStyle;
   private readonly _documentSource: ESSearchSource;
-  private readonly _documentStyle: IVectorStyle;
+  private readonly _documentStyle: VectorStyle;
 
   constructor(options: BlendedVectorLayerArguments) {
     super({
@@ -195,7 +196,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     });
 
     this._documentSource = this._source as ESSearchSource; // VectorLayer constructor sets _source as document source
-    this._documentStyle = this._style as IVectorStyle; // VectorLayer constructor sets _style as document source
+    this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
 
     this._clusterSource = getClusterSource(this._documentSource, this._documentStyle);
     const clusterStyleDescriptor = getClusterStyleDescriptor(
@@ -279,7 +280,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentSource;
   }
 
-  getCurrentStyle(): IVectorStyle {
+  getCurrentStyle(): VectorStyle {
     return this._isClustered ? this._clusterStyle : this._documentStyle;
   }
 
@@ -290,16 +291,18 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
-    const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
+    const requestMeta: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
+      syncContext.isForceRefresh,
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
     );
     const source = this.getSource();
-    const canSkipFetch = await canSkipSourceUpdate({
+
+    const canSkipSourceFetch = await canSkipSourceUpdate({
       source,
       prevDataRequest: this.getDataRequest(dataRequestId),
-      nextMeta: searchFilters,
+      nextRequestMeta: requestMeta,
       extentAware: source.isFilterByMapBounds(),
       getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
         return this._getUpdateDueToTimesliceFromSourceRequestMeta(source, timeslice);
@@ -308,7 +311,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
     let activeSource;
     let activeStyle;
-    if (canSkipFetch) {
+    if (canSkipSourceFetch) {
       // Even when source fetch is skipped, need to call super._syncData to sync StyleMeta and formatters
       if (this._isClustered) {
         activeSource = this._clusterSource;
@@ -320,12 +323,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     } else {
       let isSyncClustered;
       try {
-        syncContext.startLoading(dataRequestId, requestToken, searchFilters);
+        syncContext.startLoading(dataRequestId, requestToken, requestMeta);
         isSyncClustered = !(await this._documentSource.canLoadAllDocuments(
-          searchFilters,
+          requestMeta,
           syncContext.registerCancelCallback.bind(null, requestToken)
         ));
-        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
+        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, requestMeta);
       } catch (error) {
         if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);

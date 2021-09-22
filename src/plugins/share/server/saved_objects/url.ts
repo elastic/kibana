@@ -19,6 +19,12 @@ export const url: SavedObjectsType = {
     getTitle(obj) {
       return `/goto/${encodeURIComponent(obj.id)}`;
     },
+    getInAppUrl(obj) {
+      return {
+        path: '/goto/' + encodeURIComponent(obj.id),
+        uiCapabilitiesPath: '',
+      };
+    },
   },
   mappings: {
     properties: {

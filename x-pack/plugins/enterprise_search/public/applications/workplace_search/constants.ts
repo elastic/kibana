@@ -568,23 +568,23 @@ export const REDIRECT_INSECURE_ERROR_TEXT = i18n.translate(
   }
 );
 
-export const LICENSE_MODAL_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.licenseModal.title',
+export const NON_PLATINUM_OAUTH_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.nonPlatinumOauthTitle',
   {
     defaultMessage: 'Configuring OAuth for Custom Search Applications',
   }
 );
 
-export const LICENSE_MODAL_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.licenseModal.description',
+export const NON_PLATINUM_OAUTH_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.nonPlatinumOauthDescription',
   {
     defaultMessage:
       'Configure an OAuth application for secure use of the Workplace Search Search API. Upgrade to a Platinum license to enable the Search API and create your OAuth application.',
   }
 );
 
-export const LICENSE_MODAL_LINK = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.licenseModal.link',
+export const EXPLORE_PLATINUM_FEATURES_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.explorePlatinumFeatures.link',
   {
     defaultMessage: 'Explore Platinum features',
   }
@@ -734,6 +734,10 @@ export const FIELD_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearc
   defaultMessage: 'Field',
 });
 
+export const LABEL_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.label.label', {
+  defaultMessage: 'Label',
+});
+
 export const DESCRIPTION_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.description.label',
   {
@@ -803,5 +807,26 @@ export const STATUS_POPOVER_TOOLTIP = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.statusPopoverTooltip',
   {
     defaultMessage: 'Click to view info',
+  }
+);
+
+export const DOCUMENTS_HEADER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.documentsHeader',
+  {
+    defaultMessage: 'Documents',
+  }
+);
+
+export const SEARCHABLE_HEADER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.searchableHeader',
+  {
+    defaultMessage: 'Searchable',
+  }
+);
+
+export const PLATINUM_FEATURE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.platinumFeature',
+  {
+    defaultMessage: 'Platinum feature',
   }
 );

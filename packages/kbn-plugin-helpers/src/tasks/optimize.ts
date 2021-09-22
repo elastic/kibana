@@ -31,7 +31,7 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
     pluginPaths: [sourceDir],
     cache: false,
     dist: true,
-    pluginScanDirs: [],
+    filter: [plugin.manifest.id],
   });
 
   const target = Path.resolve(sourceDir, 'target');

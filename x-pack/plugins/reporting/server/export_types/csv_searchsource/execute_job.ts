@@ -18,7 +18,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
 ) => {
   const config = reporting.getConfig();
 
-  return async function runTask(jobId, job, cancellationToken) {
+  return async function runTask(jobId, job, cancellationToken, stream) {
     const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job', jobId]);
 
     const encryptionKey = config.get('encryptionKey');
@@ -43,7 +43,15 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
       fieldFormatsRegistry,
     };
 
-    const csv = new CsvGenerator(job, config, clients, dependencies, cancellationToken, logger);
+    const csv = new CsvGenerator(
+      job,
+      config,
+      clients,
+      dependencies,
+      cancellationToken,
+      logger,
+      stream
+    );
     return await csv.generateData();
   };
 };

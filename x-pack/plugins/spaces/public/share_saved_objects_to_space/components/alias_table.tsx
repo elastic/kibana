@@ -19,7 +19,7 @@ import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getSpaceAvatarComponent } from '../../space_avatar';
-import type { ShareToSpaceTarget } from '../../types';
+import type { SpacesDataEntry } from '../../types';
 import type { InternalLegacyUrlAliasTarget } from './types';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
@@ -28,7 +28,7 @@ const LazySpaceAvatar = lazy(() =>
 );
 
 interface Props {
-  spaces: ShareToSpaceTarget[];
+  spaces: SpacesDataEntry[];
   aliasesToDisable: InternalLegacyUrlAliasTarget[];
 }
 
@@ -38,10 +38,7 @@ export const AliasTable: FunctionComponent<Props> = ({ spaces, aliasesToDisable 
 
   const spacesMap = useMemo(
     () =>
-      spaces.reduce(
-        (acc, space) => acc.set(space.id, space),
-        new Map<string, ShareToSpaceTarget>()
-      ),
+      spaces.reduce((acc, space) => acc.set(space.id, space), new Map<string, SpacesDataEntry>()),
     [spaces]
   );
   const filteredAliasesToDisable = useMemo(

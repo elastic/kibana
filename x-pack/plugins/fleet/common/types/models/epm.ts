@@ -281,7 +281,6 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
-  permissions = 'permissions',
 }
 
 export interface RegistryDataStream {
@@ -297,15 +296,15 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
-  [RegistryDataStreamKeys.permissions]?: RegistryDataStreamPermissions;
 }
 
 export interface RegistryElasticsearch {
+  privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
 }
 
-export interface RegistryDataStreamPermissions {
+export interface RegistryDataStreamPrivileges {
   cluster?: string[];
   indices?: string[];
 }
@@ -414,7 +413,7 @@ export interface IndexTemplateMappings {
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
 // until "proper" documentation of the new format is available.
-// Ingest Manager does not use nor support the legacy index template v1 format at all
+// Fleet does not use nor support the legacy index template v1 format at all
 export interface IndexTemplate {
   priority: number;
   index_patterns: string[];

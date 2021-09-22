@@ -52,6 +52,7 @@ describe('duplicateRule', () => {
           query: 'process.args : "chmod"',
           filters: [],
           buildingBlockType: undefined,
+          namespace: undefined,
           note: undefined,
           timelineId: undefined,
           timelineTitle: undefined,
@@ -99,6 +100,7 @@ describe('duplicateRule', () => {
           "license": "",
           "maxSignals": 100,
           "meta": undefined,
+          "namespace": undefined,
           "note": undefined,
           "outputIndex": ".siem-signals-default",
           "query": "process.args : \\"chmod\\"",
@@ -123,8 +125,8 @@ describe('duplicateRule', () => {
         },
         "tags": Array [
           "test",
-          "__internal_immutable:false",
           "__internal_rule_id:newId",
+          "__internal_immutable:false",
         ],
         "throttle": null,
       }

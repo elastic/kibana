@@ -42,7 +42,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AsyncPlugin](./kibana-plugin-core-public.asyncplugin.md) | A plugin with asynchronous lifecycle methods. |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-core-public.chromebadge.md) |  |
-|  [ChromeBrand](./kibana-plugin-core-public.chromebrand.md) |  |
 |  [ChromeDocTitle](./kibana-plugin-core-public.chromedoctitle.md) | APIs for accessing and updating the document title. |
 |  [ChromeHelpExtension](./kibana-plugin-core-public.chromehelpextension.md) |  |
 |  [ChromeHelpExtensionMenuCustomLink](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.md) |  |
@@ -108,6 +107,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBatchResponse](./kibana-plugin-core-public.savedobjectsbatchresponse.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-public.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkCreateOptions](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.md) |  |
+|  [SavedObjectsBulkResolveObject](./kibana-plugin-core-public.savedobjectsbulkresolveobject.md) |  |
+|  [SavedObjectsBulkResolveResponse](./kibana-plugin-core-public.savedobjectsbulkresolveresponse.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-public.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsCollectMultiNamespaceReferencesResponse](./kibana-plugin-core-public.savedobjectscollectmultinamespacereferencesresponse.md) | The response when object references are collected. |
@@ -159,6 +160,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |
+|  [KibanaExecutionContext](./kibana-plugin-core-public.kibanaexecutioncontext.md) | Represents a meta-information about a Kibana entity initiating a search request. |
 |  [MountPoint](./kibana-plugin-core-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |
 |  [NavType](./kibana-plugin-core-public.navtype.md) |  |
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-/* eslint-disable no-duplicate-imports */
 import type ResizeObserver from 'resize-observer-polyfill';
 import type React from 'react';
-import { Store } from 'redux';
-import { Middleware, Dispatch } from 'redux';
+import { Store, Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
 import { Provider } from 'react-redux';
 import { ResolverAction } from './store/actions';

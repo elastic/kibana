@@ -8,10 +8,9 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get, cloneDeep } from 'lodash';
+import * as esKuery from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
-// @ts-expect-error no ts
-import { esKuery } from '../../es_query';
 
 type KueryNode = any;
 

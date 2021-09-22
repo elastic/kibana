@@ -5,74 +5,24 @@
 <titleabbrev>Production considerations</titleabbrev>
 ++++
 
-* <<configuring-kibana-shield>>
-* <<csp-strict-mode>>
-* <<enabling-ssl>>
-* <<load-balancing-kibana>>
-* <<accessing-load-balanced-kibana>>
-* <<high-availability>>
-* <<memory>>
+How you deploy {kib} largely depends on your use case. If you are the only user,
+you can run {kib} on your local machine and configure it to point to whatever
+{es} instance you want to interact with. Conversely, if you have a large
+number of heavy {kib} users, you might need to load balance across multiple
+{kib} instances that are all connected to the same {es} instance.
 
-How you deploy Kibana largely depends on your use case. If you are the only user,
-you can run Kibana on your local machine and configure it to point to whatever
-Elasticsearch instance you want to interact with. Conversely, if you have a large
-number of heavy Kibana users, you might need to load balance across multiple
-Kibana instances that are all connected to the same Elasticsearch instance.
-
-While Kibana isn't terribly resource intensive, we still recommend running Kibana
-separate from  your Elasticsearch data or master nodes. To distribute Kibana
-traffic across the nodes in your Elasticsearch cluster,
-you can configure Kibana to use a list of Elasticsearch hosts.
-
-[float]
-[[configuring-kibana-shield]]
-=== Use {stack} {security-features}
-
-You can use {stack} {security-features} to control what {es} data users can
-access through Kibana.
-
-When {security-features} are enabled, Kibana users have to log in. They need to
-have a role granting <<kibana-privileges, Kibana privileges>> as well as access
-to the indices they will be working with in Kibana.
-
-If a user loads a Kibana dashboard that accesses data in an index that they
-are not authorized to view, they get an error that indicates the index does
-not exist.
-
-For more information on granting access to Kibana, see <<xpack-security-authorization>>.
-
-[float]
-[[csp-strict-mode]]
-=== Require Content Security Policy
-
-Kibana uses a Content Security Policy to help prevent the browser from allowing
-unsafe scripting, but older browsers will silently ignore this policy. If your
-organization does not need to support Internet Explorer 11 or much older
-versions of our other supported browsers, we recommend that you enable Kibana's
-`strict` mode for content security policy, which will block access to Kibana
-for any browser that does not enforce even a rudimentary set of CSP
-protections.
-
-To do this, set `csp.strict` to `true` in your `kibana.yml`:
-
-[source,js]
---------
-csp.strict: true
---------
-
-
-[float]
-[[enabling-ssl]]
-=== Enable SSL
-
-See <<configuring-tls>>.
+While {kib} isn't terribly resource intensive, we still recommend running {kib}
+separate from  your {es} data or master nodes. To distribute {kib}
+traffic across the nodes in your {es} cluster,
+you can configure {kib} to use a list of {es} hosts.
 
 [float]
 [[load-balancing-kibana]]
-=== Load balancing across multiple Kibana instances
-To serve multiple Kibana installations behind a load balancer, you must change the configuration. See {kibana-ref}/settings.html[Configuring Kibana] for details on each setting.
+=== Load balancing across multiple {kib} instances
+To serve multiple {kib} installations behind a load balancer, you must change the configuration.
+See {kibana-ref}/settings.html[Configuring {kib}] for details on each setting.
 
-Settings unique across each Kibana instance:
+Settings unique across each {kib} instance:
 [source,js]
 --------
 server.uuid
@@ -119,8 +69,8 @@ active in case of failure from the currently used instance.
 [float]
 [[high-availability]]
 === High availability across multiple {es} nodes
-Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
-Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
+{kib} can be configured to connect to multiple {es} nodes in the same cluster.  In situations where a node becomes unavailable,
+{kib} will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
 
 In kibana.yml:
 [source,js]
@@ -136,10 +86,11 @@ These can be used to automatically update the list of hosts as a cluster is resi
 [float]
 [[memory]]
 === Memory
-Kibana has a default maximum memory limit of 1.4 GB, and in most cases, we recommend leaving this unconfigured.  In some scenarios, such as large reporting jobs,
+
+Kibana has a default memory limit that scales based on total memory available.  In some scenarios, such as large reporting jobs, 
 it may make sense to tweak limits to meet more specific requirements.
 
-You can modify this limit by setting `--max-old-space-size` in the `node.options` config file that can be found inside `kibana/config` folder or any other configured with the environment variable `KBN_PATH_CONF` (for example in debian based system would be `/etc/kibana`).
+A limit can be defined by setting `--max-old-space-size` in the `node.options` config file found inside the `kibana/config` folder or any other folder configured with the environment variable `KBN_PATH_CONF`. For example, in the Debian-based system, the folder is `/etc/kibana`.
 
 The option accepts a limit in MB:
 [source,js]

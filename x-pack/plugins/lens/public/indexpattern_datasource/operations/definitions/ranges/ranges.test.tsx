@@ -77,9 +77,9 @@ type ReactMouseEvent = React.MouseEvent<HTMLAnchorElement, MouseEvent> &
   React.MouseEvent<HTMLButtonElement, MouseEvent>;
 
 // need this for MAX_HISTOGRAM value
-const uiSettingsMock = ({
+const uiSettingsMock = {
   get: jest.fn().mockReturnValue(100),
-} as unknown) as IUiSettingsClient;
+} as unknown as IUiSettingsClient;
 
 const sourceField = 'MyField';
 const defaultOptions = {
@@ -96,9 +96,23 @@ const defaultOptions = {
     id: '1',
     title: 'my_index_pattern',
     hasRestrictions: false,
-    fields: [{ name: sourceField, type: 'number', displayName: sourceField }],
+    fields: [
+      {
+        name: sourceField,
+        type: 'number',
+        displayName: sourceField,
+        searchable: true,
+        aggregatable: true,
+      },
+    ],
     getFieldByName: getFieldByNameFactory([
-      { name: sourceField, type: 'number', displayName: sourceField },
+      {
+        name: sourceField,
+        type: 'number',
+        displayName: sourceField,
+        searchable: true,
+        aggregatable: true,
+      },
     ]),
   },
   operationDefinitionMap: {},
@@ -186,7 +200,16 @@ describe('ranges', () => {
               true,
             ],
             "extended_bounds": Array [
-              "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+              Object {
+                "chain": Array [
+                  Object {
+                    "arguments": Object {},
+                    "function": "extendedBounds",
+                    "type": "function",
+                  },
+                ],
+                "type": "expression",
+              },
             ],
             "field": Array [
               "MyField",
@@ -272,9 +295,12 @@ describe('ranges', () => {
         []
       );
 
-      expect((esAggsFn as { arguments: unknown }).arguments).toEqual(
+      expect(esAggsFn).toHaveProperty(
+        'arguments.ranges.0.chain.0.arguments',
         expect.objectContaining({
-          ranges: [JSON.stringify([{ from: 0, to: 100, label: 'customlabel' }])],
+          from: [0],
+          to: [100],
+          label: ['customlabel'],
         })
       );
     });

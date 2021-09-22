@@ -227,30 +227,22 @@ describe('Fetch', () => {
       );
     });
 
-    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
-    it('should not allow overwriting of kbn-system-api when asSystemRequest: true', async () => {
+    it('should inject context headers if provided', async () => {
       fetchMock.get('*', {});
-      await expect(
-        fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-          asSystemRequest: true,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
-      );
-    });
 
-    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
-    it('should not allow overwriting of kbn-system-api when asSystemRequest: false', async () => {
-      fetchMock.get('*', {});
-      await expect(
-        fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-          asSystemRequest: false,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
-      );
+      await fetchInstance.fetch('/my/path', {
+        context: {
+          type: 'test-type',
+          name: 'test-name',
+          description: 'test-description',
+          id: '42',
+        },
+      });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'x-kbn-context':
+          '%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22description%22%3A%22test-description%22%2C%22id%22%3A%2242%22%7D',
+      });
     });
 
     it('should return response', async () => {

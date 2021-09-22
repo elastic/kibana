@@ -9,7 +9,6 @@ import React, { HTMLAttributes, useState } from 'react';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 
 import { TimelineTabs } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -48,6 +47,7 @@ const StatefulCellComponent = ({
         eventId,
         data,
         header,
+        isDraggable: true,
         isExpandable: true,
         isExpanded: false,
         isDetails: false,

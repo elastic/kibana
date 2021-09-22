@@ -18,6 +18,7 @@ export interface Props {
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
+  cardinalityField?: string;
 }
 
 export interface ListItem {
@@ -32,6 +33,7 @@ export const useValuesList = ({
   filters,
   time,
   keepHistory,
+  cardinalityField,
 }: Props): { values: ListItem[]; loading?: boolean } => {
   const [debouncedQuery, setDebounceQuery] = useState<string>(query);
   const [values, setValues] = useState<ListItem[]>([]);
@@ -57,6 +59,13 @@ export const useValuesList = ({
     350,
     [query]
   );
+
+  useEffect(() => {
+    if (!query) {
+      // in case query is cleared, we don't wait for debounce
+      setDebounceQuery(query);
+    }
+  }, [query]);
 
   const { data, loading } = useEsSearch(
     createEsParams({
@@ -86,9 +95,20 @@ export const useValuesList = ({
           values: {
             terms: {
               field: sourceField,
-              size: 100,
+              size: 50,
               ...(query ? { include: includeClause } : {}),
             },
+            ...(cardinalityField
+              ? {
+                  aggs: {
+                    count: {
+                      cardinality: {
+                        field: cardinalityField,
+                      },
+                    },
+                  },
+                }
+              : {}),
           },
         },
       },
@@ -98,10 +118,20 @@ export const useValuesList = ({
 
   useEffect(() => {
     const newValues =
-      data?.aggregations?.values.buckets.map(({ key: value, doc_count: count }) => ({
-        count,
-        label: String(value),
-      })) ?? [];
+      data?.aggregations?.values.buckets.map(
+        ({ key: value, doc_count: count, count: aggsCount }) => {
+          if (aggsCount) {
+            return {
+              count: aggsCount.value,
+              label: String(value),
+            };
+          }
+          return {
+            count,
+            label: String(value),
+          };
+        }
+      ) ?? [];
 
     if (keepHistory && query) {
       setValues((prevState) => {

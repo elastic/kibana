@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_FIELD_TYPES } from '../../../../common';
-import type { IndexPatternField } from '../../../../../../../src/plugins/data/common/index_patterns/fields';
+import type { IndexPatternField } from '../../../../../../../src/plugins/data/common';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
 export const jobTypeAriaLabels = {
@@ -77,6 +77,9 @@ export function kbnTypeToJobType(field: IndexPatternField) {
       break;
     case KBN_FIELD_TYPES.GEO_SHAPE:
       type = JOB_FIELD_TYPES.GEO_SHAPE;
+      break;
+    case KBN_FIELD_TYPES.HISTOGRAM:
+      type = JOB_FIELD_TYPES.HISTOGRAM;
       break;
 
     default:

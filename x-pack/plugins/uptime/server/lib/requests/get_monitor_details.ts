@@ -14,16 +14,16 @@ export interface GetMonitorDetailsParams {
   monitorId: string;
   dateStart: string;
   dateEnd: string;
-  alertsClient: any;
+  rulesClient: any;
 }
 
 const getMonitorAlerts = async ({
   uptimeEsClient,
-  alertsClient,
+  rulesClient,
   monitorId,
 }: {
   uptimeEsClient: UptimeESClient;
-  alertsClient: any;
+  rulesClient: any;
   monitorId: string;
 }) => {
   const options: any = {
@@ -34,7 +34,7 @@ const getMonitorAlerts = async ({
     sortField: 'name.keyword',
   };
 
-  const { data } = await alertsClient.find({ options });
+  const { data } = await rulesClient.find({ options });
   const monitorAlerts = [];
   for (let i = 0; i < data.length; i++) {
     const currAlert = data[i];
@@ -82,65 +82,63 @@ const getMonitorAlerts = async ({
   return monitorAlerts;
 };
 
-export const getMonitorDetails: UMElasticsearchQueryFn<
-  GetMonitorDetailsParams,
-  MonitorDetails
-> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd, alertsClient }) => {
-  const queryFilters: any = [
-    {
-      range: {
-        '@timestamp': {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-      },
-    },
-    {
-      term: {
-        'monitor.id': monitorId,
-      },
-    },
-  ];
-
-  const params = {
-    size: 1,
-    _source: ['error', '@timestamp'],
-    query: {
-      bool: {
-        must: [
-          {
-            exists: {
-              field: 'error',
-            },
-          },
-        ],
-        filter: queryFilters,
-      },
-    },
-    sort: [
+export const getMonitorDetails: UMElasticsearchQueryFn<GetMonitorDetailsParams, MonitorDetails> =
+  async ({ uptimeEsClient, monitorId, dateStart, dateEnd, rulesClient }) => {
+    const queryFilters: any = [
       {
-        '@timestamp': {
-          order: 'desc' as const,
+        range: {
+          '@timestamp': {
+            gte: dateStart,
+            lte: dateEnd,
+          },
         },
       },
-    ],
+      {
+        term: {
+          'monitor.id': monitorId,
+        },
+      },
+    ];
+
+    const params = {
+      size: 1,
+      _source: ['error', '@timestamp'],
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'error',
+              },
+            },
+          ],
+          filter: queryFilters,
+        },
+      },
+      sort: [
+        {
+          '@timestamp': {
+            order: 'desc' as const,
+          },
+        },
+      ],
+    };
+
+    const { body: result } = await uptimeEsClient.search({ body: params });
+
+    const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
+
+    const errorTimestamp: string | undefined = data?.['@timestamp'];
+    const monAlerts = await getMonitorAlerts({
+      uptimeEsClient,
+      rulesClient,
+      monitorId,
+    });
+
+    return {
+      monitorId,
+      error: data?.error,
+      timestamp: errorTimestamp,
+      alerts: monAlerts,
+    };
   };
-
-  const { body: result } = await uptimeEsClient.search({ body: params });
-
-  const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
-
-  const errorTimestamp: string | undefined = data?.['@timestamp'];
-  const monAlerts = await getMonitorAlerts({
-    uptimeEsClient,
-    alertsClient,
-    monitorId,
-  });
-
-  return {
-    monitorId,
-    error: data?.error,
-    timestamp: errorTimestamp,
-    alerts: monAlerts,
-  };
-};

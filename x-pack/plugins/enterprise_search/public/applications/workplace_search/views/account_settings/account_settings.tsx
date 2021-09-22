@@ -20,13 +20,14 @@ export const AccountSettings: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
 
   useEffect(() => {
-    security!.authc!.getCurrentUser().then(setCurrentUser);
+    security.authc.getCurrentUser().then(setCurrentUser);
   }, [security.authc]);
 
-  const PersonalInfo = useMemo(() => security!.uiApi!.components.getPersonalInfo, [security.uiApi]);
-  const ChangePassword = useMemo(() => security!.uiApi!.components.getChangePassword, [
-    security.uiApi,
-  ]);
+  const PersonalInfo = useMemo(() => security.uiApi.components.getPersonalInfo, [security.uiApi]);
+  const ChangePassword = useMemo(
+    () => security.uiApi.components.getChangePassword,
+    [security.uiApi]
+  );
 
   if (!currentUser) {
     return null;

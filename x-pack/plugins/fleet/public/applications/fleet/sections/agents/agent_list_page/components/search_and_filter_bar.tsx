@@ -136,7 +136,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       onClick={() => setIsStatutsFilterOpen(!isStatusFilterOpen)}
                       isSelected={isStatusFilterOpen}
                       hasActiveFilters={selectedStatus.length > 0}
-                      numActiveFilters={selectedStatus.length}
                       disabled={agentPolicies.length === 0}
                     >
                       <FormattedMessage

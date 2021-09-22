@@ -31,7 +31,7 @@ describe('reducer', () => {
         initialState,
         createUserChangedUrlAction(
           '/administration/trusted_apps',
-          '?page_index=5&page_size=50&show=create&view_type=list&filter=test'
+          '?page_index=5&page_size=50&show=create&view_type=list&filter=test&included_policies=global&excluded_policies=unassigned'
         )
       );
 
@@ -44,6 +44,8 @@ describe('reducer', () => {
           view_type: 'list',
           id: undefined,
           filter: 'test',
+          included_policies: 'global',
+          excluded_policies: 'unassigned',
         },
         active: true,
       });
@@ -53,7 +55,14 @@ describe('reducer', () => {
       const result = trustedAppsPageReducer(
         {
           ...initialState,
-          location: { page_index: 5, page_size: 50, view_type: 'grid', filter: '' },
+          location: {
+            page_index: 5,
+            page_size: 50,
+            view_type: 'grid',
+            filter: '',
+            included_policies: '',
+            excluded_policies: '',
+          },
         },
         createUserChangedUrlAction(
           '/administration/trusted_apps',
@@ -68,7 +77,14 @@ describe('reducer', () => {
       const result = trustedAppsPageReducer(
         {
           ...initialState,
-          location: { page_index: 5, page_size: 50, view_type: 'grid', filter: '' },
+          location: {
+            page_index: 5,
+            page_size: 50,
+            view_type: 'grid',
+            filter: '',
+            included_policies: '',
+            excluded_policies: '',
+          },
         },
         createUserChangedUrlAction('/administration/trusted_apps')
       );

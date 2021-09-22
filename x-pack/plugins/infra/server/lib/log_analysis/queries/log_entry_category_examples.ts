@@ -37,7 +37,7 @@ export const createLogEntryCategoryExamplesQuery = (
             match: {
               message: {
                 query: categoryQuery,
-                operator: 'AND',
+                operator: 'and',
               },
             },
           },

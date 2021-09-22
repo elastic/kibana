@@ -16,7 +16,7 @@ import {
   PropsForAnchor,
   PropsForButton,
 } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, SyntheticEvent } from 'react';
 import { isNil } from 'lodash/fp';
 import styled from 'styled-components';
 
@@ -42,12 +42,12 @@ import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
+import { getUebaDetailsUrl } from '../link_to/redirect_to_ueba';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
-export const LinkButton: React.FC<
-  PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
-> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
+export const LinkButton: React.FC<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>> =
+  ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
 
 export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
@@ -61,11 +61,51 @@ export const PortContainer = styled.div`
 `;
 
 // Internal Links
-const HostDetailsLinkComponent: React.FC<{
+const UebaDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   hostName: string;
   isButton?: boolean;
 }> = ({ children, hostName, isButton }) => {
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.ueba);
+  const { navigateToApp } = useKibana().services.application;
+  const goToUebaDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.ueba,
+        path: getUebaDetailsUrl(encodeURIComponent(hostName), search),
+      });
+    },
+    [hostName, navigateToApp, search]
+  );
+
+  return isButton ? (
+    <LinkButton
+      data-test-subj={'ueba-link-button'}
+      onClick={goToUebaDetails}
+      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkButton>
+  ) : (
+    <LinkAnchor
+      data-test-subj={'ueba-link-anchor'}
+      onClick={goToUebaDetails}
+      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkAnchor>
+  );
+};
+
+export const UebaDetailsLink = React.memo(UebaDetailsLinkComponent);
+
+const HostDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  hostName: string;
+  isButton?: boolean;
+  onClick?: (e: SyntheticEvent) => void;
+}> = ({ children, hostName, isButton, onClick }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
   const goToHostDetails = useCallback(
@@ -81,15 +121,17 @@ const HostDetailsLinkComponent: React.FC<{
 
   return isButton ? (
     <LinkButton
-      onClick={goToHostDetails}
+      onClick={onClick ?? goToHostDetails}
       href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj="host-details-button"
     >
       {children ? children : hostName}
     </LinkButton>
   ) : (
     <LinkAnchor
-      onClick={goToHostDetails}
+      onClick={onClick ?? goToHostDetails}
       href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj="host-details-button"
     >
       {children ? children : hostName}
     </LinkAnchor>
@@ -137,7 +179,8 @@ const NetworkDetailsLinkComponent: React.FC<{
   ip: string;
   flowTarget?: FlowTarget | FlowTargetSourceDest;
   isButton?: boolean;
-}> = ({ children, ip, flowTarget = FlowTarget.source, isButton }) => {
+  onClick?: (e: SyntheticEvent) => void | undefined;
+}> = ({ children, ip, flowTarget = FlowTarget.source, isButton, onClick }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const goToNetworkDetails = useCallback(
@@ -154,14 +197,16 @@ const NetworkDetailsLinkComponent: React.FC<{
   return isButton ? (
     <LinkButton
       href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
-      onClick={goToNetworkDetails}
+      onClick={onClick ?? goToNetworkDetails}
+      data-test-subj="network-details"
     >
       {children ? children : ip}
     </LinkButton>
   ) : (
     <LinkAnchor
-      onClick={goToNetworkDetails}
+      onClick={onClick ?? goToNetworkDetails}
       href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+      data-test-subj="network-details"
     >
       {children ? children : ip}
     </LinkAnchor>

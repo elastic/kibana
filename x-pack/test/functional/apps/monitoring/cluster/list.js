@@ -26,6 +26,8 @@ export default function ({ getService, getPageObjects }) {
           to: 'Aug 16, 2017 @ 00:00:00.000',
         });
 
+        await clusterList.closeAlertsModal();
+
         await clusterList.assertDefaults();
       });
 
@@ -82,6 +84,8 @@ export default function ({ getService, getPageObjects }) {
           from: 'Sep 7, 2017 @ 20:12:04.011',
           to: 'Sep 7, 2017 @ 20:18:55.733',
         });
+
+        await clusterList.closeAlertsModal();
 
         await clusterList.assertDefaults();
       });

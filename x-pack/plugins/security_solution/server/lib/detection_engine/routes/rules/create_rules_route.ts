@@ -6,9 +6,11 @@
  */
 
 import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -16,8 +18,6 @@ import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { buildSiemResponse } from '../utils';
 
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
@@ -26,7 +26,7 @@ import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters'
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: RuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ): void => {
   router.post(
     {
@@ -45,18 +45,19 @@ export const createRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const alertsClient = context.alerting?.getAlertsClient();
+        const rulesClient = context.alerting?.getRulesClient();
         const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
-        if (!siemClient || !alertsClient) {
+        if (!siemClient || !rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
-            alertsClient,
+            isRuleRegistryEnabled,
+            rulesClient,
             ruleId: request.body.rule_id,
             id: undefined,
           });
@@ -68,7 +69,11 @@ export const createRulesRoute = (
           }
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
+        const internalRule = convertCreateAPIToInternalSchema(
+          request.body,
+          siemClient,
+          isRuleRegistryEnabled
+        );
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -82,7 +87,7 @@ export const createRulesRoute = (
           esClient.asCurrentUser,
           internalRule.params.outputIndex
         );
-        if (!indexExists) {
+        if (!isRuleRegistryEnabled && !indexExists) {
           return siemResponse.error({
             statusCode: 400,
             body: `To create a rule, the index must exist first. Index ${internalRule.params.outputIndex} does not exist`,
@@ -92,31 +97,24 @@ export const createRulesRoute = (
         // This will create the endpoint list if it does not exist yet
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        const createdRule = await alertsClient.create({
+        const createdRule = await rulesClient.create({
           data: internalRule,
         });
 
-        const ruleActions = await updateRulesNotifications({
-          ruleAlertId: createdRule.id,
-          alertsClient,
-          savedObjectsClient,
-          enabled: createdRule.enabled,
-          actions: request.body.actions,
-          throttle: request.body.throttle ?? null,
-          name: createdRule.name,
-        });
+        // mutes if we are creating the rule with the explicit "no_actions"
+        if (request.body.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+          await rulesClient.muteAll({ id: createdRule.id });
+        }
 
-        const ruleStatuses = await ruleStatusSavedObjectsClientFactory(savedObjectsClient).find({
-          perPage: 1,
-          sortField: 'statusDate',
-          sortOrder: 'desc',
-          search: `${createdRule.id}`,
-          searchFields: ['alertId'],
+        const ruleStatuses = await context.securitySolution.getExecutionLogClient().find({
+          logsCount: 1,
+          ruleId: createdRule.id,
+          spaceId: context.securitySolution.getSpaceId(),
         });
         const [validated, errors] = newTransformValidate(
           createdRule,
-          ruleActions,
-          ruleStatuses.saved_objects[0]
+          ruleStatuses[0],
+          isRuleRegistryEnabled
         );
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
@@ -124,7 +122,7 @@ export const createRulesRoute = (
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
-        const error = transformError(err);
+        const error = transformError(err as Error);
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

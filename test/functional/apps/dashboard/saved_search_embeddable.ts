@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104365
-  describe.skip('dashboard saved search embeddable', () => {
+  describe('dashboard saved search embeddable', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');

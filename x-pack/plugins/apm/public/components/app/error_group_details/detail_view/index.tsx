@@ -20,9 +20,9 @@ import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import type { IUrlParams } from '../../../../context/url_params_context/types';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import type { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
@@ -55,7 +55,8 @@ const TransactionLinkName = euiStyled.div`
 
 interface Props {
   errorGroup: APIReturnType<'GET /api/apm/services/{serviceName}/errors/{groupId}'>;
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
+  kuery: string;
 }
 
 // TODO: Move query-string-based tabs into a re-usable component?
@@ -67,7 +68,7 @@ function getCurrentTab(
   return selectedTab ? selectedTab : first(tabs) || {};
 }
 
-export function DetailView({ errorGroup, urlParams }: Props) {
+export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   const history = useHistory();
   const { transaction, error, occurrencesCount } = errorGroup;
 
@@ -96,7 +97,7 @@ export function DetailView({ errorGroup, urlParams }: Props) {
             )}
           </h3>
         </EuiTitle>
-        <DiscoverErrorLink error={error} kuery={urlParams.kuery}>
+        <DiscoverErrorLink error={error} kuery={kuery}>
           <EuiButtonEmpty iconType="discoverApp">
             {i18n.translate(
               'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',

@@ -7,7 +7,8 @@
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import {
   TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_DURATION,
@@ -18,7 +19,7 @@ export async function getClientMetrics({
   urlQuery,
   percentile = 50,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   urlQuery?: string;
   percentile?: number;
 }) {

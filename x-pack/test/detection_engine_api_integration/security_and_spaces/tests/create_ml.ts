@@ -100,6 +100,10 @@ export default ({ getService }: FtrProviderContext) => {
       const signalsOpen = await getOpenSignals(supertest, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(1);
       const signal = signalsOpen.hits.hits[0];
+      if (!signal._source) {
+        return expect(signal._source).to.be.ok();
+      }
+
       expect(signal._source).eql({
         '@timestamp': signal._source['@timestamp'],
         actual: [1],
@@ -131,8 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
           _meta: { version: SIGNALS_TEMPLATE_VERSION },
           parents: [
             {
-              id:
-                'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
+              id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
               type: 'event',
               index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
               depth: 0,
@@ -140,8 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           ancestors: [
             {
-              id:
-                'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
+              id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
               type: 'event',
               index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
               depth: 0,
@@ -152,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
             id: createdRule.id,
             rule_id: createdRule.rule_id,
             created_at: createdRule.created_at,
-            updated_at: signal._source.signal.rule.updated_at,
+            updated_at: signal._source?.signal.rule.updated_at,
             actions: [],
             interval: '5m',
             name: 'Test ML rule',
@@ -183,12 +185,12 @@ export default ({ getService }: FtrProviderContext) => {
           },
           depth: 1,
           parent: {
-            id:
-              'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
+            id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
             type: 'event',
             index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
             depth: 0,
           },
+          reason: `event with process store, by root on mothra created critical alert Test ML rule.`,
           original_time: '2020-11-16T22:58:08.000Z',
         },
         all_field_values: [

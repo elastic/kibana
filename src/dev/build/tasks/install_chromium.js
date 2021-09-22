@@ -19,7 +19,6 @@ export const InstallChromium = {
       log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
 
       const { binaryPath$ } = installBrowser(
-        // TODO: https://github.com/elastic/kibana/issues/72496
         log,
         build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
         platform.getName(),

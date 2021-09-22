@@ -5,17 +5,16 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
+  cellHasFormulas,
   ES_SEARCH_STRATEGY,
-  FieldFormat,
-  FieldFormatConfig,
-  IFieldFormatsRegistry,
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
@@ -23,6 +22,11 @@ import {
   SearchSourceFields,
   tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
+import {
+  FieldFormat,
+  FieldFormatConfig,
+  IFieldFormatsRegistry,
+} from '../../../../../../../src/plugins/field_formats/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
@@ -30,7 +34,6 @@ import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
 import { TaskRunResult } from '../../../lib/tasks';
 import { JobParamsCSV } from '../types';
-import { cellHasFormulas } from './cell_has_formula';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
@@ -68,19 +71,21 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: JobParamsCSV,
+    private job: Omit<JobParamsCSV, 'version'>,
     private config: ReportingConfig,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
-    private logger: LevelLogger
+    private logger: LevelLogger,
+    private stream: Writable
   ) {}
 
   private async scan(
     index: IndexPattern,
     searchSource: ISearchSource,
-    scrollSettings: CsvExportSettings['scroll']
+    settings: CsvExportSettings
   ) {
+    const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
     const searchParams = {
@@ -89,11 +94,13 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
+        ignore_throttled: !includeFrozen,
       },
     };
+
     const results = (
       await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
-    ).rawResponse as SearchResponse<unknown>;
+    ).rawResponse as estypes.SearchResponse<unknown>;
 
     return results;
   }
@@ -107,7 +114,7 @@ export class CsvGenerator {
           scroll_id: scrollId,
         },
       })
-    ).body as SearchResponse<unknown>;
+    ).body;
     return results;
   }
 
@@ -177,7 +184,7 @@ export class CsvGenerator {
       data: dataTableCell,
     }: {
       column: string;
-      data: any;
+      data: unknown;
     }): string => {
       let cell: string[] | string | object;
       // check truthiness to guard against _score, _type, etc
@@ -219,7 +226,6 @@ export class CsvGenerator {
    */
   private generateHeader(
     columns: string[],
-    table: Datatable,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
@@ -228,7 +234,6 @@ export class CsvGenerator {
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
         content: '',
         maxSizeReached: true,
         warnings: [],
@@ -286,12 +291,12 @@ export class CsvGenerator {
     const index = searchSource.getField('index');
 
     if (!index) {
-      throw new Error(`The search must have a revference to an index pattern!`);
+      throw new Error(`The search must have a reference to an index pattern!`);
     }
 
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
 
-    const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(maxSizeBytes), bom);
+    const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
@@ -321,13 +326,13 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
-        let results: SearchResponse<unknown> | undefined;
+        let results: estypes.SearchResponse<unknown> | undefined;
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
-          results = await this.scan(index, searchSource, scrollSettings);
+          results = await this.scan(index, searchSource, settings);
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
-            totalRecords = results.hits.total;
+            totalRecords = results.hits.total as number;
             this.logger.debug(`Total search results: ${totalRecords}`);
           }
         } else {
@@ -357,7 +362,7 @@ export class CsvGenerator {
 
         if (first) {
           first = false;
-          this.generateHeader(columns, table, builder, settings);
+          this.generateHeader(columns, builder, settings);
         }
 
         if (table.rows.length < 1) {
@@ -398,17 +403,12 @@ export class CsvGenerator {
       }
     }
 
-    const size = builder.getSizeInBytes();
-    this.logger.debug(
-      `Finished generating. Total size in bytes: ${size}. Row count: ${this.csvRowCount}.`
-    );
+    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     return {
-      content: builder.getString(),
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
-      size,
       warnings,
     };
   }

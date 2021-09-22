@@ -30,15 +30,12 @@ import * as fetcherHook from '../../../hooks/use_fetcher';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
+
 import indexPatternData from './configurations/test_data/test_index_pattern.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
-import {
-  IndexPattern,
-  IndexPatternsContract,
-} from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
+import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
 import { AppDataType, UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
@@ -80,19 +77,19 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
 
 function getSetting<T = any>(key: string): T {
   if (key === 'timepicker:quickRanges') {
-    return ([
+    return [
       {
         display: 'Today',
         from: 'now/d',
         to: 'now/d',
       },
-    ] as unknown) as T;
+    ] as unknown as T;
   }
-  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+  return 'MMM D, YYYY @ HH:mm:ss.SSS' as unknown as T;
 }
 
 function setSetting$<T = any>(key: string): T {
-  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+  return of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown as T;
 }
 
 /* default mock core */
@@ -134,10 +131,10 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
 }: MockKibanaProviderProps<ExtraCore>) {
   const indexPattern = mockIndexPattern;
 
-  setIndexPatterns(({
+  setIndexPatterns({
     ...[indexPattern],
     get: async () => indexPattern,
-  } as unknown) as IndexPatternsContract);
+  } as unknown as IndexPatternsContract);
 
   return (
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
@@ -239,7 +236,7 @@ export const mockAppIndexPattern = () => {
     loading: false,
     hasAppData: { ux: true } as any,
     loadIndexPattern,
-    indexPatterns: ({ ux: mockIndexPattern } as unknown) as Record<AppDataType, IndexPattern>,
+    indexPatterns: { ux: mockIndexPattern } as unknown as Record<AppDataType, IndexPattern>,
   });
   return { spy, loadIndexPattern };
 };
@@ -320,10 +317,11 @@ export const mockHistory = {
   },
 };
 
-export const mockIndexPattern = getStubIndexPattern(
-  'apm-*',
-  () => {},
-  '@timestamp',
-  JSON.parse(indexPatternData.attributes.fields),
-  mockCore() as any
-);
+export const mockIndexPattern = createStubIndexPattern({
+  spec: {
+    id: 'apm-*',
+    title: 'apm-*',
+    timeFieldName: '@timestamp',
+    fields: JSON.parse(indexPatternData.attributes.fields),
+  },
+});

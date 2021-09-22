@@ -1,0 +1,344 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".alerts-security.alerts-default": {
+        "is_write_index": false
+      },
+      ".siem-signals-default": {
+        "is_write_index": true
+      }
+    },
+    "index": ".siem-signals-default-000001",
+    "mappings": {
+      "_meta": {
+        "aliases_version": 1,
+        "version": 45
+      },
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "threat": {
+          "properties": {
+            "framework": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "indicator": {
+              "properties": {
+                "as": {
+                  "properties": {
+                    "number": {
+                      "type": "long"
+                    },
+                    "organization": {
+                      "properties": {
+                        "name": {
+                          "fields": {
+                            "text": {
+                              "norms": false,
+                              "type": "text"
+                            }
+                          },
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "confidence": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "dataset": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "wildcard"
+                },
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "properties": {
+                    "address": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "event": {
+                  "properties": {
+                    "action": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "category": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "created": {
+                      "type": "date"
+                    },
+                    "dataset": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "duration": {
+                      "type": "long"
+                    },
+                    "end": {
+                      "type": "date"
+                    },
+                    "hash": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "ingested": {
+                      "type": "date"
+                    },
+                    "kind": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "module": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "original": {
+                      "doc_values": false,
+                      "ignore_above": 1024,
+                      "index": false,
+                      "type": "keyword"
+                    },
+                    "outcome": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "provider": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reason": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "risk_score": {
+                      "type": "float"
+                    },
+                    "risk_score_norm": {
+                      "type": "float"
+                    },
+                    "sequence": {
+                      "type": "long"
+                    },
+                    "severity": {
+                      "type": "long"
+                    },
+                    "start": {
+                      "type": "date"
+                    },
+                    "timezone": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "url": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "first_seen": {
+                  "type": "date"
+                },
+                "geo": {
+                  "properties": {
+                    "city_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "continent_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country_iso_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "location": {
+                      "type": "geo_point"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "region_iso_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "region_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "last_seen": {
+                  "type": "date"
+                },
+                "marking": {
+                  "properties": {
+                    "tlp": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "matched": {
+                  "properties": {
+                    "atomic": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "field": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "module": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "port": {
+                  "type": "long"
+                },
+                "provider": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "scanner_stats": {
+                  "type": "long"
+                },
+                "sightings": {
+                  "type": "long"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
+            "tactic": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "reference": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "technique": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "fields": {
+                    "text": {
+                      "norms": false,
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "reference": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "subtechnique": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "fields": {
+                        "text": {
+                          "norms": false,
+                          "type": "text"
+                        }
+                      },
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": ".siem-signals-default",
+          "rollover_alias": ".siem-signals-default"
+        },
+        "mapping": {
+          "total_fields": {
+            "limit": "10000"
+          }
+        },
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

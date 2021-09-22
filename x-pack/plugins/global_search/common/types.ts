@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { Serializable } from 'src/core/types';
+import { Serializable } from '@kbn/utility-types';
 
 /**
  * Options provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method.

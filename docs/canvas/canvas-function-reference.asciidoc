@@ -406,6 +406,60 @@ This prints the `datatable` objects in the browser console before and after the 
 
 *Returns:* `any`
 
+[float]
+[[createTable_fn]]
+=== `createTable`
+
+Creates a datatable with a list of columns, and 1 or more empty rows.
+To populate the rows, use <<mapColumn_fn>> or <<mathColumn_fn>>.
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|ids *** †
+
+|`string`
+|Column ids to generate in positional order. ID represents the key in the row.
+
+|`names` †
+|`string`
+|Column names to generate in positional order. Names are not required to be unique, and default to the ID if not provided.
+
+|`rowCount`
+
+Default: 1
+|`number`
+|The number of empty rows to add to the table, to be assigned a value later.
+|===
+
+*Expression syntax*
+[source,js]
+----
+createTable id="a" id="b"
+createTable id="a" name="A" id="b" name="B" rowCount=5
+----
+
+*Code example*
+[source,text]
+----
+var_set
+  name="logs" value={essql "select count(*) as a from kibana_sample_data_logs"}
+  name="commerce" value={essql "select count(*) as b from kibana_sample_data_ecommerce"}
+| createTable ids="totalA" ids="totalB"
+| staticColumn name="totalA" value={var "logs" | getCell "a"}
+| alterColumn column="totalA" type="number"
+| staticColumn name="totalB" value={var "commerce" | getCell "b"}
+| alterColumn column="totalB" type="number"
+| mathColumn id="percent" name="percent" expression="totalA / totalB"
+| render
+----
+
+This creates a table based on the results of two `essql` queries, joined
+into one table.
+
+*Accepts:* `null`
+
 
 [float]
 [[columns_fn]]

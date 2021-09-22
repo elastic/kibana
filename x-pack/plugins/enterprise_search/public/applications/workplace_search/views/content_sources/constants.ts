@@ -21,6 +21,13 @@ export const CONTENT_SUMMARY_TITLE = i18n.translate(
   }
 );
 
+export const CONTENT_SUMMARY_LOADING_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.contentSummaryLoading.text',
+  {
+    defaultMessage: 'Loading summary details...',
+  }
+);
+
 export const CONTENT_TYPE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.contentType.header',
   {
@@ -222,6 +229,20 @@ export const SOURCE_CONTENT_TITLE = i18n.translate(
   }
 );
 
+export const SEARCH_CONTENT_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.search.placeholder',
+  {
+    defaultMessage: 'Search content...',
+  }
+);
+
+export const FILTER_CONTENT_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.filter.placeholder',
+  {
+    defaultMessage: 'Filter content...',
+  }
+);
+
 export const CONTENT_LOADING_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.contentLoading.text',
   {
@@ -289,6 +310,48 @@ export const SOURCE_CONFIG_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
   {
     defaultMessage: 'Edit content source connector settings to change.',
+  }
+);
+
+export const SYNC_MANAGEMENT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementTitle',
+  {
+    defaultMessage: 'Sync management',
+  }
+);
+
+export const SYNC_MANAGEMENT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementDescription',
+  {
+    defaultMessage: 'Enable and disable extraction of specific content for this source.',
+  }
+);
+
+export const SYNC_MANAGEMENT_SYNCHRONIZE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementSynchronizeLabel',
+  {
+    defaultMessage: 'Synchronize this source',
+  }
+);
+
+export const SYNC_MANAGEMENT_THUMBNAILS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementThumbnailsLabel',
+  {
+    defaultMessage: 'Sync thumbnails',
+  }
+);
+
+export const SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementGlobalConfigLabel',
+  {
+    defaultMessage: 'Sync thumbnails - disabled at global configuration level',
+  }
+);
+
+export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementContentExtractionLabel',
+  {
+    defaultMessage: 'Sync all text and content',
   }
 );
 
@@ -385,10 +448,10 @@ export const PRIVATE_HEADER_DESCRIPTION = i18n.translate(
   }
 );
 
-export const PRIVATE_SHARED_SOURCES_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.title',
+export const PRIVATE_ORG_SOURCES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.privateOrg.header.title',
   {
-    defaultMessage: 'Shared content sources',
+    defaultMessage: 'Organizational content sources',
   }
 );
 
@@ -398,15 +461,15 @@ export const PRIVATE_EMPTY_TITLE = i18n.translate(
     defaultMessage: 'You have no private sources',
   }
 );
-export const SHARED_EMPTY_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.shared.empty.title',
+export const ORG_SOURCES_EMPTY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.empty.title',
   {
     defaultMessage: 'No content source available',
   }
 );
 
-export const SHARED_EMPTY_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.shared.empty.description',
+export const ORG_SOURCES_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.empty.description',
   {
     defaultMessage:
       'Once content sources are shared with you, they will be displayed here, and available via the search experience.',
@@ -463,10 +526,24 @@ export const UNDERSTAND_BUTTON = i18n.translate(
   }
 );
 
-export const PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.privateDashboard.readOnlyMode.warning',
+export const PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.personalDashboard.readOnlyMode.warning',
   {
     defaultMessage:
       'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
+  }
+);
+
+export const PERSONAL_DASHBOARD_SOURCE_ERROR = (error: string) =>
+  i18n.translate('xpack.enterpriseSearch.workplaceSearch.personalDashboardSourceError', {
+    defaultMessage:
+      'Could not connect the source, reach out to your admin for help. Error message: {error}',
+    values: { error },
+  });
+
+export const SOURCE_OVERVIEW_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceOverviewTitle',
+  {
+    defaultMessage: 'Source overview',
   }
 );

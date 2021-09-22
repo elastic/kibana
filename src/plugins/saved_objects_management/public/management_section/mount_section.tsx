@@ -37,11 +37,8 @@ export const mountManagementSection = async ({
   mountParams,
   serviceRegistry,
 }: MountParams) => {
-  const [
-    coreStart,
-    { data, savedObjectsTaggingOss, spacesOss },
-    pluginStart,
-  ] = await core.getStartServices();
+  const [coreStart, { data, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
+    await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
@@ -61,18 +58,15 @@ export const mountManagementSection = async ({
     return children! as React.ReactElement;
   };
 
-  const spacesApi = spacesOss?.isSpacesAvailable ? spacesOss : undefined;
-
   ReactDOM.render(
     <I18nProvider>
       <Router history={history}>
         <Switch>
-          <Route path={'/:service/:id'} exact={true}>
+          <Route path={'/:type/:id'} exact={true}>
             <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsEditionPage
                   coreStart={coreStart}
-                  serviceRegistry={serviceRegistry}
                   setBreadcrumbs={setBreadcrumbs}
                   history={history}
                 />

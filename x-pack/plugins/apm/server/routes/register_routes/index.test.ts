@@ -7,7 +7,7 @@
 
 import { jsonRt } from '@kbn/io-ts-utils';
 import { createServerRouteRepository } from '@kbn/server-route-repository';
-import { ServerRoute } from '@kbn/server-route-repository/target/typings';
+import { ServerRoute } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { CoreSetup, Logger } from 'src/core/server';
 import { APMConfig } from '../..';
@@ -26,15 +26,15 @@ const getRegisterRouteDependencies = () => {
     put,
   });
 
-  const coreSetup = ({
+  const coreSetup = {
     http: {
       createRouter,
     },
-  } as unknown) as CoreSetup;
+  } as unknown as CoreSetup;
 
-  const logger = ({
+  const logger = {
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   return {
     mocks: {
@@ -45,14 +45,14 @@ const getRegisterRouteDependencies = () => {
       coreSetup,
       logger,
     },
-    dependencies: ({
+    dependencies: {
       core: {
         setup: coreSetup,
       },
       logger,
       config: {} as APMConfig,
       plugins: {},
-    } as unknown) as RegisterRouteDependencies,
+    } as unknown as RegisterRouteDependencies,
   };
 };
 
@@ -109,6 +109,11 @@ const initApi = (
         params: {},
         query: {},
         body: null,
+        events: {
+          aborted$: {
+            toPromise: () => new Promise(() => {}),
+          },
+        },
         ...request,
       },
       responseMock
@@ -202,7 +207,7 @@ describe('createApi', () => {
   describe('when validating', () => {
     describe('_inspect', () => {
       it('allows _inspect=true', async () => {
-        const handlerMock = jest.fn();
+        const handlerMock = jest.fn().mockResolvedValue({});
         const {
           simulateRequest,
           mocks: { response },
@@ -234,7 +239,7 @@ describe('createApi', () => {
       });
 
       it('rejects _inspect=1', async () => {
-        const handlerMock = jest.fn();
+        const handlerMock = jest.fn().mockResolvedValue({});
 
         const {
           simulateRequest,
@@ -267,7 +272,7 @@ describe('createApi', () => {
       });
 
       it('allows omitting _inspect', async () => {
-        const handlerMock = jest.fn();
+        const handlerMock = jest.fn().mockResolvedValue({});
 
         const {
           simulateRequest,
@@ -297,7 +302,11 @@ describe('createApi', () => {
         simulateRequest,
         mocks: { response },
       } = initApi([
-        { endpoint: 'GET /foo', options: { tags: [] }, handler: jest.fn() },
+        {
+          endpoint: 'GET /foo',
+          options: { tags: [] },
+          handler: jest.fn().mockResolvedValue({}),
+        },
       ]);
 
       await simulateRequest({
@@ -328,7 +337,7 @@ describe('createApi', () => {
     });
 
     it('validates path parameters', async () => {
-      const handlerMock = jest.fn();
+      const handlerMock = jest.fn().mockResolvedValue({});
       const {
         simulateRequest,
         mocks: { response },
@@ -402,7 +411,7 @@ describe('createApi', () => {
     });
 
     it('validates body parameters', async () => {
-      const handlerMock = jest.fn();
+      const handlerMock = jest.fn().mockResolvedValue({});
       const {
         simulateRequest,
         mocks: { response },
@@ -448,7 +457,7 @@ describe('createApi', () => {
     });
 
     it('validates query parameters', async () => {
-      const handlerMock = jest.fn();
+      const handlerMock = jest.fn().mockResolvedValue({});
       const {
         simulateRequest,
         mocks: { response },

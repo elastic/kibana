@@ -14,8 +14,8 @@ import React from 'react';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
 import type { SavedObjectReferenceWithContext } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
@@ -320,13 +320,8 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out to add a space', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToShare,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+      await setup();
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -348,13 +343,8 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out to remove a space', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToShare,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+      await setup();
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -376,13 +366,8 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out to add and remove a space', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToShare,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+      await setup();
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);

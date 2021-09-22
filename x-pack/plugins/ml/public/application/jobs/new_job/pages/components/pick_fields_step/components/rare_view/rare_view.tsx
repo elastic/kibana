@@ -35,7 +35,7 @@ export const RareView: FC<Props> = ({ isActive, setCanProceed }) => {
   }, [rareFieldValid, settingsValid]);
 
   return isActive === false ? (
-    <RareDetectorsSummary rareDetectorType={rareDetectorType} />
+    <RareDetectorsSummary />
   ) : (
     <>
       <RareDetectors

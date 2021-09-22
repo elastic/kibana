@@ -174,9 +174,10 @@ const UnstyledProcessEventDot = React.memo(
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
-    const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), [
-      htmlIDPrefix,
-    ]);
+    const nodeHTMLID = useCallback(
+      (id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`),
+      [htmlIDPrefix]
+    );
 
     const ariaLevel: number | null = useSelector((state: ResolverState) =>
       selectors.ariaLevel(state)(nodeID)
@@ -328,11 +329,7 @@ const UnstyledProcessEventDot = React.memo(
     );
 
     const nodeName = nodeModel.nodeName(node);
-
     /* eslint-disable jsx-a11y/click-events-have-key-events */
-    /**
-     * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
-     */
     return (
       <div
         data-test-subj="resolver:node"

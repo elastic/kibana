@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiProgress } from '@elastic/eui';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
 import { difference, head, isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import classnames from 'classnames';
@@ -38,6 +37,7 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
+import { useConnectors } from '../../containers/configure/use_connectors';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -104,6 +104,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
+    const { connectors } = useConnectors({ toastPermissionsErrors: false });
 
     const sorting = useMemo(
       () => ({
@@ -113,6 +114,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     );
 
     const filterRefetch = useRef<() => void>();
+    const tableRef = useRef<EuiBasicTable>();
     const setFilterRefetch = useCallback(
       (refetchFilter: () => void) => {
         filterRefetch.current = refetchFilter;
@@ -182,10 +184,13 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
         ) {
           setQueryParams({ sortField: SortFieldCase.createdAt });
         }
+
+        setSelectedCases([]);
+        tableRef.current?.setSelection([]);
         setFilters(newFilterOptions);
         refreshCases(false);
       },
-      [refreshCases, setQueryParams, setFilters]
+      [setSelectedCases, setFilters, refreshCases, setQueryParams]
     );
 
     const showActions = userCanCrud && !isSelectorView;
@@ -198,8 +203,10 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       handleIsLoading,
       isLoadingCases: loading,
       refreshCases,
-      showActions,
+      // isSelectorView is boolean | undefined. We need to convert it to a boolean.
+      isSelectorView: !!isSelectorView,
       userCanCrud,
+      connectors,
     });
 
     const itemIdToExpandedRowMap = useMemo(
@@ -319,6 +326,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
             selection={euiBasicTableSelectionProps}
             showActions={showActions}
             sorting={sorting}
+            tableRef={tableRef}
             tableRowProps={tableRowProps}
             userCanCrud={userCanCrud}
           />

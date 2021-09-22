@@ -79,7 +79,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
   }),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger, core } = resources;
+    const { params, logger, core, telemetryUsageCounter } = resources;
 
     const { service } = params.body;
 
@@ -106,6 +106,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
         core,
         fleetPluginStart: await resources.plugins.fleet.start(),
         setup,
+        telemetryUsageCounter,
       });
       logger.info(
         `Updated Fleet integration policy for APM to remove the deleted agent configuration.`
@@ -128,7 +129,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   ]),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger, core } = resources;
+    const { params, logger, core, telemetryUsageCounter } = resources;
     const { body, query } = params;
 
     // if the config already exists, it is fetched and updated
@@ -162,6 +163,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
         core,
         fleetPluginStart: await resources.plugins.fleet.start(),
         setup,
+        telemetryUsageCounter,
       });
       logger.info(
         `Saved latest agent settings to Fleet integration policy for APM.`
@@ -241,9 +243,11 @@ const listAgentConfigurationServicesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      kuery: '',
+    });
     const serviceNames = await getServiceNames({
       setup,
       searchAggregatedTransactions,
@@ -265,9 +269,11 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
     const { params } = resources;
 
     const { serviceName } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      kuery: '',
+    });
 
     const environments = await getEnvironments({
       serviceName,
@@ -295,12 +301,13 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   },
 });
 
-export const agentConfigurationRouteRepository = createApmServerRouteRepository()
-  .add(agentConfigurationRoute)
-  .add(getSingleAgentConfigurationRoute)
-  .add(deleteAgentConfigurationRoute)
-  .add(createOrUpdateAgentConfigurationRoute)
-  .add(agentConfigurationSearchRoute)
-  .add(listAgentConfigurationServicesRoute)
-  .add(listAgentConfigurationEnvironmentsRoute)
-  .add(agentConfigurationAgentNameRoute);
+export const agentConfigurationRouteRepository =
+  createApmServerRouteRepository()
+    .add(agentConfigurationRoute)
+    .add(getSingleAgentConfigurationRoute)
+    .add(deleteAgentConfigurationRoute)
+    .add(createOrUpdateAgentConfigurationRoute)
+    .add(agentConfigurationSearchRoute)
+    .add(listAgentConfigurationServicesRoute)
+    .add(listAgentConfigurationEnvironmentsRoute)
+    .add(agentConfigurationAgentNameRoute);

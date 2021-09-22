@@ -59,7 +59,7 @@ describe('handleEsError', () => {
 
     expect(payload).toEqual({
       attributes: { causes: undefined, error: undefined },
-      message: 'Response Error',
+      message: '{}',
     });
 
     expect(status).toBe(400);

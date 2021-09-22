@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import {
-  POLICY_ELASTIC_AGENT_ON_CLOUD,
-  APM_PACKAGE_NAME,
-} from './get_cloud_apm_package_policy';
+import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
+import { APMPluginSetupDependencies } from '../../types';
+import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
+interface GetApmPackagePolicyDefinitionOptions {
+  apmServerSchema: Record<string, any>;
+  cloudPluginSetup: APMPluginSetupDependencies['cloud'];
+}
 export function getApmPackagePolicyDefinition(
-  apmServerSchema: Record<string, any>
+  options: GetApmPackagePolicyDefinitionOptions
 ) {
+  const { apmServerSchema, cloudPluginSetup } = options;
   return {
-    name: 'apm',
+    name: 'Elastic APM',
     namespace: 'default',
     enabled: true,
     policy_id: POLICY_ELASTIC_AGENT_ON_CLOUD,
@@ -24,38 +28,72 @@ export function getApmPackagePolicyDefinition(
         type: 'apm',
         enabled: true,
         streams: [],
-        vars: getApmPackageInputVars(apmServerSchema),
+        vars: getApmPackageInputVars({
+          cloudPluginSetup,
+          apmServerSchema: preprocessLegacyFields({ apmServerSchema }),
+        }),
       },
     ],
     package: {
       name: APM_PACKAGE_NAME,
-      version: '0.3.0-dev.1',
+      version: '0.4.0',
       title: 'Elastic APM',
     },
   };
 }
 
-function getApmPackageInputVars(apmServerSchema: Record<string, any>) {
-  const apmServerConfigs = Object.entries(
-    apmConfigMapping
-  ).map(([key, { name, type }]) => ({ key, name, type }));
+function preprocessLegacyFields({
+  apmServerSchema,
+}: {
+  apmServerSchema: Record<string, any>;
+}) {
+  const copyOfApmServerSchema = { ...apmServerSchema };
+  [
+    {
+      key: 'apm-server.auth.anonymous.rate_limit.event_limit',
+      legacyKey: 'apm-server.rum.event_rate.limit',
+    },
+    {
+      key: 'apm-server.auth.anonymous.rate_limit.ip_limit',
+      legacyKey: 'apm-server.rum.event_rate.lru_size',
+    },
+    {
+      key: 'apm-server.auth.anonymous.allow_service',
+      legacyKey: 'apm-server.rum.allow_service_names',
+    },
+  ].forEach(({ key, legacyKey }) => {
+    if (!copyOfApmServerSchema[key]) {
+      copyOfApmServerSchema[key] = copyOfApmServerSchema[legacyKey];
+      delete copyOfApmServerSchema[legacyKey];
+    }
+  });
+  return copyOfApmServerSchema;
+}
 
-  const inputVars: Record<
-    string,
-    { type: string; value: any }
-  > = apmServerConfigs.reduce((acc, { key, name, type }) => {
-    const value = apmServerSchema[key] ?? ''; // defaults to an empty string to be edited in Fleet UI
-    return {
-      ...acc,
-      [name]: { type, value },
-    };
-  }, {});
+function getApmPackageInputVars(options: GetApmPackagePolicyDefinitionOptions) {
+  const { apmServerSchema } = options;
+  const apmServerConfigs = Object.entries(apmConfigMapping).map(
+    ([key, { name, type, getValue }]) => ({ key, name, type, getValue })
+  );
+
+  const inputVars: Record<string, { type: string; value: any }> =
+    apmServerConfigs.reduce((acc, { key, name, type, getValue }) => {
+      const value = (getValue ? getValue(options) : apmServerSchema[key]) ?? ''; // defaults to an empty string to be edited in Fleet UI
+      return {
+        ...acc,
+        [name]: { type, value },
+      };
+    }, {});
   return inputVars;
 }
 
 export const apmConfigMapping: Record<
   string,
-  { name: string; type: string }
+  {
+    name: string;
+    type: string;
+    getValue?: (options: GetApmPackagePolicyDefinitionOptions) => any;
+  }
 > = {
   'apm-server.host': {
     name: 'host',
@@ -64,14 +102,7 @@ export const apmConfigMapping: Record<
   'apm-server.url': {
     name: 'url',
     type: 'text',
-  },
-  'apm-server.secret_token': {
-    name: 'secret_token',
-    type: 'text',
-  },
-  'apm-server.api_key.enabled': {
-    name: 'api_key_enabled',
-    type: 'bool',
+    getValue: ({ cloudPluginSetup }) => cloudPluginSetup?.apm?.url,
   },
   'apm-server.rum.enabled': {
     name: 'enable_rum',
@@ -79,10 +110,6 @@ export const apmConfigMapping: Record<
   },
   'apm-server.default_service_environment': {
     name: 'default_service_environment',
-    type: 'text',
-  },
-  'apm-server.rum.allow_service_names': {
-    name: 'rum_allow_service_names',
     type: 'text',
   },
   'apm-server.rum.allow_origins': {
@@ -93,21 +120,29 @@ export const apmConfigMapping: Record<
     name: 'rum_allow_headers',
     type: 'text',
   },
-  'apm-server.rum.response_headers': {
-    name: 'rum_response_headers',
-    type: 'yaml',
-  },
   'apm-server.rum.event_rate.limit': {
     name: 'rum_event_rate_limit',
     type: 'integer',
+  },
+  'apm-server.rum.allow_service_names': {
+    name: 'rum_allow_service_names',
+    type: 'text',
   },
   'apm-server.rum.event_rate.lru_size': {
     name: 'rum_event_rate_lru_size',
     type: 'integer',
   },
-  'apm-server.api_key.limit': {
-    name: 'api_key_limit',
-    type: 'integer',
+  'apm-server.rum.response_headers': {
+    name: 'rum_response_headers',
+    type: 'yaml',
+  },
+  'apm-server.rum.library_pattern': {
+    name: 'rum_library_pattern',
+    type: 'text',
+  },
+  'apm-server.rum.exclude_from_grouping': {
+    name: 'rum_exclude_from_grouping',
+    type: 'text',
   },
   'apm-server.max_event_size': {
     name: 'max_event_bytes',
@@ -172,5 +207,37 @@ export const apmConfigMapping: Record<
   'apm-server.ssl.curve_types': {
     name: 'tls_curve_types',
     type: 'text',
+  },
+  'apm-server.auth.secret_token': {
+    name: 'secret_token',
+    type: 'text',
+  },
+  'apm-server.auth.api_key.enabled': {
+    name: 'api_key_enabled',
+    type: 'bool',
+  },
+  'apm-server.auth.api_key.limit': {
+    name: 'api_key_limit',
+    type: 'bool',
+  },
+  'apm-server.auth.anonymous.enabled': {
+    name: 'anonymous_enabled',
+    type: 'bool',
+  },
+  'apm-server.auth.anonymous.allow_agent': {
+    name: 'anonymous_allow_agent',
+    type: 'text',
+  },
+  'apm-server.auth.anonymous.allow_service': {
+    name: 'anonymous_allow_service',
+    type: 'text',
+  },
+  'apm-server.auth.anonymous.rate_limit.ip_limit': {
+    name: 'anonymous_rate_limit_ip_limit',
+    type: 'integer',
+  },
+  'apm-server.auth.anonymous.rate_limit.event_limit': {
+    name: 'anonymous_rate_limit_event_limit',
+    type: 'integer',
   },
 };

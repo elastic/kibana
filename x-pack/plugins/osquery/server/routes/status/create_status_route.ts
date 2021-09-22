@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
@@ -14,16 +14,10 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     {
       path: '/internal/osquery/status',
       validate: false,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
       const soClient = context.core.savedObjects.client;
-      const isSuperUser = osqueryContext.security.authc
-        .getCurrentUser(request)
-        ?.roles.includes('superuser');
-
-      if (!isSuperUser) {
-        return response.ok({ body: undefined });
-      }
 
       const packageInfo = await osqueryContext.service
         .getPackageService()

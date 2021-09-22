@@ -6,7 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { Render, ContainerStyle } from '../../../types';
+import { ExpressionValueRender, ContainerStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 
@@ -19,11 +19,14 @@ interface Arguments {
   css: string;
   containerStyle: ContainerStyleArgument;
 }
+
+export type Renderable = ExpressionValueRender<Arguments> & Arguments;
+
 export function render(): ExpressionFunctionDefinition<
   'render',
-  Render<any>,
+  ExpressionValueRender<any>,
   Arguments,
-  Render<Arguments>
+  ExpressionValueRender<Arguments>
 > {
   const { help, args: argHelp } = getFunctionHelp().render;
 

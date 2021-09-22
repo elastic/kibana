@@ -100,7 +100,7 @@ export class SecurityNavControl extends Component<Props, State> {
       (authenticatedUser && (authenticatedUser.full_name || authenticatedUser.username)) || '';
 
     const buttonContents = authenticatedUser ? (
-      <EuiAvatar name={username} size="s" />
+      <EuiAvatar name={username} size="s" data-test-subj="userMenuAvatar" />
     ) : (
       <EuiLoadingSpinner size="m" />
     );

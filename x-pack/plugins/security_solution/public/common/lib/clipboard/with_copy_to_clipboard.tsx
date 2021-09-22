@@ -19,10 +19,11 @@ import { Clipboard } from './clipboard';
  * the clipboard and displays a confirmation toast
  */
 export const WithCopyToClipboard = React.memo<{
+  isHoverAction?: boolean;
   keyboardShortcut?: string;
   text: string;
   titleSummary?: string;
-}>(({ keyboardShortcut = '', text, titleSummary }) => (
+}>(({ isHoverAction, keyboardShortcut = '', text, titleSummary }) => (
   <EuiToolTip
     content={
       <TooltipWithKeyboardShortcut
@@ -33,7 +34,12 @@ export const WithCopyToClipboard = React.memo<{
       />
     }
   >
-    <Clipboard content={text} titleSummary={titleSummary} toastLifeTimeMs={800} />
+    <Clipboard
+      content={text}
+      isHoverAction={isHoverAction}
+      titleSummary={titleSummary}
+      toastLifeTimeMs={800}
+    />
   </EuiToolTip>
 ));
 

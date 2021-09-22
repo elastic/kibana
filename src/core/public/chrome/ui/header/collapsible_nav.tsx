@@ -126,7 +126,7 @@ export function CollapsibleNav({
       onClose={closeNav}
       button={button}
       ownFocus={false}
-      size={240}
+      size={248}
     >
       {customNavLink && (
         <Fragment>

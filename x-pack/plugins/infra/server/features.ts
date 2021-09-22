@@ -10,9 +10,10 @@ import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../common/alerting/logs/log_th
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/inventory_metric_threshold/types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/metric_threshold/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 
 export const METRICS_FEATURE = {
-  id: 'infrastructure',
+  id: METRICS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
     defaultMessage: 'Metrics',
   }),
@@ -71,7 +72,7 @@ export const METRICS_FEATURE = {
 };
 
 export const LOGS_FEATURE = {
-  id: 'logs',
+  id: LOGS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
     defaultMessage: 'Logs',
   }),

@@ -11,7 +11,7 @@ import { usageMetricSavedObjectType } from '../../../common/types';
 
 import {
   CounterValue,
-  createMetricObjects,
+  getOrCreateMetricObject,
   getRouteMetric,
   incrementCount,
   RouteString,
@@ -45,31 +45,22 @@ describe('Usage metric recorder', () => {
       get.mockClear();
       create.mockClear();
     });
-    it('should seed route metrics objects', async () => {
+    it('should create metrics that do not exist', async () => {
       get.mockRejectedValueOnce('stub value');
       create.mockReturnValueOnce('stub value');
-      const result = await createMetricObjects(savedObjectsClient);
+      const result = await getOrCreateMetricObject(savedObjectsClient, 'live_query');
       checkGetCalls(get.mock.calls);
       checkCreateCalls(create.mock.calls);
-      expect(result).toBe(true);
+      expect(result).toBe('stub value');
     });
 
-    it('should handle previously seeded objects properly', async () => {
+    it('should handle previously created objects properly', async () => {
       get.mockReturnValueOnce('stub value');
       create.mockRejectedValueOnce('stub value');
-      const result = await createMetricObjects(savedObjectsClient);
+      const result = await getOrCreateMetricObject(savedObjectsClient, 'live_query');
       checkGetCalls(get.mock.calls);
       checkCreateCalls(create.mock.calls, []);
-      expect(result).toBe(true);
-    });
-
-    it('should report failure to create the metrics object', async () => {
-      get.mockRejectedValueOnce('stub value');
-      create.mockRejectedValueOnce('stub value');
-      const result = await createMetricObjects(savedObjectsClient);
-      checkGetCalls(get.mock.calls);
-      checkCreateCalls(create.mock.calls);
-      expect(result).toBe(false);
+      expect(result).toBe('stub value');
     });
   });
 

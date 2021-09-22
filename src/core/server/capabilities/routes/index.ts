@@ -7,10 +7,9 @@
  */
 
 import { CapabilitiesResolver } from '../resolve_capabilities';
-import { InternalHttpServiceSetup } from '../../http';
+import { IRouter } from '../../http';
 import { registerCapabilitiesRoutes } from './resolve_capabilities';
 
-export function registerRoutes(http: InternalHttpServiceSetup, resolver: CapabilitiesResolver) {
-  const router = http.createRouter('');
+export function registerRoutes(router: IRouter, resolver: CapabilitiesResolver) {
   registerCapabilitiesRoutes(router, resolver);
 }

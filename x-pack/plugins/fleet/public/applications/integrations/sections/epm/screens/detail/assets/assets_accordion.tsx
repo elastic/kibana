@@ -24,6 +24,8 @@ import { AssetTitleMap } from '../../../constants';
 
 import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
 
+import { KibanaAssetType } from '../../../../../types';
+
 import type { AllowedAssetType, AssetSavedObject } from './types';
 
 interface Props {
@@ -33,8 +35,12 @@ interface Props {
 
 export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }) => {
   const { http } = useStartServices();
+
+  const isDashboard = type === KibanaAssetType.dashboard;
+
   return (
     <EuiAccordion
+      initialIsOpen={isDashboard}
       buttonContent={
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>

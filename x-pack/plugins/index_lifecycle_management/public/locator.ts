@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ManagementAppLocator } from 'src/plugins/management/common';
 import { LocatorDefinition } from '../../../../src/plugins/share/public/';
 import {
@@ -17,7 +17,7 @@ import { PLUGIN } from '../common/constants';
 
 export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
 
-export interface IlmLocatorParams extends SerializableState {
+export interface IlmLocatorParams extends SerializableRecord {
   page: 'policies_list' | 'policy_edit' | 'policy_create';
   policyName?: string;
 }

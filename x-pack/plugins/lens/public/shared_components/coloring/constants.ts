@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequiredPaletteParamTypes } from './types';
+import type { RequiredPaletteParamTypes } from '../../../common';
 
 export const DEFAULT_PALETTE_NAME = 'positive';
 export const FIXED_PROGRESSION = 'fixed' as const;

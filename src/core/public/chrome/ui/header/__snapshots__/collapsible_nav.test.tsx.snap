@@ -371,7 +371,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
     isOpen={true}
     onClose={[Function]}
     ownFocus={false}
-    size={240}
+    size={248}
   >
     <button
       aria-controls="collapsibe-nav"
@@ -395,7 +395,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       pushMinBreakpoint="l"
       role={null}
       side="left"
-      size={240}
+      size={248}
       type="overlay"
     >
       <nav
@@ -746,9 +746,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   onResize={[Function]}
                 >
                   <div>
-                    <div
-                      className=""
-                    >
+                    <div>
                       <div
                         className="euiCollapsibleNavGroup__children"
                       >
@@ -1021,9 +1019,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       onResize={[Function]}
                     >
                       <div>
-                        <div
-                          className=""
-                        >
+                        <div>
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >
@@ -1315,9 +1311,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       onResize={[Function]}
                     >
                       <div>
-                        <div
-                          className=""
-                        >
+                        <div>
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >
@@ -1570,9 +1564,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       onResize={[Function]}
                     >
                       <div>
-                        <div
-                          className=""
-                        >
+                        <div>
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >
@@ -1786,9 +1778,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       onResize={[Function]}
                     >
                       <div>
-                        <div
-                          className=""
-                        >
+                        <div>
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >
@@ -2158,7 +2148,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
     isOpen={false}
     onClose={[Function]}
     ownFocus={false}
-    size={240}
+    size={248}
   >
     <button
       aria-controls="collapsibe-nav"
@@ -2407,7 +2397,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
     isOpen={false}
     onClose={[Function]}
     ownFocus={false}
-    size={240}
+    size={248}
   >
     <button
       aria-controls="collapsibe-nav"

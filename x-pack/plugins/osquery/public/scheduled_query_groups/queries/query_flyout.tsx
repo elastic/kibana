@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import {
   EuiCallOut,
   EuiFlyout,
@@ -13,67 +14,87 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
-  EuiPortal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiDescribedFormGroup,
+  EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { satisfies } from 'semver';
 
-import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
-import { Form, getUseField, Field } from '../../shared_imports';
+import { Form, getUseField, Field, useFormData } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
 import {
   UseScheduledQueryGroupQueryFormProps,
+  ScheduledQueryGroupFormData,
   useScheduledQueryGroupQueryForm,
 } from './use_scheduled_query_group_query_form';
 import { ManageIntegrationLink } from '../../components/manage_integration_link';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
+import { ECSMappingEditorField, ECSMappingEditorFieldRef } from './lazy_ecs_mapping_editor_field';
 
 const CommonUseField = getUseField({ component: Field });
 
 interface QueryFlyoutProps {
+  uniqueQueryIds: string[];
   defaultValue?: UseScheduledQueryGroupQueryFormProps['defaultValue'] | undefined;
   integrationPackageVersion?: string | undefined;
-  onSave: (payload: OsqueryManagerPackagePolicyConfigRecord) => Promise<void>;
+  onSave: (payload: ScheduledQueryGroupFormData) => Promise<void>;
   onClose: () => void;
 }
 
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
+  uniqueQueryIds,
   defaultValue,
   integrationPackageVersion,
   onSave,
   onClose,
 }) => {
+  const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const [isEditMode] = useState(!!defaultValue);
   const { form } = useScheduledQueryGroupQueryForm({
+    uniqueQueryIds,
     defaultValue,
-    handleSubmit: (payload, isValid) =>
-      new Promise((resolve) => {
-        if (isValid) {
-          onSave(payload);
+    handleSubmit: async (payload, isValid) => {
+      const ecsFieldValue = await ecsFieldRef?.current?.validate();
+
+      return new Promise((resolve) => {
+        if (isValid && ecsFieldValue) {
+          onSave({
+            ...payload,
+            ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
+          });
           onClose();
         }
         resolve();
-      }),
+      });
+    },
   });
 
-  /* Platform and version fields are supported since osquer_manger@0.3.0 */
+  /* Platform and version fields are supported since osquery_manager@0.3.0 */
   const isFieldSupported = useMemo(
     () => (integrationPackageVersion ? satisfies(integrationPackageVersion, '>=0.3.0') : false),
     [integrationPackageVersion]
   );
 
-  const { submit, setFieldValue } = form;
+  const { submit, setFieldValue, reset, isSubmitting } = form;
+
+  const [{ query }] = useFormData({
+    form,
+    watch: ['query'],
+  });
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
+      if (!savedQuery) {
+        return reset();
+      }
+
       setFieldValue('id', savedQuery.id);
       setFieldValue('query', savedQuery.query);
 
@@ -93,119 +114,148 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         setFieldValue('version', [savedQuery.version]);
       }
     },
-    [isFieldSupported, setFieldValue]
+    [isFieldSupported, setFieldValue, reset]
   );
 
+  /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
+  const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
+
   return (
-    <EuiPortal>
-      <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h2 id="flyoutTitle">
-              {isEditMode ? (
-                <FormattedMessage
-                  id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.editFormTitle"
-                  defaultMessage="Edit query"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.addFormTitle"
-                  defaultMessage="Attach next query"
-                />
-              )}
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <Form form={form}>
-            {!isEditMode ? (
-              <>
-                <SavedQueriesDropdown onChange={handleSetQueryValue} />
-                <EuiSpacer />
-              </>
-            ) : null}
-            <CommonUseField path="id" />
-            <EuiSpacer />
-            <CommonUseField path="query" component={CodeEditorField} />
-            <EuiSpacer />
-            <EuiDescribedFormGroup
-              title={<h3>Set heading level based on context</h3>}
-              description={'Will be wrapped in a small, subdued EuiText block.'}
-            >
-              <EuiFlexItem>
-                <CommonUseField
-                  path="interval"
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  euiFieldProps={{ append: 's' }}
-                />
-                <EuiSpacer />
-                <CommonUseField
-                  path="version"
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  euiFieldProps={{
-                    isDisabled: !isFieldSupported,
-                    noSuggestions: false,
-                    singleSelection: { asPlainText: true },
-                    placeholder: ALL_OSQUERY_VERSIONS_OPTIONS[0].label,
-                    options: ALL_OSQUERY_VERSIONS_OPTIONS,
-                    onCreateOption: undefined,
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <CommonUseField
-                  path="platform"
-                  component={PlatformCheckBoxGroupField}
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  euiFieldProps={{ disabled: !isFieldSupported }}
-                />
-              </EuiFlexItem>
-            </EuiDescribedFormGroup>
-            <EuiSpacer />
-          </Form>
-          {!isFieldSupported ? (
-            <EuiCallOut
-              size="s"
-              title={
-                <FormattedMessage
-                  id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.unsupportedPlatformAndVersionFieldsCalloutTitle"
-                  defaultMessage="Platform and version fields are available from {version}"
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  values={{ version: `osquery_manager@0.3.0` }}
-                />
-              }
-              iconType="pin"
-            >
-              <EuiFlexGroup gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <ManageIntegrationLink />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiCallOut>
+    <EuiFlyout
+      size="m"
+      onClose={onClose}
+      aria-labelledby="flyoutTitle"
+      outsideClickCloses={false}
+      maskProps={maskProps}
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id="flyoutTitle">
+            {isEditMode ? (
+              <FormattedMessage
+                id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.editFormTitle"
+                defaultMessage="Edit query"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.addFormTitle"
+                defaultMessage="Attach next query"
+              />
+            )}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <Form form={form}>
+          {!isEditMode ? (
+            <>
+              <SavedQueriesDropdown onChange={handleSetQueryValue} />
+              <EuiSpacer />
+            </>
           ) : null}
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-                <FormattedMessage
-                  id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
+          <CommonUseField path="id" />
+          <EuiSpacer />
+          <CommonUseField path="query" component={CodeEditorField} />
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <CommonUseField
+                path="interval"
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                euiFieldProps={{ append: 's' }}
+              />
+              <EuiSpacer />
+              <CommonUseField
+                path="version"
+                labelAppend={
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      <FormattedMessage
+                        id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.versionFieldOptionalLabel"
+                        defaultMessage="(optional)"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                }
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                euiFieldProps={{
+                  isDisabled: !isFieldSupported,
+                  noSuggestions: false,
+                  singleSelection: { asPlainText: true },
+                  placeholder: i18n.translate(
+                    'xpack.osquery.scheduledQueryGroup.queriesTable.osqueryVersionAllLabel',
+                    {
+                      defaultMessage: 'ALL',
+                    }
+                  ),
+                  options: ALL_OSQUERY_VERSIONS_OPTIONS,
+                  onCreateOption: undefined,
+                }}
+              />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={submit} fill>
-                <FormattedMessage
-                  id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
+            <EuiFlexItem>
+              <CommonUseField
+                path="platform"
+                component={PlatformCheckBoxGroupField}
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                euiFieldProps={{ disabled: !isFieldSupported }}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    </EuiPortal>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <CommonUseField
+                path="ecs_mapping"
+                component={ECSMappingEditorField}
+                query={query}
+                fieldRef={ecsFieldRef}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Form>
+        {!isFieldSupported ? (
+          <EuiCallOut
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.unsupportedPlatformAndVersionFieldsCalloutTitle"
+                defaultMessage="Platform and version fields are available from {version}"
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                values={{ version: `osquery_manager@0.3.0` }}
+              />
+            }
+            iconType="pin"
+          >
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <ManageIntegrationLink />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiCallOut>
+        ) : null}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+              <FormattedMessage
+                id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton isLoading={isSubmitting} onClick={submit} fill>
+              <FormattedMessage
+                id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.saveButtonLabel"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 };
 

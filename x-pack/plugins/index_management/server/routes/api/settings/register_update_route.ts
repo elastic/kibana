@@ -16,37 +16,28 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-export function registerUpdateRoute({ router, lib }: RouteDependencies) {
+export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/settings/{indexName}'),
       validate: { body: bodySchema, params: paramsSchema },
     },
-    async (ctx, req, res) => {
-      const { indexName } = req.params as typeof paramsSchema.type;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
-        ignoreUnavailable: true,
-        allowNoIndices: false,
-        expandWildcards: 'none',
+        ignore_unavailable: true,
+        allow_no_indices: false,
+        expand_wildcards: 'none',
         index: indexName,
-        body: req.body,
+        body: request.body,
       };
 
       try {
-        const response = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'indices.putSettings',
-          params
-        );
-        return res.ok({ body: response });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        const { body: responseBody } = await client.asCurrentUser.indices.putSettings(params);
+        return response.ok({ body: responseBody });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

@@ -69,7 +69,7 @@ export default function ({ getService }) {
 
         const { body } = await loadPolicies(true);
         const fetchedPolicy = body.find((p) => p.name === policyName);
-        expect(fetchedPolicy.linkedIndices).to.eql([indexName]);
+        expect(fetchedPolicy.indices).to.eql([indexName]);
       });
 
       it('should add hidden indices linked to policies', async () => {
@@ -97,7 +97,7 @@ export default function ({ getService }) {
         const { body } = await loadPolicies(true);
         const fetchedPolicy = body.find((p) => p.name === policyName);
         // The index name is dynamically generated as .ds-<indexName>-XXX so we don't check for exact match
-        expect(fetchedPolicy.linkedIndices[0]).to.contain(indexName);
+        expect(fetchedPolicy.indices[0]).to.contain(indexName);
       });
     });
 
@@ -116,6 +116,38 @@ export default function ({ getService }) {
         // Make sure the new policy is returned
         const { body: bodySecondLoad } = await loadPolicies();
         expect(getPolicyNames(bodySecondLoad)).to.contain(name);
+      });
+    });
+
+    describe('edit', () => {
+      it('keeps _meta field intact', async () => {
+        const policyName = 'edit-meta-test-policy';
+        const policy = {
+          ...getPolicyPayload(policyName),
+          _meta: { description: 'test policy with _meta field' },
+        };
+
+        // Update the policy (uses the same route as create)
+        await createPolicy(policy).expect(200);
+
+        // only update warm phase timing, not deleting or changing _meta field
+        const editedPolicy = {
+          ...policy,
+          phases: {
+            ...policy.phases,
+            warm: {
+              ...policy.phases.warm,
+              min_age: '2d',
+            },
+          },
+        };
+
+        await createPolicy(editedPolicy).expect(200);
+
+        const { body } = await loadPolicies();
+        const loadedPolicy = body.find((p) => p.name === policyName);
+        // Make sure the edited policy still has _meta field
+        expect(loadedPolicy.policy._meta).to.eql(editedPolicy._meta);
       });
     });
 

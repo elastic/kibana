@@ -20,26 +20,6 @@ import { populateTimeline } from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
 
-const RowRenderersId = [
-  'alerts',
-  'auditd',
-  'auditd_file',
-  'library',
-  'netflow',
-  'plain',
-  'registry',
-  'suricata',
-  'system',
-  'system_dns',
-  'system_endgame_process',
-  'system_file',
-  'system_fim',
-  'system_security_event',
-  'system_socket',
-  'threat_match',
-  'zeek',
-];
-
 describe('Row renderers', () => {
   beforeEach(() => {
     cleanKibana();
@@ -100,9 +80,5 @@ describe('Row renderers', () => {
       .should('not.be.checked');
 
     cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);
-
-    cy.wait('@updateTimeline').then((interception) => {
-      expect(interception.request.body.timeline.excludedRowRendererIds).to.eql(RowRenderersId);
-    });
   });
 });

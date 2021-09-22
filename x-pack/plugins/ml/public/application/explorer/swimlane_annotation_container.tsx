@@ -12,10 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '../../../common/util/date_utils';
 import { AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
+import { useCurrentEuiTheme } from '../components/color_range_legend';
 
+export const X_AXIS_RIGHT_OVERFLOW = 50;
 export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;
-export const Y_AXIS_LABEL_FONT_COLOR = '#6a717d';
 const ANNOTATION_CONTAINER_HEIGHT = 12;
 const ANNOTATION_MIN_WIDTH = 8;
 
@@ -37,6 +38,8 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
 }) => {
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
 
+  const { euiTheme } = useCurrentEuiTheme();
+
   useEffect(() => {
     if (canvasRef.current !== null && Array.isArray(annotationsData)) {
       const chartElement = d3.select(canvasRef.current);
@@ -45,7 +48,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
       const dimensions = canvasRef.current.getBoundingClientRect();
 
       const startingXPos = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
-      const endingXPos = dimensions.width - 2 * Y_AXIS_LABEL_PADDING - 4;
+      const endingXPos = dimensions.width - X_AXIS_RIGHT_OVERFLOW;
 
       const svg = chartElement
         .append('svg')
@@ -66,8 +69,8 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         )
         .attr('x', Y_AXIS_LABEL_WIDTH + Y_AXIS_LABEL_PADDING)
         .attr('y', ANNOTATION_CONTAINER_HEIGHT)
-        .style('fill', Y_AXIS_LABEL_FONT_COLOR)
-        .style('font-size', '12px');
+        .style('fill', euiTheme.euiTextSubduedColor)
+        .style('font-size', euiTheme.euiFontSizeXS);
 
       // Add border
       svg
@@ -76,24 +79,29 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         .attr('y', 0)
         .attr('height', ANNOTATION_CONTAINER_HEIGHT)
         .attr('width', endingXPos - startingXPos)
-        .style('stroke', '#cccccc')
+        .style('stroke', euiTheme.euiBorderColor)
         .style('fill', 'none')
         .style('stroke-width', 1);
 
       // Add annotation marker
       annotationsData.forEach((d) => {
-        const annotationWidth = d.end_timestamp
-          ? xScale(Math.min(d.end_timestamp, domain.max)) -
-            Math.max(xScale(d.timestamp), startingXPos)
-          : 0;
+        const annotationWidth = Math.max(
+          d.end_timestamp
+            ? xScale(Math.min(d.end_timestamp, domain.max)) -
+                Math.max(xScale(d.timestamp), startingXPos)
+            : 0,
+          ANNOTATION_MIN_WIDTH
+        );
 
+        const xPos = d.timestamp >= domain.min ? xScale(d.timestamp) : startingXPos;
         svg
           .append('rect')
           .classed('mlAnnotationRect', true)
-          .attr('x', d.timestamp >= domain.min ? xScale(d.timestamp) : startingXPos)
+          // If annotation is at the end, prevent overflow by shifting it back
+          .attr('x', xPos + annotationWidth >= endingXPos ? endingXPos - annotationWidth : xPos)
           .attr('y', 0)
           .attr('height', ANNOTATION_CONTAINER_HEIGHT)
-          .attr('width', Math.max(annotationWidth, ANNOTATION_MIN_WIDTH))
+          .attr('width', annotationWidth)
           .on('mouseover', function () {
             const startingTime = formatHumanReadableDateTimeSeconds(d.timestamp);
             const endingTime =

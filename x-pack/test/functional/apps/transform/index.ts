@@ -39,6 +39,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.securityUI.logout();
     });
 
+    loadTestFile(require.resolve('./permissions'));
     loadTestFile(require.resolve('./creation_index_pattern'));
     loadTestFile(require.resolve('./creation_saved_search'));
     loadTestFile(require.resolve('./creation_runtime_mappings'));

@@ -61,8 +61,8 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   additionalFilters = [],
   operationName,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -91,11 +91,11 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
       },
       aggs: {
         timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams(
+          date_histogram: getMetricsDateHistogramParams({
             start,
             end,
-            config['xpack.apm.metricsInterval']
-          ),
+            metricsInterval: config['xpack.apm.metricsInterval'],
+          }),
           aggs,
         },
         ...aggs,

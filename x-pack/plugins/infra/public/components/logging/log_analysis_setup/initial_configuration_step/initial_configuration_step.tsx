@@ -63,7 +63,6 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiForm>
         <AnalysisSetupTimerangeForm
           disabled={disabled}
@@ -73,6 +72,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
           endTime={endTime}
           validationErrors={timeRangeValidationErrors}
         />
+        <EuiSpacer size="xl" />
         <AnalysisSetupIndicesForm
           disabled={disabled}
           indices={validatedIndices}

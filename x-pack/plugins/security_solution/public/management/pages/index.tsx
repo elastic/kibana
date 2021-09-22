@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
@@ -22,9 +22,9 @@ import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';
 import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
 const NoPermissions = memo(() => {
   return (
@@ -80,9 +80,14 @@ const EventFilterTelemetry = () => (
 );
 
 export const ManagementContainer = memo(() => {
-  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
+  const { loading, canAccessEndpointManagement } = useUserPrivileges().endpointPrivileges;
 
-  if (!isIngestEnabled) {
+  // Lets wait until we can verify permissions
+  if (loading) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (!canAccessEndpointManagement) {
     return <Route path="*" component={NoPermissions} />;
   }
 

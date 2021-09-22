@@ -18,8 +18,9 @@ import {
   DocumentsTransformFailed,
   DocumentsTransformSuccess,
 } from '../migrations/core/migrate_raw_docs';
+import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
 
-export type MigrationLogLevel = 'error' | 'info';
+export type MigrationLogLevel = 'error' | 'info' | 'warning';
 
 export interface MigrationLog {
   level: MigrationLogLevel;
@@ -75,19 +76,31 @@ export interface BaseState extends ControlState {
   readonly retryAttempts: number;
 
   /**
-   * The number of documents to fetch from Elasticsearch server to run migration over.
+   * The number of documents to process in each batch. This determines the
+   * maximum number of documents that will be read and written in a single
+   * request.
    *
-   * The higher the value, the faster the migration process will be performed since it reduces
-   * the number of round trips between Kibana and Elasticsearch servers.
-   * For the migration speed, we have to pay the price of increased memory consumption.
+   * The higher the value, the faster the migration process will be performed
+   * since it reduces the number of round trips between Kibana and
+   * Elasticsearch servers. For the migration speed, we have to pay the price
+   * of increased memory consumption and HTTP payload size.
    *
-   * Since batchSize defines the number of documents, not their size, it might happen that
-   * Elasticsearch fails a request with circuit_breaking_exception when it retrieves a set of
-   * saved objects of significant size.
+   * Since we cannot control the size in bytes of a batch when reading,
+   * Elasticsearch might fail with a circuit_breaking_exception when it
+   * retrieves a set of saved objects of significant size. In this case, you
+   * should set a smaller batchSize value and restart the migration process
+   * again.
    *
-   * In this case, you should set a smaller batchSize value and restart the migration process again.
+   * When writing batches, we limit the number of documents in a batch
+   * (batchSize) as well as the size of the batch in bytes (maxBatchSizeBytes).
    */
   readonly batchSize: number;
+  /**
+   * When writing batches, limits the batch size in bytes to ensure that we
+   * don't construct HTTP requests which would exceed Elasticsearch's
+   * http.max_content_length which defaults to 100mb.
+   */
+  readonly maxBatchSizeBytes: number;
   readonly logs: MigrationLog[];
   /**
    * The current alias e.g. `.kibana` which always points to the latest
@@ -118,6 +131,13 @@ export interface BaseState extends ControlState {
    * The list of known SO types that are registered.
    */
   readonly knownTypes: string[];
+  /**
+   * All exclude filter hooks registered for types on this index. Keyed by type name.
+   */
+  readonly excludeFromUpgradeFilterHooks: Record<
+    string,
+    SavedObjectTypeExcludeFromUpgradeFilterHook
+  >;
 }
 
 export interface InitState extends BaseState {
@@ -172,6 +192,11 @@ export interface SetSourceWriteBlockState extends PostInitState {
   readonly sourceIndex: Option.Some<string>;
 }
 
+export interface CalculateExcludeFiltersState extends PostInitState {
+  readonly controlState: 'CALCULATE_EXCLUDE_FILTERS';
+  readonly sourceIndex: Option.Some<string>;
+}
+
 export interface CreateNewTargetState extends PostInitState {
   /** Blank ES cluster, create a new version-specific target index */
   readonly controlState: 'CREATE_NEW_TARGET';
@@ -220,7 +245,8 @@ export interface ReindexSourceToTempIndex extends PostInitState {
 
 export interface ReindexSourceToTempIndexBulk extends PostInitState {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK';
-  readonly transformedDocs: SavedObjectsRawDoc[];
+  readonly transformedDocBatches: [SavedObjectsRawDoc[]];
+  readonly currentBatch: number;
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
   readonly progress: Progress;
@@ -305,7 +331,8 @@ export interface TransformedDocumentsBulkIndex extends PostInitState {
    * Write the up-to-date transformed documents to the target index
    */
   readonly controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX';
-  readonly transformedDocs: SavedObjectsRawDoc[];
+  readonly transformedDocBatches: SavedObjectsRawDoc[][];
+  readonly currentBatch: number;
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;
   readonly pitId: string;
@@ -401,6 +428,7 @@ export type State = Readonly<
   | WaitForYellowSourceState
   | CheckUnknownDocumentsState
   | SetSourceWriteBlockState
+  | CalculateExcludeFiltersState
   | CreateNewTargetState
   | CreateReindexTempState
   | ReindexSourceToTempOpenPit

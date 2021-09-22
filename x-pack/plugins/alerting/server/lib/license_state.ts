@@ -55,6 +55,15 @@ export class LicenseState {
     return this.licenseInformation;
   }
 
+  public getIsSecurityEnabled(): boolean | null {
+    if (!this.license || !this.license?.isAvailable) {
+      return null;
+    }
+
+    const { isEnabled } = this.license.getFeature('security');
+    return isEnabled;
+  }
+
   public setNotifyUsage(notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage']) {
     this._notifyUsage = notifyUsage;
   }
@@ -140,6 +149,7 @@ export class LicenseState {
 
   public ensureLicenseForAlertType<
     Params extends AlertTypeParams,
+    ExtractedParams extends AlertTypeParams,
     State extends AlertTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
@@ -148,6 +158,7 @@ export class LicenseState {
   >(
     alertType: AlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,

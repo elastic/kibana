@@ -15,20 +15,20 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUiTracker } from '../../../../../../observability/public';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 interface Props {
   onConfirm: () => void;
   onCancel: () => void;
   unsupportedConfigs: Array<{ key: string; value: string }>;
-  isLoading: boolean;
 }
 export function ConfirmSwitchModal({
   onConfirm,
   onCancel,
   unsupportedConfigs,
-  isLoading,
 }: Props) {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const [isConfirmChecked, setIsConfirmChecked] = useState(false);
   const hasUnsupportedConfigs = !!unsupportedConfigs.length;
   return (
@@ -50,9 +50,13 @@ export function ConfirmSwitchModal({
         }
       )}
       defaultFocusedButton="confirm"
-      onConfirm={onConfirm}
+      onConfirm={() => {
+        trackApmEvent({
+          metric: 'confirm_data_stream_switch',
+        });
+        onConfirm();
+      }}
       confirmButtonDisabled={!isConfirmChecked}
-      isLoading={isLoading}
     >
       <p>
         {i18n.translate('xpack.apm.settings.schema.confirm.descriptionText', {
@@ -135,7 +139,6 @@ export function ConfirmSwitchModal({
           onChange={(e) => {
             setIsConfirmChecked(e.target.checked);
           }}
-          disabled={isLoading}
         />
       </p>
     </EuiConfirmModal>

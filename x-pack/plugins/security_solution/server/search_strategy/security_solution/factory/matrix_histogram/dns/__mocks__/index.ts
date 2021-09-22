@@ -10,6 +10,7 @@ import { MatrixHistogramType } from '../../../../../../../common/search_strategy
 export const mockOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -28,6 +29,7 @@ export const expectedDsl = {
   allowNoIndices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',

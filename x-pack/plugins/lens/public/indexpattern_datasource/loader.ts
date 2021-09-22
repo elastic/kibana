@@ -73,31 +73,29 @@ export async function loadIndexPatterns({
           (field) =>
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
         )
-        .map(
-          (field): IndexPatternField => {
-            // Convert the getters on the index pattern service into plain JSON
-            const base = {
-              name: field.name,
-              displayName: field.displayName,
-              type: field.type,
-              aggregatable: field.aggregatable,
-              searchable: field.searchable,
-              meta: indexPattern.metaFields.includes(field.name),
-              esTypes: field.esTypes,
-              scripted: field.scripted,
-              runtime: Boolean(field.runtimeField),
-            };
+        .map((field): IndexPatternField => {
+          // Convert the getters on the index pattern service into plain JSON
+          const base = {
+            name: field.name,
+            displayName: field.displayName,
+            type: field.type,
+            aggregatable: field.aggregatable,
+            searchable: field.searchable,
+            meta: indexPattern.metaFields.includes(field.name),
+            esTypes: field.esTypes,
+            scripted: field.scripted,
+            runtime: Boolean(field.runtimeField),
+          };
 
-            // Simplifies tests by hiding optional properties instead of undefined
-            return base.scripted
-              ? {
-                  ...base,
-                  lang: field.lang,
-                  script: field.script,
-                }
-              : base;
-          }
-        )
+          // Simplifies tests by hiding optional properties instead of undefined
+          return base.scripted
+            ? {
+                ...base,
+                lang: field.lang,
+                script: field.script,
+              }
+            : base;
+        })
         .concat(documentField);
 
       const { typeMeta, title, timeFieldName, fieldFormatMap } = indexPattern;
@@ -227,12 +225,14 @@ export async function loadInitialState({
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
 
+  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
+
   const requiredPatterns: string[] = uniq(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
           .concat(state.currentIndexPatternId)
-      : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id]
+      : [fallbackId]
   )
     // take out the undefined from the list
     .filter(Boolean);
@@ -248,15 +248,16 @@ export async function loadInitialState({
     indexPatternRefs[0]?.id,
   ].filter((id) => id != null && availableIndexPatterns.has(id));
 
-  const currentIndexPatternId = availableIndexPatternIds[0]!;
+  const currentIndexPatternId = availableIndexPatternIds[0];
 
   if (currentIndexPatternId) {
     setLastUsedIndexPatternId(storage, currentIndexPatternId);
+
+    if (!requiredPatterns.includes(currentIndexPatternId)) {
+      requiredPatterns.push(currentIndexPatternId);
+    }
   }
 
-  if (!requiredPatterns.includes(currentIndexPatternId)) {
-    requiredPatterns.push(currentIndexPatternId);
-  }
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
@@ -265,7 +266,7 @@ export async function loadInitialState({
   if (state) {
     return {
       ...state,
-      currentIndexPatternId,
+      currentIndexPatternId: currentIndexPatternId ?? fallbackId,
       indexPatternRefs,
       indexPatterns,
       existingFields: {},
@@ -274,7 +275,7 @@ export async function loadInitialState({
   }
 
   return {
-    currentIndexPatternId,
+    currentIndexPatternId: currentIndexPatternId ?? fallbackId,
     indexPatternRefs,
     indexPatterns,
     layers: {},

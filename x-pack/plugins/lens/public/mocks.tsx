@@ -16,29 +16,48 @@ import moment from 'moment';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
+import { DeepPartial } from '@reduxjs/toolkit';
 import { LensPublicStart } from '.';
 import { visualizationTypes } from './xy_visualization/types';
 import { navigationPluginMock } from '../../../../src/plugins/navigation/public/mocks';
 import { LensAppServices } from './app_plugin/types';
-import { DOC_TYPE } from '../common';
+import { DOC_TYPE, layerTypes } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
+import { inspectorPluginMock } from '../../../../src/plugins/inspector/public/mocks';
+import { spacesPluginMock } from '../../spaces/public/mocks';
 import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
-import {
+import type {
   LensByValueInput,
-  LensSavedObjectAttributes,
   LensByReferenceInput,
+  ResolvedLensSavedObjectAttributes,
 } from './embeddable/embeddable';
 import {
   mockAttributeService,
   createEmbeddableStateTransferMock,
 } from '../../../../src/plugins/embeddable/public/mocks';
-import { LensAttributeService } from './lens_attribute_service';
-import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
+import { fieldFormatsServiceMock } from '../../../../src/plugins/field_formats/public/mocks';
+import type { LensAttributeService } from './lens_attribute_service';
+import type { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 
-import { makeConfigureStore, getPreloadedState, LensAppState } from './state_management/index';
+import { makeConfigureStore, LensAppState, LensState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
 import { presentationUtilPluginMock } from '../../../../src/plugins/presentation_util/public/mocks';
-import { DatasourcePublicAPI, Datasource, Visualization, FramePublicAPI } from './types';
+import {
+  DatasourcePublicAPI,
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  FrameDatasourceAPI,
+} from './types';
+
+export function mockDatasourceStates() {
+  return {
+    testDatasource: {
+      state: {},
+      isLoading: false,
+    },
+  };
+}
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -46,6 +65,8 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     clearLayer: jest.fn((state, _layerId) => state),
     removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
+    getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
+    getLayerType: jest.fn((_state, _layerId) => layerTypes.DATA),
     visualizationTypes: [
       {
         icon: 'empty',
@@ -81,6 +102,11 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     renderDimensionEditor: jest.fn(),
   };
 }
+
+export const visualizationMap = {
+  testVis: createMockVisualization(),
+  testVis2: createMockVisualization(),
+};
 
 export type DatasourceMock = jest.Mocked<Datasource> & {
   publicAPIMock: jest.Mocked<DatasourcePublicAPI>;
@@ -123,8 +149,16 @@ export function createMockDatasource(id: string): DatasourceMock {
     publicAPIMock,
     getErrorMessages: jest.fn((_state) => undefined),
     checkIntegrity: jest.fn((_state) => []),
+    isTimeBased: jest.fn(),
   };
 }
+
+const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
+const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
+export const datasourceMap = {
+  testDatasource2: mockDatasource2,
+  testDatasource: mockDatasource,
+};
 
 export function createExpressionRendererMock(): jest.Mock<
   React.ReactElement,
@@ -137,10 +171,16 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 export function createMockFramePublicAPI(): FrameMock {
   return {
     datasourceLayers: {},
+  };
+}
+
+export type FrameDatasourceMock = jest.Mocked<FrameDatasourceAPI>;
+export function createMockFrameDatasourceAPI(): FrameDatasourceMock {
+  return {
+    datasourceLayers: {},
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
     filters: [],
-    searchSessionId: 'sessionId',
   };
 }
 
@@ -165,19 +205,21 @@ export const lensPluginMock = {
   createStartContract,
 };
 
-export const defaultDoc = ({
+export const defaultDoc = {
   savedObjectId: '1234',
   title: 'An extremely cool default document!',
   expression: 'definitely a valid expression',
+  visualizationType: 'testVis',
   state: {
     query: 'kuery',
     filters: [{ query: { match_phrase: { src: 'test' } } }],
     datasourceStates: {
       testDatasource: 'datasource',
     },
+    visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-} as unknown) as Document;
+} as unknown as Document;
 
 export function createMockTimefilter() {
   const unsubscribe = jest.fn();
@@ -262,7 +304,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
       getDefaultQuery: jest.fn(() => ({ query: '', language: 'lucene' })),
     };
   }
-  return ({
+  return {
     query: {
       filterManager: createMockFilterManager(),
       timefilter: {
@@ -272,9 +314,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
       state$: new Observable(),
     },
     indexPatterns: {
-      get: jest.fn((id) => {
-        return new Promise((resolve) => resolve({ id }));
-      }),
+      get: jest.fn().mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true })),
     },
     search: createMockSearchService(),
     nowProvider: {
@@ -283,7 +323,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
     fieldFormats: {
       deserialize: jest.fn(),
     },
-  } as unknown) as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 }
 
 export function makeDefaultServices(
@@ -313,7 +353,7 @@ export function makeDefaultServices(
 
   function makeAttributeService(): LensAttributeService {
     const attributeServiceMock = mockAttributeService<
-      LensSavedObjectAttributes,
+      ResolvedLensSavedObjectAttributes,
       LensByValueInput,
       LensByReferenceInput
     >(
@@ -326,9 +366,14 @@ export function makeDefaultServices(
       core
     );
 
-    attributeServiceMock.unwrapAttributes = jest.fn().mockResolvedValue(doc);
+    attributeServiceMock.unwrapAttributes = jest.fn().mockResolvedValue({
+      ...doc,
+      sharingSavedObjectProps: {
+        outcome: 'exactMatch',
+      },
+    });
     attributeServiceMock.wrapAttributes = jest.fn().mockResolvedValue({
-      savedObjectId: ((doc as unknown) as LensByReferenceInput).savedObjectId,
+      savedObjectId: (doc as unknown as LensByReferenceInput).savedObjectId,
     });
 
     return attributeServiceMock;
@@ -342,6 +387,7 @@ export function makeDefaultServices(
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
+    inspector: inspectorPluginMock.createStartContract(),
     dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
     savedObjectsClient: core.savedObjects.client,
@@ -357,12 +403,14 @@ export function makeDefaultServices(
       getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
     },
     data: mockDataPlugin(sessionIdSubject),
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
     storage: {
       get: jest.fn(),
       set: jest.fn(),
       remove: jest.fn(),
       clear: jest.fn(),
     },
+    spaces: spacesPluginMock.createStartContract(),
   };
 }
 
@@ -380,12 +428,7 @@ export const defaultState = {
     state: {},
     activeId: 'testVis',
   },
-  datasourceStates: {
-    testDatasource: {
-      isLoading: false,
-      state: '',
-    },
-  },
+  datasourceStates: mockDatasourceStates(),
 };
 
 export function makeLensStore({
@@ -401,17 +444,21 @@ export function makeLensStore({
     data = mockDataPlugin();
   }
   const lensStore = makeConfigureStore(
-    getPreloadedState({
-      ...defaultState,
-      searchSessionId: data.search.session.start(),
-      query: data.query.queryString.getQuery(),
-      filters: data.query.filterManager.getGlobalFilters(),
-      resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-      ...preloadedState,
-    }),
     {
-      data,
-    }
+      lensServices: { ...makeDefaultServices(), data },
+      datasourceMap,
+      visualizationMap,
+    },
+    {
+      lens: {
+        ...defaultState,
+        searchSessionId: data.search.session.start(),
+        query: data.query.queryString.getQuery(),
+        filters: data.query.filterManager.getGlobalFilters(),
+        resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+        ...preloadedState,
+      },
+    } as DeepPartial<LensState>
   );
 
   const origDispatch = lensStore.dispatch;
@@ -458,10 +505,10 @@ export const mountWithProvider = async (
   let instance: ReactWrapper = {} as ReactWrapper;
 
   await act(async () => {
-    instance = mount(component, ({
+    instance = mount(component, {
       wrappingComponent,
       ...restOptions,
-    } as unknown) as ReactWrapper);
+    } as unknown as ReactWrapper);
   });
   return { instance, lensStore };
 };

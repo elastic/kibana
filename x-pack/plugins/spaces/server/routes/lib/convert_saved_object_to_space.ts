@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from '../../../common';
 
 export function convertSavedObjectToSpace(savedObject: any): Space {
   return {

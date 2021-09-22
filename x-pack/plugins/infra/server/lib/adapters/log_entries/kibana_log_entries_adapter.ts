@@ -11,7 +11,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
 import { compact } from 'lodash';
-import { JsonArray } from '@kbn/common-utils';
+import { JsonArray } from '@kbn/utility-types';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesAdapter,
@@ -268,9 +268,7 @@ const createFilterClauses = (
 const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
   filterQuery ? [filterQuery] : [];
 
-function processCursor(
-  cursor: LogEntriesParams['cursor']
-): {
+function processCursor(cursor: LogEntriesParams['cursor']): {
   sortDirection: 'asc' | 'desc';
   searchAfterClause: { search_after?: readonly [number, number] };
 } {

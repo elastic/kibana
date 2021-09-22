@@ -40,9 +40,8 @@ import {
   APP_OVERVIEW_PATH,
   APP_PATH,
   DEFAULT_INDEX_KEY,
-  DETECTION_ENGINE_INDEX_URL,
-  DEFAULT_ALERTS_INDEX,
   APP_ICON_SOLUTION,
+  DETECTION_ENGINE_INDEX_URL,
 } from '../common/constants';
 
 import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
@@ -58,16 +57,21 @@ import { SecuritySolutionUiConfigType } from './common/types';
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
-import { parseExperimentalConfigValue } from '../common/experimental_features';
+import {
+  ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
-  private kibanaVersion: string;
+  readonly kibanaVersion: string;
   private config: SecuritySolutionUiConfigType;
+  readonly experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
   private appUpdater$ = new Subject<AppUpdater>();
@@ -100,24 +104,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.home.featureCatalogue.registerSolution({
         id: APP_ID,
         title: APP_NAME,
-        subtitle: i18n.translate('xpack.securitySolution.featureCatalogue.subtitle', {
-          defaultMessage: 'SIEM & Endpoint Security',
-        }),
         description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
           defaultMessage:
             'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
         }),
-        appDescriptions: [
-          i18n.translate('xpack.securitySolution.featureCatalogueDescription1', {
-            defaultMessage: 'Prevent threats autonomously.',
-          }),
-          i18n.translate('xpack.securitySolution.featureCatalogueDescription2', {
-            defaultMessage: 'Detect and respond.',
-          }),
-          i18n.translate('xpack.securitySolution.featureCatalogueDescription3', {
-            defaultMessage: 'Investigate incidents.',
-          }),
-        ],
         icon: 'logoSecurity',
         path: APP_OVERVIEW_PATH,
         order: 300,
@@ -151,7 +141,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       defaultPath: OVERVIEW_PATH,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
-      deepLinks: getDeepLinks(),
+      deepLinks: getDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
@@ -231,7 +221,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         if (currentLicense.type !== undefined) {
           this.appUpdater$.next(() => ({
             navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-            deepLinks: getDeepLinks(currentLicense.type, core.application.capabilities),
+            deepLinks: getDeepLinks(
+              this.experimentalFeatures,
+              currentLicense.type,
+              core.application.capabilities
+            ),
           }));
         }
       });
@@ -239,6 +233,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       updateGlobalNavigation({
         capabilities: core.application.capabilities,
         updater$: this.appUpdater$,
+        enableExperimental: this.experimentalFeatures,
       });
     }
 
@@ -295,6 +290,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
         network: new subPluginClasses.Network(),
+        ...(this.experimentalFeatures.uebaEnabled ? { ueba: new subPluginClasses.Ueba() } : {}),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -320,6 +316,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
+      ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+        ? { ueba: subPlugins.ueba.start(storage) }
+        : {}),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
     };
@@ -334,38 +333,34 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     subPlugins: StartedSubPlugins
   ): Promise<SecurityAppStore> {
     if (!this._store) {
-      const experimentalFeatures = parseExperimentalConfigValue(
-        this.config.enableExperimental || []
-      );
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      const [
-        { createStore, createInitialState },
-        kibanaIndexPatterns,
-        configIndexPatterns,
-      ] = await Promise.all([
-        this.lazyApplicationDependencies(),
-        startPlugins.data.indexPatterns.getIdsWithTitle(),
-        startPlugins.data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
-            {
-              strategy: 'indexFields',
-            }
-          )
-          .toPromise(),
-      ]);
+      const [{ createStore, createInitialState }, kibanaIndexPatterns, configIndexPatterns] =
+        await Promise.all([
+          this.lazyApplicationDependencies(),
+          startPlugins.data.indexPatterns.getIdsWithTitle(),
+          startPlugins.data.search
+            .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+              { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
+              {
+                strategy: 'indexFields',
+              }
+            )
+            .toPromise(),
+        ]);
 
       let signal: { name: string | null } = { name: null };
       try {
-        // TODO: Once we are past experimental phase this code should be removed
-        // TODO: This currently prevents TGrid from refreshing
-        if (experimentalFeatures.ruleRegistryEnabled) {
-          signal = { name: DEFAULT_ALERTS_INDEX };
-        } else {
-          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-            method: 'GET',
-          });
-        }
+        // const { index_name: indexName } = await coreStart.http.fetch(
+        //   `${BASE_RAC_ALERTS_API_PATH}/index`,
+        //   {
+        //     method: 'GET',
+        //     query: { features: SERVER_APP_ID },
+        //   }
+        // );
+        // signal = { name: indexName[0] };
+        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+          method: 'GET',
+        });
       } catch {
         signal = { name: null };
       }
@@ -383,22 +378,28 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.exceptions.storageTimelines!.timelineById,
             ...subPlugins.hosts.storageTimelines!.timelineById,
             ...subPlugins.network.storageTimelines!.timelineById,
+            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+              ? subPlugins.ueba.storageTimelines!.timelineById
+              : {}),
           },
         },
       };
 
       const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
-      const timelineReducer = (reduceReducers(
+      const timelineReducer = reduceReducers(
         timelineInitialState.timeline,
         tGridReducer,
         subPlugins.timelines.store.reducer.timeline
-      ) as unknown) as Reducer<TimelineState, AnyAction>;
+      ) as unknown as Reducer<TimelineState, AnyAction>;
 
       this._store = createStore(
         createInitialState(
           {
             ...subPlugins.hosts.store.initialState,
             ...subPlugins.network.store.initialState,
+            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+              ? subPlugins.ueba.store.initialState
+              : {}),
             ...timelineInitialState,
             ...subPlugins.management.store.initialState,
           },
@@ -406,12 +407,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
-            enableExperimental: experimentalFeatures,
+            enableExperimental: this.experimentalFeatures,
           }
         ),
         {
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.network.store.reducer,
+          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
+            ? subPlugins.ueba.store.reducer
+            : {}),
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,
@@ -420,9 +424,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.storage,
         [...(subPlugins.management.store.middleware ?? [])]
       );
-      if (startPlugins.timelines) {
-        startPlugins.timelines.setTGridEmbeddedStore(this._store);
-      }
+    }
+    if (startPlugins.timelines) {
+      startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
   }

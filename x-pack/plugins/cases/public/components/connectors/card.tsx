@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { ConnectorTypes } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
+import { getConnectorIcon } from '../utils';
 
 interface ConnectorCardProps {
   connectorType: ConnectorTypes;
@@ -47,16 +48,13 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
     ),
     [listItems]
   );
+
   const icon = useMemo(
-    () => (
-      <EuiIcon
-        size="xl"
-        type={triggersActionsUi.actionTypeRegistry.get(`${connectorType}`)?.iconClass ?? ''}
-      />
-    ),
+    () => <EuiIcon size="xl" type={getConnectorIcon(triggersActionsUi, connectorType)} />,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectorType]
   );
+
   return (
     <>
       {isLoading && <EuiLoadingSpinner data-test-subj="connector-card-loading" />}

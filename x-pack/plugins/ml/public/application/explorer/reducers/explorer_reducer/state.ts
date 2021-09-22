@@ -36,7 +36,7 @@ export interface ExplorerState {
   filteredFields: any[];
   filterPlaceHolder: any;
   indexPattern: { title: string; fields: any[] };
-  influencersFilterQuery: InfluencersFilterQuery;
+  influencersFilterQuery?: InfluencersFilterQuery;
   influencers: Dictionary<any>;
   isAndOperator: boolean;
   loading: boolean;
@@ -59,6 +59,7 @@ export interface ExplorerState {
   viewBySwimlaneOptions: string[];
   swimlaneLimit?: number;
   swimLaneSeverity?: number;
+  showCharts: boolean;
 }
 
 function getDefaultIndexPattern() {
@@ -112,5 +113,6 @@ export function getExplorerDefaultState(): ExplorerState {
     viewByPerPage: SWIM_LANE_DEFAULT_PAGE_SIZE,
     viewByFromPage: 1,
     swimlaneLimit: undefined,
+    showCharts: true,
   };
 }

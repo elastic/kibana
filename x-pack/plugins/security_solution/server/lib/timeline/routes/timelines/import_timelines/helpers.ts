@@ -106,133 +106,132 @@ export const importTimelines = async (
       batchParseObjects.reduce<Array<Promise<ImportTimelineResponse>>>((accum, parsedTimeline) => {
         const importsWorkerPromise = new Promise<ImportTimelineResponse>(
           async (resolve, reject) => {
-            if (parsedTimeline instanceof Error) {
-              // If the JSON object had a validation or parse error then we return
-              // early with the error and an (unknown) for the ruleId
-              resolve(
-                createBulkErrorObject({
-                  statusCode: 400,
-                  message: parsedTimeline.message,
-                })
-              );
-
-              return null;
-            }
-
-            const {
-              savedObjectId,
-              pinnedEventIds,
-              globalNotes,
-              eventNotes,
-              status,
-              templateTimelineId,
-              templateTimelineVersion,
-              title,
-              timelineType,
-              version,
-            } = parsedTimeline;
-
-            const parsedTimelineObject = omit(timelineSavedObjectOmittedFields, parsedTimeline);
-            let newTimeline = null;
             try {
-              const compareTimelinesStatus = new CompareTimelinesStatus({
-                status,
-                timelineType,
-                title,
-                timelineInput: {
-                  id: savedObjectId,
-                  version,
-                },
-                templateTimelineInput: {
-                  id: templateTimelineId,
-                  version: templateTimelineVersion,
-                },
-                frameworkRequest,
-              });
-              await compareTimelinesStatus.init();
-              const isTemplateTimeline = compareTimelinesStatus.isHandlingTemplateTimeline;
-              if (compareTimelinesStatus.isCreatableViaImport) {
-                // create timeline / timeline template
-                newTimeline = await createTimelines({
-                  frameworkRequest,
-                  timeline: setTimeline(parsedTimelineObject, parsedTimeline, isTemplateTimeline),
-                  pinnedEventIds: isTemplateTimeline ? null : pinnedEventIds,
-                  notes: isTemplateTimeline ? globalNotes : [...globalNotes, ...eventNotes],
-                  isImmutable,
-                  overrideNotesOwner: false,
-                });
-
-                resolve({
-                  timeline_id: newTimeline.timeline.savedObjectId,
-                  status_code: 200,
-                  action: TimelineStatusActions.createViaImport,
-                });
-              }
-
-              if (!compareTimelinesStatus.isHandlingTemplateTimeline) {
-                const errorMessage = compareTimelinesStatus.checkIsFailureCases(
-                  TimelineStatusActions.createViaImport
-                );
-                const message = errorMessage?.body ?? DEFAULT_ERROR;
-
+              if (parsedTimeline instanceof Error) {
+                // If the JSON object had a validation or parse error then we return
+                // early with the error and an (unknown) for the ruleId
                 resolve(
                   createBulkErrorObject({
-                    id: savedObjectId ?? 'unknown',
-                    statusCode: 409,
-                    message,
+                    statusCode: 400,
+                    message: parsedTimeline.message,
                   })
                 );
-              } else {
-                if (compareTimelinesStatus.isUpdatableViaImport) {
-                  // update timeline template
+                return null;
+              }
+
+              const {
+                savedObjectId,
+                pinnedEventIds,
+                globalNotes,
+                eventNotes,
+                status,
+                templateTimelineId,
+                templateTimelineVersion,
+                title,
+                timelineType,
+                version,
+              } = parsedTimeline;
+              const parsedTimelineObject = omit(timelineSavedObjectOmittedFields, parsedTimeline);
+              let newTimeline = null;
+
+              try {
+                const compareTimelinesStatus = new CompareTimelinesStatus({
+                  status,
+                  timelineType,
+                  title,
+                  timelineInput: {
+                    id: savedObjectId,
+                    version,
+                  },
+                  templateTimelineInput: {
+                    id: templateTimelineId,
+                    version: templateTimelineVersion,
+                  },
+                  frameworkRequest,
+                });
+                await compareTimelinesStatus.init();
+                const isTemplateTimeline = compareTimelinesStatus.isHandlingTemplateTimeline;
+
+                if (compareTimelinesStatus.isCreatableViaImport) {
+                  // create timeline / timeline template
                   newTimeline = await createTimelines({
                     frameworkRequest,
-                    timeline: parsedTimelineObject,
-                    timelineSavedObjectId: compareTimelinesStatus.timelineId,
-                    timelineVersion: compareTimelinesStatus.timelineVersion,
-                    notes: globalNotes,
-                    existingNoteIds: compareTimelinesStatus.timelineInput.data?.noteIds,
+                    timeline: setTimeline(parsedTimelineObject, parsedTimeline, isTemplateTimeline),
+                    pinnedEventIds: isTemplateTimeline ? null : pinnedEventIds,
+                    notes: isTemplateTimeline ? globalNotes : [...globalNotes, ...eventNotes],
                     isImmutable,
                     overrideNotesOwner: false,
                   });
-
                   resolve({
                     timeline_id: newTimeline.timeline.savedObjectId,
                     status_code: 200,
-                    action: TimelineStatusActions.updateViaImport,
+                    action: TimelineStatusActions.createViaImport,
                   });
-                } else {
+                }
+
+                if (!compareTimelinesStatus.isHandlingTemplateTimeline) {
                   const errorMessage = compareTimelinesStatus.checkIsFailureCases(
-                    TimelineStatusActions.updateViaImport
+                    TimelineStatusActions.createViaImport
                   );
-
                   const message = errorMessage?.body ?? DEFAULT_ERROR;
-
                   resolve(
                     createBulkErrorObject({
-                      id:
-                        savedObjectId ??
-                        (templateTimelineId
-                          ? `(template_timeline_id) ${templateTimelineId}`
-                          : 'unknown'),
+                      id: savedObjectId ?? 'unknown',
                       statusCode: 409,
                       message,
                     })
                   );
+                } else {
+                  if (compareTimelinesStatus.isUpdatableViaImport) {
+                    // update timeline template
+                    newTimeline = await createTimelines({
+                      frameworkRequest,
+                      timeline: parsedTimelineObject,
+                      timelineSavedObjectId: compareTimelinesStatus.timelineId,
+                      timelineVersion: compareTimelinesStatus.timelineVersion,
+                      notes: globalNotes,
+                      existingNoteIds: compareTimelinesStatus.timelineInput.data?.noteIds,
+                      isImmutable,
+                      overrideNotesOwner: false,
+                    });
+                    resolve({
+                      timeline_id: newTimeline.timeline.savedObjectId,
+                      status_code: 200,
+                      action: TimelineStatusActions.updateViaImport,
+                    });
+                  } else {
+                    const errorMessage = compareTimelinesStatus.checkIsFailureCases(
+                      TimelineStatusActions.updateViaImport
+                    );
+                    const message = errorMessage?.body ?? DEFAULT_ERROR;
+                    resolve(
+                      createBulkErrorObject({
+                        id:
+                          savedObjectId ??
+                          (templateTimelineId
+                            ? `(template_timeline_id) ${templateTimelineId}`
+                            : 'unknown'),
+                        statusCode: 409,
+                        message,
+                      })
+                    );
+                  }
                 }
+              } catch (err) {
+                resolve(
+                  createBulkErrorObject({
+                    id:
+                      savedObjectId ??
+                      (templateTimelineId
+                        ? `(template_timeline_id) ${templateTimelineId}`
+                        : 'unknown'),
+                    statusCode: 400,
+                    message: err.message,
+                  })
+                );
               }
-            } catch (err) {
-              resolve(
-                createBulkErrorObject({
-                  id:
-                    savedObjectId ??
-                    (templateTimelineId
-                      ? `(template_timeline_id) ${templateTimelineId}`
-                      : 'unknown'),
-                  statusCode: 400,
-                  message: err.message,
-                })
-              );
+            } catch (error) {
+              reject(error);
             }
           }
         );

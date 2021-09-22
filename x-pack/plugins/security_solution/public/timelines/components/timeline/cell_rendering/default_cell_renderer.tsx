@@ -18,15 +18,20 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   data,
   eventId,
   header,
+  isDraggable,
   linkValues,
   setCellProps,
   timelineId,
+  rowRenderers,
+  browserFields,
+  ecsData,
 }) => (
   <>
     {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
       columnName: header.id,
       eventId,
       field: header,
+      isDraggable,
       linkValues,
       timelineId,
       truncate: true,
@@ -34,6 +39,9 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         data,
         fieldName: header.id,
       }),
+      rowRenderers,
+      browserFields,
+      ecsData,
     })}
   </>
 );

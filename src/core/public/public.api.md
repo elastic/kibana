@@ -232,14 +232,6 @@ export interface ChromeBadge {
 }
 
 // @public (undocumented)
-export interface ChromeBrand {
-    // (undocumented)
-    logo?: string;
-    // (undocumented)
-    smallLogo?: string;
-}
-
-// @public (undocumented)
 export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
@@ -332,7 +324,6 @@ export interface ChromeNavLinks {
     getForceAppSwitcherNavigation$(): Observable<boolean>;
     getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
     has(id: string): boolean;
-    showOnly(id: string): void;
 }
 
 // @public
@@ -355,11 +346,8 @@ export interface ChromeRecentlyAccessedHistoryItem {
 
 // @public
 export interface ChromeStart {
-    addApplicationClass(className: string): void;
     docTitle: ChromeDocTitle;
-    getApplicationClasses$(): Observable<string[]>;
     getBadge$(): Observable<ChromeBadge | undefined>;
-    getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
     // Warning: (ae-forgotten-export) The symbol "ChromeBreadcrumbsAppendExtension" needs to be exported by the entry point index.d.ts
     getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
@@ -367,13 +355,11 @@ export interface ChromeStart {
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
+    hasHeaderBanner$(): Observable<boolean>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
-    removeApplicationClass(className: string): void;
-    setAppTitle(appTitle: string): void;
     setBadge(badge?: ChromeBadge): void;
-    setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
     setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
     setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
@@ -488,6 +474,14 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly settings: string;
+        readonly apm: {
+            readonly kibanaSettings: string;
+            readonly supportedServiceMaps: string;
+            readonly customLinks: string;
+            readonly droppedTransactionSpans: string;
+            readonly upgrading: string;
+            readonly metaData: string;
+        };
         readonly canvas: {
             readonly guide: string;
         };
@@ -607,6 +601,7 @@ export interface DocLinksStart {
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
+            readonly privileges: string;
             readonly guide: string;
             readonly gettingStarted: string;
             readonly ml: string;
@@ -620,6 +615,7 @@ export interface DocLinksStart {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
+            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -657,7 +653,16 @@ export interface DocLinksStart {
             timeUnits: string;
             updateTransform: string;
         }>;
-        readonly observability: Record<string, string>;
+        readonly observability: Readonly<{
+            guide: string;
+            infrastructureThreshold: string;
+            logsThreshold: string;
+            metricsThreshold: string;
+            monitorStatus: string;
+            monitorUptime: string;
+            tlsCertificate: string;
+            uptimeDurationAnomaly: string;
+        }>;
         readonly alerting: Record<string, string>;
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;
@@ -752,6 +757,8 @@ export class HttpFetchError extends Error implements IHttpFetchError {
 export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
     asSystemRequest?: boolean;
+    // (undocumented)
+    context?: KibanaExecutionContext;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -950,6 +957,16 @@ export interface IUiSettingsClient {
 }
 
 // @public
+export type KibanaExecutionContext = {
+    readonly type: string;
+    readonly name: string;
+    readonly id: string;
+    readonly description: string;
+    readonly url?: string;
+    parent?: KibanaExecutionContext;
+};
+
+// @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
 
 // @public
@@ -994,13 +1011,18 @@ export interface OverlayBannersStart {
 // @public (undocumented)
 export interface OverlayFlyoutOpenOptions {
     // (undocumented)
+    'aria-label'?: string;
+    // (undocumented)
     'data-test-subj'?: string;
     // (undocumented)
     className?: string;
     // (undocumented)
     closeButtonAriaLabel?: string;
     // (undocumented)
+    hideCloseButton?: boolean;
+    // (undocumented)
     maxWidth?: boolean | number | string;
+    onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)
@@ -1134,9 +1156,9 @@ export type ResolveDeprecationResponse = {
 
 // @public
 export interface ResolvedSimpleSavedObject<T = unknown> {
-    aliasTargetId?: SavedObjectsResolveResponse['aliasTargetId'];
+    alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
-    savedObject: SimpleSavedObject<T>;
+    saved_object: SimpleSavedObject<T>;
 }
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1232,6 +1254,20 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 // @public (undocumented)
+export interface SavedObjectsBulkResolveObject {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkResolveResponse<T = unknown> {
+    // (undocumented)
+    resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+}
+
+// @public (undocumented)
 export interface SavedObjectsBulkUpdateObject<T = unknown> {
     // (undocumented)
     attributes: T;
@@ -1260,6 +1296,12 @@ export class SavedObjectsClient {
         id: string;
         type: string;
     }>) => Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkResolve: <T = unknown>(objects?: Array<{
+        id: string;
+        type: string;
+    }>) => Promise<{
+        resolved_objects: ResolvedSimpleSavedObject<T>[];
+    }>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
@@ -1491,7 +1533,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
-    aliasTargetId?: string;
+    alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
 }

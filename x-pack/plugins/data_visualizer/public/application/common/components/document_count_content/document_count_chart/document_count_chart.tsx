@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
   Axis,
   BarSeries,
+  BrushEndListener,
   Chart,
+  ElementClickListener,
   niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
+  XYChartElementEvent,
 } from '@elastic/charts';
+import moment from 'moment';
+import { useDataVisualizerKibana } from '../../../../kibana_context';
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -41,6 +46,10 @@ export const DocumentCountChart: FC<Props> = ({
   timeRangeLatest,
   interval,
 }) => {
+  const {
+    services: { data },
+  } = useDataVisualizerKibana();
+
   const seriesName = i18n.translate(
     'xpack.dataVisualizer.dataGrid.field.documentCountChart.seriesLabel',
     {
@@ -71,6 +80,35 @@ export const DocumentCountChart: FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
 
+  const timefilterUpdateHandler = useCallback(
+    (ranges: { from: number; to: number }) => {
+      data.query.timefilter.timefilter.setTime({
+        from: moment(ranges.from).toISOString(),
+        to: moment(ranges.to).toISOString(),
+        mode: 'absolute',
+      });
+    },
+    [data]
+  );
+
+  const onBrushEnd: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [from, to] = x;
+    timefilterUpdateHandler({ from, to });
+  };
+
+  const onElementClick: ElementClickListener = ([elementData]) => {
+    const startRange = (elementData as XYChartElementEvent)[0].x;
+
+    const range = {
+      from: startRange,
+      to: startRange + interval,
+    };
+    timefilterUpdateHandler(range);
+  };
+
   return (
     <div style={{ width: width ?? '100%' }} data-test-subj="dataVisualizerDocumentCountChart">
       <Chart
@@ -79,7 +117,7 @@ export const DocumentCountChart: FC<Props> = ({
           height: 120,
         }}
       >
-        <Settings xDomain={xDomain} />
+        <Settings xDomain={xDomain} onBrushEnd={onBrushEnd} onElementClick={onElementClick} />
         <Axis
           id="bottom"
           position={Position.Bottom}

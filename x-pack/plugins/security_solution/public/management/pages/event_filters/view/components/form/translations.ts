@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FORM_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.eventFilter.modal.description',
-  {
-    defaultMessage: "Events are filtered when the rule's conditions are met:",
-  }
-);
-
 export const NAME_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.eventFilter.form.name.placeholder',
   {

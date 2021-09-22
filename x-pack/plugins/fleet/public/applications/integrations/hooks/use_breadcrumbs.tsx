@@ -27,7 +27,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.allIntegrationsPageTitle', {
-        defaultMessage: 'Browse',
+        defaultMessage: 'Browse integrations',
       }),
     },
   ],
@@ -35,7 +35,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.installedIntegrationsPageTitle', {
-        defaultMessage: 'Manage',
+        defaultMessage: 'Installed integrations',
       }),
     },
   ],
@@ -51,14 +51,23 @@ const breadcrumbGetters: {
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
-  const { chrome, http } = useStartServices();
+  const { chrome, http, application } = useStartServices();
   const breadcrumbs: ChromeBreadcrumb[] =
-    breadcrumbGetters[page]?.(values).map((breadcrumb) => ({
-      ...breadcrumb,
-      href: breadcrumb.href
-        ? http.basePath.prepend(`${INTEGRATIONS_BASE_PATH}#${breadcrumb.href}`)
-        : undefined,
-    })) || [];
+    breadcrumbGetters[page]?.(values).map((breadcrumb) => {
+      const href = breadcrumb.href
+        ? http.basePath.prepend(`${INTEGRATIONS_BASE_PATH}${breadcrumb.href}`)
+        : undefined;
+      return {
+        ...breadcrumb,
+        href,
+        onClick: href
+          ? (ev: React.MouseEvent) => {
+              ev.preventDefault();
+              application.navigateToUrl(href);
+            }
+          : undefined,
+      };
+    }) || [];
   const docTitle: string[] = [...breadcrumbs]
     .reverse()
     .map((breadcrumb) => breadcrumb.text as string);

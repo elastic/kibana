@@ -41,8 +41,9 @@ jest.mock('../../../hooks/use_selector', () => ({
 
 jest.mock(
   'react-visibility-sensor',
-  () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-    children({ isVisible: true })
+  () =>
+    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
+      children({ isVisible: true })
 );
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
@@ -60,26 +61,44 @@ describe('Body', () => {
   const props: StatefulBodyProps = {
     activePage: 0,
     browserFields: mockBrowserFields,
-    clearSelected: (jest.fn() as unknown) as StatefulBodyProps['clearSelected'],
+    clearSelected: jest.fn() as unknown as StatefulBodyProps['clearSelected'],
     columnHeaders: defaultHeaders,
     data: mockTimelineData,
     excludedRowRendererIds: [],
     id: 'timeline-test',
     isSelectAllChecked: false,
+    isLoading: false,
+    itemsPerPageOptions: [],
     loadingEventIds: [],
+    loadPage: jest.fn(),
+    pageSize: 25,
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
     selectedEventIds: {},
-    setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
+    setSelected: jest.fn() as unknown as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
     tabType: TimelineTabs.query,
-    totalPages: 1,
+    tableView: 'gridView',
+    totalItems: 1,
     leadingControlColumns: [],
     trailingControlColumns: [],
+    filterStatus: 'open',
+    filterQuery: '',
+    refetch: jest.fn(),
+    indexNames: [''],
   };
 
   describe('rendering', () => {
+    test('it renders the body data grid', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...props} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="body-data-grid"]').first().exists()).toEqual(true);
+    });
+
     test('it renders the column headers', () => {
       const wrapper = mount(
         <TestProviders>
@@ -87,7 +106,7 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="column-headers"]').first().exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="dataGridHeader"]').first().exists()).toEqual(true);
     });
 
     test('it renders the scroll container', () => {
@@ -97,7 +116,7 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="timeline-body"]').first().exists()).toEqual(true);
+      expect(wrapper.find('div.euiDataGrid__overflow').first().exists()).toEqual(true);
     });
 
     test('it renders events', () => {
@@ -107,12 +126,16 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
+      expect(wrapper.find('div.euiDataGridRowCell').first().exists()).toEqual(true);
     });
 
-    test('it renders a tooltip for timestamp', () => {
+    test('it renders cell value', () => {
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
-      const testProps = { ...props, columnHeaders: headersJustTimestamp };
+      const testProps = {
+        ...props,
+        columnHeaders: headersJustTimestamp,
+        data: mockTimelineData.slice(0, 1),
+      };
       const wrapper = mount(
         <TestProviders>
           <BodyComponent {...testProps} />
@@ -121,10 +144,10 @@ describe('Body', () => {
       wrapper.update();
       expect(
         wrapper
-          .find('[data-test-subj="data-driven-columns"]')
-          .first()
-          .find('[data-test-subj="statefulCell"]')
-          .last()
+          .find('[data-test-subj="dataGridRowCell"]')
+          .at(0)
+          .find('.euiDataGridRowCell__truncate')
+          .childAt(0)
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);
     });

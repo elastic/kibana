@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from 'kibana/server';
 import { DependencyList } from 'react';
-import type { PersistableState, SerializableState } from 'src/plugins/kibana_utils/common';
+import type { PersistableState } from 'src/plugins/kibana_utils/common';
 import { useLocatorUrl } from './use_locator_url';
 import type {
   LocatorDefinition,
@@ -17,8 +18,19 @@ import type {
   LocatorNavigationParams,
   LocatorGetUrlParams,
 } from './types';
+import { formatSearchParams, FormatSearchParamsOptions, RedirectOptions } from './redirect';
 
 export interface LocatorDependencies {
+  /**
+   * Public URL of the Kibana server.
+   */
+  baseUrl?: string;
+
+  /**
+   * Current version of Kibana, e.g. `7.0.0`.
+   */
+  version?: string;
+
   /**
    * Navigate without reloading the page to a KibanaLocation.
    */
@@ -30,7 +42,7 @@ export interface LocatorDependencies {
   getUrl: (location: KibanaLocation, getUrlParams: LocatorGetUrlParams) => Promise<string>;
 }
 
-export class Locator<P extends SerializableState> implements LocatorPublic<P> {
+export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
   public readonly migrations: PersistableState<P>['migrations'];
 
   constructor(
@@ -73,6 +85,22 @@ export class Locator<P extends SerializableState> implements LocatorPublic<P> {
     const url = this.deps.getUrl(location, { absolute });
 
     return url;
+  }
+
+  public getRedirectUrl(params: P, options: FormatSearchParamsOptions = {}): string {
+    const { baseUrl = '', version = '0.0.0' } = this.deps;
+    const redirectOptions: RedirectOptions = {
+      id: this.definition.id,
+      version,
+      params,
+    };
+    const formatOptions: FormatSearchParamsOptions = {
+      ...options,
+      lzCompress: options.lzCompress ?? true,
+    };
+    const search = formatSearchParams(redirectOptions, formatOptions).toString();
+
+    return baseUrl + '/app/r?' + search;
   }
 
   public async navigate(

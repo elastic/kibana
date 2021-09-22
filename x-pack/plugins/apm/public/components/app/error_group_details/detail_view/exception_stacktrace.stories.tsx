@@ -7,7 +7,6 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ExceptionStacktrace } from './exception_stacktrace';
 
 type Args = ComponentProps<typeof ExceptionStacktrace>;
@@ -15,13 +14,6 @@ type Args = ComponentProps<typeof ExceptionStacktrace>;
 export default {
   title: 'app/ErrorGroupDetails/DetailView/ExceptionStacktrace',
   component: ExceptionStacktrace,
-  decorators: [
-    (StoryComponent: ComponentType) => (
-      <EuiThemeProvider>
-        <StoryComponent />
-      </EuiThemeProvider>
-    ),
-  ],
 };
 
 export const JavaWithLongLines: Story<Args> = (args) => (
@@ -593,8 +585,7 @@ JavaWithLongLines.args = {
           module: 'org.apache.tomcat.util.threads',
         },
       ],
-      type:
-        'org.springframework.http.converter.HttpMessageNotWritableException',
+      type: 'org.springframework.http.converter.HttpMessageNotWritableException',
       message:
         'Could not write JSON: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue(); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue() (through reference chain: co.elastic.apm.opbeans.repositories.Stats["numbers"]->com.sun.proxy.$Proxy128["revenue"])',
     },

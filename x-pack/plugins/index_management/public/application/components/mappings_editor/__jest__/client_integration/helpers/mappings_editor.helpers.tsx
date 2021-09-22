@@ -276,7 +276,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 
   const updateJsonEditor = (testSubject: TestSubjects, value: object) => {
-    find(testSubject).simulate('change', { jsonContent: JSON.stringify(value) });
+    find(testSubject).simulate('change', { jsonString: JSON.stringify(value) });
   };
 
   const getJsonEditorValue = (testSubject: TestSubjects) => {

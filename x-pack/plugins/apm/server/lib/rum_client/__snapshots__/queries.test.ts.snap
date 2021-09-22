@@ -64,13 +64,7 @@ Object {
             },
           },
         ],
-        "must_not": Array [
-          Object {
-            "term": Object {
-              "service.environment": "staging",
-            },
-          },
-        ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -512,13 +506,7 @@ Object {
             },
           },
         ],
-        "must_not": Array [
-          Object {
-            "term": Object {
-              "service.environment": "staging",
-            },
-          },
-        ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -566,13 +554,7 @@ Object {
             },
           },
         ],
-        "must_not": Array [
-          Object {
-            "term": Object {
-              "service.environment": "staging",
-            },
-          },
-        ],
+        "must_not": Array [],
       },
     },
     "size": 0,

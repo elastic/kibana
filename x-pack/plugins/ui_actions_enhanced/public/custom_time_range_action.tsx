@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
+import {
+  IEmbeddable,
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+} from 'src/plugins/embeddable/public';
 import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
@@ -26,7 +31,8 @@ function hasTimeRange(
 }
 
 const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
-type VisualizeEmbeddable = any;
+
+type VisualizeEmbeddable = IEmbeddable<{ id: string }, EmbeddableOutput & { visTypeName: string }>;
 
 function isVisualizeEmbeddable(
   embeddable: IEmbeddable | VisualizeEmbeddable

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import {
   InventoryItemType,
   MetricsUIAggregation,

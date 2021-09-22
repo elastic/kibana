@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import * as Rx from 'rxjs';
 import { filter, first, catchError, map } from 'rxjs/operators';
 import exitHook from 'exit-hook';
@@ -199,8 +198,12 @@ export class ProcRunner {
     // tie into proc outcome$, remove from _procs on compete
     proc.outcome$.subscribe({
       next: (code) => {
-        const duration = moment.duration(Date.now() - startMs);
-        this.log.info('[%s] exited with %s after %s', name, code, duration.humanize());
+        this.log.info(
+          '[%s] exited with %s after %s seconds',
+          name,
+          code,
+          ((Date.now() - startMs) / 1000).toFixed(1)
+        );
       },
       complete: () => {
         remove();

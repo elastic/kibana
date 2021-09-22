@@ -6,7 +6,7 @@
  */
 
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { kqlQuery, rangeQuery } from '../../../../server/utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   TRANSACTION_DURATION,
@@ -24,7 +24,7 @@ export async function getHasAggregatedTransactions({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery?: string;
+  kuery: string;
 }) {
   const response = await apmEventClient.search(
     'get_has_aggregated_transactions',
@@ -47,11 +47,7 @@ export async function getHasAggregatedTransactions({
     }
   );
 
-  if (response.hits.total.value > 0) {
-    return true;
-  }
-
-  return false;
+  return response.hits.total.value > 0;
 }
 
 export async function getSearchAggregatedTransactions({
@@ -65,7 +61,7 @@ export async function getSearchAggregatedTransactions({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery?: string;
+  kuery: string;
 }): Promise<boolean> {
   const searchAggregatedTransactions =
     config['xpack.apm.searchAggregatedTransactions'];

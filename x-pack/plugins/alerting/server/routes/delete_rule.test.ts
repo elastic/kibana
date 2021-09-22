@@ -10,9 +10,9 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { alertsClientMock } from '../alerts_client.mock';
+import { rulesClientMock } from '../rules_client.mock';
 
-const alertsClient = alertsClientMock.create();
+const rulesClient = rulesClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -33,10 +33,10 @@ describe('deleteRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}"`);
 
-    alertsClient.delete.mockResolvedValueOnce({});
+    rulesClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: {
           id: '1',
@@ -47,8 +47,8 @@ describe('deleteRuleRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(alertsClient.delete).toHaveBeenCalledTimes(1);
-    expect(alertsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.delete).toHaveBeenCalledTimes(1);
+    expect(rulesClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -67,10 +67,10 @@ describe('deleteRuleRoute', () => {
 
     const [, handler] = router.delete.mock.calls[0];
 
-    alertsClient.delete.mockResolvedValueOnce({});
+    rulesClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: { id: '1' },
       }
@@ -93,10 +93,10 @@ describe('deleteRuleRoute', () => {
 
     const [, handler] = router.delete.mock.calls[0];
 
-    alertsClient.delete.mockResolvedValueOnce({});
+    rulesClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         id: '1',
       }

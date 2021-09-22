@@ -19,7 +19,6 @@ import {
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
-import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import {
@@ -27,7 +26,7 @@ import {
   onRedirectNoIndexPattern,
   IndexPatternsApiClient,
   UiSettingsPublicToCommon,
-} from './index_patterns';
+} from './data_views';
 import {
   setIndexPatterns,
   setNotifications,
@@ -45,11 +44,12 @@ import {
   createSelectRangeAction,
 } from './actions';
 import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
-import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { getIndexPatternLoad } from './index_patterns/expressions';
+import { SavedObjectsClientPublicToCommon } from './data_views';
+import { getIndexPatternLoad } from './data_views/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
+import { getAggsFormats } from '../common';
 
 export class DataPublicPlugin
   implements
@@ -58,10 +58,10 @@ export class DataPublicPlugin
       DataPublicPluginStart,
       DataSetupDependencies,
       DataStartDependencies
-    > {
+    >
+{
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
-  private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
   private usageCollection: UsageCollectionSetup | undefined;
@@ -70,7 +70,7 @@ export class DataPublicPlugin
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
-    this.fieldFormatsService = new FieldFormatsService();
+
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
     this.nowProvider = new NowProvider();
@@ -78,7 +78,14 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    { bfetch, expressions, uiActions, usageCollection, inspector }: DataSetupDependencies
+    {
+      bfetch,
+      expressions,
+      uiActions,
+      usageCollection,
+      inspector,
+      fieldFormats,
+    }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
@@ -113,24 +120,30 @@ export class DataPublicPlugin
       }))
     );
 
+    fieldFormats.register(
+      getAggsFormats((serializedFieldFormat) =>
+        startServices().plugins.fieldFormats.deserialize(serializedFieldFormat)
+      )
+    );
+
     return {
       autocomplete: this.autocomplete.setup(core, {
         timefilter: queryService.timefilter,
         usageCollection,
       }),
       search: searchService,
-      fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
     };
   }
 
-  public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
+  public start(
+    core: CoreStart,
+    { uiActions, fieldFormats }: DataStartDependencies
+  ): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
-
-    const fieldFormats = this.fieldFormatsService.start();
 
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
@@ -185,6 +198,7 @@ export class DataPublicPlugin
       autocomplete: this.autocomplete.start(),
       fieldFormats,
       indexPatterns,
+      dataViews: indexPatterns,
       query,
       search,
       nowProvider: this.nowProvider,

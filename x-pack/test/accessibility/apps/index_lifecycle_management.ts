@@ -34,6 +34,8 @@ const POLICY_ALL_PHASES = {
   },
 };
 
+const indexTemplateName = 'ilm-a11y-test-template';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, indexLifecycleManagement } = getPageObjects([
     'common',
@@ -55,21 +57,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     throw new Error(`Could not find ${policyName} in policy table`);
   };
 
-  const clickPolicyActionsButton = async (policyName: string) => {
-    const actionsCell = await testSubjects.find(`policyTableCell-actions-${policyName}`);
-    const actionsButton = await actionsCell.findByTestSubject('policyActionsContextMenuButton');
-
-    await actionsButton.click();
-  };
-
   describe('Index Lifecycle Management', async () => {
     before(async () => {
       await esClient.ilm.putLifecycle({ policy: POLICY_NAME, body: POLICY_ALL_PHASES });
+      await esClient.indices.putIndexTemplate({
+        name: indexTemplateName,
+        body: {
+          template: {
+            settings: {
+              lifecycle: {
+                name: POLICY_NAME,
+              },
+            },
+          },
+          index_patterns: ['test*'],
+        },
+      });
     });
 
     after(async () => {
       // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
       await esClient.ilm.deleteLifecycle({ policy: POLICY_NAME });
+      await esClient.indices.deleteIndexTemplate({ name: indexTemplateName });
     });
 
     beforeEach(async () => {
@@ -133,34 +142,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add policy to index template modal', async () => {
-      await clickPolicyActionsButton(POLICY_NAME);
+      const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
+      const addPolicyButton = await policyRow.findByTestSubject('addPolicyToTemplate');
 
-      const buttonSelector = 'addPolicyToTemplate';
-
-      await retry.waitFor('ILM add policy to index template button', async () => {
-        return testSubjects.isDisplayed(buttonSelector);
-      });
-      await testSubjects.click(buttonSelector);
+      await addPolicyButton.click();
 
       await retry.waitFor('ILM add policy to index template modal to be present', async () => {
-        return testSubjects.isDisplayed('confirmModalTitleText');
+        return testSubjects.isDisplayed('addPolicyToTemplateModal');
       });
 
       await a11y.testAppSnapshot();
     });
 
     it('Delete policy modal', async () => {
-      await clickPolicyActionsButton(POLICY_NAME);
+      const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
+      const deleteButton = await policyRow.findByTestSubject('deletePolicy');
 
-      const buttonSelector = 'deletePolicy';
-
-      await retry.waitFor('ILM delete policy button', async () => {
-        return testSubjects.isDisplayed(buttonSelector);
-      });
-      await testSubjects.click(buttonSelector);
+      await deleteButton.click();
 
       await retry.waitFor('ILM delete policy modal to be present', async () => {
-        return testSubjects.isDisplayed('confirmModalTitleText');
+        return testSubjects.isDisplayed('deletePolicyModal');
+      });
+
+      await a11y.testAppSnapshot();
+    });
+
+    it('Index templates flyout', async () => {
+      const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
+      const actionsButton = await policyRow.findByTestSubject('viewIndexTemplates');
+
+      await actionsButton.click();
+
+      const flyoutTitleSelector = 'indexTemplatesFlyoutHeader';
+      await retry.waitFor('Index templates flyout', async () => {
+        return testSubjects.isDisplayed(flyoutTitleSelector);
       });
 
       await a11y.testAppSnapshot();

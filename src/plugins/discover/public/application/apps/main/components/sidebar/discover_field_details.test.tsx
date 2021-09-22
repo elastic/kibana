@@ -9,25 +9,15 @@
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
-// @ts-expect-error
-import stubbedLogstashFields from '../../../../../__fixtures__/logstash_fields';
-import { DiscoverFieldDetails } from './discover_field_details';
-import { coreMock } from '../../../../../../../../core/public/mocks';
-import { IndexPatternField } from '../../../../../../../data/public';
-import { getStubIndexPattern } from '../../../../../../../data/public/test_utils';
 
-const indexPattern = getStubIndexPattern(
-  'logstash-*',
-  (cfg: unknown) => cfg,
-  'time',
-  stubbedLogstashFields(),
-  coreMock.createSetup()
-);
+import { DiscoverFieldDetails } from './discover_field_details';
+import { IndexPatternField } from '../../../../../../../data/public';
+import { stubIndexPattern } from '../../../../../../../data/common/stubs';
 
 describe('discover sidebar field details', function () {
   const onAddFilter = jest.fn();
   const defaultProps = {
-    indexPattern,
+    indexPattern: stubIndexPattern,
     details: { buckets: [], error: '', exists: 1, total: 2, columns: [] },
     onAddFilter,
   };

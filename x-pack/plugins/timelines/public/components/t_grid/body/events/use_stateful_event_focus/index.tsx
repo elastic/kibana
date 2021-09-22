@@ -7,7 +7,6 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { focusColumn, isArrowDownOrArrowUp, isArrowUp, isEscape } from '../../../../../../common';
-// eslint-disable-next-line no-duplicate-imports
 import type { OnColumnFocused } from '../../../../../../common';
 
 type FocusOwnership = 'not-owned' | 'owned';
@@ -85,12 +84,10 @@ export const useStatefulEventFocus = ({
     ]
   );
 
-  const memoizedReturn = useMemo(() => ({ focusOwnership, onFocus, onOutsideClick, onKeyDown }), [
-    focusOwnership,
-    onFocus,
-    onKeyDown,
-    onOutsideClick,
-  ]);
+  const memoizedReturn = useMemo(
+    () => ({ focusOwnership, onFocus, onOutsideClick, onKeyDown }),
+    [focusOwnership, onFocus, onKeyDown, onOutsideClick]
+  );
 
   return memoizedReturn;
 };

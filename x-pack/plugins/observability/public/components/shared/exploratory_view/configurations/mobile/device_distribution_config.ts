@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, USE_BREAK_DOWN_COLUMN } from '../constants';
+import { FieldLabels, REPORT_METRIC_FIELD, USE_BREAK_DOWN_COLUMN } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
@@ -22,9 +22,8 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
     },
     yAxisColumns: [
       {
-        sourceField: 'labels.device_id',
+        sourceField: REPORT_METRIC_FIELD,
         operationType: 'unique_count',
-        label: NUMBER_OF_DEVICES,
       },
     ],
     hasOperationType: false,
@@ -39,6 +38,13 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
       ...MobileFields,
       [SERVICE_NAME]: MOBILE_APP,
     },
+    metricOptions: [
+      {
+        id: 'labels.device_id',
+        field: 'labels.device_id',
+        label: NUMBER_OF_DEVICES,
+      },
+    ],
     definitionFields: [SERVICE_NAME],
   };
 }

@@ -17,5 +17,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./default_index_pattern'));
     loadTestFile(require.resolve('./runtime_fields_crud'));
     loadTestFile(require.resolve('./integration'));
+    loadTestFile(require.resolve('./deprecations'));
+    loadTestFile(require.resolve('./has_user_index_pattern'));
   });
 }

@@ -15,7 +15,7 @@ import {
   KibanaResponseFactory,
   CustomHttpResponseOptions,
 } from '../../../../../../../src/core/server';
-import { AlertsClient } from '../../../../../alerting/server';
+import { RulesClient } from '../../../../../alerting/server';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 import { RuleParams } from '../schemas/rule_schemas';
@@ -200,16 +200,15 @@ interface Schema {
   validate: (input: any) => { value: any; error?: Error };
 }
 
-export const buildRouteValidation = <T>(schema: Schema): RouteValidationFunction<T> => (
-  payload: T,
-  { ok, badRequest }
-) => {
-  const { value, error } = schema.validate(payload);
-  if (error) {
-    return badRequest(error.message);
-  }
-  return ok(value);
-};
+export const buildRouteValidation =
+  <T>(schema: Schema): RouteValidationFunction<T> =>
+  (payload: T, { ok, badRequest }) => {
+    const { value, error } = schema.validate(payload);
+    if (error) {
+      return badRequest(error.message);
+    }
+    return ok(value);
+  };
 
 const statusToErrorMessage = (statusCode: number) => {
   switch (statusCode) {
@@ -304,12 +303,12 @@ export type GetFailingRulesResult = Record<string, SanitizedAlert<RuleParams>>;
 
 export const getFailingRules = async (
   ids: string[],
-  alertsClient: AlertsClient
+  rulesClient: RulesClient
 ): Promise<GetFailingRulesResult> => {
   try {
     const errorRules = await Promise.all(
       ids.map(async (id) =>
-        alertsClient.get({
+        rulesClient.get({
           id,
         })
       )
@@ -328,6 +327,6 @@ export const getFailingRules = async (
     if (Boom.isBoom(exc)) {
       throw exc;
     }
-    throw new Error(`Failed to get executionStatus with AlertsClient: ${exc.message}`);
+    throw new Error(`Failed to get executionStatus with RulesClient: ${(exc as Error).message}`);
   }
 };

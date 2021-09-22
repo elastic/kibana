@@ -21,7 +21,7 @@ function split(arr, fn) {
   return [a, b];
 }
 
-export function decorateMochaUi(log, lifecycle, context, { isDockerGroup }) {
+export function decorateMochaUi(log, lifecycle, context, { isDockerGroup, rootTags }) {
   // incremented at the start of each suite, decremented after
   // so that in each non-suite call we can know if we are within
   // a suite, or that when a suite is defined it is within a suite
@@ -62,7 +62,13 @@ export function decorateMochaUi(log, lifecycle, context, { isDockerGroup }) {
           });
 
           const relativeFilePath = relative(REPO_ROOT, this.file);
-          this._tags = isDockerGroup ? ['ciGroupDocker', relativeFilePath] : [relativeFilePath];
+          this._tags = [
+            ...(isDockerGroup ? ['ciGroupDocker', relativeFilePath] : [relativeFilePath]),
+            // we attach the "root tags" to all the child suites of the root suite, so that if they
+            // need to be excluded they can be removed from the root suite without removing the entire
+            // root suite
+            ...(this.parent.root ? [...(rootTags ?? [])] : []),
+          ];
           this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
           this.tags = (tags) => {
             const newTags = Array.isArray(tags) ? tags : [tags];

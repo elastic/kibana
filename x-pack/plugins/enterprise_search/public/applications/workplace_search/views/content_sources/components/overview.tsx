@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiListGroup,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -29,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiPanelTo } from '../../../../shared/react_router_helpers';
+import { EuiListGroupItemTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
 import { ComponentLoader } from '../../../components/shared/component_loader';
@@ -51,7 +52,9 @@ import {
 } from '../../../routes';
 import {
   SOURCES_NO_CONTENT_TITLE,
+  SOURCE_OVERVIEW_TITLE,
   CONTENT_SUMMARY_TITLE,
+  CONTENT_SUMMARY_LOADING_TEXT,
   CONTENT_TYPE_HEADER,
   ITEMS_HEADER,
   EVENT_HEADER,
@@ -133,10 +136,10 @@ export const Overview: React.FC = () => {
     return (
       <>
         <EuiTitle size="xs">
-          <h4>{CONTENT_SUMMARY_TITLE}</h4>
+          <h3>{CONTENT_SUMMARY_TITLE}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {!summary && <ComponentLoader text="Loading summary details..." />}
+        {!summary && <ComponentLoader text={CONTENT_SUMMARY_LOADING_TEXT} />}
         {!!summary &&
           (totalDocuments === 0 ? (
             emptyState
@@ -218,7 +221,7 @@ export const Overview: React.FC = () => {
     return (
       <>
         <EuiTitle size="xs">
-          <h3>{RECENT_ACTIVITY_TITLE}</h3>
+          <h4>{RECENT_ACTIVITY_TITLE}</h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         {activities.length === 0 ? emptyState : activitiesTable}
@@ -228,35 +231,31 @@ export const Overview: React.FC = () => {
 
   const groupsSummary = (
     <>
-      <EuiText>
-        <h4>{GROUP_ACCESS_TITLE}</h4>
-      </EuiText>
+      <EuiTitle size="xs">
+        <h5>{GROUP_ACCESS_TITLE}</h5>
+      </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
-        {groups.map((group, index) => (
-          <EuiFlexItem key={index}>
-            <EuiPanelTo
-              hasShadow={false}
-              color="subdued"
+      <EuiPanel color="subdued">
+        <EuiListGroup flush maxWidth={false} data-test-subj="GroupsSummary">
+          {groups.map((group, index) => (
+            <EuiListGroupItemTo
+              label={group.name}
+              key={index}
               to={getGroupPath(group.id)}
               data-test-subj="SourceGroupLink"
-            >
-              <EuiText size="s" className="eui-textTruncate">
-                <strong>{group.name}</strong>
-              </EuiText>
-            </EuiPanelTo>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+            />
+          ))}
+        </EuiListGroup>
+      </EuiPanel>
     </>
   );
 
   const detailsSummary = (
     <>
       <EuiSpacer size="l" />
-      <EuiText>
-        <h4>{CONFIGURATION_TITLE}</h4>
-      </EuiText>
+      <EuiTitle size="xs">
+        <h3>{CONFIGURATION_TITLE}</h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiPanel hasShadow={false} color="subdued">
         <EuiText size="s">
@@ -282,7 +281,7 @@ export const Overview: React.FC = () => {
   const documentPermissions = (
     <>
       <EuiSpacer />
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
@@ -304,7 +303,7 @@ export const Overview: React.FC = () => {
   const documentPermissionsDisabled = (
     <>
       <EuiSpacer />
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
@@ -315,7 +314,7 @@ export const Overview: React.FC = () => {
               <EuiIcon size="l" type="iInCircle" color="subdued" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="m">
+              <EuiText size="s">
                 <strong>{DOCUMENT_PERMISSIONS_DISABLED_TEXT}</strong>
               </EuiText>
               <EuiText size="s">
@@ -427,7 +426,7 @@ export const Overview: React.FC = () => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
-        <h4>{title}</h4>
+        <span>{title}</span>
       </EuiTitle>
       <EuiText size="s">{children}</EuiText>
     </EuiPanel>
@@ -438,7 +437,7 @@ export const Overview: React.FC = () => {
       <LicenseBadge />
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
-        <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
+        <span>{DOCUMENT_PERMISSIONS_TITLE}</span>
       </EuiTitle>
       <EuiText size="s">
         <p>{DOC_PERMISSIONS_DESCRIPTION}</p>
@@ -454,7 +453,7 @@ export const Overview: React.FC = () => {
 
   return (
     <SourceLayout pageViewTelemetry="source_overview">
-      <ViewContentHeader title="Source overview" />
+      <ViewContentHeader title={SOURCE_OVERVIEW_TITLE} />
 
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem grow={8}>

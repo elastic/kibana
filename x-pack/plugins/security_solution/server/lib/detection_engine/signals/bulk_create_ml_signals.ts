@@ -19,6 +19,7 @@ import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
 import { AlertAttributes, BulkCreate, WrapHits } from './types';
 import { MachineLearningRuleParams } from '../schemas/rule_schemas';
+import { buildReasonMessageForMlAlert } from './reason_formatters';
 
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
@@ -53,8 +54,8 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
   }
 
   const omitDottedFields = omit(errantFields.map((field) => field.name));
-  const setNestedFields = errantFields.map((field) => (_anomaly: Anomaly) =>
-    set(_anomaly, field.name, field.value)
+  const setNestedFields = errantFields.map(
+    (field) => (_anomaly: Anomaly) => set(_anomaly, field.name, field.value)
   );
   const setTimestamp = (_anomaly: Anomaly) =>
     set(_anomaly, '@timestamp', new Date(timestamp).toISOString());
@@ -89,6 +90,6 @@ export const bulkCreateMlSignals = async (
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 
-  const wrappedDocs = params.wrapHits(ecsResults.hits.hits);
+  const wrappedDocs = params.wrapHits(ecsResults.hits.hits, buildReasonMessageForMlAlert);
   return params.bulkCreate(wrappedDocs);
 };

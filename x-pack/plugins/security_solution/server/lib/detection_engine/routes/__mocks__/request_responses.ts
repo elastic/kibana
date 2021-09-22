@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
 import { ActionResult } from '../../../../../../actions/server';
 import { SignalSearchResponse } from '../../signals/types';
 import {
@@ -20,14 +20,13 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
 } from '../../../../../common/constants';
-import { ShardsResponse } from '../../../types';
 import {
   RuleAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
   HapiReadableStream,
+  IRuleStatusSOAttributes,
 } from '../../rules/types';
 import { requestMock } from './request';
-import { RuleNotificationAlertType } from '../../notifications/types';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
@@ -38,6 +37,9 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import { Alert } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
+import { ruleTypeMappings } from '../../signals/utils';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -50,6 +52,7 @@ export const typicalSetStatusSignalByQueryPayload = (): SetSignalsStatusSchemaDe
 });
 
 export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
+  aggs: {},
   query: { match_all: {} },
 });
 
@@ -177,18 +180,18 @@ export const getEmptyFindResult = (): FindHit => ({
   data: [],
 });
 
-export const getFindResultWithSingleHit = (): FindHit => ({
+export const getFindResultWithSingleHit = (isRuleRegistryEnabled: boolean): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getAlertMock(getQueryRuleParams())],
+  data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
 });
 
-export const nonRuleFindResult = (): FindHit => ({
+export const nonRuleFindResult = (isRuleRegistryEnabled: boolean): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [nonRuleAlert()],
+  data: [nonRuleAlert(isRuleRegistryEnabled)],
 });
 
 export const getFindResultWithMultiHits = ({
@@ -346,19 +349,22 @@ export const createActionResult = (): ActionResult => ({
   isPreconfigured: false,
 });
 
-export const nonRuleAlert = () => ({
+export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
   // Defaulting to QueryRuleParams because ts doesn't like empty objects
-  ...getAlertMock(getQueryRuleParams()),
+  ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
   name: 'Non-Rule Alert',
   alertTypeId: 'something',
 });
 
-export const getAlertMock = <T extends RuleParams>(params: T): Alert<T> => ({
+export const getAlertMock = <T extends RuleParams>(
+  isRuleRegistryEnabled: boolean,
+  params: T
+): Alert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
-  alertTypeId: 'siem.signals',
+  alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[params.type] : 'siem.signals',
   consumer: 'siem',
   params,
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
@@ -442,128 +448,94 @@ export const getMockPrivilegesResult = () => ({
   application: {},
 });
 
-export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
-  page: 1,
-  per_page: 1,
-  total: 0,
-  saved_objects: [],
-});
+export const getEmptySavedObjectsResponse =
+  (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+    page: 1,
+    per_page: 1,
+    total: 0,
+    saved_objects: [],
+  });
 
-export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
-  page: 1,
-  per_page: 6,
-  total: 2,
-  saved_objects: [
-    {
-      type: 'my-type',
-      id: 'e0b86950-4e9f-11ea-bdbd-07b56aa159b3',
-      attributes: {
-        alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
-        statusDate: '2020-02-18T15:26:49.783Z',
-        status: 'succeeded',
-        lastFailureAt: undefined,
-        lastSuccessAt: '2020-02-18T15:26:49.783Z',
-        lastFailureMessage: undefined,
-        lastSuccessMessage: 'succeeded',
-        lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-        gap: '500.32',
-        searchAfterTimeDurations: ['200.00'],
-        bulkCreateTimeDurations: ['800.43'],
-      },
-      score: 1,
-      references: [],
-      updated_at: '2020-02-18T15:26:51.333Z',
-      version: 'WzQ2LDFd',
+export const getRuleExecutionStatuses = (): Array<
+  SavedObjectsFindResult<IRuleStatusSOAttributes>
+> => [
+  {
+    type: 'my-type',
+    id: 'e0b86950-4e9f-11ea-bdbd-07b56aa159b3',
+    attributes: {
+      alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
+      statusDate: '2020-02-18T15:26:49.783Z',
+      status: RuleExecutionStatus.succeeded,
+      lastFailureAt: undefined,
+      lastSuccessAt: '2020-02-18T15:26:49.783Z',
+      lastFailureMessage: undefined,
+      lastSuccessMessage: 'succeeded',
+      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+      gap: '500.32',
+      searchAfterTimeDurations: ['200.00'],
+      bulkCreateTimeDurations: ['800.43'],
     },
+    score: 1,
+    references: [],
+    updated_at: '2020-02-18T15:26:51.333Z',
+    version: 'WzQ2LDFd',
+  },
+  {
+    type: 'my-type',
+    id: '91246bd0-5261-11ea-9650-33b954270f67',
+    attributes: {
+      alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
+      statusDate: '2020-02-18T15:15:58.806Z',
+      status: RuleExecutionStatus.failed,
+      lastFailureAt: '2020-02-18T15:15:58.806Z',
+      lastSuccessAt: '2020-02-13T20:31:59.855Z',
+      lastFailureMessage:
+        'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
+      lastSuccessMessage: 'succeeded',
+      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+      gap: '500.32',
+      searchAfterTimeDurations: ['200.00'],
+      bulkCreateTimeDurations: ['800.43'],
+    },
+    score: 1,
+    references: [],
+    updated_at: '2020-02-18T15:15:58.860Z',
+    version: 'WzMyLDFd',
+  },
+];
+
+export const getFindBulkResultStatus = (): FindBulkExecutionLogResponse => ({
+  '04128c15-0d1b-4716-a4c5-46997ac7f3bd': [
     {
-      type: 'my-type',
-      id: '91246bd0-5261-11ea-9650-33b954270f67',
-      attributes: {
-        alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
-        statusDate: '2020-02-18T15:15:58.806Z',
-        status: 'failed',
-        lastFailureAt: '2020-02-18T15:15:58.806Z',
-        lastSuccessAt: '2020-02-13T20:31:59.855Z',
-        lastFailureMessage:
-          'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
-        lastSuccessMessage: 'succeeded',
-        lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-        gap: '500.32',
-        searchAfterTimeDurations: ['200.00'],
-        bulkCreateTimeDurations: ['800.43'],
-      },
-      score: 1,
-      references: [],
-      updated_at: '2020-02-18T15:15:58.860Z',
-      version: 'WzMyLDFd',
+      alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+      statusDate: '2020-02-18T15:26:49.783Z',
+      status: RuleExecutionStatus.succeeded,
+      lastFailureAt: undefined,
+      lastSuccessAt: '2020-02-18T15:26:49.783Z',
+      lastFailureMessage: undefined,
+      lastSuccessMessage: 'succeeded',
+      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+      gap: '500.32',
+      searchAfterTimeDurations: ['200.00'],
+      bulkCreateTimeDurations: ['800.43'],
     },
   ],
-});
-
-export const getFindBulkResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
-  page: 1,
-  per_page: 6,
-  total: 2,
-  saved_objects: [],
-  aggregations: {
-    alertIds: {
-      buckets: [
-        {
-          key: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          most_recent_statuses: {
-            hits: {
-              hits: [
-                {
-                  _source: {
-                    'siem-detection-engine-rule-status': {
-                      alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-                      statusDate: '2020-02-18T15:26:49.783Z',
-                      status: 'succeeded',
-                      lastFailureAt: undefined,
-                      lastSuccessAt: '2020-02-18T15:26:49.783Z',
-                      lastFailureMessage: undefined,
-                      lastSuccessMessage: 'succeeded',
-                      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-                      gap: '500.32',
-                      searchAfterTimeDurations: ['200.00'],
-                      bulkCreateTimeDurations: ['800.43'],
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        },
-        {
-          key: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
-          most_recent_statuses: {
-            hits: {
-              hits: [
-                {
-                  _source: {
-                    'siem-detection-engine-rule-status': {
-                      alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
-                      statusDate: '2020-02-18T15:15:58.806Z',
-                      status: 'failed',
-                      lastFailureAt: '2020-02-18T15:15:58.806Z',
-                      lastSuccessAt: '2020-02-13T20:31:59.855Z',
-                      lastFailureMessage:
-                        'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
-                      lastSuccessMessage: 'succeeded',
-                      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-                      gap: '500.32',
-                      searchAfterTimeDurations: ['200.00'],
-                      bulkCreateTimeDurations: ['800.43'],
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        },
-      ],
+  '1ea5a820-4da1-4e82-92a1-2b43a7bece08': [
+    {
+      alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
+      statusDate: '2020-02-18T15:15:58.806Z',
+      status: RuleExecutionStatus.failed,
+      lastFailureAt: '2020-02-18T15:15:58.806Z',
+      lastSuccessAt: '2020-02-13T20:31:59.855Z',
+      lastFailureMessage:
+        'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
+      lastSuccessMessage: 'succeeded',
+      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+      gap: '500.32',
+      searchAfterTimeDurations: ['200.00'],
+      bulkCreateTimeDurations: ['800.43'],
     },
-  },
+  ],
 });
 
 export const getEmptySignalsResponse = (): SignalSearchResponse => ({
@@ -606,62 +578,6 @@ export const getSuccessfulSignalUpdateResponse = () => ({
   requests_per_second: -1,
   throttled_until_millis: 0,
   failures: [],
-});
-
-export const getIndexName = () => 'index-name';
-export const getEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
-  _shards: { total: 0 },
-});
-export const getNonEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
-  _shards: { total: 1 },
-});
-
-export const getNotificationResult = (): RuleNotificationAlertType => ({
-  id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
-  name: 'Notification for Rule Test',
-  tags: ['__internal_rule_alert_id:85b64e8a-2e40-4096-86af-5ac172c10825'],
-  alertTypeId: 'siem.notifications',
-  consumer: 'siem',
-  params: {
-    ruleAlertId: '85b64e8a-2e40-4096-86af-5ac172c10825',
-  },
-  schedule: {
-    interval: '5m',
-  },
-  enabled: true,
-  actions: [
-    {
-      actionTypeId: '.slack',
-      params: {
-        message:
-          'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
-      },
-      group: 'default',
-      id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-    },
-  ],
-  throttle: null,
-  notifyWhen: null,
-  apiKey: null,
-  apiKeyOwner: 'elastic',
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
-  createdAt: new Date('2020-03-21T11:15:13.530Z'),
-  muteAll: false,
-  mutedInstanceIds: [],
-  scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
-  updatedAt: new Date('2020-03-21T12:37:08.730Z'),
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-  },
-});
-
-export const getFindNotificationsResultWithSingleHit = (): FindHit<RuleNotificationAlertType> => ({
-  page: 1,
-  perPage: 1,
-  total: 1,
-  data: [getNotificationResult()],
 });
 
 export const getFinalizeSignalsMigrationRequest = () =>

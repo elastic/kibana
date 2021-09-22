@@ -40,7 +40,7 @@ export const useSavedQueries = ({
     {
       keepPreviousData: true,
       // Refetch the data every 10 seconds
-      refetchInterval: isLive ? 10000 : false,
+      refetchInterval: isLive ? 5000 : false,
     }
   );
 };

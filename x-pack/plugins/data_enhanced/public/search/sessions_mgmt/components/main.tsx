@@ -23,6 +23,7 @@ interface Props {
   timezone: string;
   config: SessionsConfigSchema;
   plugins: IManagementSectionsPluginsSetup;
+  kibanaVersion: string;
 }
 
 export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {

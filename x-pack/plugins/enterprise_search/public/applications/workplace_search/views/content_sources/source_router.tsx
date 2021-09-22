@@ -79,7 +79,7 @@ export const SourceRouter: React.FC = () => {
         </Route>
       )}
       {isCustomSource && (
-        <Route exact path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}>
+        <Route path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}>
           <DisplaySettingsRouter />
         </Route>
       )}

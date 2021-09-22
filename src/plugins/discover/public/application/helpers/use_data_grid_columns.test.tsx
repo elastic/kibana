@@ -11,12 +11,12 @@ import { useDataGridColumns } from './use_data_grid_columns';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { configMock } from '../../__mocks__/config';
 import { indexPatternsMock } from '../../__mocks__/index_patterns';
-import { AppState } from '../angular/context_state';
+import { AppState } from '../apps/context/services/context_state';
 import { Capabilities } from '../../../../../core/types';
 
 describe('useDataGridColumns', () => {
   const defaultProps = {
-    capabilities: ({ discover: { save: true } } as unknown) as Capabilities,
+    capabilities: { discover: { save: true } } as unknown as Capabilities,
     config: configMock,
     indexPattern: indexPatternMock,
     indexPatterns: indexPatternsMock,

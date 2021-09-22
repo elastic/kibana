@@ -9,17 +9,17 @@ import {
   GEO_JSON_TYPE,
   FEATURE_VISIBLE_PROPERTY_NAME,
   KBN_IS_CENTROID_FEATURE,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_METADATA_FEATURE,
 } from '../../../common/constants';
 
 import { Timeslice } from '../../../common/descriptor_types';
 
 export interface TimesliceMaskConfig {
-  timesiceMaskField: string;
+  timesliceMaskField: string;
   timeslice: Timeslice;
 }
 
-export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true];
+export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_METADATA_FEATURE], true];
 export const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
 
 function getFilterExpression(
@@ -34,15 +34,15 @@ function getFilterExpression(
   }
 
   if (timesliceMaskConfig) {
-    allFilters.push(['has', timesliceMaskConfig.timesiceMaskField]);
+    allFilters.push(['has', timesliceMaskConfig.timesliceMaskField]);
     allFilters.push([
       '>=',
-      ['get', timesliceMaskConfig.timesiceMaskField],
+      ['get', timesliceMaskConfig.timesliceMaskField],
       timesliceMaskConfig.timeslice.from,
     ]);
     allFilters.push([
       '<',
-      ['get', timesliceMaskConfig.timesiceMaskField],
+      ['get', timesliceMaskConfig.timesliceMaskField],
       timesliceMaskConfig.timeslice.to,
     ]);
   }

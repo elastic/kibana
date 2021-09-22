@@ -7,13 +7,10 @@
 
 import { addParameters } from '@storybook/react';
 
-import { startServices } from '../public/services/stubs';
 import { addDecorators } from './decorators';
 
 // Import Canvas CSS
 import '../public/style/index.scss';
-
-startServices();
 
 addDecorators();
 addParameters({

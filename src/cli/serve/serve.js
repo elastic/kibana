@@ -68,12 +68,14 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
-    if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'kibana_system');
-    }
+    if (!has('elasticsearch.serviceAccountToken')) {
+      if (!has('elasticsearch.username')) {
+        set('elasticsearch.username', 'kibana_system');
+      }
 
-    if (!has('elasticsearch.password')) {
-      set('elasticsearch.password', 'changeme');
+      if (!has('elasticsearch.password')) {
+        set('elasticsearch.password', 'changeme');
+      }
     }
 
     if (opts.ssl) {

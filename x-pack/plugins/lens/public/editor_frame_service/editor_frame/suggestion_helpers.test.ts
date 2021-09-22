@@ -9,6 +9,7 @@ import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource, DatasourceMock } from '../../mocks';
 import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
 import { PaletteOutput } from 'src/plugins/charts/public';
+import { DatasourceStates } from '../../state_management';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
@@ -22,13 +23,7 @@ const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSu
 });
 
 let datasourceMap: Record<string, DatasourceMock>;
-let datasourceStates: Record<
-  string,
-  {
-    isLoading: boolean;
-    state: unknown;
-  }
->;
+let datasourceStates: DatasourceStates;
 
 beforeEach(() => {
   datasourceMap = {
@@ -525,13 +520,10 @@ describe('suggestion helpers', () => {
             getOperationForColumnId: jest.fn(),
           },
         },
-        'vis1',
+        { activeId: 'vis1', state: {} },
+        { mockindexpattern: { state: mockDatasourceState, isLoading: false } },
         { vis1: mockVisualization1 },
-        {},
         datasourceMap.mock,
-        {
-          mockindexpattern: { state: mockDatasourceState, isLoading: false },
-        },
         { id: 'myfield', humanData: { label: 'myfieldLabel' } },
       ];
     });
@@ -558,7 +550,7 @@ describe('suggestion helpers', () => {
 
     it('should return nothing if datasource does not produce suggestions', () => {
       datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValue([]);
-      defaultParams[2] = {
+      defaultParams[3] = {
         vis1: { ...mockVisualization1, getSuggestions: () => [] },
         vis2: mockVisualization2,
       };
@@ -567,7 +559,7 @@ describe('suggestion helpers', () => {
     });
 
     it('should not consider suggestion from other visualization if there is data', () => {
-      defaultParams[2] = {
+      defaultParams[3] = {
         vis1: { ...mockVisualization1, getSuggestions: () => [] },
         vis2: mockVisualization2,
       };
@@ -593,7 +585,7 @@ describe('suggestion helpers', () => {
           previewIcon: 'empty',
         },
       ]);
-      defaultParams[2] = {
+      defaultParams[3] = {
         vis1: mockVisualization1,
         vis2: mockVisualization2,
         vis3: mockVisualization3,

@@ -10,21 +10,21 @@ import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { createInventoryMetricAlertType } from './alerting/inventory';
-import { getAlertType as getLogsAlertType } from './alerting/log_threshold';
+import { createLogThresholdAlertType } from './alerting/log_threshold';
+import { createMetricThresholdAlertType } from './alerting/metric_threshold';
+import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
+import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
+import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import {
-  InfraClientSetupDeps,
-  InfraClientStartDeps,
   InfraClientCoreSetup,
   InfraClientCoreStart,
   InfraClientPluginClass,
+  InfraClientSetupDeps,
+  InfraClientStartDeps,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
-import { createMetricsHasData, createMetricsFetchData } from './metrics_overview_fetchers';
-import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
-import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 
 export class Plugin implements InfraClientPluginClass {
   constructor(_context: PluginInitializerContext) {}
@@ -34,10 +34,16 @@ export class Plugin implements InfraClientPluginClass {
       registerFeatures(pluginsSetup.home);
     }
 
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(getLogsAlertType());
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createInventoryMetricAlertType()
+    );
 
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdAlertType()
+    );
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createMetricThresholdAlertType()
+    );
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_logs',
       hasData: getLogsHasDataFetcher(core.getStartServices),
@@ -53,33 +59,39 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
     pluginsSetup.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
-        map(([{ application: { capabilities } }]) => [
-          ...(capabilities.logs.show
-            ? [
-                {
-                  label: 'Logs',
-                  sortKey: 200,
-                  entries: [
-                    { label: 'Stream', app: 'logs', path: '/stream' },
-                    { label: 'Anomalies', app: 'logs', path: '/anomalies' },
-                    { label: 'Categories', app: 'logs', path: '/log-categories' },
-                  ],
-                },
-              ]
-            : []),
-          ...(capabilities.infrastructure.show
-            ? [
-                {
-                  label: 'Metrics',
-                  sortKey: 300,
-                  entries: [
-                    { label: 'Inventory', app: 'metrics', path: '/inventory' },
-                    { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-                  ],
-                },
-              ]
-            : []),
-        ])
+        map(
+          ([
+            {
+              application: { capabilities },
+            },
+          ]) => [
+            ...(capabilities.logs.show
+              ? [
+                  {
+                    label: 'Logs',
+                    sortKey: 200,
+                    entries: [
+                      { label: 'Stream', app: 'logs', path: '/stream' },
+                      { label: 'Anomalies', app: 'logs', path: '/anomalies' },
+                      { label: 'Categories', app: 'logs', path: '/log-categories' },
+                    ],
+                  },
+                ]
+              : []),
+            ...(capabilities.infrastructure.show
+              ? [
+                  {
+                    label: 'Metrics',
+                    sortKey: 300,
+                    entries: [
+                      { label: 'Inventory', app: 'metrics', path: '/inventory' },
+                      { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+                    ],
+                  },
+                ]
+              : []),
+          ]
+        )
       )
     );
 

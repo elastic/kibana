@@ -51,7 +51,7 @@ import {
   AlertTypeIndex,
   AlertType,
   ValidationResult,
-  AlertTypeRegistryContract,
+  RuleTypeRegistryContract,
   ActionTypeRegistryContract,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
@@ -145,8 +145,9 @@ export async function getAlertActionErrors(
   return await Promise.all(
     alert.actions.map(
       async (alertAction: AlertAction) =>
-        (await actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params))
-          .errors
+        (
+          await actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+        ).errors
     )
   );
 }
@@ -176,7 +177,7 @@ interface AlertFormProps<MetaData = Record<string, any>> {
   alert: InitialAlert;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
-  alertTypeRegistry: AlertTypeRegistryContract;
+  ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   operation: string;
   canChangeTrigger?: boolean; // to hide Change trigger button
@@ -193,7 +194,7 @@ export const AlertForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   operation,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
 }: AlertFormProps) => {
@@ -285,11 +286,11 @@ export const AlertForm = ({
   }, []);
 
   useEffect(() => {
-    setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
+    setAlertTypeModel(alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null);
     if (alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)) {
       setDefaultActionGroupId(alertTypesIndex.get(alert.alertTypeId)!.defaultActionGroupId);
     }
-  }, [alert, alert.alertTypeId, alertTypesIndex, alertTypeRegistry]);
+  }, [alert, alert.alertTypeId, alertTypesIndex, ruleTypeRegistry]);
 
   const setAlertProperty = useCallback(
     <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
@@ -344,21 +345,21 @@ export const AlertForm = ({
         )
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertTypeRegistry, availableAlertTypes, searchText, JSON.stringify(solutionsFilter)]);
+  }, [ruleTypeRegistry, availableAlertTypes, searchText, JSON.stringify(solutionsFilter)]);
 
   const getAvailableAlertTypes = (alertTypesResult: AlertType[]) =>
-    alertTypeRegistry
+    ruleTypeRegistry
       .list()
       .reduce(
         (
           arr: Array<{ alertType: AlertType; alertTypeModel: AlertTypeModel }>,
-          alertTypeRegistryItem: AlertTypeModel
+          ruleTypeRegistryItem: AlertTypeModel
         ) => {
-          const alertType = alertTypesResult.find((item) => alertTypeRegistryItem.id === item.id);
+          const alertType = alertTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
           if (alertType) {
             arr.push({
               alertType,
-              alertTypeModel: alertTypeRegistryItem,
+              alertTypeModel: ruleTypeRegistryItem,
             });
           }
           return arr;

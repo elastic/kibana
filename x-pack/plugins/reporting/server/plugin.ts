@@ -24,7 +24,8 @@ import type {
 import { registerReportingUsageCollector } from './usage';
 
 export class ReportingPlugin
-  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
+  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
+{
   private logger: LevelLogger;
   private reportingCore?: ReportingCore;
 
@@ -33,11 +34,14 @@ export class ReportingPlugin
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+    const { http } = core;
+    const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
+
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
-    core.http.registerRouteHandlerContext(PLUGIN_ID, () => {
+    http.registerRouteHandlerContext(PLUGIN_ID, () => {
       if (reportingCore.pluginIsStarted()) {
         return reportingCore.getContract();
       } else {
@@ -45,9 +49,6 @@ export class ReportingPlugin
         return null;
       }
     });
-
-    const { http } = core;
-    const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
 
     const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;
@@ -65,7 +66,10 @@ export class ReportingPlugin
     });
 
     registerUiSettings(core);
-    registerDeprecations(reportingCore, core);
+    registerDeprecations({
+      core,
+      reportingCore,
+    });
     registerReportingUsageCollector(reportingCore, plugins);
     registerRoutes(reportingCore, this.logger);
 

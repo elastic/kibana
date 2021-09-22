@@ -11,7 +11,6 @@ import Boom from '@hapi/boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
-import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy/errors';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
@@ -204,7 +203,8 @@ function validOptions(
  * @internal
  */
 export class Router<Context extends RequestHandlerContext = RequestHandlerContext>
-  implements IRouter<Context> {
+  implements IRouter<Context>
+{
   public routes: Array<Readonly<RouterRoute>> = [];
   public get: IRouter<Context>['get'];
   public post: IRouter<Context>['post'];
@@ -217,25 +217,27 @@ export class Router<Context extends RequestHandlerContext = RequestHandlerContex
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>
   ) {
-    const buildMethod = <Method extends RouteMethod>(method: Method) => <P, Q, B>(
-      route: RouteConfig<P, Q, B, Method>,
-      handler: RequestHandler<P, Q, B, Context, Method>
-    ) => {
-      const routeSchemas = routeSchemasFromRouteConfig(route, method);
+    const buildMethod =
+      <Method extends RouteMethod>(method: Method) =>
+      <P, Q, B>(
+        route: RouteConfig<P, Q, B, Method>,
+        handler: RequestHandler<P, Q, B, Context, Method>
+      ) => {
+        const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
-      this.routes.push({
-        handler: async (req, responseToolkit) =>
-          await this.handle({
-            routeSchemas,
-            request: req,
-            responseToolkit,
-            handler: this.enhanceWithContext(handler),
-          }),
-        method,
-        path: getRouteFullPath(this.routerPath, route.path),
-        options: validOptions(method, route),
-      });
-    };
+        this.routes.push({
+          handler: async (req, responseToolkit) =>
+            await this.handle({
+              routeSchemas,
+              request: req,
+              responseToolkit,
+              handler: this.enhanceWithContext(handler),
+            }),
+          method,
+          path: getRouteFullPath(this.routerPath, route.path),
+          options: validOptions(method, route),
+        });
+      };
 
     this.get = buildMethod('get');
     this.post = buildMethod('post');
@@ -279,10 +281,6 @@ export class Router<Context extends RequestHandlerContext = RequestHandlerContex
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
-      }
-      // forward 401 (boom) errors from legacy ES client
-      if (LegacyElasticsearchErrorHelpers.isNotAuthorizedError(e)) {
-        return e;
       }
       return hapiResponseAdapter.toInternalError();
     }

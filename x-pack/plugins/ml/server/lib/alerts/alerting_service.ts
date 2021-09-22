@@ -389,24 +389,27 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
 
     const formatter = getResultsFormatter(params.resultType, !!previewTimeInterval);
 
-    return (previewTimeInterval
-      ? (result as {
-          alerts_over_time: {
-            buckets: Array<
-              {
-                doc_count: number;
-                key: number;
-                key_as_string: string;
-              } & AggResultsResponse
-            >;
-          };
-        }).alerts_over_time.buckets
-          // Filter out empty buckets
-          .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
-          // Map response
-          .map(formatter)
-      : // @ts-expect-error
-        [formatter(result as AggResultsResponse)]
+    return (
+      previewTimeInterval
+        ? (
+            result as {
+              alerts_over_time: {
+                buckets: Array<
+                  {
+                    doc_count: number;
+                    key: number;
+                    key_as_string: string;
+                  } & AggResultsResponse
+                >;
+              };
+            }
+          ).alerts_over_time.buckets
+            // Filter out empty buckets
+            .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
+            // Map response
+            .map(formatter)
+        : // @ts-expect-error
+          [formatter(result as AggResultsResponse)]
     ).filter(isDefined);
   };
 
@@ -436,7 +439,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
 
     const jobIds = jobsResponse.map((v) => v.job_id);
 
-    const dataFeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+    const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
     const maxBucketInSeconds = resolveMaxTimeInterval(
       jobsResponse.map((v) => v.analysis_config.bucket_span)
@@ -448,7 +451,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
     }
 
     const lookBackTimeInterval: string =
-      params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, dataFeeds ?? []);
+      params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, datafeeds ?? []);
 
     const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 
@@ -584,8 +587,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                     should: [
                       {
                         match_phrase: {
-                          [r.topInfluencers![0].influencer_field_name]: r.topInfluencers![0]
-                            .influencer_field_value,
+                          [r.topInfluencers![0].influencer_field_name]:
+                            r.topInfluencers![0].influencer_field_value,
                         },
                       },
                     ],

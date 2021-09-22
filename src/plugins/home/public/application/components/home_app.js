@@ -12,19 +12,10 @@ import PropTypes from 'prop-types';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
-import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
-import useMount from 'react-use/lib/useMount';
-
-const RedirectToDefaultApp = () => {
-  useMount(() => {
-    const { urlForwarding } = getServices();
-    urlForwarding.navigateToDefaultApp();
-  });
-  return null;
-};
 
 export function HomeApp({ directories, solutions }) {
   const {
@@ -33,6 +24,7 @@ export function HomeApp({ directories, solutions }) {
     addBasePath,
     environmentService,
     telemetry,
+    indexPatternService,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
@@ -71,13 +63,13 @@ export function HomeApp({ directories, solutions }) {
               addBasePath={addBasePath}
               directories={directories}
               solutions={solutions}
-              find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               telemetry={telemetry}
+              hasUserIndexPattern={() => indexPatternService.hasUserDataView()}
             />
           </Route>
-          <Route path="*" exact={true} component={RedirectToDefaultApp} />
+          <Redirect to="/" />
         </Switch>
       </Router>
     </I18nProvider>
@@ -103,9 +95,7 @@ HomeApp.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
-      subtitle: PropTypes.string.isRequired,
       description: PropTypes.string,
-      appDescriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       order: PropTypes.number,

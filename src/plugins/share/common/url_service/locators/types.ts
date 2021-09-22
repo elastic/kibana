@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { DependencyList } from 'react';
-import { PersistableState, SerializableState } from 'src/plugins/kibana_utils/common';
+import { PersistableState } from 'src/plugins/kibana_utils/common';
+import type { FormatSearchParamsOptions } from './redirect';
 
 /**
  * URL locator registry.
@@ -18,20 +20,20 @@ export interface ILocatorClient {
    *
    * @param urlGenerator Definition of the new locator.
    */
-  create<P extends SerializableState>(locatorDefinition: LocatorDefinition<P>): LocatorPublic<P>;
+  create<P extends SerializableRecord>(locatorDefinition: LocatorDefinition<P>): LocatorPublic<P>;
 
   /**
    * Retrieve a previously registered locator.
    *
    * @param id Unique ID of the locator.
    */
-  get<P extends SerializableState>(id: string): undefined | LocatorPublic<P>;
+  get<P extends SerializableRecord>(id: string): undefined | LocatorPublic<P>;
 }
 
 /**
  * A convenience interface used to define and register a locator.
  */
-export interface LocatorDefinition<P extends SerializableState>
+export interface LocatorDefinition<P extends SerializableRecord>
   extends Partial<PersistableState<P>> {
   /**
    * Unique ID of the locator. Should be constant and unique across Kibana.
@@ -50,7 +52,7 @@ export interface LocatorDefinition<P extends SerializableState>
 /**
  * Public interface of a registered locator.
  */
-export interface LocatorPublic<P extends SerializableState> extends PersistableState<P> {
+export interface LocatorPublic<P extends SerializableRecord> extends PersistableState<P> {
   /**
    * Returns a reference to a Kibana client-side location.
    *
@@ -61,10 +63,23 @@ export interface LocatorPublic<P extends SerializableState> extends PersistableS
   /**
    * Returns a URL as a string.
    *
+   * @deprecated Use `getRedirectUrl` instead. `getRedirectUrl` will preserve
+   * the location state, whereas the `getUrl` just return the URL without
+   * the location state.
+   *
    * @param params URL locator parameters.
    * @param getUrlParams URL construction parameters.
    */
   getUrl(params: P, getUrlParams?: LocatorGetUrlParams): Promise<string>;
+
+  /**
+   * Returns a URL to the redirect endpoint, which will redirect the user to
+   * the final destination.
+   *
+   * @param params URL locator parameters.
+   * @param options URL serialization options.
+   */
+  getRedirectUrl(params: P, options?: FormatSearchParamsOptions): string;
 
   /**
    * Navigate using the `core.application.navigateToApp()` method to a Kibana

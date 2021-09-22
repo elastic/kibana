@@ -29,9 +29,9 @@ const addWarning = jest.fn();
 const httpGet = jest.fn();
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+  const mockPluginContext = merge({}, mockApmPluginContextValue, {
     core: { http: { get: httpGet }, notifications: { toasts: { addWarning } } },
-  }) as unknown) as ApmPluginContextValue;
+  }) as unknown as ApmPluginContextValue;
 
   return (
     <KibanaReactContext.Provider>
@@ -62,7 +62,11 @@ describe('ServiceIcons', () => {
       const { getByTestId, queryAllByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -81,7 +85,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -102,7 +110,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -124,7 +136,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -147,7 +163,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -159,13 +179,11 @@ describe('ServiceIcons', () => {
   });
 
   describe('details', () => {
-    const callApmApi = (apisMockData: Record<string, object>) => ({
-      endpoint,
-    }: {
-      endpoint: string;
-    }) => {
-      return apisMockData[endpoint];
-    };
+    const callApmApi =
+      (apisMockData: Record<string, object>) =>
+      ({ endpoint }: { endpoint: string }) => {
+        return apisMockData[endpoint];
+      };
     it('Shows loading spinner while fetching data', () => {
       const apisMockData = {
         'GET /api/apm/services/{serviceName}/metadata/icons': {
@@ -192,7 +210,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -230,7 +252,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId, getByText } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );

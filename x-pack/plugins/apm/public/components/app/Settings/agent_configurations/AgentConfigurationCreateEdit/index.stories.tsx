@@ -8,7 +8,6 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { CoreStart } from 'kibana/public';
-import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
@@ -23,7 +22,7 @@ storiesOf(
   module
 )
   .addDecorator((storyFn) => {
-    const coreMock = ({} as unknown) as CoreStart;
+    const coreMock = {} as unknown as CoreStart;
 
     // mock
     createCallApmApi(coreMock);
@@ -37,13 +36,11 @@ storiesOf(
     };
 
     return (
-      <EuiThemeProvider>
-        <ApmPluginContext.Provider
-          value={(contextMock as unknown) as ApmPluginContextValue}
-        >
-          {storyFn()}
-        </ApmPluginContext.Provider>
-      </EuiThemeProvider>
+      <ApmPluginContext.Provider
+        value={contextMock as unknown as ApmPluginContextValue}
+      >
+        {storyFn()}
+      </ApmPluginContext.Provider>
     );
   })
   .add(
@@ -67,7 +64,6 @@ storiesOf(
         propTablesExclude: [
           AgentConfigurationCreateEdit,
           ApmPluginContext.Provider,
-          EuiThemeProvider,
         ],
         source: false,
       },

@@ -25,7 +25,7 @@ export {
   getConfigFromFiles,
 } from './raw';
 
-export { ConfigService, IConfigService } from './config_service';
+export { ConfigService, IConfigService, ConfigValidateParameters } from './config_service';
 export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs, Env, RawPackageInfo } from './env';

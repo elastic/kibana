@@ -15,9 +15,9 @@ import {
   SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { transformListItemToElasticQuery } from '../utils';
-import { encodeHitVersion } from '../utils/encode_hit_version';
 import { IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemOptions {

@@ -51,6 +51,7 @@ kibana_vars=(
     elasticsearch.pingTimeout
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
+    elasticsearch.serviceAccountToken
     elasticsearch.shardTimeout
     elasticsearch.sniffInterval
     elasticsearch.sniffOnConnectionFault
@@ -72,10 +73,11 @@ kibana_vars=(
     enterpriseSearch.host
     externalUrl.policy
     i18n.locale
+    interactiveSetup.enabled
+    interactiveSetup.connectionCheck.interval
     interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
     kibana.autocompleteTimeout
-    kibana.defaultAppId
     kibana.index
     logging.appenders
     logging.appenders.console
@@ -107,6 +109,7 @@ kibana_vars=(
     map.tilemap.options.subdomains
     map.tilemap.url
     migrations.batchSize
+    migrations.maxBatchSizeBytes
     migrations.enableV2
     migrations.pollInterval
     migrations.retryAttempts
@@ -190,13 +193,13 @@ kibana_vars=(
     telemetry.enabled
     telemetry.optIn
     telemetry.optInStatusUrl
+    telemetry.sendUsageTo
     telemetry.sendUsageFrom
     tilemap.options.attribution
     tilemap.options.maxZoom
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
-    timelion.enabled
     url_drilldown.enabled
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls
@@ -291,7 +294,6 @@ kibana_vars=(
     xpack.ingestManager.registryUrl
     xpack.license_management.enabled
     xpack.maps.enabled
-    xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
     xpack.observability.annotations.index
     xpack.observability.unsafe.alertingExperience.enabled
@@ -381,6 +383,7 @@ kibana_vars=(
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
     xpack.securitySolution.alertMergeStrategy
+    xpack.securitySolution.alertIgnoreFields
     xpack.securitySolution.endpointResultListDefaultFirstPageIndex
     xpack.securitySolution.endpointResultListDefaultPageSize
     xpack.securitySolution.maxRuleImportExportSize
@@ -388,6 +391,8 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportExportSize
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
+    xpack.securitySolution.prebuiltRulesFromFileSystem
+    xpack.securitySolution.prebuiltRulesFromSavedObjects
     xpack.spaces.enabled
     xpack.spaces.maxSpaces
     xpack.task_manager.enabled

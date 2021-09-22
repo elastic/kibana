@@ -107,7 +107,7 @@ function createMockTimefilter() {
 }
 
 function makeDefaultData(): jest.Mocked<DataPublicPluginStart> {
-  return ({
+  return {
     query: {
       filterManager: createMockFilterManager(),
       timefilter: {
@@ -117,15 +117,13 @@ function makeDefaultData(): jest.Mocked<DataPublicPluginStart> {
       state$: new Observable(),
     },
     indexPatterns: {
-      get: jest.fn((id) => {
-        return new Promise((resolve) => resolve({ id }));
-      }),
+      get: jest.fn().mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true })),
     },
     search: createMockSearchService(),
     nowProvider: {
       get: jest.fn(),
     },
-  } as unknown) as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 }
 
 const createMiddleware = (data: DataPublicPluginStart) => {

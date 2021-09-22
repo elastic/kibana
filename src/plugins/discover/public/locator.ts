@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import { esFilters } from '../../data/public';
@@ -14,7 +14,7 @@ import { setStateToKbnUrl } from '../../kibana_utils/public';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
-export interface DiscoverAppLocatorParams extends SerializableState {
+export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set saved search ID.
    */
@@ -33,7 +33,7 @@ export interface DiscoverAppLocatorParams extends SerializableState {
   /**
    * Optionally set the refresh interval.
    */
-  refreshInterval?: RefreshInterval & SerializableState;
+  refreshInterval?: RefreshInterval & SerializableRecord;
 
   /**
    * Optionally apply filters.
@@ -69,7 +69,7 @@ export interface DiscoverAppLocatorParams extends SerializableState {
   /**
    * Array of the used sorting [[field,direction],...]
    */
-  sort?: string[][] & SerializableState;
+  sort?: string[][] & SerializableRecord;
 
   /**
    * id of the used saved query

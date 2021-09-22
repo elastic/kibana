@@ -29,11 +29,13 @@ export type ElasticsearchClientConfig = Pick<
   | 'hosts'
   | 'username'
   | 'password'
+  | 'serviceAccountToken'
 > & {
   pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
   requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
   ssl?: Partial<ElasticsearchConfig['ssl']>;
   keepAlive?: boolean;
+  caFingerprint?: ClientOptions['caFingerprint'];
 };
 
 /**
@@ -54,6 +56,9 @@ export function parseClientOptions(
       ...DEFAULT_HEADERS,
       ...config.customHeaders,
     },
+    // do not make assumption on user-supplied data content
+    // fixes https://github.com/elastic/kibana/issues/101944
+    disablePrototypePoisoningProtection: true,
   };
 
   if (config.pingTimeout != null) {
@@ -74,11 +79,16 @@ export function parseClientOptions(
     };
   }
 
-  if (config.username && config.password && !scoped) {
-    clientOptions.auth = {
-      username: config.username,
-      password: config.password,
-    };
+  if (!scoped) {
+    if (config.username && config.password) {
+      clientOptions.auth = {
+        username: config.username,
+        password: config.password,
+      };
+    } else if (config.serviceAccountToken) {
+      // TODO: change once ES client has native support for service account tokens: https://github.com/elastic/elasticsearch-js/issues/1477
+      clientOptions.headers!.authorization = `Bearer ${config.serviceAccountToken}`;
+    }
   }
 
   clientOptions.nodes = config.hosts.map((host) => convertHost(host));
@@ -88,6 +98,10 @@ export function parseClientOptions(
       config.ssl,
       scoped && !config.ssl.alwaysPresentCertificate
     );
+  }
+
+  if (config.caFingerprint != null) {
+    clientOptions.caFingerprint = config.caFingerprint;
   }
 
   return clientOptions;

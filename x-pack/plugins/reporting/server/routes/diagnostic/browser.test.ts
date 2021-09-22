@@ -53,9 +53,6 @@ describe('POST /diagnose/browser', () => {
     );
 
     const mockSetupDeps = createMockPluginSetup({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
-      },
       router: httpSetup.createRouter(''),
     });
 
@@ -88,7 +85,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
+      addEventListener: (_e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
       removeEventListener: jest.fn(),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
@@ -110,7 +107,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => setTimeout(() => cb(logs), 0),
+      addEventListener: (_e: string, cb: any) => setTimeout(() => cb(logs), 0),
       removeEventListener: jest.fn(),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
@@ -146,7 +143,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => {
+      addEventListener: (_e: string, cb: any) => {
         setTimeout(() => cb(devtoolMessage), 0);
         setTimeout(() => cb(fontNotFoundMessage), 0);
       },
@@ -186,7 +183,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => {
+      addEventListener: (_e: string, cb: any) => {
         setTimeout(() => cb(fontNotFoundMessage), 0);
       },
       removeEventListener: jest.fn(),
@@ -209,17 +206,16 @@ describe('POST /diagnose/browser', () => {
       .post('/api/reporting/diagnose/browser')
       .expect(200)
       .then(({ body }) => {
-        expect(body).toMatchInlineSnapshot(`
-          Object {
-            "help": Array [
-              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
-            ],
-            "logs": "Could not find the default font
-          Browser exited abnormally during startup
-          ",
-            "success": false,
-          }
+        const helpArray = [...body.help];
+        helpArray.sort();
+        expect(helpArray).toMatchInlineSnapshot(`
+          Array [
+            "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
+          ]
         `);
+        expect(body.logs).toMatch(/Could not find the default font/);
+        expect(body.logs).toMatch(/Browser exited abnormally during startup/);
+        expect(body.success).toBe(false);
       });
   });
 
@@ -242,7 +238,7 @@ describe('POST /diagnose/browser', () => {
     }));
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
+      addEventListener: (_e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
       removeEventListener: jest.fn(),
       removeAllListeners: createInterfaceListenersMock,
       close: createInterfaceCloseMock,

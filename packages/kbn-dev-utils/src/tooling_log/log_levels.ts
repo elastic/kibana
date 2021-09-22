@@ -7,6 +7,7 @@
  */
 
 const LEVELS = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'] as const;
+export const DEFAULT_LOG_LEVEL = 'info' as const;
 export type LogLevel = typeof LEVELS[number];
 
 export function pickLevelFromFlags(
@@ -15,9 +16,39 @@ export function pickLevelFromFlags(
 ) {
   if (flags.verbose) return 'verbose';
   if (flags.debug) return 'debug';
+  if (flags.info) return 'info';
   if (flags.quiet) return 'error';
   if (flags.silent) return 'silent';
-  return options.default || 'info';
+  return options.default || DEFAULT_LOG_LEVEL;
+}
+
+export const LOG_LEVEL_FLAGS = [
+  {
+    name: 'verbose',
+    help: '--verbose, -v      Log verbosely',
+  },
+  {
+    name: 'info',
+    help: "--info             Don't log debug messages",
+  },
+  {
+    name: 'debug',
+    help: '--debug            Log debug messages (less than verbose)',
+  },
+  {
+    name: 'quiet',
+    help: '--quiet            Only log errors',
+  },
+  {
+    name: 'silent',
+    help: "--silent           Don't log anything",
+  },
+];
+
+export function getLogLevelFlagsHelp(defaultLogLevel: string = DEFAULT_LOG_LEVEL) {
+  return LOG_LEVEL_FLAGS.filter(({ name }) => name !== defaultLogLevel)
+    .map(({ help }) => help)
+    .join('\n');
 }
 
 export type ParsedLogLevel = ReturnType<typeof parseLogLevel>;

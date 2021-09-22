@@ -14,8 +14,9 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { TableDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { PalettePanelContainer } from './palette_panel_container';
 import { act } from 'react-dom/test-utils';
+import { PalettePanelContainer } from '../../shared_components';
+import { layerTypes } from '../../../common';
 
 describe('data table dimension editor', () => {
   let frame: FramePublicAPI;
@@ -28,6 +29,7 @@ describe('data table dimension editor', () => {
   function testState(): DatatableVisualizationState {
     return {
       layerId: 'first',
+      layerType: layerTypes.DATA,
       columns: [
         {
           columnId: 'foo',
@@ -204,10 +206,12 @@ describe('data table dimension editor', () => {
     const instance = mountWithIntl(<TableDimensionEditor {...props} />);
 
     act(() =>
-      (instance
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_trigger"]')
-        .first()
-        .prop('onClick') as () => void)?.()
+      (
+        instance
+          .find('[data-test-subj="lnsDatatable_dynamicColoring_trigger"]')
+          .first()
+          .prop('onClick') as () => void
+      )?.()
     );
 
     expect(instance.find(PalettePanelContainer).exists()).toBe(true);

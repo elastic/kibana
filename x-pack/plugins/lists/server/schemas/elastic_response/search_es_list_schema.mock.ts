@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   DATE_NOW,
@@ -40,7 +40,7 @@ export const getSearchEsListMock = (): SearchEsListSchema => ({
   version: VERSION,
 });
 
-export const getSearchListMock = (): SearchResponse<SearchEsListSchema> => ({
+export const getSearchListMock = (): estypes.SearchResponse<SearchEsListSchema> => ({
   _scroll_id: '123',
   _shards: getShardMock(),
   hits: {
@@ -60,7 +60,7 @@ export const getSearchListMock = (): SearchResponse<SearchEsListSchema> => ({
   took: 10,
 });
 
-export const getEmptySearchListMock = (): SearchResponse<SearchEsListSchema> => ({
+export const getEmptySearchListMock = (): estypes.SearchResponse<SearchEsListSchema> => ({
   _scroll_id: '123',
   _shards: getShardMock(),
   hits: {

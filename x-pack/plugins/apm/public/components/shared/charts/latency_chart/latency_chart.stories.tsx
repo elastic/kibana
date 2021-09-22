@@ -5,17 +5,34 @@
  * 2.0.
  */
 
+import {
+  ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_RULE_TYPE_ID,
+  ALERT_EVALUATION_VALUE,
+  ALERT_INSTANCE_ID,
+  ALERT_SEVERITY,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+  TIMESTAMP,
+  ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_PRODUCER,
+} from '@kbn/rule-data-utils';
 import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   ApmPluginContext,
   ApmPluginContextValue,
 } from '../../../../context/apm_plugin/apm_plugin_context';
-import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
+import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import {
@@ -42,8 +59,9 @@ export default {
   decorators: [
     (Story: ComponentType, { args }: StoryContext) => {
       const { alertsResponse, latencyChartResponse } = args as Args;
+      const serviceName = 'testService';
 
-      const apmPluginContextMock = ({
+      const apmPluginContextMock = {
         core: {
           notifications: {
             toasts: { addWarning: () => {}, addDanger: () => {} },
@@ -52,10 +70,8 @@ export default {
             basePath: { prepend: () => {} },
             get: (endpoint: string) => {
               switch (endpoint) {
-                case '/api/apm/services/test-service/transactions/charts/latency':
+                case `/api/apm/services/${serviceName}/transactions/charts/latency`:
                   return latencyChartResponse;
-                case '/api/apm/services/test-service/alerts':
-                  return alertsResponse;
                 default:
                   return {};
               }
@@ -65,31 +81,37 @@ export default {
         },
         plugins: { observability: { isAlertingExperienceEnabled: () => true } },
         observabilityRuleTypeRegistry: { getFormatter: () => undefined },
-      } as unknown) as ApmPluginContextValue;
+      } as unknown as ApmPluginContextValue;
 
       createCallApmApi(apmPluginContextMock.core);
 
+      const transactionType = `${Math.random()}`; // So we don't memoize
+
       return (
         <ApmPluginContext.Provider value={apmPluginContextMock}>
-          <MemoryRouter initialEntries={[`/app/apm/services/test-service`]}>
-            <Route path="/app/apm/services/:serviceName">
+          <MemoryRouter initialEntries={[`/services/${serviceName}`]}>
+            <Route path="/services/{serviceName}">
               <KibanaContextProvider
                 services={{ ...apmPluginContextMock.core }}
               >
-                <EuiThemeProvider>
-                  <MockUrlParamsContextProvider
-                    params={{
-                      latencyAggregationType: LatencyAggregationType.avg,
-                      transactionType: `${Math.random()}`, // So we don't memoize
+                <MockUrlParamsContextProvider
+                  params={{
+                    latencyAggregationType: LatencyAggregationType.avg,
+                  }}
+                >
+                  <APMServiceContext.Provider
+                    value={{
+                      alerts: alertsResponse.alerts,
+                      serviceName,
+                      transactionType,
+                      transactionTypes: [],
                     }}
                   >
-                    <ApmServiceContextProvider>
-                      <ChartPointerEventContextProvider>
-                        <Story />
-                      </ChartPointerEventContextProvider>
-                    </ApmServiceContextProvider>
-                  </MockUrlParamsContextProvider>
-                </EuiThemeProvider>
+                    <ChartPointerEventContextProvider>
+                      <Story />
+                    </ChartPointerEventContextProvider>
+                  </APMServiceContext.Provider>
+                </MockUrlParamsContextProvider>
               </KibanaContextProvider>
             </Route>
           </MemoryRouter>
@@ -100,75 +122,77 @@ export default {
 };
 
 export function Example(_args: Args) {
-  return <LatencyChart height={300} />;
+  return (
+    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
+  );
 }
 Example.args = {
   alertsResponse: {
     alerts: [
       {
-        'rule.id': ['apm.transaction_duration'],
-        'kibana.rac.alert.evaluation.value': [2001708.19],
+        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
+        [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
-        'rule.name': ['Latency threshold | frontend-rum'],
-        'kibana.rac.alert.duration.us': [10000000000],
-        'kibana.rac.alert.status': ['open'],
+        [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
+        [ALERT_DURATION]: [10000000000],
+        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        'kibana.rac.alert.producer': ['apm'],
-        'kibana.rac.alert.uuid': ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
-        'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
+        [ALERT_RULE_PRODUCER]: ['apm'],
+        [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
+        [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
-        'kibana.rac.alert.id': ['apm.transaction_duration_All'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
+        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
-        'kibana.rac.alert.evaluation.threshold': [500000],
-        'kibana.rac.alert.start': ['2021-06-02T04:00:00.000Z'],
+        [ALERT_EVALUATION_THRESHOLD]: [500000],
+        [ALERT_START]: ['2021-06-02T04:00:00.000Z'],
         'event.kind': ['state'],
-        'rule.category': ['Latency threshold'],
+        [ALERT_RULE_CATEGORY]: ['Latency threshold'],
       },
       {
-        'rule.id': ['apm.transaction_duration'],
-        'kibana.rac.alert.evaluation.value': [2001708.19],
+        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
+        [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
-        'rule.name': ['Latency threshold | frontend-rum'],
-        'kibana.rac.alert.duration.us': [10000000000],
-        'kibana.rac.alert.status': ['open'],
+        [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
+        [ALERT_DURATION]: [10000000000],
+        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        'kibana.rac.alert.producer': ['apm'],
-        'kibana.rac.alert.severity.level': ['warning'],
-        'kibana.rac.alert.uuid': ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
-        'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
+        [ALERT_RULE_PRODUCER]: ['apm'],
+        [ALERT_SEVERITY]: ['warning'],
+        [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
+        [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
-        'kibana.rac.alert.id': ['apm.transaction_duration_All'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
+        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
-        'kibana.rac.alert.evaluation.threshold': [500000],
-        'kibana.rac.alert.start': ['2021-06-02T10:45:00.000Z'],
+        [ALERT_EVALUATION_THRESHOLD]: [500000],
+        [ALERT_START]: ['2021-06-02T10:45:00.000Z'],
         'event.kind': ['state'],
-        'rule.category': ['Latency threshold'],
+        [ALERT_RULE_CATEGORY]: ['Latency threshold'],
       },
       {
-        'rule.id': ['apm.transaction_duration'],
-        'kibana.rac.alert.evaluation.value': [2001708.19],
+        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
+        [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
-        'rule.name': ['Latency threshold | frontend-rum'],
-        'kibana.rac.alert.duration.us': [1000000000],
-        'kibana.rac.alert.status': ['open'],
+        [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
+        [ALERT_DURATION]: [1000000000],
+        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        'kibana.rac.alert.producer': ['apm'],
-        'kibana.rac.alert.severity.level': ['critical'],
-        'kibana.rac.alert.uuid': ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
-        'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
+        [ALERT_RULE_PRODUCER]: ['apm'],
+        [ALERT_SEVERITY]: ['critical'],
+        [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
+        [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
-        'kibana.rac.alert.id': ['apm.transaction_duration_All'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
+        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
-        'kibana.rac.alert.evaluation.threshold': [500000],
-        'kibana.rac.alert.start': ['2021-06-02T16:50:00.000Z'],
+        [ALERT_EVALUATION_THRESHOLD]: [500000],
+        [ALERT_START]: ['2021-06-02T16:50:00.000Z'],
         'event.kind': ['state'],
-        'rule.category': ['Latency threshold'],
+        [ALERT_RULE_CATEGORY]: ['Latency threshold'],
       },
     ],
   },
@@ -782,7 +806,9 @@ Example.args = {
 };
 
 export function NoData(_args: Args) {
-  return <LatencyChart height={300} />;
+  return (
+    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
+  );
 }
 NoData.args = {
   alertsResponse: { alerts: [] },

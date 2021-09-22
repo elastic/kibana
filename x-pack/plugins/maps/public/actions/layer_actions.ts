@@ -47,6 +47,7 @@ import {
   JoinDescriptor,
   LayerDescriptor,
   StyleDescriptor,
+  TileMetaFeature,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
@@ -79,7 +80,7 @@ export function rollbackToTrackedLayerStateForSelectedLayer() {
     // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
     dispatch(updateStyleMeta(layerId));
 
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -148,7 +149,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       type: ADD_LAYER,
       layer: layerDescriptor,
     });
-    dispatch(syncDataForLayerId(layerDescriptor.id));
+    dispatch(syncDataForLayerId(layerDescriptor.id, false));
 
     const layer = createLayerInstance(layerDescriptor);
     const features = await layer.getLicensedFeatures();
@@ -225,7 +226,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       visibility: makeVisible,
     });
     if (makeVisible) {
-      dispatch(syncDataForLayerId(layerId));
+      dispatch(syncDataForLayerId(layerId, false));
     }
   };
 }
@@ -242,6 +243,32 @@ export function toggleLayerVisible(layerId: string) {
     const makeVisible = !layer.isVisible();
 
     dispatch(setLayerVisibility(layerId, makeVisible));
+  };
+}
+
+export function showThisLayerOnly(layerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      if (layer.isBasemap(index)) {
+        return;
+      }
+
+      // show target layer
+      if (layer.getId() === layerId) {
+        if (!layer.isVisible()) {
+          dispatch(setLayerVisibility(layerId, true));
+        }
+        return;
+      }
+
+      // hide all other layers
+      if (layer.isVisible()) {
+        dispatch(setLayerVisibility(layer.getId(), false));
+      }
+    });
   };
 }
 
@@ -303,7 +330,7 @@ function updateMetricsProp(layerId: string, value: unknown) {
       value,
     });
     await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -329,7 +356,7 @@ export function updateSourceProp(
     if (newLayerType) {
       dispatch(updateLayerType(layerId, newLayerType));
     }
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -432,7 +459,7 @@ export function setLayerQuery(id: string, query: Query) {
       newValue: query,
     });
 
-    dispatch(syncDataForLayerId(id));
+    dispatch(syncDataForLayerId(id, false));
   };
 }
 
@@ -507,14 +534,9 @@ function updateStyleProperties(layerId: string, previousFields: IField[]) {
     }
 
     const nextFields = await (targetLayer as IVectorLayer).getFields(); // take into account all fields, since labels can be driven by any field (source or join)
-    const {
-      hasChanges,
-      nextStyleDescriptor,
-    } = await (style as IVectorStyle).getDescriptorWithUpdatedStyleProps(
-      nextFields,
-      previousFields,
-      getMapColors(getState())
-    );
+    const { hasChanges, nextStyleDescriptor } = await (
+      style as IVectorStyle
+    ).getDescriptorWithUpdatedStyleProps(nextFields, previousFields, getMapColors(getState()));
     if (hasChanges && nextStyleDescriptor) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
     }
@@ -536,7 +558,7 @@ export function updateLayerStyle(layerId: string, styleDescriptor: StyleDescript
     dispatch(updateStyleMeta(layerId));
 
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -562,7 +584,7 @@ export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
       joins,
     });
     await dispatch(updateStyleProperties(layer.getId(), previousFields));
-    dispatch(syncDataForLayerId(layer.getId()));
+    dispatch(syncDataForLayerId(layer.getId(), false));
   };
 }
 
@@ -589,5 +611,25 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
     id: layerId,
     propName: '__areTilesLoaded',
     newValue: areTilesLoaded,
+  };
+}
+
+export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFeature[]) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__metaFromTiles',
+      newValue: mbMetaFeatures,
+    });
+    await dispatch(updateStyleMeta(layerId));
   };
 }

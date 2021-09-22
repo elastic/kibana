@@ -9,13 +9,13 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 
 import type { ISavedObjectsRepository, SavedObject } from 'src/core/server';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
   LegacyUrlAliasTarget,
+  Space,
 } from '../../common';
 import { isReservedSpace } from '../../common';
 import type { ConfigType } from '../config';

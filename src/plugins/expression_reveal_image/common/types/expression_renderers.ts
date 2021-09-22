@@ -11,7 +11,7 @@ export type OriginString = 'bottom' | 'left' | 'top' | 'right';
 export interface RevealImageRendererConfig {
   percent: number;
   origin?: OriginString;
-  image?: string;
+  image: string;
   emptyImage?: string;
 }
 

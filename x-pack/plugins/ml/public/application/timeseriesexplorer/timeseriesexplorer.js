@@ -264,12 +264,8 @@ export class TimeSeriesExplorer extends React.Component {
    * Gets focus data for the current component state/
    */
   getFocusData(selection) {
-    const {
-      selectedJobId,
-      selectedForecastId,
-      selectedDetectorIndex,
-      functionDescription,
-    } = this.props;
+    const { selectedJobId, selectedForecastId, selectedDetectorIndex, functionDescription } =
+      this.props;
     const { modelPlotEnabled } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     if (isMetricDetector(selectedJob, selectedDetectorIndex) && functionDescription === undefined) {
@@ -1231,7 +1227,7 @@ export class TimeSeriesExplorer extends React.Component {
                 )}
                 {focusAnnotationData && focusAnnotationData.length > 0 && (
                   <EuiAccordion
-                    id={'EuiAccordion-blah'}
+                    id={'mlAnnotationsAccordion'}
                     buttonContent={
                       <EuiTitle className="panel-title">
                         <h2>

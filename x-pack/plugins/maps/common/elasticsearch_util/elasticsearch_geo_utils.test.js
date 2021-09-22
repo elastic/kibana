@@ -269,6 +269,26 @@ describe('hitsToGeoJson', () => {
         type: 'Point',
       });
     });
+
+    it('Should not modify results of flattenHit', () => {
+      const geoFieldName = 'location';
+      const cachedProperities = {
+        [geoFieldName]: '20,100',
+      };
+      const cachedFlattenHit = () => {
+        return cachedProperities;
+      };
+      const hits = [
+        {
+          _source: {
+            [geoFieldName]: '20,100',
+          },
+        },
+      ];
+      const geojson = hitsToGeoJson(hits, cachedFlattenHit, geoFieldName, 'geo_point', []);
+      expect(cachedProperities.hasOwnProperty('location')).toBe(true);
+      expect(geojson.features[0].properties).toEqual({});
+    });
   });
 });
 

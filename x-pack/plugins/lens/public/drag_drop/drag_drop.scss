@@ -20,7 +20,15 @@
   transform: translate(-12px, 8px);
   z-index: $lnsZLevel3;
   pointer-events: none;
-  box-shadow: 0 0 0 $euiFocusRingSize $euiFocusRingColor;
+
+  @include kbnThemeStyle('v7') {
+    box-shadow: 0 0 0 $euiFocusRingSize $euiFocusRingColor;
+  }
+
+  @include kbnThemeStyle('v8') {
+    outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
+    outline-style: auto; // Chrome
+  }
 }
 
 // Draggable item
@@ -133,6 +141,7 @@
   &:focus-within {
     @include euiFocusRing;
     pointer-events: none;
+    z-index: $lnsZLevel2;
   }
 }
 

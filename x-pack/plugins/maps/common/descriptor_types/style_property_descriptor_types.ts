@@ -225,14 +225,16 @@ export type GeometryTypes = {
   isPolygonsOnly: boolean;
 };
 
+export type FieldMeta = {
+  [key: string]: {
+    range?: RangeFieldMeta;
+    categories?: CategoryFieldMeta;
+  };
+};
+
 export type StyleMetaDescriptor = {
   geometryTypes?: GeometryTypes;
-  fieldMeta: {
-    [key: string]: {
-      range?: RangeFieldMeta;
-      categories?: CategoryFieldMeta;
-    };
-  };
+  fieldMeta: FieldMeta;
 };
 
 export type VectorStyleDescriptor = StyleDescriptor & {

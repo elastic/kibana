@@ -263,7 +263,7 @@ export default function ({ getService, getPageObjects }) {
           }
         );
 
-        overview.closeAlertsModal();
+        await overview.closeAlertsModal();
 
         // go to nodes listing
         await overview.clickEsNodes();

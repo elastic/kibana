@@ -36,7 +36,7 @@ function checkSessionExpirationPage(
         `${SEARCH_SESSIONS_EXPIRE_TASK_TYPE} Found ${searchSessions.total} sessions, processing ${searchSessions.saved_objects.length}`
       );
 
-      const updatedSessions = await getAllSessionsStatusUpdates(deps, searchSessions);
+      const updatedSessions = await getAllSessionsStatusUpdates(deps, config, searchSessions);
       await bulkUpdateSessions(deps, updatedSessions);
 
       return searchSessions;

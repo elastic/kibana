@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
 import {
   SavedObjectsStart,
   SavedObjectsClientContract,
@@ -19,8 +20,10 @@ export interface CanvasPlatformService {
   getBasePathInterface: () => IBasePath;
   getDocLinkVersion: () => string;
   getElasticWebsiteUrl: () => string;
+  getKibanaVersion: () => string;
   getHasWriteAccess: () => boolean;
   getUISetting: (key: string, defaultValue?: any) => any;
+  hasHeaderBanner$: () => Observable<boolean>;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   setRecentlyAccessed: (link: string, label: string, id: string) => void;
   setFullscreen: ChromeStart['setIsVisible'];

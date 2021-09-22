@@ -38,8 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104409
-    describe.skip('query', function () {
+    describe('query', function () {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
@@ -109,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should modify the time range when the histogram is brushed', async function () {
         // this is the number of renderings of the histogram needed when new data is fetched
         // this needs to be improved
-        const renderingCountInc = 1;
+        const renderingCountInc = 2;
         const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -173,6 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // reset to persisted state
+        await queryBar.clearQuery();
         await PageObjects.discover.clickResetSavedSearchButton();
         const expectedHitCount = '14,004';
         await retry.try(async function () {
@@ -230,10 +230,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           await PageObjects.discover.loadSavedSearch(expected.title);
-          const {
-            title,
-            description,
-          } = await PageObjects.common.getSharedItemTitleAndDescription();
+          const { title, description } =
+            await PageObjects.common.getSharedItemTitleAndDescription();
           expect(title).to.eql(expected.title);
           expect(description).to.eql(expected.description);
         });
@@ -268,8 +266,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
-
-        expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
+        await retry.waitFor('number of fetches to be 1', async () => {
+          const nrOfFetches = await PageObjects.discover.getNrOfFetches();
+          return nrOfFetches === 1;
+        });
       });
     });
 
@@ -308,7 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
-        await PageObjects.discover.clickFieldListItemAdd('_score');
+        await PageObjects.discover.clickFieldListItemRemove('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
       });

@@ -44,13 +44,14 @@ describe('useVisualizeAppState', () => {
   connectToQueryState.mockImplementation(() => stopSyncingAppFiltersMock);
 
   const eventEmitter = new EventEmitter();
-  const savedVisInstance = ({
+  const savedVisInstance = {
     vis: {
       setState: jest.fn().mockResolvedValue({}),
+      data: {},
     },
     savedVis: {},
     embeddableHandler: {},
-  } as unknown) as SavedVisInstance;
+  } as unknown as SavedVisInstance;
   let mockServices: jest.Mocked<VisualizeServices>;
 
   beforeEach(() => {
@@ -156,7 +157,6 @@ describe('useVisualizeAppState', () => {
     };
 
     it('should successfully update vis state and set up app state container', async () => {
-      // @ts-expect-error
       stateContainerGetStateMock.mockImplementation(() => state);
       const { result, waitForNextUpdate } = renderHook(() =>
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
@@ -167,7 +167,31 @@ describe('useVisualizeAppState', () => {
       const { aggs, ...visState } = stateContainer.getState().vis;
       const expectedNewVisState = {
         ...visState,
-        data: { aggs: state.vis.aggs },
+        data: { aggs: state.vis.aggs, searchSource: { query: state.query, filter: state.filters } },
+      };
+
+      expect(savedVisInstance.vis.setState).toHaveBeenCalledWith(expectedNewVisState);
+      expect(result.current).toEqual({
+        appState: stateContainer,
+        hasUnappliedChanges: false,
+      });
+    });
+
+    it('should successfully updated vis state and set up app state container if query from app state is different', async () => {
+      stateContainerGetStateMock.mockImplementation(() => ({
+        ...visualizeAppStateStub,
+        query: { query: 'test', language: 'kuery' },
+      }));
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
+      );
+
+      await waitForNextUpdate();
+
+      const { aggs, ...visState } = stateContainer.getState().vis;
+      const expectedNewVisState = {
+        ...visState,
+        data: { aggs: state.vis.aggs, searchSource: { query: state.query, filter: state.filters } },
       };
 
       expect(savedVisInstance.vis.setState).toHaveBeenCalledWith(expectedNewVisState);
@@ -179,7 +203,6 @@ describe('useVisualizeAppState', () => {
 
     it(`should add warning toast and redirect to the landing page
         if setting new vis state was not successful, e.x. invalid query params`, async () => {
-      // @ts-expect-error
       stateContainerGetStateMock.mockImplementation(() => state);
       // @ts-expect-error
       savedVisInstance.vis.setState.mockRejectedValue({

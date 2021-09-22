@@ -37,9 +37,9 @@ interface Props {
 }
 
 const connectorTypeButtons = [
-  { id: 'all', label: 'All' },
-  { id: 'alerts', label: 'Alerts' },
-  { id: 'cases', label: 'Cases' },
+  { id: SwimlaneConnectorType.All, label: 'All' },
+  { id: SwimlaneConnectorType.Alerts, label: 'Alerts' },
+  { id: SwimlaneConnectorType.Cases, label: 'Cases' },
 ];
 
 const SwimlaneFieldsComponent: React.FC<Props> = ({

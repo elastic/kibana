@@ -18,6 +18,12 @@ import {
   UserActionField,
 } from '../api';
 
+export interface CasesUiConfigType {
+  markdownPlugins: {
+    lens: boolean;
+  };
+}
+
 export const StatusAll = 'all' as const;
 export type StatusAllType = typeof StatusAll;
 

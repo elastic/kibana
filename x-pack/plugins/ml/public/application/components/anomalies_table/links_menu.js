@@ -30,7 +30,7 @@ import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_util
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
-import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 /*
  * Component for rendering the links menu inside a cell in the anomalies table.
  */
@@ -146,13 +146,9 @@ class LinksMenuUI extends Component {
 
   viewSeries = async () => {
     const {
-      services: {
-        share: {
-          urlGenerators: { getUrlGenerator },
-        },
-      },
+      services: { share },
     } = this.props.kibana;
-    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+    const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
     const record = this.props.anomaly.source;
     const bounds = this.props.bounds;
@@ -182,33 +178,35 @@ class LinksMenuUI extends Component {
       entityCondition[record.by_field_name] = record.by_field_value;
     }
 
-    const singleMetricViewerLink = await mlUrlGenerator.createUrl({
-      excludeBasePath: false,
-      page: ML_PAGES.SINGLE_METRIC_VIEWER,
-      pageState: {
-        jobIds: [record.job_id],
-        refreshInterval: {
-          display: 'Off',
-          pause: true,
-          value: 0,
-        },
-        timeRange: {
-          from: from,
-          to: to,
-          mode: 'absolute',
-        },
-        zoom: {
-          from: zoomFrom,
-          to: zoomTo,
-        },
-        detectorIndex: record.detector_index,
-        entities: entityCondition,
-        query_string: {
-          analyze_wildcard: true,
-          query: '*',
+    const singleMetricViewerLink = await mlLocator.getUrl(
+      {
+        page: ML_PAGES.SINGLE_METRIC_VIEWER,
+        pageState: {
+          jobIds: [record.job_id],
+          refreshInterval: {
+            display: 'Off',
+            pause: true,
+            value: 0,
+          },
+          timeRange: {
+            from: from,
+            to: to,
+            mode: 'absolute',
+          },
+          zoom: {
+            from: zoomFrom,
+            to: zoomTo,
+          },
+          detectorIndex: record.detector_index,
+          entities: entityCondition,
+          query_string: {
+            analyze_wildcard: true,
+            query: '*',
+          },
         },
       },
-    });
+      { absolute: true }
+    );
     window.open(singleMetricViewerLink, '_blank');
   };
 

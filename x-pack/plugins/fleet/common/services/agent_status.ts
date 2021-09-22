@@ -54,7 +54,7 @@ export function buildKueryForOnlineAgents() {
 }
 
 export function buildKueryForErrorAgents() {
-  return 'last_checkin_status:error or last_checkin_status:degraded';
+  return `(last_checkin_status:error or last_checkin_status:degraded) AND not (${buildKueryForUpdatingAgents()})`;
 }
 
 export function buildKueryForOfflineAgents() {

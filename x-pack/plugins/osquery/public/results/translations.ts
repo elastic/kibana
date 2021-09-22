@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const generateEmptyDataMessage = (agentsResponded: number): string => {
   return i18n.translate('xpack.osquery.results.multipleAgentsResponded', {
     defaultMessage:
-      '{agentsResponded, plural, one {# agent has} other {# agents have}} responded, but no osquery data has been reported.',
+      '{agentsResponded, plural, one {# agent has} other {# agents have}} responded, no osquery data has been reported.',
     values: { agentsResponded },
   });
 };

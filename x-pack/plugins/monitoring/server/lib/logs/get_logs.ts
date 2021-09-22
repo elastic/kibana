@@ -22,7 +22,7 @@ import { LegacyRequest } from '../../types';
 import { FilebeatResponse } from '../../../common/types/filebeat';
 
 interface Log {
-  timestamp?: string;
+  timestamp?: string | number;
   component?: string;
   node?: string;
   index?: string;
@@ -83,7 +83,7 @@ export async function getLogs(
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
 
   const metric = { timestampField: '@timestamp' };
-  const filter = [
+  const filter: any[] = [
     { term: { 'service.type': 'elasticsearch' } },
     createTimeFilter({ start, end, metric }),
   ];

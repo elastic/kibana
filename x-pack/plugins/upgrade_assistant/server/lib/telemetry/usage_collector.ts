@@ -20,7 +20,10 @@ import {
   UpgradeAssistantTelemetrySavedObject,
   UpgradeAssistantTelemetrySavedObjectAttributes,
 } from '../../../common/types';
-import { isDeprecationLoggingEnabled } from '../es_deprecation_logging_apis';
+import {
+  isDeprecationLogIndexingEnabled,
+  isDeprecationLoggingEnabled,
+} from '../es_deprecation_logging_apis';
 
 async function getSavedObjectAttributesFromRepo(
   savedObjectsRepository: ISavedObjectsRepository,
@@ -45,7 +48,10 @@ async function getDeprecationLoggingStatusValue(esClient: ElasticsearchClient): 
       include_defaults: true,
     });
 
-    return isDeprecationLoggingEnabled(loggerDeprecationCallResult);
+    return (
+      isDeprecationLogIndexingEnabled(loggerDeprecationCallResult) &&
+      isDeprecationLoggingEnabled(loggerDeprecationCallResult)
+    );
   } catch (e) {
     return false;
   }
@@ -71,8 +77,7 @@ export async function fetchUpgradeAssistantMetrics(
     const defaultTelemetrySavedObject = {
       ui_open: {
         overview: 0,
-        cluster: 0,
-        indices: 0,
+        elasticsearch: 0,
         kibana: 0,
       },
       ui_reindex: {
@@ -90,8 +95,7 @@ export async function fetchUpgradeAssistantMetrics(
     return {
       ui_open: {
         overview: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.overview', 0),
-        cluster: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.cluster', 0),
-        indices: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.indices', 0),
+        elasticsearch: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.elasticsearch', 0),
         kibana: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.kibana', 0),
       },
       ui_reindex: {
@@ -124,8 +128,8 @@ export function registerUpgradeAssistantUsageCollector({
   usageCollection,
   savedObjects,
 }: Dependencies) {
-  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector<UpgradeAssistantTelemetry>(
-    {
+  const upgradeAssistantUsageCollector =
+    usageCollection.makeUsageCollector<UpgradeAssistantTelemetry>({
       type: 'upgrade-assistant-telemetry',
       isReady: () => true,
       schema: {
@@ -140,18 +144,10 @@ export function registerUpgradeAssistantUsageCollector({
           },
         },
         ui_open: {
-          cluster: {
+          elasticsearch: {
             type: 'long',
             _meta: {
-              description:
-                'Number of times a user viewed the list of Elasticsearch cluster deprecations.',
-            },
-          },
-          indices: {
-            type: 'long',
-            _meta: {
-              description:
-                'Number of times a user viewed the list of Elasticsearch index deprecations.',
+              description: 'Number of times a user viewed the list of Elasticsearch deprecations.',
             },
           },
           overview: {
@@ -175,8 +171,7 @@ export function registerUpgradeAssistantUsageCollector({
         },
       },
       fetch: async () => fetchUpgradeAssistantMetrics(elasticsearch, savedObjects),
-    }
-  );
+    });
 
   usageCollection.registerCollector(upgradeAssistantUsageCollector);
 }

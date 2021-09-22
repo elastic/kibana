@@ -92,7 +92,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
   ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
-  const allTypes = normalTypes.concat(hiddenType);
+  const allTypes = [...normalTypes, ...crossNamespace, ...hiddenType];
   return { normalTypes, crossNamespace, hiddenType, allTypes };
 };
 
@@ -100,11 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const {
-    addTests,
-    createTestDefinitions,
-    expectSavedObjectForbidden,
-  } = bulkCreateTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    bulkCreateTestSuiteFactory(esArchiver, supertest);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
     const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
       overwrite,
@@ -118,18 +115,17 @@ export default function ({ getService }: FtrProviderContext) {
         singleRequest: true,
       }),
       createTestDefinitions(hiddenType, true, overwrite, { spaceId, user }),
-      createTestDefinitions(allTypes, true, overwrite, {
-        spaceId,
-        user,
-        singleRequest: true,
-        responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
-      }),
     ].flat();
     return {
       unauthorized: createTestDefinitions(allTypes, true, overwrite, { spaceId, user }),
       authorizedAtSpace: [
         authorizedCommon,
         createTestDefinitions(crossNamespace, true, overwrite, { spaceId, user }),
+        createTestDefinitions(allTypes, true, overwrite, {
+          spaceId,
+          user,
+          singleRequest: true,
+        }),
       ].flat(),
       authorizedEverywhere: [
         authorizedCommon,
@@ -137,6 +133,12 @@ export default function ({ getService }: FtrProviderContext) {
           spaceId,
           user,
           singleRequest: true,
+        }),
+        createTestDefinitions(allTypes, true, overwrite, {
+          spaceId,
+          user,
+          singleRequest: true,
+          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
         }),
       ].flat(),
       superuser: createTestDefinitions(allTypes, false, overwrite, {

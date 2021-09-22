@@ -54,12 +54,11 @@ type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
   'apm'
 > & { index: string[] | string };
 
-type TypedSearchResponse<
-  TParams extends APMEventESSearchRequest
-> = InferSearchResponseOf<
-  TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
-  ESSearchRequestOf<TParams>
->;
+type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
+  InferSearchResponseOf<
+    TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
+    ESSearchRequestOf<TParams>
+  >;
 
 export type APMEventClient = ReturnType<typeof createApmEventClient>;
 
@@ -95,6 +94,7 @@ export function createApmEventClient({
         ...withPossibleLegacyDataFilter,
         ignore_throttled: !includeFrozen,
         ignore_unavailable: true,
+        preference: 'any',
       };
 
       // only "search" operation is currently supported

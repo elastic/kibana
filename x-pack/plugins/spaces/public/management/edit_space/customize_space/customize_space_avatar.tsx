@@ -6,46 +6,30 @@
  */
 
 import {
-  EuiButton,
+  EuiButtonGroup,
   EuiColorPicker,
   EuiFieldText,
   EuiFilePicker,
-  EuiFlexItem,
   EuiFormRow,
-  EuiSpacer,
-  isValidHex,
 } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { MAX_SPACE_INITIALS } from '../../../../common';
 import { encode, imageTypes } from '../../../../common/lib/dataurl';
-import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
+import type { SpaceValidator } from '../../lib';
+import type { FormValues } from '../manage_space_page';
 
 interface Props {
-  space: Partial<Space>;
-  onChange: (space: Partial<Space>) => void;
+  space: FormValues;
+  onChange: (space: FormValues) => void;
+  validator: SpaceValidator;
 }
 
-interface State {
-  initialsHasFocus: boolean;
-  pendingInitials?: string | null;
-}
-
-export class CustomizeSpaceAvatar extends Component<Props, State> {
-  private initialsRef: HTMLInputElement | null = null;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      initialsHasFocus: false,
-    };
-  }
-
-  private storeImageChanges(imageUrl: string) {
+export class CustomizeSpaceAvatar extends Component<Props> {
+  private storeImageChanges(imageUrl: string | undefined) {
     this.props.onChange({
       ...this.props.space,
       imageUrl,
@@ -96,7 +80,10 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
   };
 
   private onFileUpload = (files: FileList | null) => {
-    if (files == null) return;
+    if (files == null || files.length === 0) {
+      this.storeImageChanges(undefined);
+      return;
+    }
     const file = files[0];
     if (imageTypes.indexOf(file.type) > -1) {
       encode(file).then((dataurl: string) => this.handleImageUpload(dataurl));
@@ -106,130 +93,117 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
   public render() {
     const { space } = this.props;
 
-    const { initialsHasFocus, pendingInitials } = this.state;
-
-    const spaceColor = getSpaceColor(space);
-    const isInvalidSpaceColor = !isValidHex(spaceColor) && spaceColor !== '';
-
     return (
       <form onSubmit={() => false}>
         <EuiFormRow
           label={i18n.translate(
-            'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
+            'xpack.spaces.management.customizeSpaceAvatar.avatarTypeFormRowLabel',
             {
-              defaultMessage: 'Initials (2 max)',
+              defaultMessage: 'Avatar type',
             }
           )}
+          fullWidth
         >
-          <EuiFieldText
-            inputRef={this.initialsInputRef}
-            data-test-subj="spaceLetterInitial"
-            name="spaceInitials"
-            // allows input to be cleared or otherwise invalidated while user is editing the initials,
-            // without defaulting to the derived initials provided by `getSpaceInitials`
-            value={initialsHasFocus ? pendingInitials || '' : getSpaceInitials(space)}
-            onChange={this.onInitialsChange}
-            disabled={this.props.space.imageUrl && this.props.space.imageUrl !== '' ? true : false}
+          <EuiButtonGroup
+            legend=""
+            options={[
+              {
+                id: `initials`,
+                label: i18n.translate(
+                  'xpack.spaces.management.customizeSpaceAvatar.initialsLabel',
+                  {
+                    defaultMessage: 'Initials',
+                  }
+                ),
+              },
+              {
+                id: `image`,
+                label: i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageLabel', {
+                  defaultMessage: 'Image',
+                }),
+              },
+            ]}
+            idSelected={space.avatarType ?? 'initials'}
+            onChange={(avatarType: string) =>
+              this.props.onChange({
+                ...space,
+                avatarType: avatarType as FormValues['avatarType'],
+              })
+            }
+            buttonSize="m"
           />
         </EuiFormRow>
-        <EuiSpacer size="m" />
+        {space.avatarType !== 'image' ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsLabel', {
+              defaultMessage: 'Initials',
+            })}
+            helpText={i18n.translate(
+              'xpack.spaces.management.customizeSpaceAvatar.initialsHelpText',
+              {
+                defaultMessage: 'Enter up to two characters.',
+              }
+            )}
+            {...this.props.validator.validateAvatarInitials(space)}
+            fullWidth
+          >
+            <EuiFieldText
+              data-test-subj="spaceLetterInitial"
+              name="spaceInitials"
+              value={space.initials ?? ''}
+              onChange={this.onInitialsChange}
+              isInvalid={this.props.validator.validateAvatarInitials(space).isInvalid}
+              fullWidth
+            />
+          </EuiFormRow>
+        ) : (
+          <EuiFormRow
+            label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageUrlLabel', {
+              defaultMessage: 'Image',
+            })}
+            {...this.props.validator.validateAvatarImage(space)}
+            fullWidth
+          >
+            <EuiFilePicker
+              display="default"
+              data-test-subj="uploadCustomImageFile"
+              initialPromptText={i18n.translate(
+                'xpack.spaces.management.customizeSpaceAvatar.imageUrlPromptText',
+                {
+                  defaultMessage: 'Select image file',
+                }
+              )}
+              onChange={this.onFileUpload}
+              accept={imageTypes.join(',')}
+              isInvalid={this.props.validator.validateAvatarImage(space).isInvalid}
+              fullWidth
+            />
+          </EuiFormRow>
+        )}
         <EuiFormRow
-          label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel', {
-            defaultMessage: 'Color',
+          label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.colorLabel', {
+            defaultMessage: 'Background color',
           })}
-          isInvalid={isInvalidSpaceColor}
+          {...this.props.validator.validateAvatarColor(space)}
+          fullWidth
         >
           <EuiColorPicker
-            color={spaceColor}
+            color={space.color ?? ''}
             onChange={this.onColorChange}
-            isInvalid={isInvalidSpaceColor}
+            isInvalid={this.props.validator.validateAvatarColor(space).isInvalid}
+            fullWidth
           />
         </EuiFormRow>
-        <EuiSpacer size="m" />
-        {this.filePickerOrImage()}
       </form>
     );
   }
 
-  private removeImageUrl() {
-    this.props.onChange({
-      ...this.props.space,
-      imageUrl: '',
-    });
-  }
-
-  public filePickerOrImage() {
-    if (!this.props.space.imageUrl) {
-      return (
-        <EuiFormRow
-          label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageUrl', {
-            defaultMessage: 'Custom image',
-          })}
-        >
-          <EuiFilePicker
-            display="default"
-            data-test-subj="uploadCustomImageFile"
-            initialPromptText={i18n.translate(
-              'xpack.spaces.management.customizeSpaceAvatar.selectImageUrl',
-              {
-                defaultMessage: 'Select image file',
-              }
-            )}
-            onChange={this.onFileUpload}
-            accept={imageTypes.join(',')}
-          />
-        </EuiFormRow>
-      );
-    } else {
-      return (
-        <EuiFlexItem grow={true}>
-          <EuiButton onClick={() => this.removeImageUrl()} color="danger" iconType="trash">
-            {i18n.translate('xpack.spaces.management.customizeSpaceAvatar.removeImage', {
-              defaultMessage: 'Remove custom image',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      );
-    }
-  }
-
-  public initialsInputRef = (ref: HTMLInputElement) => {
-    if (ref) {
-      this.initialsRef = ref;
-      this.initialsRef.addEventListener('focus', this.onInitialsFocus);
-      this.initialsRef.addEventListener('blur', this.onInitialsBlur);
-    } else {
-      if (this.initialsRef) {
-        this.initialsRef.removeEventListener('focus', this.onInitialsFocus);
-        this.initialsRef.removeEventListener('blur', this.onInitialsBlur);
-        this.initialsRef = null;
-      }
-    }
-  };
-
-  public onInitialsFocus = () => {
-    this.setState({
-      initialsHasFocus: true,
-      pendingInitials: getSpaceInitials(this.props.space),
-    });
-  };
-
-  public onInitialsBlur = () => {
-    this.setState({
-      initialsHasFocus: false,
-      pendingInitials: null,
-    });
-  };
-
   public onInitialsChange = (e: ChangeEvent<HTMLInputElement>) => {
     const initials = (e.target.value || '').substring(0, MAX_SPACE_INITIALS);
 
-    this.setState({
-      pendingInitials: initials,
-    });
-
     this.props.onChange({
       ...this.props.space,
+      customAvatarInitials: true,
       initials,
     });
   };
@@ -237,6 +211,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
   public onColorChange = (color: string) => {
     this.props.onChange({
       ...this.props.space,
+      customAvatarColor: true,
       color,
     });
   };

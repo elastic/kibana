@@ -19,7 +19,9 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
 import React, { Suspense, useState } from 'react';
-import { RULE_ID } from '@kbn/rule-data-utils/target/technical_field_names';
+import type { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
@@ -29,7 +31,11 @@ import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_ann
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
 
-type ErrorDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
+const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
+  ALERT_RULE_TYPE_ID_NON_TYPED;
+
+type ErrorDistributionAPIResponse =
+  APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
 
 interface FormattedBucket {
   x0: number;
@@ -75,6 +81,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
   );
 
   const tooltipProps: SettingsSpec['tooltip'] = {
+    stickTo: 'top',
     headerFormatter: (tooltip: TooltipValue) => {
       const serie = buckets.find((bucket) => bucket.x0 === tooltip.value);
       if (serie) {
@@ -123,7 +130,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
           />
           {getAlertAnnotations({
             alerts: alerts?.filter(
-              (alert) => alert[RULE_ID]?.[0] === AlertType.ErrorCount
+              (alert) => alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.ErrorCount
             ),
             chartStartTime: buckets[0]?.x0,
             getFormatter,

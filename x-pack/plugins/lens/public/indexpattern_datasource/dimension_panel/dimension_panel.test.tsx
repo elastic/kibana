@@ -6,7 +6,8 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import React, { ChangeEvent, MouseEvent, ReactElement } from 'react';
+import 'jest-canvas-mock';
+import React, { ChangeEvent, MouseEvent } from 'react';
 import { act } from 'react-dom/test-utils';
 import {
   EuiComboBox,
@@ -15,7 +16,6 @@ import {
   EuiRange,
   EuiSelect,
   EuiButtonIcon,
-  EuiPopover,
 } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import {
@@ -32,10 +32,11 @@ import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
-import { Filtering } from './filtering';
+import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
+import { layerTypes } from '../../../common';
 
 jest.mock('../loader');
 jest.mock('../query_input', () => ({
@@ -184,14 +185,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       columnId: 'col1',
       layerId: 'first',
+      layerType: layerTypes.DATA,
       uniqueLabel: 'stuff',
       filterOperations: () => true,
       storage: {} as IStorageWrapper,
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
-      data: ({
-        fieldFormats: ({
+      data: {
+        fieldFormats: {
           getType: jest.fn().mockReturnValue({
             id: 'number',
             title: 'Number',
@@ -203,8 +205,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
           deserialize: jest.fn().mockReturnValue({
             convert: () => 'formatted',
           }),
-        } as unknown) as DataPublicPluginStart['fieldFormats'],
-      } as unknown) as DataPublicPluginStart,
+        } as unknown as DataPublicPluginStart['fieldFormats'],
+      } as unknown as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
       groupId: 'a',
@@ -1208,9 +1210,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('[data-test-subj="indexPattern-time-scaling-unit"]')
         .find(EuiSelect)
-        .prop('onChange')!(({
+        .prop('onChange')!({
         target: { value: 'h' },
-      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      } as unknown as ChangeEvent<HTMLSelectElement>);
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1235,9 +1237,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('[data-test-subj="indexPattern-time-scaling-unit"]')
         .find(EuiSelect)
-        .prop('onChange')!(({
+        .prop('onChange')!({
         target: { value: 'h' },
-      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      } as unknown as ChangeEvent<HTMLSelectElement>);
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1540,9 +1542,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
           {...getProps({ filter: { language: 'kuery', query: 'a: b' } })}
         />
       );
+
       expect(
-        (wrapper.find(Filtering).find(EuiPopover).prop('children') as ReactElement).props.value
-      ).toEqual({ language: 'kuery', query: 'a: b' });
+        wrapper
+          .find(Filtering)
+          .find('button[data-test-subj="indexPattern-filters-existingFilterTrigger"]')
+          .text()
+      ).toBe(`a: b`);
     });
 
     it('should allow to set filter initially', () => {
@@ -1608,11 +1614,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const props = getProps({
         filter: { language: 'kuery', query: 'a: b' },
       });
+
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      (wrapper.find(Filtering).find(EuiPopover).prop('children') as ReactElement).props.onChange({
-        language: 'kuery',
-        query: 'c: d',
+
+      act(() => {
+        const { updateLayer, columnId, layer } = wrapper.find(Filtering).props();
+
+        updateLayer(setFilter(columnId, layer, { language: 'kuery', query: 'c: d' }));
       });
+
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,

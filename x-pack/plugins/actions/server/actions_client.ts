@@ -41,6 +41,7 @@ import {
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
+import { RunNowResult } from '../../task_manager/server';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -68,7 +69,8 @@ interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
-  executionEnqueuer: ExecutionEnqueuer;
+  executionEnqueuer: ExecutionEnqueuer<void>;
+  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -88,7 +90,8 @@ export class ActionsClient {
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
-  private readonly executionEnqueuer: ExecutionEnqueuer;
+  private readonly executionEnqueuer: ExecutionEnqueuer<void>;
+  private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   private readonly auditLogger?: AuditLogger;
 
   constructor({
@@ -99,6 +102,7 @@ export class ActionsClient {
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
+    ephemeralExecutionEnqueuer,
     request,
     authorization,
     auditLogger,
@@ -110,6 +114,7 @@ export class ActionsClient {
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
+    this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
@@ -203,11 +208,8 @@ export class ActionsClient {
       );
       throw error;
     }
-    const {
-      attributes,
-      references,
-      version,
-    } = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    const { attributes, references, version } =
+      await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
@@ -497,6 +499,17 @@ export class ActionsClient {
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
+  public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
+    const { source } = options;
+    if (
+      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      AuthorizationMode.RBAC
+    ) {
+      await this.authorization.ensureAuthorized('execute');
+    }
+    return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
   public async listTypes(): Promise<ActionType[]> {
     return this.actionTypeRegistry.list();
   }
@@ -506,6 +519,10 @@ export class ActionsClient {
     options: { notifyUsage: boolean } = { notifyUsage: false }
   ) {
     return this.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
+  }
+
+  public isPreconfigured(connectorId: string): boolean {
+    return !!this.preconfiguredActions.find((preconfigured) => preconfigured.id === connectorId);
   }
 }
 

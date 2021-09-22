@@ -7,11 +7,12 @@
 
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
 import { AveragedStat } from './task_run_calcultors';
 import { TaskPersistenceTypes } from './task_run_statistics';
 import { asErr, asOk, map, Result } from '../lib/result_type';
+import { Logger } from '../../../../../src/core/server';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
@@ -44,6 +45,7 @@ function isCapacityEstimationParams(
 }
 
 export function estimateCapacity(
+  logger: Logger,
   capacityStats: CapacityEstimationParams
 ): RawMonitoredStat<CapacityEstimationStat> {
   const workload = capacityStats.workload.value;
@@ -59,10 +61,8 @@ export function estimateCapacity(
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
   } = capacityStats.runtime.value.execution.persistence;
   const { overdue, capacity_requirements: capacityRequirements } = workload;
-  const {
-    poll_interval: pollInterval,
-    max_workers: maxWorkers,
-  } = capacityStats.configuration.value;
+  const { poll_interval: pollInterval, max_workers: maxWorkers } =
+    capacityStats.configuration.value;
 
   /**
    * On average, how many polling cycles does it take to execute a task?
@@ -100,6 +100,7 @@ export function estimateCapacity(
       percentageOfExecutionsUsedByRecurringTasks + percentageOfExecutionsUsedByNonRecurringTasks
     )
   );
+
   /**
    * On average, how much of this kibana's capacity has been historically used to execute
    * non-recurring and ephemeral tasks
@@ -147,7 +148,7 @@ export function estimateCapacity(
    */
   const minRequiredKibanaInstances = Math.ceil(
     hasTooLittleCapacityToEstimateRequiredNonRecurringCapacity
-      ? /* 
+      ? /*
         if load is at 100% or there's no capacity for recurring tasks at the moment, then it's really difficult for us to assess how
         much capacity is needed for non-recurring tasks at normal times. This might be representative, but it might
         also be a spike and we have no way of knowing that. We'll recommend people scale up by 20% and go from there. */
@@ -183,13 +184,13 @@ export function estimateCapacity(
     averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
 
+  const status = getHealthStatus(logger, {
+    assumedRequiredThroughputPerMinutePerKibana,
+    assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
+    capacityPerMinutePerKibana,
+  });
   return {
-    status:
-      assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana
-        ? HealthStatus.OK
-        : assumedAverageRecurringRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana
-        ? HealthStatus.Warning
-        : HealthStatus.Error,
+    status,
     timestamp: new Date().toISOString(),
     value: {
       observed: mapValues(
@@ -200,10 +201,12 @@ export function estimateCapacity(
           minutes_to_drain_overdue:
             overdue / (assumedKibanaInstances * averageCapacityUsedByPersistedTasksPerKibana),
           avg_recurring_required_throughput_per_minute: averageRecurringRequiredPerMinute,
-          avg_recurring_required_throughput_per_minute_per_kibana: assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
+          avg_recurring_required_throughput_per_minute_per_kibana:
+            assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
           avg_required_throughput_per_minute:
             assumedRequiredThroughputPerMinutePerKibana * assumedKibanaInstances,
-          avg_required_throughput_per_minute_per_kibana: assumedRequiredThroughputPerMinutePerKibana,
+          avg_required_throughput_per_minute_per_kibana:
+            assumedRequiredThroughputPerMinutePerKibana,
         },
         Math.ceil
       ),
@@ -211,8 +214,10 @@ export function estimateCapacity(
         {
           provisioned_kibana: minRequiredKibanaInstances,
           min_required_kibana: minRequiredKibanaInstancesForRecurringTasks,
-          avg_recurring_required_throughput_per_minute_per_kibana: averageRecurringRequiredPerMinutePerKibana,
-          avg_required_throughput_per_minute_per_kibana: averageRequiredThroughputPerMinutePerKibana,
+          avg_recurring_required_throughput_per_minute_per_kibana:
+            averageRecurringRequiredPerMinutePerKibana,
+          avg_required_throughput_per_minute_per_kibana:
+            averageRequiredThroughputPerMinutePerKibana,
         },
         Math.ceil
       ),
@@ -220,13 +225,43 @@ export function estimateCapacity(
   };
 }
 
+interface GetHealthStatusParams {
+  assumedRequiredThroughputPerMinutePerKibana: number;
+  assumedAverageRecurringRequiredThroughputPerMinutePerKibana: number;
+  capacityPerMinutePerKibana: number;
+}
+
+function getHealthStatus(logger: Logger, params: GetHealthStatusParams): HealthStatus {
+  const {
+    assumedRequiredThroughputPerMinutePerKibana,
+    assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
+    capacityPerMinutePerKibana,
+  } = params;
+  if (assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
+    return HealthStatus.OK;
+  }
+
+  if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
+    logger.debug(
+      `setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`
+    );
+    return HealthStatus.Warning;
+  }
+
+  logger.debug(
+    `setting HealthStatus.Error because assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana}) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`
+  );
+  return HealthStatus.Error;
+}
+
 export function withCapacityEstimate(
+  logger: Logger,
   monitoredStats: RawMonitoringStats['stats']
 ): RawMonitoringStats['stats'] {
   if (isCapacityEstimationParams(monitoredStats)) {
     return {
       ...monitoredStats,
-      capacity_estimation: estimateCapacity(monitoredStats),
+      capacity_estimation: estimateCapacity(logger, monitoredStats),
     };
   }
   return monitoredStats;
