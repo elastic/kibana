@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
-import type { ElasticsearchClient, SharedGlobalConfig } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { take } from 'rxjs/operators';
 import { snakeCase } from 'lodash';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
@@ -46,7 +44,7 @@ export async function getKibanaSavedObjectCounts(
 
 export function registerKibanaUsageCollector(
   usageCollection: UsageCollectionSetup,
-  legacyConfig$: Observable<SharedGlobalConfig>
+  kibanaIndex: string
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<KibanaUsage>({
@@ -83,12 +81,9 @@ export function registerKibanaUsageCollector(
         },
       },
       async fetch({ esClient }) {
-        const {
-          kibana: { index },
-        } = await legacyConfig$.pipe(take(1)).toPromise();
         return {
-          index,
-          ...(await getKibanaSavedObjectCounts(esClient, index)),
+          index: kibanaIndex,
+          ...(await getKibanaSavedObjectCounts(esClient, kibanaIndex)),
         };
       },
     })

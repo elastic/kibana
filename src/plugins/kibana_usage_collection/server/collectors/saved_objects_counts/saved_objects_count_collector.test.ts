@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
@@ -16,9 +15,9 @@ import { registerSavedObjectsCountUsageCollector } from './saved_objects_count_c
 describe('saved_objects_count_collector', () => {
   const usageCollectionMock = createUsageCollectionSetupMock();
 
-  const legacyConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
+  const kibanaIndex = '.kibana-tests';
 
-  beforeAll(() => registerSavedObjectsCountUsageCollector(usageCollectionMock, legacyConfig$));
+  beforeAll(() => registerSavedObjectsCountUsageCollector(usageCollectionMock, kibanaIndex));
   afterAll(() => jest.clearAllTimers());
 
   test('registered collector is set', () => {
