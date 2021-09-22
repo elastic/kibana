@@ -60,4 +60,14 @@ export const schema = {
     }),
     defaultValue: INDEX_PATTERN_TYPE.DEFAULT,
   },
+  description: {
+    label: i18n.translate('indexPatternEditor.editor.form.DescriptionLabel', {
+      defaultMessage: 'Index pattern description',
+    }),
+    helpText: i18n.translate('indexPatternEditor.editor.form.descriptionHelp', {
+      defaultMessage:
+        'Use this field for a detailed description where index pattern should be used',
+    }),
+    defaultValue: '',
+  },
 };

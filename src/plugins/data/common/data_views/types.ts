@@ -53,6 +53,8 @@ export interface IIndexPattern extends DataViewBase {
 export interface DataViewAttributes {
   fields: string;
   title: string;
+  description?: string;
+  createdAt?: string;
   type?: string;
   typeMeta?: string;
   timeFieldName?: string;
@@ -245,6 +247,7 @@ export interface DataViewSpec {
    */
   version?: string;
   title?: string;
+  description?: string;
   /**
    * @deprecated
    * Deprecated. Was used by time range based index patterns

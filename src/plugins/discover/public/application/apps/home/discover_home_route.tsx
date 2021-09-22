@@ -16,13 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FlexGridColumns } from '@elastic/eui/src/components/flex/flex_grid';
-import { ChromeRecentlyAccessedHistoryItem } from 'kibana/public';
 import { DiscoverServices } from '../../../build_services';
 import { SectionTitle } from './section_title';
 import { SavedSearch } from '../../../saved_searches';
 import { DiscoverView } from './discover_view';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { LastRecentlyAccessedView } from './last_recently_view';
+import { IndexPatternView } from "./index_pattern_view";
 
 export interface DiscoverMainProps {
   /**
@@ -35,7 +35,7 @@ export interface DiscoverMainProps {
   services: DiscoverServices;
 }
 
-const DISPLAY_NUMBER_OF_SAVED_SEARCHES = 3;
+const DISPLAY_NUMBER_OF_SAVED_SEARCHES = 4;
 
 export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
   const button = <></>;
@@ -141,20 +141,12 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
           {savedSearchesSection()}
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle>
-            <h1>Data Views</h1>
-          </EuiTitle>
-          <EuiFlexGrid columns={3}>
-            <EuiFlexItem>
-              <EuiPanel style={{ height: 200 }} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel style={{ height: 200 }} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel style={{ height: 200 }} />
-            </EuiFlexItem>
-          </EuiFlexGrid>
+          <SectionTitle text={'Index Patterns'} />
+          <IndexPatternView
+            indexPattern={
+              savedSearches.length > 0 ? savedSearches[0].searchSource.getField('index') : undefined
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGrid>
     </EuiPageTemplate>

@@ -63,6 +63,10 @@ export class DataView implements IIndexPattern {
    * Type is used to identify rollup index patterns
    */
   public type: string | undefined;
+  /**
+   * Optional description of an index pattern
+   */
+  public description: string | undefined;
   public formatHit: {
     (hit: Record<string, any>, type?: string): any;
     formatField: FormatFieldFn;
@@ -109,6 +113,7 @@ export class DataView implements IIndexPattern {
     this.version = spec.version;
 
     this.title = spec.title || '';
+    this.description = spec.description || '';
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
     this.fields.replaceAll(Object.values(spec.fields || {}));
@@ -209,6 +214,7 @@ export class DataView implements IIndexPattern {
       version: this.version,
 
       title: this.title,
+      description: this.description,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
@@ -330,6 +336,7 @@ export class DataView implements IIndexPattern {
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
+      description: this.description,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,

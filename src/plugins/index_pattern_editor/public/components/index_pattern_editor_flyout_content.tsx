@@ -45,6 +45,7 @@ import {
   PreviewPanel,
   RollupBetaWarning,
 } from '.';
+import { DescriptionField } from "./form_fields";
 
 export interface Props {
   /**
@@ -85,6 +86,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
       const indexPatternStub: IndexPatternSpec = {
         title: formData.title,
+        description: formData.description,
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
       };
@@ -111,6 +113,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [
     {
       title = schema.title.defaultValue,
+      description = schema.description.defaultValue,
       allowHidden = schema.allowHidden.defaultValue,
       type = schema.type.defaultValue,
     },
@@ -278,6 +281,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const onTypeChange = useCallback(
     (newType) => {
       form.setFieldValue('title', '');
+      form.setFieldValue('description', '');
       form.setFieldValue('timestampField', '');
       if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
         form.setFieldValue('allowHidden', false);
@@ -336,6 +340,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   matchedIndices={matchedIndices.exactMatchedIndices}
                   rollupIndicesCapabilities={rollupIndicesCapabilities}
                 />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <DescriptionField description={description} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />

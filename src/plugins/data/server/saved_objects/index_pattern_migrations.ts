@@ -51,8 +51,18 @@ const addAllowNoIndex: SavedObjectMigrationFn<any, any> = (doc) => ({
   },
 });
 
+const addDescription: SavedObjectMigrationFn<any, any> = (doc) => ({
+  ...doc,
+  attributes: {
+    ...doc.attributes,
+    description: doc.attributes.description || '',
+    created_at: doc.attributes.created_at || Date.now(),
+  },
+});
+
 export const indexPatternSavedObjectTypeMigrations = {
   '6.5.0': flow(migrateAttributeTypeAndAttributeTypeMeta),
   '7.6.0': flow(migrateSubTypeAndParentFieldProperties),
   '7.11.0': flow(addAllowNoIndex),
+  '7.16.0': flow(addDescription),
 };

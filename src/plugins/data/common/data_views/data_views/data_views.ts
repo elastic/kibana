@@ -376,6 +376,7 @@ export class DataViewsService {
       version,
       attributes: {
         title,
+        description,
         timeFieldName,
         intervalName,
         fields,
@@ -402,6 +403,7 @@ export class DataViewsService {
       id,
       version,
       title,
+      description,
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -550,6 +552,7 @@ export class DataViewsService {
   async createAndSave(spec: DataViewSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
     const createdIndexPattern = await this.createSavedObject(indexPattern, override);
+    debugger;
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;
   }
