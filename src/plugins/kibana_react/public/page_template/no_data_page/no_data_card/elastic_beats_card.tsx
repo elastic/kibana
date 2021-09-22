@@ -19,9 +19,9 @@ export type ElasticBeatsCardProps = NoDataPageActions & {
 
 export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   recommended,
-  href,
   title,
   button,
+  href,
   solution, // unused for now
   layout,
   ...cardRest
