@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './packs_table';
+import { i18n } from '@kbn/i18n';
+
+export const INVALID_ID_ERROR = i18n.translate('xpack.osquery.agents.failSearchDescription', {
+  defaultMessage: `Failed to fetch agents`,
+});

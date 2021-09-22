@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { find, map } from 'lodash/fp';
+import { filter, find, map, compact } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
 import { IRouter } from '../../../../../../src/core/server';
-import { savedQuerySavedObjectType, packSavedObjectType } from '../../../common/types';
+import { packSavedObjectType } from '../../../common/types';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const readPackRoute = (router: IRouter) => {
+export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
-      path: '/internal/osquery/pack/{id}',
+      path: '/internal/osquery/packs/{id}',
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
+      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
       const { attributes, references, ...rest } = await savedObjectsClient.get<{
         name: string;
@@ -32,53 +35,23 @@ export const readPackRoute = (router: IRouter) => {
         request.params.id
       );
 
-      const queries =
-        attributes.queries?.map((packQuery) => {
-          const queryReference = find(['name', packQuery.name], references);
+      const packagePolicyReferences = filter(references, [
+        'type',
+        PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      ]);
 
-          if (queryReference) {
-            return {
-              ...packQuery,
-              id: queryReference?.id,
-            };
-          }
-
-          return packQuery;
-        }) ?? [];
-
-      const queriesIds = map('id', queries);
-
-      const { saved_objects: savedQueries } = await savedObjectsClient.bulkGet<{}>(
-        queriesIds.map((queryId) => ({
-          type: savedQuerySavedObjectType,
-          id: queryId,
-        }))
+      const packagePolicies = await packagePolicyService?.getByIDs(
+        savedObjectsClient,
+        map(packagePolicyReferences, 'id')
       );
-
-      // @ts-expect-error update types
-      const queriesWithQueries = queries.reduce((acc, query) => {
-        // @ts-expect-error update types
-        const querySavedObject = find(['id', query.id], savedQueries);
-        // @ts-expect-error update types
-        if (querySavedObject?.attributes?.query) {
-          return [
-            ...acc,
-            {
-              ...query,
-              // @ts-expect-error update types
-              query: querySavedObject.attributes.query,
-            },
-          ];
-        }
-
-        return acc;
-      }, []);
 
       return response.ok({
         body: {
           ...rest,
           ...attributes,
-          queries: queriesWithQueries,
+          packagePolicies,
+          agent_policy_ids: packagePolicies ? compact(map(packagePolicies, 'policy_id')) : [],
+          references,
         },
       });
     }

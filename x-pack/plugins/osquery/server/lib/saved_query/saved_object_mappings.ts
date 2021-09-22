@@ -71,13 +71,34 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     updated_by: {
       type: 'text',
     },
+    namespace: {
+      type: 'keyword',
+    },
+    enabled: {
+      type: 'boolean',
+    },
+    integration_version: {
+      type: 'keyword',
+    },
     queries: {
       properties: {
-        name: {
+        enabled: {
+          type: 'boolean',
+        },
+        id: {
           type: 'keyword',
+        },
+        query: {
+          type: 'text',
         },
         interval: {
           type: 'text',
+        },
+        platform: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
         },
       },
     },

@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './packs_table';
+import { PlatformType } from './types';
+
+export const SUPPORTED_PLATFORMS = [PlatformType.darwin, PlatformType.linux, PlatformType.windows];

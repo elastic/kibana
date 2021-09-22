@@ -12,6 +12,8 @@ export type StaticPage =
   | 'live_query_new'
   | 'scheduled_query_groups'
   | 'scheduled_query_group_add'
+  | 'packs'
+  | 'pack_add'
   | 'saved_queries'
   | 'saved_query_new';
 
@@ -19,6 +21,8 @@ export type DynamicPage =
   | 'live_query_details'
   | 'scheduled_query_group_details'
   | 'scheduled_query_group_edit'
+  | 'pack_details'
+  | 'pack_edit'
   | 'saved_query_edit';
 
 export type Page = StaticPage | DynamicPage;
@@ -38,6 +42,10 @@ export const PAGE_ROUTING_PATHS = {
   scheduled_query_group_add: '/scheduled_query_groups/add',
   scheduled_query_group_details: '/scheduled_query_groups/:scheduledQueryGroupId',
   scheduled_query_group_edit: '/scheduled_query_groups/:scheduledQueryGroupId/edit',
+  packs: '/packs',
+  pack_add: '/packs/add',
+  pack_details: '/packs/:packId',
+  pack_edit: '/packs/:packId/edit',
 };
 
 export const pagePathGetters: {
@@ -59,4 +67,8 @@ export const pagePathGetters: {
     `/scheduled_query_groups/${scheduledQueryGroupId}`,
   scheduled_query_group_edit: ({ scheduledQueryGroupId }) =>
     `/scheduled_query_groups/${scheduledQueryGroupId}/edit`,
+  packs: () => '/packs',
+  pack_add: () => '/packs/add',
+  pack_details: ({ packId }) => `/packs/${packId}`,
+  pack_edit: ({ packId }) => `/packs/${packId}/edit`,
 };

@@ -53,6 +53,12 @@ const OsqueryAppComponent = () => {
                     defaultMessage="Scheduled query groups"
                   />
                 </EuiTab>
+                <EuiTab isSelected={section === 'packs'} {...useRouterNavigate('packs')}>
+                  <FormattedMessage
+                    id="xpack.osquery.appNavigation.packsLinkText"
+                    defaultMessage="Packs"
+                  />
+                </EuiTab>
                 <EuiTab
                   isSelected={section === 'saved_queries'}
                   {...useRouterNavigate('saved_queries')}

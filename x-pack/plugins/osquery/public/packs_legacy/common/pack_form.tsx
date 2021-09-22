@@ -40,7 +40,7 @@ const PackFormComponent = ({ data, handleSubmit }) => {
       },
     },
   });
-  const { submit, isSubmitting } = form;
+  const { submit } = form;
 
   return (
     <Form form={form}>
@@ -50,7 +50,7 @@ const PackFormComponent = ({ data, handleSubmit }) => {
       <EuiSpacer />
       <CommonUseField path="queries" component={PackQueriesField} />
       <EuiSpacer />
-      <EuiButton isLoading={isSubmitting} fill onClick={submit}>
+      <EuiButton fill onClick={submit}>
         {'Save pack'}
       </EuiButton>
     </Form>

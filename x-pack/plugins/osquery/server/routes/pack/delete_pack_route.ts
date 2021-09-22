@@ -13,7 +13,7 @@ import { packSavedObjectType } from '../../../common/types';
 export const deletePackRoute = (router: IRouter) => {
   router.delete(
     {
-      path: '/internal/osquery/pack',
+      path: '/internal/osquery/packs',
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
       },

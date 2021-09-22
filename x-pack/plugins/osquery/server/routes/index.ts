@@ -25,7 +25,7 @@ export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
   initPrivilegesCheckRoutes(router, context);
 
   if (config.packs) {
-    initPackRoutes(router);
+    initPackRoutes(router, context);
   }
 
   if (config.savedQueries) {

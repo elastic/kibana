@@ -14,7 +14,7 @@ import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/
 export const findPackRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/internal/osquery/pack',
+      path: '/internal/osquery/packs',
       validate: {
         query: schema.object({}, { unknowns: 'allow' }),
       },

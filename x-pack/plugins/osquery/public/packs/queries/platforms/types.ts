@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './packs_table';
+export enum PlatformType {
+  darwin = 'darwin',
+  windows = 'windows',
+  linux = 'linux',
+}

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './packs_table';
+export const PACKS_ID = 'packList';

@@ -51,7 +51,7 @@ const AddPackQueryFormComponent = ({ handleSubmit }) => {
       },
     },
   });
-  const { submit, isSubmitting } = form;
+  const { submit } = form;
 
   const createSavedQueryMutation = useMutation(
     (payload) => http.post(`/internal/osquery/saved_query`, { body: JSON.stringify(payload) }),
@@ -108,7 +108,7 @@ const AddPackQueryFormComponent = ({ handleSubmit }) => {
         <EuiSpacer />
         <CommonUseField path="interval" />
         <EuiSpacer />
-        <EuiButton isLoading={isSubmitting} fill onClick={submit}>
+        <EuiButton fill onClick={submit}>
           {'Add query'}
         </EuiButton>
       </Form>
