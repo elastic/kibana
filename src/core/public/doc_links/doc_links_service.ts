@@ -282,6 +282,7 @@ export class DocLinksService {
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
+          configureSettings: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/configure-settings.html`,
           infrastructureThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/infrastructure-threshold-alert.html`,
           logsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/logs-threshold-alert.html`,
           metricsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/metrics-threshold-alert.html`,
@@ -413,6 +414,7 @@ export class DocLinksService {
           fail: `${ELASTICSEARCH_DOCS}fail-processor.html`,
           foreach: `${ELASTICSEARCH_DOCS}foreach-processor.html`,
           geoIp: `${ELASTICSEARCH_DOCS}geoip-processor.html`,
+          geoMatch: `${ELASTICSEARCH_DOCS}geo-match-enrich-policy-type.html`,
           grok: `${ELASTICSEARCH_DOCS}grok-processor.html`,
           gsub: `${ELASTICSEARCH_DOCS}gsub-processor.html`,
           htmlString: `${ELASTICSEARCH_DOCS}htmlstrip-processor.html`,
