@@ -2,25 +2,31 @@
 [[dependencies]]
 === Dependencies
 
-Many application issues are caused by slow or unresponsive downstream dependencies,
-like databases, or remote services provided by a cloud provider or vendor.
-
 APM agents collect details about external calls made from instrumented services.
-Sometimes, these external calls resolve into a downstream service that is instrumented --
-in these cases, users can utilize distributed tracing to drill down into problematic downstream services.
-Other times though, it's not possible to instrument a downstream dependency -- like with a database or third-party service.
-A single slow dependency can negatively impact the end-user experience,
-so it's important to be able to quickly identify such problems and pinpoint the root cause.
-**Dependencies** gives you a window into your uninstrumented, downstream dependencies.
+Sometimes, these external calls resolve into a downstream service that's instrumented -- in these cases,
+you can utilize <<distributed-tracing,distributed tracing>> to drill down into problematic downstream services.
+Other times, though, it's not possible to instrument a downstream dependency --
+like with a database or third-party service.
+**Dependencies** gives you a window into these uninstrumented, downstream dependencies.
 
 [role="screenshot"]
 image::apm/images/dependencies.png[Dependencies view in the APM app in Kibana]
 
-If you notice a dependency with a high impact, select it to learn more.
+Many application issues are caused by slow or unresponsive downstream dependencies.
+And because a single, slow dependency can greatly impact the end-user experience,
+it's important to be able to quickly identify these problems and determine the root cause.
+
+Select a dependency to see detailed latency, throughput, and failed transaction rate metrics.
 
 [role="screenshot"]
 image::apm/images/dependencies-drilldown.png[Dependencies drilldown view in the APM app in Kibana]
 
-The dependencies detail page shows the latency, throughput,
-and failed transaction rate over time for the selected dependency.
-You can also easily see the upstream services of the dependency and determine if the dependency is having trouble with one or more services.
+When viewing a dependency, consider your pattern of usage with that dependency.
+If your usage pattern _hasn't_ increased or decreased,
+but the experience has been negatively effected -- either with an increase in latency or errors,
+there's likely a problem with the dependency that needs to be addressed.
+
+If your usage pattern _has_ changed, the dependency view can quickly show you whether
+that pattern change exists in all upstream services, or just a subset of your services.
+You might then start digging into traces coming from
+impacted services to determine why that pattern change has occurred.
