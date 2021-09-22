@@ -9,7 +9,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
-import { ALERT_INSTANCE_ID, ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
 import { User } from '../../../../rule_registry/common/lib/authentication/types';
 import { TimelineEdges, TimelineNonEcsData } from '../../../../../plugins/timelines/common/';
