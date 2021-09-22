@@ -288,13 +288,14 @@ export class ContentStream extends Duplex {
     }
   }
 
-  async _final(callback: Callback) {
-    try {
-      await this.flush();
-      callback();
-    } catch (error) {
-      callback(error);
-    }
+  // Starting in Node 16.5.0+
+  // this can either return a promise or
+  // use a callback, but not both
+  // see https://github.com/nodejs/node/issues/39535
+  _final(callback: Callback) {
+    this.flush()
+      .then(() => callback())
+      .catch((e) => callback(e));
   }
 
   getSeqNo(): number | undefined {
