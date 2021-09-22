@@ -37,40 +37,40 @@ export const createDeserializer =
         customRollover: {
           enabled: Boolean(hot?.actions?.rollover),
         },
-      bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
-      readonlyEnabled: Boolean(hot?.actions?.readonly),
-      shrink: { isUsingShardSize: Boolean(hot?.actions.shrink?.max_primary_shard_size) },
-    },
-    warm: {
-      enabled: Boolean(warm),
-      warmPhaseOnRollover: warm === undefined ? true : Boolean(warm.min_age === '0ms'),
-      bestCompression: warm?.actions?.forcemerge?.index_codec === 'best_compression',
-      dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
-      readonlyEnabled: Boolean(warm?.actions?.readonly),
-      minAgeToMilliSeconds: -1,
-      shrink: { isUsingShardSize: Boolean(warm?.actions.shrink?.max_primary_shard_size) },
-    },
-    cold: {
-      enabled: Boolean(cold),
-      dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
-      freezeEnabled: Boolean(cold?.actions?.freeze),
-      readonlyEnabled: Boolean(cold?.actions?.readonly),
-      minAgeToMilliSeconds: -1,
-    },
-    frozen: {
-      enabled: Boolean(frozen),
-      dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
-      freezeEnabled: Boolean(frozen?.actions?.freeze),
-      minAgeToMilliSeconds: -1,
-    },
-    delete: {
-      enabled: Boolean(deletePhase),
-      minAgeToMilliSeconds: -1,
-    },
-    searchableSnapshot: {
-      repository: defaultRepository,
-    },
-  };
+        bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
+        readonlyEnabled: Boolean(hot?.actions?.readonly),
+        shrink: { isUsingShardSize: Boolean(hot?.actions.shrink?.max_primary_shard_size) },
+      },
+      warm: {
+        enabled: Boolean(warm),
+        warmPhaseOnRollover: warm === undefined ? true : Boolean(warm.min_age === '0ms'),
+        bestCompression: warm?.actions?.forcemerge?.index_codec === 'best_compression',
+        dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
+        readonlyEnabled: Boolean(warm?.actions?.readonly),
+        minAgeToMilliSeconds: -1,
+        shrink: { isUsingShardSize: Boolean(warm?.actions.shrink?.max_primary_shard_size) },
+      },
+      cold: {
+        enabled: Boolean(cold),
+        dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
+        freezeEnabled: Boolean(cold?.actions?.freeze),
+        readonlyEnabled: Boolean(cold?.actions?.readonly),
+        minAgeToMilliSeconds: -1,
+      },
+      frozen: {
+        enabled: Boolean(frozen),
+        dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
+        freezeEnabled: Boolean(frozen?.actions?.freeze),
+        minAgeToMilliSeconds: -1,
+      },
+      delete: {
+        enabled: Boolean(deletePhase),
+        minAgeToMilliSeconds: -1,
+      },
+      searchableSnapshot: {
+        repository: defaultRepository,
+      },
+    };
 
     return produce<FormInternal>(
       {
@@ -99,36 +99,35 @@ export const createDeserializer =
             draft._meta.hot.customRollover.maxAgeUnit = maxAge.units;
           }
         }
-      if (draft.phases.hot?.actions.shrink?.max_primary_shard_size) {
-        const primaryShardSize = splitSizeAndUnits(
-          draft.phases.hot.actions.shrink.max_primary_shard_size!
-        );
-        draft.phases.hot.actions.shrink.max_primary_shard_size = primaryShardSize.size;
-        draft._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
-      }
-
-      if (draft.phases.warm) {
-        if (draft.phases.warm.actions?.allocate?.require) {
-          Object.entries(draft.phases.warm.actions.allocate.require).forEach((entry) => {
-            draft._meta.warm.allocationNodeAttribute = entry.join(':');
-          });
+        if (draft.phases.hot?.actions.shrink?.max_primary_shard_size) {
+          const primaryShardSize = splitSizeAndUnits(
+            draft.phases.hot.actions.shrink.max_primary_shard_size!
+          );
+          draft.phases.hot.actions.shrink.max_primary_shard_size = primaryShardSize.size;
+          draft._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
         }
+
+        if (draft.phases.warm) {
+          if (draft.phases.warm.actions?.allocate?.require) {
+            Object.entries(draft.phases.warm.actions.allocate.require).forEach((entry) => {
+              draft._meta.warm.allocationNodeAttribute = entry.join(':');
+            });
+          }
 
           if (draft.phases.warm.min_age) {
             const minAge = splitSizeAndUnits(draft.phases.warm.min_age);
             draft.phases.warm.min_age = minAge.size;
             draft._meta.warm.minAgeUnit = minAge.units;
           }
-        }
 
-        if (draft.phases.warm.actions.shrink?.max_primary_shard_size) {
-          const primaryShardSize = splitSizeAndUnits(
-            draft.phases.warm.actions.shrink.max_primary_shard_size!
-          );
-          draft.phases.warm.actions.shrink.max_primary_shard_size = primaryShardSize.size;
-          draft._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
+          if (draft.phases.warm.actions.shrink?.max_primary_shard_size) {
+            const primaryShardSize = splitSizeAndUnits(
+              draft.phases.warm.actions.shrink.max_primary_shard_size!
+            );
+            draft.phases.warm.actions.shrink.max_primary_shard_size = primaryShardSize.size;
+            draft._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
+          }
         }
-      }
 
         if (draft.phases.cold) {
           if (draft.phases.cold.actions?.allocate?.require) {

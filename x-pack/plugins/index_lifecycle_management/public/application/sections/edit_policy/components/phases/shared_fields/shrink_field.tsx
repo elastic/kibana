@@ -26,9 +26,8 @@ interface Props {
 
 export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
   const globalFields = useGlobalFields();
-  const { setValue: setIsUsingShardSize } = globalFields[
-    `${phase}IsUsingShardSize` as 'hotIsUsingShardSize'
-  ];
+  const { setValue: setIsUsingShardSize } =
+    globalFields[`${phase}IsUsingShardSize` as 'hotIsUsingShardSize'];
   const { policy } = useEditPolicyContext();
   const isUsingShardSizePath = `_meta.${phase}.shrink.isUsingShardSize`;
   const [formData] = useFormData({ watch: [isUsingShardSizePath] });
