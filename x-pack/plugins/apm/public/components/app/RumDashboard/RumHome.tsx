@@ -83,8 +83,8 @@ export function RumHome() {
                 }
               : { children: <PageHeader /> }
           }
-          {isLoading && <EmptyStateLoading />}
         >
+          {isLoading && <EmptyStateLoading />}
           <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
             <RumOverview />
           </div>
