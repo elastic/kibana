@@ -120,7 +120,7 @@ export function getTimelionRequestHandler({
         const err = new Error(
           `${i18n.translate('timelion.requestHandlerErrorTitle', {
             defaultMessage: 'Timelion request error',
-          })}: ${e.body.title} ${e.body.message}`
+          })}:${e.body.title ? ' ' + e.body.title : ''} ${e.body.message}`
         );
         err.stack = e.stack;
         throw err;

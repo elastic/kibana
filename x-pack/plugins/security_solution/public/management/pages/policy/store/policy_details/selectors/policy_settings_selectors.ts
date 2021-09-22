@@ -7,23 +7,23 @@
 
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
-import { ILicense } from '../../../../../../../licensing/common/types';
-import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
-import { PolicyDetailsState } from '../../types';
+import { ILicense } from '../../../../../../../../licensing/common/types';
+import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
+import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../../../types';
 import {
   Immutable,
   NewPolicyData,
   PolicyConfig,
   PolicyData,
   UIPolicyConfig,
-} from '../../../../../../common/endpoint/types';
-import { policyFactory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
+} from '../../../../../../../common/endpoint/types';
+import { policyFactory as policyConfigFactory } from '../../../../../../../common/endpoint/models/policy_config';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-} from '../../../../common/constants';
-import { ManagementRoutePolicyDetailsParams } from '../../../../types';
-import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
+} from '../../../../../common/constants';
+import { ManagementRoutePolicyDetailsParams } from '../../../../../types';
+import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -79,6 +79,13 @@ export const policyDetailsForUpdate: (
 export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean => {
   return !state.policyItem && !state.apiError;
 };
+
+/**
+ * Returns current artifacts location
+ */
+export const getCurrentArtifactsLocation = (
+  state: Immutable<PolicyDetailsState>
+): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifacts.location;
 
 /** Returns a boolean of whether the user is on the policy form page or not */
 export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {
