@@ -725,7 +725,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: true,
-          indexPattern: { id: indexPatternId } as IndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(
@@ -765,7 +765,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: false,
-          indexPattern: { id: indexPatternId } as IndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(getMockedDocResponse(indexPatternId));
