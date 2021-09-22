@@ -33,6 +33,7 @@ export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
     hasShadow: false,
     color: 'transparent',
   },
+  'data-test-subj': 'noDataPage',
 };
 
 export const NO_DATA_RECOMMENDED = i18n.translate(
