@@ -14,6 +14,7 @@ import {
   LayoutCounts,
   RangeStats,
   ReportingUsageType,
+  SizePercentiles,
 } from './types';
 
 const appCountsSchema: MakeSchemaFrom<AppCounts> = {
@@ -39,10 +40,21 @@ const byAppCountsSchema: MakeSchemaFrom<ByAppCounts> = {
   printable_pdf_v2: appCountsSchema,
 };
 
+const sizesSchema: MakeSchemaFrom<SizePercentiles> = {
+  '1.0': { type: 'long' },
+  '5.0': { type: 'long' },
+  '25.0': { type: 'long' },
+  '50.0': { type: 'long' },
+  '75.0': { type: 'long' },
+  '95.0': { type: 'long' },
+  '99.0': { type: 'long' },
+};
+
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
+  sizes: sizesSchema,
   app: appCountsSchema,
   layout: layoutCountsSchema,
 };
@@ -74,6 +86,7 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
     pending: byAppCountsSchema,
     processing: byAppCountsSchema,
   },
+  output_size: sizesSchema,
 };
 
 export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {
