@@ -40,7 +40,7 @@ import { TreeItem } from '../components/tree';
 export const getUniqueId = () => uuid.v4();
 
 export const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
-  if (dataType === 'text' || dataType === 'keyword') {
+  if (dataType === 'text' || dataType === 'keyword' || dataType === 'ip') {
     return 'fields';
   } else if (dataType === 'object' || dataType === 'nested') {
     return 'properties';
