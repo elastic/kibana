@@ -27,7 +27,6 @@ export const PackagePolicyAgentsCell = ({
         count={agentCount}
         agentPolicyId={agentPolicyId}
         className="eui-textTruncate"
-        data-test-subj="rowAgentCount"
       />
     );
   }
