@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');

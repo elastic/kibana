@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('check filebeat', function () {
     const retry = getService('retry');
     const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
