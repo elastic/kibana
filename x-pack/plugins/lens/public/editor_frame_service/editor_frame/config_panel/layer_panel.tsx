@@ -310,12 +310,7 @@ export function LayerPanel(
         className="lnsLayerPanel"
         style={{ visibility: isDimensionPanelOpen ? 'hidden' : 'visible' }}
       >
-        <EuiPanel
-          data-test-subj={`lns-layerPanel-${layerIndex}`}
-          paddingSize="none"
-          hasBorder
-          hasShadow
-        >
+        <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="none">
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
