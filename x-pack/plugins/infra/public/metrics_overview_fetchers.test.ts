@@ -56,7 +56,7 @@ describe('Metrics UI Observability Homepage Functions', () => {
       const fetchData = createMetricsFetchData(mockedGetStartServices);
       const endTime = moment('2020-07-02T13:25:11.629Z');
       const startTime = endTime.clone().subtract(1, 'h');
-      const bucketSize = '300s';
+      const intervalString = '300s';
       const response = await fetchData({
         absoluteTime: {
           start: startTime.valueOf(),
@@ -66,13 +66,14 @@ describe('Metrics UI Observability Homepage Functions', () => {
           start: 'now-15m',
           end: 'now',
         },
-        bucketSize,
+        bucketSize: 300,
+        intervalString,
       });
       expect(core.http.post).toHaveBeenCalledTimes(1);
       expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview/top', {
         body: JSON.stringify({
           sourceId: 'default',
-          bucketSize,
+          bucketSize: intervalString,
           size: 5,
           timerange: {
             from: startTime.valueOf(),
