@@ -120,8 +120,6 @@ export const BootstrapCommand: ICommand = {
       { prefix: '[vscode]', debug: false }
     );
 
-    // Build typescript references
-    const typescriptStartTime = Date.now();
     await spawnStreaming(
       process.execPath,
       ['scripts/build_ts_refs', '--ignore-type-failures', '--info'],
@@ -131,7 +129,6 @@ export const BootstrapCommand: ICommand = {
       },
       { prefix: '[ts refs]', debug: false }
     );
-    const typescriptTotalTime = Date.now() - typescriptStartTime;
 
     // send timings
     await reporter.timings({
@@ -145,16 +142,6 @@ export const BootstrapCommand: ICommand = {
           ms: packagesTotalTime,
           meta: {
             success: true,
-          },
-        },
-        {
-          group: 'bootstrap',
-          id: 'typescript references',
-          ms: typescriptTotalTime,
-          meta: {
-            success: true,
-            buildTsRefsEnabled: process.env.BUILD_TS_REFS_DISABLE !== 'true',
-            buildTsRefsCacheEnabled: process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false',
           },
         },
       ],

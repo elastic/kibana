@@ -8985,17 +8985,14 @@ const BootstrapCommand = {
     }, {
       prefix: '[vscode]',
       debug: false
-    }); // Build typescript references
-
-    const typescriptStartTime = Date.now();
+    });
     await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_3__["spawnStreaming"])(process.execPath, ['scripts/build_ts_refs', '--ignore-type-failures', '--info'], {
       cwd: kbn.getAbsolute(),
       env: process.env
     }, {
       prefix: '[ts refs]',
       debug: false
-    });
-    const typescriptTotalTime = Date.now() - typescriptStartTime; // send timings
+    }); // send timings
 
     await reporter.timings({
       upstreamBranch: kbn.kibanaProject.json.branch,
@@ -9007,15 +9004,6 @@ const BootstrapCommand = {
         ms: packagesTotalTime,
         meta: {
           success: true
-        }
-      }, {
-        group: 'bootstrap',
-        id: 'typescript references',
-        ms: typescriptTotalTime,
-        meta: {
-          success: true,
-          buildTsRefsEnabled: process.env.BUILD_TS_REFS_DISABLE !== 'true',
-          buildTsRefsCacheEnabled: process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false'
         }
       }]
     });
