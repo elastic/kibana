@@ -81,11 +81,15 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   );
 
   useEffect(() => {
-    embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
+    const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
       if (output.showDistributions !== undefined && stateContainer) {
         stateContainer.setAppState({ hideAggregatedPreview: !output.showDistributions });
       }
     });
+
+    return () => {
+      sub?.unsubscribe();
+    };
   }, [embeddable, stateContainer]);
 
   useEffect(() => {
