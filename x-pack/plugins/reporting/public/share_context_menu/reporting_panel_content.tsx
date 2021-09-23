@@ -273,7 +273,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
               {(copy) => (
                 <EuiButton
-                  color={this.props.isDirty ? 'warning' : 'primary'}
+                  color={isUnsaved ? 'warning' : 'primary'}
                   fullWidth
                   onClick={copy}
                   size="s"
