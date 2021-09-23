@@ -12,25 +12,20 @@ import {
   TutorialContextFactory,
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
-import { tutorialSchema } from './lib/tutorial_schema';
+import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
 import { Category, CATEGORY_DISPLAY } from '../../../../custom_integrations/common';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 
-const emptyContext = {};
-
 function registerTutorialWithCustomIntegrations(
   customIntegrations: CustomIntegrationsPluginSetup,
-  provider: TutorialProvider
+  tutorial: TutorialSchema
 ) {
-  const tutorial = provider(emptyContext);
-  const allowedCategories: Category[] = (
-    tutorial.integrationBrowserCategories
-      ? tutorial.integrationBrowserCategories.filter((category) => {
-          return CATEGORY_DISPLAY.hasOwnProperty(category);
-        })
-      : []
+  const allowedCategories: Category[] = (tutorial.integrationBrowserCategories ?? []).filter(
+    (category) => {
+      return CATEGORY_DISPLAY.hasOwnProperty(category);
+    }
   ) as Category[];
 
   customIntegrations.registerCustomIntegration({
@@ -57,7 +52,7 @@ export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
-  public setup(core: CoreSetup, customIntegrations: CustomIntegrationsPluginSetup) {
+  public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
     const router = core.http.createRouter();
     router.get(
       { path: '/api/kibana/home/tutorials', validate: false },
@@ -78,13 +73,17 @@ export class TutorialsRegistry {
     );
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
+        const emptyContext = {};
+        let tutorial: TutorialSchema;
         try {
-          tutorialSchema.validate(specProvider(emptyContext));
+          tutorial = tutorialSchema.validate(specProvider(emptyContext));
         } catch (error) {
           throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
         }
 
-        registerTutorialWithCustomIntegrations(customIntegrations, specProvider);
+        if (customIntegrations && tutorial) {
+          registerTutorialWithCustomIntegrations(customIntegrations, tutorial);
+        }
         this.tutorialProviders.push(specProvider);
       },
 

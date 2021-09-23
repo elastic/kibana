@@ -23,14 +23,13 @@ import { CustomIntegrationsPluginSetup } from '../../custom_integrations/server'
 
 export interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
-  customIntegrations: CustomIntegrationsPluginSetup;
+  customIntegrations?: CustomIntegrationsPluginSetup;
 }
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
   constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly tutorialsRegistry = new TutorialsRegistry();
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
-  private customIntegrations: CustomIntegrationsPluginSetup | undefined = undefined;
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -39,7 +38,6 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     const router = core.http.createRouter();
     registerRoutes(router);
 
-    this.customIntegrations = plugins.customIntegrations;
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
       sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
@@ -47,9 +45,6 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   }
 
   public start(): HomeServerPluginStart {
-    if (!this.customIntegrations) {
-      throw new Error('Cannot start home server. CustomIntegrations plugin missing.');
-    }
     return {
       tutorials: { ...this.tutorialsRegistry.start() },
       sampleData: { ...this.sampleDataRegistry.start() },
