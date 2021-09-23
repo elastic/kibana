@@ -577,7 +577,7 @@ class PackagePolicyService {
           success: true,
         });
         await removeOldAssets({
-          savedObjectsClient: soClient,
+          soClient,
           pkgName: packageInfo.name,
           currentVersion: packageInfo.version,
         });

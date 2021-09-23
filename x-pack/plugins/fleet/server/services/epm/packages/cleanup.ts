@@ -15,17 +15,17 @@ import { packagePolicyService } from '../../package_policy';
 import { appContextService } from '../..';
 
 export async function removeOldAssets(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   pkgName: string;
   currentVersion: string;
 }) {
-  const { savedObjectsClient, pkgName, currentVersion } = options;
+  const { soClient, pkgName, currentVersion } = options;
 
   // find all assets of older versions
   const aggs = {
     versions: { terms: { field: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version` } },
   };
-  const oldVersionsAgg = await savedObjectsClient.find<PackageAssetReference, any>({
+  const oldVersionsAgg = await soClient.find<any, any>({
     type: ASSETS_SAVED_OBJECT_TYPE,
     filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version<${currentVersion}`,
     aggs,
@@ -38,17 +38,17 @@ export async function removeOldAssets(options: {
   );
 
   for (const oldVersion of oldVersions) {
-    await removeAssetsFromVersion(savedObjectsClient, pkgName, oldVersion);
+    await removeAssetsFromVersion(soClient, pkgName, oldVersion);
   }
 }
 
 async function removeAssetsFromVersion(
-  savedObjectsClient: SavedObjectsClientContract,
+  soClient: SavedObjectsClientContract,
   pkgName: string,
   oldVersion: string
 ) {
   // check if any policies are using this package version
-  const { total } = await packagePolicyService.list(savedObjectsClient, {
+  const { total } = await packagePolicyService.list(soClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version:${oldVersion}`,
     page: 0,
     perPage: 0,
@@ -62,7 +62,7 @@ async function removeAssetsFromVersion(
   }
 
   // check if old version has assets
-  const finder = await savedObjectsClient.createPointInTimeFinder({
+  const finder = await soClient.createPointInTimeFinder({
     type: ASSETS_SAVED_OBJECT_TYPE,
     filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${oldVersion}`,
     perPage: 1000,
@@ -74,7 +74,7 @@ async function removeAssetsFromVersion(
       (obj) => ({ id: obj.id, type: ASSETS_SAVED_OBJECT_TYPE } as PackageAssetReference)
     );
 
-    await removeArchiveEntries({ savedObjectsClient, refs });
+    await removeArchiveEntries({ savedObjectsClient: soClient, refs });
   }
   await finder.close();
 }

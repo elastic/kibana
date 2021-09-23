@@ -270,7 +270,7 @@ async function installPackageFromRegistry({
     })
       .then(async (assets) => {
         await removeOldAssets({
-          savedObjectsClient,
+          soClient: savedObjectsClient,
           pkgName: packageInfo.name,
           currentVersion: packageInfo.version,
         });
