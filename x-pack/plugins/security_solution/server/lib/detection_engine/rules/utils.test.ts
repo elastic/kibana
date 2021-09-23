@@ -365,6 +365,94 @@ describe('utils', () => {
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
     });
+
+    test('it will use the "rule" and not the "legacyRuleActions" if the rule and actions is defined', () => {
+      const legacyRuleActions: LegacyRuleActions = {
+        id: 'id_1',
+        ruleThrottle: '',
+        alertThrottle: '',
+        actions: [
+          {
+            id: 'id_2',
+            group: 'group',
+            action_type_id: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+
+      expect(
+        transformFromAlertThrottle(
+          {
+            muteAll: true,
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'group',
+                id: 'id-123',
+                actionTypeId: 'id-456',
+                params: {},
+              },
+            ],
+          } as SanitizedAlert<RuleParams>,
+          legacyRuleActions
+        )
+      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
+    });
+
+    test('it will use the "legacyRuleActions" and not the "rule" if the rule actions is an empty array', () => {
+      const legacyRuleActions: LegacyRuleActions = {
+        id: 'id_1',
+        ruleThrottle: NOTIFICATION_THROTTLE_RULE,
+        alertThrottle: null,
+        actions: [
+          {
+            id: 'id_2',
+            group: 'group',
+            action_type_id: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+
+      expect(
+        transformFromAlertThrottle(
+          {
+            muteAll: true,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+          } as unknown as SanitizedAlert<RuleParams>,
+          legacyRuleActions
+        )
+      ).toEqual(NOTIFICATION_THROTTLE_RULE);
+    });
+
+    test('it will use the "legacyRuleActions" and not the "rule" if the rule actions is a null', () => {
+      const legacyRuleActions: LegacyRuleActions = {
+        id: 'id_1',
+        ruleThrottle: NOTIFICATION_THROTTLE_RULE,
+        alertThrottle: null,
+        actions: [
+          {
+            id: 'id_2',
+            group: 'group',
+            action_type_id: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+
+      expect(
+        transformFromAlertThrottle(
+          {
+            muteAll: true,
+            notifyWhen: 'onActiveAlert',
+            actions: null,
+          } as unknown as SanitizedAlert<RuleParams>,
+          legacyRuleActions
+        )
+      ).toEqual(NOTIFICATION_THROTTLE_RULE);
+    });
   });
 
   describe('#transformActions', () => {

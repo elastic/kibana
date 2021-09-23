@@ -64,6 +64,7 @@ import { RulesClient } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleActions } from '../rule_actions/legacy_types';
 import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -230,12 +231,7 @@ export const transformActions = (
   legacyRuleActions: LegacyRuleActions | null | undefined
 ): FullResponseSchema['actions'] => {
   if (alertAction != null && alertAction.length !== 0) {
-    return alertAction.map((action) => ({
-      group: action.group,
-      id: action.id,
-      action_type_id: action.actionTypeId,
-      params: action.params,
-    }));
+    return alertAction.map((action) => transformAlertToRuleAction(action));
   } else if (legacyRuleActions != null) {
     return legacyRuleActions.actions;
   } else {
