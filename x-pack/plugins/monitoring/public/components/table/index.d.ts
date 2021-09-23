@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const ElasticsearchOverview: FunctionComponent<Props>;
-export const ElasticsearchNodes: FunctionComponent<Props>;
+export const euiTableStorageGetter: (string) => any;
+export const euiTableStorageSetter: (string) => any;
