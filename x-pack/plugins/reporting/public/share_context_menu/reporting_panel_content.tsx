@@ -187,7 +187,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
                 <p>
                   <FormattedMessage
                     id="xpack.reporting.panelContent.unsavedStateWarningText"
-                    defaultMessage="It is highly recommended to save your changes before copying this URL."
+                    defaultMessage="It is recommended to save your work before copying this URL."
                   />{' '}
                   <EuiLink
                     onClick={() =>
