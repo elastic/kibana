@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { cloneDeep, get } from 'lodash';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -19,7 +19,6 @@ import { SeriesPanel } from './series_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { ValueAxesPanel } from './value_axes_panel';
 import {
-  makeSerie,
   isAxisHorizontal,
   countNextAxisNumber,
   getUpdatedAxisName,
@@ -27,6 +26,7 @@ import {
   mapPosition,
   mapPositionOpposingOpposite,
 } from './utils';
+import { getSeriesParams } from '../../../../utils/get_series_params';
 
 export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof SeriesParam>(
   axesName: 'valueAxes' | 'seriesParams',
@@ -273,40 +273,19 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
   );
 
   const schemaName = vis.type.schemas.metrics[0].name;
-  const metrics = useMemo(() => {
-    return aggs.bySchemaName(schemaName);
-  }, [schemaName, aggs]);
-
   const firstValueAxesId = stateParams.valueAxes[0].id;
 
   useEffect(() => {
-    const updatedSeries = metrics.map((agg) => {
-      const params = stateParams.seriesParams.find((param) => param.data.id === agg.id);
-      const label = agg.makeLabel();
+    const updatedSeries = getSeriesParams(
+      aggs,
+      stateParams.seriesParams,
+      schemaName,
+      firstValueAxesId
+    );
 
-      // update labels for existing params or create new one
-      if (params) {
-        return {
-          ...params,
-          data: {
-            ...params.data,
-            label,
-          },
-        };
-      } else {
-        const series = makeSerie(
-          agg.id,
-          label,
-          firstValueAxesId,
-          stateParams.seriesParams[stateParams.seriesParams.length - 1]
-        );
-        return series;
-      }
-    });
-
-    setValue('seriesParams', updatedSeries);
+    if (updatedSeries) setValue('seriesParams', updatedSeries);
     updateAxisTitle(updatedSeries);
-  }, [metrics, firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle]);
+  }, [firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle, aggs, schemaName]);
 
   return isTabSelected ? (
     <>

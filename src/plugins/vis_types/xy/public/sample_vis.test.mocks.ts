@@ -1780,6 +1780,7 @@ export const sampleAreaVis = {
     },
     aggs: {
       typesRegistry: {},
+      bySchemaName: jest.fn(),
       getResponseAggs: () => [
         {
           id: '1',
