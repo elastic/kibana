@@ -8,7 +8,7 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { I18nProvider } from '@kbn/i18n/react';
-import { FleetTrustedAppsCard } from './fleet_trusted_apps_card';
+import { FleetTrustedAppsCardWrapper } from './fleet_trusted_apps_card_wrapper';
 import * as reactTestingLibrary from '@testing-library/react';
 import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
 import { useToasts } from '../../../../../../../common/lib/kibana';
@@ -67,7 +67,9 @@ describe('Fleet trusted apps card', () => {
       </I18nProvider>
     );
     // @ts-ignore
-    const component = reactTestingLibrary.render(<FleetTrustedAppsCard />, { wrapper: Wrapper });
+    const component = reactTestingLibrary.render(<FleetTrustedAppsCardWrapper />, {
+      wrapper: Wrapper,
+    });
     try {
       // @ts-ignore
       await reactTestingLibrary.act(() => promise);
