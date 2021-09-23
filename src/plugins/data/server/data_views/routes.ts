@@ -9,7 +9,10 @@
 import { schema } from '@kbn/config-schema';
 import { HttpServiceSetup, RequestHandlerContext, StartServicesAccessor } from 'kibana/server';
 import { IndexPatternsFetcher } from './fetcher';
-import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
+import {
+  registerCreateDataViewRoute,
+  registerCreateIndexPatternRoute,
+} from './routes/create_index_pattern';
 import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
 import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
 import { registerUpdateIndexPatternRoute } from './routes/update_index_pattern';
@@ -44,8 +47,8 @@ export function registerRoutes(
 
   const router = http.createRouter();
 
-  // Index Patterns API
-  registerCreateIndexPatternRoute(router, getStartServices);
+  // Data Views API
+  registerCreateDataViewRoute(router, getStartServices);
   registerGetIndexPatternRoute(router, getStartServices);
   registerDeleteIndexPatternRoute(router, getStartServices);
   registerUpdateIndexPatternRoute(router, getStartServices);
@@ -68,6 +71,9 @@ export function registerRoutes(
   registerDeleteRuntimeFieldRoute(router, getStartServices);
   registerPutRuntimeFieldRoute(router, getStartServices);
   registerUpdateRuntimeFieldRoute(router, getStartServices);
+
+  // Legacy Index Pattern API
+  registerCreateIndexPatternRoute(router, getStartServices);
 
   router.get(
     {

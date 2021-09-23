@@ -46,47 +46,57 @@ const indexPatternSpecSchema = schema.object({
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
 });
 
-export const registerCreateIndexPatternRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
-) => {
-  router.post(
-    {
-      path: '/api/index_patterns/index_pattern',
-      validate: {
-        body: schema.object({
-          override: schema.maybe(schema.boolean({ defaultValue: false })),
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-          index_pattern: indexPatternSpecSchema,
-        }),
-      },
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatterns }] = await getStartServices();
-        const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient
-        );
-        const body = req.body;
-
-        const indexPattern = await indexPatternsService.createAndSave(
-          body.index_pattern as IndexPatternSpec,
-          body.override,
-          !body.refresh_fields
-        );
-
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            index_pattern: indexPattern.toSpec(),
+const registerCreateDataViewRouteFactory =
+  (path: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
+  ) => {
+    router.post(
+      {
+        path,
+        validate: {
+          body: schema.object({
+            override: schema.maybe(schema.boolean({ defaultValue: false })),
+            refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
+            index_pattern: indexPatternSpecSchema,
           }),
-        });
-      })
-    )
-  );
-};
+        },
+      },
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const [, , { indexPatterns }] = await getStartServices();
+          const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient
+          );
+          const body = req.body;
+
+          const indexPattern = await indexPatternsService.createAndSave(
+            body.index_pattern as IndexPatternSpec,
+            body.override,
+            !body.refresh_fields
+          );
+
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              index_pattern: indexPattern.toSpec(),
+            }),
+          });
+        })
+      )
+    );
+  };
+
+export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(
+  '/api/data_views/data_view'
+);
+
+export const registerCreateIndexPatternRoute = registerCreateDataViewRouteFactory(
+  '/api/index_patterns/index_pattern'
+);
