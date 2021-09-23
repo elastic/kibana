@@ -48,6 +48,7 @@ const initialRuleState: TestRuleState = {
 
 const mockOptions = {
   alertId: '',
+  executionId: '',
   startedAt: new Date(),
   previousStartedAt: null,
   state: {

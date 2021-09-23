@@ -8,6 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
+import uuid from 'uuid';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -246,6 +247,7 @@ export class TaskRunner<
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const alertType = this.ruleTypeRegistry.get(alertTypeId);
+    const executionId = uuid.v4();
 
     const alertInstances = mapValues<
       Record<string, RawAlertInstance>,
@@ -274,6 +276,7 @@ export class TaskRunner<
       updatedAlertTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.alertType.executor({
           alertId,
+          executionId,
           services: {
             ...services,
             alertInstanceFactory: createAlertInstanceFactory<
@@ -504,7 +507,7 @@ export class TaskRunner<
 
   async run(): Promise<AlertTaskRunResult> {
     const {
-      params: { alertId, spaceId },
+      params: { alertId, executionId, spaceId },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
@@ -527,6 +530,13 @@ export class TaskRunner<
         category: [this.alertType.producer],
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: executionId,
+            },
+          },
+        },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,

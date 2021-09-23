@@ -116,6 +116,19 @@ export const EventSchema = schema.maybe(
             status: ecsString(),
           })
         ),
+        alert: schema.maybe(
+          schema.object({
+            rule: schema.maybe(
+              schema.object({
+                execution: schema.maybe(
+                  schema.object({
+                    uuid: ecsString(),
+                  })
+                ),
+              })
+            ),
+          })
+        ),
         saved_objects: schema.maybe(
           schema.arrayOf(
             schema.object({

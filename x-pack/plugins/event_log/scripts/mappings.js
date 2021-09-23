@@ -49,6 +49,20 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
+      alert: {
+        properties: {
+          rule: {
+            properties: {
+              execution: {
+                properties: {
+                  uuid: {
+                    type: 'keyword',
+                  },
+              },
+            },
+          },
+        },
+      },
       // array of saved object references, for "linking" via search
       saved_objects: {
         type: 'nested',

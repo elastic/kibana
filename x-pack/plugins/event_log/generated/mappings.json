@@ -267,6 +267,21 @@
                         }
                     }
                 },
+              "alert": {
+                "properties": {
+                  "rule": {
+                    "properties": {
+                      "execution": {
+                        "properties": {
+                          "uuid": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
                 "saved_objects": {
                     "type": "nested",
                     "properties": {

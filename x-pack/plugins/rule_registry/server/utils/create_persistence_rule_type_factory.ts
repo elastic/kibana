@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_INSTANCE_ID, VERSION } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_EXECUTION_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeFactory } from './persistence_types';
 
@@ -31,6 +31,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                     { index: {} },
                     {
                       [ALERT_INSTANCE_ID]: alert.id,
+                      [ALERT_RULE_EXECUTION_UUID]: options.executionId,
                       [VERSION]: ruleDataClient.kibanaVersion,
                       ...commonRuleFields,
                       ...alert.fields,

@@ -116,6 +116,7 @@ function createRule() {
         tags: ['tags'],
         updatedBy: 'updatedBy',
         namespace: 'namespace',
+        executionId: 'executionId',
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;

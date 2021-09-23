@@ -8,6 +8,7 @@
 
 import { ElasticsearchClient } from '../elasticsearch_client';
 
+// TODO: Being fooled by alias, so can return true if concrete index doesn't exist
 export const getIndexExists = async (
   esClient: ElasticsearchClient,
   index: string

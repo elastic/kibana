@@ -169,6 +169,7 @@ describe('alertType', () => {
 
     await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as AlertServices<{}, ActionContext, typeof ActionGroupId>,
@@ -230,6 +231,7 @@ describe('alertType', () => {
 
     await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as AlertServices<
@@ -295,6 +297,7 @@ describe('alertType', () => {
 
     await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as AlertServices<
