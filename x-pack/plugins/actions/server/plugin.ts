@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -151,6 +151,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOCanEncrypt?: boolean;
+  private usageCounter?: UsageCounter;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
@@ -265,13 +266,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     // Usage counter for telemetry
-    const usageCounter = plugins.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
 
     // Routes
     defineRoutes(
       core.http.createRouter<ActionsRequestHandlerContext>(),
       this.licenseState,
-      usageCounter
+      this.usageCounter
     );
 
     // Cleanup failed execution task definition
@@ -368,6 +369,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           preconfiguredActions,
         }),
         auditLogger: this.security?.audit.asScoped(request),
+        usageCounter: this.usageCounter,
       });
     };
 
@@ -498,6 +500,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionExecutor,
       instantiateAuthorization,
       security,
+      usageCounter,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -534,6 +537,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               preconfiguredActions,
             }),
             auditLogger: security?.audit.asScoped(request),
+            usageCounter,
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
