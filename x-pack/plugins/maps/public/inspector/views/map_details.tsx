@@ -6,7 +6,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiTab,
   EuiTabs,
@@ -22,31 +21,42 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const DETAILS_TAB_ID = 'details';
 const STYLE_TAB_ID = 'mapStyle';
 
-class MapDetails extends Component {
-  tabs = [
-    {
-      id: DETAILS_TAB_ID,
-      name: i18n.translate('xpack.maps.inspector.mapDetailsTitle', {
-        defaultMessage: 'Map details',
-      }),
-      dataTestSubj: 'mapDetailsTab',
-    },
-    {
-      id: STYLE_TAB_ID,
-      name: i18n.translate('xpack.maps.inspector.mapboxStyleTitle', {
-        defaultMessage: 'Mapbox style',
-      }),
-      dataTestSubj: 'mapboxStyleTab',
-    },
-  ];
+const TABS = [
+  {
+    id: DETAILS_TAB_ID,
+    name: i18n.translate('xpack.maps.inspector.mapDetailsTitle', {
+      defaultMessage: 'Map details',
+    }),
+    dataTestSubj: 'mapDetailsTab',
+  },
+  {
+    id: STYLE_TAB_ID,
+    name: i18n.translate('xpack.maps.inspector.mapboxStyleTitle', {
+      defaultMessage: 'Mapbox style',
+    }),
+    dataTestSubj: 'mapboxStyleTab',
+  },
+];
 
-  state = {
+interface Props {
+  centerLon: number;
+  centerLat: number;
+  zoom: number;
+  style: string;
+}
+
+interface State {
+  selectedTabId: typeof DETAILS_TAB_ID | typeof STYLE_TAB_ID;
+}
+
+export class MapDetails extends Component<Props, State> {
+  state: State = {
     selectedTabId: DETAILS_TAB_ID,
   };
 
-  onSelectedTabChanged = (id) => {
+  onSelectedTabChanged = (id: string) => {
     this.setState({
-      selectedTabId: id,
+      selectedTabId: id as typeof DETAILS_TAB_ID | typeof STYLE_TAB_ID,
     });
   };
 
@@ -55,7 +65,7 @@ class MapDetails extends Component {
       return (
         <div data-test-subj="mapboxStyleContainer">
           <EuiCodeBlock language="json" paddingSize="s">
-            {JSON.stringify(this.props.mapStyle, null, 2)}
+            {JSON.stringify(this.props.style, null, 2)}
           </EuiCodeBlock>
         </div>
       );
@@ -68,7 +78,7 @@ class MapDetails extends Component {
             <EuiTableRowCell>
               <FormattedMessage
                 id="xpack.maps.inspector.centerLonLabel"
-                defaultMessage="Center lon"
+                defaultMessage="Center lon test"
               />
             </EuiTableRowCell>
             <EuiTableRowCell data-test-subj="centerLon">{this.props.centerLon}</EuiTableRowCell>
@@ -96,7 +106,7 @@ class MapDetails extends Component {
   };
 
   renderTabs() {
-    return this.tabs.map((tab, index) => (
+    return TABS.map((tab, index) => (
       <EuiTab
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
@@ -118,12 +128,3 @@ class MapDetails extends Component {
     );
   }
 }
-
-MapDetails.propTypes = {
-  centerLon: PropTypes.number.isRequired,
-  centerLat: PropTypes.number.isRequired,
-  zoom: PropTypes.number.isRequired,
-  mapStyle: PropTypes.object.isRequired,
-};
-
-export { MapDetails };
