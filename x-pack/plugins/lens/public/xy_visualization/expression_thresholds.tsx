@@ -17,21 +17,25 @@ import type { ColorAssignments } from './color_assignment';
 
 const THRESHOLD_ICON_SIZE = 20;
 
+function hasNoIcon(icon: string | undefined) {
+  return icon == null || icon !== 'none';
+}
+
 // Note: it does take into consideration whether the threshold is in view or not
 export const getThresholdRequiredPaddings = (thresholdLayers: LayerArgs[]) => ({
   ...(thresholdLayers.some((thresholdLayer) =>
-    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'right' && icon)
+    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'right' && hasNoIcon(icon))
   )
     ? { right: THRESHOLD_ICON_SIZE }
     : null),
   ...(thresholdLayers.some((thresholdLayer) =>
-    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'bottom' && icon)
+    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'bottom' && hasNoIcon(icon))
   )
     ? { bottom: THRESHOLD_ICON_SIZE }
     : null),
   ...(thresholdLayers.some((thresholdLayer) =>
     thresholdLayer.yConfig?.some(
-      ({ axisMode, icon }) => icon && (axisMode === 'left' || axisMode == null)
+      ({ axisMode, icon }) => hasNoIcon(icon) && (axisMode === 'left' || axisMode == null)
     )
   )
     ? { left: THRESHOLD_ICON_SIZE }
