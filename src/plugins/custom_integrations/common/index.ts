@@ -14,7 +14,6 @@ export interface CategoryCount {
   id: Category;
 }
 
-// todo internationalize
 export const CATEGORY_DISPLAY = {
   aws: 'AWS',
   azure: 'Azure',
