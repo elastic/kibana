@@ -10,7 +10,10 @@ import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
 import type { CoreSetup, NotificationsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
-import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
+import type {
+  ISearchEmbeddable,
+  LegacySavedSearch,
+} from '../../../../../src/plugins/discover/public';
 import {
   loadSharingDataHelpers,
   SEARCH_EMBEDDABLE_TYPE,
@@ -85,7 +88,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     });
   }
 
-  public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
+  public async getSearchSource(savedSearch: LegacySavedSearch, embeddable: ISearchEmbeddable) {
     const [{ uiSettings }, { data }] = await this.startServices$.pipe(first()).toPromise();
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(

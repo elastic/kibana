@@ -14,7 +14,7 @@ import {
   sendResetMsg,
 } from '../services/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
-import { SortOrder } from '../../../../saved_searches/types';
+import type { SortOrder } from '../../../../saved_searches';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';

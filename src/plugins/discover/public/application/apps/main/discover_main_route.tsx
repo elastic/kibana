@@ -8,10 +8,9 @@
 import React, { useEffect, useState, memo } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
-import type { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/public';
-import { IndexPatternAttributes, SavedObject } from 'src/plugins/data/common';
+import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
 import { DiscoverServices } from '../../../build_services';
-import { SavedSearch } from '../../../saved_searches';
+import { SavedSearch, getSavedSearch, getSavedSearchFullPathUrl } from '../../../saved_searches';
 import { getState } from './services/discover_state';
 import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
@@ -58,18 +57,16 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   useEffect(() => {
     const savedSearchId = id;
 
-    async function loadDefaultOrCurrentIndexPattern(usedSavedSearch: SavedSearch) {
+    async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
       await data.indexPatterns.ensureDefaultDataView();
       const { appStateContainer } = getState({ history, uiSettings: config });
       const { index } = appStateContainer.getState();
       const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
       const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
-      const indexPatternData = await resolveIndexPattern(
-        ip,
-        usedSavedSearch.searchSource,
-        toastNotifications
-      );
+      const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
+
       setIndexPatternList(ipList);
+
       return indexPatternData;
     }
 
@@ -77,17 +74,27 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
       try {
         // force a refresh if a given saved search without id was saved
         setSavedSearch(undefined);
-        const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
-        const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(loadedSavedSearch);
-        if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
-          loadedSavedSearch.searchSource.setField('index', loadedIndexPattern);
+
+        const currentSavedSearch = await getSavedSearch(savedSearchId, {
+          search: services.data.search,
+          savedObjectsClient: core.savedObjects.client,
+        });
+
+        const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
+          currentSavedSearch!.searchSource
+        );
+
+        if (!currentSavedSearch?.searchSource.getField('index')) {
+          currentSavedSearch!.searchSource.setField('index', loadedIndexPattern);
         }
-        setSavedSearch(loadedSavedSearch);
-        if (savedSearchId) {
+
+        setSavedSearch(currentSavedSearch);
+
+        if (currentSavedSearch.id) {
           chrome.recentlyAccessed.add(
-            (loadedSavedSearch as unknown as SavedObjectDeprecated).getFullPath(),
-            loadedSavedSearch.title,
-            loadedSavedSearch.id
+            getSavedSearchFullPathUrl(currentSavedSearch!.id),
+            currentSavedSearch.title ?? '',
+            currentSavedSearch.id
           );
         }
       } catch (e) {
@@ -112,6 +119,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
     loadSavedSearch();
   }, [
+    core.savedObjects.client,
     basePath,
     chrome.recentlyAccessed,
     config,

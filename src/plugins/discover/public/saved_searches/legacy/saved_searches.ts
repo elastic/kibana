@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
+import type { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../../../saved_objects/public';
 import { createSavedSearchClass } from './_saved_search';
+import { getSavedSearchUrl } from '../saved_searches_utils';
 
 interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjects: SavedObjectsStart;
 }
 
+/** @deprecated **/
 export function createSavedSearchesLoader({ savedObjectsClient, savedObjects }: Services) {
   const SavedSearchClass = createSavedSearchClass(savedObjects);
   const savedSearchLoader = new SavedObjectLoader(SavedSearchClass, savedObjectsClient);
@@ -25,7 +27,7 @@ export function createSavedSearchesLoader({ savedObjectsClient, savedObjects }: 
     nouns: 'saved searches',
   };
 
-  savedSearchLoader.urlFor = (id: string) => (id ? `#/view/${encodeURIComponent(id)}` : '#/');
+  savedSearchLoader.urlFor = getSavedSearchUrl;
 
   return savedSearchLoader;
 }

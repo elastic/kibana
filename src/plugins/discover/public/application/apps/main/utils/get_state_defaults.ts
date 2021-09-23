@@ -31,10 +31,11 @@ export function getStateDefaults({
   data: DataPublicPluginStart;
   savedSearch: SavedSearch;
 }) {
-  const searchSource = savedSearch.searchSource;
-  const indexPattern = savedSearch.searchSource.getField('index');
+  const { searchSource } = savedSearch;
+  const indexPattern = searchSource.getField('index');
+
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-  const sort = getSortArray(savedSearch.sort, indexPattern!);
+  const sort = getSortArray(savedSearch.sort ?? [], indexPattern!);
   const columns = getDefaultColumns(savedSearch, config);
 
   const defaultState = {

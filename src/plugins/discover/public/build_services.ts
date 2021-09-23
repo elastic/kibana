@@ -30,7 +30,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 
 import { UiCounterMetricType } from '@kbn/analytics';
 import { DiscoverStartPlugins } from './plugin';
-import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
+import { __LEGACY, LegacySavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
@@ -56,8 +56,7 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id?: string) => Promise<SavedSearch>;
-  getSavedSearchUrlById: (id: string) => Promise<string>;
+  getSavedSearchById: (id?: string) => Promise<LegacySavedSearch>;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
@@ -69,11 +68,11 @@ export function buildServices(
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext
 ): DiscoverServices {
-  const services = {
+  const savedObjectService = __LEGACY.createSavedSearchesLoader({
     savedObjectsClient: core.savedObjects.client,
     savedObjects: plugins.savedObjects,
-  };
-  const savedObjectService = createSavedSearchesLoader(services);
+  });
+
   const { usageCollection } = plugins;
 
   return {
@@ -86,7 +85,6 @@ export function buildServices(
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id?: string) => savedObjectService.get(id),
-    getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,

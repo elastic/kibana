@@ -14,7 +14,7 @@ import {
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { SavedSearch } from '../../../../saved_searches';
+import { LegacySavedSearch } from '../../../../saved_searches';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 
 let history: History;
@@ -150,7 +150,7 @@ describe('Test discover state with legacy migration', () => {
 });
 
 describe('createSearchSessionRestorationDataProvider', () => {
-  let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
+  let mockSavedSearch: LegacySavedSearch = {} as unknown as LegacySavedSearch;
   const mockDataPlugin = dataPluginMock.createStartContract();
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,
@@ -167,12 +167,12 @@ describe('createSearchSessionRestorationDataProvider', () => {
     });
 
     test('Saved Search with a title returns saved search title', async () => {
-      mockSavedSearch = { id: 'id', title: 'Name' } as unknown as SavedSearch;
+      mockSavedSearch = { id: 'id', title: 'Name' } as unknown as LegacySavedSearch;
       expect(await searchSessionInfoProvider.getName()).toBe('Name');
     });
 
     test('Saved Search without a title returns default name', async () => {
-      mockSavedSearch = { id: 'id', title: undefined } as unknown as SavedSearch;
+      mockSavedSearch = { id: 'id', title: undefined } as unknown as LegacySavedSearch;
       expect(await searchSessionInfoProvider.getName()).toBe('Discover');
     });
   });

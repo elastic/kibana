@@ -9,7 +9,7 @@ import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
 import type { SearchSource } from 'src/plugins/data/common';
-import type { SavedSearch } from 'src/plugins/discover/public';
+import type { LegacySavedSearch } from 'src/plugins/discover/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import type { ILicense, LicensingPluginSetup } from '../../../licensing/public';
@@ -124,7 +124,7 @@ describe('GetCsvReportPanelAction', () => {
       return {
         searchSource: mockSearchSource,
         columns: ['column_a', 'column_b'],
-      } as unknown as SavedSearch;
+      } as unknown as LegacySavedSearch;
     };
 
     const panel = new ReportingCsvPanelAction({

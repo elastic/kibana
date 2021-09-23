@@ -6,26 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { SearchSource } from '../../../data/public';
-import { SavedObjectSaveOpts } from '../../../saved_objects/public';
-import { DiscoverGridSettings } from '../application/components/discover_grid/types';
+import type { SimpleSavedObject } from '../../../../core/public';
+import type { ISearchSource } from '../../../data/public';
+import { DiscoverGridSettingsColumn } from '../application/components/discover_grid/types';
 
-export type SortOrder = [string, string];
-export interface SavedSearch {
-  readonly id: string;
+/** @internal **/
+export interface SavedSearchAttributes extends SimpleSavedObject {
   title: string;
-  searchSource: SearchSource;
-  description?: string;
+  sort: Array<[string, string]>;
   columns: string[];
-  sort: SortOrder[];
-  grid: DiscoverGridSettings;
-  destroy: () => void;
-  save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  lastSavedTitle?: string;
-  copyOnSave?: boolean;
-  hideChart?: boolean;
+  description: string;
+  grid: {
+    columns?: Record<string, DiscoverGridSettingsColumn>;
+  };
+  hideChart: boolean;
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: string;
+  };
 }
-export interface SavedSearchLoader {
-  get: (id: string) => Promise<SavedSearch>;
-  urlFor: (id: string) => string;
+
+/** @public **/
+export interface SavedSearch {
+  searchSource: ISearchSource;
+  id?: string;
+  title?: string;
+  sort?: Array<[string, string]>;
+  columns?: string[];
+  description?: string;
+  grid?: {
+    columns?: Record<string, DiscoverGridSettingsColumn>;
+  };
+  hideChart?: boolean;
+  // @todo: should be removed;
+  lastSavedTitle?: string;
 }
