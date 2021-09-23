@@ -144,31 +144,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<
       </EuiFlexGroup>
     </>
   );
-  const serviceSelect = (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
-        {
-          defaultMessage: 'Service',
-        }
-      )}
-      error={errors.serverType}
-      isInvalid={isServiceInvalid}
-    >
-      <EuiSelect
-        name="service"
-        hasNoInitialSelection={true}
-        value={service}
-        disabled={readOnly}
-        isInvalid={isServiceInvalid}
-        data-test-subj="emailServiceSelectInput"
-        options={getEmailServices(isCloud)}
-        onChange={(e) => {
-          setEmailService(e.target.value);
-        }}
-      />
-    </EuiFormRow>
-  );
 
   return (
     <>
@@ -213,23 +188,44 @@ export const EmailActionConnectorFields: React.FunctionComponent<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
+              {
+                defaultMessage: 'Service',
+              }
+            )}
+            error={errors.serverType}
+            isInvalid={isServiceInvalid}
+          >
+            <EuiSelect
+              name="service"
+              hasNoInitialSelection={true}
+              value={service}
+              disabled={readOnly}
+              isInvalid={isServiceInvalid}
+              data-test-subj="emailServiceSelectInput"
+              options={getEmailServices(isCloud)}
+              onChange={(e) => {
+                setEmailService(e.target.value);
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {service === AdditionalEmailServices.EXCHANGE ? (
-        <>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>{serviceSelect}</EuiFlexItem>
-          </EuiFlexGroup>
-          <ExchangeFormFields
-            action={action}
-            editActionConfig={editActionConfig}
-            editActionSecrets={editActionSecrets}
-            errors={errors}
-            readOnly={readOnly}
-          />
-        </>
+        <ExchangeFormFields
+          action={action}
+          editActionConfig={editActionConfig}
+          editActionSecrets={editActionSecrets}
+          errors={errors}
+          readOnly={readOnly}
+        />
       ) : (
         <>
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>{serviceSelect}</EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
                 id="emailHost"

@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { IErrorObject } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { nullableString } from './email_connector';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 interface ExchangeFormFieldsProps {
   action: EmailActionConnector;
@@ -111,6 +112,17 @@ const ExchangeFormFields: React.FunctionComponent<ExchangeFormFieldsProps> = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {getEncryptedFieldNotifyLabel(
+        !action.id,
+        1,
+        action.isMissingSecrets ?? false,
+        i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.reenterClientSecretLabel',
+          {
+            defaultMessage: 'Client Secret is encrypted. Please reenter value for this field.',
+          }
+        )
+      )}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFormRow
