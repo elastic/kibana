@@ -9,11 +9,14 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { useDecodedParams } from '../../../../utils/encode_path_params';
 import { AppSearchPageTemplate } from '../../../layout';
 import { getCurationsBreadcrumbs } from '../../utils';
 
 export const CurationSuggestion: React.FC = () => {
-  const query = 'expert cooking advice';
+  const { query } = useDecodedParams();
+
+  const queryTitle = query === '""' ? query : `"${query}"`;
 
   return (
     <AppSearchPageTemplate
@@ -24,7 +27,7 @@ export const CurationSuggestion: React.FC = () => {
         ),
       ])}
       pageHeader={{
-        pageTitle: query,
+        pageTitle: queryTitle,
       }}
     />
   );
