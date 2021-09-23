@@ -51,7 +51,7 @@ describe.each([
     });
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const result = resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       // @ts-expect-error
       delete result.alertTypeId;
       rulesClient.resolve.mockResolvedValue(result);

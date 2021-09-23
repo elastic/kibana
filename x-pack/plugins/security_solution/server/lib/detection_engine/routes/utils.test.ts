@@ -22,7 +22,7 @@ import {
 } from './utils';
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus } from '../signals/__mocks__/es_results';
-import { getAlertMock } from './__mocks__/request_responses';
+import { resolveAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -230,13 +230,13 @@ describe.each([
     });
     it('getFailingRules finds no failing rules', async () => {
       rulesClient.resolve.mockResolvedValue(
-        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+        resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
       );
       const res = await getFailingRules(['my-fake-id'], rulesClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const foundRule = resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,
