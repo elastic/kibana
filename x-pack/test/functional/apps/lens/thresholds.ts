@@ -78,7 +78,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.closeDimensionEditor();
 
       await testSubjects.existOrFail('lnsXY_yThresholdRightPanel > lns-empty-dimension');
+    });
 
+    it('should carry the style when moving a threshold to another group', async () => {
       // style it enabling the fill
       await testSubjects.click('lnsXY_yThresholdLeftPanel > lns-dimensionTrigger');
       await testSubjects.click('lnsXY_fill_below');
@@ -94,6 +96,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(
         await find.existsByCssSelector('[data-test-subj="lnsXY_fill_below"][class$="isSelected"]')
       ).to.be(true);
+      await PageObjects.lens.closeDimensionEditor();
+    });
+
+    it('should duplicate also the original style when duplicating a threshold', async () => {
+      // drag and drop to the empty field to generate a duplicate
+      await PageObjects.lens.dragDimensionToDimension(
+        'lnsXY_yThresholdRightPanel > lns-dimensionTrigger',
+        'lnsXY_yThresholdRightPanel > lns-empty-dimension'
+      );
+
+      await (
+        await find.byCssSelector(
+          '[data-test-subj="lnsXY_yThresholdRightPanel"]:nth-child(2) [data-test-subj="lns-dimensionTrigger"]'
+        )
+      ).click();
+      expect(
+        await find.existsByCssSelector('[data-test-subj="lnsXY_fill_below"][class$="isSelected"]')
+      ).to.be(true);
+      await PageObjects.lens.closeDimensionEditor();
     });
   });
 }
