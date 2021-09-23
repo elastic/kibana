@@ -28,6 +28,8 @@ export const jobsAndCurrentSpace = schema.object({
 
 export const syncJobObjects = schema.object({ simulate: schema.maybe(schema.boolean()) });
 
+export const syncCheckSchema = schema.object({ jobType: schema.maybe(schema.string()) });
+
 export const canDeleteJobSchema = schema.object({
   /** List of job IDs. */
   jobIds: schema.arrayOf(schema.string()),

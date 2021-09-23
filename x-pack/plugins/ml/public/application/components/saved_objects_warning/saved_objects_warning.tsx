@@ -21,7 +21,7 @@ interface Props {
 
 export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRefresh }) => {
   const {
-    savedObjects: { initSavedObjects },
+    savedObjects: { syncCheck },
   } = useMlApiContext();
 
   const mounted = useRef(false);
@@ -31,18 +31,13 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
 
   const checkStatus = useCallback(async () => {
     try {
-      const { jobs, datafeeds } = await initSavedObjects(true);
-
       if (mounted.current === false) {
         return;
       }
 
-      const missingJobs =
-        jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
+      const { result } = await syncCheck(jobType);
 
-      const missingDatafeeds = datafeeds.length > 0 && jobType === 'anomaly-detector';
-
-      setShowWarning(showSyncFlyout || missingJobs || missingDatafeeds);
+      setShowWarning(showSyncFlyout || result);
     } catch (error) {
       console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
     }
@@ -90,7 +85,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
         <>
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.description"
-            defaultMessage="Some jobs are missing or have incomplete saved objects."
+            defaultMessage="Some jobs are missing or have incomplete saved objects. "
           />
           {canCreateJob ? (
             <FormattedMessage
@@ -110,7 +105,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
           ) : (
             <FormattedMessage
               id="xpack.ml.jobsList.missingSavedObjectWarning.noPermission"
-              defaultMessage="Go to Stack Management to synchronize your jobs."
+              defaultMessage="Please synchronize your jobs in Stack Management."
             />
           )}
           {showSyncFlyout && <JobSpacesSyncFlyout onClose={onClose} />}

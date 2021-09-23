@@ -38,6 +38,10 @@ export interface InitializeSavedObjectResponse {
   error?: any;
 }
 
+export interface SyncCheckResponse {
+  result: boolean;
+}
+
 export interface DeleteJobCheckResponse {
   [jobId: string]: DeleteJobPermission;
 }

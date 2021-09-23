@@ -314,5 +314,15 @@ export function syncSavedObjectsFactory(
     return results;
   }
 
-  return { checkStatus, syncSavedObjects, initSavedObjects };
+  async function isSyncNeeded(jobType: JobType) {
+    const { jobs, datafeeds } = await initSavedObjects(true);
+    const missingJobs =
+      jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
+
+    const missingDatafeeds = datafeeds.length > 0 && jobType !== 'data-frame-analytics';
+
+    return missingJobs || missingDatafeeds;
+  }
+
+  return { checkStatus, syncSavedObjects, initSavedObjects, isSyncNeeded };
 }
