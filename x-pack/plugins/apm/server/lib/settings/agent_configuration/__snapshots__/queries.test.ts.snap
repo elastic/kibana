@@ -163,7 +163,7 @@ Object {
         "terms": Object {
           "field": "service.name",
           "min_doc_count": 0,
-          "size": undefined,
+          "size": 50,
         },
       },
     },

@@ -16,14 +16,26 @@ interface TransactionTypesSelectProps {
   onChange: (value: string) => void;
 }
 
+const allOption: EuiComboBoxOptionOption<string> = {
+  label: i18n.translate(
+    'xpack.apm.transactionTypesSelectAllDropDownOptionLabel',
+    {
+      defaultMessage: 'All',
+    }
+  ),
+  value: undefined,
+};
+
 export function TransactionTypesSelect({
   compressed,
   defaultValue,
   onChange,
 }: TransactionTypesSelectProps) {
-  const [selectedOptions, setSelectedOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >(defaultValue ? [{ label: defaultValue, value: defaultValue }] : []);
+  const defaultOption = !defaultValue
+    ? allOption
+    : { label: defaultValue, value: defaultValue };
+  const [selectedOptions, setSelectedOptions] = useState([defaultOption]);
+
   const [searchValue, setSearchValue] = useState('');
 
   const { data, status } = useFetcher(
@@ -42,6 +54,7 @@ export function TransactionTypesSelect({
   const transactionTypes = data?.transactionTypes ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
+    allOption,
     ...transactionTypes.map((name) => {
       return { label: name, value: name };
     }),

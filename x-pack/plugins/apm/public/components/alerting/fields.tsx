@@ -78,7 +78,7 @@ export function TransactionTypeField({
     defaultMessage: 'Type',
   });
   return (
-    <PopoverExpression value={currentValue} title={label}>
+    <PopoverExpression value={currentValue || ALL_OPTION} title={label}>
       <TransactionTypesSelect
         compressed={true}
         defaultValue={currentValue}

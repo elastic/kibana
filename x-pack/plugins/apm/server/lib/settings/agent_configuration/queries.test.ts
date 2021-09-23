@@ -58,6 +58,7 @@ describe('agent configuration queries', () => {
         getServiceNames({
           setup,
           searchAggregatedTransactions: false,
+          size: 50,
         })
       );
 

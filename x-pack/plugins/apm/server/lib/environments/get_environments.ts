@@ -34,7 +34,7 @@ export async function getEnvironments({
     ? 'get_environments_for_service'
     : 'get_environments';
 
-  const { start, end, apmEventClient, config } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const filter = rangeQuery(start, end);
 
