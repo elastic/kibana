@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { SavedObjectReference, SavedObjectsFindResponse } from 'kibana/server';
 import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
   CaseUserActionsResponse,
   CaseUserActionsResponseRt,
   SUB_CASE_SAVED_OBJECT,
+  CaseUserActionResponse,
 } from '../../../common';
-import { createCaseError, checkEnabledCaseConnectorOrThrow } from '../../common';
+import { createCaseError, checkEnabledCaseConnectorOrThrow, SUB_CASE_REF_NAME } from '../../common';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { UserActionGet } from './client';
@@ -40,23 +40,12 @@ export const get = async (
       operation: Operations.getUserActions,
     });
 
-    return CaseUserActionsResponseRt.encode(
-      userActions.saved_objects.reduce<CaseUserActionsResponse>((acc, ua) => {
-        if (subCaseId == null && ua.references.some((uar) => uar.type === SUB_CASE_SAVED_OBJECT)) {
-          return acc;
-        }
-        return [
-          ...acc,
-          {
-            ...ua.attributes,
-            action_id: ua.id,
-            case_id: ua.references.find((r) => r.type === CASE_SAVED_OBJECT)?.id ?? '',
-            comment_id: ua.references.find((r) => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
-            sub_case_id: ua.references.find((r) => r.type === SUB_CASE_SAVED_OBJECT)?.id ?? '',
-          },
-        ];
-      }, [])
-    );
+    const resultsToEncode =
+      subCaseId == null
+        ? extractAttributesWithoutSubCases(userActions)
+        : extractAttributes(userActions);
+
+    return CaseUserActionsResponseRt.encode(resultsToEncode);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve user actions case id: ${caseId} sub case id: ${subCaseId}: ${error}`,
@@ -65,3 +54,21 @@ export const get = async (
     });
   }
 };
+
+export function extractAttributesWithoutSubCases(
+  userActions: SavedObjectsFindResponse<CaseUserActionResponse>
+): CaseUserActionsResponse {
+  // exclude user actions relating to sub cases from the results
+  const hasSubCaseReference = (references: SavedObjectReference[]) =>
+    references.find((ref) => ref.type === SUB_CASE_SAVED_OBJECT && ref.name === SUB_CASE_REF_NAME);
+
+  return userActions.saved_objects
+    .filter((so) => !hasSubCaseReference(so.references))
+    .map((so) => so.attributes);
+}
+
+function extractAttributes(
+  userActions: SavedObjectsFindResponse<CaseUserActionResponse>
+): CaseUserActionsResponse {
+  return userActions.saved_objects.map((so) => so.attributes);
+}
