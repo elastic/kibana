@@ -7,6 +7,7 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -39,6 +40,15 @@ interface ClearableProps {
 
 type Props = RequiredProps | ClearableProps;
 
+const findPalette = (colorPalette: ColorPalette | null, colorPalettes: ColorPalette[] = []) => {
+  const palette = colorPalettes.filter((cp) => cp.id === colorPalette?.id)[0] ?? null;
+  if (palette === null) {
+    return colorPalettes.filter((cp) => isEqual(cp.colors, colorPalette?.colors))[0] ?? null;
+  }
+
+  return palette;
+};
+
 export const PalettePicker: FC<Props> = (props) => {
   const colorPalettes: EuiColorPalettePickerPaletteProps[] = palettes.map((item) => ({
     value: item.id,
@@ -61,13 +71,15 @@ export const PalettePicker: FC<Props> = (props) => {
       onChange(canvasPalette || null);
     };
 
+    const foundPalette = findPalette(palette, palettes);
+
     return (
       <EuiColorPalettePicker
         id={props.id}
         compressed={true}
         palettes={colorPalettes}
         onChange={onPickerChange}
-        valueOfSelected={palette ? palette.id : 'clear'}
+        valueOfSelected={foundPalette?.id ?? 'clear'}
       />
     );
   }
@@ -84,13 +96,15 @@ export const PalettePicker: FC<Props> = (props) => {
     onChange(canvasPalette);
   };
 
+  const foundPalette = findPalette(palette, palettes);
+
   return (
     <EuiColorPalettePicker
       id={props.id}
       compressed={true}
       palettes={colorPalettes}
       onChange={onPickerChange}
-      valueOfSelected={palette.id}
+      valueOfSelected={foundPalette?.id}
     />
   );
 };

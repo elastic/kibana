@@ -43,6 +43,12 @@ SelectArgInput.propTypes = {
     }),
   }),
   argId: PropTypes.string.isRequired,
+  choices: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]).isRequired,
+    })
+  ),
 };
 
 export const select = () => ({

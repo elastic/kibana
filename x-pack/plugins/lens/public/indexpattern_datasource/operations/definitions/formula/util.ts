@@ -19,12 +19,13 @@ import type { GroupedNodes } from './types';
 export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;
 
 export function groupArgsByType(args: TinymathAST[]) {
-  const { namedArgument, variable, function: functions } = groupBy<TinymathAST>(
-    args,
-    (arg: TinymathAST) => {
-      return isObject(arg) ? arg.type : 'variable';
-    }
-  ) as GroupedNodes;
+  const {
+    namedArgument,
+    variable,
+    function: functions,
+  } = groupBy<TinymathAST>(args, (arg: TinymathAST) => {
+    return isObject(arg) ? arg.type : 'variable';
+  }) as GroupedNodes;
   // better naming
   return {
     namedArguments: namedArgument || [],

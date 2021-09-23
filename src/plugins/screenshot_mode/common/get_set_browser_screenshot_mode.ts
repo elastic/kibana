@@ -21,7 +21,7 @@ export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KE
  */
 export const getScreenshotMode = (): boolean => {
   return (
-    ((window as unknown) as Record<string, unknown>)[KBN_SCREENSHOT_MODE_ENABLED_KEY] === true ||
+    (window as unknown as Record<string, unknown>)[KBN_SCREENSHOT_MODE_ENABLED_KEY] === true ||
     window.localStorage.getItem(KBN_SCREENSHOT_MODE_ENABLED_KEY) === 'true'
   );
 };

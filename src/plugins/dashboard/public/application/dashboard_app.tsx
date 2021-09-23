@@ -36,15 +36,8 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const {
-    core,
-    chrome,
-    embeddable,
-    onAppLeave,
-    uiSettings,
-    data,
-    screenshotMode,
-  } = useKibana<DashboardAppServices>().services;
+  const { core, chrome, embeddable, onAppLeave, uiSettings, data, screenshotMode } =
+    useKibana<DashboardAppServices>().services;
 
   const isScreenshotMode = screenshotMode.isScreenshotMode();
 
