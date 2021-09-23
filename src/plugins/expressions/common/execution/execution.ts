@@ -180,7 +180,7 @@ export class Execution<
     const ast = execution.ast || parseExpression(this.expression);
 
     this.state = createExecutionContainer({
-      ...executor.state.get(),
+      ...executor.state,
       state: 'not-started',
       ast,
     });
