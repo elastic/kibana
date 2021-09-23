@@ -517,7 +517,7 @@ export class ManifestManager {
   }
 
   /**
-   * Cleanup .fleet-agents index if there are some orphan artifacts
+   * Cleanup .fleet-artifacts index if there are some orphan artifacts
    */
   public async cleanup(manifest: Manifest) {
     try {
