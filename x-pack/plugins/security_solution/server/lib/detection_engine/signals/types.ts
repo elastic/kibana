@@ -36,6 +36,7 @@ import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
 import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import { BuildReasonMessage } from './reason_formatters';
+import { SanitizedRuleConfig } from '../../../../../alerting/common';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -299,7 +300,7 @@ export interface SearchAfterAndBulkCreateParams {
     from: moment.Moment;
     maxSignals: number;
   };
-  ruleSO: SavedObject<AlertAttributes>;
+  rule: SanitizedRuleConfig;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];

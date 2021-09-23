@@ -55,6 +55,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           spaceId,
           state,
           updatedBy: updatedByUser,
+          rule,
         } = options;
         let runState = state;
         const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
@@ -67,14 +68,19 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           savedObjectsClient,
           ruleDataService,
         });
-        const ruleSO = await savedObjectsClient.get('alert', alertId);
 
         const {
           actions,
           name,
           schedule: { interval },
-        } = ruleSO.attributes;
+        } = rule;
         const refresh = actions.length ? 'wait_for' : false;
+
+        const completeRule = {
+          ruleConfig: rule,
+          ruleParams: params,
+          alertId,
+        };
 
         const buildRuleMessage = buildRuleMessageFactory({
           id: alertId,
@@ -169,6 +175,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           interval,
           maxSignals: DEFAULT_MAX_SIGNALS,
           buildRuleMessage,
+          startedAt,
         });
         if (remainingGap.asMilliseconds() > 0) {
           const gapString = remainingGap.humanize();
@@ -212,7 +219,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
             logger,
             ignoreFields,
             mergeStrategy,
-            ruleSO,
+            completeRule,
             spaceId,
           });
 
@@ -220,7 +227,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
             logger,
             ignoreFields,
             mergeStrategy,
-            ruleSO,
+            completeRule,
             spaceId,
           });
 
@@ -234,7 +241,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
                 bulkCreate,
                 exceptionItems,
                 listClient,
-                rule: ruleSO,
+                completeRule,
                 searchAfterSize,
                 tuple,
                 wrapHits,
@@ -276,7 +283,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
               const notificationRuleParams: NotificationRuleTypeParams = {
                 ...params,
                 name: name as string,
-                id: ruleSO.id as string,
+                id: alertId as string,
               } as unknown as NotificationRuleTypeParams;
 
               const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
@@ -284,7 +291,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
               const resultsLink = getNotificationResultsLink({
                 from: fromInMs,
                 to: toInMs,
-                id: ruleSO.id,
+                id: alertId,
                 kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                   ?.kibana_siem_app_url,
               });
@@ -293,12 +300,12 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
                 buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
               );
 
-              if (ruleSO.attributes.throttle != null) {
+              if (rule.throttle != null) {
                 await scheduleThrottledNotificationActions({
                   alertInstance: services.alertInstanceFactory(alertId),
-                  throttle: ruleSO.attributes.throttle,
+                  throttle: completeRule.ruleConfig.throttle,
                   startedAt,
-                  id: ruleSO.id,
+                  id: alertId,
                   kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                     ?.kibana_siem_app_url,
                   outputIndex: ruleDataClient.indexName,

@@ -14,6 +14,7 @@ import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 export type AlertTypeState = Record<string, unknown>;
 export type AlertTypeParams = Record<string, unknown>;
+export type AlertTypeParams = Record<string, unknown>;
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;

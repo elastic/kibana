@@ -114,9 +114,9 @@ export const previewRulesRoute = (
 
         const previewRuleParams = internalRule.params;
 
-        const runExecutors = <X extends RuleParams>(
-          executor: AlertTypeExecutor<{}, X, {}, {}>,
-          params: X
+        const runExecutors = <T extends RuleParams>(
+          executor: AlertTypeExecutor<{}, T, {}, {}>,
+          params: T
         ) => {};
 
         switch (previewRuleParams.type) {
