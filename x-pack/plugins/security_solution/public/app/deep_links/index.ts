@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 
 import { LicenseType } from '../../../../licensing/common/types';
-import { SecurityDeepLinkName, SecurityDeepLinks, SecurityPageName } from '../types';
+import { SecurityPageName } from '../types';
 import {
   AppDeepLink,
   ApplicationStart,
@@ -45,7 +45,13 @@ import {
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
-export const topDeepLinks: AppDeepLink[] = [
+export const PREMIUM_DEEP_LINKS_IDS: string[] = [
+  SecurityPageName.hostsAnomalies,
+  SecurityPageName.networkAnomalies,
+  SecurityPageName.caseConfigure,
+];
+
+export const securitySolutionsDeepLinks: AppDeepLink[] = [
   {
     id: SecurityPageName.overview,
     title: OVERVIEW,
@@ -68,86 +74,7 @@ export const topDeepLinks: AppDeepLink[] = [
         defaultMessage: 'Detect',
       }),
     ],
-  },
-  {
-    id: SecurityPageName.hosts,
-    title: HOSTS,
-    path: HOSTS_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.hosts', {
-        defaultMessage: 'Hosts',
-      }),
-    ],
-    order: 9002,
-  },
-  {
-    id: SecurityPageName.network,
-    title: NETWORK,
-    path: NETWORK_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.network', {
-        defaultMessage: 'Network',
-      }),
-    ],
-    order: 9003,
-  },
-  {
-    id: SecurityPageName.ueba,
-    title: UEBA,
-    path: UEBA_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.ueba', {
-        defaultMessage: 'Users & Entities',
-      }),
-    ],
-    order: 9004,
-  },
-  {
-    id: SecurityPageName.timelines,
-    title: TIMELINES,
-    path: TIMELINES_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.timelines', {
-        defaultMessage: 'Timelines',
-      }),
-    ],
-    order: 9005,
-  },
-  {
-    id: SecurityPageName.case,
-    title: CASE,
-    path: CASES_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.cases', {
-        defaultMessage: 'Cases',
-      }),
-    ],
-    order: 9006,
-  },
-  {
-    id: SecurityPageName.administration,
-    title: MANAGE,
-    path: ENDPOINTS_PATH,
-    navLinkStatus: AppNavLinkStatus.hidden,
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.manage', {
-        defaultMessage: 'Manage',
-      }),
-    ],
-  },
-];
-
-const nestedDeepLinks: SecurityDeepLinks = {
-  [SecurityPageName.overview]: {
-    base: [],
-  },
-  [SecurityPageName.detections]: {
-    base: [
+    deepLinks: [
       {
         id: SecurityPageName.alerts,
         title: ALERTS,
@@ -187,124 +114,200 @@ const nestedDeepLinks: SecurityDeepLinks = {
       },
     ],
   },
-  [SecurityPageName.hosts]: {
-    base: [
-      {
-        id: 'authentications',
-        title: i18n.translate('xpack.securitySolution.search.hosts.authentications', {
-          defaultMessage: 'Authentications',
-        }),
-        path: `${HOSTS_PATH}/authentications`,
-      },
-      {
-        id: 'uncommonProcesses',
-        title: i18n.translate('xpack.securitySolution.search.hosts.uncommonProcesses', {
-          defaultMessage: 'Uncommon Processes',
-        }),
-        path: `${HOSTS_PATH}/uncommonProcesses`,
-      },
-      {
-        id: 'events',
-        title: i18n.translate('xpack.securitySolution.search.hosts.events', {
-          defaultMessage: 'Events',
-        }),
-        path: `${HOSTS_PATH}/events`,
-      },
-      {
-        id: 'externalAlerts',
-        title: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
-          defaultMessage: 'External Alerts',
-        }),
-        path: `${HOSTS_PATH}/externalAlerts`,
-      },
+  {
+    id: SecurityPageName.explore,
+    title: 'Explore', // TODO: lang
+    navLinkStatus: AppNavLinkStatus.hidden,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.explore', {
+        defaultMessage: 'Explore',
+      }),
     ],
-    premium: [
+    deepLinks: [
       {
-        id: 'anomalies',
-        title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
-          defaultMessage: 'Anomalies',
-        }),
-        path: `${HOSTS_PATH}/anomalies`,
+        id: SecurityPageName.hosts,
+        title: HOSTS,
+        path: HOSTS_PATH,
+        navLinkStatus: AppNavLinkStatus.visible,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.hosts', {
+            defaultMessage: 'Hosts',
+          }),
+        ],
+        order: 9002,
+        deepLinks: [
+          {
+            id: SecurityPageName.authentications,
+            title: i18n.translate('xpack.securitySolution.search.hosts.authentications', {
+              defaultMessage: 'Authentications',
+            }),
+            path: `${HOSTS_PATH}/authentications`,
+          },
+          {
+            id: SecurityPageName.uncommonProcesses,
+            title: i18n.translate('xpack.securitySolution.search.hosts.uncommonProcesses', {
+              defaultMessage: 'Uncommon Processes',
+            }),
+            path: `${HOSTS_PATH}/uncommonProcesses`,
+          },
+          {
+            id: SecurityPageName.events,
+            title: i18n.translate('xpack.securitySolution.search.hosts.events', {
+              defaultMessage: 'Events',
+            }),
+            path: `${HOSTS_PATH}/events`,
+          },
+          {
+            id: SecurityPageName.hostsExternalAlerts,
+            title: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
+              defaultMessage: 'External Alerts',
+            }),
+            path: `${HOSTS_PATH}/externalAlerts`,
+          },
+          {
+            id: SecurityPageName.hostsAnomalies,
+            title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: `${HOSTS_PATH}/anomalies`,
+          },
+        ],
       },
-    ],
-  },
-  [SecurityPageName.network]: {
-    base: [
       {
-        id: 'dns',
-        title: i18n.translate('xpack.securitySolution.search.network.dns', {
-          defaultMessage: 'DNS',
-        }),
-        path: `${NETWORK_PATH}/dns`,
-      },
-      {
-        id: 'http',
-        title: i18n.translate('xpack.securitySolution.search.network.http', {
-          defaultMessage: 'HTTP',
-        }),
-        path: `${NETWORK_PATH}/http`,
-      },
-      {
-        id: 'tls',
-        title: i18n.translate('xpack.securitySolution.search.network.tls', {
-          defaultMessage: 'TLS',
-        }),
-        path: `${NETWORK_PATH}/tls`,
-      },
-      {
-        id: 'externalAlertsNetwork',
-        title: i18n.translate('xpack.securitySolution.search.network.externalAlerts', {
-          defaultMessage: 'External Alerts',
-        }),
-        path: `${NETWORK_PATH}/external-alerts`,
-      },
-    ],
-    premium: [
-      {
-        id: 'anomalies',
-        title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
-          defaultMessage: 'Anomalies',
-        }),
-        path: `${NETWORK_PATH}/anomalies`,
-      },
-    ],
-  },
-  [SecurityPageName.ueba]: {
-    base: [],
-  },
-  [SecurityPageName.timelines]: {
-    base: [
-      {
-        id: 'timelineTemplates',
-        title: i18n.translate('xpack.securitySolution.search.timeline.templates', {
-          defaultMessage: 'Templates',
-        }),
-        path: `${TIMELINES_PATH}/template`,
-      },
-    ],
-  },
-  [SecurityPageName.case]: {
-    base: [
-      {
-        id: 'create',
-        title: i18n.translate('xpack.securitySolution.search.cases.create', {
-          defaultMessage: 'Create New Case',
-        }),
-        path: `${CASES_PATH}/create`,
-      },
-    ],
-    premium: [
-      {
-        id: 'configure',
-        title: i18n.translate('xpack.securitySolution.search.cases.configure', {
-          defaultMessage: 'Configure Cases',
-        }),
-        path: `${CASES_PATH}/configure`,
+        id: SecurityPageName.network,
+        title: NETWORK,
+        path: NETWORK_PATH,
+        navLinkStatus: AppNavLinkStatus.visible,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.network', {
+            defaultMessage: 'Network',
+          }),
+        ],
+        order: 9003,
+        deepLinks: [
+          {
+            id: SecurityPageName.dns,
+            title: i18n.translate('xpack.securitySolution.search.network.dns', {
+              defaultMessage: 'DNS',
+            }),
+            path: `${NETWORK_PATH}/dns`,
+          },
+          {
+            id: SecurityPageName.http,
+            title: i18n.translate('xpack.securitySolution.search.network.http', {
+              defaultMessage: 'HTTP',
+            }),
+            path: `${NETWORK_PATH}/http`,
+          },
+          {
+            id: SecurityPageName.tls,
+            title: i18n.translate('xpack.securitySolution.search.network.tls', {
+              defaultMessage: 'TLS',
+            }),
+            path: `${NETWORK_PATH}/tls`,
+          },
+          {
+            id: SecurityPageName.networkExternalAlerts,
+            title: i18n.translate('xpack.securitySolution.search.network.externalAlerts', {
+              defaultMessage: 'External Alerts',
+            }),
+            path: `${NETWORK_PATH}/external-alerts`,
+          },
+          {
+            id: SecurityPageName.networkAnomalies,
+            title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: `${NETWORK_PATH}/anomalies`,
+          },
+        ],
       },
     ],
   },
-  [SecurityPageName.administration]: {
-    base: [
+  {
+    id: SecurityPageName.ueba,
+    title: UEBA,
+    path: UEBA_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.ueba', {
+        defaultMessage: 'Users & Entities',
+      }),
+    ],
+    order: 9004,
+  },
+  {
+    id: SecurityPageName.investigate,
+    title: 'Investigate', // TODO: lang
+    navLinkStatus: AppNavLinkStatus.hidden,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.investigate', {
+        defaultMessage: 'Investigate',
+      }),
+    ],
+    deepLinks: [
+      {
+        id: SecurityPageName.timelines,
+        title: TIMELINES,
+        path: TIMELINES_PATH,
+        navLinkStatus: AppNavLinkStatus.visible,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.timelines', {
+            defaultMessage: 'Timelines',
+          }),
+        ],
+        order: 9005,
+        deepLinks: [
+          {
+            id: SecurityPageName.timelinesTemplates,
+            title: i18n.translate('xpack.securitySolution.search.timeline.templates', {
+              defaultMessage: 'Templates',
+            }),
+            path: `${TIMELINES_PATH}/template`,
+          },
+        ],
+      },
+      {
+        id: SecurityPageName.case,
+        title: CASE,
+        path: CASES_PATH,
+        navLinkStatus: AppNavLinkStatus.visible,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.cases', {
+            defaultMessage: 'Cases',
+          }),
+        ],
+        order: 9006,
+        deepLinks: [
+          {
+            id: SecurityPageName.caseCreate,
+            title: i18n.translate('xpack.securitySolution.search.cases.create', {
+              defaultMessage: 'Create New Case',
+            }),
+            path: `${CASES_PATH}/create`,
+          },
+          {
+            id: SecurityPageName.caseConfigure,
+            title: i18n.translate('xpack.securitySolution.search.cases.configure', {
+              defaultMessage: 'Configure Cases',
+            }),
+            path: `${CASES_PATH}/configure`,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: SecurityPageName.administration,
+    title: MANAGE,
+    path: ENDPOINTS_PATH,
+    navLinkStatus: AppNavLinkStatus.hidden,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.manage', {
+        defaultMessage: 'Manage',
+      }),
+    ],
+    deepLinks: [
       {
         id: SecurityPageName.endpoints,
         navLinkStatus: AppNavLinkStatus.visible,
@@ -330,7 +333,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
       },
     ],
   },
-};
+];
 
 /**
  * A function that generates the plugin deepLinks structure
@@ -344,42 +347,44 @@ export function getDeepLinks(
   licenseType?: LicenseType,
   capabilities?: ApplicationStart['capabilities']
 ): AppDeepLink[] {
-  return topDeepLinks
-    .filter(
-      (deepLink) =>
-        (deepLink.id !== SecurityPageName.case && deepLink.id !== SecurityPageName.ueba) || // is not cases or ueba
-        (deepLink.id === SecurityPageName.case &&
-          (capabilities == null || capabilities.siem.read_cases === true)) || // is cases with at least read only caps
-        (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled) // is ueba with ueba feature flag enabled
-    )
-    .map((deepLink) => {
-      const deepLinkId = deepLink.id as SecurityDeepLinkName;
-      const subPluginDeepLinks = nestedDeepLinks[deepLinkId];
-      const baseDeepLinks = Array.isArray(subPluginDeepLinks.base)
-        ? [...subPluginDeepLinks.base]
-        : [];
-      if (
-        deepLinkId === SecurityPageName.case &&
-        capabilities != null &&
-        capabilities.siem.crud_cases === false
-      ) {
-        return {
-          ...deepLink,
-          deepLinks: [],
-        };
-      }
+  const isPremium = isPremiumLicense(licenseType);
 
-      if (isPremiumLicense(licenseType) && subPluginDeepLinks?.premium) {
-        return {
-          ...deepLink,
-          deepLinks: [...baseDeepLinks, ...subPluginDeepLinks.premium],
-        };
-      }
-      return {
-        ...deepLink,
-        deepLinks: baseDeepLinks,
-      };
-    });
+  const filterDeepLinks = (deepLinks: AppDeepLink[]): AppDeepLink[] => {
+    return deepLinks
+      .filter((deepLink) => {
+        if (!isPremium && PREMIUM_DEEP_LINKS_IDS.includes(deepLink.id)) {
+          return false;
+        }
+        if (deepLink.id === SecurityPageName.case) {
+          return capabilities == null || capabilities.siem.read_cases === true;
+        }
+        if (deepLink.id === SecurityPageName.ueba) {
+          return enableExperimental.uebaEnabled;
+        }
+        return true;
+      })
+      .map((deepLink) => {
+        if (
+          deepLink.id === SecurityPageName.case &&
+          capabilities != null &&
+          capabilities.siem.crud_cases === false
+        ) {
+          return {
+            ...deepLink,
+            deepLinks: [],
+          };
+        }
+        if (deepLink.deepLinks) {
+          return {
+            ...deepLink,
+            deepLinks: filterDeepLinks(deepLink.deepLinks),
+          };
+        }
+        return deepLink;
+      });
+  };
+
+  return filterDeepLinks(securitySolutionsDeepLinks);
 }
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {
