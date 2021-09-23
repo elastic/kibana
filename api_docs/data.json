@@ -2716,19 +2716,19 @@
         "references": [
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "reporting",
@@ -2924,11 +2924,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "osquery",
@@ -3076,35 +3076,35 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/types.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/types.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
           },
           {
             "plugin": "discover",
@@ -4972,15 +4972,15 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
           },
           {
             "plugin": "inputControlVis",
@@ -5144,15 +5144,15 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "discover",
@@ -5176,15 +5176,15 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
           },
           {
             "plugin": "discover",
@@ -6581,27 +6581,27 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "discover",
@@ -6874,51 +6874,51 @@
         "references": [
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "maps",
@@ -6946,39 +6946,39 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/plugin.ts"
+            "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/plugin.ts"
+            "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "discover",
@@ -6990,27 +6990,27 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
           },
           {
             "plugin": "discover",
@@ -14937,11 +14937,11 @@
         "references": [
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           }
         ],
         "initialIsOpen": false
@@ -16879,11 +16879,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "securitySolution",
@@ -24265,35 +24265,35 @@
             },
             {
               "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_type_timeseries/public/application/lib/fetch_fields.ts"
+              "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
             },
             {
               "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
+              "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
             },
             {
               "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_type_timeseries/public/application/components/query_bar_wrapper.tsx"
+              "path": "src/plugins/vis_types/timeseries/public/application/components/query_bar_wrapper.tsx"
             },
             {
               "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_type_timeseries/public/application/components/annotation_row.tsx"
+              "path": "src/plugins/vis_types/timeseries/public/application/components/annotation_row.tsx"
             },
             {
               "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_type_timeseries/public/metrics_type.ts"
+              "path": "src/plugins/vis_types/timeseries/public/metrics_type.ts"
             },
             {
               "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+              "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
             },
             {
               "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_type_timeseries/public/application/components/timeseries_visualization.tsx"
+              "path": "src/plugins/vis_types/timeseries/public/application/components/timeseries_visualization.tsx"
             },
             {
               "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_type_timeseries/public/application/components/timeseries_visualization.tsx"
+              "path": "src/plugins/vis_types/timeseries/public/application/components/timeseries_visualization.tsx"
             },
             {
               "plugin": "visTypeVega",
@@ -24483,7 +24483,7 @@
             },
             {
               "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_type_timeseries/public/plugin.ts"
+              "path": "src/plugins/vis_types/timeseries/public/plugin.ts"
             },
             {
               "plugin": "visTypeMetric",
@@ -25018,19 +25018,19 @@
         "references": [
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "reporting",
@@ -25226,11 +25226,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "osquery",
@@ -25378,35 +25378,35 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/types.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/types.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
           },
           {
             "plugin": "discover",
@@ -27274,15 +27274,15 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
           },
           {
             "plugin": "inputControlVis",
@@ -27446,15 +27446,15 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "discover",
@@ -27478,15 +27478,15 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
           },
           {
             "plugin": "discover",
@@ -28883,27 +28883,27 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "discover",
@@ -29176,51 +29176,51 @@
         "references": [
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "maps",
@@ -29248,39 +29248,39 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/plugin.ts"
+            "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/plugin.ts"
+            "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "discover",
@@ -29292,27 +29292,27 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
           },
           {
             "plugin": "discover",
@@ -29373,51 +29373,51 @@
         "references": [
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/default_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
             "plugin": "maps",
@@ -29445,39 +29445,39 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/fields_fetcher.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/plugin.ts"
+            "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/plugin.ts"
+            "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.test.ts"
+            "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
           {
             "plugin": "discover",
@@ -29489,27 +29489,27 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/rollup_search_strategy.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/combo_box_select.tsx"
           },
           {
             "plugin": "discover",
@@ -30753,11 +30753,11 @@
         "references": [
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           }
         ],
         "initialIsOpen": false
@@ -32456,11 +32456,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "securitySolution",
@@ -37439,11 +37439,11 @@
         "references": [
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           }
         ],
         "initialIsOpen": false
@@ -39172,11 +39172,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "securitySolution",
