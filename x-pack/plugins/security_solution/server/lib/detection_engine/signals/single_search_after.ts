@@ -74,9 +74,11 @@ export const singleSearchAfter = async ({
         searchAfterQuery as estypes.SearchRequest
       );
     const end = performance.now();
+
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],
     });
+
     return {
       searchResult: nextSearchAfterResult,
       searchDuration: makeFloatString(end - start),

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+
 import { performance } from 'perf_hooks';
 import { countBy, isEmpty } from 'lodash';
 
@@ -64,11 +66,15 @@ export const bulkCreateFactory =
     );
 
     const createdItems = wrappedDocs
-      .map((doc, index) => ({
-        _id: response.body.items[index].index?._id ?? '',
-        _index: response.body.items[index].index?._index ?? '',
-        ...doc._source,
-      }))
+      .map((doc, index) => {
+        const responseIndex = response.body.items[index].index;
+        return {
+          _id: responseIndex?._id ?? '',
+          _index: responseIndex?._index ?? '',
+          [ALERT_INSTANCE_ID]: responseIndex?._id ?? '',
+          ...doc._source,
+        };
+      })
       .filter((_, index) => response.body.items[index].index?.status === 201);
     const createdItemsCount = createdItems.length;
 
