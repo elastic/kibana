@@ -82,7 +82,7 @@ function mapToCard(
     description: item.description,
     icons: !item.icons || !item.icons.length ? [] : item.icons,
     integration: 'integration' in item ? item.integration || '' : '',
-    name: item.name,
+    name: 'name' in item ? item.name || '' : '',
     title: item.title,
     version: 'version' in item ? item.version || '' : '',
     release: 'release' in item ? item.release : undefined,

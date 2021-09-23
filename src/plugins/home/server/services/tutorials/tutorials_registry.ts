@@ -29,7 +29,6 @@ function registerTutorialWithCustomIntegrations(
   ) as Category[];
 
   customIntegrations.registerCustomIntegration({
-    name: tutorial.name,
     id: tutorial.id,
     title: tutorial.name,
     categories: allowedCategories,

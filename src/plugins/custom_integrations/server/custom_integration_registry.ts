@@ -27,10 +27,10 @@ export class CustomIntegrationRegistry {
   registerCustomIntegration(customIntegration: CustomIntegration) {
     if (
       this._integrations.some((integration: CustomIntegration) => {
-        return integration.name === customIntegration.name;
+        return integration.id === customIntegration.id;
       })
     ) {
-      const message = `Integration with id=${customIntegration.name} already exists.`;
+      const message = `Integration with id=${customIntegration.id} already exists.`;
       if (this._isDev) {
         this._logger.error(message);
       } else {

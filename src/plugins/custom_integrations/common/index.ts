@@ -49,7 +49,6 @@ export type Category = keyof typeof CATEGORY_DISPLAY;
 export interface CustomIntegration {
   id: string;
   title: string;
-  name: string;
   description: string;
   type: 'ui_link';
   uiInternalPath: string;
