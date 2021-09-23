@@ -69,7 +69,7 @@ Review the following information about the 7.14.2 release.
 [[known-issue-v7.14.2]]
 === Known issue
 
-{kib} is unable to restore *Discover* search sessions with a relative time range. When you restore the *Discover* search session, then run a new searche, {kib} displays a `Your search session is still running` message. For more information, refer to {kibana-issue}101430[#101430].
+{kib} is unable to restore *Discover* search sessions with a relative time range. When you restore the *Discover* search session, then run a new search, {kib} displays a `Your search session is still running` message. For more information, refer to {kibana-issue}101430[#101430].
 
 [float]
 [[breaking-changes-v7.14.2]]
