@@ -219,7 +219,7 @@ export async function buildUnitedIndexQuery(
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext,
   ignoredAgentIds: string[] | undefined,
-  endpointPolicyIds: string[] | undefined
+  endpointPolicyIds: string[] = []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<Record<string, any>> {
   const pagingProperties = await getPagingProperties(request, endpointAppContext);
@@ -232,16 +232,25 @@ export async function buildUnitedIndexQuery(
           must_not: { terms: { 'agent.id': ignoredAgentIds } },
         }
       : null;
-  const filterEndpointPolicyAgents =
-    endpointPolicyIds && endpointPolicyIds.length
-      ? {
-          filter: [
-            {
-              terms: { 'united.agent.policy_id': endpointPolicyIds },
-            },
-          ],
-        }
-      : null;
+  const filterEndpointPolicyAgents = {
+    filter: [
+      // must contain an endpoint policy id
+      {
+        terms: { 'united.agent.policy_id': endpointPolicyIds },
+      },
+      // doc contains both agent and metadata
+      { exists: { field: 'united.endpoint.agent.id' } },
+      { exists: { field: 'united.agent.agent.id' } },
+      // agent is enrolled
+      {
+        term: {
+          'united.agent.active': {
+            value: true,
+          },
+        },
+      },
+    ],
+  };
 
   const idFilter = {
     bool: {
