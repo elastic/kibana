@@ -8,8 +8,9 @@
 import React, { useEffect, useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageHeader, EuiSpacer, EuiPageContent } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DocLinksStart } from 'kibana/public';
 
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
@@ -42,16 +43,30 @@ const i18nTexts = {
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'You must resolve all critical issues before upgrading. Back up recommended. Make sure you have a current snapshot before modifying your configuration or reindexing.',
+      'You must resolve all critical issues before upgrading. Back up recommended. Make sure you have a current snapshot before modifying your configuration or reindexing. ',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecation issues…',
   }),
 };
 
+const getBatchReindexLink = (docLinks: DocLinksStart) => {
+  return (
+    <EuiLink href={docLinks.links.upgradeAssistant.batchReindex} target="_blank" external={true}>
+      {i18n.translate('xpack.upgradeAssistant.esDeprecations.batchReindexingDocsLink', {
+        defaultMessage: 'Learn more about Kibana batch reindexing API.',
+      })}
+    </EuiLink>
+  );
+};
+
 export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   const {
-    services: { api, breadcrumbs },
+    services: {
+      api,
+      breadcrumbs,
+      core: { docLinks },
+    },
   } = useAppContext();
 
   const {
@@ -116,7 +131,15 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
 
   return (
     <div data-test-subj="esDeprecationsContent">
-      <EuiPageHeader pageTitle={i18nTexts.pageTitle} description={i18nTexts.pageDescription}>
+      <EuiPageHeader
+        pageTitle={i18nTexts.pageTitle}
+        description={
+          <>
+            {i18nTexts.pageDescription}
+            {getBatchReindexLink(docLinks)}
+          </>
+        }
+      >
         <DeprecationCount
           totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
           totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
