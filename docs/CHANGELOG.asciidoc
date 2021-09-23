@@ -68,6 +68,11 @@ Review important information about the {kib} 7.x releases.
 Review the following information about the 7.14.2 release.
 
 [float]
+[[known-issue-v7.14.2]]
+=== Known issue
+{kib} is unable to restore *Discover* search sessions with a relative time range. When you restore the *Discover* search session, then run a new search, {kib} displays a `Your search session is still running` message. For more information, refer to {kibana-issue}101430[#101430].
+
+[float]
 [[breaking-changes-v7.14.2]]
 === Breaking changes
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.14.2, review the <<breaking-changes-7.14.0,7.14.0 breaking changes>>.
