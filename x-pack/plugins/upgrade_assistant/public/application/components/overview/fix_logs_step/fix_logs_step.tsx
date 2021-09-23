@@ -75,7 +75,7 @@ const i18nTexts = {
   deniedPrivilegeTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeTitle',
     {
-      defaultMessage: `You're missing index privileges`,
+      defaultMessage: 'You require index privileges to analyze the deprecation logs',
     }
   ),
   deniedPrivilegeDescription: (privilegesMissing: MissingPrivileges) => (
@@ -84,7 +84,7 @@ const i18nTexts = {
     // is missing.
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription"
-      defaultMessage="To analyze deprecation logs, you need the read index {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
+      defaultMessage="The deprecation logs will continue to be indexed, but you won't be able to analyze them until you have the read index {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
       values={{
         missingPrivileges: (
           <EuiCode transparentBackground={true}>{privilegesMissing?.index?.join(', ')}</EuiCode>
