@@ -17,6 +17,8 @@ export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
 
 export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
 
+export const MAPPING_ERROR_ROUTE = '/mapping-error';
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',

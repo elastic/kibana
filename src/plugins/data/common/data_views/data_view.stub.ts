@@ -7,12 +7,15 @@
  */
 
 import { stubFieldSpecMap, stubLogstashFieldSpecMap } from './field.stub';
-import { createStubIndexPattern } from './data_views/index_pattern.stub';
-export { createStubIndexPattern } from './data_views/index_pattern.stub';
+import { createStubDataView } from './data_views/data_view.stub';
+export {
+  createStubDataView,
+  createStubDataView as createStubIndexPattern,
+} from './data_views/data_view.stub';
 import { SavedObject } from '../../../../core/types';
-import { IndexPatternAttributes } from '../types';
+import { DataViewAttributes } from '../types';
 
-export const stubIndexPattern = createStubIndexPattern({
+export const stubDataView = createStubDataView({
   spec: {
     id: 'logstash-*',
     fields: stubFieldSpecMap,
@@ -21,7 +24,9 @@ export const stubIndexPattern = createStubIndexPattern({
   },
 });
 
-export const stubIndexPatternWithoutTimeField = createStubIndexPattern({
+export const stubIndexPattern = stubDataView;
+
+export const stubDataViewWithoutTimeField = createStubDataView({
   spec: {
     id: 'logstash-*',
     fields: stubFieldSpecMap,
@@ -29,7 +34,9 @@ export const stubIndexPatternWithoutTimeField = createStubIndexPattern({
   },
 });
 
-export const stubLogstashIndexPattern = createStubIndexPattern({
+export const stubIndexPatternWithoutTimeField = stubDataViewWithoutTimeField;
+
+export const stubLogstashDataView = createStubDataView({
   spec: {
     id: 'logstash-*',
     title: 'logstash-*',
@@ -38,9 +45,11 @@ export const stubLogstashIndexPattern = createStubIndexPattern({
   },
 });
 
-export function stubbedSavedObjectIndexPattern(
+export const stubLogstashIndexPattern = stubLogstashDataView;
+
+export function stubbedSavedObjectDataView(
   id: string | null = null
-): SavedObject<IndexPatternAttributes> {
+): SavedObject<DataViewAttributes> {
   return {
     id: id ?? '',
     type: 'index-pattern',
@@ -53,3 +62,5 @@ export function stubbedSavedObjectIndexPattern(
     references: [],
   };
 }
+
+export const stubbedSavedObjectIndexPattern = stubbedSavedObjectDataView;
