@@ -13,7 +13,7 @@ import {
   ruleAssetType,
 } from './lib/detection_engine/rules/saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__type as __DO_NOT_USE__ruleActionsType } from './lib/detection_engine/rule_actions/do_not_use_saved_object_mappings';
+import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule_actions/legacy_saved_object_mappings';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
 import {
   exceptionsArtifactType,
@@ -23,7 +23,7 @@ import {
 const types = [
   noteType,
   pinnedEventType,
-  __DO_NOT_USE__ruleActionsType,
+  legacyRuleActionsType,
   ruleStatusType,
   ruleAssetType,
   timelineType,

@@ -7,12 +7,12 @@
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__createNotifications } from './do_not_use_create_notifications';
+import { legacyCreateNotifications } from './legacy_create_notifications';
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-describe('__DO_NOT_USE__createNotifications', () => {
+describe('legacyCreateNotifications', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe('__DO_NOT_USE__createNotifications', () => {
   it('calls the rulesClient with proper params', async () => {
     const ruleAlertId = 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 
-    await __DO_NOT_USE__createNotifications({
+    await legacyCreateNotifications({
       rulesClient,
       actions: [],
       ruleAlertId,
@@ -49,7 +49,7 @@ describe('__DO_NOT_USE__createNotifications', () => {
       params: { message: 'Rule generated {{state.signals_count}} signals' },
       actionTypeId: '.slack',
     };
-    await __DO_NOT_USE__createNotifications({
+    await legacyCreateNotifications({
       rulesClient,
       actions: [action],
       ruleAlertId: 'new-rule-id',

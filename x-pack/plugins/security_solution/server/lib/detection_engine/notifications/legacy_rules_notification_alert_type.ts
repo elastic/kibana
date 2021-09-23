@@ -10,12 +10,12 @@ import { schema } from '@kbn/config-schema';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
-  __DO_NOT_USE__NOTIFICATIONS_ID,
+  LEGACY_NOTIFICATIONS_ID,
   SERVER_APP_ID,
 } from '../../../../common/constants';
 
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__NotificationAlertTypeDefinition } from './do_not_use_types';
+import { LegacyNotificationAlertTypeDefinition } from './legacy_types';
 import { AlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
@@ -25,12 +25,12 @@ import { getSignals } from './get_signals';
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should also be removed
  */
-export const __DO_NOT_USE__rulesNotificationAlertType = ({
+export const legacyRulesNotificationAlertType = ({
   logger,
 }: {
   logger: Logger;
-}): __DO_NOT_USE__NotificationAlertTypeDefinition => ({
-  id: __DO_NOT_USE__NOTIFICATIONS_ID,
+}): LegacyNotificationAlertTypeDefinition => ({
+  id: LEGACY_NOTIFICATIONS_ID,
   name: 'SIEM notification',
   actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',

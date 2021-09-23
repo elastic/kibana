@@ -67,7 +67,7 @@ import {
   APP_ID,
   SERVER_APP_ID,
   SIGNALS_ID,
-  __DO_NOT_USE__NOTIFICATIONS_ID,
+  LEGACY_NOTIFICATIONS_ID,
   QUERY_RULE_TYPE_ID,
   DEFAULT_SPACE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -105,9 +105,9 @@ import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__rulesNotificationAlertType } from './lib/detection_engine/notifications/do_not_use_rules_notification_alert_type';
+import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__isNotificationAlertExecutor } from './lib/detection_engine/notifications/do_not_use_types';
+import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -300,7 +300,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     ];
     const ruleTypes = [
       SIGNALS_ID,
-      __DO_NOT_USE__NOTIFICATIONS_ID,
+      LEGACY_NOTIFICATIONS_ID,
       ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
@@ -319,7 +319,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         experimentalFeatures,
         ruleDataService: plugins.ruleRegistry.ruleDataService,
       });
-      const ruleNotificationType = __DO_NOT_USE__rulesNotificationAlertType({
+      const ruleNotificationType = legacyRulesNotificationAlertType({
         logger: this.logger,
       });
 
@@ -327,7 +327,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.setupPlugins.alerting.registerType(signalRuleType);
       }
 
-      if (__DO_NOT_USE__isNotificationAlertExecutor(ruleNotificationType)) {
+      if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
         this.setupPlugins.alerting.registerType(ruleNotificationType);
       }
     }

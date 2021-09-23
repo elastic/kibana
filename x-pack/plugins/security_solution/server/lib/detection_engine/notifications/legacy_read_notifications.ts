@@ -7,26 +7,23 @@
 
 import { AlertTypeParams, SanitizedAlert } from '../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
-import {
-  __DO_NOT_USE__ReadNotificationParams,
-  __DO_NOT_USE__isAlertType,
-} from './do_not_use_types';
+import { LegacyReadNotificationParams, legacyIsAlertType } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__findNotifications } from './do_not_use_find_notifications';
+import { legacyFindNotifications } from './legacy_find_notifications';
 import { INTERNAL_RULE_ALERT_ID_KEY } from '../../../../common/constants';
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__readNotifications = async ({
+export const legacyReadNotifications = async ({
   rulesClient,
   id,
   ruleAlertId,
-}: __DO_NOT_USE__ReadNotificationParams): Promise<SanitizedAlert<AlertTypeParams> | null> => {
+}: LegacyReadNotificationParams): Promise<SanitizedAlert<AlertTypeParams> | null> => {
   if (id != null) {
     try {
       const notification = await rulesClient.get({ id });
-      if (__DO_NOT_USE__isAlertType(notification)) {
+      if (legacyIsAlertType(notification)) {
         return notification;
       } else {
         return null;
@@ -40,14 +37,14 @@ export const __DO_NOT_USE__readNotifications = async ({
       }
     }
   } else if (ruleAlertId != null) {
-    const notificationFromFind = await __DO_NOT_USE__findNotifications({
+    const notificationFromFind = await legacyFindNotifications({
       rulesClient,
       filter: `alert.attributes.tags: "${INTERNAL_RULE_ALERT_ID_KEY}:${ruleAlertId}"`,
       page: 1,
     });
     if (
       notificationFromFind.data.length === 0 ||
-      !__DO_NOT_USE__isAlertType(notificationFromFind.data[0])
+      !legacyIsAlertType(notificationFromFind.data[0])
     ) {
       return null;
     } else {

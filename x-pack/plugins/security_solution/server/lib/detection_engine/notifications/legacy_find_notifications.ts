@@ -6,25 +6,25 @@
  */
 
 import { AlertTypeParams, FindResult } from '../../../../../alerting/server';
-import { __DO_NOT_USE__NOTIFICATIONS_ID } from '../../../../common/constants';
+import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__FindNotificationParams } from './do_not_use_types';
+import { LegacyFindNotificationParams } from './legacy_types';
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__getFilter = (filter: string | null | undefined) => {
+export const legacyGetFilter = (filter: string | null | undefined) => {
   if (filter == null) {
-    return `alert.attributes.alertTypeId: ${__DO_NOT_USE__NOTIFICATIONS_ID}`;
+    return `alert.attributes.alertTypeId: ${LEGACY_NOTIFICATIONS_ID}`;
   } else {
-    return `alert.attributes.alertTypeId: ${__DO_NOT_USE__NOTIFICATIONS_ID} AND ${filter}`;
+    return `alert.attributes.alertTypeId: ${LEGACY_NOTIFICATIONS_ID} AND ${filter}`;
   }
 };
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__findNotifications = async ({
+export const legacyFindNotifications = async ({
   rulesClient,
   perPage,
   page,
@@ -32,13 +32,13 @@ export const __DO_NOT_USE__findNotifications = async ({
   filter,
   sortField,
   sortOrder,
-}: __DO_NOT_USE__FindNotificationParams): Promise<FindResult<AlertTypeParams>> =>
+}: LegacyFindNotificationParams): Promise<FindResult<AlertTypeParams>> =>
   rulesClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: __DO_NOT_USE__getFilter(filter),
+      filter: legacyGetFilter(filter),
       sortOrder,
       sortField,
     },

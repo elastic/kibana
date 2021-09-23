@@ -8,17 +8,16 @@
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { AlertServices } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__ruleActionsSavedObjectType } from './do_not_use_saved_object_mappings';
+import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes } from './do_not_use_types';
+import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__getRuleActionsFromSavedObject } from './do_not_use_utils';
+import { legacyGetRuleActionsFromSavedObject } from './legacy_utils';
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-interface __DO_NOT_USE__GetRuleActionsSavedObject {
+interface LegacyGetRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: AlertServices['savedObjectsClient'];
 }
@@ -26,8 +25,7 @@ interface __DO_NOT_USE__GetRuleActionsSavedObject {
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export interface __DO_NOT_USE__RulesActionsSavedObject {
+export interface LegacyRulesActionsSavedObject {
   id: string;
   actions: RuleAlertAction[];
   alertThrottle: string | null;
@@ -37,15 +35,15 @@ export interface __DO_NOT_USE__RulesActionsSavedObject {
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__getRuleActionsSavedObject = async ({
+export const legacyGetRuleActionsSavedObject = async ({
   ruleAlertId,
   savedObjectsClient,
-}: __DO_NOT_USE__GetRuleActionsSavedObject): Promise<__DO_NOT_USE__RulesActionsSavedObject | null> => {
+}: LegacyGetRuleActionsSavedObject): Promise<LegacyRulesActionsSavedObject | null> => {
   const {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     saved_objects,
-  } = await savedObjectsClient.find<__DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes>({
-    type: __DO_NOT_USE__ruleActionsSavedObjectType,
+  } = await savedObjectsClient.find<LegacyIRuleActionsAttributesSavedObjectAttributes>({
+    type: legacyRuleActionsSavedObjectType,
     perPage: 1,
     search: `${ruleAlertId}`,
     searchFields: ['ruleAlertId'],
@@ -54,6 +52,6 @@ export const __DO_NOT_USE__getRuleActionsSavedObject = async ({
   if (!saved_objects[0]) {
     return null;
   } else {
-    return __DO_NOT_USE__getRuleActionsFromSavedObject(saved_objects[0]);
+    return legacyGetRuleActionsFromSavedObject(saved_objects[0]);
   }
 };

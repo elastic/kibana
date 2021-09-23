@@ -16,28 +16,24 @@ import {
   AlertExecutorOptions,
 } from '../../../../../alerting/server';
 import { Alert, AlertAction } from '../../../../../alerting/common';
-import { __DO_NOT_USE__NOTIFICATIONS_ID } from '../../../../common/constants';
+import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export interface __DO_NOT_USE__RuleNotificationAlertTypeParams extends AlertTypeParams {
+export interface LegacyRuleNotificationAlertTypeParams extends AlertTypeParams {
   ruleAlertId: string;
 }
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type __DO_NOT_USE__RuleNotificationAlertType =
-  Alert<__DO_NOT_USE__RuleNotificationAlertTypeParams>;
+export type LegacyRuleNotificationAlertType = Alert<LegacyRuleNotificationAlertTypeParams>;
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export interface __DO_NOT_USE__FindNotificationParams {
+export interface LegacyFindNotificationParams {
   rulesClient: RulesClient;
   perPage?: number;
   page?: number;
@@ -50,16 +46,14 @@ export interface __DO_NOT_USE__FindNotificationParams {
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export interface __DO_NOT_USE__Clients {
+export interface LegacyClients {
   rulesClient: RulesClient;
 }
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export interface __DO_NOT_USE__NotificationAlertParams {
+export interface LegacyNotificationAlertParams {
   actions: AlertAction[];
   enabled: boolean;
   ruleAlertId: string;
@@ -70,14 +64,12 @@ export interface __DO_NOT_USE__NotificationAlertParams {
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export type CreateNotificationParams = __DO_NOT_USE__NotificationAlertParams &
-  __DO_NOT_USE__Clients;
+export type CreateNotificationParams = LegacyNotificationAlertParams & LegacyClients;
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export interface __DO_NOT_USE__ReadNotificationParams {
+export interface LegacyReadNotificationParams {
   rulesClient: RulesClient;
   id?: string | null;
   ruleAlertId?: string | null;
@@ -86,18 +78,17 @@ export interface __DO_NOT_USE__ReadNotificationParams {
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__isAlertType = (
+export const legacyIsAlertType = (
   partialAlert: PartialAlert<AlertTypeParams>
-): partialAlert is __DO_NOT_USE__RuleNotificationAlertType => {
-  return partialAlert.alertTypeId === __DO_NOT_USE__NOTIFICATIONS_ID;
+): partialAlert is LegacyRuleNotificationAlertType => {
+  return partialAlert.alertTypeId === LEGACY_NOTIFICATIONS_ID;
 };
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type __DO_NOT_USE__NotificationExecutorOptions = AlertExecutorOptions<
-  __DO_NOT_USE__RuleNotificationAlertTypeParams,
+export type LegacyNotificationExecutorOptions = AlertExecutorOptions<
+  LegacyRuleNotificationAlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext
@@ -108,8 +99,8 @@ export type __DO_NOT_USE__NotificationExecutorOptions = AlertExecutorOptions<
  * since we are only increasing the strictness of params.
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__isNotificationAlertExecutor = (
-  obj: __DO_NOT_USE__NotificationAlertTypeDefinition
+export const legacyIsNotificationAlertExecutor = (
+  obj: LegacyNotificationAlertTypeDefinition
 ): obj is AlertType<
   AlertTypeParams,
   AlertTypeParams,
@@ -123,8 +114,7 @@ export const __DO_NOT_USE__isNotificationAlertExecutor = (
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type __DO_NOT_USE__NotificationAlertTypeDefinition = Omit<
+export type LegacyNotificationAlertTypeDefinition = Omit<
   AlertType<
     AlertTypeParams,
     AlertTypeParams,
@@ -139,5 +129,5 @@ export type __DO_NOT_USE__NotificationAlertTypeDefinition = Omit<
     services,
     params,
     state,
-  }: __DO_NOT_USE__NotificationExecutorOptions) => Promise<AlertTypeState | void>;
+  }: LegacyNotificationExecutorOptions) => Promise<AlertTypeState | void>;
 };

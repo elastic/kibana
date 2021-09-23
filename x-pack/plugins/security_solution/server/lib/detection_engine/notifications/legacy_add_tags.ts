@@ -10,5 +10,5 @@ import { INTERNAL_RULE_ALERT_ID_KEY } from '../../../../common/constants';
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__addTags = (tags: string[], ruleAlertId: string): string[] =>
+export const legacyAddTags = (tags: string[], ruleAlertId: string): string[] =>
   Array.from(new Set([...tags, `${INTERNAL_RULE_ALERT_ID_KEY}:${ruleAlertId}`]));

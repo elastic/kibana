@@ -8,15 +8,15 @@
 import { schema } from '@kbn/config-schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__updateOrCreateRuleActionsSavedObject } from '../../rule_actions/do_not_use_update_or_create_rule_actions_saved_object';
+import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../rule_actions/legacy_update_or_create_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__readNotifications } from '../../notifications/do_not_use_read_notifications';
+import { legacyReadNotifications } from '../../notifications/legacy_read_notifications';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__RuleNotificationAlertTypeParams } from '../../notifications/do_not_use_types';
+import { LegacyRuleNotificationAlertTypeParams } from '../../notifications/legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__addTags } from '../../notifications/do_not_use_add_tags';
+import { legacyAddTags } from '../../notifications/legacy_add_tags';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__createNotifications } from '../../notifications/do_not_use_create_notifications';
+import { legacyCreateNotifications } from '../../notifications/legacy_create_notifications';
 
 /**
  * Given an "alert_id" and a valid "action_id" this will create a legacy notification. This is for testing
@@ -25,12 +25,10 @@ import { __DO_NOT_USE__createNotifications } from '../../notifications/do_not_us
  * @deprecated Once we no longer have legacy notifications and "side car actions" this can be removed.
  * @param router The router
  */
-export const __DO_NOT_USE__createLegacyNotificationRoute = (
-  router: SecuritySolutionPluginRouter
-): void => {
+export const legacyCreateLegacyNotificationRoute = (router: SecuritySolutionPluginRouter): void => {
   router.post(
     {
-      path: '/internal/api/detection/do_not_use/notifications',
+      path: '/internal/api/detection/legacy/notifications',
       validate: {
         query: schema.object({ alert_id: schema.string() }),
         body: schema.object({
@@ -60,16 +58,16 @@ export const __DO_NOT_USE__createLegacyNotificationRoute = (
       try {
         // This is to ensure it exists before continuing.
         await rulesClient.get({ id: ruleAlertId });
-        const notification = await __DO_NOT_USE__readNotifications({
+        const notification = await legacyReadNotifications({
           rulesClient,
           id: undefined,
           ruleAlertId,
         });
         if (notification != null) {
-          await rulesClient.update<__DO_NOT_USE__RuleNotificationAlertTypeParams>({
+          await rulesClient.update<LegacyRuleNotificationAlertTypeParams>({
             id: notification.id,
             data: {
-              tags: __DO_NOT_USE__addTags([], ruleAlertId),
+              tags: legacyAddTags([], ruleAlertId),
               name,
               schedule: {
                 interval,
@@ -83,7 +81,7 @@ export const __DO_NOT_USE__createLegacyNotificationRoute = (
             },
           });
         } else {
-          await __DO_NOT_USE__createNotifications({
+          await legacyCreateNotifications({
             rulesClient,
             actions: [],
             enabled: true,
@@ -92,7 +90,7 @@ export const __DO_NOT_USE__createLegacyNotificationRoute = (
             name,
           });
         }
-        await __DO_NOT_USE__updateOrCreateRuleActionsSavedObject({
+        await legacyUpdateOrCreateRuleActionsSavedObject({
           ruleAlertId,
           savedObjectsClient,
           actions,

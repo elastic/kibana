@@ -18,7 +18,7 @@ import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__getBulkRuleActionsSavedObject } from '../../rule_actions/do_not_use_get_bulk_rule_actions_saved_object';
+import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -71,7 +71,7 @@ export const findRulesRoute = (
             logsCount: 1,
             spaceId: context.securitySolution.getSpaceId(),
           }),
-          __DO_NOT_USE__getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
+          legacyGetBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
         const transformed = transformFindAlerts(rules, ruleStatuses, ruleActions);
         if (transformed == null) {

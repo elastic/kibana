@@ -20,7 +20,7 @@ import { buildSiemResponse } from '../utils';
 import { readRules } from '../../rules/read_rules';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__getRuleActionsSavedObject } from '../../rule_actions/do_not_use_get_rule_actions_saved_object';
+import { legacyGetRuleActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -63,7 +63,7 @@ export const readRulesRoute = (
           ruleId,
         });
         if (rule != null) {
-          const legacyRuleActions = await __DO_NOT_USE__getRuleActionsSavedObject({
+          const legacyRuleActions = await legacyGetRuleActionsSavedObject({
             savedObjectsClient,
             ruleAlertId: rule.id,
           });

@@ -21,5 +21,5 @@ curl -s -k \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X POST ${KIBANA_URL}${SPACE_URL}/internal/api/detection/do_not_use/notifications?alert_id="$1" \
+ -X POST ${KIBANA_URL}${SPACE_URL}/internal/api/detection/legacy/notifications?alert_id="$1" \
   -d @${NOTIFICATIONS} | jq .

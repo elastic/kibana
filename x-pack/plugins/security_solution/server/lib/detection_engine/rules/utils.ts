@@ -62,7 +62,7 @@ import {
 } from '../../../../common/constants';
 import { RulesClient } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__RuleActions } from '../rule_actions/do_not_use_types';
+import { LegacyRuleActions } from '../rule_actions/legacy_types';
 import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 
 export const calculateInterval = (
@@ -227,7 +227,7 @@ export const transformToAlertThrottle = (throttle: string | null | undefined): s
  */
 export const transformActions = (
   alertAction: AlertAction[] | undefined,
-  legacyRuleActions: __DO_NOT_USE__RuleActions | null | undefined
+  legacyRuleActions: LegacyRuleActions | null | undefined
 ): FullResponseSchema['actions'] => {
   if (alertAction != null && alertAction.length !== 0) {
     return alertAction.map((action) => ({
@@ -254,7 +254,7 @@ export const transformActions = (
  */
 export const transformFromAlertThrottle = (
   rule: SanitizedAlert<RuleParams>,
-  legacyRuleActions: __DO_NOT_USE__RuleActions | null | undefined
+  legacyRuleActions: LegacyRuleActions | null | undefined
 ): string => {
   if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
     if (rule.muteAll || rule.actions.length === 0) {

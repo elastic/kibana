@@ -7,7 +7,7 @@
 
 import { SavedObjectsType } from '../../../../../../../src/core/server';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__ruleActionsSavedObjectMigration } from './do_not_use_migrations';
+import { legacyRuleActionsSavedObjectMigration } from './legacy_migrations';
 
 /**
  * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
@@ -15,7 +15,7 @@ import { __DO_NOT_USE__ruleActionsSavedObjectMigration } from './do_not_use_migr
  * needed then it will be safe to remove this saved object and all its migrations.
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__ruleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
+export const legacyRuleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
 
 /**
  * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
@@ -23,7 +23,7 @@ export const __DO_NOT_USE__ruleActionsSavedObjectType = 'siem-detection-engine-r
  * needed then it will be safe to remove this saved object and all its migrations.
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-const __DO_NOT_USE__ruleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
+const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
     alertThrottle: {
       type: 'keyword',
@@ -60,10 +60,10 @@ const __DO_NOT_USE__ruleActionsSavedObjectMappings: SavedObjectsType['mappings']
  * needed then it will be safe to remove this saved object and all its migrations.
  * @deprecated Remove this once we no longer need legacy migrations for rule actions (8.0.0)
  */
-export const __DO_NOT_USE__type: SavedObjectsType = {
-  name: __DO_NOT_USE__ruleActionsSavedObjectType,
+export const legacyType: SavedObjectsType = {
+  name: legacyRuleActionsSavedObjectType,
   hidden: false,
   namespaceType: 'single',
-  mappings: __DO_NOT_USE__ruleActionsSavedObjectMappings,
-  migrations: __DO_NOT_USE__ruleActionsSavedObjectMigration,
+  mappings: legacyRuleActionsSavedObjectMappings,
+  migrations: legacyRuleActionsSavedObjectMigration,
 };

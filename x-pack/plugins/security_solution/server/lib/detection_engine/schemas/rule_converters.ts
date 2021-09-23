@@ -39,7 +39,7 @@ import {
 } from '../rules/utils';
 import { ruleTypeMappings } from '../signals/utils';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__RuleActions } from '../rule_actions/do_not_use_types';
+import { LegacyRuleActions } from '../rule_actions/legacy_types';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -283,7 +283,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 export const internalRuleToAPIResponse = (
   rule: SanitizedAlert<RuleParams>,
   ruleStatus?: IRuleStatusSOAttributes,
-  legacyRuleActions?: __DO_NOT_USE__RuleActions | null
+  legacyRuleActions?: LegacyRuleActions | null
 ): FullResponseSchema => {
   const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
   return {

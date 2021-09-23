@@ -27,13 +27,13 @@ import { createBulkErrorObject, BulkError } from '../utils';
 import { transform, transformAlertToRule } from './utils';
 import { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__RulesActionsSavedObject } from '../../rule_actions/do_not_use_get_rule_actions_saved_object';
+import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 export const transformValidate = (
   alert: PartialAlert<RuleParams>,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
   isRuleRegistryEnabled?: boolean,
-  legacyRuleActions?: __DO_NOT_USE__RulesActionsSavedObject | null
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [RulesSchema | null, string | null] => {
   const transformed = transform(alert, ruleStatus, isRuleRegistryEnabled, legacyRuleActions);
   if (transformed == null) {
@@ -47,7 +47,7 @@ export const newTransformValidate = (
   alert: PartialAlert<RuleParams>,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
   isRuleRegistryEnabled?: boolean,
-  legacyRuleActions?: __DO_NOT_USE__RulesActionsSavedObject | null
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [FullResponseSchema | null, string | null] => {
   const transformed = transform(alert, ruleStatus, isRuleRegistryEnabled, legacyRuleActions);
   if (transformed == null) {

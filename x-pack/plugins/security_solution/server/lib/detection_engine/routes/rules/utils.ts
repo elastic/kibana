@@ -26,7 +26,7 @@ import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert } from '../../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__RulesActionsSavedObject } from '../../rule_actions/do_not_use_get_rule_actions_saved_object';
+import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -98,7 +98,7 @@ export const transformTags = (tags: string[]): string[] => {
 export const transformAlertToRule = (
   alert: SanitizedAlert<RuleParams>,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
-  legacyRuleActions?: __DO_NOT_USE__RulesActionsSavedObject | null
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> => {
   return internalRuleToAPIResponse(alert, ruleStatus?.attributes, legacyRuleActions);
 };
@@ -110,7 +110,7 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
 export const transformFindAlerts = (
   findResults: FindResult<RuleParams>,
   ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined },
-  legacyRuleActions: Record<string, __DO_NOT_USE__RulesActionsSavedObject | undefined>
+  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
 ): {
   page: number;
   perPage: number;
@@ -133,7 +133,7 @@ export const transform = (
   alert: PartialAlert<RuleParams>,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
   isRuleRegistryEnabled?: boolean,
-  legacyRuleActions?: __DO_NOT_USE__RulesActionsSavedObject | null
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
   if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     return transformAlertToRule(

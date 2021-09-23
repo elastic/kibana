@@ -8,12 +8,12 @@
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes } from './do_not_use_types';
+import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__getThrottleOptions = (
+export const legacyGetThrottleOptions = (
   throttle: string | undefined | null = 'no_actions'
 ): {
   ruleThrottle: string;
@@ -26,8 +26,8 @@ export const __DO_NOT_USE__getThrottleOptions = (
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__getRuleActionsFromSavedObject = (
-  savedObject: SavedObjectsUpdateResponse<__DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes>
+export const legacyGetRuleActionsFromSavedObject = (
+  savedObject: SavedObjectsUpdateResponse<LegacyIRuleActionsAttributesSavedObjectAttributes>
 ): {
   id: string;
   actions: RuleAlertAction[];

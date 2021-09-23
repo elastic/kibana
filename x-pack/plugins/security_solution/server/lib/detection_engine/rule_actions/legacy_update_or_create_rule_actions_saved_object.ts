@@ -8,19 +8,18 @@
 import { AlertAction } from '../../../../../alerting/common';
 import { AlertServices } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__getRuleActionsSavedObject } from './do_not_use_get_rule_actions_saved_object';
+import { legacyGetRuleActionsSavedObject } from './legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__createRuleActionsSavedObject } from './do_not_use_create_rule_actions_saved_object';
+import { legacyCreateRuleActionsSavedObject } from './legacy_create_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__updateRuleActionsSavedObject } from './do_not_use_update_rule_actions_saved_object';
+import { legacyUpdateRuleActionsSavedObject } from './legacy_update_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__RuleActions } from './do_not_use_types';
+import { LegacyRuleActions } from './legacy_types';
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-interface __DO_NOT_USE__UpdateOrCreateRuleActionsSavedObject {
+interface LegacyUpdateOrCreateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: AlertServices['savedObjectsClient'];
   actions: AlertAction[] | undefined;
@@ -30,19 +29,19 @@ interface __DO_NOT_USE__UpdateOrCreateRuleActionsSavedObject {
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__updateOrCreateRuleActionsSavedObject = async ({
+export const legacyUpdateOrCreateRuleActionsSavedObject = async ({
   savedObjectsClient,
   ruleAlertId,
   actions,
   throttle,
-}: __DO_NOT_USE__UpdateOrCreateRuleActionsSavedObject): Promise<__DO_NOT_USE__RuleActions> => {
-  const ruleActions = await __DO_NOT_USE__getRuleActionsSavedObject({
+}: LegacyUpdateOrCreateRuleActionsSavedObject): Promise<LegacyRuleActions> => {
+  const ruleActions = await legacyGetRuleActionsSavedObject({
     ruleAlertId,
     savedObjectsClient,
   });
 
   if (ruleActions != null) {
-    return __DO_NOT_USE__updateRuleActionsSavedObject({
+    return legacyUpdateRuleActionsSavedObject({
       ruleAlertId,
       savedObjectsClient,
       actions,
@@ -50,7 +49,7 @@ export const __DO_NOT_USE__updateOrCreateRuleActionsSavedObject = async ({
       ruleActions,
     });
   } else {
-    return __DO_NOT_USE__createRuleActionsSavedObject({
+    return legacyCreateRuleActionsSavedObject({
       ruleAlertId,
       savedObjectsClient,
       actions,

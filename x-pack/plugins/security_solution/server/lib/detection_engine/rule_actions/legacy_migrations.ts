@@ -12,7 +12,7 @@ import {
   SavedObjectAttributes,
 } from '../../../../../../../src/core/server';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes } from './do_not_use_types';
+import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 
 /**
  * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
@@ -35,10 +35,10 @@ function isEmptyObject(obj: {}) {
  * needed then it will be safe to remove this saved object and all its migrations
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__ruleActionsSavedObjectMigration = {
+export const legacyRuleActionsSavedObjectMigration = {
   '7.11.2': (
-    doc: SavedObjectUnsanitizedDoc<__DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes>
-  ): SavedObjectSanitizedDoc<__DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes> => {
+    doc: SavedObjectUnsanitizedDoc<LegacyIRuleActionsAttributesSavedObjectAttributes>
+  ): SavedObjectSanitizedDoc<LegacyIRuleActionsAttributesSavedObjectAttributes> => {
     const { actions } = doc.attributes;
     const newActions = actions.reduce((acc, action) => {
       if (

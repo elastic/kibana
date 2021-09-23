@@ -7,40 +7,39 @@
 
 import { AlertServices } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__ruleActionsSavedObjectType } from './do_not_use_saved_object_mappings';
+import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__RulesActionsSavedObject } from './do_not_use_get_rule_actions_saved_object';
+import { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__getThrottleOptions } from './do_not_use_utils';
+import { legacyGetThrottleOptions } from './legacy_utils';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes } from './do_not_use_types';
+import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 import { AlertAction } from '../../../../../alerting/common';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-interface __DO_NOT_USE__UpdateRuleActionsSavedObject {
+interface LegacyUpdateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: AlertServices['savedObjectsClient'];
   actions: AlertAction[] | undefined;
   throttle: string | null | undefined;
-  ruleActions: __DO_NOT_USE__RulesActionsSavedObject;
+  ruleActions: LegacyRulesActionsSavedObject;
 }
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__updateRuleActionsSavedObject = async ({
+export const legacyUpdateRuleActionsSavedObject = async ({
   ruleAlertId,
   savedObjectsClient,
   actions,
   throttle,
   ruleActions,
-}: __DO_NOT_USE__UpdateRuleActionsSavedObject): Promise<__DO_NOT_USE__RulesActionsSavedObject> => {
+}: LegacyUpdateRuleActionsSavedObject): Promise<LegacyRulesActionsSavedObject> => {
   const throttleOptions = throttle
-    ? __DO_NOT_USE__getThrottleOptions(throttle)
+    ? legacyGetThrottleOptions(throttle)
     : {
         ruleThrottle: ruleActions.ruleThrottle,
         alertThrottle: ruleActions.alertThrottle,
@@ -54,8 +53,8 @@ export const __DO_NOT_USE__updateRuleActionsSavedObject = async ({
     ...throttleOptions,
   };
 
-  await savedObjectsClient.update<__DO_NOT_USE__IRuleActionsAttributesSavedObjectAttributes>(
-    __DO_NOT_USE__ruleActionsSavedObjectType,
+  await savedObjectsClient.update<LegacyIRuleActionsAttributesSavedObjectAttributes>(
+    legacyRuleActionsSavedObjectType,
     ruleActions.id,
     {
       ruleAlertId,

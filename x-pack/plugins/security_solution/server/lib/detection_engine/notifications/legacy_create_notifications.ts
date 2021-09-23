@@ -6,33 +6,28 @@
  */
 
 import { SanitizedAlert } from '../../../../../alerting/common';
-import { SERVER_APP_ID, __DO_NOT_USE__NOTIFICATIONS_ID } from '../../../../common/constants';
+import { SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
-import {
-  CreateNotificationParams,
-  __DO_NOT_USE__RuleNotificationAlertTypeParams,
-} from './do_not_use_types';
+import { CreateNotificationParams, LegacyRuleNotificationAlertTypeParams } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__addTags } from './do_not_use_add_tags';
+import { legacyAddTags } from './legacy_add_tags';
 
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__createNotifications = async ({
+export const legacyCreateNotifications = async ({
   rulesClient,
   actions,
   enabled,
   ruleAlertId,
   interval,
   name,
-}: CreateNotificationParams): Promise<
-  SanitizedAlert<__DO_NOT_USE__RuleNotificationAlertTypeParams>
-> =>
-  rulesClient.create<__DO_NOT_USE__RuleNotificationAlertTypeParams>({
+}: CreateNotificationParams): Promise<SanitizedAlert<LegacyRuleNotificationAlertTypeParams>> =>
+  rulesClient.create<LegacyRuleNotificationAlertTypeParams>({
     data: {
       name,
-      tags: __DO_NOT_USE__addTags([], ruleAlertId),
-      alertTypeId: __DO_NOT_USE__NOTIFICATIONS_ID,
+      tags: legacyAddTags([], ruleAlertId),
+      alertTypeId: LEGACY_NOTIFICATIONS_ID,
       consumer: SERVER_APP_ID,
       params: {
         ruleAlertId,

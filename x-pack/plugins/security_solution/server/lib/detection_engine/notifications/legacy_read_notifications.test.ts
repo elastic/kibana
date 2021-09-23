@@ -6,15 +6,14 @@
  */
 
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__readNotifications } from './do_not_use_read_notifications';
+import { legacyReadNotifications } from './legacy_read_notifications';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import {
-  __DO_NOT_USE__getNotificationResult,
-  __DO_NOT_USE__getFindNotificationsResultWithSingleHit,
+  legacyGetNotificationResult,
+  legacyGetFindNotificationsResultWithSingleHit,
 } from '../routes/__mocks__/request_responses';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-class __DO_NOT_USE__TestError extends Error {
+class LegacyTestError extends Error {
   constructor() {
     super();
 
@@ -24,7 +23,7 @@ class __DO_NOT_USE__TestError extends Error {
   public output: { statusCode: number };
 }
 
-describe('__DO_NOT_USE__read_notifications', () => {
+describe('legacyRead_notifications', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
   beforeEach(() => {
@@ -33,22 +32,22 @@ describe('__DO_NOT_USE__read_notifications', () => {
 
   describe('readNotifications', () => {
     test('should return the output from rulesClient if id is set but ruleAlertId is undefined', async () => {
-      rulesClient.get.mockResolvedValue(__DO_NOT_USE__getNotificationResult());
+      rulesClient.get.mockResolvedValue(legacyGetNotificationResult());
 
-      const rule = await __DO_NOT_USE__readNotifications({
+      const rule = await legacyReadNotifications({
         rulesClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleAlertId: undefined,
       });
-      expect(rule).toEqual(__DO_NOT_USE__getNotificationResult());
+      expect(rule).toEqual(legacyGetNotificationResult());
     });
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
-      const result = __DO_NOT_USE__getNotificationResult();
+      const result = legacyGetNotificationResult();
       // @ts-expect-error
       delete result.alertTypeId;
       rulesClient.get.mockResolvedValue(result);
 
-      const rule = await __DO_NOT_USE__readNotifications({
+      const rule = await legacyReadNotifications({
         rulesClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleAlertId: undefined,
@@ -58,10 +57,10 @@ describe('__DO_NOT_USE__read_notifications', () => {
 
     test('should return error if alerts client throws 404 error on get', async () => {
       rulesClient.get.mockImplementation(() => {
-        throw new __DO_NOT_USE__TestError();
+        throw new LegacyTestError();
       });
 
-      const rule = await __DO_NOT_USE__readNotifications({
+      const rule = await legacyReadNotifications({
         rulesClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleAlertId: undefined,
@@ -74,7 +73,7 @@ describe('__DO_NOT_USE__read_notifications', () => {
         throw new Error('Test error');
       });
       try {
-        await __DO_NOT_USE__readNotifications({
+        await legacyReadNotifications({
           rulesClient,
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           ruleAlertId: undefined,
@@ -85,33 +84,33 @@ describe('__DO_NOT_USE__read_notifications', () => {
     });
 
     test('should return the output from rulesClient if id is set but ruleAlertId is null', async () => {
-      rulesClient.get.mockResolvedValue(__DO_NOT_USE__getNotificationResult());
+      rulesClient.get.mockResolvedValue(legacyGetNotificationResult());
 
-      const rule = await __DO_NOT_USE__readNotifications({
+      const rule = await legacyReadNotifications({
         rulesClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleAlertId: null,
       });
-      expect(rule).toEqual(__DO_NOT_USE__getNotificationResult());
+      expect(rule).toEqual(legacyGetNotificationResult());
     });
 
     test('should return the output from rulesClient if id is undefined but ruleAlertId is set', async () => {
-      rulesClient.get.mockResolvedValue(__DO_NOT_USE__getNotificationResult());
-      rulesClient.find.mockResolvedValue(__DO_NOT_USE__getFindNotificationsResultWithSingleHit());
+      rulesClient.get.mockResolvedValue(legacyGetNotificationResult());
+      rulesClient.find.mockResolvedValue(legacyGetFindNotificationsResultWithSingleHit());
 
-      const rule = await __DO_NOT_USE__readNotifications({
+      const rule = await legacyReadNotifications({
         rulesClient,
         id: undefined,
         ruleAlertId: 'rule-1',
       });
-      expect(rule).toEqual(__DO_NOT_USE__getNotificationResult());
+      expect(rule).toEqual(legacyGetNotificationResult());
     });
 
     test('should return null if the output from rulesClient with ruleAlertId set is empty', async () => {
-      rulesClient.get.mockResolvedValue(__DO_NOT_USE__getNotificationResult());
+      rulesClient.get.mockResolvedValue(legacyGetNotificationResult());
       rulesClient.find.mockResolvedValue({ data: [], page: 0, perPage: 1, total: 0 });
 
-      const rule = await __DO_NOT_USE__readNotifications({
+      const rule = await legacyReadNotifications({
         rulesClient,
         id: undefined,
         ruleAlertId: 'rule-1',
@@ -120,22 +119,22 @@ describe('__DO_NOT_USE__read_notifications', () => {
     });
 
     test('should return the output from rulesClient if id is null but ruleAlertId is set', async () => {
-      rulesClient.get.mockResolvedValue(__DO_NOT_USE__getNotificationResult());
-      rulesClient.find.mockResolvedValue(__DO_NOT_USE__getFindNotificationsResultWithSingleHit());
+      rulesClient.get.mockResolvedValue(legacyGetNotificationResult());
+      rulesClient.find.mockResolvedValue(legacyGetFindNotificationsResultWithSingleHit());
 
-      const rule = await __DO_NOT_USE__readNotifications({
+      const rule = await legacyReadNotifications({
         rulesClient,
         id: null,
         ruleAlertId: 'rule-1',
       });
-      expect(rule).toEqual(__DO_NOT_USE__getNotificationResult());
+      expect(rule).toEqual(legacyGetNotificationResult());
     });
 
     test('should return null if id and ruleAlertId are null', async () => {
-      rulesClient.get.mockResolvedValue(__DO_NOT_USE__getNotificationResult());
-      rulesClient.find.mockResolvedValue(__DO_NOT_USE__getFindNotificationsResultWithSingleHit());
+      rulesClient.get.mockResolvedValue(legacyGetNotificationResult());
+      rulesClient.find.mockResolvedValue(legacyGetFindNotificationsResultWithSingleHit());
 
-      const rule = await __DO_NOT_USE__readNotifications({
+      const rule = await legacyReadNotifications({
         rulesClient,
         id: null,
         ruleAlertId: null,
@@ -144,10 +143,10 @@ describe('__DO_NOT_USE__read_notifications', () => {
     });
 
     test('should return null if id and ruleAlertId are undefined', async () => {
-      rulesClient.get.mockResolvedValue(__DO_NOT_USE__getNotificationResult());
-      rulesClient.find.mockResolvedValue(__DO_NOT_USE__getFindNotificationsResultWithSingleHit());
+      rulesClient.get.mockResolvedValue(legacyGetNotificationResult());
+      rulesClient.find.mockResolvedValue(legacyGetFindNotificationsResultWithSingleHit());
 
-      const rule = await __DO_NOT_USE__readNotifications({
+      const rule = await legacyReadNotifications({
         rulesClient,
         id: undefined,
         ruleAlertId: undefined,

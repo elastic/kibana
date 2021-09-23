@@ -8,11 +8,11 @@
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__rulesNotificationAlertType } from './do_not_use_rules_notification_alert_type';
+import { legacyRulesNotificationAlertType } from './legacy_rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__NotificationExecutorOptions } from './do_not_use_types';
+import { LegacyNotificationExecutorOptions } from './legacy_types';
 import {
   sampleDocSearchResultsNoSortIdNoVersion,
   sampleDocSearchResultsWithSortId,
@@ -27,9 +27,9 @@ jest.mock('./build_signals_query');
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-describe('__DO_NOT_USE__rules_notification_alert_type', () => {
-  let payload: __DO_NOT_USE__NotificationExecutorOptions;
-  let alert: ReturnType<typeof __DO_NOT_USE__rulesNotificationAlertType>;
+describe('legacyRules_notification_alert_type', () => {
+  let payload: LegacyNotificationExecutorOptions;
+  let alert: ReturnType<typeof legacyRulesNotificationAlertType>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
 
@@ -70,7 +70,7 @@ describe('__DO_NOT_USE__rules_notification_alert_type', () => {
       },
     };
 
-    alert = __DO_NOT_USE__rulesNotificationAlertType({
+    alert = legacyRulesNotificationAlertType({
       logger,
     });
   });

@@ -41,7 +41,7 @@ import { RuleExecutionStatus } from '../../../../../common/detection_engine/sche
 import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
 import { ruleTypeMappings } from '../../signals/utils';
 // eslint-disable-next-line no-restricted-imports
-import { __DO_NOT_USE__RuleNotificationAlertType } from '../../notifications/do_not_use_types';
+import type { LegacyRuleNotificationAlertType } from '../../notifications/legacy_types';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -599,7 +599,7 @@ export const getSignalsMigrationStatusRequest = () =>
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__getNotificationResult = (): __DO_NOT_USE__RuleNotificationAlertType => ({
+export const legacyGetNotificationResult = (): LegacyRuleNotificationAlertType => ({
   id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
   name: 'Notification for Rule Test',
   tags: ['__internal_rule_alert_id:85b64e8a-2e40-4096-86af-5ac172c10825'],
@@ -643,10 +643,10 @@ export const __DO_NOT_USE__getNotificationResult = (): __DO_NOT_USE__RuleNotific
 /**
  * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
  */
-export const __DO_NOT_USE__getFindNotificationsResultWithSingleHit =
-  (): FindHit<__DO_NOT_USE__RuleNotificationAlertType> => ({
+export const legacyGetFindNotificationsResultWithSingleHit =
+  (): FindHit<LegacyRuleNotificationAlertType> => ({
     page: 1,
     perPage: 1,
     total: 1,
-    data: [__DO_NOT_USE__getNotificationResult()],
+    data: [legacyGetNotificationResult()],
   });
