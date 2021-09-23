@@ -116,8 +116,93 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return this.props.objectId === undefined || this.props.objectId === '';
   };
 
+  private setShowCopyButton() {
+    this.setState({
+      showCopyButtonWithUnsavedChanges: true,
+    });
+  }
+
+  private shouldShowCopyButton({
+    isUnsaved,
+    exceedsMaxLength,
+  }: {
+    isUnsaved: boolean;
+    exceedsMaxLength: boolean;
+  }): boolean {
+    if (exceedsMaxLength) {
+      return false;
+    }
+    return !isUnsaved || (isUnsaved && this.state.showCopyButtonWithUnsavedChanges);
+  }
+
+  private renderWarningText({
+    isUnsaved,
+    exceedsMaxLength,
+  }: {
+    isUnsaved: boolean;
+    exceedsMaxLength: boolean;
+  }) {
+    if (isUnsaved) {
+      if (exceedsMaxLength) {
+        return (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="danger">
+              <p>
+                <FormattedMessage
+                  id="xpack.reporting.panelContent.unsavedStateAndExceedsMaxLength"
+                  defaultMessage="This URL is too long and cannot be copied. Try saving your work."
+                />
+              </p>
+            </EuiText>
+          </>
+        );
+      }
+
+      return (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="warning">
+            <p>
+              <FormattedMessage
+                id="xpack.reporting.panelContent.unsavedStateWarningText"
+                defaultMessage="It is recommended to save your work before copying this URL."
+              />{' '}
+              <EuiLink
+                onClick={() => this.setShowCopyButton()}
+                color={this.state.showCopyButtonWithUnsavedChanges ? 'subdued' : 'warning'}
+              >
+                <FormattedMessage
+                  id="xpack.reporting.panelContent.checkbox.showCopyURLAnywayButtonLabel"
+                  defaultMessage="Proceed anyway."
+                />
+              </EuiLink>
+            </p>
+          </EuiText>
+        </>
+      );
+    } else if (exceedsMaxLength) {
+      return (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="danger">
+            <p>
+              <FormattedMessage
+                id="xpack.reporting.panelContent.unsavedStateAndExceedsMaxLength"
+                defaultMessage="This URL is too long and cannot be copied."
+              />
+            </p>
+          </EuiText>
+        </>
+      );
+    }
+    return undefined;
+  }
+
   public render() {
-    const isUnsaved = this.isNotSaved() || this.props.isDirty || this.state.isStale;
+    const isUnsaved: boolean = this.isNotSaved() || this.props.isDirty || this.state.isStale;
+    const exceedsMaxLength = this.state.absoluteUrl.length >= CHROMIUM_MAX_URL_LENGTH;
+
     if (this.props.requiresSavedState && isUnsaved) {
       return (
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
@@ -135,8 +220,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       );
     }
 
-    const showCopyPostURLButton =
-      !isUnsaved || (isUnsaved && this.state.showCopyButtonWithUnsavedChanges);
+    const showCopyPostURLButton = this.shouldShowCopyButton({ isUnsaved, exceedsMaxLength });
 
     return (
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
@@ -180,32 +264,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
               />
             </p>
           </EuiText>
-          {isUnsaved ? (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="warning">
-                <p>
-                  <FormattedMessage
-                    id="xpack.reporting.panelContent.unsavedStateWarningText"
-                    defaultMessage="It is recommended to save your work before copying this URL."
-                  />{' '}
-                  <EuiLink
-                    onClick={() =>
-                      this.setState({
-                        showCopyButtonWithUnsavedChanges: true,
-                      })
-                    }
-                    color={this.state.showCopyButtonWithUnsavedChanges ? 'subdued' : 'warning'}
-                  >
-                    <FormattedMessage
-                      id="xpack.reporting.panelContent.checkbox.showCopyURLButtonLabel"
-                      defaultMessage="Show anyway."
-                    />
-                  </EuiLink>
-                </p>
-              </EuiText>
-            </>
-          ) : undefined}
+
+          {this.renderWarningText({ isUnsaved, exceedsMaxLength })}
+
           <EuiSpacer size="s" />
 
           {showCopyPostURLButton && (
