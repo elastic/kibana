@@ -142,13 +142,11 @@ export function DiscoverChart({
             })}
             className="dscTimechart"
           >
-            <div className="dscHistogram" data-test-subj="discoverChart">
-              <DiscoverHistogramMemoized
-                savedSearchData$={savedSearchDataChart$}
-                timefilterUpdateHandler={timefilterUpdateHandler}
-                services={services}
-              />
-            </div>
+            <DiscoverHistogramMemoized
+              savedSearchData$={savedSearchDataChart$}
+              timefilterUpdateHandler={timefilterUpdateHandler}
+              services={services}
+            />
           </section>
           <EuiSpacer size="s" />
         </EuiFlexItem>

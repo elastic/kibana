@@ -25,8 +25,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
   public async getChartTimespan() {
-    const el = await this.find.byCssSelector('[data-test-subj="discoverIntervalDateRange"]');
-    return await el.getVisibleText();
+    return await this.testSubjects.getAttribute('dscHistogram', 'data-time-range');
   }
 
   public async getDocTable() {

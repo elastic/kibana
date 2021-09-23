@@ -2534,7 +2534,6 @@
     "discover.histogramOfFoundDocumentsAriaLabel": "已找到文档的直方图",
     "discover.hitCountSpinnerAriaLabel": "最终命中计数仍在加载",
     "discover.hitsPluralTitle": "{formattedHits} 个{hits, plural, other {命中}}",
-    "discover.howToChangeTheTimeTooltip": "要更改时间，请使用全局时间筛选。",
     "discover.howToSeeOtherMatchingDocumentsDescription": "下面是与您的搜索匹配的前 {sampleSize} 个文档，请优化您的搜索以查看其他文档。",
     "discover.howToSeeOtherMatchingDocumentsDescriptionGrid": "下面是与您的搜索匹配的前 {sampleSize} 个文档，请优化您的搜索以查看其他文档。",
     "discover.inspectorRequestDataTitleChart": "图表数据",
