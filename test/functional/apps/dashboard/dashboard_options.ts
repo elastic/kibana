@@ -36,24 +36,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should be able to hide all panel titles', async () => {
       await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
-        const titles = await PageObjects.dashboard.getVisiblePanelTitles();
-        expect(titles[0]).to.eql('');
+        const hiddenTitles = await PageObjects.dashboard.getVisiblePanelTitles();
+        expect(hiddenTitles[0]).to.eql('');
       });
     });
 
     it('should be able to unhide all panel titles', async () => {
       await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
-        const titles = await PageObjects.dashboard.getVisiblePanelTitles();
-        expect(titles[0]).to.eql(originalTitles[0]);
+        const visibleTitles = await PageObjects.dashboard.getVisiblePanelTitles();
+        expect(visibleTitles[0]).to.eql(originalTitles[0]);
       });
     });
 
     it('should always present accessible labels', async () => {
-      await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
-        const titles = await PageObjects.dashboard.getPanelTitles();
-        expect(titles[0]).to.eql(originalAccessibleTitles[0]);
+        const accessibleTitles = await PageObjects.dashboard.getPanelTitles();
+        expect(accessibleTitles[0]).to.eql(originalAccessibleTitles[0]);
       });
     });
   });
