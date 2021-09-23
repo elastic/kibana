@@ -1153,7 +1153,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           [ALERT_WORKFLOW_STATUS]: 'open',
           [ALERT_DEPTH]: 2,
-          [ALERT_ORIGINAL_EVENT_KIND]: 'signal', 
+          [ALERT_ORIGINAL_EVENT_KIND]: 'signal',
         });
       });
     });
