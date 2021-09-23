@@ -21,19 +21,17 @@ const LinkLabel = styled.span<{
   font-size: ${({ size }) => (size === 'm' ? '12px' : 'innherit')};
 `;
 
-interface CustomProps {
-  size: 'm' | 'l';
-}
+type ComponentProps = LinkToAppProps & {
+  size?: 'm' | 'l';
+};
 
-export const LinkWithIcon: FC<LinkToAppProps & CustomProps> = memo(
-  ({ children, size, ...props }) => {
-    return (
-      <LinkToApp {...props}>
-        <LinkLabel size={size}>{children}</LinkLabel>
-        <EuiIcon type={size === 'm' ? 'arrowRight' : 'popout'} />
-      </LinkToApp>
-    );
-  }
-);
+export const LinkWithIcon: FC<ComponentProps> = memo(({ children, size = 'l', ...props }) => {
+  return (
+    <LinkToApp {...props}>
+      <LinkLabel size={size}>{children}</LinkLabel>
+      <EuiIcon type={size === 'm' ? 'arrowRight' : 'popout'} />
+    </LinkToApp>
+  );
+});
 
 LinkWithIcon.displayName = 'LinkWithIcon';
