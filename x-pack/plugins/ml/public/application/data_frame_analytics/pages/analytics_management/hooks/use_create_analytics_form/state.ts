@@ -220,7 +220,7 @@ export const getJobConfigFromFormState = (
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
     description: formState.description,
     source: {
-      // If a Kibana index patterns includes commas, we need to split
+      // If a Kibana data view name includes commas, we need to split
       // the into an array of indices to be in the correct format for
       // the data frame analytics API.
       index: formState.sourceIndex.includes(',')

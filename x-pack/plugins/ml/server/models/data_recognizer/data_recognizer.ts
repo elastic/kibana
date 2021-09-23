@@ -463,21 +463,21 @@ export class DataRecognizer {
     this._indexPatternId = await this._getIndexPatternId(this._indexPatternName);
 
     // the module's jobs contain custom URLs which require an index patten id
-    // but there is no corresponding index pattern, throw an error
+    // but there is no corresponding data view, throw an error
     if (this._indexPatternId === undefined && this._doJobUrlsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
-        `Module's jobs contain custom URLs which require a kibana index pattern (${this._indexPatternName}) which cannot be found.`
+        `Module's jobs contain custom URLs which require a Kibana data view (${this._indexPatternName}) which cannot be found.`
       );
     }
 
     // the module's saved objects require an index patten id
-    // but there is no corresponding index pattern, throw an error
+    // but there is no corresponding data view, throw an error
     if (
       this._indexPatternId === undefined &&
       this._doSavedObjectsContainIndexPatternId(moduleConfig)
     ) {
       throw Boom.badRequest(
-        `Module's saved objects contain custom URLs which require a kibana index pattern (${this._indexPatternName}) which cannot be found.`
+        `Module's saved objects contain custom URLs which require a Kibana data view (${this._indexPatternName}) which cannot be found.`
       );
     }
 
@@ -622,7 +622,7 @@ export class DataRecognizer {
     });
   }
 
-  // returns a id based on an index pattern name
+  // returns a id based on a data viewn name
   private async _getIndexPatternId(name: string) {
     try {
       const indexPatterns = await this._loadIndexPatterns();
@@ -632,7 +632,7 @@ export class DataRecognizer {
       const ip = indexPatterns.saved_objects.find((i) => i.attributes.title === name);
       return ip !== undefined ? ip.id : undefined;
     } catch (error) {
-      mlLog.warn(`Error loading index patterns, ${error}`);
+      mlLog.warn(`Error loading data views, ${error}`);
       return;
     }
   }

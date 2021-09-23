@@ -191,8 +191,8 @@ export const Page: FC<Props> = ({ jobId }) => {
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
-                      defaultMessage="Source index pattern: {indexTitle}"
-                      values={{ indexTitle: currentIndexPattern.title }}
+                      defaultMessage="Source data view: {dataViewTitle}"
+                      values={{ dataViewTitle: currentIndexPattern.title }}
                     />
                   </h2>
                 </EuiFlexItem>

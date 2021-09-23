@@ -258,10 +258,10 @@ class LinksMenuUI extends Component {
     };
 
     const createAndOpenUrl = (index, categorizationFieldType) => {
-      // Find the ID of the index pattern with a title attribute which matches the
-      // index configured in the datafeed. If a Kibana index pattern has not been created
+      // Find the ID of the data view with a title attribute which matches the
+      // index configured in the datafeed. If a Kibana data view has not been created
       // for this index, then the user will see a warning message on the Discover tab advising
-      // them that no matching index pattern has been configured.
+      // them that no matching data view has been configured.
       const indexPatternId = getIndexPatternIdFromName(index) || index;
 
       // Get the definition of the category and use the terms or regex to view the

@@ -267,8 +267,8 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.customUrlsEditor.indexPatternLabel"
-                defaultMessage="Index pattern"
+                id="xpack.ml.customUrlsEditor.dataViewLabel"
+                defaultMessage="Data view"
               />
             }
             display="rowCompressed"

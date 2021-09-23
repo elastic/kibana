@@ -15,7 +15,7 @@ export const ANOMALY_DETECTOR = 'anomaly-detector';
 export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
 
 // called in the routing resolve block to initialize the NewJobCapabilites
-// service for the corresponding job type with the currently selected index pattern
+// service for the corresponding job type with the currently selected data view
 export function loadNewJobCapabilities(
   indexPatternId: string,
   savedSearchId: string,
@@ -28,18 +28,18 @@ export function loadNewJobCapabilities(
         jobType === ANOMALY_DETECTOR ? newJobCapsService : newJobCapsServiceAnalytics;
 
       if (indexPatternId !== undefined) {
-        // index pattern is being used
+        // data view is being used
         const indexPattern: IIndexPattern = await indexPatterns.get(indexPatternId);
         await serviceToUse.initializeFromIndexPattern(indexPattern);
         resolve(serviceToUse.newJobCaps);
       } else if (savedSearchId !== undefined) {
         // saved search is being used
-        // load the index pattern from the saved search
+        // load the data view from the saved search
         const { indexPattern } = await getIndexPatternAndSavedSearch(savedSearchId);
 
         if (indexPattern === null) {
           // eslint-disable-next-line no-console
-          console.error('Cannot retrieve index pattern from saved search');
+          console.error('Cannot retrieve data view from saved search');
           reject();
           return;
         }
