@@ -10,6 +10,7 @@
 
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import moment from 'moment';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '../..';
 import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
@@ -39,6 +40,7 @@ interface SavedObjectBody {
   fieldFormatMap?: string;
   typeMeta?: string;
   type?: string;
+  createdAt?: string;
 }
 
 type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
@@ -84,6 +86,7 @@ export class DataView implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
   private runtimeFieldMap: Record<string, RuntimeField>;
+  private createdAt: string;
 
   /**
    * prevents errors when index pattern exists before indices
@@ -123,6 +126,7 @@ export class DataView implements IIndexPattern {
     this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.createdAt = spec.createdAt || moment.utc().toISOString();
   }
 
   /**
@@ -225,6 +229,7 @@ export class DataView implements IIndexPattern {
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
+      createdAt: this.createdAt,
     };
   }
 
@@ -332,7 +337,7 @@ export class DataView implements IIndexPattern {
       : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
-
+    debugger;
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
@@ -346,6 +351,7 @@ export class DataView implements IIndexPattern {
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
+      createdAt: this.createdAt,
     };
   }
 

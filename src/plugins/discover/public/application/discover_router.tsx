@@ -44,7 +44,8 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
             children={<SingleDocRoute services={services} />}
           />
           <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
-          <Route path="/" exact children={<DiscoverHomeRoute {...mainRouteProps} />} />
+          <Route path="/home" exact children={<DiscoverHomeRoute {...mainRouteProps} />} />
+          <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
           <NotFoundRoute services={services} />
         </Switch>
       </Router>

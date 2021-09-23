@@ -12,17 +12,20 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiPageTemplate,
-  EuiPanel,
-  EuiTitle,
+  EuiCard,
+  EuiIcon,
 } from '@elastic/eui';
 import { FlexGridColumns } from '@elastic/eui/src/components/flex/flex_grid';
+import { DataView } from 'src/plugins/data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SectionTitle } from './section_title';
 import { SavedSearch } from '../../../saved_searches';
 import { DiscoverView } from './discover_view';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { LastRecentlyAccessedView } from './last_recently_view';
-import { IndexPatternView } from "./index_pattern_view";
+import { IndexPatternView } from './index_pattern_view';
+import { MoreButton } from './more_button';
+import { SectionNavigation } from "./section_navigation";
 
 export interface DiscoverMainProps {
   /**
@@ -35,17 +38,18 @@ export interface DiscoverMainProps {
   services: DiscoverServices;
 }
 
-const DISPLAY_NUMBER_OF_SAVED_SEARCHES = 4;
+const DISPLAY_NUMBER_OF_SAVED_SEARCHES = 3;
+const MAX_NUMBER_OF_SAVED_SEARCHES = 30;
 
 export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
-  const button = <></>;
   const { core } = services;
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [recentlyAccessed, setRecentlyAccessed] = useState<SavedSearch[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
 
   useEffect(() => {
     async function loadSavedSearches() {
-      const result = await services.findSavedSearches(DISPLAY_NUMBER_OF_SAVED_SEARCHES);
+      const result = await services.findSavedSearches(MAX_NUMBER_OF_SAVED_SEARCHES);
       const loadedSavedSearches = [] as SavedSearch[];
       for (const hit of result.hits) {
         const id = hit.id as string;
@@ -58,29 +62,25 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
   }, [services]);
 
   const savedSearchesSection = () => {
-    const savedSearchesDisplay: JSX.Element[] = [];
-    savedSearches.forEach((savedSearch) => {
+    const savedSearchesToDisplay: JSX.Element[] = savedSearches.map((savedSearch) => {
       const { title, searchSource, id } = savedSearch;
       const indexPattern = searchSource.getField('index');
-      savedSearchesDisplay.push(
-        <EuiFlexItem>
-          <DiscoverView
-            id={id}
-            title={title}
-            isTimeBased={!!indexPattern?.isTimeBased()}
-            application={core.application}
-            savedObjectsClient={core.savedObjects.client}
-          />
-        </EuiFlexItem>
+      return (
+        <DiscoverView
+          id={id}
+          title={title}
+          isTimeBased={!!indexPattern?.isTimeBased()}
+          application={core.application}
+          savedObjectsClient={core.savedObjects.client}
+        />
       );
     });
-    if (savedSearchesDisplay.length === 0) {
-      return <LoadingIndicator />;
-    }
     return (
-      <EuiFlexGrid columns={savedSearchesDisplay.length as FlexGridColumns}>
-        {savedSearchesDisplay}
-      </EuiFlexGrid>
+      <SectionNavigation
+        items={savedSearchesToDisplay}
+        itemsPerPage={DISPLAY_NUMBER_OF_SAVED_SEARCHES}
+        page={0}
+      />
     );
   };
 
@@ -97,6 +97,23 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     });
     setRecentlyAccessed(recentlyAccessedSavedSearches);
   }, [core, services]);
+
+  useEffect(() => {
+    async function loadIndexPatterns() {
+      const savedObjectsClient = services.core.savedObjects.client;
+      const result = await savedObjectsClient.find({
+        type: 'index-pattern',
+        sortField: 'created_at',
+      });
+      const loadedIndexPatterns = [] as DataView[];
+      for (const savedObject of result.savedObjects.reverse()) {
+        const indexPattern = await services.indexPatterns.get(savedObject.id);
+        loadedIndexPatterns.push(indexPattern);
+      }
+      setIndexPatterns(loadedIndexPatterns);
+    }
+    loadIndexPatterns();
+  }, [services]);
 
   const lastRecentlyAccessedSection = () => {
     const recentlyAccessedDisplay: JSX.Element[] = [];
@@ -120,6 +137,38 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     );
   };
 
+  const addNewIndexPattern = (
+    <EuiFlexItem>
+      <EuiCard
+        icon={<EuiIcon size="xxl" type="plusInCircle" />}
+        title={'Add New'}
+        description=""
+        onClick={() => {}}
+      />
+    </EuiFlexItem>
+  );
+
+  const indexPatternsSection = () => {
+    const displayElements: JSX.Element[] = [];
+    indexPatterns.slice(0, 2).forEach((indexPattern) => {
+      displayElements.push(
+        <EuiFlexItem>
+          <IndexPatternView indexPattern={indexPattern} />
+        </EuiFlexItem>
+      );
+    });
+    return displayElements;
+  };
+
+  const goToDiscover = () => {
+    const { application } = services.core;
+    if (!application) return;
+    const path = `#/`;
+    application.navigateToApp('discover', { path });
+  };
+
+  const discoverButton = <EuiButton onClick={goToDiscover}>Go To Discover</EuiButton>;
+
   return (
     <EuiPageTemplate
       restrictWidth={false}
@@ -127,7 +176,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
       pageHeader={{
         iconType: 'inspect',
         pageTitle: 'Select Your Data',
-        rightSideItems: [button, <EuiButton>Do something</EuiButton>],
+        rightSideItems: [discoverButton],
       }}
       direction="column"
     >
@@ -141,12 +190,11 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
           {savedSearchesSection()}
         </EuiFlexItem>
         <EuiFlexItem>
-          <SectionTitle text={'Index Patterns'} />
-          <IndexPatternView
-            indexPattern={
-              savedSearches.length > 0 ? savedSearches[0].searchSource.getField('index') : undefined
-            }
-          />
+          <SectionTitle text={'DataViews'} />
+          <EuiFlexGrid columns={3}>
+            {addNewIndexPattern}
+            {indexPatternsSection()}
+          </EuiFlexGrid>
         </EuiFlexItem>
       </EuiFlexGrid>
     </EuiPageTemplate>

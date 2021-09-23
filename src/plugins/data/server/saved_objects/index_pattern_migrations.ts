@@ -8,6 +8,7 @@
 
 import { flow, omit } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
+import moment from "moment";
 
 const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,
@@ -56,7 +57,7 @@ const addDescription: SavedObjectMigrationFn<any, any> = (doc) => ({
   attributes: {
     ...doc.attributes,
     description: doc.attributes.description || '',
-    created_at: doc.attributes.created_at || Date.now(),
+    created_at: doc.attributes.createdAt || moment().utc().toISOString(),
   },
 });
 

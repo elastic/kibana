@@ -9,6 +9,7 @@ import { EuiCard, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import './discover_view.scss';
 import { DataView } from 'src/plugins/data/common';
+import { LoadingIndicator } from '../../components/common/loading_indicator';
 
 interface IndexPatternViewProps {
   indexPattern: DataView | undefined;
@@ -16,10 +17,9 @@ interface IndexPatternViewProps {
 
 export function IndexPatternView(props: IndexPatternViewProps) {
   const { indexPattern } = props;
-  debugger;
 
   if (!indexPattern) {
-    return <div>No index pattern here</div>;
+    return <LoadingIndicator />;
   }
   return (
     <EuiCard
