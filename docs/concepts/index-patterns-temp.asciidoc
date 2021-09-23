@@ -1,3 +1,0 @@
-[[index-patterns]]
-
-== Index patterns has been renamed to <<data-views, data views>>.
