@@ -35,7 +35,7 @@ import { TooltipPopover } from './tooltip_popover';
 import { FeatureGeometryFilterForm } from './features_tooltip';
 import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
 import { ILayer } from '../../../classes/layers/layer';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
 
 function justifyAnchorLocation(
@@ -56,10 +56,6 @@ function justifyAnchorLocation(
     popupAnchorLocation = coordinates;
   }
   return popupAnchorLocation;
-}
-
-function isVectorLayer(layer: ILayer) {
-  return (layer as IVectorLayer).canShowTooltip !== undefined;
 }
 
 export interface Props {
