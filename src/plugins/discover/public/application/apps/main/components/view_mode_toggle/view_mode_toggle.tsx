@@ -34,7 +34,7 @@ export const DocumentViewModeToggle = ({
           <div className="fieldStatsButton">
             <FormattedMessage
               id="discover.viewModes.fieldStatistics.label"
-              defaultMessage="Field Statistics"
+              defaultMessage="Field statistics"
             />
             <EuiBetaBadge
               label={i18n.translate('discover.viewModes.fieldStatistics.betaTitle', {
