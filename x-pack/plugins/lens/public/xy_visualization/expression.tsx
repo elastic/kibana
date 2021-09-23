@@ -59,7 +59,7 @@ import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axe
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
-import { ThresholdAnnotations } from './expression_thresholds';
+import { getThresholdRequiredPaddings, ThresholdAnnotations } from './expression_thresholds';
 
 declare global {
   interface Window {
@@ -316,6 +316,8 @@ export function XYChart({
     Boolean(isHistogramViz)
   );
 
+  const thresholdPaddings = getThresholdRequiredPaddings(thresholdLayers);
+
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
     groupId: string
@@ -332,7 +334,7 @@ export function XYChart({
     );
   };
 
-  const getYAxesStyle = (groupId: string) => {
+  const getYAxesStyle = (groupId: 'left' | 'right') => {
     const style = {
       tickLabel: {
         visible:
@@ -343,6 +345,12 @@ export function XYChart({
           groupId === 'right'
             ? args.labelsOrientation?.yRight || 0
             : args.labelsOrientation?.yLeft || 0,
+        padding:
+          thresholdPaddings[groupId] != null
+            ? {
+                inner: thresholdPaddings[groupId],
+              }
+            : undefined,
       },
       axisTitle: {
         visible:
@@ -547,6 +555,8 @@ export function XYChart({
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
             rotation: labelsOrientation?.x,
+            padding:
+              thresholdPaddings.bottom != null ? { inner: thresholdPaddings.bottom } : undefined,
           },
           axisTitle: {
             visible: axisTitlesVisibilitySettings.x,
@@ -570,7 +580,7 @@ export function XYChart({
             }}
             hide={filteredLayers[0].hide}
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
-            style={getYAxesStyle(axis.groupId)}
+            style={getYAxesStyle(axis.groupId as 'left' | 'right')}
             domain={getYAxisDomain(axis)}
           />
         );

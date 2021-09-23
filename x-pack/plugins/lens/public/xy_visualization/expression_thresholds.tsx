@@ -15,6 +15,29 @@ import type { LayerArgs } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
 import type { ColorAssignments } from './color_assignment';
 
+const THRESHOLD_ICON_SIZE = 20;
+
+// Note: it does take into consideration whether the threshold is in view or not
+export const getThresholdRequiredPaddings = (thresholdLayers: LayerArgs[]) => ({
+  ...(thresholdLayers.some((thresholdLayer) =>
+    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'right' && icon)
+  )
+    ? { right: THRESHOLD_ICON_SIZE }
+    : null),
+  ...(thresholdLayers.some((thresholdLayer) =>
+    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'bottom' && icon)
+  )
+    ? { bottom: THRESHOLD_ICON_SIZE }
+    : null),
+  ...(thresholdLayers.some((thresholdLayer) =>
+    thresholdLayer.yConfig?.some(
+      ({ axisMode, icon }) => icon && (axisMode === 'left' || axisMode == null)
+    )
+  )
+    ? { left: THRESHOLD_ICON_SIZE }
+    : null),
+});
+
 export const ThresholdAnnotations = ({
   thresholdLayers,
   data,
