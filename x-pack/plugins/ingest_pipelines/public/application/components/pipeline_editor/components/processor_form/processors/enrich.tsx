@@ -139,7 +139,6 @@ const fieldsConfig: FieldsConfig = {
 
 export const Enrich: FunctionComponent = () => {
   const { services } = useKibana();
-  const esDocUrl = services.documentation.getEsDocsBasePath();
   return (
     <>
       <FieldNameField
@@ -161,7 +160,11 @@ export const Enrich: FunctionComponent = () => {
               defaultMessage="Name of the {enrichPolicyLink}."
               values={{
                 enrichPolicyLink: (
-                  <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
+                  <EuiLink
+                    external
+                    target="_blank"
+                    href={services.documentation.getEnrichDataUrl()}
+                  >
                     {i18n.translate(
                       'xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText.enrichPolicyLink',
                       { defaultMessage: 'enrich policy' }
@@ -206,11 +209,7 @@ export const Enrich: FunctionComponent = () => {
               defaultMessage="Operator used to match the geo-shape of incoming documents to enrich documents. Only used for {geoMatchPolicyLink}."
               values={{
                 geoMatchPolicyLink: (
-                  <EuiLink
-                    external
-                    target="_blank"
-                    href={esDocUrl + '/enrich-policy-definition.html'}
-                  >
+                  <EuiLink external target="_blank" href={services.documentation.getGeoMatchUrl()}>
                     {i18n.translate(
                       'xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldHelpText.geoMatchPoliciesLink',
                       { defaultMessage: 'geo-match enrich policies' }
