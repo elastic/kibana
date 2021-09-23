@@ -44,7 +44,6 @@ For example, `logs-elasticsearch-prod-*` is an index pattern,
 and it is time-based with a time field of `@timestamp`. The time field is not editable.
 
 Data views are typically created by an administrator when sending data to {es}.
-
 You can <<data-views,create or update data views>> in *Stack Management*, or by using a script
 that accesses the {kib} API.
 
@@ -76,7 +75,7 @@ and can optionally contain the time filter and extra filters.
 ==== Time filter
 
 The <<set-time-filter, global time filter>> limits the time range of data displayed.
-In most cases, the time filter applies to the time field in the {data-source},
+In most cases, the time filter applies to the time field in the data view,
 but some apps allow you to use a different time field.
 
 Using the time filter, you can configure a refresh rate to periodically
