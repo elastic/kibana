@@ -66,7 +66,12 @@ export function defineConfigureRoute({
 
       if (!preboot.isSetupOnHold()) {
         logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot stage`);
-        return response.badRequest({ body: 'Cannot process request outside of preboot stage.' });
+        return response.badRequest({
+          body: {
+            message: 'Cannot process request outside of preboot stage.',
+            attributes: { type: 'outside_preboot_stage' },
+          },
+        });
       }
 
       const connectionStatus = await elasticsearch.connectionStatus$.pipe(first()).toPromise();

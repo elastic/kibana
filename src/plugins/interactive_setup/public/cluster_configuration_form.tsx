@@ -37,10 +37,10 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
-import type { IHttpFetchError } from 'kibana/public';
 
 import type { Certificate } from '../common';
 import { DocLink } from './doc_link';
+import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
@@ -147,17 +147,19 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
     <EuiForm component="form" noValidate {...eventHandlers}>
       {status !== 'unverified' && !form.isSubmitting && !form.isValidating && form.submitError && (
         <>
-          <EuiCallOut
-            color="danger"
-            title={i18n.translate('interactiveSetup.clusterConfigurationForm.submitErrorTitle', {
-              defaultMessage: "Couldn't connect to cluster",
-            })}
-          >
-            {(form.submitError as IHttpFetchError).body?.message}
-          </EuiCallOut>
+          <SubmitErrorCallout
+            error={form.submitError}
+            defaultTitle={i18n.translate(
+              'interactiveSetup.clusterConfigurationForm.submitErrorTitle',
+              {
+                defaultMessage: "Couldn't connect to cluster",
+              }
+            )}
+          />
           <EuiSpacer />
         </>
       )}
+
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false} className="eui-textNoWrap">
           <FormattedMessage

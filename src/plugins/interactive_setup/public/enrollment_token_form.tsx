@@ -9,7 +9,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -24,9 +23,9 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { IHttpFetchError } from 'kibana/public';
 
 import type { EnrollmentToken } from '../common';
+import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
@@ -100,14 +99,12 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
     <EuiForm component="form" noValidate {...eventHandlers}>
       {status !== 'unverified' && !form.isSubmitting && !form.isValidating && form.submitError && (
         <>
-          <EuiCallOut
-            color="danger"
-            title={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
+          <SubmitErrorCallout
+            error={form.submitError}
+            defaultTitle={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
               defaultMessage: "Couldn't connect to cluster",
             })}
-          >
-            {(form.submitError as IHttpFetchError).body?.message}
-          </EuiCallOut>
+          />
           <EuiSpacer />
         </>
       )}

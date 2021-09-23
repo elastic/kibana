@@ -8,7 +8,6 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiEmptyPrompt,
   EuiForm,
@@ -25,6 +24,7 @@ import type { IHttpFetchError } from 'kibana/public';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
 import { SingleCharsField } from './single_chars_field';
+import { SubmitErrorCallout } from './submit_error_callout';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useKibana } from './use_kibana';
@@ -97,17 +97,19 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
           <>
             {form.submitError && (
               <>
-                <EuiCallOut
-                  color="danger"
-                  title={i18n.translate('interactiveSetup.verificationCodeForm.submitErrorTitle', {
-                    defaultMessage: "Couldn't verify code",
-                  })}
-                >
-                  {(form.submitError as IHttpFetchError).body?.message}
-                </EuiCallOut>
+                <SubmitErrorCallout
+                  error={form.submitError}
+                  defaultTitle={i18n.translate(
+                    'interactiveSetup.verificationCodeForm.submitErrorTitle',
+                    {
+                      defaultMessage: "Couldn't verify code",
+                    }
+                  )}
+                />
                 <EuiSpacer />
               </>
             )}
+
             <EuiText>
               <p>
                 <FormattedMessage
