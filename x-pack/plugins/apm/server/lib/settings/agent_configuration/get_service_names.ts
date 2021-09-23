@@ -15,15 +15,17 @@ import { getProcessorEventForAggregatedTransactions } from '../../helpers/aggreg
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
 >;
+
 export async function getServiceNames({
   setup,
   searchAggregatedTransactions,
+  size,
 }: {
   setup: Setup;
   searchAggregatedTransactions: boolean;
+  size: number;
 }) {
-  const { apmEventClient, config } = setup;
-  const maxServiceSelection = config['xpack.apm.maxServiceSelection'];
+  const { apmEventClient } = setup;
 
   const params = {
     apm: {
@@ -42,8 +44,8 @@ export async function getServiceNames({
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: maxServiceSelection,
             min_doc_count: 0,
+            size,
           },
         },
       },

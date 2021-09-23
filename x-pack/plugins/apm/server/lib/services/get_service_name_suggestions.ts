@@ -11,16 +11,17 @@ import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregate
 import { Setup } from '../helpers/setup_request';
 
 export async function getServiceNameSuggestions({
+  size,
   searchAggregatedTransactions,
   setup,
   string,
 }: {
   searchAggregatedTransactions: boolean;
   setup: Setup;
+  size: number;
   string: string;
 }) {
-  const { apmEventClient, config } = setup;
-  const maxSuggestions = config['xpack.apm.maxServiceEnvironments']; // FIXME: Rename this
+  const { apmEventClient } = setup;
 
   const response = await apmEventClient.termsEnum(
     'get_service_name_suggestions',
@@ -37,7 +38,7 @@ export async function getServiceNameSuggestions({
       body: {
         case_insensitive: true,
         field: SERVICE_NAME,
-        size: maxSuggestions,
+        size,
         string,
       },
     }

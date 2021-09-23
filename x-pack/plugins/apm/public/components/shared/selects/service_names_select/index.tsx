@@ -30,11 +30,17 @@ export function ServiceNamesSelect({
   defaultValue,
   onChange,
 }: ServiceNamesSelectProps) {
-  const defaultOption =
-    !defaultValue && allowAll
-      ? allOption
-      : { label: defaultValue, value: defaultValue };
-  const [selectedOptions, setSelectedOptions] = useState([defaultOption]);
+  let defaultOption: EuiComboBoxOptionOption<string> | undefined;
+  if (allowAll && !defaultValue) {
+    defaultOption = allOption;
+  }
+  if (defaultValue) {
+    defaultOption = { label: defaultValue, value: defaultValue };
+  }
+  const [selectedOptions, setSelectedOptions] = useState(
+    defaultOption ? [defaultOption] : []
+  );
+
   const [searchValue, setSearchValue] = useState('');
 
   const { data, status } = useFetcher(

@@ -13,14 +13,15 @@ import { Setup } from '../helpers/setup_request';
 export async function getEnvironmentSuggestions({
   searchAggregatedTransactions,
   setup,
+  size,
   string,
 }: {
   searchAggregatedTransactions: boolean;
   setup: Setup;
+  size: number;
   string: string;
 }) {
-  const { apmEventClient, config } = setup;
-  const maxSuggestions = config['xpack.apm.maxServiceEnvironments']; // FIXME: Rename this
+  const { apmEventClient } = setup;
 
   const response = await apmEventClient.termsEnum(
     'get_environment_suggestions',
@@ -37,7 +38,7 @@ export async function getEnvironmentSuggestions({
       body: {
         case_insensitive: true,
         field: SERVICE_ENVIRONMENT,
-        size: maxSuggestions,
+        size,
         string,
       },
     }

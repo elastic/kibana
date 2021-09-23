@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { maxSuggestions } from '../../../observability/common';
 import { getEnvironmentSuggestions } from '../lib/environments/get_environment_suggestions';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -22,17 +23,20 @@ const environmentSuggestionsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
+    const { context, params } = resources;
     const { string } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
     });
-
+    const size = await context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const environments = await getEnvironmentSuggestions({
       searchAggregatedTransactions,
       setup,
+      size,
       string,
     });
 
@@ -48,17 +52,20 @@ const serviceNameSuggestionsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
+    const { context, params } = resources;
     const { string } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
     });
-
+    const size = await context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const serviceNames = await getServiceNameSuggestions({
       searchAggregatedTransactions,
       setup,
+      size,
       string,
     });
 
@@ -74,17 +81,20 @@ const transactionTypeSuggestionsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
+    const { context, params } = resources;
     const { string } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
     });
-
+    const size = await context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const transactionTypes = await getTransactionTypeSuggestions({
       searchAggregatedTransactions,
       setup,
+      size,
       string,
     });
 

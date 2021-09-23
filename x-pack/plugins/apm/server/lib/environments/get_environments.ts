@@ -20,13 +20,15 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
  * filtered by range.
  */
 export async function getEnvironments({
-  setup,
-  serviceName,
   searchAggregatedTransactions,
+  serviceName,
+  setup,
+  size,
 }: {
   setup: Setup & SetupTimeRange;
   serviceName?: string;
   searchAggregatedTransactions: boolean;
+  size: number;
 }) {
   const operationName = serviceName
     ? 'get_environments_for_service'
@@ -41,8 +43,6 @@ export async function getEnvironments({
       term: { [SERVICE_NAME]: serviceName },
     });
   }
-
-  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   const params = {
     apm: {
@@ -66,7 +66,7 @@ export async function getEnvironments({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ENVIRONMENT_NOT_DEFINED.value,
-            size: maxServiceEnvironments,
+            size,
           },
         },
       },

@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
+import { maxSuggestions } from '../../../../observability/common';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
@@ -248,9 +249,13 @@ const listAgentConfigurationServicesRoute = createApmServerRoute({
       config: setup.config,
       kuery: '',
     });
+    const size = await resources.context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const serviceNames = await getServiceNames({
-      setup,
       searchAggregatedTransactions,
+      setup,
+      size,
     });
 
     return { serviceNames };
@@ -266,7 +271,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
+    const { context, params } = resources;
 
     const { serviceName } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -274,11 +279,14 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
       config: setup.config,
       kuery: '',
     });
-
+    const size = await context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const environments = await getEnvironments({
       serviceName,
       setup,
       searchAggregatedTransactions,
+      size,
     });
 
     return { environments };

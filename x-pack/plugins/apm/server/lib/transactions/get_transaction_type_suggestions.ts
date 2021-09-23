@@ -13,14 +13,15 @@ import { Setup } from '../helpers/setup_request';
 export async function getTransactionTypeSuggestions({
   searchAggregatedTransactions,
   setup,
+  size,
   string,
 }: {
   searchAggregatedTransactions: boolean;
   setup: Setup;
+  size: number;
   string: string;
 }) {
   const { apmEventClient, config } = setup;
-  const maxSuggestions = config['xpack.apm.maxServiceEnvironments']; // FIXME: Rename this
 
   const response = await apmEventClient.termsEnum(
     'get_transaction_type_suggestions',
@@ -37,7 +38,7 @@ export async function getTransactionTypeSuggestions({
       body: {
         case_insensitive: true,
         field: TRANSACTION_TYPE,
-        size: maxSuggestions,
+        size,
         string,
       },
     }
