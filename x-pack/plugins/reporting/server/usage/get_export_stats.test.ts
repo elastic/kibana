@@ -136,7 +136,6 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
-      "sizes": undefined,
       "total": 0,
     }
   `);
