@@ -9,7 +9,7 @@ import { AggField } from './agg_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { IESAggSource } from '../../sources/es_agg_source';
 
-const mockEsAggSource = ({} as unknown) as IESAggSource;
+const mockEsAggSource = {} as unknown as IESAggSource;
 
 const defaultParams = {
   label: 'my agg field',
