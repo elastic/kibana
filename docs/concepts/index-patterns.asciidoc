@@ -1,3 +1,5 @@
 [[index-patterns]]
 
+[[reload-fields]]
+
 == Index patterns has been renamed to <<data-views, data views>>.
