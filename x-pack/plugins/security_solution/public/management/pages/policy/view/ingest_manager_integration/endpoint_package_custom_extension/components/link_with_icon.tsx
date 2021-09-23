@@ -18,7 +18,7 @@ const LinkLabel = styled.span<{
 }>`
   display: inline-block;
   padding-right: ${(props) => props.theme.eui.paddingSizes.s};
-  font-size: ${({ size }) => (size === 'm' ? '12px' : 'innherit')};
+  font-size: ${({ size, theme }) => (size === 'm' ? theme.eui.euiFontSizeXS : 'innherit')};
 `;
 
 type ComponentProps = LinkToAppProps & {

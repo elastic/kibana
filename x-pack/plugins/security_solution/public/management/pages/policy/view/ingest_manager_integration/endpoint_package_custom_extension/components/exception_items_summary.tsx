@@ -44,21 +44,21 @@ export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)`
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)<{
-  small: boolean;
+  isSmall: boolean;
 }>`
-  font-size: ${({ small }) => (small ? '12px' : 'innherit')};
-  font-weight: ${({ small }) => (small ? '1px' : 'innherit')};
+  font-size: ${({ isSmall, theme }) => (isSmall ? theme.eui.euiFontSizeXS : 'innherit')};
+  font-weight: ${({ isSmall }) => (isSmall ? '1px' : 'innherit')};
 `;
 
 const CSS_BOLD: Readonly<React.CSSProperties> = { fontWeight: 'bold' };
 
 interface ExceptionItemsSummaryProps {
   stats: GetExceptionSummaryResponse | undefined;
-  small?: boolean;
+  isSmall?: boolean;
 }
 
 export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(
-  ({ stats, small = false }) => {
+  ({ stats, isSmall = false }) => {
     const getItem = useCallback(
       (stat: keyof GetExceptionSummaryResponse) => (
         <EuiFlexItem key={stat}>
@@ -66,20 +66,20 @@ export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(
             value={stats?.[stat] ?? 0}
             color={stat === 'total' ? 'primary' : 'default'}
             key={stat}
-            small={small}
+            isSmall={isSmall}
           >
             {SUMMARY_LABELS[stat]}
           </SummaryStat>
         </EuiFlexItem>
       ),
-      [stats, small]
+      [stats, isSmall]
     );
 
     return (
       <EuiFlexGroup
         alignItems="center"
-        justifyContent={small ? 'flexStart' : 'spaceAround'}
-        gutterSize={small ? 's' : 'l'}
+        justifyContent={isSmall ? 'flexStart' : 'spaceAround'}
+        gutterSize={isSmall ? 's' : 'l'}
       >
         {SUMMARY_KEYS.map((stat) => getItem(stat))}
       </EuiFlexGroup>
@@ -89,36 +89,23 @@ export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(
 
 ExceptionItemsSummary.displayName = 'ExceptionItemsSummary';
 
-const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color']; small?: boolean }> = memo(
-  ({ children, value, color, small = false, ...commonProps }) => {
+const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color']; isSmall?: boolean }> = memo(
+  ({ children, value, color, isSmall = false, ...commonProps }) => {
     return (
-      <EuiText className="eui-displayInlineBlock" size={small ? 'xs' : 's'}>
+      <EuiText className="eui-displayInlineBlock" size={isSmall ? 'xs' : 's'}>
         <StyledEuiFlexGroup
-          justifyContent={small ? 'flexStart' : 'center'}
-          direction="row"
+          justifyContent={isSmall ? 'flexStart' : 'center'}
+          direction={isSmall ? 'rowReverse' : 'row'}
           alignItems="center"
-          gutterSize={small ? 'xs' : 'l'}
-          small={small}
+          gutterSize={isSmall ? 'xs' : 'l'}
+          isSmall={isSmall}
         >
-          {small ? (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={color}>{value}</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
-                {children}
-              </EuiFlexItem>
-            </>
-          ) : (
-            <>
-              <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
-                {children}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={color}>{value}</EuiBadge>
-              </EuiFlexItem>
-            </>
-          )}
+          <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
+            {children}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={color}>{value}</EuiBadge>
+          </EuiFlexItem>
         </StyledEuiFlexGroup>
       </EuiText>
     );
