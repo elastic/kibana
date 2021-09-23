@@ -181,8 +181,17 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
 
 export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ additionalLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, share, security, fileUpload, lens, indexPatternFieldEditor } =
-    getPluginsStart();
+  const {
+    data,
+    maps,
+    embeddable,
+    share,
+    security,
+    fileUpload,
+    lens,
+    indexPatternFieldEditor,
+    uiActions,
+  } = getPluginsStart();
   const services = {
     data,
     maps,
@@ -192,6 +201,7 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     fileUpload,
     lens,
     indexPatternFieldEditor,
+    uiActions,
     ...coreStart,
   };
 

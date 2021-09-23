@@ -21,6 +21,7 @@ import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/index
 import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
+import type { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -34,6 +35,7 @@ export interface DataVisualizerStartDependencies {
   share: SharePluginStart;
   lens?: LensPublicStart;
   indexPatternFieldEditor?: IndexPatternFieldEditorStart;
+  uiActions: UiActionsStart;
 }
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
