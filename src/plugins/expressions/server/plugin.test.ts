@@ -24,15 +24,5 @@ describe('ExpressionsServerPlugin', () => {
         expect(setup.getFunctions().add.name).toBe('add');
       });
     });
-
-    describe('.run()', () => {
-      test('can execute simple expression', async () => {
-        const { setup } = await expressionsPluginMock.createPlugin();
-        const { result } = await setup
-          .run('var_set name="foo" value="bar" | var name="foo"', null)
-          .toPromise();
-        expect(result).toBe('bar');
-      });
-    });
   });
 });

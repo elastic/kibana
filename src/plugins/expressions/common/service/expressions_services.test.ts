@@ -17,11 +17,16 @@ describe('ExpressionsService', () => {
     const expressions = new ExpressionsService();
 
     expect(expressions.setup()).toMatchObject({
+      getFunction: expect.any(Function),
       getFunctions: expect.any(Function),
+      getRenderer: expect.any(Function),
+      getRenderers: expect.any(Function),
+      getType: expect.any(Function),
+      getTypes: expect.any(Function),
       registerFunction: expect.any(Function),
       registerType: expect.any(Function),
       registerRenderer: expect.any(Function),
-      run: expect.any(Function),
+      fork: expect.any(Function),
     });
   });
 
@@ -30,7 +35,16 @@ describe('ExpressionsService', () => {
     expressions.setup();
 
     expect(expressions.start()).toMatchObject({
+      getFunction: expect.any(Function),
       getFunctions: expect.any(Function),
+      getRenderer: expect.any(Function),
+      getRenderers: expect.any(Function),
+      getType: expect.any(Function),
+      getTypes: expect.any(Function),
+      registerFunction: expect.any(Function),
+      registerType: expect.any(Function),
+      registerRenderer: expect.any(Function),
+      execute: expect.any(Function),
       run: expect.any(Function),
     });
   });
@@ -54,21 +68,21 @@ describe('ExpressionsService', () => {
       const service = new ExpressionsService();
       const fork = service.fork();
 
-      expect(fork.executor.state.get().types).toEqual(service.executor.state.get().types);
+      expect(fork.getTypes()).toEqual(service.getTypes());
     });
 
     test('fork keeps all functions of the origin service', () => {
       const service = new ExpressionsService();
       const fork = service.fork();
 
-      expect(fork.executor.state.get().functions).toEqual(service.executor.state.get().functions);
+      expect(fork.getFunctions()).toEqual(service.getFunctions());
     });
 
     test('fork keeps context of the origin service', () => {
       const service = new ExpressionsService();
       const fork = service.fork();
 
-      expect(fork.executor.state.get().context).toEqual(service.executor.state.get().context);
+      expect(fork.executor.state.context).toEqual(service.executor.state.context);
     });
 
     test('newly registered functions in origin are also available in fork', () => {
@@ -82,7 +96,7 @@ describe('ExpressionsService', () => {
         fn: () => {},
       });
 
-      expect(fork.executor.state.get().functions).toEqual(service.executor.state.get().functions);
+      expect(fork.getFunctions()).toEqual(service.getFunctions());
     });
 
     test('newly registered functions in fork are NOT available in origin', () => {
@@ -96,14 +110,15 @@ describe('ExpressionsService', () => {
         fn: () => {},
       });
 
-      expect(Object.values(fork.executor.state.get().functions)).toHaveLength(
-        Object.values(service.executor.state.get().functions).length + 1
+      expect(Object.values(fork.getFunctions())).toHaveLength(
+        Object.values(service.getFunctions()).length + 1
       );
     });
 
     test('fork can execute an expression with newly registered function', async () => {
       const service = new ExpressionsService();
       const fork = service.fork();
+      fork.start();
 
       service.registerFunction({
         name: '__test__',
@@ -117,6 +132,29 @@ describe('ExpressionsService', () => {
       const { result } = await fork.run('__test__', null).toPromise();
 
       expect(result).toBe('123');
+    });
+
+    test('throw on fork if the service is already started', async () => {
+      const service = new ExpressionsService();
+      service.start();
+
+      expect(() => service.fork()).toThrow();
+    });
+  });
+
+  describe('.execute()', () => {
+    test('throw if the service is not started', () => {
+      const expressions = new ExpressionsService();
+
+      expect(() => expressions.execute('foo', null)).toThrow();
+    });
+  });
+
+  describe('.run()', () => {
+    test('throw if the service is not started', () => {
+      const expressions = new ExpressionsService();
+
+      expect(() => expressions.run('foo', null)).toThrow();
     });
   });
 });
