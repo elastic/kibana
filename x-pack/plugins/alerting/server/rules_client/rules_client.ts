@@ -763,10 +763,24 @@ export class RulesClient {
               fixed_interval: '1h',
             },
             aggs: {
-              alerts: {
+              ruleType: {
                 terms: {
                   field: 'event.category',
                   size: 100,
+                },
+              },
+              rule: {
+                terms: {
+                  field: 'rule.id',
+                  size: 100,
+                },
+                aggs: {
+                  ruleName: {
+                    terms: {
+                      field: 'rule.name',
+                      size: 1,
+                    },
+                  },
                 },
               },
             },

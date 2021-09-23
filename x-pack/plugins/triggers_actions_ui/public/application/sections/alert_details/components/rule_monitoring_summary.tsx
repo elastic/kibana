@@ -7,14 +7,13 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment, { Duration } from 'moment';
+import moment from 'moment';
 import {
   dateFormatAliases,
   EuiBasicTable,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -24,7 +23,7 @@ import {
 } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { chunk, sortBy, padStart } from 'lodash';
+import { chunk, sortBy } from 'lodash';
 import {
   Axis,
   BarSeries,
