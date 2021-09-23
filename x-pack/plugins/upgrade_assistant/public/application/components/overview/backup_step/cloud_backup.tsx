@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiLoadingContent,
   EuiFlexGroup,
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { useAppContext } from '../../../app_context';
+import { uiMetricService, UIM_BACKUP_DATA_CLOUD_CLICK } from '../../../lib/ui_metric';
 
 interface Props {
   cloudSnapshotsUrl: string;
@@ -35,13 +37,8 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
     services: { api },
   } = useAppContext();
 
-  const {
-    isInitialRequest,
-    isLoading,
-    error,
-    data,
-    resendRequest,
-  } = api.useLoadCloudBackupStatus();
+  const { isInitialRequest, isLoading, error, data, resendRequest } =
+    api.useLoadCloudBackupStatus();
 
   // Tell overview whether the step is complete or not.
   useEffect(() => {
@@ -133,11 +130,13 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   return (
     <>
       {statusMessage}
-
       <EuiSpacer size="s" />
-
+      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
       <EuiButton
         href={cloudSnapshotsUrl}
+        onClick={() => {
+          uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_BACKUP_DATA_CLOUD_CLICK);
+        }}
         data-test-subj="cloudSnapshotsLink"
         target="_blank"
         iconType="popout"

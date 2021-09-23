@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButtonEmpty,
@@ -24,7 +25,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
+import { DeprecationBadge } from '../shared';
 
 import './_deprecation_details_flyout.scss';
 
@@ -130,12 +133,23 @@ export const DeprecationDetailsFlyout = ({
   deprecationResolutionState,
 }: DeprecationDetailsFlyoutProps) => {
   const { documentationUrl, message, correctiveActions, title } = deprecation;
+  const isCurrent = deprecationResolutionState?.id === deprecation.id;
+  const isResolved = isCurrent && deprecationResolutionState?.resolveDeprecationStatus === 'ok';
+
+  const onResolveDeprecation = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_KIBANA_QUICK_RESOLVE_CLICK);
+    resolveDeprecation(deprecation);
+  }, [deprecation, resolveDeprecation]);
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
+        <DeprecationBadge isCritical={deprecation.level === 'critical'} isResolved={isResolved} />
+        <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2 id="kibanaDeprecationDetailsFlyoutTitle">{title}</h2>
+          <h2 id="kibanaDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">
+            {title}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -154,7 +168,7 @@ export const DeprecationDetailsFlyout = ({
         )}
 
         <EuiText>
-          <p>{message}</p>
+          <p className="eui-textBreakWord">{message}</p>
 
           {documentationUrl && (
             <p>
@@ -168,7 +182,7 @@ export const DeprecationDetailsFlyout = ({
         <EuiSpacer />
 
         {/* Hide resolution steps if already resolved */}
-        {deprecationResolutionState?.resolveDeprecationStatus !== 'ok' && (
+        {!isResolved && (
           <div data-test-subj="resolveSection">
             {correctiveActions.api && (
               <>
@@ -212,17 +226,16 @@ export const DeprecationDetailsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {/* Only show the "Quick resolve" button if deprecation supports it */}
-          {correctiveActions.api && (
+          {/* Only show the "Quick resolve" button if deprecation supports it and deprecation is not yet resolved */}
+          {correctiveActions.api && !isResolved && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
                 data-test-subj="resolveButton"
-                onClick={() => resolveDeprecation(deprecation)}
+                onClick={onResolveDeprecation}
                 isLoading={Boolean(
                   deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'
                 )}
-                disabled={Boolean(deprecationResolutionState?.resolveDeprecationStatus === 'ok')}
               >
                 {getQuickResolveButtonLabel(deprecationResolutionState)}
               </EuiButton>

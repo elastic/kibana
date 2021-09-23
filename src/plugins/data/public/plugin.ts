@@ -22,12 +22,12 @@ import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import {
-  IndexPatternsService,
+  DataViewsService,
   onRedirectNoIndexPattern,
   onUnsupportedTimePattern,
-  IndexPatternsApiClient,
+  DataViewsApiClient,
   UiSettingsPublicToCommon,
-} from './index_patterns';
+} from './data_views';
 import {
   setIndexPatterns,
   setNotifications,
@@ -45,8 +45,8 @@ import {
   createSelectRangeAction,
 } from './actions';
 import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
-import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { getIndexPatternLoad } from './index_patterns/expressions';
+import { SavedObjectsClientPublicToCommon } from './data_views';
+import { getIndexPatternLoad } from './data_views/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
@@ -59,7 +59,8 @@ export class DataPublicPlugin
       DataPublicPluginStart,
       DataSetupDependencies,
       DataStartDependencies
-    > {
+    >
+{
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
@@ -145,10 +146,10 @@ export class DataPublicPlugin
     setOverlays(overlays);
     setUiSettings(uiSettings);
 
-    const indexPatterns = new IndexPatternsService({
+    const indexPatterns = new DataViewsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
-      apiClient: new IndexPatternsApiClient(http),
+      apiClient: new DataViewsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields) => {
         notifications.toasts.add(toastInputFields);

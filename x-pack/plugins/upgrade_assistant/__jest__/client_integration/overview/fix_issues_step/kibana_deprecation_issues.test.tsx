@@ -16,10 +16,8 @@ import { esNoDeprecations } from './mock_es_issues';
 describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
-  const {
-    mockedKibanaDeprecations,
-    mockedCriticalKibanaDeprecations,
-  } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
+  const { mockedKibanaDeprecations, mockedCriticalKibanaDeprecations } =
+    kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
   afterAll(() => {
     server.restore();
@@ -124,9 +122,11 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
         });
       });
 
-      const { component, exists } = testBed;
+      const { component, find } = testBed;
       component.update();
-      expect(exists('kibanaRequestErrorIconTip')).toBe(true);
+      expect(find('loadingIssuesError').text()).toBe(
+        'Could not retrieve Kibana deprecation issues.'
+      );
     });
   });
 });

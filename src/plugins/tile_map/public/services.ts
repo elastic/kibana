@@ -19,14 +19,12 @@ export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('vislib data.fieldFormats');
 
-export const [getQueryService, setQueryService] = createGetterSetter<
-  DataPublicPluginStart['query']
->('Query');
+export const [getQueryService, setQueryService] =
+  createGetterSetter<DataPublicPluginStart['query']>('Query');
 
 export const [getShareService, setShareService] = createGetterSetter<SharePluginStart>('Share');
 
-export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
-  'KibanaLegacy'
-);
+export const [getKibanaLegacy, setKibanaLegacy] =
+  createGetterSetter<KibanaLegacyStart>('KibanaLegacy');
 
 export const [getTmsLayers, setTmsLayers] = createGetterSetter<TmsLayer[]>('TmsLayers');

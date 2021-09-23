@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButton,
@@ -24,6 +25,12 @@ import {
 } from '@elastic/eui';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import {
+  uiMetricService,
+  UIM_ML_SNAPSHOT_UPGRADE_CLICK,
+  UIM_ML_SNAPSHOT_DELETE_CLICK,
+} from '../../../../lib/ui_metric';
+import { DeprecationBadge } from '../../../shared';
 import { MlSnapshotContext } from './context';
 import { SnapshotState } from './use_snapshot_state';
 
@@ -51,12 +58,6 @@ const i18nTexts = {
       defaultMessage: 'Retry upgrade',
     }
   ),
-  upgradeResolvedButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteResolvupgradeResolvedButtonLabeledButtonLabel',
-    {
-      defaultMessage: 'Upgrade complete',
-    }
-  ),
   closeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.closeButtonLabel',
     {
@@ -73,12 +74,6 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deletingButtonLabel',
     {
       defaultMessage: 'Deleting…',
-    }
-  ),
-  deleteResolvedButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteResolvedButtonLabel',
-    {
-      defaultMessage: 'Deletion complete',
     }
   ),
   retryDeleteButtonLabel: i18n.translate(
@@ -119,8 +114,6 @@ const getDeleteButtonLabel = (snapshotState: SnapshotState) => {
     switch (snapshotState.status) {
       case 'in_progress':
         return i18nTexts.deletingButtonLabel;
-      case 'complete':
-        return i18nTexts.deleteResolvedButtonLabel;
       case 'idle':
       default:
         return i18nTexts.deleteButtonLabel;
@@ -138,8 +131,6 @@ const getUpgradeButtonLabel = (snapshotState: SnapshotState) => {
     switch (snapshotState.status) {
       case 'in_progress':
         return i18nTexts.upgradingButtonLabel;
-      case 'complete':
-        return i18nTexts.upgradeResolvedButtonLabel;
       case 'idle':
       default:
         return i18nTexts.upgradeButtonLabel;
@@ -155,12 +146,16 @@ export const FixSnapshotsFlyout = ({
   upgradeSnapshot,
   deleteSnapshot,
 }: FixSnapshotsFlyoutProps) => {
+  const isResolved = snapshotState.status === 'complete';
+
   const onUpgradeSnapshot = () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_ML_SNAPSHOT_UPGRADE_CLICK);
     upgradeSnapshot();
     closeFlyout();
   };
 
   const onDeleteSnapshot = () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_ML_SNAPSHOT_DELETE_CLICK);
     deleteSnapshot();
     closeFlyout();
   };
@@ -168,12 +163,14 @@ export const FixSnapshotsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
+        <DeprecationBadge isCritical={deprecation.isCritical} isResolved={isResolved} />
+        <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="mlSnapshotDetailsFlyoutTitle">{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {snapshotState.error && (
+        {snapshotState.error && !isResolved && (
           <>
             <EuiCallOut
               title={
@@ -207,40 +204,38 @@ export const FixSnapshotsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  data-test-subj="deleteSnapshotButton"
-                  color="danger"
-                  onClick={onDeleteSnapshot}
-                  isLoading={
-                    snapshotState.action === 'delete' && snapshotState.status === 'in_progress'
-                  }
-                  disabled={
-                    snapshotState.status === 'in_progress' || snapshotState.status === 'complete'
-                  }
-                >
-                  {getDeleteButtonLabel(snapshotState)}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButton
-                  fill
-                  onClick={onUpgradeSnapshot}
-                  isLoading={
-                    snapshotState.action === 'upgrade' && snapshotState.status === 'in_progress'
-                  }
-                  disabled={
-                    snapshotState.status === 'in_progress' || snapshotState.status === 'complete'
-                  }
-                  data-test-subj="upgradeSnapshotButton"
-                >
-                  {getUpgradeButtonLabel(snapshotState)}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {!isResolved && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    data-test-subj="deleteSnapshotButton"
+                    color="danger"
+                    onClick={onDeleteSnapshot}
+                    isLoading={
+                      snapshotState.action === 'delete' && snapshotState.status === 'in_progress'
+                    }
+                    isDisabled={snapshotState.status === 'in_progress'}
+                  >
+                    {getDeleteButtonLabel(snapshotState)}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton
+                    fill
+                    onClick={onUpgradeSnapshot}
+                    isLoading={
+                      snapshotState.action === 'upgrade' && snapshotState.status === 'in_progress'
+                    }
+                    isDisabled={snapshotState.status === 'in_progress'}
+                    data-test-subj="upgradeSnapshotButton"
+                  >
+                    {getUpgradeButtonLabel(snapshotState)}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

@@ -21,7 +21,7 @@ import { PromptFooter } from './prompt_footer';
 import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const removeAliases = (item: MatchedItem) =>
-  !((item as unknown) as ResolveIndexResponseItemAlias).indices;
+  !(item as unknown as ResolveIndexResponseItemAlias).indices;
 
 interface Props {
   onCancel: () => void;
@@ -56,7 +56,7 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
 
   const hasDataIndices = allSources.some(isUserDataIndex);
   const hasUserIndexPattern = useAsync(() =>
-    indexPatternService.hasUserIndexPattern().catch(() => true)
+    indexPatternService.hasUserDataView().catch(() => true)
   );
 
   useEffect(() => {

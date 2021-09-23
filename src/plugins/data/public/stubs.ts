@@ -7,4 +7,4 @@
  */
 
 export * from '../common/stubs';
-export { createStubIndexPattern } from './index_patterns/index_patterns/index_pattern.stub';
+export { createStubDataView } from './data_views/data_views/data_view.stub';

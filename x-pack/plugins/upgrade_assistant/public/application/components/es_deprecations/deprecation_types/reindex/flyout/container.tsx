@@ -21,6 +21,7 @@ import { useAppContext } from '../../../../../app_context';
 import type { ReindexStateContext } from '../context';
 import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
+import { DeprecationBadge } from '../../../../shared';
 
 enum ReindexFlyoutStep {
   reindexWarnings,
@@ -130,6 +131,11 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
+        <DeprecationBadge
+          isCritical={deprecation.isCritical}
+          isResolved={reindexState.status === ReindexStatus.completed}
+        />
+        <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="reindexDetailsFlyoutTitle">
             <FormattedMessage

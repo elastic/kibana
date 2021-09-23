@@ -325,20 +325,22 @@ export function createConfig(
   }
 
   const isUsingLegacyProvidersFormat = Array.isArray(config.authc.providers);
-  const providers = (isUsingLegacyProvidersFormat
-    ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
-        (legacyProviders, providerType, order) => {
-          legacyProviders[providerType] = {
-            [providerType]:
-              providerType === 'saml' || providerType === 'oidc'
-                ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
-                : { enabled: true, showInSelector: true, order },
-          };
-          return legacyProviders;
-        },
-        {} as Record<string, unknown>
-      )
-    : config.authc.providers) as ProvidersConfigType;
+  const providers = (
+    isUsingLegacyProvidersFormat
+      ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
+          (legacyProviders, providerType, order) => {
+            legacyProviders[providerType] = {
+              [providerType]:
+                providerType === 'saml' || providerType === 'oidc'
+                  ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
+                  : { enabled: true, showInSelector: true, order },
+            };
+            return legacyProviders;
+          },
+          {} as Record<string, unknown>
+        )
+      : config.authc.providers
+  ) as ProvidersConfigType;
 
   // Remove disabled providers and sort the rest.
   const sortedProviders: Array<{

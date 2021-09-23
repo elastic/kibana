@@ -13,7 +13,7 @@ import { useRequest } from '../../../public/request';
 
 import { Privileges, Error as CustomError } from '../types';
 
-interface Authorization {
+export interface Authorization {
   isLoading: boolean;
   apiError: CustomError | null;
   privileges: Privileges;
@@ -45,7 +45,11 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, httpClient, children }: Props) => {
-  const { isLoading, error, data: privilegesData } = useRequest<any, CustomError>(httpClient, {
+  const {
+    isLoading,
+    error,
+    data: privilegesData,
+  } = useRequest<any, CustomError>(httpClient, {
     path: privilegesEndpoint,
     method: 'get',
   });

@@ -48,7 +48,8 @@ export class ManagementPlugin
       ManagementStart,
       ManagementSetupDependencies,
       ManagementStartDependencies
-    > {
+    >
+{
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {

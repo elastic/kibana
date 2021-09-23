@@ -51,10 +51,8 @@ export const ClusterOverview: React.FC<{}> = () => {
       {
         id: 'clusterName',
         label: clusters[0].cluster_name,
-        disabled: false,
-        description: clusters[0].cluster_name,
-        onClick: () => {},
         testSubj: 'clusterName',
+        route: '/overview',
       },
     ];
   }

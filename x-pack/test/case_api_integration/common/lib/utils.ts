@@ -47,6 +47,7 @@ import {
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
+  CaseResolveResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -550,9 +551,10 @@ export const superUserSpace1Auth = getAuthWithSuperUser();
  * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
  * functions.
  */
-export function getAuthWithSuperUser(
-  space: string | null = 'space1'
-): { user: User; space: string | null } {
+export function getAuthWithSuperUser(space: string | null = 'space1'): {
+  user: User;
+  space: string | null;
+} {
   return { user: superUser, space };
 }
 
@@ -588,20 +590,19 @@ interface ConnectorMappingsSavedObject {
  * Returns connector mappings saved objects from Elasticsearch directly.
  */
 export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) => {
-  const mappings: ApiResponse<
-    estypes.SearchResponse<ConnectorMappingsSavedObject>
-  > = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases-connector-mappings',
+  const mappings: ApiResponse<estypes.SearchResponse<ConnectorMappingsSavedObject>> =
+    await es.search({
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases-connector-mappings',
+            },
           },
         },
       },
-    },
-  });
+    });
 
   return mappings;
 };
@@ -631,20 +632,19 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient 
 };
 
 export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
-  const configure: ApiResponse<
-    estypes.SearchResponse<{ cases: ESCaseAttributes }>
-  > = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases',
+  const configure: ApiResponse<estypes.SearchResponse<{ cases: ESCaseAttributes }>> =
+    await es.search({
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases',
+            },
           },
         },
       },
-    },
-  });
+    });
 
   return configure;
 };
@@ -1065,6 +1065,32 @@ export const getCase = async ({
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+export const resolveCase = async ({
+  supertest,
+  caseId,
+  includeComments = false,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  includeComments?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResolveResponse> => {
+  const { body: theResolvedCase } = await supertest
+    .get(
+      `${getSpaceUrlPrefix(
+        auth?.space
+      )}${CASES_URL}/${caseId}/resolve?includeComments=${includeComments}`
+    )
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return theResolvedCase;
 };
 
 export const findCases = async ({
