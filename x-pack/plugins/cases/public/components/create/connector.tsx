@@ -131,7 +131,7 @@ const ConnectorComponent: React.FC<Props> = ({
           component={ConnectorFields}
           componentProps={{
             connectors,
-            hideConnectorServiceNowSir,
+            hideConnectorServiceNowSir,//
             isEdit: true,
           }}
         />
