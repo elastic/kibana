@@ -12,7 +12,7 @@ import { handleError } from '../../../../lib/errors';
 // @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 // @ts-ignore
 import { metricSet } from './metric_set_instance';
 import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';

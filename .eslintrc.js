@@ -492,7 +492,7 @@ module.exports = {
     {
       files: [
         '**/*.stories.tsx',
-        'src/cli_keystore/*.test.js',
+        'src/cli/keystore/*.test.js',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/plugins/apm/**/*.js',
@@ -507,6 +507,7 @@ module.exports = {
       ],
       rules: {
         'import/no-default-export': 'off',
+        'import/no-named-as-default-member': 'off',
         'import/no-named-as-default': 'off',
       },
     },
