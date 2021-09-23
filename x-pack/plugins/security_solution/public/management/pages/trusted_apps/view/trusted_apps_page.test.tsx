@@ -430,8 +430,11 @@ describe('When on the Trusted Apps Page', () => {
     it('should have list of policies populated', async () => {
       useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       const resetEnv = forceHTMLElementOffsetWidth();
-      const { getByTestId } = await renderAndClickAddButton();
-      expect(getByTestId('policy-abc123'));
+      const renderResult = await renderAndClickAddButton();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('perPolicy'));
+      });
+      expect(renderResult.getByTestId('policy-abc123'));
       resetEnv();
     });
 
