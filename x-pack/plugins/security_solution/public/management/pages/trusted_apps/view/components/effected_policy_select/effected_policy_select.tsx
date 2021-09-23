@@ -56,12 +56,14 @@ export type EffectedPolicySelectProps = Omit<
 > & {
   options: PolicyData[];
   isGlobal: boolean;
+  isPlatinumPlus: boolean;
   onChange: (selection: EffectedPolicySelection) => void;
   selected?: PolicyData[];
 };
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({
     isGlobal,
+    isPlatinumPlus,
     onChange,
     listProps,
     options,
@@ -107,7 +109,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               id={htmlIdGenerator()()}
               onChange={NOOP}
               checked={isPolicySelected.has(policy.id)}
-              disabled={isGlobal}
+              disabled={isGlobal || !isPlatinumPlus}
             />
           ),
           append: (
@@ -124,11 +126,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           ),
           policy,
           checked: isPolicySelected.has(policy.id) ? 'on' : undefined,
-          disabled: isGlobal,
+          disabled: isGlobal || !isPlatinumPlus,
           'data-test-subj': `policy-${policy.id}`,
         }))
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
-    }, [getAppUrl, isGlobal, options, selected]);
+    }, [getAppUrl, isGlobal, isPlatinumPlus, options, selected]);
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']

@@ -48,6 +48,7 @@ import {
   EffectedPolicySelectProps,
 } from './effected_policy_select';
 import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useLicense } from '../../../../../common/hooks/use_license';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -189,6 +190,7 @@ export type CreateTrustedAppFormProps = Pick<
 > & {
   /** The trusted app values that will be passed to the form */
   trustedApp: MaybeImmutable<NewTrustedApp>;
+  isEditMode: boolean;
   onChange: (state: TrustedAppFormState) => void;
   /** Setting passed on to the EffectedPolicySelect component */
   policies: Pick<EffectedPolicySelectProps, 'options' | 'isLoading'>;
@@ -196,7 +198,14 @@ export type CreateTrustedAppFormProps = Pick<
   fullWidth?: boolean;
 };
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
-  ({ fullWidth, onChange, trustedApp: _trustedApp, policies = { options: [] }, ...formProps }) => {
+  ({
+    fullWidth,
+    isEditMode,
+    onChange,
+    trustedApp: _trustedApp,
+    policies = { options: [] },
+    ...formProps
+  }) => {
     const trustedApp = _trustedApp as NewTrustedApp;
 
     const dataTestSubj = formProps['data-test-subj'];
@@ -204,6 +213,14 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
       'trustedAppsByPolicyEnabled'
     );
+
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+
+    const isGlobal = isGlobalEffectScope(trustedApp.effectScope);
+
+    const showAssignmentSection = useMemo(() => {
+      return isPlatinumPlus || (isEditMode && !isGlobal);
+    }, [isEditMode, isGlobal, isPlatinumPlus]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
@@ -213,7 +230,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     // We create local state for the list of policies because we want the selected policies to
     // persist while the user is on the form and possibly toggling between global/non-global
     const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
-      isGlobal: isGlobalEffectScope(trustedApp.effectScope),
+      isGlobal,
       selected: [],
     });
 
@@ -530,12 +547,13 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
-        {isTrustedAppsByPolicyEnabled ? (
+        {isTrustedAppsByPolicyEnabled && showAssignmentSection ? (
           <>
             <EuiHorizontalRule />
             <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
               <EffectedPolicySelect
-                isGlobal={isGlobalEffectScope(trustedApp.effectScope)}
+                isGlobal={isGlobal}
+                isPlatinumPlus={isPlatinumPlus}
                 selected={selectedPolicies.selected}
                 options={policies.options}
                 onChange={handlePolicySelectChange}

@@ -191,6 +191,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             fullWidth
             onChange={handleFormOnChange}
             isInvalid={!!creationErrors}
+            isEditMode={isEditMode}
             error={creationErrorsMessage}
             policies={policies}
             trustedApp={formValues}
