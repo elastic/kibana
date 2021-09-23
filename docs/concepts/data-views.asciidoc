@@ -63,7 +63,7 @@ based on different timestamps.
 
 . Click *Create data view*.
 +
-[[data-view-reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index,
+[[reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index,
 the data view field list is updated
 the next time the data view is loaded, for example, when you load the page or
 move between {kib} apps.
