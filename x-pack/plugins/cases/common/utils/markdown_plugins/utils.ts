@@ -14,7 +14,7 @@ import unified from 'unified';
 import { TimeRange } from 'src/plugins/data/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import { LENS_ID, LensParser, LensSerializer } from './lens';
-import { TimelineSerializer, TimelineParser } from './timeline';
+import { TimelineSerializer, TimelineParser, TIMELINE_ID } from './timeline';
 
 export interface LensMarkdownNode extends Node {
   timeRange: TimeRange;
@@ -23,11 +23,18 @@ export interface LensMarkdownNode extends Node {
   id: string;
 }
 
+export interface TimelineMarkdownNode extends Node {
+  type: string;
+  title: string;
+  url: string;
+  id: string;
+}
+
 /**
  * A node that has children of other nodes describing the markdown elements or a specific lens visualization.
  */
 export interface MarkdownNode extends Node {
-  children: Array<LensMarkdownNode | Node>;
+  children: Array<LensMarkdownNode | TimelineMarkdownNode | Node>;
 }
 
 export const getLensVisualizations = (parsedComment?: Array<LensMarkdownNode | Node>) =>
@@ -62,12 +69,25 @@ export const stringifyMarkdownComment = (comment: MarkdownNode) =>
     ])
     .stringify(comment);
 
+// TODO: move these to their respective directory
+
 export const isLensMarkdownNode = (node?: unknown): node is LensMarkdownNode => {
   const unsafeNode = node as LensMarkdownNode;
   return (
     unsafeNode != null &&
     unsafeNode.timeRange != null &&
     unsafeNode.attributes != null &&
-    unsafeNode.type === 'lens'
+    unsafeNode.type === LENS_ID
+  );
+};
+
+export const isTimelineMarkdownNode = (node?: unknown): node is TimelineMarkdownNode => {
+  const unsafeNode = node as TimelineMarkdownNode;
+
+  return (
+    unsafeNode != null &&
+    unsafeNode.title != null &&
+    unsafeNode.url != null &&
+    unsafeNode.type === TIMELINE_ID
   );
 };

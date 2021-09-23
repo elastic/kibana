@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export interface TimelineSerializerProps {
-  title: string;
-  url: string;
-}
-
-export const TimelineSerializer = ({ title, url }: TimelineSerializerProps) => `[${title}](${url})`;
+export type Eat = Function & { now: Function };

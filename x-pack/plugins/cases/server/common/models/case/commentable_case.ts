@@ -37,7 +37,7 @@ import { flattenCommentSavedObjects, flattenSubCaseSavedObject, transformNewComm
 import { AttachmentService, CasesService } from '../../../services';
 import { createCaseError } from '../../error';
 import { countAlertsForID } from '../../index';
-import { getOrUpdateLensReferences } from './utils';
+import { ReferencesExtractor } from './reference_extractor';
 import { isCommentRequestTypeUser, isCommentSavedObjectTypeUser } from '../../utils';
 
 interface UpdateCommentResp {
@@ -50,6 +50,8 @@ interface NewCommentResp {
   commentableCase: CommentableCase;
 }
 
+type LensEmbeddableFactory = LensServerPluginSetup['lensEmbeddableFactory'];
+
 interface CommentableCaseParams {
   collection: SavedObject<CaseAttributes>;
   subCase?: SavedObject<SubCaseAttributes>;
@@ -57,7 +59,7 @@ interface CommentableCaseParams {
   caseService: CasesService;
   attachmentService: AttachmentService;
   logger: Logger;
-  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  lensEmbeddableFactory: LensEmbeddableFactory;
 }
 
 /**
@@ -71,8 +73,10 @@ export class CommentableCase {
   private readonly caseService: CasesService;
   private readonly attachmentService: AttachmentService;
   private readonly logger: Logger;
-  private readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  private readonly referencesExtractor: ReferencesExtractor;
+  private readonly lensEmbeddableFactory: LensEmbeddableFactory;
 
+  constructor(params: CommentableCaseParams);
   constructor({
     collection,
     subCase,
@@ -89,6 +93,7 @@ export class CommentableCase {
     this.attachmentService = attachmentService;
     this.logger = logger;
     this.lensEmbeddableFactory = lensEmbeddableFactory;
+    this.referencesExtractor = new ReferencesExtractor(lensEmbeddableFactory);
   }
 
   public get status(): CaseStatuses {
@@ -191,8 +196,7 @@ export class CommentableCase {
       throw new Error('update request of type user comment does not match stored comment type');
     }
 
-    const updatedReferences = getOrUpdateLensReferences(
-      this.lensEmbeddableFactory,
+    const updatedReferences = this.referencesExtractor.extractReferences(
       request.comment,
       currentComment
     );
@@ -344,10 +348,7 @@ export class CommentableCase {
       return [];
     }
 
-    const commentStringReferences = getOrUpdateLensReferences(
-      this.lensEmbeddableFactory,
-      request.comment
-    );
+    const commentStringReferences = this.referencesExtractor.extractReferences(request.comment);
 
     return commentStringReferences;
   }

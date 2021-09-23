@@ -7,9 +7,24 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NO_PARENTHESES = i18n.translate(
-  'xpack.cases.markdownEditor.plugins.timeline.noParenthesesErrorMsg',
+export const NO_CHARACTER = (character: string) =>
+  i18n.translate('xpack.cases.markdownEditor.plugins.timeline.noCharacterErrorMsg', {
+    defaultMessage: 'Expected a { character }',
+    values: {
+      character,
+    },
+  });
+
+export const NO_TIMELINE_NAME_FOUND = i18n.translate(
+  'xpack.cases.markdownEditor.plugins.timeline.noTimelineNameFoundErrorMsg',
   {
-    defaultMessage: 'Expected left parentheses',
+    defaultMessage: 'No timeline name found',
+  }
+);
+
+export const NO_TIMELINE_URL_FOUND = i18n.translate(
+  'xpack.cases.markdownEditor.plugins.timeline.noTimelineUrlFoundErrorMsg',
+  {
+    defaultMessage: 'No timeline URL found',
   }
 );
