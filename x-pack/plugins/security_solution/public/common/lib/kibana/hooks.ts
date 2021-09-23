@@ -12,7 +12,12 @@ import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-import { APP_ID, DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
+import {
+  APP_ID,
+  CASES_FEATURE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+} from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { AuthenticatedUser } from '../../../../../security/common/model';
 import { NavigateToAppOptions } from '../../../../../../../src/core/public';
@@ -152,9 +157,13 @@ export const useGetUserCasesPermissions = () => {
 
   useEffect(() => {
     const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities.siem.crud_cases === 'boolean' ? uiCapabilities.siem.crud_cases : false;
+      typeof uiCapabilities[CASES_FEATURE_ID].crud_cases === 'boolean'
+        ? (uiCapabilities[CASES_FEATURE_ID].crud_cases as boolean)
+        : false;
     const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities.siem.read_cases === 'boolean' ? uiCapabilities.siem.read_cases : false;
+      typeof uiCapabilities[CASES_FEATURE_ID].read_cases === 'boolean'
+        ? (uiCapabilities[CASES_FEATURE_ID].read_cases as boolean)
+        : false;
     setCasesPermissions({
       crud: capabilitiesCanUserCRUD,
       read: capabilitiesCanUserRead,

@@ -42,6 +42,7 @@ import {
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
   UEBA_PATH,
+  CASES_FEATURE_ID,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -349,7 +350,7 @@ export function getDeepLinks(
       (deepLink) =>
         (deepLink.id !== SecurityPageName.case && deepLink.id !== SecurityPageName.ueba) || // is not cases or ueba
         (deepLink.id === SecurityPageName.case &&
-          (capabilities == null || capabilities.siem.read_cases === true)) || // is cases with at least read only caps
+          (capabilities == null || capabilities[CASES_FEATURE_ID].read_cases === true)) || // is cases with at least read only caps
         (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled) // is ueba with ueba feature flag enabled
     )
     .map((deepLink) => {
@@ -361,7 +362,7 @@ export function getDeepLinks(
       if (
         deepLinkId === SecurityPageName.case &&
         capabilities != null &&
-        capabilities.siem.crud_cases === false
+        capabilities[CASES_FEATURE_ID].crud_cases === false
       ) {
         return {
           ...deepLink,
