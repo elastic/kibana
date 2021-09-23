@@ -255,7 +255,10 @@ export const Expressions: React.FC<Props> = (props) => {
     [alertParams.criteria]
   );
 
-  const hasGroupBy = useMemo(() => alertParams.groupBy?.length > 0, [alertParams.groupBy]);
+  const hasGroupBy = useMemo(
+    () => alertParams.groupBy && alertParams.groupBy.length > 0,
+    [alertParams.groupBy]
+  );
 
   return (
     <>
