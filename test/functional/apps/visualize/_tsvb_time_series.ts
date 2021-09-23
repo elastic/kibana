@@ -433,6 +433,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         after(async () => await visualBuilder.toggleNewChartsLibraryWithDebug(false));
       });
+
+      describe('index pattern selection mode', () => {
+        it('should disable switch for Kibana index patterns mode by default', async () => {
+          await visualBuilder.clickPanelOptions('timeSeries');
+          const isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+          expect(isEnabled).to.be(false);
+        });
+
+        describe('metrics:allowStringIndices = true', () => {
+          before(async () => {
+            await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': true });
+            await browser.refresh();
+          });
+
+          beforeEach(async () => await visualBuilder.clickPanelOptions('timeSeries'));
+
+          it('should not disable switch for Kibana index patterns mode', async () => {
+            await visualBuilder.switchIndexPatternSelectionMode(true);
+
+            const isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+            expect(isEnabled).to.be(true);
+          });
+
+          it('should disable switch after selecting Kibana index patterns mode and metrics:allowStringIndices = false', async () => {
+            await visualBuilder.switchIndexPatternSelectionMode(false);
+            await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false });
+            await browser.refresh();
+            await visualBuilder.clickPanelOptions('timeSeries');
+
+            let isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+            expect(isEnabled).to.be(true);
+
+            await visualBuilder.switchIndexPatternSelectionMode(true);
+            isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+            expect(isEnabled).to.be(false);
+          });
+
+          after(
+            async () =>
+              await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false })
+          );
+        });
+      });
     });
   });
 }
