@@ -7,10 +7,14 @@
 
 import * as React from 'react';
 import { DrilldownManagerDependencies, PublicDrilldownManagerProps } from '../../types';
-import { DrilldownManagerProvider } from '../context';
-import { DrilldownManager } from './drilldown_manager';
 
 export type PublicDrilldownManagerComponent = React.FC<PublicDrilldownManagerProps>;
+
+const LazyDrilldownManager = React.lazy(() =>
+  import('./drilldown_manager_with_provider').then((m) => ({
+    default: m.DrilldownManagerWithProvider,
+  }))
+);
 
 /**
  * This HOC creates a "public" `<DrilldownManager>` component `PublicDrilldownManagerComponent`,
@@ -21,9 +25,9 @@ export const createPublicDrilldownManager = (
 ): PublicDrilldownManagerComponent => {
   const PublicDrilldownManager: PublicDrilldownManagerComponent = (drilldownManagerProps) => {
     return (
-      <DrilldownManagerProvider {...dependencies} {...drilldownManagerProps}>
-        <DrilldownManager />
-      </DrilldownManagerProvider>
+      <React.Suspense fallback={null}>
+        <LazyDrilldownManager {...dependencies} {...drilldownManagerProps} />
+      </React.Suspense>
     );
   };
 

@@ -18,7 +18,6 @@ export {
   StartContract as AdvancedUiActionsStart,
 } from './plugin';
 
-export { ActionWizard } from './components';
 export {
   ActionFactoryDefinition as UiActionsEnhancedActionFactoryDefinition,
   ActionFactory as UiActionsEnhancedActionFactory,

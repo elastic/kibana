@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './drilldown_manager';
 export * from './create_public_drilldown_manager';
