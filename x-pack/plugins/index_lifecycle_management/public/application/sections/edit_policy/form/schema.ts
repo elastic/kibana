@@ -108,9 +108,7 @@ const numberOfShardsField = {
   serializer: serializers.stringToNumber,
 };
 const shardSizeField = {
-  label: i18n.translate('xpack.indexLifecycleMgmt.shrink.primaryShardSizeLabel', {
-    defaultMessage: 'Maximum shard size',
-  }),
+  label: i18nTexts.editPolicy.maxPrimaryShardSizeLabel,
   validations: [
     {
       validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
@@ -368,12 +366,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_primary_shard_size: {
-            label: i18n.translate(
-              'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeLabel',
-              {
-                defaultMessage: 'Maximum primary shard size',
-              }
-            ),
+            label: i18nTexts.editPolicy.maxPrimaryShardSizeLabel,
             validations: [
               {
                 validator: rolloverThresholdsValidator,
