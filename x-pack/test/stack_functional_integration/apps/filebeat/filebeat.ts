@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.selectIndexPattern('filebeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('Last_30 days');
       await retry.try(async () => {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount());
+        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
     });

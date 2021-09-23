@@ -11,14 +11,17 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'uptime']);
 
-  describe('check heartbeat', function () {
-    it('Uptime app should show snapshot count  greater than zero', async function () {
+  describe('check heartbeat overview page', function () {
+    it('Uptime app should show 1 UP monitor', async function () {
       await PageObjects.common.navigateToApp('uptime', { insertTimestamp: false });
 
       await retry.try(async function () {
-        const upCount = parseInt((await PageObjects.uptime.getSnapshotCount()).up);
-        expect(upCount).to.be.greaterThan(0);
+        const upCount = parseInt((await PageObjects.uptime.getSnapshotCount()).up, 10);
+        expect(upCount).to.eql(1);
       });
+    });
+    it('Uptime app should show Kibana QA Monitor present', async function () {
+      await PageObjects.uptime.pageHasExpectedIds(['kibana-qa-monitor']);
     });
   });
 }

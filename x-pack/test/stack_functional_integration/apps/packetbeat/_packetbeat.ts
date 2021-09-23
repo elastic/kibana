@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.selectIndexPattern('packetbeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('Today');
       await retry.try(async function () {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount());
+        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
     });
