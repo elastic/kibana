@@ -28,7 +28,7 @@ describe('ClusterConfigurationForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <ClusterConfigurationForm
           host="https://localhost:9200"
           authRequired
@@ -76,7 +76,7 @@ describe('ClusterConfigurationForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <ClusterConfigurationForm
           host="https://localhost:9200"
           authRequired

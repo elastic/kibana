@@ -30,7 +30,7 @@ import type { EnrollmentToken } from '../common';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
-import { useHttp } from './use_http';
+import { useKibana } from './use_kibana';
 import { useVerification } from './use_verification';
 import { useVisibility } from './use_visibility';
 
@@ -51,7 +51,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
   onCancel,
   onSuccess,
 }) => {
-  const http = useHttp();
+  const { http } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
     defaultValues,

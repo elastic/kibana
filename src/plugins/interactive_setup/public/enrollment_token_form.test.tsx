@@ -36,7 +36,7 @@ describe('EnrollmentTokenForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <EnrollmentTokenForm onSuccess={onSuccess} />
       </Providers>
     );
@@ -62,7 +62,7 @@ describe('EnrollmentTokenForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <EnrollmentTokenForm onSuccess={onSuccess} />
       </Providers>
     );

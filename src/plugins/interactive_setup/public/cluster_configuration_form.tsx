@@ -7,6 +7,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -19,25 +20,32 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLink,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import type { IHttpFetchError } from 'kibana/public';
 
 import type { Certificate } from '../common';
+import { DocLink } from './doc_link';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useHtmlId } from './use_html_id';
-import { useHttp } from './use_http';
+import { useKibana } from './use_kibana';
 import { useVerification } from './use_verification';
 import { useVisibility } from './use_visibility';
 
@@ -68,7 +76,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
   onCancel,
   onSuccess,
 }) => {
-  const http = useHttp();
+  const { http } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
     defaultValues,
@@ -218,12 +226,12 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
               />
             </p>
             <p>
-              <EuiLink color="warning">
+              <DocLink app="elasticsearch" doc="configuring-stack-security.html" color="warning">
                 <FormattedMessage
                   id="interactiveSetup.clusterConfigurationForm.insecureClusterLink"
                   defaultMessage="Learn how to enable security features."
                 />
-              </EuiLink>
+              </DocLink>
             </p>
           </EuiCallOut>
           <EuiSpacer />
@@ -253,7 +261,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
                 form.setValue('caCert', form.values.caCert ? '' : intermediateCa.raw);
               }}
             >
-              <CertificatePanel certificate={certificateChain[0]} />
+              <CertificateChain certificateChain={certificateChain} />
             </EuiCheckableCard>
           </EuiFormRow>
           <EuiSpacer />
@@ -290,40 +298,169 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
 };
 
 export interface CertificatePanelProps {
-  certificate: Certificate;
+  certificate: Omit<Certificate, 'raw'>;
+  compressed?: boolean;
+  type?: 'root' | 'intermediate';
+  onClick?(): void;
 }
 
-export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({ certificate }) => {
+export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({
+  certificate,
+  onClick,
+  type,
+  compressed = false,
+}) => {
   return (
-    <EuiPanel color="subdued">
+    <EuiPanel color={compressed ? 'subdued' : undefined} hasBorder={!compressed}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiIcon type="document" size="l" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h3>{certificate.subject.O || certificate.subject.CN}</h3>
-          </EuiTitle>
-          <EuiText size="xs">
-            <FormattedMessage
-              id="interactiveSetup.certificatePanel.issuer"
-              defaultMessage="Issued by: {issuer}"
-              values={{
-                issuer: certificate.issuer.O || certificate.issuer.CN,
-              }}
-            />
-          </EuiText>
+          <EuiFlexGroup responsive={false} gutterSize="none" justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h3>{certificate.subject.O || certificate.subject.CN}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {!compressed && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge>
+                  {type === 'root'
+                    ? i18n.translate('interactiveSetup.certificatePanel.rootCertificateAuthority', {
+                        defaultMessage: 'Root CA',
+                      })
+                    : type === 'intermediate'
+                    ? i18n.translate(
+                        'interactiveSetup.certificatePanel.intermediateCertificateAuthority',
+                        {
+                          defaultMessage: 'Intermediate CA',
+                        }
+                      )
+                    : i18n.translate('interactiveSetup.certificatePanel.serverCertificate', {
+                        defaultMessage: 'Server certificate',
+                      })}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          {compressed && (
+            <EuiText size="xs">
+              <FormattedMessage
+                id="interactiveSetup.certificatePanel.issuer"
+                defaultMessage="Issued by: {issuer}"
+                values={{
+                  issuer: onClick ? (
+                    <EuiLink onClick={onClick}>
+                      {certificate.issuer.O || certificate.issuer.CN}
+                    </EuiLink>
+                  ) : (
+                    certificate.issuer.O || certificate.issuer.CN
+                  ),
+                }}
+              />
+            </EuiText>
+          )}
+          {!compressed && (
+            <EuiText size="xs">
+              <FormattedMessage
+                id="interactiveSetup.certificatePanel.validFrom"
+                defaultMessage="Issued on: {validFrom}"
+                values={{
+                  validFrom: certificate.valid_from,
+                }}
+              />
+            </EuiText>
+          )}
           <EuiText size="xs">
             <FormattedMessage
               id="interactiveSetup.certificatePanel.validTo"
-              defaultMessage="Expires: {validTo}"
+              defaultMessage="Expires on: {validTo}"
               values={{
                 validTo: certificate.valid_to,
               }}
             />
           </EuiText>
+          {!compressed && (
+            <EuiText size="xs">
+              <FormattedMessage
+                id="interactiveSetup.certificatePanel.validFrom"
+                defaultMessage="Fingerprint (SHA-256): {fingerprint}"
+                values={{
+                  fingerprint: certificate.fingerprint256.replace(/\:/g, ' '),
+                }}
+              />
+            </EuiText>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
+  );
+};
+
+export interface CertificateChainProps {
+  certificateChain: Certificate[];
+}
+const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificateChain }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <>
+      <CertificatePanel
+        certificate={certificateChain[0]}
+        onClick={() => setShowModal(true)}
+        compressed
+      />
+      {showModal && (
+        <EuiModal onClose={() => setShowModal(false)} maxWidth={euiThemeVars.euiBreakpoints.s}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="interactiveSetup.certificateChain.title"
+                defaultMessage="Certificate chain"
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            {certificateChain
+              .slice()
+              .reverse()
+              .map(({ raw, ...certificate }, i) => (
+                <>
+                  {i > 0 && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiFlexGroup responsive={false} justifyContent="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="sortDown" color="subdued" />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="s" />
+                    </>
+                  )}
+                  <CertificatePanel
+                    certificate={certificate}
+                    type={
+                      i === 0
+                        ? 'root'
+                        : i < certificateChain.length - 1
+                        ? 'intermediate'
+                        : undefined
+                    }
+                  />
+                </>
+              ))}
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton fill onClick={() => setShowModal(false)}>
+              <FormattedMessage
+                id="interactiveSetup.certificateChain.cancelButton"
+                defaultMessage="Close"
+              />
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+    </>
   );
 };

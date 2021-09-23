@@ -28,7 +28,7 @@ describe('ClusterAddressForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <ClusterAddressForm onSuccess={onSuccess} />
       </Providers>
     );
@@ -52,7 +52,7 @@ describe('ClusterAddressForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <ClusterAddressForm onSuccess={onSuccess} />
       </Providers>
     );

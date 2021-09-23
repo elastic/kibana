@@ -27,7 +27,7 @@ import type { IHttpFetchError } from 'kibana/public';
 import type { PingResult } from '../common';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
-import { useHttp } from './use_http';
+import { useKibana } from './use_kibana';
 
 export interface ClusterAddressFormValues {
   host: string;
@@ -46,7 +46,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
   onCancel,
   onSuccess,
 }) => {
-  const http = useHttp();
+  const { http } = useKibana();
 
   const [form, eventHandlers] = useForm({
     defaultValues,

@@ -11,10 +11,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import type { CoreSetup, CoreStart, HttpSetup, Plugin } from 'src/core/public';
+import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { App } from './app';
-import { HttpProvider } from './use_http';
+import { KibanaProvider } from './use_kibana';
 import { VerificationProvider } from './use_verification';
 
 export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
@@ -24,16 +24,17 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
       title: 'Configure Elastic to get started',
       appRoute: '/',
       chromeless: true,
-      mount: (params) => {
+      mount: async (params) => {
         const url = new URL(window.location.href);
         const defaultCode = url.searchParams.get('code') || undefined;
         const onSuccess = () => {
           url.searchParams.delete('code');
           window.location.replace(url.href);
         };
+        const [services] = await core.getStartServices();
 
         ReactDOM.render(
-          <Providers defaultCode={defaultCode} http={core.http}>
+          <Providers defaultCode={defaultCode} services={services}>
             <App onSuccess={onSuccess} />
           </Providers>,
           params.element
@@ -47,14 +48,18 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
 }
 
 export interface ProvidersProps {
-  http: HttpSetup;
+  services: CoreStart;
   defaultCode?: string;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({ defaultCode, http, children }) => (
+export const Providers: FunctionComponent<ProvidersProps> = ({
+  defaultCode,
+  services,
+  children,
+}) => (
   <I18nProvider>
-    <HttpProvider http={http}>
+    <KibanaProvider services={services}>
       <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>
-    </HttpProvider>
+    </KibanaProvider>
   </I18nProvider>
 );
