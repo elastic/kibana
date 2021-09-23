@@ -120,6 +120,7 @@ describe('When using the Trusted App Form', () => {
     formProps = {
       'data-test-subj': dataTestSubjForForm,
       trustedApp: latestUpdatedTrustedApp,
+      isEditMode: false,
       onChange: jest.fn((updates) => {
         latestUpdatedTrustedApp = updates.item;
       }),
