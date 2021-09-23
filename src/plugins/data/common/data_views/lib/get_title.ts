@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+import { SavedObjectsClientContract } from '../../../../../core/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../constants';
+import { DataViewAttributes } from '../types';
 
 export async function getTitle(
   client: SavedObjectsClientContract,
   indexPatternId: string
-): Promise<SimpleSavedObject<any>> {
-  const savedObject = (await client.get(
+): Promise<string> {
+  const savedObject = await client.get<DataViewAttributes>(
     DATA_VIEW_SAVED_OBJECT_TYPE,
     indexPatternId
-  )) as SimpleSavedObject<any>;
+  );
 
   if (savedObject.error) {
     throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
