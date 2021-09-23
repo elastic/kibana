@@ -255,8 +255,8 @@ describe('EngineLogic', () => {
         expect(EngineLogic.actions.onPollStart).toHaveBeenCalled();
       });
 
-      it('polls for engine data if the current engine is empty', () => {
-        mount({ engine: {} });
+      it('polls for engine data if the current engine has no documents', () => {
+        mount({ engine: { ...mockEngineData, document_count: 0 } });
         jest.spyOn(EngineLogic.actions, 'initializeEngine');
 
         EngineLogic.actions.pollEmptyEngine();
@@ -267,8 +267,8 @@ describe('EngineLogic', () => {
         expect(EngineLogic.actions.initializeEngine).toHaveBeenCalledTimes(2);
       });
 
-      it('cancels the poll if the current engine changed from empty to non-empty', () => {
-        mount({ engine: mockEngineData });
+      it('cancels the poll if the current engine has documents', () => {
+        mount({ engine: { ...mockEngineData, document_count: 1 } });
         jest.spyOn(EngineLogic.actions, 'stopPolling');
         jest.spyOn(EngineLogic.actions, 'initializeEngine');
 
