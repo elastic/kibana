@@ -12,13 +12,17 @@ import {
   transformToNotifyWhen,
   transformToAlertThrottle,
   transformFromAlertThrottle,
+  transformActions,
 } from './utils';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { AlertAction, SanitizedAlert } from '../../../../../alerting/common';
 import { RuleParams } from '../schemas/rule_schemas';
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
+import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleActions } from '../rule_actions/legacy_types';
 
 describe('utils', () => {
   describe('#calculateInterval', () => {
@@ -360,6 +364,137 @@ describe('utils', () => {
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
+    });
+  });
+
+  describe('#transformActions', () => {
+    test('It transforms two alert actions', () => {
+      const alertAction: AlertAction[] = [
+        {
+          id: 'id_1',
+          group: 'group',
+          actionTypeId: 'actionTypeId',
+          params: {},
+        },
+        {
+          id: 'id_2',
+          group: 'group',
+          actionTypeId: 'actionTypeId',
+          params: {},
+        },
+      ];
+
+      const transformed = transformActions(alertAction, null);
+      expect(transformed).toEqual<FullResponseSchema['actions']>([
+        {
+          id: 'id_1',
+          group: 'group',
+          action_type_id: 'actionTypeId',
+          params: {},
+        },
+        {
+          id: 'id_2',
+          group: 'group',
+          action_type_id: 'actionTypeId',
+          params: {},
+        },
+      ]);
+    });
+
+    test('It transforms two alert actions but not a legacyRuleActions if this is also passed in', () => {
+      const alertAction: AlertAction[] = [
+        {
+          id: 'id_1',
+          group: 'group',
+          actionTypeId: 'actionTypeId',
+          params: {},
+        },
+        {
+          id: 'id_2',
+          group: 'group',
+          actionTypeId: 'actionTypeId',
+          params: {},
+        },
+      ];
+      const legacyRuleActions: LegacyRuleActions = {
+        id: 'id_1',
+        ruleThrottle: '',
+        alertThrottle: '',
+        actions: [
+          {
+            id: 'id_2',
+            group: 'group',
+            action_type_id: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+      const transformed = transformActions(alertAction, legacyRuleActions);
+      expect(transformed).toEqual<FullResponseSchema['actions']>([
+        {
+          id: 'id_1',
+          group: 'group',
+          action_type_id: 'actionTypeId',
+          params: {},
+        },
+        {
+          id: 'id_2',
+          group: 'group',
+          action_type_id: 'actionTypeId',
+          params: {},
+        },
+      ]);
+    });
+
+    test('It will transform the legacyRuleActions if the alertAction is an empty array', () => {
+      const alertAction: AlertAction[] = [];
+      const legacyRuleActions: LegacyRuleActions = {
+        id: 'id_1',
+        ruleThrottle: '',
+        alertThrottle: '',
+        actions: [
+          {
+            id: 'id_2',
+            group: 'group',
+            action_type_id: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+      const transformed = transformActions(alertAction, legacyRuleActions);
+      expect(transformed).toEqual<FullResponseSchema['actions']>([
+        {
+          id: 'id_2',
+          group: 'group',
+          action_type_id: 'actionTypeId',
+          params: {},
+        },
+      ]);
+    });
+
+    test('It will transform the legacyRuleActions if the alertAction is undefined', () => {
+      const legacyRuleActions: LegacyRuleActions = {
+        id: 'id_1',
+        ruleThrottle: '',
+        alertThrottle: '',
+        actions: [
+          {
+            id: 'id_2',
+            group: 'group',
+            action_type_id: 'actionTypeId',
+            params: {},
+          },
+        ],
+      };
+      const transformed = transformActions(undefined, legacyRuleActions);
+      expect(transformed).toEqual<FullResponseSchema['actions']>([
+        {
+          id: 'id_2',
+          group: 'group',
+          action_type_id: 'actionTypeId',
+          params: {},
+        },
+      ]);
     });
   });
 });
