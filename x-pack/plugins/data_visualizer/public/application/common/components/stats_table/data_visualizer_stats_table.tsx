@@ -66,7 +66,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   onChange,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
-  const [expandAll, toggleExpandAll] = useState<boolean>(false);
+  const [expandAll, setExpandAll] = useState<boolean>(false);
 
   const { onTableChange, pagination, sorting } = useTableSettings<T>(
     items,
@@ -75,8 +75,21 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
   const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
-
   const [tableWidth, setTableWidth] = useState<number>(1400);
+
+  const toggleExpandAll = useCallback(
+    (shouldExpandAll: boolean) => {
+      setExpandedRowItemIds(
+        shouldExpandAll
+          ? // Update list of ids in expandedRowIds to include all
+            (items.map((item) => item.fieldName).filter((id) => id !== undefined) as string[])
+          : // Otherwise, reset list of ids in expandedRowIds
+            []
+      );
+      setExpandAll(shouldExpandAll);
+    },
+    [items]
+  );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
@@ -290,16 +303,19 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     ];
     return extendedColumns ? [...baseColumns, ...extendedColumns] : baseColumns;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expandAll, showDistributions, updatePageState, extendedColumns, dimensions.breakPoint]);
+  }, [
+    expandAll,
+    showDistributions,
+    updatePageState,
+    extendedColumns,
+    dimensions.breakPoint,
+    toggleExpandAll,
+  ]);
 
   const itemIdToExpandedRowMap = useMemo(() => {
-    let itemIds = expandedRowItemIds;
-    if (expandAll) {
-      itemIds = items.map((i) => i[FIELD_NAME]).filter((f) => f !== undefined) as string[];
-    }
+    const itemIds = expandedRowItemIds;
     return getItemIdToExpandedRowMap(itemIds, items);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expandAll, items, expandedRowItemIds]);
+  }, [items, expandedRowItemIds, getItemIdToExpandedRowMap]);
 
   return (
     <EuiResizeObserver onResize={resizeHandler}>
