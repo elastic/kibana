@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { find, isEmpty } from 'lodash/fp';
 import { PolicyDetailsState, MiddlewareRunner } from '../../../types';
 import {
   policyIdFromParams,
@@ -96,16 +96,7 @@ const searchTrustedApps = async (
 
     store.dispatch({
       type: 'policyArtifactsAvailableListPageDataChanged',
-      payload: createLoadedResourceState({
-        items: trustedApps.data,
-        pageIndex: 1,
-        pageSize: 100,
-        totalItemsCount: trustedApps.total,
-        timestamp: Date.now(),
-        filter: filter || '',
-        excludedPolicies: '',
-        includedPolicies: policyId,
-      }),
+      payload: createLoadedResourceState(trustedApps),
     });
 
     if (isEmpty(trustedApps.data)) {
@@ -130,7 +121,7 @@ const updateTrustedApps = async (
   const policyId = policyIdFromParams(state);
   const availavleArtifacts = getAvailableArtifactsList(state);
 
-  if (!availavleArtifacts || !availavleArtifacts.items.length) {
+  if (!availavleArtifacts || !availavleArtifacts.data.length) {
     return;
   }
 
@@ -144,8 +135,9 @@ const updateTrustedApps = async (
   try {
     const trustedAppsUpdateActions = [];
 
-    for (const entry of availavleArtifacts.items) {
-      if (trustedAppsIds.includes(entry.id)) {
+    for (const entryId of trustedAppsIds) {
+      const entry = find({ id: entryId }, availavleArtifacts.data);
+      if (entry) {
         const policies = entry.effectScope.type === 'policy' ? entry.effectScope.policies : [];
         const trustedApp = trustedAppsService.updateTrustedApp({ id: entry.id }, {
           effectScope: { type: 'policy', policies: [...policies, policyId] },

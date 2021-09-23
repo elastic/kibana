@@ -125,17 +125,17 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
     () =>
       isAvailableArtifactsListExistLoading ||
       isAvailableArtifactsListLoading ||
-      !isEmpty(availableArtifactsList?.items),
+      !isEmpty(availableArtifactsList?.data),
     [
-      availableArtifactsList?.items,
+      availableArtifactsList?.data,
       isAvailableArtifactsListExistLoading,
       isAvailableArtifactsListLoading,
     ]
   );
 
   const entriesExists = useMemo(
-    () => isEmpty(availableArtifactsList?.items) && isAvailableArtifactsListExist,
-    [availableArtifactsList?.items, isAvailableArtifactsListExist]
+    () => isEmpty(availableArtifactsList?.data) && isAvailableArtifactsListExist,
+    [availableArtifactsList?.data, isAvailableArtifactsListExist]
   );
 
   return (
@@ -157,7 +157,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {(availableArtifactsList?.totalItemsCount || 0) > 2 ? searchWarningMessage : null}
+        {(availableArtifactsList?.total || 0) > 100 ? searchWarningMessage : null}
         <SearchExceptions
           defaultValue={location.filter}
           onSearch={handleOnSearch}
@@ -187,7 +187,14 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             }
           />
         ) : (
-          'There are no available trusted apps' // TODO: to be done
+          <EuiEmptyPrompt
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noAvailable"
+                defaultMessage="There are no available Trused Apps to assign to this policy"
+              />
+            }
+          />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

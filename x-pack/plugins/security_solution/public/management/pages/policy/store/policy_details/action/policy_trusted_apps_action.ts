@@ -6,11 +6,13 @@
  */
 
 import { AsyncResourceState } from '../../../../../state';
-import { TrustedAppsListData } from '../../../../trusted_apps/state';
-import { PostTrustedAppCreateResponse } from '../../../../../../../common/endpoint/types';
+import {
+  PostTrustedAppCreateResponse,
+  GetTrustedListAppsResponse,
+} from '../../../../../../../common/endpoint/types';
 export interface PolicyArtifactsAvailableListPageDataChanged {
   type: 'policyArtifactsAvailableListPageDataChanged';
-  payload: AsyncResourceState<TrustedAppsListData>;
+  payload: AsyncResourceState<GetTrustedListAppsResponse>;
 }
 
 export interface PolicyArtifactsUpdateTrustedApps {

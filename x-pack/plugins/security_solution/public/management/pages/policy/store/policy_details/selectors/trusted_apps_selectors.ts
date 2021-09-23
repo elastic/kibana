@@ -11,6 +11,7 @@ import {
   Immutable,
   ImmutableArray,
   PostTrustedAppCreateResponse,
+  GetTrustedListAppsResponse,
 } from '../../../../../../../common/endpoint/types';
 import { MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH } from '../../../../../common/constants';
 import {
@@ -18,7 +19,6 @@ import {
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../../../state';
-import { TrustedAppsListData } from '../../../../trusted_apps/state';
 
 /**
  * Returns current artifacts location
@@ -32,7 +32,7 @@ export const getCurrentArtifactsLocation = (
  */
 export const getAvailableArtifactsList = (
   state: Immutable<PolicyDetailsState>
-): Immutable<TrustedAppsListData | undefined> =>
+): Immutable<GetTrustedListAppsResponse | undefined> =>
   isLoadedResourceState(state.artifacts.availableList)
     ? state.artifacts.availableList.data
     : undefined;

@@ -7,13 +7,16 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 
-import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
-import { TrustedAppsListData } from '../../../../trusted_apps/state';
+import {
+  GetTrustedListAppsResponse,
+  Immutable,
+  TrustedApp,
+} from '../../../../../../../common/endpoint/types';
 import { Loader } from '../../../../../../common/components/loader';
 import { ArtifactEntryCardMinified } from '../../../../../components/artifact_entry_card';
 
 interface PolicyArtifactsListProps {
-  artifacts: Immutable<TrustedAppsListData | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
+  artifacts: Immutable<GetTrustedListAppsResponse | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
   defaultSelectedArtifactIds: string[];
   selectedArtifactsUpdated: (ids: string[]) => void;
   isListLoading: boolean;
@@ -41,8 +44,8 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     }, [selectedArtifactIdsByKey]);
 
     const availableList = useMemo(() => {
-      if (!artifacts || !artifacts.items.length) return null;
-      const items = Array.from(artifacts.items) as TrustedApp[];
+      if (!artifacts || !artifacts.data.length) return null;
+      const items = Array.from(artifacts.data) as TrustedApp[];
       return items.map((artifact) => (
         <ArtifactEntryCardMinified
           key={artifact.id}
