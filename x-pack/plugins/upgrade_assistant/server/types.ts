@@ -21,4 +21,7 @@ export interface RouteDependencies {
   lib: {
     handleEsError: typeof handleEsError;
   };
+  config: {
+    isSecurityEnabled: () => boolean;
+  };
 }

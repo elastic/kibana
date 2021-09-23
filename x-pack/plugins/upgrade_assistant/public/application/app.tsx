@@ -10,8 +10,9 @@ import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { ScopedHistory } from 'src/core/public';
 
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
-import { APP_WRAPPER_CLASS, GlobalFlyout } from '../shared_imports';
+import { APP_WRAPPER_CLASS, GlobalFlyout, AuthorizationProvider } from '../shared_imports';
 import { AppDependencies } from '../types';
+import { API_BASE_PATH } from '../../common/constants';
 import { AppContextProvider, useAppContext } from './app_context';
 import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from './components';
 
@@ -46,18 +47,20 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
 export const RootComponent = (dependencies: AppDependencies) => {
   const {
     history,
-    core: { i18n, application },
+    core: { i18n, application, http },
   } = dependencies.services;
 
   return (
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
-      <i18n.Context>
-        <AppContextProvider value={dependencies}>
-          <GlobalFlyoutProvider>
-            <AppWithRouter history={history} />
-          </GlobalFlyoutProvider>
-        </AppContextProvider>
-      </i18n.Context>
+      <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}/privileges`}>
+        <i18n.Context>
+          <AppContextProvider value={dependencies}>
+            <GlobalFlyoutProvider>
+              <AppWithRouter history={history} />
+            </GlobalFlyoutProvider>
+          </AppContextProvider>
+        </i18n.Context>
+      </AuthorizationProvider>
     </RedirectAppLinks>
   );
 };
