@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('metric chart-miaou', function () {
+  describe('metric chart', function () {
     before(async function () {
       await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
@@ -148,11 +148,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Percentiles', 'metrics');
       log.debug('Field =  machine.ram');
       await PageObjects.visEditor.selectField('machine.ram', 'metrics');
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       await PageObjects.visEditor.clickGo();
-      await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
-        expect(percentileMachineRam).to.eql(metricValue);
-      });
+      const metricValue = await PageObjects.visChart.getMetric();
+      expect(percentileMachineRam).to.eql(metricValue);
     });
 
     it('should show Percentile Ranks', async function () {
