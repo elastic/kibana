@@ -10,7 +10,8 @@ import { inspect } from 'util';
 import Os from 'os';
 import Fs from 'fs';
 import Path from 'path';
-
+import crypto from 'crypto';
+import execa from 'execa';
 import Axios from 'axios';
 
 import { ToolingLog } from '../tooling_log';
@@ -80,6 +81,15 @@ export class CiStatsReporter {
     const timings = options.timings;
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
+    let email;
+
+    try {
+      const { stdout } = await execa('git', ['config', 'user.email']);
+      email = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
     const defaultMetadata = {
       osPlatform: Os.platform(),
       osRelease: Os.release(),
@@ -89,6 +99,10 @@ export class CiStatsReporter {
       cpuSpeed: Os.cpus()[0]?.speed,
       freeMem: Os.freemem(),
       totalMem: Os.totalmem(),
+      committerHash: email
+        ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
+        : '',
+      isElasticCommitter: email ? email.endsWith('@elastic.co') : false,
       kibanaUuid,
     };
 

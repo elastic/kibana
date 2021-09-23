@@ -13,6 +13,11 @@ export const BuildCommand: ICommand = {
   description: 'Runs a build in the Bazel built packages',
   name: 'build',
 
+  reportTiming: {
+    group: 'bootstrap',
+    id: 'build',
+  },
+
   async run(projects, projectGraph, { options }) {
     const runOffline = options?.offline === true;
 
