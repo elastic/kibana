@@ -15,7 +15,7 @@ describe('index_pattern', () => {
     expect(isIndexPattern({})).toBe(false);
     expect(isIndexPattern({ attribute: 'value' })).toBe(false);
     expect(
-      isIndexPattern({ fields: [], title: 'Index Pattern Title', getComputedFields: () => {} })
+      isIndexPattern({ fields: [], title: 'Data View Title', getComputedFields: () => {} })
     ).toBe(true);
   });
 });
