@@ -151,10 +151,23 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         //   .join('\n');
       }
       if (alertOnNoData || alertOnGroupDisappear) {
-        // Handle the possibility that the user only wants to be alerted on disappearing groups but not general No Data
+        // Handle the possibility that the user only wants to be alerted on disappearing groups but not a complete lack of any data
+        // If the user has for some reason disabled `alertOnNoData`, use these comditions to distinguish between receiving a No Data state
+        // of { '*': No Data } versus, for example, { 'a': No Data, 'b': OK, 'c': OK }
+
+        // First, make sure that there is either more than 1 group, or that the sole detected group isn't '*':
         const soleGroupIsNotUngroupedKey = groups.length > 1 || groups[0] !== UNGROUPED_FACTORY_KEY;
+        // If that's the case, AND alertOnGroupDisappear is true, then a nextState of NO_DATA would indicate a disappeared group
         const noDataStateIndicatesDisappearedGroup =
           alertOnGroupDisappear && soleGroupIsNotUngroupedKey;
+        // With that information, we can determine whether to alert on nextState === NO_DATA, if:
+        // 1. alertOnNoData is true, or
+        // 2. alertOnNoData is false, alertOnGroupDisappear is true, and a group has disappeared
+
+        // Note that we can only receive a report of a disappeared group IF alertOnGroupDisappear is true. Detecting a disappearing group
+        // depends on the value of prevGroups (see above), and prevGroups is NOT computed if alertOnGroupDisappear === false
+        // Therefore, it is safe to always send a No Data alert if alertOnNoData is true.
+
         const shouldAlertIfNoDataStateDetected =
           alertOnNoData || noDataStateIndicatesDisappearedGroup;
         if (nextState === AlertStates.NO_DATA && shouldAlertIfNoDataStateDetected) {
