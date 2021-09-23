@@ -14,7 +14,6 @@ import { PrimaryNavigationItemsProps } from './types';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -63,9 +62,6 @@ export const usePrimaryNavigationItems = ({
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
-  const isHostIsolationExceptionsTabEnabled = useIsExperimentalFeatureEnabled(
-    'hostIsolationExceptionsTabEnabled'
-  );
   return useMemo(
     () => [
       {
@@ -91,16 +87,14 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
         // the logic and the the clean up required of the temporal hostIsolationExceptionsTabEnabled
         // feature flag.
         // This flag will be temporal as per the development of version 7.16
-        items: isHostIsolationExceptionsTabEnabled
-          ? [
-              navTabs.endpoints,
-              navTabs.trusted_apps,
-              navTabs.event_filters,
-              navTabs.host_isolation_exceptions,
-            ]
-          : [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
+        items: [
+          navTabs.endpoints,
+          navTabs.trusted_apps,
+          navTabs.event_filters,
+          navTabs.host_isolation_exceptions,
+        ],
       },
     ],
-    [navTabs, hasCasesReadPermissions, isHostIsolationExceptionsTabEnabled]
+    [navTabs, hasCasesReadPermissions]
   );
 }
