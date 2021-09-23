@@ -56,7 +56,6 @@ async function loadHostIsolationExceptionsList(
       perPage: pageSize,
       filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
     };
-    const entries = await getHostIsolationExceptionsList(query);
 
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',
@@ -68,6 +67,8 @@ async function loadHostIsolationExceptionsList(
         previousState: getCurrentListPageDataState(store.getState()),
       },
     });
+
+    const entries = await getHostIsolationExceptionsList(query);
 
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',
