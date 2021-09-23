@@ -31,6 +31,10 @@ const CardContainerPanel = styled(EuiSplitPanel.Outer)`
   }
 `;
 
+const CustomSplitInnerPanel = styled(EuiSplitPanel.Inner)`
+  background-color: ${({ theme }) => theme.eui.euiColorLightestShade} !important;
+`;
+
 export interface ArtifactEntryCardMinifiedProps extends CommonProps {
   item: AnyArtifact;
   isSelected: boolean;
@@ -65,7 +69,7 @@ export const ArtifactEntryCardMinified = memo(
 
     const cardTitle = useMemo(
       () => (
-        <EuiSplitPanel.Inner color="subdued">
+        <CustomSplitInnerPanel>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiCheckbox
@@ -80,7 +84,7 @@ export const ArtifactEntryCardMinified = memo(
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiSplitPanel.Inner>
+        </CustomSplitInnerPanel>
       ),
       [artifact.name, getTestId, isSelected, onToggleSelectedArtifact]
     );
