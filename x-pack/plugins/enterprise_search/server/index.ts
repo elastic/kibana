@@ -37,4 +37,5 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     host: true,
   },
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };

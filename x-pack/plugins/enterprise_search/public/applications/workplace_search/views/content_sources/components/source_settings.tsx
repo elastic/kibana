@@ -44,7 +44,6 @@ import {
   SOURCE_SETTINGS_DESCRIPTION,
   SOURCE_NAME_LABEL,
   SOURCE_CONFIG_TITLE,
-  SOURCE_CONFIG_DESCRIPTION,
   SOURCE_CONFIG_LINK,
   SOURCE_REMOVE_TITLE,
   SOURCE_REMOVE_DESCRIPTION,
@@ -206,7 +205,7 @@ export const SourceSettings: React.FC = () => {
         </form>
       </ContentSection>
       {showConfig && (
-        <ContentSection title={SOURCE_CONFIG_TITLE} description={SOURCE_CONFIG_DESCRIPTION}>
+        <ContentSection title={SOURCE_CONFIG_TITLE}>
           <SourceConfigFields
             clientId={clientId}
             clientSecret={clientSecret}

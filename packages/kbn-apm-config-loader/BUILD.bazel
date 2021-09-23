@@ -36,6 +36,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-utils",
+  "@npm//elastic-apm-node",
   "@npm//@types/jest",
   "@npm//@types/js-yaml",
   "@npm//@types/lodash",
