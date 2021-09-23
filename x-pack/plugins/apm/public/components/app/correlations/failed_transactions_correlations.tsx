@@ -19,6 +19,7 @@ import {
   EuiTitle,
   EuiBetaBadge,
   EuiBadge,
+  EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
   EuiSwitch,
@@ -43,6 +44,7 @@ import {
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
+import { useTheme } from '../../../hooks/use_theme';
 
 import { ImpactBar } from '../../shared/ImpactBar';
 import { createHref, push } from '../../shared/Links/url_helpers';
@@ -68,6 +70,13 @@ export function FailedTransactionsCorrelations({
 }: {
   onFilter: () => void;
 }) {
+  const euiTheme = useTheme();
+  const chartPalette = [
+    euiTheme.eui.euiColorVis1,
+    euiTheme.eui.euiColorVis7,
+    euiTheme.eui.euiColorVis2,
+  ];
+
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -89,9 +98,6 @@ export function FailedTransactionsCorrelations({
 
   const [selectedSignificantTerm, setSelectedSignificantTerm] =
     useState<FailedTransactionsCorrelation | null>(null);
-
-  const selectedTerm =
-    selectedSignificantTerm ?? response.failedTransactionsCorrelations?.[0];
 
   const history = useHistory();
   const [showStats, setShowStats] = useLocalStorage(
@@ -398,6 +404,8 @@ export function FailedTransactionsCorrelations({
     [response.failedTransactionsCorrelations, sortField, sortDirection]
   );
 
+  const selectedTerm = selectedSignificantTerm ?? correlationTerms?.[0];
+
   const showCorrelationsTable =
     progress.isRunning || correlationTerms.length > 0;
 
@@ -485,6 +493,22 @@ export function FailedTransactionsCorrelations({
         </EuiFlexItem>
       </EuiFlexItem>
 
+      {selectedTerm && (
+        <EuiText color="subdued" size="xs">
+          Log log transaction distribution by latency with overlapping bands for
+          <br />
+          <span style={{ color: chartPalette[0] }}>all transactions</span>,{' '}
+          <span style={{ color: chartPalette[1] }}>
+            all failed transactions
+          </span>{' '}
+          and{' '}
+          <span style={{ color: chartPalette[2] }}>
+            {selectedTerm?.fieldName}:{selectedTerm?.fieldValue}
+          </span>
+          .
+        </EuiText>
+      )}
+
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
@@ -492,6 +516,7 @@ export function FailedTransactionsCorrelations({
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
+        palette={chartPalette}
         status={status}
       />
 
