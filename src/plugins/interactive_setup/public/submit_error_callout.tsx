@@ -76,33 +76,43 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
           : props.defaultTitle
       }
     >
-      {error.body?.attributes?.type === 'kibana_config_not_writable'
-        ? i18n.translate(
-            'interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorDescription',
-            {
-              defaultMessage: 'Check ./config/kibana.yml file permissions or update manually.',
-            }
-          )
-        : error.body?.attributes?.type === 'kibana_config_failure'
-        ? i18n.translate(
-            'interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorDescription',
-            {
-              defaultMessage: 'Retry or update ./config/kibana.yml file manually.',
-            }
-          )
-        : error.body?.attributes?.type === 'enroll_failure'
-        ? i18n.translate('interactiveSetup.submitErrorCallout.EnrollFailureErrorDescription', {
-            defaultMessage: 'Generate a new enrollment token or configure manually.',
-          })
-        : error.body?.attributes?.type === 'configure_failure'
-        ? i18n.translate('interactiveSetup.submitErrorCallout.configureFailureErrorDescription', {
-            defaultMessage: 'Retry or update ./config/kibana.yml file manually.',
-          })
-        : error.body?.attributes?.type === 'ping_failure'
-        ? i18n.translate('interactiveSetup.submitErrorCallout.pingFailureErrorDescription', {
-            defaultMessage: 'Check address and retry.',
-          })
-        : error.body?.message || error.message}
+      {error.body?.attributes?.type === 'kibana_config_not_writable' ? (
+        <FormattedMessage
+          id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorDescription"
+          defaultMessage="Check {config} file permissions and ensure Kibana process can write to it."
+          values={{
+            config: <strong>kibana.yml</strong>,
+          }}
+        />
+      ) : error.body?.attributes?.type === 'kibana_config_failure' ? (
+        <FormattedMessage
+          id="interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorDescription"
+          defaultMessage="Retry or update {config} file manually."
+          values={{
+            config: <strong>kibana.yml</strong>,
+          }}
+        />
+      ) : error.body?.attributes?.type === 'enroll_failure' ? (
+        <FormattedMessage
+          id="interactiveSetup.submitErrorCallout.EnrollFailureErrorDescription"
+          defaultMessage="Generate a new enrollment token or configure manually."
+        />
+      ) : error.body?.attributes?.type === 'configure_failure' ? (
+        <FormattedMessage
+          id="interactiveSetup.submitErrorCallout.configureFailureErrorDescription"
+          defaultMessage="Retry or update {config} file manually."
+          values={{
+            config: <strong>kibana.yml</strong>,
+          }}
+        />
+      ) : error.body?.attributes?.type === 'ping_failure' ? (
+        <FormattedMessage
+          id="interactiveSetup.submitErrorCallout.pingFailureErrorDescription"
+          defaultMessage="Check address and retry."
+        />
+      ) : (
+        error.body?.message || error.message
+      )}
     </EuiCallOut>
   );
 };
