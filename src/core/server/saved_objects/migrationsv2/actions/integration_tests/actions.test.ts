@@ -802,7 +802,9 @@ describe('migration actions', () => {
                 }
               `);
     });
-    it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
+
+    // FLAKY https://github.com/elastic/kibana/issues/113012
+    it.skip('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       const res = (await reindex({
         client,
         sourceIndex: 'existing_index_with_docs',

@@ -42,11 +42,7 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
           defaultMessage="Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard. Use a {keyModifier} to alter the dissection behavior."
           values={{
             keyModifier: (
-              <EuiLink
-                target="_blank"
-                external
-                href={esDocUrl + '/dissect-processor.html#dissect-key-modifiers'}
-              >
+              <EuiLink target="_blank" external href={esDocUrl}>
                 {i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText.dissectProcessorLink',
                   {
@@ -97,7 +93,7 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
 
 export const Dissect: FunctionComponent = () => {
   const { services } = useKibana();
-  const fieldsConfig = getFieldsConfig(services.documentation.getEsDocsBasePath());
+  const fieldsConfig = getFieldsConfig(services.documentation.getDissectKeyModifiersUrl());
 
   return (
     <>
