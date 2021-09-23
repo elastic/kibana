@@ -16,15 +16,17 @@ export const configSchema = schema.object({
   /*
    * Do not use
    */
-  legacyTrackingPurposes: schema.object({
-    healthCheck: schema.object({
-      interval: schema.string({ validate: validateDurationSchema, defaultValue: '60m' }),
-    }),
-    invalidateApiKeysTask: schema.object({
-      interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
-      removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '1h' }),
-    }),
-  }),
+  legacyTrackingPurposes: schema.maybe(
+    schema.object({
+      healthCheck: schema.object({
+        interval: schema.string({ validate: validateDurationSchema, defaultValue: '60m' }),
+      }),
+      invalidateApiKeysTask: schema.object({
+        interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
+        removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '1h' }),
+      }),
+    })
+  ),
   invalidateApiKeysTask: schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
     removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '1h' }),
