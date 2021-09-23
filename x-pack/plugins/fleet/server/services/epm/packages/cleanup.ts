@@ -25,15 +25,17 @@ export async function removeOldAssets(options: {
   const aggs = {
     versions: { terms: { field: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version` } },
   };
-  const oldVersionsAgg = (await savedObjectsClient.find<PackageAssetReference>({
+  const oldVersionsAgg = await savedObjectsClient.find<PackageAssetReference, any>({
     type: ASSETS_SAVED_OBJECT_TYPE,
     filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version<${currentVersion}`,
     aggs,
     page: 0,
     perPage: 0,
-  })) as any;
+  });
 
-  const oldVersions = oldVersionsAgg.aggregations.versions.buckets.map((obj) => obj.key);
+  const oldVersions = oldVersionsAgg.aggregations.versions.buckets.map(
+    (obj: { key: string }) => obj.key
+  );
 
   for (const oldVersion of oldVersions) {
     await removeAssetsFromVersion(savedObjectsClient, pkgName, oldVersion);

@@ -291,8 +291,6 @@ class PackagePolicyService {
     }));
   }
 
-  i = 0;
-
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
