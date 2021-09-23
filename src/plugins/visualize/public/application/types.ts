@@ -35,6 +35,8 @@ import type {
   ReduxLikeStateContainer,
 } from 'src/plugins/kibana_utils/public';
 
+import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
+
 import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import type { Query, Filter, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
@@ -105,6 +107,7 @@ export interface VisualizeServices extends CoreStart {
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
   getKibanaVersion: () => string;
+  spaces: SpacesPluginStart;
 }
 
 export interface SavedVisInstance {

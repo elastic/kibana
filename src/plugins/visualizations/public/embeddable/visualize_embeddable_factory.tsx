@@ -33,11 +33,7 @@ import type {
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
-import {
-  getCapabilities,
-  getTypes,
-  getUISettings,
-} from '../services';
+import { getCapabilities, getTypes, getUISettings } from '../services';
 import { showNewVisModal } from '../wizard';
 import {
   convertToSerializedVis,
@@ -149,13 +145,28 @@ export class VisualizeEmbeddableFactory
     input: Partial<VisualizeInput> & { id: string },
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const { savedObjectsClient, data } = await this.deps.start().plugins;
+    const startDeps = await this.deps.start();
 
     try {
       const savedObject = await getSavedVisualization(
-        { savedObjectsClient, search: data.search, dataViews: data.dataViews },
+        {
+          savedObjectsClient: startDeps.core.savedObjects.client,
+          search: startDeps.plugins.data.search,
+          dataViews: startDeps.plugins.data.dataViews,
+        },
         savedObjectId
       );
+
+      if (savedObject.sharingSavedObjectProps?.outcome === 'conflict') {
+        return new ErrorEmbeddable(
+          i18n.translate('visualizations.embeddable.legacyURLConflict.errorMessage', {
+            defaultMessage: `This object has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+            values: { json: savedObject.sharingSavedObjectProps?.errorJSON },
+          }),
+          input,
+          parent
+        );
+      }
       const visState = convertToSerializedVis(savedObject);
       const vis = await createVisAsync(savedObject.visState.type, visState);
 
@@ -219,12 +230,9 @@ export class VisualizeEmbeddableFactory
       if (visObj) {
         savedVis.uiStateJSON = visObj?.uiState.toString();
       }
-      const {
-        plugins: { savedObjectsClient },
-        core,
-      } = await this.deps.start();
+      const { core } = await this.deps.start();
       const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsClient,
+        savedObjectsClient: core.savedObjects.client,
         chrome: core.chrome,
         overlays: core.overlays,
       });

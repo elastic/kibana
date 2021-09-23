@@ -6,27 +6,29 @@
  * Side Public License, v 1.
  */
 
-import _, { assign, cloneDeep, defaults } from 'lodash';
+import _ from 'lodash';
 import type {
   SavedObjectsFindOptionsReference,
   SavedObjectsFindOptions,
   SavedObjectsClientContract,
   SavedObjectAttributes,
 } from 'kibana/public';
+import type { ChromeStart, OverlayStart } from '../../../../core/public';
 import { SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
+  DataPublicPluginStart,
 } from '../../../../plugins/data/public';
 import {
   checkForDuplicateTitle,
   saveWithConfirmation,
   isErrorNonFatal,
 } from '../../../../plugins/saved_objects/public';
-import { getTypes } from '../services';
+import { getTypes, getSpaces, getSavedSearchLoader } from '../services';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
-import type { ISavedVis, SerializedVis } from '../types';
+import type { VisSavedObject, SerializedVis, ISavedVis } from '../types';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
@@ -42,7 +44,7 @@ const getDefaults = (opts: Record<string, unknown>) => ({
   version: 1,
 });
 
-function getFullPath(id: string) {
+export function getFullPath(id: string) {
   return `/app/visualize#/edit/${id}`;
 }
 
@@ -90,7 +92,7 @@ export function mapHitSource(
   return attributes;
 }
 
-export const convertToSerializedVis = (savedVis: ISavedVis): SerializedVis => {
+export const convertToSerializedVis = (savedVis: VisSavedObject): SerializedVis => {
   const { id, title, description, visState, uiStateJSON, searchSourceFields } = savedVis;
 
   const aggs = searchSourceFields && searchSourceFields.index ? visState.aggs || [] : visState.aggs;
@@ -180,11 +182,11 @@ export async function findListItems(
 export async function getSavedVisualization(
   services: {
     savedObjectsClient: SavedObjectsClientContract;
-    search: any;
-    dataViews: any;
+    search: DataPublicPluginStart['search'];
+    dataViews: DataPublicPluginStart['dataViews'];
   },
   opts?: any
-) {
+): Promise<VisSavedObject> {
   if (typeof opts !== 'object') {
     opts = { id: opts };
   }
@@ -203,8 +205,8 @@ export async function getSavedVisualization(
   const defaultsProps = getDefaults(opts);
 
   if (!id) {
-    assign(savedObject, defaultsProps);
-    return Promise.resolve(savedObject);
+    _.assign(savedObject, defaultsProps);
+    return Promise.resolve(savedObject as VisSavedObject);
   }
 
   const {
@@ -217,27 +219,27 @@ export async function getSavedVisualization(
     throw new SavedObjectNotFound(SAVED_VIS_TYPE, id || '');
   }
 
-  savedObject._source = cloneDeep(resp.attributes);
+  savedObject._source = _.cloneDeep(resp.attributes);
 
   if (savedObject._source.visState) {
     savedObject._source.visState = JSON.parse(savedObject._source.visState);
   }
 
   // assign the defaults to the response
-  defaults(savedObject._source, defaultsProps);
+  _.defaults(savedObject._source, defaultsProps);
 
-  assign(savedObject, savedObject._source);
+  _.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
   savedObject.sharingSavedObjectProps = {
     aliasTargetId,
     outcome,
     errorJSON:
-      outcome === 'conflict'
+      outcome === 'conflict' && getSpaces()
         ? JSON.stringify({
             targetType: SAVED_VIS_TYPE,
             sourceId: id,
-            targetSpace: '',
+            targetSpace: (await getSpaces().getActiveSpace()).id,
           })
         : undefined,
   };
@@ -263,7 +265,7 @@ export async function getSavedVisualization(
   }
 
   if (resp.references && resp.references.length > 0) {
-    injectReferences(savedObject as ISavedVis, resp.references);
+    injectReferences(savedObject as VisSavedObject, resp.references);
   }
 
   savedObject.visState = await updateOldState(savedObject.visState);
@@ -271,16 +273,28 @@ export async function getSavedVisualization(
     await services.dataViews.get(savedObject.searchSourceFields.index as any);
   }
 
-  return savedObject as ISavedVis;
+  if (savedObject.savedSearchId && getSavedSearchLoader()) {
+    await getSavedSearchLoader().get(savedObject.savedSearchId);
+  }
+
+  return savedObject as VisSavedObject;
 }
 
 export async function saveVisualization(
-  savedObject: any,
-  { confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate }: any = {},
+  savedObject: VisSavedObject,
+  {
+    confirmOverwrite = false,
+    isTitleDuplicateConfirmed = false,
+    onTitleDuplicate,
+  }: {
+    confirmOverwrite?: boolean;
+    isTitleDuplicateConfirmed?: boolean;
+    onTitleDuplicate?: () => void;
+  },
   services: {
     savedObjectsClient: SavedObjectsClientContract;
-    chrome: any;
-    overlays: any;
+    chrome: ChromeStart;
+    overlays: OverlayStart;
   }
 ) {
   // Save the original id in case the save fails.
@@ -323,10 +337,6 @@ export async function saveVisualization(
     references.push(...searchSourceReferences);
   }
 
-  if (savedObject.unresolvedIndexPatternReference) {
-    references.push(savedObject.unresolvedIndexPatternReference);
-  }
-
   const extractedRefs = extractReferences({ attributes, references });
 
   if (!extractedRefs.references) {
@@ -360,7 +370,7 @@ export async function saveVisualization(
     savedObject.isSaving = false;
     savedObject.lastSavedTitle = savedObject.title;
     return savedObject.id;
-  } catch (err) {
+  } catch (err: any) {
     savedObject.isSaving = false;
     savedObject.id = originalId;
     if (isErrorNonFatal(err)) {

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsMigrationVersion } from 'kibana/public';
 import {
   IAggConfigs,
   SearchSourceFields,
@@ -35,9 +36,24 @@ export interface ISavedVis {
   uiStateJSON?: string;
   savedSearchRefName?: string;
   savedSearchId?: string;
+  sharingSavedObjectProps?: {
+    outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+    aliasTargetId?: string;
+    errorJSON?: string;
+  };
 }
 
-export interface VisSavedObject extends ISavedVis {}
+export interface VisSavedObject extends ISavedVis {
+  lastSavedTitle: string;
+  copyOnSave?: boolean;
+  getEsType: () => string;
+  getDisplayName?: () => string;
+  displayName: string;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  searchSource?: any;
+  version?: string;
+  isSaving?: boolean;
+}
 
 export interface VisToExpressionAstParams {
   timefilter: TimefilterContract;

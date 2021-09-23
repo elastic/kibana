@@ -28,6 +28,7 @@ import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../kibana_utils/public';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 import { VisualizeConstants } from './application/visualize_constants';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
@@ -61,6 +62,7 @@ export interface VisualizePluginStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -212,6 +214,7 @@ export class VisualizePlugin
           presentationUtil: pluginsStart.presentationUtil,
           usageCollection: pluginsStart.usageCollection,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
+          spaces: pluginsStart.spaces,
         };
 
         params.element.classList.add('visAppWrapper');

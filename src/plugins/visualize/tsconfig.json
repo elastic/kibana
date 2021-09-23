@@ -24,6 +24,7 @@
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../home/tsconfig.json" },
     { "path": "../presentation_util/tsconfig.json" },
-    { "path": "../discover/tsconfig.json" }
+    { "path": "../discover/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
   ]
 }

@@ -24,12 +24,14 @@ import {
   setSavedSearchLoader,
   setEmbeddable,
   setDocLinks,
+  setSpaces,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeEmbeddableFactory,
   createVisEmbeddableFromObject,
 } from './embeddable';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 import { TypesService } from './vis_types/types_service';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
@@ -103,6 +105,7 @@ export interface VisualizationsStartDeps {
   getAttributeService: EmbeddableStart['getAttributeService'];
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
+  spaces: SpacesPluginStart;
 }
 
 /**
@@ -149,7 +152,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, savedObjects }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable, savedObjects, spaces }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setTypes(types);
@@ -166,6 +169,7 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
+    setSpaces(spaces);
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
