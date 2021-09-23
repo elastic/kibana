@@ -171,11 +171,21 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
+          <EuiText size="xs">
+            <h3>
+              {i18n.translate('xpack.securitySolution.trustedApps.detailsSectionTitle', {
+                defaultMessage: 'Details',
+              })}
+            </h3>
+          </EuiText>
+          <EuiSpacer size="xs" />
           {!isEditMode && (
-            <EuiText color="subdued" size="xs">
-              <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
+            <>
+              <EuiText size="s">
+                <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
+              </EuiText>
               <EuiSpacer size="m" />
-            </EuiText>
+            </>
           )}
           <CreateTrustedAppForm
             fullWidth
