@@ -74,9 +74,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         },
       });
 
-    const { sourceId, alertOnNoData } = params as {
+    const { sourceId, alertOnNoData, alertOnGroupDisappear } = params as {
       sourceId?: string;
       alertOnNoData: boolean;
+      alertOnGroupDisappear: boolean | undefined;
     };
 
     const source = await libs.sources.getSourceConfiguration(
@@ -86,12 +87,16 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const config = source.configuration;
 
     const previousGroupBy = state.groupBy;
-    const prevGroups = isEqual(previousGroupBy, params.groupBy)
-      ? // Filter out the * key from the previous groups, only include it if it's one of
-        // the current groups. In case of a groupBy alert that starts out with no data and no
-        // groups, we don't want to persist the existence of the * alert instance
-        state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
-      : [];
+    const prevGroups =
+      alertOnGroupDisappear !== false && // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
+      isEqual(previousGroupBy, params.groupBy)
+        ? // Filter out the * key from the previous groups, only include it if it's one of
+          // the current groups. In case of a groupBy alert that starts out with no data and no
+          // groups, we don't want to persist the existence of the * alert instance
+          state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
+        : [];
+
+    console.log('alertOnGroupDisappear', alertOnGroupDisappear);
 
     const alertResults = await evaluateAlert(
       services.scopedClusterClient.asCurrentUser,
@@ -147,8 +152,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         //   .map((result) => buildRecoveredAlertReason(formatAlertResult(result[group])))
         //   .join('\n');
       }
-      if (alertOnNoData) {
-        if (nextState === AlertStates.NO_DATA) {
+      if (alertOnNoData || alertOnGroupDisappear) {
+        if (
+          nextState === AlertStates.NO_DATA &&
+          (alertOnNoData || groups.length > 1) // Handle the possibility that the user only wants to be alerted on disappearing groups but not general No Data
+        ) {
           reason = alertResults
             .filter((result) => result[group].isNoData)
             .map((result) => buildNoDataAlertReason(result[group]))

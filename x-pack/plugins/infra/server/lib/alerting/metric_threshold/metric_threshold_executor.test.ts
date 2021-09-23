@@ -446,7 +446,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const instanceIdA = 'a';
     const instanceIdB = 'b';
-    const execute = (metric: string, state?: any) =>
+    const execute = (metric: string, alertOnGroupDisappear: boolean = true, state?: any) =>
       executor({
         ...mockOptions,
         services,
@@ -462,6 +462,7 @@ describe('The metric threshold alert type', () => {
             },
           ],
           alertOnNoData: true,
+          alertOnGroupDisappear,
         },
         state: state ?? mockOptions.state.wrapped,
       });
@@ -469,18 +470,68 @@ describe('The metric threshold alert type', () => {
     test('first sends a No Data alert with the * group, but then reports groups when data is available', async () => {
       resultState.push(await execute('test.metric.3'));
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      resultState.push(await execute('test.metric.3', resultState.pop()));
+      resultState.push(await execute('test.metric.3', true, resultState.pop()));
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      resultState.push(await execute('test.metric.1', resultState.pop()));
+      resultState.push(await execute('test.metric.1', true, resultState.pop()));
       expect(mostRecentAction(instanceID)).toBe(undefined);
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
       expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
     });
     test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
-      await execute('test.metric.3', resultState.pop());
+      await execute('test.metric.3', true, resultState.pop());
       expect(mostRecentAction(instanceID)).toBe(undefined);
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
       expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+    });
+    test('does not send No Data alerts when groups disappear if alertOnGroupDisappear is disabled', async () => {
+      resultState.push(await execute('test.metric.1', false, resultState.pop()));
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+      await execute('test.metric.3', false, resultState.pop());
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdA)).toBe(undefined);
+      expect(mostRecentAction(instanceIdB)).toBe(undefined);
+    });
+
+    describe('if alertOnNoData is disabled but alertOnGroupDisappear is NOT disabled', () => {
+      const executeWeirdNoDataConfig = (metric: string, state?: any) =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            groupBy: 'something',
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: Comparator.GT,
+                threshold: [0],
+                metric,
+              },
+            ],
+            alertOnNoData: false,
+            alertOnGroupDisappear: true,
+          },
+          state: state ?? mockOptions.state.wrapped,
+        });
+
+      test('does not send a No Data alert with the * group, but then reports groups when data is available', async () => {
+        resultState.push(await executeWeirdNoDataConfig('test.metric.3'));
+        expect(mostRecentAction(instanceID)).toBe(undefined);
+        resultState.push(await executeWeirdNoDataConfig('test.metric.3', resultState.pop()));
+        expect(mostRecentAction(instanceID)).toBe(undefined);
+        resultState.push(await executeWeirdNoDataConfig('test.metric.1', resultState.pop()));
+        expect(mostRecentAction(instanceID)).toBe(undefined);
+        expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+        expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+      });
+      test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
+        await executeWeirdNoDataConfig('test.metric.3', resultState.pop());
+        expect(mostRecentAction(instanceID)).toBe(undefined);
+        expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+        expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+      });
     });
   });
 
