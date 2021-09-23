@@ -13,6 +13,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar, DimensionEditor } from './xy_config_panel';
 import { LayerHeader } from './xy_config_panel/layer_header';
@@ -457,6 +458,7 @@ export const getXyVisualization = ({
             icon: undefined,
             lineStyle: 'solid',
             lineWidth: 1,
+            color: euiLightVars.euiColorDarkShade,
           },
         ];
       }
