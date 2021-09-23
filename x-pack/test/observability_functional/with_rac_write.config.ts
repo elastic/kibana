@@ -11,9 +11,7 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.firefox.js')
-  );
+  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   const servers = {
     ...xpackFunctionalConfig.get('servers'),
