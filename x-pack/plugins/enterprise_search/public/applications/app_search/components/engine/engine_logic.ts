@@ -20,7 +20,7 @@ interface EngineValues {
   engine: Partial<EngineDetails>;
   engineName: string;
   hasNoDocuments: boolean;
-  isEngineSchemaEmpty: boolean;
+  hasEmptySchema: boolean;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
   hasSchemaErrors: boolean;
@@ -95,7 +95,7 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
   },
   selectors: ({ selectors }) => ({
     hasNoDocuments: [() => [selectors.engine], (engine) => !engine.document_count],
-    isEngineSchemaEmpty: [
+    hasEmptySchema: [
       () => [selectors.engine],
       (engine) => Object.keys(engine.schema || {}).length === 0,
     ],

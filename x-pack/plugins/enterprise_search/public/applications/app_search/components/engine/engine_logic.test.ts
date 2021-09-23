@@ -50,7 +50,7 @@ describe('EngineLogic', () => {
     engine: {},
     engineName: '',
     hasNoDocuments: true,
-    isEngineSchemaEmpty: true,
+    hasEmptySchema: true,
     isMetaEngine: false,
     isSampleEngine: false,
     hasSchemaErrors: false,
@@ -65,7 +65,7 @@ describe('EngineLogic', () => {
     ...DEFAULT_VALUES,
     engine: mockEngineData,
     hasNoDocuments: false,
-    isEngineSchemaEmpty: false,
+    hasEmptySchema: false,
   };
 
   beforeEach(() => {
@@ -334,7 +334,7 @@ describe('EngineLogic', () => {
       });
     });
 
-    describe('isEngineSchemaEmpty', () => {
+    describe('hasEmptySchema', () => {
       it('returns true if the engine schema contains no fields', () => {
         const engine = { ...mockEngineData, schema: {} };
         mount({ engine });
@@ -342,7 +342,7 @@ describe('EngineLogic', () => {
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
-          isEngineSchemaEmpty: true,
+          hasEmptySchema: true,
         });
       });
 
@@ -351,7 +351,7 @@ describe('EngineLogic', () => {
 
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          isEngineSchemaEmpty: true,
+          hasEmptySchema: true,
         });
       });
     });
