@@ -17,25 +17,25 @@ import type { ColorAssignments } from './color_assignment';
 
 const THRESHOLD_ICON_SIZE = 20;
 
-function hasNoIcon(icon: string | undefined) {
-  return icon == null || icon !== 'none';
+function hasIcon(icon: string | undefined): icon is string {
+  return icon != null && icon !== 'none';
 }
 
 // Note: it does take into consideration whether the threshold is in view or not
 export const getThresholdRequiredPaddings = (thresholdLayers: LayerArgs[]) => ({
   ...(thresholdLayers.some((thresholdLayer) =>
-    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'right' && hasNoIcon(icon))
+    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'right' && hasIcon(icon))
   )
     ? { right: THRESHOLD_ICON_SIZE }
     : null),
   ...(thresholdLayers.some((thresholdLayer) =>
-    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'bottom' && hasNoIcon(icon))
+    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'bottom' && hasIcon(icon))
   )
     ? { bottom: THRESHOLD_ICON_SIZE }
     : null),
   ...(thresholdLayers.some((thresholdLayer) =>
     thresholdLayer.yConfig?.some(
-      ({ axisMode, icon }) => hasNoIcon(icon) && (axisMode === 'left' || axisMode == null)
+      ({ axisMode, icon }) => hasIcon(icon) && (axisMode === 'left' || axisMode == null)
     )
   )
     ? { left: THRESHOLD_ICON_SIZE }
@@ -113,7 +113,7 @@ export const ThresholdAnnotations = ({
 
           const props = {
             groupId,
-            marker: yConfig.icon ? <EuiIcon type={yConfig.icon} /> : undefined,
+            marker: hasIcon(yConfig.icon) ? <EuiIcon type={yConfig.icon} /> : undefined,
           };
           const annotations = [];
 

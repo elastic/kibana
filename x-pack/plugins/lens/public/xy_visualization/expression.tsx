@@ -335,12 +335,14 @@ export function XYChart({
   };
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
+    const tickVisible =
+      groupId === 'right'
+        ? tickLabelsVisibilitySettings?.yRight
+        : tickLabelsVisibilitySettings?.yLeft;
+
     const style = {
       tickLabel: {
-        visible:
-          groupId === 'right'
-            ? tickLabelsVisibilitySettings?.yRight
-            : tickLabelsVisibilitySettings?.yLeft,
+        visible: tickVisible,
         rotation:
           groupId === 'right'
             ? args.labelsOrientation?.yRight || 0
@@ -357,6 +359,13 @@ export function XYChart({
           groupId === 'right'
             ? axisTitlesVisibilitySettings?.yRight
             : axisTitlesVisibilitySettings?.yLeft,
+        // if labels are not visible add the padding to the title
+        padding:
+          !tickVisible && thresholdPaddings[groupId] != null
+            ? {
+                inner: thresholdPaddings[groupId],
+              }
+            : undefined,
       },
     };
     return style;
@@ -520,6 +529,16 @@ export function XYChart({
           legend: {
             labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
           },
+          // if not title or labels are shown for axes, add some padding if required by threshold markers
+          chartMargins: {
+            ...chartTheme.chartPaddings,
+            ...(!tickLabelsVisibilitySettings?.x &&
+              !axisTitlesVisibilitySettings.x && { bottom: thresholdPaddings.bottom }),
+            ...(!tickLabelsVisibilitySettings?.yLeft &&
+              !axisTitlesVisibilitySettings.yLeft && { left: thresholdPaddings.left }),
+            ...(!tickLabelsVisibilitySettings?.yRight &&
+              !axisTitlesVisibilitySettings.yRight && { right: thresholdPaddings.right }),
+          },
         }}
         baseTheme={chartBaseTheme}
         tooltip={{
@@ -560,6 +579,10 @@ export function XYChart({
           },
           axisTitle: {
             visible: axisTitlesVisibilitySettings.x,
+            padding:
+              !tickLabelsVisibilitySettings?.x && thresholdPaddings.bottom != null
+                ? { inner: thresholdPaddings.bottom }
+                : undefined,
           },
         }}
       />
