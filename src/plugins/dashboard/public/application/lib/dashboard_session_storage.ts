@@ -11,6 +11,7 @@ import { Storage } from '../../services/kibana_utils';
 import { NotificationsStart } from '../../services/core';
 import { panelStorageErrorStrings } from '../../dashboard_strings';
 import { DashboardState } from '../../types';
+import { ViewMode } from '../../services/embeddable';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
@@ -69,6 +70,7 @@ export class DashboardSessionStorage {
       const dashboardsWithUnsavedChanges: string[] = [];
       Object.keys(dashboardStatesInSpace).map((dashboardId) => {
         if (
+          dashboardStatesInSpace[dashboardId].viewMode === ViewMode.EDIT &&
           Object.keys(dashboardStatesInSpace[dashboardId]).some(
             (stateKey) => stateKey !== 'viewMode'
           )

@@ -10,6 +10,7 @@
 
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import type { estypes } from '@elastic/elasticsearch';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '../..';
 import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
@@ -158,7 +159,7 @@ export class DataView implements IIndexPattern {
   };
 
   getComputedFields() {
-    const scriptFields: any = {};
+    const scriptFields: Record<string, estypes.ScriptField> = {};
     if (!this.fields) {
       return {
         storedFields: ['*'],
@@ -170,23 +171,21 @@ export class DataView implements IIndexPattern {
 
     // Date value returned in "_source" could be in any number of formats
     // Use a docvalue for each date field to ensure standardized formats when working with date fields
-    // indexPattern.flattenHit will override "_source" values when the same field is also defined in "fields"
-    const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map(
-      (dateField: any) => {
-        return {
-          field: dateField.name,
-          format:
-            dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
-              ? 'strict_date_time'
-              : 'date_time',
-        };
-      }
-    );
+    // dataView.flattenHit will override "_source" values when the same field is also defined in "fields"
+    const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map((dateField) => {
+      return {
+        field: dateField.name,
+        format:
+          dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
+            ? 'strict_date_time'
+            : 'date_time',
+      };
+    });
 
     each(this.getScriptedFields(), function (field) {
       scriptFields[field.name] = {
         script: {
-          source: field.script,
+          source: field.script as string,
           lang: field.lang,
         },
       };
@@ -227,7 +226,7 @@ export class DataView implements IIndexPattern {
    */
   getSourceFiltering() {
     return {
-      excludes: (this.sourceFilters && this.sourceFilters.map((filter: any) => filter.value)) || [],
+      excludes: (this.sourceFilters && this.sourceFilters.map((filter) => filter.value)) || [],
     };
   }
 
@@ -322,8 +321,8 @@ export class DataView implements IIndexPattern {
   }
 
   isTimeNanosBased(): boolean {
-    const timeField: any = this.getTimeField();
-    return timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1;
+    const timeField = this.getTimeField();
+    return !!(timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1);
   }
 
   getTimeField() {

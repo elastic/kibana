@@ -100,8 +100,8 @@ export type OnUnsupportedTimePattern = ({
 }) => void;
 
 export interface UiSettingsCommon {
-  get: (key: string) => Promise<any>;
-  getAll: () => Promise<Record<string, any>>;
+  get: <T = any>(key: string) => Promise<T>;
+  getAll: () => Promise<Record<string, unknown>>;
   set: (key: string, value: any) => Promise<void>;
   remove: (key: string) => Promise<void>;
 }

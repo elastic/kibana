@@ -91,12 +91,9 @@ describe('Error handling', () => {
       });
     });
 
-    const { component, exists, find } = testBed;
-
+    const { component, find } = testBed;
     component.update();
-
-    expect(exists('kibanaRequestError')).toBe(true);
-    expect(find('kibanaRequestError').text()).toContain(
+    expect(find('deprecationsPageLoadingError').text()).toContain(
       'Could not retrieve Kibana deprecation issues'
     );
   });
