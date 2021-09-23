@@ -56,7 +56,7 @@ const getBatchReindexLink = (docLinks: DocLinksStart) => {
   return (
     <EuiLink href={docLinks.links.upgradeAssistant.batchReindex} target="_blank" external={true}>
       {i18n.translate('xpack.upgradeAssistant.esDeprecations.batchReindexingDocsLink', {
-        defaultMessage: 'Learn more about Kibana batch reindexing API.',
+        defaultMessage: 'To start multiple reindexing tasks in a single request, use the Kibana batch reindexing API.',
       })}
     </EuiLink>
   );
