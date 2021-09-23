@@ -102,7 +102,7 @@ Tokens include the following:
 * `"%dashboard_context-filter_clause%"`: String replaced by an object containing filters
 * `"%dashboard_context-must_not_clause%"`: String replaced by an object containing filters
 
-NOTE: VEGA supports the `interval` paramater although is not supported by {es} since v8.0. It is recommended though to use the `fixed_interval` or `calendar_interval` instead.
+NOTE: Vega supports the `interval` parameter, which is unsupported {es} 8.0.0 and later. To use intervals, use `fixed_interval` or `calendar_interval` instead.
 
 For example, the following query counts the number of documents in a specific index:
 
