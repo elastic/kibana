@@ -47,7 +47,7 @@ const getAggs = (querySize: number, sort: SortField<NetworkTlsFields>) => ({
       },
       ja3: {
         terms: {
-          field: 'tls.server.ja3s',
+          field: 'tls.client.ja3',
         },
       },
     },
