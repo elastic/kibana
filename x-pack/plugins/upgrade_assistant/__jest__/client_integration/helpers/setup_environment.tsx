@@ -15,6 +15,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { MAJOR_VERSION } from '../../../common/constants';
 import { HttpSetup } from 'src/core/public';
 
+import { AuthorizationContext, Authorization, Privileges } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
@@ -29,22 +30,33 @@ const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
-export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown> = {}) => (
-  props: Record<string, unknown>
-) => {
-  apiService.setup((mockHttpClient as unknown) as HttpSetup);
-  breadcrumbService.setup(() => '');
-
-  const appContextMock = (getAppContextMock() as unknown) as AppDependencies;
-
-  return (
-    <AppContextProvider value={merge(appContextMock, overrides)}>
-      <GlobalFlyoutProvider>
-        <Comp {...props} />
-      </GlobalFlyoutProvider>
-    </AppContextProvider>
-  );
+const createAuthorizationContextValue = (privileges: Privileges) => {
+  return {
+    isLoading: false,
+    privileges: privileges ?? { hasAllPrivileges: false, missingPrivileges: {} },
+  } as Authorization;
 };
+
+export const WithAppDependencies =
+  (Comp: any, { privileges, ...overrides }: Record<string, unknown> = {}) =>
+  (props: Record<string, unknown>) => {
+    apiService.setup(mockHttpClient as unknown as HttpSetup);
+    breadcrumbService.setup(() => '');
+
+    const appContextMock = getAppContextMock() as unknown as AppDependencies;
+
+    return (
+      <AuthorizationContext.Provider
+        value={createAuthorizationContextValue(privileges as Privileges)}
+      >
+        <AppContextProvider value={merge(appContextMock, overrides)}>
+          <GlobalFlyoutProvider>
+            <Comp {...props} />
+          </GlobalFlyoutProvider>
+        </AppContextProvider>
+      </AuthorizationContext.Provider>
+    );
+  };
 
 export const setupEnvironment = () => {
   const { server, setServerAsync, httpRequestsMockHelpers } = initHttpRequests();
