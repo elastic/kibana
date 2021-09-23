@@ -69,7 +69,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-              defaultMessage="Add Agent"
+              defaultMessage="Add agent"
             />
           </EuiContextMenuItem>,
         ]
@@ -117,7 +117,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               disabled={!hasWriteCapabilities}
               icon="trash"
               onClick={() => {
-                deletePackagePoliciesPrompt([packagePolicy.id], refreshAgentPolicy);
+                deletePackagePoliciesPrompt([packagePolicy.id], () => {
+                  setIsActionsMenuOpen(false);
+                  refreshAgentPolicy();
+                });
               }}
             >
               <FormattedMessage
