@@ -142,6 +142,9 @@ The default placeholder value to use in
 Fields that exist outside of `_source`. Kibana merges these fields into the
 document when displaying it.
 
+[[metrics:allowStringIndices]]`metrics:allowStringIndices`::
+Enables you to use {es} indices in *TSVB* visualizations.
+
 [[metrics-maxbuckets]]`metrics:max_buckets`::
 Affects the *TSVB* histogram density. Must be set higher than `histogram:maxBars`.
 
