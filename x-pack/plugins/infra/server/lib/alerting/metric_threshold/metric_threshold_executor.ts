@@ -152,8 +152,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
       if (alertOnNoData || alertOnGroupDisappear) {
         // Handle the possibility that the user only wants to be alerted on disappearing groups but not a complete lack of any data
-        // If the user has for some reason disabled `alertOnNoData`, use these comditions to distinguish between receiving a No Data state
-        // of { '*': No Data } versus, for example, { 'a': No Data, 'b': OK, 'c': OK }
+        // If the user has for some reason disabled alertOnNoData but left alertOnGroupDisappear enabled, use these comditions to
+        // distinguish between receiving a No Data state of { '*': No Data } versus, for example, { 'a': No Data, 'b': OK, 'c': OK }
 
         // First, make sure that there is either more than 1 group, or that the sole detected group isn't '*':
         const soleGroupIsNotUngroupedKey = groups.length > 1 || groups[0] !== UNGROUPED_FACTORY_KEY;
