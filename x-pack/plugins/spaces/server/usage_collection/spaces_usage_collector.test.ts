@@ -40,6 +40,8 @@ const MOCK_USAGE_STATS: UsageStats = {
   'apiCalls.disableLegacyUrlAliases.total': 17,
 };
 
+const kibanaIndex = '.kibana-tests';
+
 function setup({
   license = { isAvailable: true },
   features = [{ id: 'feature1' } as KibanaFeature, { id: 'feature2' } as KibanaFeature],
@@ -119,7 +121,7 @@ describe('error handling', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex: '.kibana',
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -143,7 +145,7 @@ describe('with a basic license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex: '.kibana-tests',
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -162,7 +164,7 @@ describe('with a basic license', () => {
         size: 0,
         track_total_hits: true,
       },
-      index: '.kibana-tests',
+      index: kibanaIndex,
     });
   });
 
@@ -202,7 +204,7 @@ describe('with no license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex: '.kibana',
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -243,7 +245,7 @@ describe('with platinum license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex: '.kibana',
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
