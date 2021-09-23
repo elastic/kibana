@@ -43,23 +43,23 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     return await testSubjects.find(ALERTS_PAGINATION_FIFTY_ROWS);
   };
 
-  const getPrevPaginationButton = async () => {
+  const getPrevPageButton = async () => {
     return await testSubjects.find(ALERTS_PAGINATION_BUTTON_PREVIOUS);
   };
 
-  const getPrevPaginationButtonOrFail = async () => {
+  const getPrevPageButtonOrFail = async () => {
     return await testSubjects.existOrFail(ALERTS_PAGINATION_BUTTON_PREVIOUS);
   };
 
-  const missingPrevPaginationButtonOrFail = async () => {
+  const missingPrevPageButtonOrFail = async () => {
     return await testSubjects.missingOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
   };
 
-  const getNextPaginationButton = async () => {
+  const getNextPageButton = async () => {
     return await testSubjects.find(ALERTS_PAGINATION_BUTTON_NEXT, 20000);
   };
 
-  const getNextPaginationButtonOrFail = async () => {
+  const getNextPageButtonOrFail = async () => {
     return await testSubjects.existOrFail(ALERTS_PAGINATION_BUTTON_NEXT);
   };
 
@@ -71,6 +71,22 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     return await testSubjects.find(ALERTS_PAGINATION_BUTTON_TWO);
   };
 
+  const goToNextPage = async () => {
+    return await (await getNextPageButton()).click();
+  };
+
+  const goToPrevPage = async () => {
+    return await (await getPrevPageButton()).click();
+  };
+
+  const goToFirstPage = async () => {
+    await (await getPaginationButtonOne()).click();
+  };
+
+  const getPrevButtonDisabledValue = async () => {
+    return await (await getPrevPageButton()).getAttribute('disabled');
+  };
+
   return {
     getPageSizeSelector,
     getPageSizeSelectorOrFail,
@@ -78,12 +94,16 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     getTenRowsPageSelector,
     getTwentyFiveRowsPageSelector,
     getFiftyRowsPageSelector,
-    getPrevPaginationButton,
-    getPrevPaginationButtonOrFail,
-    missingPrevPaginationButtonOrFail,
-    getNextPaginationButton,
-    getNextPaginationButtonOrFail,
+    getPrevPageButton,
+    getPrevPageButtonOrFail,
+    missingPrevPageButtonOrFail,
+    getNextPageButton,
+    getNextPageButtonOrFail,
     getPaginationButtonOne,
     getPaginationButtonTwo,
+    goToNextPage,
+    goToPrevPage,
+    goToFirstPage,
+    getPrevButtonDisabledValue,
   };
 }
