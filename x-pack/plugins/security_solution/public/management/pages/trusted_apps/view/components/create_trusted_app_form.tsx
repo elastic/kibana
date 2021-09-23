@@ -14,6 +14,8 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiTextArea,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
@@ -459,6 +461,41 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           />
         </EuiFormRow>
         <EuiFormRow
+          label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
+            defaultMessage: 'Description',
+          })}
+          fullWidth={fullWidth}
+          data-test-subj={getTestId('descriptionRow')}
+        >
+          <EuiTextArea
+            name="description"
+            value={trustedApp.description}
+            onChange={handleDomChangeEvents}
+            fullWidth
+            compressed={isTrustedAppsByPolicyEnabled}
+            maxLength={256}
+            data-test-subj={getTestId('descriptionField')}
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule />
+        <EuiText size="xs">
+          <h3>
+            {i18n.translate('xpack.securitySolution.trustedApps.conditionsSectionTitle', {
+              defaultMessage: 'Conditions',
+            })}
+          </h3>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.securitySolution.trustedApps.conditionsSectionDescription', {
+              defaultMessage:
+                'Select an operating system and add conditions. Availability of conditions may depend on your chosen OS.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFormRow
           label={i18n.translate('xpack.securitySolution.trustedapps.create.os', {
             defaultMessage: 'Select operating system',
           })}
@@ -493,24 +530,6 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
-            defaultMessage: 'Description',
-          })}
-          fullWidth={fullWidth}
-          data-test-subj={getTestId('descriptionRow')}
-        >
-          <EuiTextArea
-            name="description"
-            value={trustedApp.description}
-            onChange={handleDomChangeEvents}
-            fullWidth
-            compressed={isTrustedAppsByPolicyEnabled ? true : false}
-            maxLength={256}
-            data-test-subj={getTestId('descriptionField')}
-          />
-        </EuiFormRow>
-
         {isTrustedAppsByPolicyEnabled ? (
           <>
             <EuiHorizontalRule />
