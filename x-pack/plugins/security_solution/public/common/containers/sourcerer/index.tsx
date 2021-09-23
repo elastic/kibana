@@ -130,7 +130,6 @@ export const useInitSourcerer = (
             // redo indexFieldsSearch
             indexFieldsSearch(response.defaultDataView.id, newSignalsIndex);
           }
-          // if (newPattern)
           dispatch(sourcererActions.setSourcererDataViews(response));
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         } catch (err) {

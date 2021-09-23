@@ -795,6 +795,7 @@ describe('Fields Provider', () => {
   describe('search', () => {
     const getFieldsForWildcardMock = jest.fn();
     const esClientSearchMock = jest.fn();
+    const esClientFieldCapsMock = jest.fn();
     const mockPattern = {
       title: 'coolbro',
       fields: {
@@ -825,7 +826,7 @@ describe('Fields Provider', () => {
     ]);
 
     const deps = {
-      esClient: { asCurrentUser: { search: esClientSearchMock } },
+      esClient: { asCurrentUser: { search: esClientSearchMock, fieldCaps: esClientFieldCapsMock } },
     } as unknown as SearchStrategyDependencies;
 
     beforeAll(() => {
@@ -834,12 +835,16 @@ describe('Fields Provider', () => {
       esClientSearchMock.mockResolvedValue({
         body: { hits: { total: { value: 123 } } },
       });
+      esClientFieldCapsMock.mockResolvedValue({
+        body: { indices: ['value'] },
+      });
       IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     });
 
     beforeEach(() => {
       getFieldsForWildcardMock.mockClear();
       esClientSearchMock.mockClear();
+      esClientFieldCapsMock.mockClear();
     });
 
     afterAll(() => {
