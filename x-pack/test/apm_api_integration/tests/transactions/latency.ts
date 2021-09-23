@@ -14,7 +14,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 
-type LatencyChartReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
+type LatencyChartReturnType =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
@@ -193,13 +194,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns some data', async () => {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
-          const currentPeriodNonNullDataPoints = latencyChartReturn.currentPeriod.latencyTimeseries.filter(
-            ({ y }) => y !== null
-          );
+          const currentPeriodNonNullDataPoints =
+            latencyChartReturn.currentPeriod.latencyTimeseries.filter(({ y }) => y !== null);
           expect(currentPeriodNonNullDataPoints.length).to.be.greaterThan(0);
-          const previousPeriodNonNullDataPoints = latencyChartReturn.previousPeriod.latencyTimeseries.filter(
-            ({ y }) => y !== null
-          );
+          const previousPeriodNonNullDataPoints =
+            latencyChartReturn.previousPeriod.latencyTimeseries.filter(({ y }) => y !== null);
           expect(previousPeriodNonNullDataPoints.length).to.be.greaterThan(0);
 
           expectSnapshot(currentPeriodNonNullDataPoints).toMatch();
@@ -237,9 +236,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(null);
 
-          const currentPeriodNonNullDataPoints = latencyChartReturn.currentPeriod.latencyTimeseries.filter(
-            ({ y }) => y !== null
-          );
+          const currentPeriodNonNullDataPoints =
+            latencyChartReturn.currentPeriod.latencyTimeseries.filter(({ y }) => y !== null);
 
           expect(currentPeriodNonNullDataPoints).to.be.empty();
         });

@@ -41,7 +41,8 @@ export const sourceTitle = i18n.translate(
 
 export class MVTSingleLayerVectorSource
   extends AbstractSource
-  implements ITiledSingleLayerVectorSource {
+  implements ITiledSingleLayerVectorSource
+{
   static createDescriptor({
     urlTemplate,
     layerName,
@@ -241,6 +242,14 @@ export class MVTSingleLayerVectorSource
 
   async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
     return {};
+  }
+
+  showJoinEditor(): boolean {
+    return false;
+  }
+
+  getJoinsDisabledReason(): string | null {
+    return null;
   }
 }
 
