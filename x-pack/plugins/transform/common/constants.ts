@@ -59,6 +59,9 @@ export const APP_CLUSTER_PRIVILEGES = [
   'cluster:admin/transform/stop',
 ];
 
+// Minimum privileges required to return transform node count
+export const NODES_INFO_PRIVILEGES = ['cluster:monitor/transform/get'];
+
 // Equivalent of capabilities.canGetTransform
 export const APP_GET_TRANSFORM_CLUSTER_PRIVILEGES = [
   'cluster.cluster:monitor/transform/get',
