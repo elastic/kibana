@@ -16,7 +16,6 @@ import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { IndexPatternsContract, SavedQueryService } from '../../services/data';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
-import { kibanaUtilsPluginMock } from '../../../../kibana_utils/public/mocks';
 import { PluginInitializerContext, ScopedHistory } from '../../../../../core/public';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
 import {
@@ -83,7 +82,6 @@ export function makeDefaultServices(): DashboardAppServices {
     dashboardCapabilities: defaultCapabilities,
     data: dataPluginMock.createStartContract(),
     indexPatterns: {} as IndexPatternsContract,
-    kibanaUtils: kibanaUtilsPluginMock.createSetupContract(),
     savedQueryService: {} as SavedQueryService,
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
