@@ -20,6 +20,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const log = getService('log');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -177,14 +178,14 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
         const total = (runningSearchResult.body.hits.total as estypes.SearchTotalHits).value;
-        console.log({ total }); // eslint-disable-line no-console
+        log.warning(`Total: ${total}`);
         expect(total).to.eql(1);
         const hitsMetadata = runningSearchResult.body.hits as estypes.SearchHitsMetadata<{
           task?: { status: string };
         }>;
         const hits = hitsMetadata.hits;
         const firstHitStatus = hits[0]._source?.task?.status;
-        console.log({ firstHitStatus }); // eslint-disable-line no-console
+        log.warning(`firstHitStatus: ${firstHitStatus}`);
         expect(firstHitStatus).to.eql('running');
       });
 
