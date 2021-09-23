@@ -10,6 +10,7 @@ import { PluginInitializerContext } from '../../../core/public';
 import { Schema, VisualizationsSetup, VisualizationsStart } from './';
 import { Schemas } from './vis_types';
 import { VisualizationsPlugin } from './plugin';
+import { spacesPluginMock } from '../../../../x-pack/plugins/spaces/public/mocks';
 import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
@@ -61,6 +62,7 @@ const createInstance = async () => {
       uiActions: uiActionsPluginMock.createStartContract(),
       application: applicationServiceMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
+      spaces: spacesPluginMock.createStartContract(),
       getAttributeService: jest.fn(),
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),

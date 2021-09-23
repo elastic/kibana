@@ -22,6 +22,7 @@ export interface FindListItemsOptions {
   references?: SavedObjectsFindOptionsReference[];
 }
 
+/** @deprecated **/
 export function createSavedVisLoader(services: SavedVisServicesWithVisualizations) {
   const { savedObjectsClient, visualizationTypes } = services;
 

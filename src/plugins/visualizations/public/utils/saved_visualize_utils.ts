@@ -309,7 +309,7 @@ export async function saveVisualization(
     delete savedObject.id;
   }
 
-  let attributes: any = {
+  const attributes: any = {
     visState: JSON.stringify(savedObject.visState),
     title: savedObject.title,
     uiStateJSON: savedObject.uiStateJSON,
@@ -317,7 +317,7 @@ export async function saveVisualization(
     savedSearchId: savedObject.savedSearchId,
     version: savedObject.version,
   };
-  let references: any = [];
+  const references: any = [];
 
   if (savedObject.searchSource) {
     const {

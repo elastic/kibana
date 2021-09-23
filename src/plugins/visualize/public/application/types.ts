@@ -35,8 +35,6 @@ import type {
   ReduxLikeStateContainer,
 } from 'src/plugins/kibana_utils/public';
 
-import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
-
 import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import type { Query, Filter, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
@@ -44,6 +42,7 @@ import type { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/p
 import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import type { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import type { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
+import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 import type { DashboardStart } from '../../../dashboard/public';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../../usage_collection/public';
