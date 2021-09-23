@@ -168,7 +168,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           from: from as string,
           to: to as string,
           interval,
-          maxSignals: DEFAULT_MAX_SIGNALS,
+          maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
           buildRuleMessage,
         });
         if (remainingGap.asMilliseconds() > 0) {

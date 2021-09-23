@@ -12,6 +12,7 @@ export const technicalRuleFieldMap = {
   ...pickWithPatterns(
     ecsFieldMap,
     Fields.TIMESTAMP,
+    'event', // TODO: constant
     Fields.EVENT_KIND,
     Fields.EVENT_ACTION,
     Fields.TAGS

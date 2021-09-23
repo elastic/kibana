@@ -11,6 +11,7 @@ import {
   EqlCreateSchema,
   QueryCreateSchema,
 } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { ALERT_ORIGINAL_TIME } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -65,7 +66,9 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
+          const hits = signalsOpen.hits.hits
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
+            .sort();
           expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
         });
 
@@ -78,7 +81,9 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
+          const hits = signalsOpen.hits.hits
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
+            .sort();
           expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
         });
       });
@@ -90,7 +95,9 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
+          const hits = signalsOpen.hits.hits
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
+            .sort();
           expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
         });
 
@@ -103,7 +110,9 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
+          const hits = signalsOpen.hits.hits
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
+            .sort();
           expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
         });
       });
@@ -215,7 +224,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id, id]);
           const hits = signalsResponse.hits.hits
-            .map((hit) => hit._source?.signal.original_time)
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
             .sort();
           expect(hits).to.eql([undefined]);
         });

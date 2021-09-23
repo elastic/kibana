@@ -69,6 +69,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.indices).to.eql([
         {
+          index: '.internal.alerts-security.alerts-default-000001',
+          is_outdated: true,
+          migrations: [],
+          signal_versions: [
+            {
+              count: 2007,
+              version: 0,
+            },
+          ],
+          version: 0,
+        },
+        {
           index: legacySignalsIndexName,
           is_outdated: true,
           migrations: [],

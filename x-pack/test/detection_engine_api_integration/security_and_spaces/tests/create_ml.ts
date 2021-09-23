@@ -10,7 +10,7 @@ import {
   ALERT_REASON,
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_UPDATED_AT,
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 
 import { MachineLearningCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
@@ -29,7 +29,6 @@ import {
   deleteListsIndex,
   importFile,
 } from '../../../lists_api_integration/utils';
-import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 import { flattenWithPrefix } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/factories/utils/flatten_with_prefix';
 import {
   ALERT_ANCESTORS,
@@ -143,7 +142,6 @@ export default ({ getService }: FtrProviderContext) => {
         process: { name: ['store'] },
         host: { name: ['mothra'] },
         event: { kind: 'signal' },
-        _meta: { version: SIGNALS_TEMPLATE_VERSION },
         [ALERT_ANCESTORS]: [
           {
             id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
@@ -152,9 +150,9 @@ export default ({ getService }: FtrProviderContext) => {
             depth: 0,
           },
         ],
-        [ALERT_STATUS]: 'open',
+        [ALERT_WORKFLOW_STATUS]: 'open',
         ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
-          id: createdRule.id,
+          uuid: createdRule.id,
           rule_id: createdRule.rule_id,
           created_at: createdRule.created_at,
           updated_at: signal._source?.[ALERT_RULE_UPDATED_AT],
@@ -169,7 +167,6 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Test ML rule description',
           risk_score: 50,
           severity: 'critical',
-          output_index: '.siem-signals-default',
           author: [],
           false_positives: [],
           from: '1900-01-01T00:00:00.000Z',

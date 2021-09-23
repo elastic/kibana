@@ -25,7 +25,6 @@ import {
 
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
-import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 import { ENRICHMENT_TYPES } from '../../../../plugins/security_solution/common/cti/constants';
 import {
   ALERT_ANCESTORS,
@@ -271,9 +270,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
             id: '0',
             name: 'root',
-          },
-          _meta: {
-            version: SIGNALS_TEMPLATE_VERSION,
           },
           [ALERT_ANCESTORS]: [
             {

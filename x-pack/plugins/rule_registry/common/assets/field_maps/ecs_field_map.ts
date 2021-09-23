@@ -655,6 +655,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  event: {
+    type: 'object',
+    array: false,
+    required: false,
+  },
   'event.action': {
     type: 'keyword',
     array: false,

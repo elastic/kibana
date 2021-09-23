@@ -11,6 +11,7 @@ import {
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from './rule_type_constants';
 
@@ -21,7 +22,7 @@ export const ruleTypeMappings = {
   eql: EQL_RULE_TYPE_ID,
   machine_learning: ML_RULE_TYPE_ID,
   query: QUERY_RULE_TYPE_ID,
-  saved_query: QUERY_RULE_TYPE_ID,
+  saved_query: SAVED_QUERY_RULE_TYPE_ID,
   threat_match: INDICATOR_RULE_TYPE_ID,
   threshold: THRESHOLD_RULE_TYPE_ID,
 };

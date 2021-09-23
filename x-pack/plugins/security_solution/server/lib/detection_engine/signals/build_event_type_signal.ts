@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { flattenWithPrefix } from '../rule_types/factories/utils/flatten_with_prefix';
 import { BaseSignalHit, SimpleHit } from './types';
 import { getField } from './utils';
 
 export const buildEventTypeSignal = (doc: BaseSignalHit): object => {
   if (doc._source?.event != null && doc._source?.event instanceof Object) {
-    return { ...doc._source!.event, kind: 'signal' };
+    return flattenWithPrefix('event', { ...doc._source!.event, kind: 'signal' });
   } else {
-    return { kind: 'signal' };
+    return flattenWithPrefix('event', { kind: 'signal' });
   }
 };
 

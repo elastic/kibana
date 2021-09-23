@@ -21,7 +21,7 @@ import { createHash } from 'crypto';
 
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
-import { Ancestor, BaseSignalHit, SimpleHit } from '../../../signals/types';
+import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import {
   getField,
   getValidDateFromDoc,
@@ -38,6 +38,7 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
+import { SearchTypes } from '../../../../telemetry/types';
 
 export const generateAlertId = (alert: RACAlert) => {
   return createHash('sha256')
@@ -136,22 +137,34 @@ export const buildAlert = (
   } as unknown as RACAlert;
 };
 
+const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is ThresholdResult => {
+  return typeof thresholdResult === 'object';
+};
+
 /**
  * Creates signal fields that are only available in the special case where a signal has only 1 parent signal/event.
  * We copy the original time from the document as "original_time" since we override the timestamp with the current date time.
  * @param doc The parent signal/event of the new signal to be built.
  */
 export const additionalAlertFields = (doc: BaseSignalHit) => {
+  const thresholdResult = doc._source?.threshold_result;
+  if (thresholdResult != null && !isThresholdResult(thresholdResult)) {
+    throw new Error(`threshold_result failed to validate: ${thresholdResult}`);
+  }
   const originalTime = getValidDateFromDoc({
     doc,
     timestampOverride: undefined,
   });
   const additionalFields: Record<string, unknown> = {
     [ALERT_ORIGINAL_TIME]: originalTime != null ? originalTime.toISOString() : undefined,
+    threshold_result: thresholdResult,
   };
   const event = doc._source?.event;
   if (event != null) {
-    additionalFields[ALERT_ORIGINAL_EVENT] = event;
+    return {
+      ...additionalFields,
+      ...flattenWithPrefix(ALERT_ORIGINAL_EVENT, event),
+    };
   }
   return additionalFields;
 };

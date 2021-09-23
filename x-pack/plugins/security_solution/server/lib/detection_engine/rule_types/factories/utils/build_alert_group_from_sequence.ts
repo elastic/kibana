@@ -12,7 +12,7 @@ import { Logger } from 'kibana/server';
 import { SavedObject } from 'src/core/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithoutOverrides } from '../../../signals/build_rule';
-import { AlertAttributes, Ancestor, SignalSource } from '../../../signals/types';
+import { AlertAttributes, Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { RACAlert, WrappedRACAlert } from '../../types';
 import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
 import { buildBulkBody } from './build_bulk_body';
@@ -92,9 +92,9 @@ export const buildAlertRoot = (
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
   const rule = buildRuleWithoutOverrides(ruleSO);
-  const reason = buildReasonMessage({ rule });
-  const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
+  const reason = buildReasonMessage({ rule, mergedDoc: mergedAlerts as SignalSourceHit });
+  const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);
   return {
     ...mergedAlerts,
     event: {

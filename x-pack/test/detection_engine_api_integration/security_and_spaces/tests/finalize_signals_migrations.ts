@@ -157,9 +157,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const statusAfter: StatusResponse[] = bodyAfter.indices;
-      expect(statusAfter.map((s) => s.index)).to.eql(
-        createdMigrations.map((c) => c.migration_index)
-      );
+      expect(statusAfter.map((s) => s.index)).to.eql([
+        ...createdMigrations.map((c) => c.migration_index),
+        '.internal.alerts-security.alerts-default-000001',
+      ]);
       expect(statusAfter.map((s) => s.is_outdated)).to.eql([false, false]);
     });
 

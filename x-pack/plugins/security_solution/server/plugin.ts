@@ -14,6 +14,8 @@ import {
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   EQL_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
 import {
@@ -60,6 +62,7 @@ import {
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
+  createSavedQueryAlertType,
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
@@ -266,6 +269,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createSavedQueryAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createThresholdAlertType(createRuleOptions));
     }
 
@@ -289,9 +293,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const racRuleTypes = [
       EQL_RULE_TYPE_ID,
-      QUERY_RULE_TYPE_ID,
       INDICATOR_RULE_TYPE_ID,
       ML_RULE_TYPE_ID,
+      QUERY_RULE_TYPE_ID,
+      SAVED_QUERY_RULE_TYPE_ID,
+      THRESHOLD_RULE_TYPE_ID,
     ];
     const ruleTypes = [
       SIGNALS_ID,
