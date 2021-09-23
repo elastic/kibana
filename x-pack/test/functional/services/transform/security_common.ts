@@ -14,6 +14,7 @@ export type TransformSecurityCommon = ProvidedType<typeof TransformSecurityCommo
 export enum USER {
   TRANSFORM_POWERUSER = 'transform_poweruser',
   TRANSFORM_VIEWER = 'transform_viewer',
+  TRANSFORM_UNAUTHORIZED = 'transform_unauthorized',
 }
 
 export function TransformSecurityCommonProvider({ getService }: FtrProviderContext) {
@@ -68,6 +69,12 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
       full_name: 'Transform Viewer',
       password: 'tfv001',
       roles: ['kibana_admin', 'transform_user', 'transform_dest_readonly'],
+    },
+    {
+      name: 'transform_unauthorized',
+      full_name: 'Transform Unauthorized',
+      password: 'tfu001',
+      roles: ['kibana_admin'],
     },
   ];
 
