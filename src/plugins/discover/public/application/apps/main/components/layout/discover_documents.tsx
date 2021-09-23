@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
-  EuiSpacer,
-  EuiText,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
@@ -19,19 +19,19 @@ import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid
 import { FetchStatus } from '../../../../types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../../common';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { IndexPattern } from '../../../../../../../data/common';
 import { SavedSearch } from '../../../../../saved_searches';
-import { DataDocumentsMsg, DataDocuments$ } from '../../services/use_saved_search';
+import { DataDocuments$, DataDocumentsMsg } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../doc_table/doc_table_infinite';
 import { SortPairArr } from '../doc_table/lib/get_sort';
+import { useLabs } from '../../../../../../../presentation_util/public';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -59,9 +59,10 @@ function DiscoverDocumentsComponent({
   stateContainer: GetStateReturn;
 }) {
   const { capabilities, indexPatterns, uiSettings } = services;
+  const { isProjectEnabled } = useLabs();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const isLegacy = isProjectEnabled('doc_table:legacy');
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState: DataDocumentsMsg = useDataState(documents$);
