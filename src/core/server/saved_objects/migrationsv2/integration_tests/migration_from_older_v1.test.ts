@@ -28,6 +28,31 @@ async function removeLogFile() {
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
 
+const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
+
+function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
+  return a.type.localeCompare(b.type) || a.id.localeCompare(b.id);
+}
+
+async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
+  const { body } = await esClient.search<any>({
+    index,
+    body: {
+      query: {
+        match_all: {},
+      },
+      _source: ['type', 'id'],
+    },
+  });
+
+  return body.hits.hits
+    .map((h) => ({
+      ...h._source,
+      id: h._id,
+    }))
+    .sort(sortByTypeAndId);
+}
+
 describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
   const migratedIndex = `.kibana_${kibanaVersion}_001`;
   const originalIndex = `.kibana_1`; // v1 migrations index
