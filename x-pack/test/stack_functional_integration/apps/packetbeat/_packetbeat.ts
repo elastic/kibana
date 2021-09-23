@@ -6,27 +6,33 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const retry = getService('retry');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
-  const retry = getService('retry');
   const appsMenu = getService('appsMenu');
 
-  describe('check winlogbeat', function () {
-    it('winlogbeat- should have hit count GT 0', async function () {
+  describe('check packetbeat', function () {
+    before(function () {
+      log.debug('navigateToApp Discover');
+    });
+
+    it('packetbeat- should have hit count GT 0', async function () {
       const url = await browser.getCurrentUrl();
       log.debug(url);
       if (!url.includes('kibana')) {
         await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
-      } else if (!url.includes('discover')) {
+      }
+      if (!url.includes('discover')) {
         await appsMenu.clickLink('Discover');
       }
-      await PageObjects.discover.selectIndexPattern('winlogbeat-*');
+      await PageObjects.discover.selectIndexPattern('packetbeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('Today');
       await retry.try(async function () {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount());
+        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
     });

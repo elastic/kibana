@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function ({ loadTestFile }) {
-  describe('metricbeat app', function () {
-    loadTestFile(require.resolve('./_metricbeat'));
-    loadTestFile(require.resolve('./_metricbeat_dashboard'));
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('winlogbeat app', function () {
+    loadTestFile(require.resolve('./_winlogbeat'));
   });
 }
