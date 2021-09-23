@@ -12,28 +12,6 @@ export const byTestId = (testId: string) => {
 };
 
 journey('uptime', ({ page, params }) => {
-  // async function refreshUptimeApp() {
-  //   while (!(await page.$('div.euiBasicTable'))) {
-  //     await page.click('[data-test-subj=superDatePickerApplyTimeButton]');
-  //     // eslint-disable-next-line no-console
-  //     console.log('refreshing uptime app');
-  //     await page.waitForTimeout(5 * 1000);
-  //   }
-  // }
-  //
-  // async function waitForKibanaToLoad() {
-  //   let isStillLoading = true;
-  //
-  //   while (isStillLoading) {
-  //     const welcomeMessage = await page.$('text="Welcome to Elastic"');
-  //     isStillLoading = welcomeMessage === null;
-  //     if (isStillLoading) {
-  //       await page.reload();
-  //       await page.waitForTimeout(10 * 1000);
-  //     }
-  //   }
-  // }
-
   async function waitForLoadingToFinish() {
     let isLoadingVisible = true;
 
@@ -44,11 +22,10 @@ journey('uptime', ({ page, params }) => {
     }
   }
 
-  step('Go to  Kibana', async () => {
+  step('Go to Kibana', async () => {
     await page.goto(`${params.kibanaUrl}/app/uptime?dateRangeStart=now-5y&dateRangeEnd=now`, {
       waitUntil: 'networkidle',
     });
-    // await waitForKibanaToLoad();
   });
 
   step('Login into kibana', async () => {
@@ -84,7 +61,6 @@ journey('uptime', ({ page, params }) => {
 
   step('Check if there is table data', async () => {
     await page.click('[data-test-subj=uptimeOverviewPage]');
-    // await refreshUptimeApp();
     await page.click('div.euiBasicTable', { timeout: 60 * 1000 });
   });
 
@@ -92,7 +68,7 @@ journey('uptime', ({ page, params }) => {
     await page.click('[data-test-subj=monitor-page-link-0001-up]');
   });
 
-  step('It navigates to details page', async () => {
+  step('Navigates to details page', async () => {
     await page.click('[data-test-subj=uptimeMonitorPage]');
   });
 });
