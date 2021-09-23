@@ -112,7 +112,7 @@ export function DiscoverChart({
                 button={
                   <EuiButtonEmpty
                     size="xs"
-                    iconType={'gear'}
+                    iconType="gear"
                     onClick={onShowChartOptions}
                     data-test-subj="discoverChartOptionsToggle"
                   >
