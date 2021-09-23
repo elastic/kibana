@@ -149,7 +149,7 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       if (values.intervalId) return; // Ensure we only have one poll at a time
 
       const id = window.setInterval(() => {
-        if (values.isEngineEmpty && values.isEngineSchemaEmpty) {
+        if (values.isEngineEmpty) {
           actions.initializeEngine(); // Re-fetch engine data when engine is empty
         } else {
           actions.stopPolling();
