@@ -160,6 +160,7 @@ Use the global search to quickly open a saved object.
 
 
 include::data-views.asciidoc[]
+include::index-patterns.asciidoc[]
 
 include::set-time-filter.asciidoc[]
 
