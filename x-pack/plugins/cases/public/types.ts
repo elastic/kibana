@@ -16,6 +16,7 @@ import type {
 } from '../../triggers_actions_ui/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 import { AllCasesProps } from './components/all_cases';
@@ -36,6 +37,7 @@ export interface StartPlugins {
   lens: LensPublicStart;
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**

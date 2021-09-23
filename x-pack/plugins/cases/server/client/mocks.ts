@@ -22,6 +22,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
   return {
     create: jest.fn(),
     find: jest.fn(),
+    resolve: jest.fn(),
     get: jest.fn(),
     push: jest.fn(),
     update: jest.fn(),

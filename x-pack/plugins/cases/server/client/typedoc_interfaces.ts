@@ -16,6 +16,7 @@
 import {
   AllCommentsResponse,
   CasePostRequest,
+  CaseResolveResponse,
   CaseResponse,
   CasesConfigurePatch,
   CasesConfigureRequest,
@@ -40,6 +41,7 @@ export interface ICasePostRequest extends CasePostRequest {}
 export interface ICasesFindRequest extends CasesFindRequest {}
 export interface ICasesPatchRequest extends CasesPatchRequest {}
 export interface ICaseResponse extends CaseResponse {}
+export interface ICaseResolveResponse extends CaseResolveResponse {}
 export interface ICasesResponse extends CasesResponse {}
 export interface ICasesFindResponse extends CasesFindResponse {}
 
