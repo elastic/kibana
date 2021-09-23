@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { timelinesMigrations } from './timelines';
-export { notesMigrations } from './notes';
+/**
+ * Indicates whether which user action field is being parsed, the new_value or the old_value.
+ */
+export enum UserActionFieldType {
+  New = 'New',
+  Old = 'Old',
+}

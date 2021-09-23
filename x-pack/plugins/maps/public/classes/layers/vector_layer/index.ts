@@ -7,6 +7,7 @@
 
 export { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
 export {
+  isVectorLayer,
   IVectorLayer,
   VectorLayer,
   VectorLayerArguments,
