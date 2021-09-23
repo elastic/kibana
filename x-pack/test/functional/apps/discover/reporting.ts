@@ -54,26 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
-
-      it('remains available regardless of the saved search state', async () => {
-        // create new search, csv export is not available
-        await PageObjects.discover.clickNewSearchButton();
-        await PageObjects.reporting.setTimepickerInEcommerceDataRange();
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        // save search, csv export is available
-        await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        // add filter, csv export is not available
-        await filterBar.addFilter('currency', 'is', 'EUR');
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        // save search again, csv export is available
-        await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-      });
     });
 
     describe('Generate CSV: new search', () => {
