@@ -59,7 +59,11 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
       <div className={'dataGridChart__legend'} data-test-subj={`${dataTestSubj}-legend`}>
         {legendText && (
           <>
-            <EuiFlexGroup direction={'row'} data-test-subj={`${dataTestSubj}-legend`}>
+            <EuiFlexGroup
+              direction={'row'}
+              data-test-subj={`${dataTestSubj}-legend`}
+              responsive={false}
+            >
               <EuiFlexItem className={'dataGridChart__legend'}>
                 {kibanaFieldFormat(legendText.min, fieldFormat)}
               </EuiFlexItem>

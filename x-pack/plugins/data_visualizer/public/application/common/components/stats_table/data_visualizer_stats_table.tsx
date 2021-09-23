@@ -111,24 +111,25 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   const columns = useMemo(() => {
     const expanderColumn: EuiTableComputedColumnType<DataVisualizerTableItem> = {
-      name: (
-        <EuiButtonIcon
-          data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
-            expandAll ? 'expanded' : 'collapsed'
-          }`}
-          onClick={() => toggleExpandAll(!expandAll)}
-          aria-label={
-            !expandAll
-              ? i18n.translate('xpack.dataVisualizer.dataGrid.expandDetailsForAllAriaLabel', {
-                  defaultMessage: 'Expand details for all fields',
-                })
-              : i18n.translate('xpack.dataVisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
-                  defaultMessage: 'Collapse details for all fields',
-                })
-          }
-          iconType={expandAll ? 'arrowDown' : 'arrowRight'}
-        />
-      ),
+      name:
+        dimensions.breakPoint !== 'xs' && dimensions.breakPoint !== 's' ? (
+          <EuiButtonIcon
+            data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
+              expandAll ? 'expanded' : 'collapsed'
+            }`}
+            onClick={() => toggleExpandAll(!expandAll)}
+            aria-label={
+              !expandAll
+                ? i18n.translate('xpack.dataVisualizer.dataGrid.expandDetailsForAllAriaLabel', {
+                    defaultMessage: 'Expand details for all fields',
+                  })
+                : i18n.translate('xpack.dataVisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
+                    defaultMessage: 'Collapse details for all fields',
+                  })
+            }
+            iconType={expandAll ? 'arrowDown' : 'arrowRight'}
+          />
+        ) : null,
       align: RIGHT_ALIGNMENT,
       width: dimensions.expander,
       isExpander: true,
@@ -305,7 +306,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       {(resizeRef) => (
         <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
           <EuiInMemoryTable<T>
-            className={'dataVisualizer'}
+            className={'dataVisualizerTable'}
             items={items}
             itemId={FIELD_NAME}
             columns={columns}

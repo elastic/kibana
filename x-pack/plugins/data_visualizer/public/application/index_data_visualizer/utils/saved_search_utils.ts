@@ -16,13 +16,17 @@ import {
   Filter,
 } from '@kbn/es-query';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
+/**
+ * Parse the stringified searchSourceJSON
+ * from a saved search or saved search object
+ */
 export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | SavedSearch) {
-  // @todo: add type assertion for savedsearch
   const search = isSavedSearchSavedObject(savedSearch)
     ? savedSearch?.attributes?.kibanaSavedObjectMeta
     : // @ts-expect-error kibanaSavedObjectMeta does exist
@@ -36,15 +40,19 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | Sa
     : undefined;
 }
 
-export function createCombinedQuery(
-  query: Query,
-  filters: Filter[],
-  indexPattern?: IndexPattern,
+/**
+ * Create an Elasticsearch query that combines both lucene/kql query string and filters
+ * Should also form a valid query if only the query or filters is provided
+ */
+export function createMergedEsQuery(
+  query?: Query,
+  filters?: Filter[],
+  indexPattern?: DataView,
   uiSettings?: IUiSettingsClient
 ) {
-  let combinedQuery: any = getDefaultDatafeedQuery();
+  let combinedQuery: any = getDefaultQuery();
 
-  if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+  if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
       combinedQuery = toElasticsearchQuery(ast, indexPattern);
@@ -66,8 +74,8 @@ export function createCombinedQuery(
   } else {
     combinedQuery = buildEsQuery(
       indexPattern,
-      [query],
-      filters,
+      query ? [query] : [],
+      filters ? filters : [],
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
   }
@@ -76,20 +84,22 @@ export function createCombinedQuery(
 
 /**
  * Extract query data from the saved search object
- * and merge with query data and filters
+ * with overrides from the provided query data and/or filters
  */
-export function extractSearchData({
+export function getEsQueryFromSavedSearch({
   indexPattern,
   uiSettings,
   savedSearch,
   query,
   filters,
+  filterManager,
 }: {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   uiSettings: IUiSettingsClient;
   savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
   query?: Query;
   filters?: Filter[];
+  filterManager?: FilterManager;
 }) {
   if (!indexPattern || !savedSearch) return;
 
@@ -99,7 +109,7 @@ export function extractSearchData({
 
   // If no saved search available, use user's query and filters
   if (!savedSearchData && userQuery) {
-    const combinedQuery = createCombinedQuery(
+    const combinedQuery = createMergedEsQuery(
       userQuery,
       Array.isArray(userFilters) ? userFilters : [],
       indexPattern,
@@ -118,7 +128,9 @@ export function extractSearchData({
     const currentQuery = userQuery ?? savedSearchData?.query;
     const currentFilters = userFilters ?? savedSearchData?.filter;
 
-    const combinedQuery = createCombinedQuery(
+    if (filterManager) filterManager.setFilters(currentFilters);
+
+    const combinedQuery = createMergedEsQuery(
       currentQuery,
       Array.isArray(currentFilters) ? currentFilters : [],
       indexPattern,
@@ -143,6 +155,6 @@ const DEFAULT_QUERY = {
   },
 };
 
-export function getDefaultDatafeedQuery() {
+export function getDefaultQuery() {
   return cloneDeep(DEFAULT_QUERY);
 }

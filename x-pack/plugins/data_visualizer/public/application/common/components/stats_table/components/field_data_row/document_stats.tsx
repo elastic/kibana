@@ -19,15 +19,18 @@ export const DocumentStat = ({ config, showIcon }: Props) => {
   if (stats === undefined) return null;
 
   const { count, sampleCount } = stats;
-  if (count === undefined || sampleCount === undefined) return null;
 
-  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
+  const docsCount = count ?? 0;
+  const docsPercent =
+    count !== undefined && sampleCount !== undefined
+      ? roundToDecimalPlace((count / sampleCount) * 100)
+      : 0;
 
   return (
     <>
       {showIcon ? <EuiIcon type="document" size={'m'} className={'columnHeaderIcon'} /> : null}
       <EuiText size={'xs'}>
-        {count} ({docsPercent}%)
+        {docsCount} ({docsPercent}%)
       </EuiText>
     </>
   );

@@ -32,6 +32,7 @@ export const TotalFieldsCount: FC<TotalFieldsCountProps> = ({ fieldsCountStats }
       alignItems="center"
       className="dataVisualizerFieldCountContainer"
       data-test-subj="dataVisualizerFieldsSummary"
+      responsive={false}
     >
       <EuiFlexItem grow={false}>
         <EuiText>

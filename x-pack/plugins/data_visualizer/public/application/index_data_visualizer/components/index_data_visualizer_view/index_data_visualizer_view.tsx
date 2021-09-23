@@ -27,6 +27,7 @@ import {
   KBN_FIELD_TYPES,
   UI_SETTINGS,
   Query,
+  generateFilters,
 } from '../../../../../../../../src/plugins/data/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -63,11 +64,12 @@ import { DatePickerWrapper } from '../../../common/components/date_picker_wrappe
 import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
-import { extractSearchData } from '../../utils/saved_search_utils';
+import { createMergedEsQuery, getEsQueryFromSavedSearch } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
 import { DataViewField, DataView } from '../../../../../../../../src/plugins/data/common';
+import './_index.scss';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -130,7 +132,7 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { docLinks, notifications, uiSettings } = services;
+  const { docLinks, notifications, uiSettings, data } = services;
   const { toasts } = notifications;
 
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
@@ -228,10 +230,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const defaults = getDefaultPageState();
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const searchData = extractSearchData({
+    const searchData = getEsQueryFromSavedSearch({
       indexPattern: currentIndexPattern,
       uiSettings,
       savedSearch: currentSavedSearch,
+      filterManager: data.query.filterManager,
     });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
@@ -248,26 +251,29 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSavedSearch, currentIndexPattern, dataVisualizerListState]);
+  }, [currentSavedSearch, currentIndexPattern, dataVisualizerListState, data.query]);
 
-  const setSearchParams = (searchParams: {
-    searchQuery: Query['query'];
-    searchString: Query['query'];
-    queryLanguage: SearchQueryLanguage;
-  }) => {
-    // When the user loads saved search and then clear or modify the query
-    // we should remove the saved search and replace it with the index pattern id
-    if (currentSavedSearch !== null) {
-      setCurrentSavedSearch(null);
-    }
+  const setSearchParams = useCallback(
+    (searchParams: {
+      searchQuery: Query['query'];
+      searchString: Query['query'];
+      queryLanguage: SearchQueryLanguage;
+    }) => {
+      // When the user loads saved search and then clear or modify the query
+      // we should remove the saved search and replace it with the index pattern id
+      if (currentSavedSearch !== null) {
+        setCurrentSavedSearch(null);
+      }
 
-    setDataVisualizerListState({
-      ...dataVisualizerListState,
-      searchQuery: searchParams.searchQuery,
-      searchString: searchParams.searchString,
-      searchQueryLanguage: searchParams.queryLanguage,
-    });
-  };
+      setDataVisualizerListState({
+        ...dataVisualizerListState,
+        searchQuery: searchParams.searchQuery,
+        searchString: searchParams.searchString,
+        searchQueryLanguage: searchParams.queryLanguage,
+      });
+    },
+    [currentSavedSearch, dataVisualizerListState, setDataVisualizerListState]
+  );
 
   const samplerShardSize =
     dataVisualizerListState.samplerShardSize ?? restorableDefaults.samplerShardSize;
@@ -305,6 +311,51 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
+
+  const onAddFilter = useCallback(
+    (field: DataViewField | string, values: string, operation: '+' | '-') => {
+      const newFilters = generateFilters(
+        data.query.filterManager,
+        field,
+        values,
+        operation,
+        String(currentIndexPattern.id)
+      );
+      if (newFilters) {
+        data.query.filterManager.addFilters(newFilters);
+      }
+
+      // Merge current query with new filters
+      const mergedQuery = {
+        query: searchString || '',
+        language: searchQueryLanguage,
+      };
+
+      const combinedQuery = createMergedEsQuery(
+        {
+          query: searchString || '',
+          language: searchQueryLanguage,
+        },
+        data.query.filterManager.getFilters() ?? [],
+        currentIndexPattern,
+        uiSettings
+      );
+
+      setSearchParams({
+        searchQuery: combinedQuery,
+        searchString: mergedQuery.query,
+        queryLanguage: mergedQuery.language as SearchQueryLanguage,
+      });
+    },
+    [
+      currentIndexPattern,
+      data.query.filterManager,
+      searchQueryLanguage,
+      searchString,
+      setSearchParams,
+      uiSettings,
+    ]
+  );
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -752,13 +803,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               item={item}
               indexPattern={currentIndexPattern}
               combinedQuery={{ searchQueryLanguage, searchString }}
+              onAddFilter={onAddFilter}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentIndexPattern, searchQueryLanguage, searchString]
+    [currentIndexPattern, searchQueryLanguage, searchString, onAddFilter]
   );
 
   // Some actions open up fly-out or popup
@@ -810,17 +862,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         <EuiPageBody>
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiPageContentHeader>
+              <EuiPageContentHeader className="dataVisualizerPageHeader">
                 <EuiPageContentHeaderSection>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <EuiTitle size="l">
+                  <div className="dataViewTitleHeader">
+                    <EuiTitle>
                       <h1>{currentIndexPattern.title}</h1>
                     </EuiTitle>
                     <DataVisualizerIndexPatternManagement
@@ -830,23 +875,26 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   </div>
                 </EuiPageContentHeaderSection>
 
-                <EuiPageContentHeaderSection data-test-subj="dataVisualizerTimeRangeSelectorSection">
-                  <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-                    {currentIndexPattern.timeFieldName !== undefined && (
-                      <EuiFlexItem grow={false}>
-                        <FullTimeRangeSelector
-                          indexPattern={currentIndexPattern}
-                          query={undefined}
-                          disabled={false}
-                          timefilter={timefilter}
-                        />
-                      </EuiFlexItem>
-                    )}
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="flexEnd"
+                  gutterSize="s"
+                  data-test-subj="dataVisualizerTimeRangeSelectorSection"
+                >
+                  {currentIndexPattern.timeFieldName !== undefined && (
                     <EuiFlexItem grow={false}>
-                      <DatePickerWrapper />
+                      <FullTimeRangeSelector
+                        indexPattern={currentIndexPattern}
+                        query={undefined}
+                        disabled={false}
+                        timefilter={timefilter}
+                      />
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPageContentHeaderSection>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <DatePickerWrapper />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiPageContentHeader>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -878,8 +926,9 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     visibleFieldNames={visibleFieldNames}
                     setVisibleFieldNames={setVisibleFieldNames}
                     showEmptyFields={showEmptyFields}
+                    onAddFilter={onAddFilter}
                   />
-                  <EuiSpacer size={'l'} />
+                  <EuiSpacer size={'m'} />
                   <FieldCountPanel
                     showEmptyFields={showEmptyFields}
                     toggleShowEmptyFields={toggleShowEmptyFields}

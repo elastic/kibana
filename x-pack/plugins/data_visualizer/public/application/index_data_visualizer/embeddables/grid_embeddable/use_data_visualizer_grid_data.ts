@@ -12,7 +12,7 @@ import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_tab
 import { i18n } from '@kbn/i18n';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { extractSearchData } from '../../utils/saved_search_utils';
+import { getEsQueryFromSavedSearch } from '../../utils/saved_search_utils';
 import { MetricFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
 import { DataLoader } from '../../data_loader/data_loader';
 import { useTimefilter } from '../../hooks/use_time_filter';
@@ -62,7 +62,7 @@ export const useDataVisualizerGridData = (
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const searchData = extractSearchData({
+    const searchData = getEsQueryFromSavedSearch({
       indexPattern: currentIndexPattern,
       uiSettings,
       savedSearch: currentSavedSearch,

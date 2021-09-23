@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../../src/plugins/data/common';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
@@ -20,7 +20,7 @@ import { ExpandedRowPanel } from '../../stats_table/components/field_data_expand
 
 export const GeoPointContentWithMap: FC<{
   config: FieldVisConfig;
-  indexPattern: IndexPattern | undefined;
+  indexPattern: DataView | undefined;
   combinedQuery: CombinedQuery;
 }> = ({ config, indexPattern, combinedQuery }) => {
   const { stats } = config;

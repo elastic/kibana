@@ -28,7 +28,7 @@ import {
   isRisonSerializationRequired,
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { IndexPattern } from '../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../src/plugins/data/common';
 import { ResultLink } from '../common/components/results_links';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
@@ -50,9 +50,7 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
     const history = useHistory();
     const { search: searchString } = useLocation();
 
-    const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
-      undefined
-    );
+    const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView | undefined>(undefined);
     const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
       null
     );

@@ -24,9 +24,7 @@
 }
 
 .dataGridChart__legendBoolean {
-  width: 100%;
-  min-width: $euiButtonMinWidth;
-  td { text-align: center }
+  width: #{$euiSizeXS * 2.5} // 10px
 }
 
 /* Override to align column header to bottom of cell when no chart is available */
