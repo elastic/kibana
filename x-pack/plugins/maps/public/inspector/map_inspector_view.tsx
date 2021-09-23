@@ -8,13 +8,13 @@
 import React, { lazy } from 'react';
 import type { Adapters } from 'src/plugins/inspector/public';
 import { i18n } from '@kbn/i18n';
-import { LazyWrapper } from '../../lazy_wrapper';
+import { LazyWrapper } from '../lazy_wrapper';
 
 const getLazyComponent = () => {
   return lazy(() => import('./map_view_component'));
 };
 
-export const MapView = {
+export const MapInspectorView = {
   title: i18n.translate('xpack.maps.inspector.mapDetailsViewTitle', {
     defaultMessage: 'Map details',
   }),
