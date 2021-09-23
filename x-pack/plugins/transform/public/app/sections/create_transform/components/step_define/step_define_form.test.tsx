@@ -83,7 +83,7 @@ describe('Transform: <DefinePivotForm />', () => {
 
     // Act
     // Assert
-    expect(getByText('Index pattern')).toBeInTheDocument();
+    expect(getByText('Data view')).toBeInTheDocument();
     expect(getByText(searchItems.indexPattern.title)).toBeInTheDocument();
   });
 });

@@ -227,7 +227,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
 
     const createKibanaIndexPattern = async () => {
       setLoading(true);
-      const indexPatternName = transformConfig.dest.index;
+      const dataViewName = transformConfig.dest.index;
       const runtimeMappings = transformConfig.source.runtime_mappings as Record<
         string,
         RuntimeField
@@ -236,7 +236,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       try {
         const newIndexPattern = await indexPatterns.createAndSave(
           {
-            title: indexPatternName,
+            title: dataViewName,
             timeFieldName,
             ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
               ? { runtimeFieldMap: runtimeMappings }
@@ -247,9 +247,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
         );
 
         toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.createIndexPatternSuccessMessage', {
-            defaultMessage: 'Kibana index pattern {indexPatternName} created successfully.',
-            values: { indexPatternName },
+          i18n.translate('xpack.transform.stepCreateForm.createDataViewSuccessMessage', {
+            defaultMessage: 'Kibana data view {dataViewName} created successfully.',
+            values: { dataViewName },
           })
         );
 
@@ -259,18 +259,17 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       } catch (e) {
         if (e instanceof DuplicateDataViewError) {
           toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepCreateForm.duplicateIndexPatternErrorMessage', {
+            i18n.translate('xpack.transform.stepCreateForm.duplicateDataViewErrorMessage', {
               defaultMessage:
-                'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
-              values: { indexPatternName },
+                'An error occurred creating the Kibana data view {dataViewName}: The data view already exists.',
+              values: { dataViewName },
             })
           );
         } else {
           toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
-              defaultMessage:
-                'An error occurred creating the Kibana index pattern {indexPatternName}:',
-              values: { indexPatternName },
+            title: i18n.translate('xpack.transform.stepCreateForm.createDataViewErrorMessage', {
+              defaultMessage: 'An error occurred creating the Kibana data view {dataViewName}:',
+              values: { dataViewName },
             }),
             text: toMountPoint(
               <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
@@ -503,9 +502,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                       <EuiText color="subdued" size="s">
                         <p>
                           {i18n.translate(
-                            'xpack.transform.stepCreateForm.creatingIndexPatternMessage',
+                            'xpack.transform.stepCreateForm.creatingDataViewMessage',
                             {
-                              defaultMessage: 'Creating Kibana index pattern ...',
+                              defaultMessage: 'Creating Kibana data view ...',
                             }
                           )}
                         </p>
