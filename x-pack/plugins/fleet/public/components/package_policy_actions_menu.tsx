@@ -69,7 +69,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-              defaultMessage="Add Agent"
+              defaultMessage="Add agent"
             />
           </EuiContextMenuItem>,
         ]
