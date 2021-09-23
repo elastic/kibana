@@ -55,39 +55,24 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     const { savedObjectId, type, references, ...rest } = vis;
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
-    const attributes = (rest as unknown) as SavedObjectAttributes;
+    const attributes = rest as unknown as SavedObjectAttributes;
 
-    const result = await (savedObjectId
-      ? this.safeUpdate(savedObjectId, attributes, references)
-      : this.client.create(DOC_TYPE, attributes, {
-          references,
-        }));
+    const result = await this.client.create(
+      DOC_TYPE,
+      attributes,
+      savedObjectId
+        ? {
+            references,
+            overwrite: true,
+            id: savedObjectId,
+          }
+        : {
+            references,
+          }
+    );
 
     return { ...vis, savedObjectId: result.id };
   };
-
-  // As Lens is using an object to store its attributes, using the update API
-  // will merge the new attribute object with the old one, not overwriting deleted
-  // keys. As Lens is using objects as maps in various places, this is a problem because
-  // deleted subtrees make it back into the object after a load.
-  // This function fixes this by doing two updates - one to empty out the document setting
-  // every key to null, and a second one to load the new content.
-  private async safeUpdate(
-    savedObjectId: string,
-    attributes: SavedObjectAttributes,
-    references: SavedObjectReference[]
-  ) {
-    const resetAttributes: SavedObjectAttributes = {};
-    Object.keys(attributes).forEach((key) => {
-      resetAttributes[key] = null;
-    });
-    return (
-      await this.client.bulkUpdate([
-        { type: DOC_TYPE, id: savedObjectId, attributes: resetAttributes, references },
-        { type: DOC_TYPE, id: savedObjectId, attributes, references },
-      ])
-    ).savedObjects[1];
-  }
 
   async load(savedObjectId: string): Promise<ResolvedSimpleSavedObject<LensSavedObjectAttributes>> {
     const resolveResult = await this.client.resolve<LensSavedObjectAttributes>(

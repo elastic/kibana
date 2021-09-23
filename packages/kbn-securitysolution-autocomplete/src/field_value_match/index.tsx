@@ -187,10 +187,10 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     }
   }, [isLoading, selectedField, isLoadingSuggestions, placeholder]);
 
-  const isLoadingState = useMemo((): boolean => isLoading || isLoadingSuggestions, [
-    isLoading,
-    isLoadingSuggestions,
-  ]);
+  const isLoadingState = useMemo(
+    (): boolean => isLoading || isLoadingSuggestions,
+    [isLoading, isLoadingSuggestions]
+  );
 
   useEffect((): void => {
     setError(undefined);

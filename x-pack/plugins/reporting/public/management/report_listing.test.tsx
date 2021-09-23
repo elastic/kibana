@@ -207,11 +207,11 @@ const mockJobs: ReportApiJSON[] = [
   }),
 ];
 
-const reportingAPIClient = ({
+const reportingAPIClient = {
   list: jest.fn(() => Promise.resolve(mockJobs.map((j) => new Job(j)))),
   total: jest.fn(() => Promise.resolve(18)),
   migrateReportingIndicesIlmPolicy: jest.fn(),
-} as unknown) as DeeplyMockedKeys<ReportingAPIClient>;
+} as unknown as DeeplyMockedKeys<ReportingAPIClient>;
 
 const validCheck = {
   check: () => ({
@@ -302,15 +302,15 @@ describe('ReportListing', () => {
       navLinks: {},
       management: { data: { index_lifecycle_management: true } },
     };
-    ilmLocator = ({
+    ilmLocator = {
       getUrl: jest.fn(),
-    } as unknown) as LocatorPublic<SerializableRecord>;
+    } as unknown as LocatorPublic<SerializableRecord>;
 
-    urlService = ({
+    urlService = {
       locators: {
         get: () => ilmLocator,
       },
-    } as unknown) as SharePluginSetup['url'];
+    } as unknown as SharePluginSetup['url'];
     await runSetup();
   });
 
@@ -326,11 +326,11 @@ describe('ReportListing', () => {
 
   it('subscribes to license changes, and unsubscribes on dismount', async () => {
     const unsubscribeMock = jest.fn();
-    const subMock = ({
+    const subMock = {
       subscribe: jest.fn().mockReturnValue({
         unsubscribe: unsubscribeMock,
       }),
-    } as unknown) as Observable<ILicense>;
+    } as unknown as Observable<ILicense>;
 
     await runSetup({ license$: subMock });
 
@@ -343,15 +343,15 @@ describe('ReportListing', () => {
   describe('ILM policy', () => {
     beforeEach(async () => {
       httpService = httpServiceMock.createSetupContract();
-      ilmLocator = ({
+      ilmLocator = {
         getUrl: jest.fn(),
-      } as unknown) as LocatorPublic<SerializableRecord>;
+      } as unknown as LocatorPublic<SerializableRecord>;
 
-      urlService = ({
+      urlService = {
         locators: {
           get: () => ilmLocator,
         },
-      } as unknown) as SharePluginSetup['url'];
+      } as unknown as SharePluginSetup['url'];
 
       await runSetup();
     });

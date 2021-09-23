@@ -89,6 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const expectedLegendValue = '$ 156';
 
         await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
         await visualBuilder.enterSeriesTemplate('$ {{value}}');
         await retry.try(async () => {
           const actualCount = await visualBuilder.getRhythmChartLegendValue();
@@ -100,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const expectedLegendValue = '15,600%';
 
         await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('Percent');
+        await visualBuilder.changeDataFormatter('percent');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be(expectedLegendValue);
       });
@@ -109,14 +110,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const expectedLegendValue = '156B';
 
         await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('Bytes');
+        await visualBuilder.changeDataFormatter('bytes');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be(expectedLegendValue);
       });
 
       it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
         await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('Duration');
+        await visualBuilder.changeDataFormatter('duration');
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
         const actualCountDefault = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCountDefault).to.be('a few seconds');
@@ -431,6 +432,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         after(async () => await visualBuilder.toggleNewChartsLibraryWithDebug(false));
+      });
+
+      describe('index pattern selection mode', () => {
+        it('should disable switch for Kibana index patterns mode by default', async () => {
+          await visualBuilder.clickPanelOptions('timeSeries');
+          const isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+          expect(isEnabled).to.be(false);
+        });
+
+        describe('metrics:allowStringIndices = true', () => {
+          before(async () => {
+            await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': true });
+            await browser.refresh();
+          });
+
+          beforeEach(async () => await visualBuilder.clickPanelOptions('timeSeries'));
+
+          it('should not disable switch for Kibana index patterns mode', async () => {
+            await visualBuilder.switchIndexPatternSelectionMode(true);
+
+            const isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+            expect(isEnabled).to.be(true);
+          });
+
+          it('should disable switch after selecting Kibana index patterns mode and metrics:allowStringIndices = false', async () => {
+            await visualBuilder.switchIndexPatternSelectionMode(false);
+            await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false });
+            await browser.refresh();
+            await visualBuilder.clickPanelOptions('timeSeries');
+
+            let isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+            expect(isEnabled).to.be(true);
+
+            await visualBuilder.switchIndexPatternSelectionMode(true);
+            isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+            expect(isEnabled).to.be(false);
+          });
+
+          after(
+            async () =>
+              await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false })
+          );
+        });
       });
     });
   });
