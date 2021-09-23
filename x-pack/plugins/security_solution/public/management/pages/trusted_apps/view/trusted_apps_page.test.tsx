@@ -96,7 +96,7 @@ describe('When on the Trusted Apps Page', () => {
     const currentGetHandler = http.get.getMockImplementation();
 
     http.get.mockImplementation(async (...args) => {
-      const path = (args[0] as unknown) as string;
+      const path = args[0] as unknown as string;
       // @ts-ignore
       const httpOptions = args[1] as HttpFetchOptions;
 
@@ -237,7 +237,7 @@ describe('When on the Trusted Apps Page', () => {
 
             expect(coreStart.http.put).toHaveBeenCalledTimes(1);
 
-            const lastCallToPut = (coreStart.http.put.mock.calls[0] as unknown) as [
+            const lastCallToPut = coreStart.http.put.mock.calls[0] as unknown as [
               string,
               HttpFetchOptions
             ];
@@ -319,9 +319,11 @@ describe('When on the Trusted Apps Page', () => {
           expect(coreStart.http.get).toHaveBeenCalledWith(TRUSTED_APP_GET_URI);
 
           expect(
-            (renderResult.getByTestId(
-              'addTrustedAppFlyout-createForm-nameTextField'
-            ) as HTMLInputElement).value
+            (
+              renderResult.getByTestId(
+                'addTrustedAppFlyout-createForm-nameTextField'
+              ) as HTMLInputElement
+            ).value
           ).toEqual('one app for edit');
         });
 
@@ -681,26 +683,24 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and there are no trusted apps', () => {
-    const releaseExistsResponse: jest.MockedFunction<
-      () => Promise<GetTrustedListAppsResponse>
-    > = jest.fn(async () => {
-      return {
-        data: [],
-        total: 0,
-        page: 1,
-        per_page: 1,
-      };
-    });
-    const releaseListResponse: jest.MockedFunction<
-      () => Promise<GetTrustedListAppsResponse>
-    > = jest.fn(async () => {
-      return {
-        data: [],
-        total: 0,
-        page: 1,
-        per_page: 20,
-      };
-    });
+    const releaseExistsResponse: jest.MockedFunction<() => Promise<GetTrustedListAppsResponse>> =
+      jest.fn(async () => {
+        return {
+          data: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        };
+      });
+    const releaseListResponse: jest.MockedFunction<() => Promise<GetTrustedListAppsResponse>> =
+      jest.fn(async () => {
+        return {
+          data: [],
+          total: 0,
+          page: 1,
+          per_page: 20,
+        };
+      });
 
     beforeEach(() => {
       const priorMockImplementation = coreStart.http.get.getMockImplementation();
