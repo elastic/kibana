@@ -19,6 +19,8 @@ import { buildSiemResponse } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+// eslint-disable-next-line no-restricted-imports
+import { __DO_NOT_USE__getRuleActionsSavedObject } from '../../rule_actions/do_not_use_get_rule_actions_saved_object';
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -53,6 +55,7 @@ export const readRulesRoute = (
         }
 
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const savedObjectsClient = context.core.savedObjects.client;
         const rule = await readRules({
           id,
           isRuleRegistryEnabled,
@@ -60,6 +63,10 @@ export const readRulesRoute = (
           ruleId,
         });
         if (rule != null) {
+          const legacyRuleActions = await __DO_NOT_USE__getRuleActionsSavedObject({
+            savedObjectsClient,
+            ruleAlertId: rule.id,
+          });
           const ruleStatuses = await ruleStatusClient.find({
             logsCount: 1,
             ruleId: rule.id,
@@ -74,7 +81,12 @@ export const readRulesRoute = (
               rule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
-          const transformed = transform(rule, currentStatus, isRuleRegistryEnabled);
+          const transformed = transform(
+            rule,
+            currentStatus,
+            isRuleRegistryEnabled,
+            legacyRuleActions
+          );
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

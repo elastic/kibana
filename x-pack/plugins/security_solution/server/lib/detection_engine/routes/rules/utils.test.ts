@@ -15,16 +15,14 @@ import {
   transform,
   transformTags,
   getIdBulkError,
-  transformOrBulkError,
   transformAlertsToRules,
-  transformOrImportError,
   getDuplicates,
   getTupleDuplicateErrorsAndUniqueRules,
 } from './utils';
 import { getAlertMock } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { PartialFilter } from '../../types';
-import { BulkError, ImportSuccessError } from '../utils';
+import { BulkError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { PartialAlert } from '../../../../../../alerting/server';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
@@ -402,44 +400,6 @@ describe.each([
     });
   });
 
-  describe('transformOrBulkError', () => {
-    test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrBulkError(
-        'rule-1',
-        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
-        {
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          actions: [],
-          ruleThrottle: 'no_actions',
-          alertThrottle: null,
-        },
-        isRuleRegistryEnabled
-      );
-      const expected = getOutputRuleAlertForRest();
-      expect(output).toEqual(expected);
-    });
-
-    test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = { name: 'something else' } as unknown as PartialAlert;
-      const output = transformOrBulkError(
-        'rule-1',
-        unsafeCast,
-        {
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          actions: [],
-          ruleThrottle: 'no_actions',
-          alertThrottle: null,
-        },
-        isRuleRegistryEnabled
-      );
-      const expected: BulkError = {
-        rule_id: 'rule-1',
-        error: { message: 'Internal error transforming', status_code: 500 },
-      };
-      expect(output).toEqual(expected);
-    });
-  });
-
   describe('transformAlertsToRules', () => {
     test('given an empty array returns an empty array', () => {
       expect(transformAlertsToRules([])).toEqual([]);
@@ -464,74 +424,6 @@ describe.each([
       expected2.id = 'some other id';
       expected2.rule_id = 'some other id';
       expect(transformed).toEqual([expected1, expected2]);
-    });
-  });
-
-  describe('transformOrImportError', () => {
-    test('returns 1 given success if the alert is an alert type and the existing success count is 0', () => {
-      const output = transformOrImportError(
-        'rule-1',
-        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
-        {
-          success: true,
-          success_count: 0,
-          errors: [],
-        },
-        isRuleRegistryEnabled
-      );
-      const expected: ImportSuccessError = {
-        success: true,
-        errors: [],
-        success_count: 1,
-      };
-      expect(output).toEqual(expected);
-    });
-
-    test('returns 2 given successes if the alert is an alert type and the existing success count is 1', () => {
-      const output = transformOrImportError(
-        'rule-1',
-        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
-        {
-          success: true,
-          success_count: 1,
-          errors: [],
-        },
-        isRuleRegistryEnabled
-      );
-      const expected: ImportSuccessError = {
-        success: true,
-        errors: [],
-        success_count: 2,
-      };
-      expect(output).toEqual(expected);
-    });
-
-    test('returns 1 error and success of false if the data is not of type siem alert', () => {
-      const unsafeCast = { name: 'something else' } as unknown as PartialAlert;
-      const output = transformOrImportError(
-        'rule-1',
-        unsafeCast,
-        {
-          success: true,
-          success_count: 1,
-          errors: [],
-        },
-        isRuleRegistryEnabled
-      );
-      const expected: ImportSuccessError = {
-        success: false,
-        errors: [
-          {
-            rule_id: 'rule-1',
-            error: {
-              message: 'Internal error transforming',
-              status_code: 500,
-            },
-          },
-        ],
-        success_count: 1,
-      };
-      expect(output).toEqual(expected);
     });
   });
 
