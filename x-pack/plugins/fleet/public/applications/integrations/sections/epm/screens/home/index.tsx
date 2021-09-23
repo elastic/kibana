@@ -33,8 +33,6 @@ import type { CustomIntegration } from '../../../../../../../../../../src/plugin
 
 import type { PackageListItem } from '../../../../types';
 
-import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
-
 import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 
 import type { Category } from '../../../../../../../../../../src/plugins/custom_integrations/common';
