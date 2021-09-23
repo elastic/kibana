@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectsStart } from '../../../saved_objects/public';
+import type { SavedObject, SavedObjectsStart } from '../../../../saved_objects/public';
+import { SAVED_SEARCH_TYPE } from '../constants';
+import { getSavedSearchFullPathUrl } from '../saved_searches_utils';
 
+/** @deprecated **/
 export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
   class SavedSearch extends savedObjects.SavedObjectClass {
-    public static type: string = 'search';
+    public static type: string = SAVED_SEARCH_TYPE;
     public static mapping = {
       title: 'text',
       description: 'text',
@@ -31,7 +34,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
     constructor(id: string) {
       super({
         id,
-        type: 'search',
+        type: SAVED_SEARCH_TYPE,
         mapping: {
           title: 'text',
           description: 'text',
@@ -54,7 +57,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
       });
       this.showInRecentlyAccessed = true;
       this.id = id;
-      this.getFullPath = () => `/app/discover#/view/${String(id)}`;
+      this.getFullPath = () => getSavedSearchFullPathUrl(String(id));
     }
   }
 

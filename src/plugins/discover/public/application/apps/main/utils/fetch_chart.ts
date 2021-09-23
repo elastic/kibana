@@ -11,7 +11,7 @@ import {
   DataPublicPluginStart,
   isCompleteResponse,
   search,
-  SearchSource,
+  ISearchSource,
 } from '../../../../../../data/public';
 import { Adapters } from '../../../../../../inspector';
 import { getChartAggConfigs, getDimensions } from './index';
@@ -25,7 +25,7 @@ import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messa
 
 export function fetchChart(
   data$: SavedSearchData,
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   {
     abortController,
     appStateContainer,
@@ -114,7 +114,7 @@ export function fetchChart(
 }
 
 export function updateSearchSource(
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   interval: string,
   data: DataPublicPluginStart
 ) {

@@ -11,7 +11,7 @@ import { History } from 'history';
 import { getState } from './discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../../build_services';
-import { SavedSearch } from '../../../../saved_searches';
+import { SavedSearch, getSavedSearch } from '../../../../saved_searches';
 import { loadIndexPattern } from '../utils/resolve_index_pattern';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
@@ -147,16 +147,22 @@ export function useDiscoverState({
    */
   const resetSavedSearch = useCallback(
     async (id?: string) => {
-      const newSavedSearch = await services.getSavedSearchById(id);
-      const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
-      newSavedSearch.searchSource.setField('index', newIndexPattern);
-      const newAppState = getStateDefaults({
-        config,
-        data,
-        savedSearch: newSavedSearch,
-      });
-      await stateContainer.replaceUrlAppState(newAppState);
-      setState(newAppState);
+      if (id) {
+        const newSavedSearch = await getSavedSearch(id, {
+          search: services.data.search,
+          savedObjectsClient: services.core.savedObjects.client,
+        });
+
+        const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
+        newSavedSearch.searchSource.setField('index', newIndexPattern);
+        const newAppState = getStateDefaults({
+          config,
+          data,
+          savedSearch: newSavedSearch,
+        });
+        await stateContainer.replaceUrlAppState(newAppState);
+        setState(newAppState);
+      }
     },
     [indexPattern, services, config, data, stateContainer]
   );

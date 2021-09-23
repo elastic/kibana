@@ -14,11 +14,11 @@ import {
   sendResetMsg,
 } from '../services/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
-import { SortOrder } from '../../../../saved_searches/types';
+import type { SortOrder } from '../../../../saved_searches';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
-import { SearchSource } from '../../../../../../data/common';
+import { ISearchSource } from '../../../../../../data/common';
 import { Adapters } from '../../../../../../inspector';
 import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../../types';
@@ -29,7 +29,7 @@ import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
 
 export function fetchAll(
   dataSubjects: SavedSearchData,
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   reset = false,
   fetchDeps: {
     abortController: AbortController;

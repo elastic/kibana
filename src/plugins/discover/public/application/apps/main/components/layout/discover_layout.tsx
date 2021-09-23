@@ -39,6 +39,10 @@ import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../../types';
 import { useDataState } from '../../utils/use_data_state';
+import {
+  SavedSearchURLConflictCallout,
+  useSavedSearchAliasMatchRedirect,
+} from '../../../../../saved_searches';
 
 /**
  * Local storage key for sidebar persistence state
@@ -79,6 +83,8 @@ export function DiscoverLayout({
       fetchCounter.current++;
     }
   }, [dataState.fetchStatus]);
+
+  useSavedSearchAliasMatchRedirect({ savedSearch, spaces: services.spaces });
 
   const timeField = useMemo(() => {
     return indexPattern.type !== 'rollup' ? indexPattern.timeFieldName : undefined;
@@ -174,6 +180,7 @@ export function DiscoverLayout({
         resetSavedSearch={resetSavedSearch}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
+        <SavedSearchURLConflictCallout savedSearch={savedSearch} spaces={services.spaces} />
         <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
           {savedSearch.title}
         </h1>

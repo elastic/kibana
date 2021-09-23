@@ -21,16 +21,18 @@ import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
-import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
+import { getTypes, getAggs, getSearch, getSavedObjects } from './services';
 import {
   IAggConfigs,
   IndexPattern,
   ISearchSource,
   AggConfigSerialized,
   SearchSourceFields,
-} from '../../../plugins/data/public';
+} from '../../data/public';
 import { BaseVisType } from './vis_types';
 import { VisParams } from '../common/types';
+
+import { getSavedSearch } from '../../discover/public';
 
 export interface SerializedVisData {
   expression?: string;
@@ -58,14 +60,17 @@ export interface VisData {
 }
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
-  const searchSource = inputSearchSource.createCopy();
   if (savedSearchId) {
-    const savedSearch = await getSavedSearchLoader().get(savedSearchId);
+    const savedSearchSearch = await getSavedSearch(savedSearchId, {
+      search: getSearch(),
+      savedObjectsClient: getSavedObjects().client,
+    });
 
-    searchSource.setParent(savedSearch.searchSource);
+    if (savedSearchSearch?.searchSource) {
+      return savedSearchSearch?.searchSource;
+    }
   }
-  searchSource.setField('size', 0);
-  return searchSource;
+  return inputSearchSource;
 };
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;

@@ -21,7 +21,6 @@ import {
   setAggs,
   setChrome,
   setOverlays,
-  setSavedSearchLoader,
   setEmbeddable,
   setDocLinks,
 } from './services';
@@ -44,8 +43,6 @@ import {
   convertFromSerializedVis,
   convertToSerializedVis,
 } from './saved_visualizations/_saved_vis';
-
-import { createSavedSearchesLoader } from '../../discover/public';
 
 import type {
   PluginInitializerContext,
@@ -173,11 +170,7 @@ export class VisualizationsPlugin
       visualizationTypes: types,
     });
     setSavedVisualizationsLoader(savedVisualizationsLoader);
-    const savedSearchLoader = createSavedSearchesLoader({
-      savedObjectsClient: core.savedObjects.client,
-      savedObjects,
-    });
-    setSavedSearchLoader(savedSearchLoader);
+
     return {
       ...types,
       showNewVisModal,

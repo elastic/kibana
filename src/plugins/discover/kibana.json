@@ -15,7 +15,7 @@
     "savedObjects",
     "indexPatternFieldEditor"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection"],
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
   "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "fieldFormats"],
   "extraPublicDirs": ["common"],
   "owner": {

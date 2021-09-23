@@ -10,7 +10,7 @@ import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { debounceTime, filter, tap } from 'rxjs/operators';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { SearchSource } from '../../../../../../data/common';
+import { ISearchSource } from '../../../../../../data/common';
 import { GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector/public';
@@ -91,7 +91,7 @@ export const useSavedSearch = ({
 }: {
   initialFetchStatus: FetchStatus;
   searchSessionManager: DiscoverSearchSessionManager;
-  searchSource: SearchSource;
+  searchSource: ISearchSource;
   services: DiscoverServices;
   stateContainer: GetStateReturn;
   useNewFieldsApi: boolean;

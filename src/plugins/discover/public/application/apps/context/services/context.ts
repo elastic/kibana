@@ -5,7 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Filter, IndexPattern, IndexPatternsContract, SearchSource } from 'src/plugins/data/public';
+import {
+  Filter,
+  IndexPattern,
+  IndexPatternsContract,
+  ISearchSource,
+} from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { convertIsoToMillis, extractNanos } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
@@ -58,7 +63,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
     }
     const indexPattern = await indexPatterns.get(indexPatternId);
     const { data } = getServices();
-    const searchSource = data.search.searchSource.createEmpty() as SearchSource;
+    const searchSource = data.search.searchSource.createEmpty();
     updateSearchSource(searchSource, indexPattern, filters, Boolean(useNewFieldsApi));
     const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
 
@@ -110,7 +115,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
 }
 
 export function updateSearchSource(
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   indexPattern: IndexPattern,
   filters: Filter[],
   useNewFieldsApi: boolean

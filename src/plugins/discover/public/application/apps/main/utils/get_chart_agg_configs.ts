@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SearchSource } from '../../../../../../data/common';
+import { ISearchSource } from '../../../../../../data/common';
 import { DataPublicPluginStart } from '../../../../../../data/public';
 
 /**
@@ -13,7 +13,7 @@ import { DataPublicPluginStart } from '../../../../../../data/public';
  * for Discover's histogram vis
  */
 export function getChartAggConfigs(
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   histogramInterval: string,
   data: DataPublicPluginStart
 ) {
