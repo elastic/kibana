@@ -8,10 +8,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
-import { capitalize, sortBy, uniq } from 'lodash';
+import { capitalize, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
-import moment, { Duration } from 'moment';
+import moment from 'moment';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -41,13 +41,10 @@ import {
   Axis,
   BarSeries,
   Chart,
-  CurveType,
   Datum,
-  Fit,
-  LineSeries,
-  niceTimeFormatByDay,
   Partition,
   Settings,
+  niceTimeFormatByDay,
   timeFormatter,
 } from '@elastic/charts';
 import { useHistory } from 'react-router-dom';
@@ -171,7 +168,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [errorReasonCount, setErrorReasonCount] = useState<Datum[]>([]);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [alertCountByRuleType, setAlertCountByRuleType] = useState<any[]>([]);
-  const [ruleTypes, setRuleTypes] = useState<string[]>([]);
+  const [alertCountByRule, setAlertCountByRule] = useState<any[]>([]);
 
   const [sort, setSort] = useState<EuiTableSortingType<AlertTableItem>['sort']>({
     field: 'name',
@@ -401,26 +398,30 @@ export const AlertsList: React.FunctionComponent = () => {
       setErrorMessages(Object.keys(data));
 
       data = monitoring?.alerts?.overTime?.buckets ?? [];
-      let rTypes: string[] = [];
-      const parsedAlertData = data.map((d: any) => {
-        const alertData = d?.alerts?.buckets ?? [];
-        const values = alertData.reduce(
-          (acc: any, item: any) => ({
-            ...acc,
-            [item.key]: item.doc_count,
-          }),
-          {}
-        );
-        rTypes = rTypes.concat(Object.keys(values));
-        return {
-          ...values,
-          key: d.key_as_string,
-        };
-      });
-      console.log(parsedAlertData);
-      console.log(uniq(rTypes));
-      setAlertCountByRuleType(parsedAlertData);
-      setRuleTypes(uniq(rTypes));
+      setAlertCountByRuleType(
+        data.flatMap((d: any) => {
+          const alertData = d?.ruleType?.buckets ?? [];
+          return alertData.map((a: any) => {
+            return {
+              key: d.key_as_string,
+              value: a.doc_count,
+              type: a.key,
+            };
+          });
+        })
+      );
+      setAlertCountByRule(
+        data.flatMap((d: any) => {
+          const alertData = d?.rule?.buckets ?? [];
+          return alertData.map((a: any) => {
+            return {
+              key: d.key_as_string,
+              value: a.doc_count,
+              type: a?.ruleName?.buckets[0]?.key ?? a?.key,
+            };
+          });
+        })
+      );
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
@@ -943,12 +944,12 @@ export const AlertsList: React.FunctionComponent = () => {
       {/* Large to remain consistent with ActionsList table spacing */}
       <EuiSpacer size="l" />
       <EuiFlexGroup>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={1}>
           <EuiPanel hasBorder={true}>
             <EuiTitle size="s">
               <h3>Rules by type</h3>
             </EuiTitle>
-            <Chart size={{ height: 200, width: 400 }}>
+            <Chart size={{ height: 200, width: 200 }}>
               <Settings theme={EUI_CHARTS_THEME_LIGHT.theme} />
               <Partition
                 id="rule_types"
@@ -962,7 +963,16 @@ export const AlertsList: React.FunctionComponent = () => {
                 ]}
               />
             </Chart>
-            <EuiSpacer size="l" />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={3}>
+          <EuiPanel hasBorder={true}>
+            <EuiTitle size="s">
+              <h3>Alert count</h3>
+            </EuiTitle>
+            <EuiTitle size="xs">
+              <h4>By rule type</h4>
+            </EuiTitle>
             <Chart size={{ height: 200 }}>
               <Settings
                 theme={EUI_CHARTS_THEME_LIGHT.theme}
@@ -970,28 +980,41 @@ export const AlertsList: React.FunctionComponent = () => {
                 legendPosition="right"
               />
               <BarSeries
-                id="hi"
-                name={getRuleTypeNameFromId('AlertingExample')}
+                id="alert_count_by_rule_type"
+                name="Alert Count by Rule Type"
                 data={alertCountByRuleType}
-                xScaleType="time"
                 xAccessor="key"
-                yAccessors={['AlertingExample']}
-                yScaleType="linear"
+                yAccessors={['value']}
+                splitSeriesAccessors={['type']}
+                stackAccessors={['type']}
               />
-              {/* {ruleTypes.map((ruleType: string, index: number) => {
-                console.log(ruleType);
-                return (
-                  <BarSeries
-                    id={`r_${index}`}
-                    name={getRuleTypeNameFromId(ruleType)}
-                    data={alertCountByRuleType}
-                    xScaleType="time"
-                    xAccessor={'key'}
-                    yAccessors={[ruleType]}
-                    yScaleType="linear"
-                  />
-                );
-              })} */}
+              <Axis
+                title={formatDate(Date.now(), dateFormatAliases.date)}
+                id="bottom-axis"
+                position="bottom"
+                tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+              />
+              <Axis id="left-axis" position="left" showGridLines tickFormat={(d) => d} />
+            </Chart>
+            <EuiSpacer size="l" />
+            <EuiTitle size="xs">
+              <h4>By rule</h4>
+            </EuiTitle>
+            <Chart size={{ height: 200 }}>
+              <Settings
+                theme={EUI_CHARTS_THEME_LIGHT.theme}
+                showLegend={true}
+                legendPosition="right"
+              />
+              <BarSeries
+                id="alert_count_by_rule"
+                name="Alert Count by Rule"
+                data={alertCountByRule}
+                xAccessor="key"
+                yAccessors={['value']}
+                splitSeriesAccessors={['type']}
+                stackAccessors={['type']}
+              />
               <Axis
                 title={formatDate(Date.now(), dateFormatAliases.date)}
                 id="bottom-axis"
@@ -1002,7 +1025,7 @@ export const AlertsList: React.FunctionComponent = () => {
             </Chart>
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={2}>
           <EuiPanel hasBorder={true}>
             <EuiTitle size="s">
               <h3>Average Execution Time</h3>
@@ -1076,7 +1099,7 @@ export const AlertsList: React.FunctionComponent = () => {
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={2}>
           <EuiPanel hasBorder={true}>
             <EuiTitle size="s">
               <h3>Average Delay</h3>
