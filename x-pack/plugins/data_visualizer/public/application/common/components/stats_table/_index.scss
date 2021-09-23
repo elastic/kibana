@@ -7,9 +7,7 @@ $panelWidthL:     #{'max(40%, 450px)'};
 
 .dataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
-  // Width is subtracting the left padding
-  // to ensure the content wraps correctly
-  width: calc(100% - #{$euiSize * 2});
+  width: 100%;
 
   .fieldDataCard__valuesTitle {
     text-transform: uppercase;
