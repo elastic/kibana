@@ -38,10 +38,10 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
   AgentEnrollmentFlyout,
   AgentPolicySummaryLine,
-  LinkedAgentCount,
   PackagePolicyActionsMenu,
 } from '../../../../../components';
 
+import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
 
@@ -288,27 +288,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentCount', {
           defaultMessage: 'Agents',
         }),
-        render({ packagePolicy, agentPolicy }: InMemoryPackagePolicyAndAgentPolicy) {
-          const count = agentPolicy?.agents ?? 0;
-
-          return count > 0 ? (
-            <LinkedAgentCount
-              count={count}
-              agentPolicyId={packagePolicy.policy_id}
-              className="eui-textTruncate"
-              data-test-subj="rowAgentCount"
+        render({ agentPolicy }: InMemoryPackagePolicyAndAgentPolicy) {
+          return (
+            <PackagePolicyAgentsCell
+              agentPolicyId={agentPolicy.id}
+              agentCount={agentPolicy.agents}
+              onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
             />
-          ) : (
-            <EuiButton
-              iconType="plusInCircle"
-              data-test-subj="addAgentButton"
-              onClick={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
-            >
-              <FormattedMessage
-                id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-                defaultMessage="Add agent"
-              />
-            </EuiButton>
           );
         },
       },
