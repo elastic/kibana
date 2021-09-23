@@ -64,7 +64,7 @@ import { DatePickerWrapper } from '../../../common/components/date_picker_wrappe
 import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
-import { createCombinedQuery, extractSearchData } from '../../utils/saved_search_utils';
+import { createMergedEsQuery, getEsQueryFromSavedSearch } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
@@ -230,7 +230,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const defaults = getDefaultPageState();
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const searchData = extractSearchData({
+    const searchData = getEsQueryFromSavedSearch({
       indexPattern: currentIndexPattern,
       uiSettings,
       savedSearch: currentSavedSearch,
@@ -331,7 +331,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         language: searchQueryLanguage,
       };
 
-      const combinedQuery = createCombinedQuery(
+      const combinedQuery = createMergedEsQuery(
         {
           query: searchString || '',
           language: searchQueryLanguage,
@@ -722,7 +722,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         fieldFormat: currentIndexPattern.getFormatterForField(field),
         aggregatable: field.aggregatable,
         scripted: field.scripted,
-        loading: fieldData.existsInDocs,
+        loading: fieldData?.existsInDocs ?? false,
         deletable: field.runtimeField !== undefined,
       };
 

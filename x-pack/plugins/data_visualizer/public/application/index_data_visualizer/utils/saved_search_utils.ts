@@ -22,6 +22,10 @@ import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
+/**
+ * Parse the stringified searchSourceJSON
+ * from a saved search or saved search object
+ */
 export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | SavedSearch) {
   const search = isSavedSearchSavedObject(savedSearch)
     ? savedSearch?.attributes?.kibanaSavedObjectMeta
@@ -36,7 +40,11 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | Sa
     : undefined;
 }
 
-export function createCombinedQuery(
+/**
+ * Create an Elasticsearch query that combines both lucene/kql query string and filters
+ * Should also form a valid query if only the query or filters is provided
+ */
+export function createMergedEsQuery(
   query?: Query,
   filters?: Filter[],
   indexPattern?: DataView,
@@ -76,9 +84,9 @@ export function createCombinedQuery(
 
 /**
  * Extract query data from the saved search object
- * and merge with query data and filters
+ * with overrides from the provided query data and/or filters
  */
-export function extractSearchData({
+export function getEsQueryFromSavedSearch({
   indexPattern,
   uiSettings,
   savedSearch,
@@ -101,7 +109,7 @@ export function extractSearchData({
 
   // If no saved search available, use user's query and filters
   if (!savedSearchData && userQuery) {
-    const combinedQuery = createCombinedQuery(
+    const combinedQuery = createMergedEsQuery(
       userQuery,
       Array.isArray(userFilters) ? userFilters : [],
       indexPattern,
@@ -122,7 +130,7 @@ export function extractSearchData({
 
     if (filterManager) filterManager.setFilters(currentFilters);
 
-    const combinedQuery = createCombinedQuery(
+    const combinedQuery = createMergedEsQuery(
       currentQuery,
       Array.isArray(currentFilters) ? currentFilters : [],
       indexPattern,

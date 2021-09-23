@@ -21,7 +21,7 @@ import { JobFieldType } from '../../../../../common/types';
 import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_index.scss';
-import { createCombinedQuery } from '../../utils/saved_search_utils';
+import { createMergedEsQuery } from '../../utils/saved_search_utils';
 interface Props {
   indexPattern: DataView;
   searchString: Query['query'];
@@ -98,7 +98,7 @@ export const SearchPanel: FC<Props> = ({
         queryManager.filterManager.setFilters(filters);
       }
 
-      const combinedQuery = createCombinedQuery(
+      const combinedQuery = createMergedEsQuery(
         mergedQuery,
         queryManager.filterManager.getFilters() ?? [],
         indexPattern,
