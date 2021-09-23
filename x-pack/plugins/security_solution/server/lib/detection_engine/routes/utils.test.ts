@@ -229,7 +229,9 @@ describe.each([
       rulesClient = rulesClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.resolve.mockResolvedValue(
+        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      );
       const res = await getFailingRules(['my-fake-id'], rulesClient);
       expect(res).toEqual({});
     });
@@ -243,12 +245,12 @@ describe.each([
           message: 'oops',
         },
       };
-      rulesClient.get.mockResolvedValue(foundRule);
+      rulesClient.resolve.mockResolvedValue(foundRule);
       const res = await getFailingRules([foundRule.id], rulesClient);
       expect(res).toEqual({ [foundRule.id]: foundRule });
     });
     it('getFailingRules throws an error', async () => {
-      rulesClient.get.mockImplementation(() => {
+      rulesClient.resolve.mockImplementation(() => {
         throw new Error('my test error');
       });
       let error;

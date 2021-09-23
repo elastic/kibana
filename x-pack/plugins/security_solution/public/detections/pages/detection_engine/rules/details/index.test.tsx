@@ -72,6 +72,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
           },
         },
         timelines: { ...mockTimelines },
+        http: original.useKibana().services.http,
         data: {
           query: {
             filterManager: jest.fn().mockReturnValue({}),
