@@ -166,14 +166,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
         expect(await PageObjects.discover.getHitCount()).to.equal('740');
 
-        // filter and re-save
+        // filter
         await filterBar.addFilter('category', 'is', `Men's Shoes`);
-        await PageObjects.discover.saveSearch(`Ecommerce Data: EUR Filtered`); // renamed the search
 
         const { text: csvFile } = await getReport();
         expectSnapshot(csvFile).toMatch();
-
-        await PageObjects.discover.saveSearch(`Ecommerce Data`); // rename the search back for the next test
       });
 
       it('generates a report with discover:searchFieldsFromSource = true', async () => {
