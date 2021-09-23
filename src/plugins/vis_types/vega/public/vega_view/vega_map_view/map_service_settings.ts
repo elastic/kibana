@@ -66,6 +66,11 @@ export class MapServiceSettings {
       tileApiUrl: this.config.emsTileApiUrl,
       landingPageUrl: this.config.emsLandingPageUrl,
     });
+
+    // Allow zooms > 10 for Vega Maps
+    // any kibana user, regardless of distribution, should get all zoom levels
+    // use `sspl` license to indicate this
+    this.emsClient.addQueryParams({ license: 'sspl' });
   }
 
   public async getTmsService(tmsTileLayer: string) {
