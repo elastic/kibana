@@ -7,6 +7,9 @@
  */
 
 import { resolve, sep } from 'path';
+import { CiStatsReporter } from '@kbn/dev-utils/ci_stats_reporter';
+
+import { log } from '../utils/log';
 import { spawnStreaming } from '../utils/child_process';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { getNonBazelProjectsOnly, topologicallyBatchProjects } from '../utils/projects';
@@ -34,6 +37,7 @@ export const BootstrapCommand: ICommand = {
     const batchedNonBazelProjects = topologicallyBatchProjects(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = projects.get('kibana')?.path || '';
     const runOffline = options?.offline === true;
+    const reporter = CiStatsReporter.fromEnv(log);
 
     // Force install is set in case a flag is passed or
     // if the `.yarn-integrity` file is not found which
@@ -62,7 +66,10 @@ export const BootstrapCommand: ICommand = {
       await runBazel(['run', '@nodejs//:yarn'], runOffline);
     }
 
+    // build packages
+    const packageStartTime = Date.now();
     await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
+    const packagesTotalTime = Date.now() - packageStartTime;
 
     // Install monorepo npm dependencies outside of the Bazel managed ones
     for (const batch of batchedNonBazelProjects) {
@@ -114,6 +121,7 @@ export const BootstrapCommand: ICommand = {
     );
 
     // Build typescript references
+    const typescriptStartTime = Date.now();
     await spawnStreaming(
       process.execPath,
       ['scripts/build_ts_refs', '--ignore-type-failures', '--info'],
@@ -123,5 +131,33 @@ export const BootstrapCommand: ICommand = {
       },
       { prefix: '[ts refs]', debug: false }
     );
+    const typescriptTotalTime = Date.now() - typescriptStartTime;
+
+    // send timings
+    await reporter.timings({
+      upstreamBranch: kbn.kibanaProject.json.branch,
+      // prevent loading @kbn/utils by passing null
+      kibanaUuid: kbn.getUuid() || null,
+      timings: [
+        {
+          group: 'bootstrap',
+          id: 'build packages',
+          ms: packagesTotalTime,
+          meta: {
+            success: true,
+          },
+        },
+        {
+          group: 'bootstrap',
+          id: 'typescript references',
+          ms: typescriptTotalTime,
+          meta: {
+            success: true,
+            buildTsRefsEnabled: process.env.BUILD_TS_REFS_DISABLE !== 'true',
+            buildTsRefsCacheEnabled: process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false',
+          },
+        },
+      ],
+    });
   },
 };
