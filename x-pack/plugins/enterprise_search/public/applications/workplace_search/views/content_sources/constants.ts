@@ -306,13 +306,6 @@ export const SOURCE_CONFIG_TITLE = i18n.translate(
   }
 );
 
-export const SOURCE_CONFIG_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
-  {
-    defaultMessage: 'Edit content source connector settings to change.',
-  }
-);
-
 export const SYNC_MANAGEMENT_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementTitle',
   {
@@ -358,7 +351,7 @@ export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
 export const SOURCE_CONFIG_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.config.link',
   {
-    defaultMessage: 'Edit content source connector settings',
+    defaultMessage: 'Edit connector settings',
   }
 );
 
