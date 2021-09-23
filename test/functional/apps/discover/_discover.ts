@@ -288,8 +288,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.awaitKibanaChrome();
         const initialTimeString = await PageObjects.discover.getChartTimespan();
         await queryBar.submitQuery();
-        const refreshedTimeString = await PageObjects.discover.getChartTimespan();
-        expect(refreshedTimeString).not.to.be(initialTimeString);
+
+        await retry.waitFor('chart timespan to have changed', async () => {
+          const refreshedTimeString = await PageObjects.discover.getChartTimespan();
+          log.debug(
+            `Timestamp before: ${initialTimeString}, Timestamp after: ${refreshedTimeString}`
+          );
+          return refreshedTimeString !== initialTimeString;
+        });
       });
     });
 
