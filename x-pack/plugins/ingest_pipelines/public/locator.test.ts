@@ -7,12 +7,14 @@
 
 import { ManagementAppLocatorDefinition } from 'src/plugins/management/common/locator';
 import { IngestPipelinesLocatorDefinition, INGEST_PIPELINES_PAGES } from './locator';
+import { sharePluginMock } from '../../../../src/plugins/share/public/mocks';
 
 describe('Ingest pipeline locator', () => {
   const setup = () => {
     const managementDefinition = new ManagementAppLocatorDefinition();
     const definition = new IngestPipelinesLocatorDefinition({
       managementAppLocator: {
+        ...sharePluginMock.createLocator(),
         getLocation: (params) => managementDefinition.getLocation(params),
         getUrl: async () => {
           throw new Error('not implemented');
@@ -21,10 +23,6 @@ describe('Ingest pipeline locator', () => {
           throw new Error('not implemented');
         },
         useUrl: () => '',
-        telemetry: jest.fn(),
-        extract: jest.fn(),
-        inject: jest.fn(),
-        migrations: {},
       },
     });
     return { definition };

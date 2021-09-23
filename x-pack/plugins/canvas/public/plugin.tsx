@@ -76,7 +76,8 @@ export type CanvasStart = void;
 
 /** @internal */
 export class CanvasPlugin
-  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps>
+{
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private initContext: PluginInitializerContext;
 
@@ -131,8 +132,7 @@ export class CanvasPlugin
           setupPlugins,
           startPlugins,
           registries,
-          this.appUpdater,
-          pluginServices
+          this.appUpdater
         );
 
         const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });

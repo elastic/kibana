@@ -97,9 +97,8 @@ export const EditPackagePolicyForm = memo<{
     inputs: [],
     version: '',
   });
-  const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
-    GetOnePackagePolicyResponse['item']
-  >();
+  const [originalPackagePolicy, setOriginalPackagePolicy] =
+    useState<GetOnePackagePolicyResponse['item']>();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
 
   const policyId = agentPolicy?.id ?? '';
@@ -110,10 +109,8 @@ export const EditPackagePolicyForm = memo<{
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
-        const {
-          data: packagePolicyData,
-          error: packagePolicyError,
-        } = await sendGetOnePackagePolicy(packagePolicyId);
+        const { data: packagePolicyData, error: packagePolicyError } =
+          await sendGetOnePackagePolicy(packagePolicyId);
 
         if (packagePolicyError) {
           throw packagePolicyError;
@@ -729,7 +726,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"
-            defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform upgrade. You may reference your {previousConfigurationLink} for comparison."
+            defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform the upgrade. You may reference your {previousConfigurationLink} for comparison."
             values={{
               currentVersion: currentPackagePolicy?.package?.version,
               upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
