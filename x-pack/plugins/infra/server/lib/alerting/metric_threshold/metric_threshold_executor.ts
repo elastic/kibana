@@ -96,8 +96,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
         : [];
 
-    console.log('alertOnGroupDisappear', alertOnGroupDisappear);
-
     const alertResults = await evaluateAlert(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedAlertParams,
@@ -153,10 +151,13 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         //   .join('\n');
       }
       if (alertOnNoData || alertOnGroupDisappear) {
-        if (
-          nextState === AlertStates.NO_DATA &&
-          (alertOnNoData || groups.length > 1) // Handle the possibility that the user only wants to be alerted on disappearing groups but not general No Data
-        ) {
+        // Handle the possibility that the user only wants to be alerted on disappearing groups but not general No Data
+        const soleGroupIsNotUngroupedKey = groups.length > 1 || groups[0] !== UNGROUPED_FACTORY_KEY;
+        const noDataStateIndicatesDisappearedGroup =
+          alertOnGroupDisappear && soleGroupIsNotUngroupedKey;
+        const shouldAlertIfNoDataStateDetected =
+          alertOnNoData || noDataStateIndicatesDisappearedGroup;
+        if (nextState === AlertStates.NO_DATA && shouldAlertIfNoDataStateDetected) {
           reason = alertResults
             .filter((result) => result[group].isNoData)
             .map((result) => buildNoDataAlertReason(result[group]))
