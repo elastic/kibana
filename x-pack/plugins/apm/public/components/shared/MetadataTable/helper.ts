@@ -5,34 +5,48 @@
  * 2.0.
  */
 
-import { isEmpty, groupBy, capitalize } from 'lodash';
+import { isEmpty, groupBy, capitalize, partition } from 'lodash';
 import type { SectionDescriptor } from './types';
+
+const EXCLUDED_FIELDS = ['error.stacktrace', 'span.stacktrace'];
 
 export const getSectionsFromFields = (fields: Record<string, any>) => {
   const rows = Object.keys(fields)
+    .filter(
+      (field) => !EXCLUDED_FIELDS.some((excluded) => field.startsWith(excluded))
+    )
     .sort()
-    .map((key) => {
+    .map((field) => {
       return {
-        section: key.split('.')[0],
-        field: key,
-        value: fields[key],
+        section: field.split('.')[0],
+        field,
+        value: fields[field],
       };
     });
 
-  return Object.values(groupBy(rows, 'section')).map((rowsForSection) => {
-    const first = rowsForSection[0];
+  const sections = Object.values(groupBy(rows, 'section')).map(
+    (rowsForSection) => {
+      const first = rowsForSection[0];
 
-    const section: SectionDescriptor = {
-      key: first.section,
-      label: capitalize(first.section),
-      properties: rowsForSection.map((row) => ({
-        field: row.field,
-        value: row.value,
-      })),
-    };
+      const section: SectionDescriptor = {
+        key: first.section,
+        label: capitalize(first.section),
+        properties: rowsForSection.map((row) => ({
+          field: row.field,
+          value: row.value,
+        })),
+      };
 
-    return section;
-  });
+      return section;
+    }
+  );
+
+  const [labelSections, otherSections] = partition(
+    sections,
+    (section) => section.key === 'labels'
+  );
+
+  return [...labelSections, ...otherSections];
 };
 
 export const filterSectionsByTerm = (
