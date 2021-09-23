@@ -64,6 +64,7 @@ export function toPreviewExpression(
               yConfig: layer.yConfig?.map(({ lineWidth, ...config }) => ({
                 ...config,
                 lineWidth: 1,
+                icon: undefined,
               })),
             }
       ),
