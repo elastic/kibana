@@ -28,7 +28,6 @@ import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { SelectedDataView } from '../../store/sourcerer/selectors';
-import { useUserInfo } from '../../../detections/components/user_info';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -322,16 +321,21 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     ]
   );
   const refDataViewId = useRef('');
+  const refSelectedPatterns = useRef([] as string[]);
   useEffect(() => {
-    if (dataViewId != null && dataViewId !== refDataViewId.current) {
+    if (
+      (dataViewId != null && dataViewId !== refDataViewId.current && selectedPatterns.length > 0) ||
+      (selectedPatterns.length > 0 && refSelectedPatterns.current.length === 0)
+    ) {
       indexFieldsSearch(dataViewId);
     }
+    refSelectedPatterns.current = selectedPatterns;
     refDataViewId.current = dataViewId;
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId]);
+  }, [dataViewId, selectedPatterns]);
   return { indexFieldsSearch };
 };

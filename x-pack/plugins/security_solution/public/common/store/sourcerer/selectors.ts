@@ -48,21 +48,33 @@ export interface SelectedDataView {
 export const getSelectedDataViewSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();
+  const getSignalIndexNameSelector = signalIndexNameSelector();
   const getKibanaDataViewsSelector = kibanaDataViewsSelector();
 
   return (state: State, scopeId: SourcererScopeName): SelectedDataView => {
     const scope = getScopeSelector(state, scopeId);
     const defaultDataView = getDefaultDataViewSelector(state);
     const kibanaDataViews = getKibanaDataViewsSelector(state);
+    const signalIndexName = getSignalIndexNameSelector(state);
     const dataViewId =
       scope.selectedDataViewId === null ? defaultDataView.id : scope.selectedDataViewId;
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
 
     const patternList = theDataView != null ? theDataView.title.split(',') : [];
-    const selectedPatterns =
-      scope.selectedPatterns.length === 0 && theDataView != null
-        ? theDataView.patternList
-        : scope.selectedPatterns;
+    // const selectedPatterns =
+    //   scope.selectedPatterns.length === 0 && theDataView != null
+    //     ? theDataView.patternList
+    //     : scope.selectedPatterns;
+    let selectedPatterns: string[] = scope.selectedPatterns;
+
+    if (selectedPatterns.length === 0) {
+      if (scopeId === SourcererScopeName.detections && signalIndexName != null) {
+        selectedPatterns = [signalIndexName];
+      } else if (scopeId !== SourcererScopeName.detections && theDataView != null) {
+        selectedPatterns = theDataView.patternList;
+      }
+    }
+
     return {
       dataViewId,
       // all patterns in DATA_VIEW

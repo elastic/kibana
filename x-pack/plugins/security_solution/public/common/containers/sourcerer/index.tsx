@@ -126,6 +126,8 @@ export const useInitSourcerer = (
             signal: abortCtrl.current.signal,
           });
           if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
+            // first time signals is defined and validated in the sourcerer
+            // redo indexFieldsSearch
             indexFieldsSearch(response.defaultDataView.id, newSignalsIndex);
           }
           // if (newPattern)
