@@ -118,18 +118,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       const body2 = await runRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
 
-      // previous datafeed should be removed on first sync
-      expect(body2).to.eql({
-        datafeedsAdded: {},
-        datafeedsRemoved: { [adJobId1]: { success: true, type: 'anomaly-detector' } },
-        savedObjectsCreated: {},
-        savedObjectsDeleted: {},
-      });
-
-      const body3 = await runRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
-
       // new datafeed will be added on second sync
-      expect(body3).to.eql({
+      expect(body2).to.eql({
         datafeedsAdded: { [adJobId1]: { success: true, type: 'anomaly-detector' } },
         datafeedsRemoved: {},
         savedObjectsCreated: {},

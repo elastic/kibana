@@ -29,23 +29,23 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
 
-  const checkStatus = useCallback(() => {
-    initSavedObjects(true)
-      .then(({ jobs, datafeeds }) => {
-        if (mounted.current === false) {
-          return;
-        }
+  const checkStatus = useCallback(async () => {
+    try {
+      const { jobs, datafeeds } = await initSavedObjects(true);
 
-        const missingJobs =
-          jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
+      if (mounted.current === false) {
+        return;
+      }
 
-        const missingDatafeeds = datafeeds.length > 0 && jobType === 'anomaly-detector';
+      const missingJobs =
+        jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
 
-        setShowWarning(showSyncFlyout || missingJobs || missingDatafeeds);
-      })
-      .catch(() => {
-        console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
-      });
+      const missingDatafeeds = datafeeds.length > 0 && jobType === 'anomaly-detector';
+
+      setShowWarning(showSyncFlyout || missingJobs || missingDatafeeds);
+    } catch (error) {
+      console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
+    }
   }, [showSyncFlyout, setShowWarning]);
 
   useEffect(() => {
