@@ -409,7 +409,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
-          defaultMessage: 'Create alert per group(s) (optional)',
+          defaultMessage: 'Group alerts by (optional)',
         })}
         helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
           defaultMessage:
@@ -446,7 +446,7 @@ export const Expressions: React.FC<Props> = (props) => {
           </>
         }
         disabled={!hasGroupBy}
-        checked={hasGroupBy && alertParams.alertOnGroupDisappear}
+        checked={Boolean(hasGroupBy && alertParams.alertOnGroupDisappear)}
         onChange={(e) => setAlertParams('alertOnGroupDisappear', e.target.checked)}
       />
       <EuiSpacer size={'m'} />
