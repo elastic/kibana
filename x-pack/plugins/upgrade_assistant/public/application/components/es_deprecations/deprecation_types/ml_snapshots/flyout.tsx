@@ -102,13 +102,13 @@ const i18nTexts = {
   upgradeModeEnabledErrorTitle: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeModeEnabledErrorTitle',
     {
-      defaultMessage: 'Machine learning upgrade mode is enabled',
+      defaultMessage: 'Machine Learning upgrade mode is enabled',
     }
   ),
   upgradeModeEnabledErrorDescription: (docsLink: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeModeEnabledErrorDescription"
-      defaultMessage="No actions can be taken on machine learning snapshots while upgrade mode is enabled. {docsLink}."
+      defaultMessage="No actions can be taken on Machine Learning snapshots while upgrade mode is enabled. {docsLink}."
       values={{
         docsLink: (
           <EuiLink href={docsLink} target="_blank" data-test-subj="setUpgradeModeDocsLink">
