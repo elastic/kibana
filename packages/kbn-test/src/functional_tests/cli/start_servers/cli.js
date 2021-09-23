@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
 import { startServers } from '../../tasks';
 import { runCli } from '../../lib';
 import { processOptions, displayHelp } from './args';
+import { getTimeReporter } from '../../../kbn';
 
 /**
  * Start servers
@@ -16,8 +18,19 @@ import { processOptions, displayHelp } from './args';
  *                                   if no config option is passed
  */
 export async function startServersCli(defaultConfigPath) {
+  const runStartTime = Date.now();
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+  const reportTime = getTimeReporter(log);
+
   await runCli(displayHelp, async (userOptions) => {
     const options = processOptions(userOptions, defaultConfigPath);
-    await startServers(options);
+    await startServers({
+      ...options,
+      runStartTime,
+      reportTime,
+    });
   });
 }

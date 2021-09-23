@@ -23,6 +23,7 @@ import {
 } from './lib';
 
 import { readConfigFile } from '../functional_test_runner/lib';
+import { getTimeReporter } from '../kbn';
 
 const makeSuccessMessage = (options: StartServerOptions) => {
   const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
@@ -145,9 +146,11 @@ interface StartServerOptions {
   createLogger: () => ToolingLog;
   extraKbnOpts: string[];
   useDefaultConfig?: boolean;
+  reportTime?: ReturnType<typeof getTimeReporter>;
+  runStartTime?: number;
 }
 
-export async function startServers(options: StartServerOptions) {
+export async function startServers({ reportTime, runStartTime, ...options }: StartServerOptions) {
   const log = options.createLogger();
   const opts = {
     ...options,
@@ -169,6 +172,13 @@ export async function startServers(options: StartServerOptions) {
         ],
       },
     });
+
+    if (runStartTime && reportTime) {
+      reportTime(runStartTime, 'functional_tests_server', {
+        success: true,
+        ...options,
+      });
+    }
 
     // wait for 5 seconds of silence before logging the
     // success message so that it doesn't get buried

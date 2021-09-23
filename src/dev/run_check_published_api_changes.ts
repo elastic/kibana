@@ -21,11 +21,15 @@ import execa from 'execa';
 import fs from 'fs';
 import path from 'path';
 import getopts from 'getopts';
+import { getTimeReporter } from './report_time';
 
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
 });
+
+let runStartTime = Date.now();
+const reportTime = getTimeReporter(log, 'check_published_api_changes');
 
 /*
  * Step 1: execute build:types
@@ -184,6 +188,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
       log.error(e);
       return false;
     }
+
     log.info(`${folder} API: updated documentation ✔`);
   }
 
@@ -253,6 +258,8 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
   await runBuildTypes();
   log.info('Types for api extractor has been built');
 
+  runStartTime = Date.now();
+
   const filteredFolders = folders.filter((folder) =>
     opts.filter.length ? folder.match(opts.filter) : true
   );
@@ -262,9 +269,22 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
   }
 
   if (results.includes(false)) {
+    reportTime(runStartTime, 'extract', {
+      success: false,
+      ...opts,
+    });
     process.exitCode = 1;
+  } else {
+    reportTime(runStartTime, 'extract', {
+      success: true,
+      ...opts,
+    });
   }
 })().catch((e) => {
+  reportTime(runStartTime, 'extract', {
+    success: true,
+    error: e.message,
+  });
   log.error(e);
   process.exitCode = 1;
 });
