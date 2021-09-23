@@ -56,7 +56,7 @@ describe('index', () => {
       );
       expect(changedPaths).toStrictEqual({
         set: ['xpack.actions.allowedHosts'],
-        unset: ['xpack.actions.whitelistedHosts'],
+        unset: [],
       });
     });
   });
