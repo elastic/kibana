@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('in iframe', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/70928
+  describe.skip('in iframe', () => {
     it('should open Kibana for logged-in user', async () => {
       const isChromeHiddenBefore = await PageObjects.common.isChromeHidden();
       expect(isChromeHiddenBefore).to.be(true);
