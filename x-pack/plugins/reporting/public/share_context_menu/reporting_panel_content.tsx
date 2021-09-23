@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -30,6 +31,11 @@ import {
 } from '../../common/constants';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+
+/**
+ * Based on {@link URL_MAX_LENGTH} exported from core/public.
+ */
+const CHROMIUM_MAX_URL_LENGTH = 25000;
 
 export interface ReportingPanelProps {
   apiClient: ReportingAPIClient;
@@ -53,6 +59,7 @@ interface State {
   absoluteUrl: string;
   layoutId: string;
   objectType: string;
+  showCopyButtonWithUnsavedChanges: boolean;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
@@ -69,6 +76,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
       objectType,
+      showCopyButtonWithUnsavedChanges: false,
     };
   }
 
@@ -109,10 +117,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
   };
 
   public render() {
-    if (
-      this.props.requiresSavedState &&
-      (this.isNotSaved() || this.props.isDirty || this.state.isStale)
-    ) {
+    const isUnsaved = this.isNotSaved() || this.props.isDirty || this.state.isStale;
+    if (this.props.requiresSavedState && isUnsaved) {
       return (
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
           <EuiFormRow
@@ -128,6 +134,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
         </EuiForm>
       );
     }
+
+    const showCopyPostURLButton =
+      !isUnsaved || (isUnsaved && this.state.showCopyButtonWithUnsavedChanges);
 
     return (
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
@@ -171,18 +180,51 @@ class ReportingPanelContentUi extends Component<Props, State> {
               />
             </p>
           </EuiText>
+          {isUnsaved ? (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="warning">
+                <p>
+                  <FormattedMessage
+                    id="xpack.reporting.panelContent.unsavedStateWarningText"
+                    defaultMessage="It is highly recommended to save your changes before copying this URL."
+                  />{' '}
+                  <EuiLink
+                    onClick={() =>
+                      this.setState({
+                        showCopyButtonWithUnsavedChanges: true,
+                      })
+                    }
+                    color={this.state.showCopyButtonWithUnsavedChanges ? 'subdued' : 'warning'}
+                  >
+                    <FormattedMessage
+                      id="xpack.reporting.panelContent.checkbox.showCopyURLButtonLabel"
+                      defaultMessage="Show anyway."
+                    />
+                  </EuiLink>
+                </p>
+              </EuiText>
+            </>
+          ) : undefined}
           <EuiSpacer size="s" />
 
-          <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
-            {(copy) => (
-              <EuiButton fullWidth onClick={copy} size="s">
-                <FormattedMessage
-                  id="xpack.reporting.panelContent.copyUrlButtonLabel"
-                  defaultMessage="Copy POST URL"
-                />
-              </EuiButton>
-            )}
-          </EuiCopy>
+          {showCopyPostURLButton && (
+            <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+              {(copy) => (
+                <EuiButton
+                  color={this.props.isDirty ? 'warning' : 'primary'}
+                  fullWidth
+                  onClick={copy}
+                  size="s"
+                >
+                  <FormattedMessage
+                    id="xpack.reporting.panelContent.copyUrlButtonLabel"
+                    defaultMessage="Copy POST URL"
+                  />
+                </EuiButton>
+              )}
+            </EuiCopy>
+          )}
         </EuiAccordion>
       </EuiForm>
     );
