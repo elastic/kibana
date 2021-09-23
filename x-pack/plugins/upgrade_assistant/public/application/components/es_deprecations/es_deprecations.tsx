@@ -45,7 +45,7 @@ const i18nTexts = {
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'You must resolve all critical issues before upgrading. Back up recommended. Make sure you have a current snapshot before modifying your configuration or reindexing. ',
+      'Resolve all critical issues before upgrading. Before making changes, ensure you have a current snapshot of your cluster. Some issues may require reindexing to resolve. ',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecation issues…',
