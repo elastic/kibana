@@ -134,7 +134,7 @@ export function MockApmPluginContextWrapper({
   value = {} as ApmPluginContextValue,
   history,
 }: {
-  children: React.ReactElement;
+  children?: React.ReactNode;
   value?: ApmPluginContextValue;
   history?: History;
 }) {
