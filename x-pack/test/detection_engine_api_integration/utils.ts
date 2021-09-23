@@ -369,6 +369,11 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial
   version: 1,
 });
 
+export const resolveSimpleRuleOutput = (
+  ruleId = 'rule-1',
+  enabled = false
+): Partial<RulesSchema> => ({ outcome: 'exactMatch', ...getSimpleRuleOutput(ruleId, enabled) });
+
 /**
  * This is the typical output of a simple rule that Kibana will output with all the defaults except
  * for all the server generated properties such as created_by. Useful for testing end to end tests.
@@ -378,6 +383,17 @@ export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<Rul
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
+};
+
+/**
+ * This is the typical output of a simple rule that Kibana will output with all the defaults except
+ * for all the server generated properties such as created_by. Useful for testing end to end tests.
+ */
+export const resolveSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
+  const rule = getSimpleRuleOutput(ruleId);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { rule_id, ...ruleWithoutRuleId } = rule;
+  return { outcome: 'exactMatch', ...ruleWithoutRuleId };
 };
 
 export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => {
