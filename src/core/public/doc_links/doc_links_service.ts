@@ -206,7 +206,7 @@ export class DocLinksService {
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
           releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
-          remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
+          remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode-remote`,
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
           setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
