@@ -136,7 +136,7 @@ export const createAgentPolicyHandler: RequestHandler<
       });
     }
 
-    await agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id);
+    await agentPolicyService.createFleetServerPolicy(soClient, agentPolicy.id);
 
     const body: CreateAgentPolicyResponse = {
       item: agentPolicy,

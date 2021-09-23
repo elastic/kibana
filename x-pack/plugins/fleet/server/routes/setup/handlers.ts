@@ -9,7 +9,7 @@ import type { RequestHandler } from 'src/core/server';
 
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
-import { setupIngestManager } from '../../services/setup';
+import { setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
 
@@ -46,7 +46,7 @@ export const fleetSetupHandler: RequestHandler = async (context, request, respon
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const setupStatus = await setupIngestManager(soClient, esClient);
+    const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {
       ...setupStatus,
       nonFatalErrors: setupStatus.nonFatalErrors.map((e) => {
