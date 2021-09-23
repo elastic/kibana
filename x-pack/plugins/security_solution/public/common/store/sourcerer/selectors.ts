@@ -45,6 +45,8 @@ export interface SelectedDataView {
   patternList: string[];
   selectedPatterns: string[];
 }
+
+// TODO: Steph/sourcerer needs tests/refactor
 export const getSelectedDataViewSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();
@@ -61,12 +63,8 @@ export const getSelectedDataViewSelector = () => {
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
 
     const patternList = theDataView != null ? theDataView.title.split(',') : [];
-    // const selectedPatterns =
-    //   scope.selectedPatterns.length === 0 && theDataView != null
-    //     ? theDataView.patternList
-    //     : scope.selectedPatterns;
-    let selectedPatterns: string[] = scope.selectedPatterns;
 
+    let selectedPatterns: string[] = scope.selectedPatterns;
     if (selectedPatterns.length === 0) {
       if (scopeId === SourcererScopeName.detections && signalIndexName != null) {
         selectedPatterns = [signalIndexName];
