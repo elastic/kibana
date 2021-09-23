@@ -5,35 +5,38 @@
  * 2.0.
  */
 
-import { get, pick, isEmpty } from 'lodash';
-import { Section } from './sections';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import { Span } from '../../../../typings/es_schemas/ui/span';
-import { flattenObject, KeyValuePair } from '../../../utils/flattenObject';
+import { isEmpty, groupBy, capitalize } from 'lodash';
+import type { SectionDescriptor } from './types';
 
-export type SectionsWithRows = ReturnType<typeof getSectionsWithRows>;
+export const getSectionsFromFields = (fields: Record<string, any>) => {
+  const rows = Object.keys(fields)
+    .sort()
+    .map((key) => {
+      return {
+        section: key.split('.')[0],
+        field: key,
+        value: fields[key],
+      };
+    });
 
-export const getSectionsWithRows = (
-  sections: Section[],
-  apmDoc: Transaction | APMError | Span
-) => {
-  return sections
-    .map((section) => {
-      const sectionData: Record<string, unknown> = get(apmDoc, section.key);
-      const filteredData: Record<string, unknown> | undefined =
-        section.properties
-          ? pick(sectionData, section.properties)
-          : sectionData;
+  return Object.values(groupBy(rows, 'section')).map((rowsForSection) => {
+    const first = rowsForSection[0];
 
-      const rows: KeyValuePair[] = flattenObject(filteredData, section.key);
-      return { ...section, rows };
-    })
-    .filter(({ required, rows }) => required || !isEmpty(rows));
+    const section: SectionDescriptor = {
+      key: first.section,
+      label: capitalize(first.section),
+      properties: rowsForSection.map((row) => ({
+        field: row.field,
+        value: row.value,
+      })),
+    };
+
+    return section;
+  });
 };
 
 export const filterSectionsByTerm = (
-  sections: SectionsWithRows,
+  sections: SectionDescriptor[],
   searchTerm: string
 ) => {
   if (!searchTerm) {
@@ -41,15 +44,16 @@ export const filterSectionsByTerm = (
   }
   return sections
     .map((section) => {
-      const { rows = [] } = section;
-      const filteredRows = rows.filter(({ key, value }) => {
-        const valueAsString = String(value).toLowerCase();
+      const { properties = [] } = section;
+      const filteredProps = properties.filter(({ field, value }) => {
         return (
-          key.toLowerCase().includes(searchTerm) ||
-          valueAsString.includes(searchTerm)
+          field.toLowerCase().includes(searchTerm) ||
+          value.some((val: string | number) =>
+            String(val).toLowerCase().includes(searchTerm)
+          )
         );
       });
-      return { ...section, rows: filteredRows };
+      return { ...section, properties: filteredProps };
     })
-    .filter(({ rows }) => !isEmpty(rows));
+    .filter(({ properties }) => !isEmpty(properties));
 };
