@@ -52,8 +52,6 @@ jest.mock('./services', () => {
     service.registerFunction(func);
   }
 
-  service.start();
-
   const moduleMock = {
     __execution: undefined,
     __getLastExecution: () => moduleMock.__execution,

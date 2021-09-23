@@ -21,7 +21,6 @@ import { useSourcererScope } from '../../../containers/sourcerer';
 import { TooltipWithKeyboardShortcut } from '../../accessibility';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from '../keyboard_shortcut_constants';
-import { Filter } from '../../../../../../../../src/plugins/data/public';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.hoverActions.showTopTooltip', {
@@ -36,12 +35,11 @@ interface Props {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   enablePopOver?: boolean;
   field: string;
-  globalFilters?: Filter[];
   onClick: () => void;
   onFilterAdded?: () => void;
   ownFocus: boolean;
-  showTooltip?: boolean;
   showTopN: boolean;
+  showTooltip?: boolean;
   timelineId?: string | null;
   value?: string[] | string | null;
 }
@@ -58,7 +56,6 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     showTopN,
     timelineId,
     value,
-    globalFilters,
   }) => {
     const activeScope: SourcererScopeName =
       timelineId === TimelineId.active
@@ -131,10 +128,9 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           timelineId={timelineId ?? undefined}
           toggleTopN={onClick}
           value={value}
-          globalFilters={globalFilters}
         />
       ),
-      [browserFields, field, indexPattern, onClick, onFilterAdded, timelineId, value, globalFilters]
+      [browserFields, field, indexPattern, onClick, onFilterAdded, timelineId, value]
     );
 
     return showTopN ? (

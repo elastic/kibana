@@ -16,8 +16,7 @@ export async function fetchKibanaVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
-  size: number,
-  filterQuery?: string
+  size: number
 ): Promise<AlertVersions[]> {
   const params = {
     index,
@@ -89,15 +88,6 @@ export async function fetchKibanaVersions(
       },
     },
   };
-
-  try {
-    if (filterQuery) {
-      const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
-    }
-  } catch (e) {
-    // meh
-  }
 
   const { body: response } = await esClient.search(params);
   const indexName = get(response, 'aggregations.index.buckets[0].key', '');

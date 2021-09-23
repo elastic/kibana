@@ -108,7 +108,6 @@ export interface ContentSourceDetails extends ContentSource {
   allowsReauth: boolean;
   boost: number;
   activities: SourceActivity[];
-  isOauth1: boolean;
 }
 
 interface DescriptionList {

@@ -298,7 +298,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
             icon: 'inspect',
             'data-test-subj': 'relationshipsTableAction-inspect',
             onClick: (object: SavedObjectWithMetadata) => goInspectObject(object),
-            available: (object: SavedObjectWithMetadata) => !!(object.type && object.id),
+            available: (object: SavedObjectWithMetadata) => !!object.meta.editUrl,
           },
         ],
       },

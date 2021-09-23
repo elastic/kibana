@@ -7,15 +7,10 @@
 
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
-import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
-import {
-  LIST_ENDPOINT_EXCEPTION,
-  LIST_ENDPOINT_EVENT_FILTER,
-  LIST_TRUSTED_APPLICATION,
-} from './constants';
 import { TrustedApp } from '../../../common/endpoint/types';
+import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
+import { EndpointExceptionListItem, ListTemplate } from './types';
+import { LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -94,41 +89,43 @@ export function isPackagePolicyList(
 }
 
 /**
- * Maps trusted application to shared telemetry object
+ * Maps Exception list item to parsable object
  *
  * @param exceptionListItem
  * @returns collection of endpoint exceptions
  */
-export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedApp) => {
-  return {
-    id: trustedApplication.id,
-    version: trustedApplication.version || '',
-    name: trustedApplication.name,
-    description: trustedApplication.description,
-    created_at: trustedApplication.created_at,
-    updated_at: trustedApplication.updated_at,
-    entries: trustedApplication.entries,
-    os: trustedApplication.os,
-  } as ExceptionListItem;
-};
-
-/**
- * Maps endpoint lists to shared telemetry object
- *
- * @param exceptionListItem
- * @returns collection of endpoint exceptions
- */
-export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionListItemSchema) => {
+export const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionListItemSchema) => {
   return {
     id: exceptionListItem.id,
     version: exceptionListItem._version || '',
     name: exceptionListItem.name,
     description: exceptionListItem.description,
     created_at: exceptionListItem.created_at,
+    created_by: exceptionListItem.created_by,
     updated_at: exceptionListItem.updated_at,
+    updated_by: exceptionListItem.updated_by,
     entries: exceptionListItem.entries,
     os_types: exceptionListItem.os_types,
-  } as ExceptionListItem;
+  } as EndpointExceptionListItem;
+};
+
+/**
+ * Constructs the lists telemetry schema from a collection of Trusted Apps
+ *
+ * @param listData
+ * @returns lists telemetry schema
+ */
+export const templateTrustedApps = (listData: TrustedApp[]) => {
+  return listData.map((item) => {
+    const template: ListTemplate = {
+      trusted_application: [],
+      endpoint_exception: [],
+      endpoint_event_filter: [],
+    };
+
+    template.trusted_application.push(item);
+    return template;
+  });
 };
 
 /**
@@ -138,7 +135,10 @@ export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionLi
  * @param listType
  * @returns lists telemetry schema
  */
-export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
+export const templateEndpointExceptions = (
+  listData: EndpointExceptionListItem[],
+  listType: string
+) => {
   return listData.map((item) => {
     const template: ListTemplate = {
       trusted_application: [],
@@ -146,24 +146,13 @@ export const templateExceptionList = (listData: ExceptionListItem[], listType: s
       endpoint_event_filter: [],
     };
 
-    // cast exception list type to a TelemetryEvent for allowlist filtering
-    const filteredListItem = copyAllowlistedFields(
-      exceptionListEventFields,
-      item as unknown as TelemetryEvent
-    );
-
-    if (listType === LIST_TRUSTED_APPLICATION) {
-      template.trusted_application.push(filteredListItem);
-      return template;
-    }
-
     if (listType === LIST_ENDPOINT_EXCEPTION) {
-      template.endpoint_exception.push(filteredListItem);
+      template.endpoint_exception.push(item);
       return template;
     }
 
     if (listType === LIST_ENDPOINT_EVENT_FILTER) {
-      template.endpoint_event_filter.push(filteredListItem);
+      template.endpoint_event_filter.push(item);
       return template;
     }
 

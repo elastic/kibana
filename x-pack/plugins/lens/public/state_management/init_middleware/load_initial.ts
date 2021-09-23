@@ -149,7 +149,7 @@ export function loadInitial(
             datasourceMap,
             datasourceStates,
             visualizationMap,
-            activeVisualization: visualizationMap?.[Object.keys(visualizationMap)[0]] || null,
+            activeVisualizationId: Object.keys(visualizationMap)[0] || null,
             visualizationState: null,
             visualizeTriggerFieldContext: initialContext,
           });

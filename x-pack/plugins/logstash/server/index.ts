@@ -15,5 +15,4 @@ export const config: PluginConfigDescriptor = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };

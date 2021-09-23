@@ -8,7 +8,7 @@
 
 import { findIndex } from 'lodash';
 import { IFieldType } from './types';
-import { DataViewField } from './data_view_field';
+import { DataViewField } from './index_pattern_field';
 import { FieldSpec, DataViewFieldMap } from '../types';
 import { DataView } from '../data_views';
 

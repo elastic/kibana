@@ -73,12 +73,7 @@ export class ClusterHealthRule extends BaseRule {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const healths = await fetchClusterHealth(
-      esClient,
-      clusters,
-      esIndexPattern,
-      params.filterQuery
-    );
+    const healths = await fetchClusterHealth(esClient, clusters, esIndexPattern);
     return healths.map((clusterHealth) => {
       const shouldFire = clusterHealth.health !== AlertClusterHealthType.Green;
       const severity =

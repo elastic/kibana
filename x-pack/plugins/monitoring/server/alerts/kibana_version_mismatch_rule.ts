@@ -79,8 +79,7 @@ export class KibanaVersionMismatchRule extends BaseRule {
       esClient,
       clusters,
       kibanaIndexPattern,
-      Globals.app.config.ui.max_bucket_size,
-      params.filterQuery
+      Globals.app.config.ui.max_bucket_size
     );
 
     return kibanaVersions.map((kibanaVersion) => {

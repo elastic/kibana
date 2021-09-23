@@ -15,7 +15,6 @@ import {
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 import { AlertTypeParams } from '../../../../alerting/common';
-import { MonitoringConfig } from '../../types';
 
 interface ValidateOptions extends AlertTypeParams {
   duration: string;
@@ -37,9 +36,7 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
   return validationResult;
 };
 
-export function createCCRReadExceptionsAlertType(
-  config: MonitoringConfig
-): AlertTypeModel<ValidateOptions> {
+export function createCCRReadExceptionsAlertType(): AlertTypeModel<ValidateOptions> {
   return {
     id: RULE_CCR_READ_EXCEPTIONS,
     description: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].description,
@@ -48,11 +45,7 @@ export function createCCRReadExceptionsAlertType(
       return `${docLinks.links.monitoring.alertsKibanaCCRReadExceptions}`;
     },
     alertParamsExpression: (props: Props) => (
-      <Expression
-        {...props}
-        config={config}
-        paramDetails={RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].paramDetails}
-      />
+      <Expression {...props} paramDetails={RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',

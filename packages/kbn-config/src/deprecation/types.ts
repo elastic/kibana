@@ -91,7 +91,6 @@ export interface ConfigDeprecationCommand {
  * @example
  * ```typescript
  * const provider: ConfigDeprecationProvider = ({ rename, unused }) => [
- *   deprecate('deprecatedKey', '8.0.0'),
  *   rename('oldKey', 'newKey'),
  *   unused('deprecatedKey'),
  *   (config, path) => ({ unset: [{ key: 'path.to.key' }] })
@@ -120,43 +119,6 @@ export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => C
  */
 
 export interface ConfigDeprecationFactory {
-  /**
-   * Deprecate a configuration property from inside a plugin's configuration path.
-   * Will log a deprecation warning if the deprecatedKey was found.
-   *
-   * @example
-   * Log a deprecation warning indicating 'myplugin.deprecatedKey' should be removed by `8.0.0`
-   * ```typescript
-   * const provider: ConfigDeprecationProvider = ({ deprecate }) => [
-   *   deprecate('deprecatedKey', '8.0.0'),
-   * ]
-   * ```
-   */
-  deprecate(
-    deprecatedKey: string,
-    removeBy: string,
-    details?: Partial<DeprecatedConfigDetails>
-  ): ConfigDeprecation;
-  /**
-   * Deprecate a configuration property from the root configuration.
-   * Will log a deprecation warning if the deprecatedKey was found.
-   *
-   * This should be only used when deprecating properties from different configuration's path.
-   * To deprecate properties from inside a plugin's configuration, use 'deprecate' instead.
-   *
-   * @example
-   * Log a deprecation warning indicating 'myplugin.deprecatedKey' should be removed by `8.0.0`
-   * ```typescript
-   * const provider: ConfigDeprecationProvider = ({ deprecate }) => [
-   *   deprecateFromRoot('deprecatedKey', '8.0.0'),
-   * ]
-   * ```
-   */
-  deprecateFromRoot(
-    deprecatedKey: string,
-    removeBy: string,
-    details?: Partial<DeprecatedConfigDetails>
-  ): ConfigDeprecation;
   /**
    * Rename a configuration property from inside a plugin's configuration path.
    * Will log a deprecation warning if the oldKey was found and deprecation applied.

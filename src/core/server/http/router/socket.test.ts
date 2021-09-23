@@ -92,7 +92,7 @@ describe('KibanaSocket', () => {
       });
       const socket = new KibanaSocket(tlsSocket);
 
-      await expect(socket.renegotiate({})).rejects.toBe(result);
+      expect(socket.renegotiate({})).resolves.toBe(result);
       expect(spy).toBeCalledTimes(1);
     });
 

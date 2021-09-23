@@ -7,19 +7,17 @@
 
 import moment from 'moment';
 import { createMockPackagePolicy } from './mocks';
-import {
-  LIST_ENDPOINT_EXCEPTION,
-  LIST_ENDPOINT_EVENT_FILTER,
-  LIST_TRUSTED_APPLICATION,
-} from './constants';
+import { TrustedApp } from '../../../common/endpoint/types';
+import { LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
 import {
   getPreviousDiagTaskTimestamp,
   getPreviousEpMetaTaskTimestamp,
   batchTelemetryRecords,
   isPackagePolicyList,
-  templateExceptionList,
+  templateTrustedApps,
+  templateEndpointExceptions,
 } from './helpers';
-import { ExceptionListItem } from './types';
+import { EndpointExceptionListItem } from './types';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -135,8 +133,8 @@ describe('test package policy type guard', () => {
 
 describe('list telemetry schema', () => {
   test('trusted apps document is correctly formed', () => {
-    const data = [{ id: 'test_1' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_TRUSTED_APPLICATION);
+    const data = [{ id: 'test_1' }] as TrustedApp[];
+    const templatedItems = templateTrustedApps(data);
 
     expect(templatedItems[0]?.trusted_application.length).toEqual(1);
     expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
@@ -144,8 +142,8 @@ describe('list telemetry schema', () => {
   });
 
   test('trusted apps document is correctly formed with multiple entries', () => {
-    const data = [{ id: 'test_2' }, { id: 'test_2' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_TRUSTED_APPLICATION);
+    const data = [{ id: 'test_2' }, { id: 'test_2' }] as TrustedApp[];
+    const templatedItems = templateTrustedApps(data);
 
     expect(templatedItems[0]?.trusted_application.length).toEqual(1);
     expect(templatedItems[1]?.trusted_application.length).toEqual(1);
@@ -154,8 +152,8 @@ describe('list telemetry schema', () => {
   });
 
   test('endpoint exception document is correctly formed', () => {
-    const data = [{ id: 'test_3' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EXCEPTION);
+    const data = [{ id: 'test_3' }] as EndpointExceptionListItem[];
+    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EXCEPTION);
 
     expect(templatedItems[0]?.trusted_application.length).toEqual(0);
     expect(templatedItems[0]?.endpoint_exception.length).toEqual(1);
@@ -163,8 +161,12 @@ describe('list telemetry schema', () => {
   });
 
   test('endpoint exception document is correctly formed with multiple entries', () => {
-    const data = [{ id: 'test_4' }, { id: 'test_4' }, { id: 'test_4' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EXCEPTION);
+    const data = [
+      { id: 'test_4' },
+      { id: 'test_4' },
+      { id: 'test_4' },
+    ] as EndpointExceptionListItem[];
+    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EXCEPTION);
 
     expect(templatedItems[0]?.trusted_application.length).toEqual(0);
     expect(templatedItems[0]?.endpoint_exception.length).toEqual(1);
@@ -174,8 +176,8 @@ describe('list telemetry schema', () => {
   });
 
   test('endpoint event filters document is correctly formed', () => {
-    const data = [{ id: 'test_5' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EVENT_FILTER);
+    const data = [{ id: 'test_5' }] as EndpointExceptionListItem[];
+    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EVENT_FILTER);
 
     expect(templatedItems[0]?.trusted_application.length).toEqual(0);
     expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
@@ -183,8 +185,8 @@ describe('list telemetry schema', () => {
   });
 
   test('endpoint event filters document is correctly formed with multiple entries', () => {
-    const data = [{ id: 'test_6' }, { id: 'test_6' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EVENT_FILTER);
+    const data = [{ id: 'test_6' }, { id: 'test_6' }] as EndpointExceptionListItem[];
+    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EVENT_FILTER);
 
     expect(templatedItems[0]?.trusted_application.length).toEqual(0);
     expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);

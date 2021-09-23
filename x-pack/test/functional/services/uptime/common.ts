@@ -115,8 +115,5 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
         await testSubjects.missingOrFail('data-missing');
       });
     },
-    async hasMappingsError() {
-      return testSubjects.exists('xpack.uptime.mappingsErrorPage');
-    },
   };
 }

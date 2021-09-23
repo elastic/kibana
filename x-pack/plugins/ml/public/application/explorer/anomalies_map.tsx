@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import {
   FIELD_ORIGIN,
-  LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
@@ -126,7 +125,7 @@ export const getChoroplethAnomaliesLayer = (
       isTimeAware: true,
     },
     visible: false,
-    type: LAYER_TYPE.VECTOR,
+    type: 'VECTOR',
   };
 };
 

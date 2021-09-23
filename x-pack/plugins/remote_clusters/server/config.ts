@@ -18,7 +18,6 @@ export const configSchema = schema.object({
 export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: configSchema,
   exposeToBrowser: {
     ui: true,

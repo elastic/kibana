@@ -42,7 +42,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
 
   describe('Uptime app', function () {
-    this.tags('ciGroup10');
+    this.tags('ciGroup6');
 
     beforeEach('delete settings', async () => {
       await deleteUptimeSettingsObject(server);
@@ -79,10 +79,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./monitor'));
       loadTestFile(require.resolve('./ml_anomaly'));
       loadTestFile(require.resolve('./feature_controls'));
-    });
-
-    describe('mappings error state', () => {
-      loadTestFile(require.resolve('./missing_mappings'));
     });
   });
 };

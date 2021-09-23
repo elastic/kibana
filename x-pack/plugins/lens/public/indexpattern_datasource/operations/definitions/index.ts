@@ -49,7 +49,6 @@ import {
   formulaOperation,
   FormulaIndexPatternColumn,
 } from './formula';
-import { staticValueOperation, StaticValueIndexPatternColumn } from './static_value';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
@@ -88,8 +87,7 @@ export type IndexPatternColumn =
   | DerivativeIndexPatternColumn
   | MovingAverageIndexPatternColumn
   | MathIndexPatternColumn
-  | FormulaIndexPatternColumn
-  | StaticValueIndexPatternColumn;
+  | FormulaIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
@@ -121,7 +119,6 @@ export { CountIndexPatternColumn } from './count';
 export { LastValueIndexPatternColumn } from './last_value';
 export { RangeIndexPatternColumn } from './ranges';
 export { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
-export { StaticValueIndexPatternColumn } from './static_value';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -150,7 +147,6 @@ const internalOperationDefinitions = [
   overallMinOperation,
   overallMaxOperation,
   overallAverageOperation,
-  staticValueOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -172,7 +168,6 @@ export {
   overallMinOperation,
 } from './calculations';
 export { formulaOperation } from './formula/formula';
-export { staticValueOperation } from './static_value';
 
 /**
  * Properties passed to the operation-specific part of the popover editor

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IndexPatternColumn, operationDefinitionMap } from '.';
-import { FieldBasedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
+import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPattern } from '../../types';
 
 export function getInvalidFieldMessage(
@@ -81,7 +81,8 @@ export function isValidNumber(
   const inputValueAsNumber = Number(inputValue);
   return (
     inputValue !== '' &&
-    inputValue != null &&
+    inputValue !== null &&
+    inputValue !== undefined &&
     !Number.isNaN(inputValueAsNumber) &&
     Number.isFinite(inputValueAsNumber) &&
     (!integer || Number.isInteger(inputValueAsNumber)) &&
@@ -90,9 +91,7 @@ export function isValidNumber(
   );
 }
 
-export function getFormatFromPreviousColumn(
-  previousColumn: IndexPatternColumn | ReferenceBasedIndexPatternColumn | undefined
-) {
+export function getFormatFromPreviousColumn(previousColumn: IndexPatternColumn | undefined) {
   return previousColumn?.dataType === 'number' &&
     previousColumn.params &&
     'format' in previousColumn.params &&

@@ -87,11 +87,8 @@ const CaseBasicRt = rt.type({
   owner: rt.string,
 });
 
-/**
- * This represents the push to service UserAction. It lacks the connector_id because that is stored in a different field
- * within the user action object in the API response.
- */
-export const CaseUserActionExternalServiceRt = rt.type({
+export const CaseExternalServiceBasicRt = rt.type({
+  connector_id: rt.union([rt.string, rt.null]),
   connector_name: rt.string,
   external_id: rt.string,
   external_title: rt.string,
@@ -100,14 +97,7 @@ export const CaseUserActionExternalServiceRt = rt.type({
   pushed_by: UserRT,
 });
 
-export const CaseExternalServiceBasicRt = rt.intersection([
-  rt.type({
-    connector_id: rt.union([rt.string, rt.null]),
-  }),
-  CaseUserActionExternalServiceRt,
-]);
-
-export const CaseFullExternalServiceRt = rt.union([CaseExternalServiceBasicRt, rt.null]);
+const CaseFullExternalServiceRt = rt.union([CaseExternalServiceBasicRt, rt.null]);
 
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,

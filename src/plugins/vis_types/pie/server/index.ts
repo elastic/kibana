@@ -5,13 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginConfigDescriptor } from 'src/core/server';
-import { configSchema, ConfigSchema } from '../config';
 import { VisTypePieServerPlugin } from './plugin';
-
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  schema: configSchema,
-};
 
 export const plugin = () => new VisTypePieServerPlugin();

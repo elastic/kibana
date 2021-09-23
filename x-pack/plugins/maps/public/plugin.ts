@@ -51,7 +51,6 @@ import {
   createLayerDescriptors,
   registerLayerWizard,
   registerSource,
-  MapsSetupApi,
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
@@ -139,7 +138,7 @@ export class MapsPlugin
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
+  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -195,11 +194,6 @@ export class MapsPlugin
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
     plugins.visualizations.createBaseVisualization(tileMapVisType);
-
-    return {
-      registerLayerWizard,
-      registerSource,
-    };
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
@@ -217,6 +211,8 @@ export class MapsPlugin
 
     return {
       createLayerDescriptors,
+      registerLayerWizard,
+      registerSource,
       suggestEMSTermJoinConfig,
     };
   }

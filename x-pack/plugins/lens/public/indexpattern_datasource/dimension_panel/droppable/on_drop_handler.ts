@@ -121,12 +121,8 @@ function onMoveCompatible(
     indexPattern,
   });
 
-  const updatedColumnOrder = reorderByGroups(
-    dimensionGroups,
-    groupId,
-    getColumnOrder(modifiedLayer),
-    columnId
-  );
+  let updatedColumnOrder = getColumnOrder(modifiedLayer);
+  updatedColumnOrder = reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
   // Time to replace
   setState(

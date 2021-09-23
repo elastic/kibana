@@ -45,6 +45,7 @@ import {
   SOURCE_SETTINGS_DESCRIPTION,
   SOURCE_NAME_LABEL,
   SOURCE_CONFIG_TITLE,
+  SOURCE_CONFIG_DESCRIPTION,
   SOURCE_CONFIG_LINK,
   SOURCE_REMOVE_TITLE,
   SOURCE_REMOVE_DESCRIPTION,
@@ -77,7 +78,6 @@ export const SourceSettings: React.FC = () => {
       custom: isCustom,
       isIndexedSource,
       areThumbnailsConfigEnabled,
-      isOauth1,
       indexing: {
         enabled,
         features: {
@@ -99,9 +99,10 @@ export const SourceSettings: React.FC = () => {
     getSourceConfigData(serviceType);
   }, []);
 
-  const { editPath } = staticSourceData.find(
-    (source) => source.serviceType === serviceType
-  ) as SourceDataItem;
+  const {
+    configuration: { isPublicKey },
+    editPath,
+  } = staticSourceData.find((source) => source.serviceType === serviceType) as SourceDataItem;
 
   const [inputValue, setValue] = useState(name);
   const [confirmModalVisible, setModalVisibility] = useState(false);
@@ -205,13 +206,12 @@ export const SourceSettings: React.FC = () => {
         </form>
       </ContentSection>
       {showConfig && (
-        <ContentSection title={SOURCE_CONFIG_TITLE}>
+        <ContentSection title={SOURCE_CONFIG_TITLE} description={SOURCE_CONFIG_DESCRIPTION}>
           <SourceConfigFields
-            isOauth1={isOauth1}
             clientId={clientId}
             clientSecret={clientSecret}
-            publicKey={publicKey}
-            consumerKey={consumerKey}
+            publicKey={isPublicKey ? publicKey : undefined}
+            consumerKey={consumerKey || undefined}
             baseUrl={baseUrl}
           />
           <EuiFormRow>

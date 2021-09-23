@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { TimelinesPlugin } from './plugin';
-import { ConfigSchema, ConfigType } from './config';
+import { ConfigSchema } from './config';
 
-export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
+export const config = {
   schema: ConfigSchema,
   exposeToBrowser: {
     enabled: true,

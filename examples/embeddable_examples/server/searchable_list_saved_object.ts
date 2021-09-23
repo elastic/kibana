@@ -9,12 +9,9 @@
 import { mapValues } from 'lodash';
 import { SavedObjectsType, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { EmbeddableSetup } from '../../../src/plugins/embeddable/server';
-// NOTE: this should rather be imported from 'plugins/kibana_utils/server' but examples at the moment don't
-// allow static imports from plugins so this code was duplicated
-import { mergeMigrationFunctionMaps } from './merge_migration_function_maps';
 
 export const searchableListSavedObject = (embeddable: EmbeddableSetup) => {
-  const searchableListSO: SavedObjectsType = {
+  return {
     name: 'searchableList',
     hidden: false,
     namespaceType: 'single',
@@ -33,22 +30,14 @@ export const searchableListSavedObject = (embeddable: EmbeddableSetup) => {
       },
     },
     migrations: () => {
-      // there are no migrations defined for the saved object at the moment, possibly they would be added in the future
-      const searchableListSavedObjectMigrations = {};
-
-      // we don't know if embeddables have any migrations defined so we need to fetch them and map the received functions so we pass
-      // them the correct input and that we correctly map the response
-      const embeddableMigrations = mapValues(embeddable.getAllMigrations(), (migrate) => {
+      // we assume all the migration will be done by embeddables service and that saved object holds no extra state besides that of searchable list embeddable input\
+      // if saved object would hold additional information we would need to merge the response from embeddables.getAllMigrations with our custom migrations.
+      return mapValues(embeddable.getAllMigrations(), (migrate) => {
         return (state: SavedObjectUnsanitizedDoc) => ({
           ...state,
           attributes: migrate(state.attributes),
         });
       });
-
-      // we merge our and embeddable migrations and return
-      return mergeMigrationFunctionMaps(searchableListSavedObjectMigrations, embeddableMigrations);
     },
-  };
-
-  return searchableListSO;
+  } as SavedObjectsType;
 };

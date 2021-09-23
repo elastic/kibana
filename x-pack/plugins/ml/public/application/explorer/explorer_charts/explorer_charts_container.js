@@ -79,12 +79,8 @@ function ExplorerChartContainer({
     let isCancelled = false;
     const generateLink = async () => {
       if (!isCancelled && series.functionDescription !== ML_JOB_AGGREGATION.LAT_LONG) {
-        try {
-          const singleMetricViewerLink = await getExploreSeriesLink(mlLocator, series, timefilter);
-          setExplorerSeriesLink(singleMetricViewerLink);
-        } catch (error) {
-          setExplorerSeriesLink('');
-        }
+        const singleMetricViewerLink = await getExploreSeriesLink(mlLocator, series, timefilter);
+        setExplorerSeriesLink(singleMetricViewerLink);
       }
     };
     generateLink();

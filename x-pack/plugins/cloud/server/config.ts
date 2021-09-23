@@ -52,6 +52,5 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     organization_url: true,
     full_story: true,
   },
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: configSchema,
 };

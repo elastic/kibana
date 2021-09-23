@@ -184,7 +184,6 @@ export function insertNewColumn({
   targetGroup,
   shouldResetLabel,
   incompleteParams,
-  initialParams,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -198,7 +197,7 @@ export function insertNewColumn({
 
   const baseOptions = {
     indexPattern,
-    previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
+    previousColumn: { ...incompleteParams, ...layer.columns[columnId] },
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
@@ -397,17 +396,9 @@ export function replaceColumn({
 
     tempLayer = resetIncomplete(tempLayer, columnId);
 
-    if (
-      previousDefinition.input === 'managedReference' &&
-      operationDefinition.input !== previousDefinition.input
-    ) {
+    if (previousDefinition.input === 'managedReference') {
       // If the transition is incomplete, leave the managed state until it's finished.
-      tempLayer = removeOrphanedColumns(
-        previousDefinition,
-        previousColumn,
-        tempLayer,
-        indexPattern
-      );
+      tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
 
       const hypotheticalLayer = insertNewColumn({
         layer: tempLayer,
@@ -650,31 +641,21 @@ function removeOrphanedColumns(
   previousDefinition:
     | OperationDefinition<IndexPatternColumn, 'field'>
     | OperationDefinition<IndexPatternColumn, 'none'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>
-    | OperationDefinition<IndexPatternColumn, 'managedReference'>,
+    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
   previousColumn: IndexPatternColumn,
   tempLayer: IndexPatternLayer,
   indexPattern: IndexPattern
 ) {
-  let newLayer: IndexPatternLayer = tempLayer;
-  if (previousDefinition.input === 'managedReference') {
-    const [columnId] =
-      Object.entries(tempLayer.columns).find(([_, currColumn]) => currColumn === previousColumn) ||
-      [];
-    if (columnId != null) {
-      newLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
-    }
-  }
   if (previousDefinition.input === 'fullReference') {
     (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
-      newLayer = deleteColumn({
+      tempLayer = deleteColumn({
         layer: tempLayer,
         columnId: id,
         indexPattern,
       });
     });
   }
-  return newLayer;
+  return tempLayer;
 }
 
 export function canTransition({

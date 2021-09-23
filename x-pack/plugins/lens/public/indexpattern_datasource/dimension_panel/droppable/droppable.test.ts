@@ -17,7 +17,6 @@ import { OperationMetadata, DropType } from '../../../types';
 import { IndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
 import { getFieldByNameFactory } from '../../pure_helpers';
 import { generateId } from '../../../id_generator';
-import { layerTypes } from '../../../../common';
 
 jest.mock('../../../id_generator');
 
@@ -264,6 +263,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       columnId: 'col1',
       layerId: 'first',
+      layerType: 'data',
       uniqueLabel: 'stuff',
       groupId: 'group1',
       filterOperations: () => true,
@@ -287,8 +287,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dimensionGroups: [],
       isFullscreen: false,
       toggleFullscreen: () => {},
-      supportStaticValue: false,
-      layerType: layerTypes.DATA,
     };
 
     jest.clearAllMocks();

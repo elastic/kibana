@@ -46,9 +46,6 @@ const mockLayer = {
   hasLegendDetails: () => {
     return true;
   },
-  supportsFitToBounds: () => {
-    return true;
-  },
 } as unknown as ILayer;
 
 const defaultProps = {

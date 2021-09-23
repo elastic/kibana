@@ -19,7 +19,6 @@ describe('Intro component', () => {
     type: string;
     viewUrl: string;
     onDeleteClick: () => void;
-    title?: string;
   }) =>
     mount(
       <I18nProvider>
@@ -43,11 +42,32 @@ describe('Intro component', () => {
     expect(mounted).toMatchSnapshot();
   });
 
-  it('displays correct title if one is provided', () => {
-    let mounted = mountHeader({ ...defaultProps, title: 'my saved search' });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect my saved search"`);
-    mounted = mountHeader({ ...defaultProps, title: 'my other saved search' });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect my other saved search"`);
+  it('displays correct title depending on canEdit', () => {
+    let mounted = mountHeader({
+      ...defaultProps,
+      canEdit: true,
+    });
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Edit search"`);
+
+    mounted = mountHeader({
+      ...defaultProps,
+      canEdit: false,
+    });
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"View search"`);
+  });
+
+  it('displays correct title depending on type', () => {
+    let mounted = mountHeader({
+      ...defaultProps,
+      type: 'some-type',
+    });
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Edit some-type"`);
+
+    mounted = mountHeader({
+      ...defaultProps,
+      type: 'another-type',
+    });
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Edit another-type"`);
   });
 
   it('only displays delete button if canDelete is true', () => {

@@ -26,7 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const searchSessions = getService('searchSessions');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const toasts = getService('toasts');
 
   describe('discover async search', () => {
     before(async () => {
@@ -113,20 +112,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // load URL to restore a saved session
       await PageObjects.searchSessionsManagement.goTo();
-      const searchSessionListBeforeRestore = await PageObjects.searchSessionsManagement.getList();
-      const searchesCountBeforeRestore = searchSessionListBeforeRestore[0].searchesCount;
+      const searchSessionList = await PageObjects.searchSessionsManagement.getList();
       // navigate to Discover
-      await searchSessionListBeforeRestore[0].view();
+      await searchSessionList[0].view();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       expect(await PageObjects.discover.hasNoResults()).to.be(true);
-      expect(await toasts.getToastCount()).to.be(0); // no session restoration related warnings
-
-      await PageObjects.searchSessionsManagement.goTo();
-      const searchSessionListAfterRestore = await PageObjects.searchSessionsManagement.getList();
-      const searchesCountAfterRestore = searchSessionListAfterRestore[0].searchesCount;
-
-      expect(searchesCountBeforeRestore).to.be(searchesCountAfterRestore); // no new searches started during restore
     });
   });
 

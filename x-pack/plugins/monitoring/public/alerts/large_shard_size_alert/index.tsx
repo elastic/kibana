@@ -15,7 +15,6 @@ import {
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 import { AlertTypeParams } from '../../../../alerting/common';
-import { MonitoringConfig } from '../../types';
 
 interface ValidateOptions extends AlertTypeParams {
   indexPattern: string;
@@ -37,9 +36,7 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
   return validationResult;
 };
 
-export function createLargeShardSizeAlertType(
-  config: MonitoringConfig
-): AlertTypeModel<ValidateOptions> {
+export function createLargeShardSizeAlertType(): AlertTypeModel<ValidateOptions> {
   return {
     id: RULE_LARGE_SHARD_SIZE,
     description: RULE_DETAILS[RULE_LARGE_SHARD_SIZE].description,
@@ -48,11 +45,7 @@ export function createLargeShardSizeAlertType(
       return `${docLinks.links.monitoring.alertsKibanaLargeShardSize}`;
     },
     alertParamsExpression: (props: Props) => (
-      <Expression
-        {...props}
-        config={config}
-        paramDetails={RULE_DETAILS[RULE_LARGE_SHARD_SIZE].paramDetails}
-      />
+      <Expression {...props} paramDetails={RULE_DETAILS[RULE_LARGE_SHARD_SIZE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',

@@ -88,8 +88,7 @@ export class CCRReadExceptionsRule extends BaseRule {
       esIndexPattern,
       startMs,
       endMs,
-      Globals.app.config.ui.max_bucket_size,
-      params.filterQuery
+      Globals.app.config.ui.max_bucket_size
     );
 
     return stats.map((stat) => {
@@ -279,7 +278,7 @@ export class CCRReadExceptionsRule extends BaseRule {
       state: AlertingDefaults.ALERT_STATE.firing,
       remoteCluster,
       followerIndex,
-      /* continue to send "remoteClusters" and "followerIndices" values for users still using it though
+      /* continue to send "remoteClusters" and "followerIndices" values for users still using it though 
         we have replaced it with "remoteCluster" and "followerIndex" in the template due to alerts per index instead of all indices
         see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
         */

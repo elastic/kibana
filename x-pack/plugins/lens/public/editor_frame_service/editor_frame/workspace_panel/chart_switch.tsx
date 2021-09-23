@@ -515,14 +515,11 @@ function getTopSuggestion(
     props.visualizationMap[visualization.activeId].getMainPalette
       ? props.visualizationMap[visualization.activeId].getMainPalette!(visualization.state)
       : undefined;
-
   const unfilteredSuggestions = getSuggestions({
     datasourceMap: props.datasourceMap,
     datasourceStates,
     visualizationMap: { [visualizationId]: newVisualization },
-    activeVisualization: visualization.activeId
-      ? props.visualizationMap[visualization.activeId]
-      : undefined,
+    activeVisualizationId: visualization.activeId,
     visualizationState: visualization.state,
     subVisualizationId,
     activeData: props.framePublicAPI.activeData,

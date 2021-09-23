@@ -106,7 +106,7 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
     }
   }
   selectedIndexPattern={
-    DataView {
+    IndexPattern {
       "allowNoIndex": false,
       "deleteFieldFormat": [Function],
       "fieldAttrs": Object {},

@@ -41,86 +41,22 @@ import {
  * The public contract that `ExpressionsService` provides to other plugins
  * in Kibana Platform in *setup* life-cycle.
  */
-export interface ExpressionsServiceSetup {
-  /**
-   * Get a registered `ExpressionFunction` by its name, which was registered
-   * using the `registerFunction` method. The returned `ExpressionFunction`
-   * instance is an internal representation of the function in Expressions
-   * service - do not mutate that object.
-   * @deprecated Use start contract instead.
-   */
-  getFunction(name: string): ReturnType<Executor['getFunction']>;
-
-  /**
-   * Returns POJO map of all registered expression functions, where keys are
-   * names of the functions and values are `ExpressionFunction` instances.
-   * @deprecated Use start contract instead.
-   */
-  getFunctions(): ReturnType<Executor['getFunctions']>;
-
-  /**
-   * Returns POJO map of all registered expression types, where keys are
-   * names of the types and values are `ExpressionType` instances.
-   * @deprecated Use start contract instead.
-   */
-  getTypes(): ReturnType<Executor['getTypes']>;
-
-  /**
-   * Create a new instance of `ExpressionsService`. The new instance inherits
-   * all state of the original `ExpressionsService`, including all expression
-   * types, expression functions and context. Also, all new types and functions
-   * registered in the original services AFTER the forking event will be
-   * available in the forked instance. However, all new types and functions
-   * registered in the forked instances will NOT be available to the original
-   * service.
-   * @param name A fork name that can be used to get fork instance later.
-   */
-  fork(name?: string): ExpressionsService;
-
-  /**
-   * Register an expression function, which will be possible to execute as
-   * part of the expression pipeline.
-   *
-   * Below we register a function which simply sleeps for given number of
-   * milliseconds to delay the execution and outputs its input as-is.
-   *
-   * ```ts
-   * expressions.registerFunction({
-   *   name: 'sleep',
-   *   args: {
-   *     time: {
-   *       aliases: ['_'],
-   *       help: 'Time in milliseconds for how long to sleep',
-   *       types: ['number'],
-   *     },
-   *   },
-   *   help: '',
-   *   fn: async (input, args, context) => {
-   *     await new Promise(r => setTimeout(r, args.time));
-   *     return input;
-   *   },
-   * }
-   * ```
-   *
-   * The actual function is defined in the `fn` key. The function can be *async*.
-   * It receives three arguments: (1) `input` is the output of the previous function
-   * or the initial input of the expression if the function is first in chain;
-   * (2) `args` are function arguments as defined in expression string, that can
-   * be edited by user (e.g in case of Canvas); (3) `context` is a shared object
-   * passed to all functions that can be used for side-effects.
-   */
-  registerFunction(
-    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
-  ): void;
-
-  registerType(
-    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
-  ): void;
-
-  registerRenderer(
-    definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
-  ): void;
-}
+export type ExpressionsServiceSetup = Pick<
+  ExpressionsService,
+  | 'getFunction'
+  | 'getFunctions'
+  | 'getRenderer'
+  | 'getRenderers'
+  | 'getType'
+  | 'getTypes'
+  | 'registerFunction'
+  | 'registerRenderer'
+  | 'registerType'
+  | 'run'
+  | 'fork'
+  | 'extract'
+  | 'inject'
+>;
 
 export interface ExpressionExecutionParams {
   searchContext?: SerializableRecord;
@@ -161,13 +97,7 @@ export interface ExpressionsServiceStart {
    * instance is an internal representation of the function in Expressions
    * service - do not mutate that object.
    */
-  getFunction(name: string): ReturnType<Executor['getFunction']>;
-
-  /**
-   * Returns POJO map of all registered expression functions, where keys are
-   * names of the functions and values are `ExpressionFunction` instances.
-   */
-  getFunctions(): ReturnType<Executor['getFunctions']>;
+  getFunction: (name: string) => ReturnType<Executor['getFunction']>;
 
   /**
    * Get a registered `ExpressionRenderer` by its name, which was registered
@@ -175,13 +105,7 @@ export interface ExpressionsServiceStart {
    * instance is an internal representation of the renderer in Expressions
    * service - do not mutate that object.
    */
-  getRenderer(name: string): ReturnType<ExpressionRendererRegistry['get']>;
-
-  /**
-   * Returns POJO map of all registered expression renderers, where keys are
-   * names of the renderers and values are `ExpressionRenderer` instances.
-   */
-  getRenderers(): ReturnType<ExpressionRendererRegistry['toJS']>;
+  getRenderer: (name: string) => ReturnType<ExpressionRendererRegistry['get']>;
 
   /**
    * Get a registered `ExpressionType` by its name, which was registered
@@ -189,13 +113,7 @@ export interface ExpressionsServiceStart {
    * instance is an internal representation of the type in Expressions
    * service - do not mutate that object.
    */
-  getType(name: string): ReturnType<Executor['getType']>;
-
-  /**
-   * Returns POJO map of all registered expression types, where keys are
-   * names of the types and values are `ExpressionType` instances.
-   */
-  getTypes(): ReturnType<Executor['getTypes']>;
+  getType: (name: string) => ReturnType<Executor['getType']>;
 
   /**
    * Executes expression string or a parsed expression AST and immediately
@@ -221,23 +139,34 @@ export interface ExpressionsServiceStart {
    * expressions.run('...', null, { elasticsearchClient });
    * ```
    */
-  run<Input, Output>(
+  run: <Input, Output>(
     ast: string | ExpressionAstExpression,
     input: Input,
     params?: ExpressionExecutionParams
-  ): Observable<ExecutionResult<Output | ExpressionValueError>>;
+  ) => Observable<ExecutionResult<Output | ExpressionValueError>>;
 
   /**
    * Starts expression execution and immediately returns `ExecutionContract`
    * instance that tracks the progress of the execution and can be used to
    * interact with the execution.
    */
-  execute<Input = unknown, Output = unknown>(
+  execute: <Input = unknown, Output = unknown>(
     ast: string | ExpressionAstExpression,
     // This any is for legacy reasons.
     input: Input,
     params?: ExpressionExecutionParams
-  ): ExecutionContract<Input, Output>;
+  ) => ExecutionContract<Input, Output>;
+
+  /**
+   * Create a new instance of `ExpressionsService`. The new instance inherits
+   * all state of the original `ExpressionsService`, including all expression
+   * types, expression functions and context. Also, all new types and functions
+   * registered in the original services AFTER the forking event will be
+   * available in the forked instance. However, all new types and functions
+   * registered in the forked instances will NOT be available to the original
+   * service.
+   */
+  fork: () => ExpressionsService;
 }
 
 export interface ExpressionServiceParams {
@@ -264,19 +193,7 @@ export interface ExpressionServiceParams {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
-export class ExpressionsService
-  implements
-    PersistableStateService<ExpressionAstExpression>,
-    ExpressionsServiceSetup,
-    ExpressionsServiceStart
-{
-  /**
-   * @note Workaround since the expressions service is frozen.
-   */
-  private static started = new WeakSet<ExpressionsService>();
-  private children = new Map<string, ExpressionsService>();
-  private parent?: ExpressionsService;
-
+export class ExpressionsService implements PersistableStateService<ExpressionAstExpression> {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -288,85 +205,94 @@ export class ExpressionsService
     this.renderers = renderers;
   }
 
-  private isStarted(): boolean {
-    return !!(ExpressionsService.started.has(this) || this.parent?.isStarted());
-  }
+  /**
+   * Register an expression function, which will be possible to execute as
+   * part of the expression pipeline.
+   *
+   * Below we register a function which simply sleeps for given number of
+   * milliseconds to delay the execution and outputs its input as-is.
+   *
+   * ```ts
+   * expressions.registerFunction({
+   *   name: 'sleep',
+   *   args: {
+   *     time: {
+   *       aliases: ['_'],
+   *       help: 'Time in milliseconds for how long to sleep',
+   *       types: ['number'],
+   *     },
+   *   },
+   *   help: '',
+   *   fn: async (input, args, context) => {
+   *     await new Promise(r => setTimeout(r, args.time));
+   *     return input;
+   *   },
+   * }
+   * ```
+   *
+   * The actual function is defined in the `fn` key. The function can be *async*.
+   * It receives three arguments: (1) `input` is the output of the previous function
+   * or the initial input of the expression if the function is first in chain;
+   * (2) `args` are function arguments as defined in expression string, that can
+   * be edited by user (e.g in case of Canvas); (3) `context` is a shared object
+   * passed to all functions that can be used for side-effects.
+   */
+  public readonly registerFunction = (
+    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
+  ): void => this.executor.registerFunction(functionDefinition);
 
-  private assertSetup() {
-    if (this.isStarted()) {
-      throw new Error('The expression service is already started and can no longer be configured.');
-    }
-  }
+  public readonly registerType = (
+    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
+  ): void => this.executor.registerType(typeDefinition);
 
-  private assertStart() {
-    if (!this.isStarted()) {
-      throw new Error('The expressions service has not started yet.');
-    }
-  }
+  public readonly registerRenderer = (
+    definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
+  ): void => this.renderers.register(definition);
+
+  public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
+    this.executor.run(ast, input, params);
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
 
-  public readonly getFunctions: ExpressionsServiceStart['getFunctions'] = () =>
+  /**
+   * Returns POJO map of all registered expression functions, where keys are
+   * names of the functions and values are `ExpressionFunction` instances.
+   */
+  public readonly getFunctions = (): ReturnType<Executor['getFunctions']> =>
     this.executor.getFunctions();
 
-  public readonly getRenderer: ExpressionsServiceStart['getRenderer'] = (name) => {
-    this.assertStart();
+  public readonly getRenderer: ExpressionsServiceStart['getRenderer'] = (name) =>
+    this.renderers.get(name);
 
-    return this.renderers.get(name);
-  };
+  /**
+   * Returns POJO map of all registered expression renderers, where keys are
+   * names of the renderers and values are `ExpressionRenderer` instances.
+   */
+  public readonly getRenderers = (): ReturnType<ExpressionRendererRegistry['toJS']> =>
+    this.renderers.toJS();
 
-  public readonly getRenderers: ExpressionsServiceStart['getRenderers'] = () => {
-    this.assertStart();
+  public readonly getType: ExpressionsServiceStart['getType'] = (name) =>
+    this.executor.getType(name);
 
-    return this.renderers.toJS();
-  };
-
-  public readonly getType: ExpressionsServiceStart['getType'] = (name) => {
-    this.assertStart();
-
-    return this.executor.getType(name);
-  };
-
-  public readonly getTypes: ExpressionsServiceStart['getTypes'] = () => this.executor.getTypes();
-
-  public readonly registerFunction: ExpressionsServiceSetup['registerFunction'] = (
-    functionDefinition
-  ) => this.executor.registerFunction(functionDefinition);
-
-  public readonly registerType: ExpressionsServiceSetup['registerType'] = (typeDefinition) =>
-    this.executor.registerType(typeDefinition);
-
-  public readonly registerRenderer: ExpressionsServiceSetup['registerRenderer'] = (definition) =>
-    this.renderers.register(definition);
-
-  public readonly fork: ExpressionsServiceSetup['fork'] = (name) => {
-    this.assertSetup();
-
-    const executor = this.executor.fork();
-    const renderers = this.renderers;
-    const fork = new (this.constructor as typeof ExpressionsService)({ executor, renderers });
-    fork.parent = this;
-
-    if (name) {
-      this.children.set(name, fork);
-    }
-
-    return fork;
-  };
+  /**
+   * Returns POJO map of all registered expression types, where keys are
+   * names of the types and values are `ExpressionType` instances.
+   */
+  public readonly getTypes = (): ReturnType<Executor['getTypes']> => this.executor.getTypes();
 
   public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, params) => {
-    this.assertStart();
     const execution = this.executor.createExecution(ast, params);
     execution.start(input);
-
     return execution.contract;
   }) as ExpressionsServiceStart['execute'];
 
-  public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) => {
-    this.assertStart();
+  public readonly fork = () => {
+    const executor = this.executor.fork();
+    const renderers = this.renderers;
+    const fork = new (this.constructor as typeof ExpressionsService)({ executor, renderers });
 
-    return this.executor.run(ast, input, params);
+    return fork;
   };
 
   /**
@@ -445,12 +371,8 @@ export class ExpressionsService
    * same contract on server-side and browser-side.
    */
   public start(...args: unknown[]): ExpressionsServiceStart {
-    ExpressionsService.started.add(this);
-
     return this;
   }
 
-  public stop() {
-    ExpressionsService.started.delete(this);
-  }
+  public stop() {}
 }

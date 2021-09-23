@@ -59,7 +59,9 @@ const createDashboardAppStateServices = () => {
   const defaults = makeDefaultServices();
   const indexPatterns = {} as IndexPatternsContract;
   const defaultIndexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
-  indexPatterns.ensureDefaultDataView = jest.fn().mockImplementation(() => Promise.resolve(true));
+  indexPatterns.ensureDefaultIndexPattern = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve(true));
   indexPatterns.getDefault = jest
     .fn()
     .mockImplementation(() => Promise.resolve(defaultIndexPattern));

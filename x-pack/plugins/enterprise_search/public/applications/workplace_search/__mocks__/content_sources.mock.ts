@@ -25,7 +25,6 @@ export const contentSources = [
     allowsReauth: true,
     boost: 1,
     activities: [],
-    isOauth1: false,
   },
   {
     id: '124',
@@ -41,7 +40,6 @@ export const contentSources = [
     allowsReauth: true,
     boost: 0.5,
     activities: [],
-    isOauth1: true,
   },
 ];
 
@@ -305,7 +303,6 @@ export const sourceConfigData = {
   privateSourcesEnabled: false,
   categories: ['wiki', 'atlassian', 'intranet'],
   configuredFields: {
-    isOauth1: false,
     clientId: 'CyztADsSECRETCSAUCEh1a',
     clientSecret: 'GSjJxqSECRETCSAUCEksHk',
     baseUrl: 'https://mine.atlassian.net',

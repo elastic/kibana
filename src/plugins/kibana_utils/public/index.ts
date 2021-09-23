@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-import { KibanaUtilsPublicPlugin } from './plugin';
-
 // TODO: https://github.com/elastic/kibana/issues/109893
 /* eslint-disable @kbn/eslint/no_export_all */
 
@@ -81,8 +78,10 @@ export {
 export { applyDiff } from './state_management/utils/diff_object';
 export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
 
-export { KibanaUtilsSetup } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new KibanaUtilsPublicPlugin(initializerContext);
+/** dummy plugin, we just want kibanaUtils to have its own bundle */
+export function plugin() {
+  return new (class KibanaUtilsPlugin {
+    setup() {}
+    start() {}
+  })();
 }

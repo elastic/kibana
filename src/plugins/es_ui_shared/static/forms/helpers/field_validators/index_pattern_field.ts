@@ -37,7 +37,7 @@ export const indexPatternField =
     // Validate illegal characters
     const errors = indexPatterns.validate(value);
 
-    if (errors.ILLEGAL_CHARACTERS) {
+    if (errors[indexPatterns.ILLEGAL_CHARACTERS_KEY]) {
       return {
         code: 'ERR_FIELD_FORMAT',
         formatType: 'INDEX_PATTERN',
@@ -45,8 +45,8 @@ export const indexPatternField =
           defaultMessage:
             'The index pattern contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.',
           values: {
-            characterList: errors.ILLEGAL_CHARACTERS.join(' '),
-            characterListLength: errors.ILLEGAL_CHARACTERS.length,
+            characterList: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].join(' '),
+            characterListLength: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].length,
           },
         }),
       };

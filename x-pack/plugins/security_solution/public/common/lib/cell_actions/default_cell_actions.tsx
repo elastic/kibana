@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import type {
   BrowserFields,
@@ -168,13 +167,11 @@ export const defaultCellActions: TGridCellAction[] = [
   ({
       browserFields,
       data,
-      globalFilters,
       timelineId,
       pageSize,
     }: {
       browserFields: BrowserFields;
       data: TimelineNonEcsData[][];
-      globalFilters?: Filter[];
       timelineId: string;
       pageSize: number;
     }) =>
@@ -208,7 +205,6 @@ export const defaultCellActions: TGridCellAction[] = [
           enablePopOver
           data-test-subj="hover-actions-show-top-n"
           field={columnId}
-          globalFilters={globalFilters}
           onClick={onClick}
           onFilterAdded={onFilterAdded}
           ownFocus={false}

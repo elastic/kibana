@@ -12,6 +12,7 @@ import type {
 import { PickByValue } from 'utility-types';
 import { alertsChartPreviewRouteRepository } from './alerts/chart_preview';
 import { backendsRouteRepository } from './backends';
+import { correlationsRouteRepository } from './correlations';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { environmentsRouteRepository } from './environments';
 import { errorsRouteRepository } from './errors';
@@ -48,6 +49,7 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(traceRouteRepository)
     .merge(transactionRouteRepository)
     .merge(alertsChartPreviewRouteRepository)
+    .merge(correlationsRouteRepository)
     .merge(agentConfigurationRouteRepository)
     .merge(anomalyDetectionRouteRepository)
     .merge(apmIndicesRouteRepository)

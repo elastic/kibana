@@ -10,6 +10,7 @@ import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import { IndexPattern, ISearchSource } from '../../../../../../data/common';
 import { SortOrder } from '../../../../saved_searches/types';
 import { DiscoverServices } from '../../../../build_services';
+import { indexPatterns as indexPatternsUtils } from '../../../../../../data/public';
 import { getSortForSearchSource } from '../components/doc_table';
 
 /**
@@ -51,9 +52,12 @@ export function updateSearchSource(
       // document-like response.
       .setPreferredSearchStrategyId('default');
 
-    if (indexPattern.type !== 'rollup') {
-      // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
-      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
+    // this is not the default index pattern, it determines that it's not of type rollup
+    if (indexPatternsUtils.isDefault(indexPattern)) {
+      searchSource.setField(
+        'filter',
+        data.query.timefilter.timefilter.createRelativeFilter(indexPattern)
+      );
     }
 
     if (useNewFieldsApi) {

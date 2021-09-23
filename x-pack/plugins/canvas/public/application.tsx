@@ -98,10 +98,11 @@ export const initializeCanvas = async (
   setupPlugins: CanvasSetupDeps,
   startPlugins: CanvasStartDeps,
   registries: SetupRegistries,
-  appUpdater: BehaviorSubject<AppUpdater>
+  appUpdater: BehaviorSubject<AppUpdater>,
+  pluginServices: PluginServices<CanvasPluginServices>
 ) => {
   await startLegacyServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
-  const { expressions } = setupPlugins;
+  const { expressions } = pluginServices.getServices();
 
   // Adding these functions here instead of in plugin.ts.
   // Some of these functions have deep dependencies into Canvas, which was bulking up the size

@@ -16,11 +16,8 @@ import {
   RULE_DETAILS,
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { MonitoringConfig } from '../../types';
 
-export function createMemoryUsageAlertType(
-  config: MonitoringConfig
-): AlertTypeModel<MonitoringAlertTypeParams> {
+export function createMemoryUsageAlertType(): AlertTypeModel<MonitoringAlertTypeParams> {
   return {
     id: RULE_MEMORY_USAGE,
     description: RULE_DETAILS[RULE_MEMORY_USAGE].description,
@@ -29,11 +26,7 @@ export function createMemoryUsageAlertType(
       return `${docLinks.links.monitoring.alertsKibanaJvmThreshold}`;
     },
     alertParamsExpression: (props: Props) => (
-      <Expression
-        {...props}
-        config={config}
-        paramDetails={RULE_DETAILS[RULE_MEMORY_USAGE].paramDetails}
-      />
+      <Expression {...props} paramDetails={RULE_DETAILS[RULE_MEMORY_USAGE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',

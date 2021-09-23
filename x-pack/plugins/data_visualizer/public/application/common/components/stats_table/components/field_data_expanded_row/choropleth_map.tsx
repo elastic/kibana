@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   FIELD_ORIGIN,
-  LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
@@ -86,7 +85,7 @@ export const getChoroplethTopValuesLayer = (
       },
       isTimeAware: true,
     },
-    type: LAYER_TYPE.VECTOR,
+    type: 'VECTOR',
   };
 };
 

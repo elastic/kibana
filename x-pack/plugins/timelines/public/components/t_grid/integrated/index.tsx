@@ -347,31 +347,30 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     >
                       <ScrollableFlexItem grow={1}>
                         <StatefulBody
+                          hasAlertsCrud={hasAlertsCrud}
                           activePage={pageInfo.activePage}
                           browserFields={browserFields}
                           bulkActions={bulkActions}
+                          filterQuery={filterQuery}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
-                          filterQuery={filterQuery}
-                          filters={filters}
-                          filterStatus={filterStatus}
-                          hasAlertsCrud={hasAlertsCrud}
                           id={id}
-                          indexNames={indexNames}
                           isEventViewer={true}
                           itemsPerPageOptions={itemsPerPageOptions}
-                          leadingControlColumns={leadingControlColumns}
                           loadPage={loadPage}
                           onRuleChange={onRuleChange}
                           pageSize={itemsPerPage}
-                          refetch={refetch}
                           renderCellValue={renderCellValue}
                           rowRenderers={rowRenderers}
-                          tableView={tableView}
                           tabType={TimelineTabs.query}
+                          tableView={tableView}
                           totalItems={totalCountMinusDeleted}
-                          trailingControlColumns={trailingControlColumns}
                           unit={unit}
+                          filterStatus={filterStatus}
+                          leadingControlColumns={leadingControlColumns}
+                          trailingControlColumns={trailingControlColumns}
+                          refetch={refetch}
+                          indexNames={indexNames}
                         />
                       </ScrollableFlexItem>
                     </FullWidthFlexGroup>

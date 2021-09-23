@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   CoreSetup,
   CoreStart,
@@ -78,7 +77,6 @@ export interface ReportingPublicPluginSetupDendencies {
 
 export interface ReportingPublicPluginStartDendencies {
   home: HomePublicPluginStart;
-  data: DataPublicPluginStart;
   management: ManagementStart;
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
@@ -136,10 +134,7 @@ export class ReportingPublicPlugin
     return this.contract;
   }
 
-  public setup(
-    core: CoreSetup<ReportingPublicPluginStartDendencies>,
-    setupDeps: ReportingPublicPluginSetupDendencies
-  ) {
+  public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
     const { getStartServices, uiSettings } = core;
     const {
       home,

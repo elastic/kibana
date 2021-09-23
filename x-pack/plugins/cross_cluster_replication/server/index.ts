@@ -17,5 +17,4 @@ export const config: PluginConfigDescriptor<CrossClusterReplicationConfig> = {
   exposeToBrowser: {
     ui: true,
   },
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };

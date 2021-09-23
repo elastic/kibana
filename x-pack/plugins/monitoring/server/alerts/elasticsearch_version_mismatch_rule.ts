@@ -66,8 +66,7 @@ export class ElasticsearchVersionMismatchRule extends BaseRule {
       esClient,
       clusters,
       esIndexPattern,
-      Globals.app.config.ui.max_bucket_size,
-      params.filterQuery
+      Globals.app.config.ui.max_bucket_size
     );
 
     return elasticsearchVersions.map((elasticsearchVersion) => {

@@ -26,13 +26,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags(['ciGroup3', 'skipFirefox']);
-      loadTestFile(require.resolve('./smokescreen'));
-    });
-
-    describe('', function () {
       this.tags(['ciGroup4', 'skipFirefox']);
 
+      loadTestFile(require.resolve('./smokescreen'));
       loadTestFile(require.resolve('./add_to_dashboard'));
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./runtime_fields'));
@@ -47,7 +43,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./lens_tagging'));
       loadTestFile(require.resolve('./formula'));
       loadTestFile(require.resolve('./heatmap'));
-      loadTestFile(require.resolve('./thresholds'));
       loadTestFile(require.resolve('./inspector'));
 
       // has to be last one in the suite because it overrides saved objects

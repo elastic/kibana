@@ -12,24 +12,26 @@ import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
 import { RedirectAppLinks } from '../../../kibana_react/public';
+import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { SavedObjectEdition } from './object_view';
-import './saved_objects_edition_page.scss';
 
 const SavedObjectsEditionPage = ({
   coreStart,
+  serviceRegistry,
   setBreadcrumbs,
   history,
 }: {
   coreStart: CoreStart;
+  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
 }) => {
-  const { type, id } = useParams<{ type: string; id: string }>();
+  const { service: serviceName, id } = useParams<{ service: string; id: string }>();
   const capabilities = coreStart.application.capabilities;
-  const dockLinks = coreStart.docLinks.links;
 
   const { search } = useLocation();
   const query = parse(search);
+  const service = serviceRegistry.get(serviceName);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -40,31 +42,27 @@ const SavedObjectsEditionPage = ({
         href: '/',
       },
       {
-        text: i18n.translate('savedObjectsManagement.breadcrumb.inspect', {
-          defaultMessage: 'Inspect {savedObjectType}',
-          values: { savedObjectType: type },
+        text: i18n.translate('savedObjectsManagement.breadcrumb.edit', {
+          defaultMessage: 'Edit {savedObjectType}',
+          values: { savedObjectType: service?.service.type ?? 'object' },
         }),
       },
     ]);
-  }, [setBreadcrumbs, type]);
+  }, [setBreadcrumbs, service]);
 
   return (
-    <RedirectAppLinks
-      application={coreStart.application}
-      className="savedObjectsManagementEditionPage"
-    >
+    <RedirectAppLinks application={coreStart.application}>
       <SavedObjectEdition
         id={id}
-        savedObjectType={type}
         http={coreStart.http}
+        serviceName={serviceName}
+        serviceRegistry={serviceRegistry}
         savedObjectsClient={coreStart.savedObjects.client}
         overlays={coreStart.overlays}
         notifications={coreStart.notifications}
         capabilities={capabilities}
         notFoundType={query.notFound as string}
-        uiSettings={coreStart.uiSettings}
         history={history}
-        docLinks={dockLinks}
       />
     </RedirectAppLinks>
   );

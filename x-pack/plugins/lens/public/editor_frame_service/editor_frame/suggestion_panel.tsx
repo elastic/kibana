@@ -201,9 +201,7 @@ export function SuggestionPanel({
           datasourceMap,
           datasourceStates: currentDatasourceStates,
           visualizationMap,
-          activeVisualization: currentVisualization.activeId
-            ? visualizationMap[currentVisualization.activeId]
-            : undefined,
+          activeVisualizationId: currentVisualization.activeId,
           visualizationState: currentVisualization.state,
           activeData,
         })

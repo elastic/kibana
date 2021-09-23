@@ -8,4 +8,4 @@
 
 export * from '../../../common/data_views/data_views';
 export * from './redirect_no_index_pattern';
-export * from './data_views_api_client';
+export * from './index_patterns_api_client';

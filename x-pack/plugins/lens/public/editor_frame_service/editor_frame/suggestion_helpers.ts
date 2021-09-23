@@ -58,7 +58,7 @@ export function getSuggestions({
   datasourceMap,
   datasourceStates,
   visualizationMap,
-  activeVisualization,
+  activeVisualizationId,
   subVisualizationId,
   visualizationState,
   field,
@@ -69,7 +69,7 @@ export function getSuggestions({
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
-  activeVisualization?: Visualization;
+  activeVisualizationId: string | null;
   subVisualizationId?: string;
   visualizationState: unknown;
   field?: unknown;
@@ -83,12 +83,16 @@ export function getSuggestions({
 
   const layerTypesMap = datasources.reduce((memo, [datasourceId, datasource]) => {
     const datasourceState = datasourceStates[datasourceId].state;
-    if (!activeVisualization || !datasourceState) {
+    if (!activeVisualizationId || !datasourceState || !visualizationMap[activeVisualizationId]) {
       return memo;
     }
     const layers = datasource.getLayers(datasourceState);
     for (const layerId of layers) {
-      const type = getLayerType(activeVisualization, visualizationState, layerId);
+      const type = getLayerType(
+        visualizationMap[activeVisualizationId],
+        visualizationState,
+        layerId
+      );
       memo[layerId] = type;
     }
     return memo;
@@ -108,11 +112,7 @@ export function getSuggestions({
         visualizeTriggerFieldContext.fieldName
       );
     } else if (field) {
-      dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(
-        datasourceState,
-        field,
-        (layerId) => isLayerSupportedByVisualization(layerId, [layerTypes.DATA]) // a field dragged to workspace should added to data layer
-      );
+      dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(datasourceState, field);
     } else {
       dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
         datasourceState,
@@ -121,6 +121,7 @@ export function getSuggestions({
     }
     return dataSourceSuggestions.map((suggestion) => ({ ...suggestion, datasourceId }));
   });
+
   // Pass all table suggestions to all visualization extensions to get visualization suggestions
   // and rank them by score
   return Object.entries(visualizationMap)
@@ -138,8 +139,12 @@ export function getSuggestions({
         .flatMap((datasourceSuggestion) => {
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
-            visualizationId === activeVisualization?.id ? visualizationState : undefined;
-          const palette = mainPalette || activeVisualization?.getMainPalette?.(visualizationState);
+            visualizationId === activeVisualizationId ? visualizationState : undefined;
+          const palette =
+            mainPalette ||
+            (activeVisualizationId && visualizationMap[activeVisualizationId]?.getMainPalette
+              ? visualizationMap[activeVisualizationId].getMainPalette?.(visualizationState)
+              : undefined);
 
           return getVisualizationSuggestions(
             visualization,
@@ -164,14 +169,14 @@ export function getVisualizeFieldSuggestions({
   datasourceMap,
   datasourceStates,
   visualizationMap,
-  activeVisualization,
+  activeVisualizationId,
   visualizationState,
   visualizeTriggerFieldContext,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
-  activeVisualization: Visualization;
+  activeVisualizationId: string | null;
   subVisualizationId?: string;
   visualizationState: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
@@ -180,12 +185,12 @@ export function getVisualizeFieldSuggestions({
     datasourceMap,
     datasourceStates,
     visualizationMap,
-    activeVisualization,
+    activeVisualizationId,
     visualizationState,
     visualizeTriggerFieldContext,
   });
   if (suggestions.length) {
-    return suggestions.find((s) => s.visualizationId === activeVisualization?.id) || suggestions[0];
+    return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
   }
 }
 
@@ -258,19 +263,18 @@ export function getTopSuggestionForField(
     (datasourceLayer) => datasourceLayer.getTableSpec().length > 0
   );
 
-  const activeVisualization = visualization.activeId
-    ? visualizationMap[visualization.activeId]
-    : undefined;
-
-  const mainPalette = activeVisualization?.getMainPalette?.(visualization.state);
+  const mainPalette =
+    visualization.activeId && visualizationMap[visualization.activeId]?.getMainPalette
+      ? visualizationMap[visualization.activeId].getMainPalette?.(visualization.state)
+      : undefined;
   const suggestions = getSuggestions({
     datasourceMap: { [datasource.id]: datasource },
     datasourceStates,
     visualizationMap:
       hasData && visualization.activeId
-        ? { [visualization.activeId]: activeVisualization! }
+        ? { [visualization.activeId]: visualizationMap[visualization.activeId] }
         : visualizationMap,
-    activeVisualization,
+    activeVisualizationId: visualization.activeId,
     visualizationState: visualization.state,
     field,
     mainPalette,

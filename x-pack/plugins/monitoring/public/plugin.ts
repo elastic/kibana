@@ -28,6 +28,14 @@ import {
   RULE_THREAD_POOL_WRITE_REJECTIONS,
   RULE_DETAILS,
 } from '../common/constants';
+import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
+import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
+import { createLegacyAlertTypes } from './alerts/legacy_alert';
+import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
+import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
+import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
+import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
+import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
 import { setConfig } from './external_config';
 
 interface MonitoringSetupPluginDependencies {
@@ -41,11 +49,11 @@ const HASH_CHANGE = 'hashchange';
 
 export class MonitoringPlugin
   implements
-    Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
+    Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
 {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
@@ -78,7 +86,7 @@ export class MonitoringPlugin
       });
     }
 
-    await this.registerAlerts(plugins, monitoring);
+    this.registerAlerts(plugins);
 
     const app: App = {
       id,
@@ -144,6 +152,7 @@ export class MonitoringPlugin
     };
 
     core.application.register(app);
+    return true;
   }
 
   public start(core: CoreStart, plugins: any) {}
@@ -183,48 +192,29 @@ export class MonitoringPlugin
     ];
   }
 
-  private async registerAlerts(
-    plugins: MonitoringSetupPluginDependencies,
-    config: MonitoringConfig
-  ) {
+  private registerAlerts(plugins: MonitoringSetupPluginDependencies) {
     const {
       triggersActionsUi: { ruleTypeRegistry },
     } = plugins;
-
-    const { createCpuUsageAlertType } = await import('./alerts/cpu_usage_alert');
-    const { createMissingMonitoringDataAlertType } = await import(
-      './alerts/missing_monitoring_data_alert'
-    );
-    const { createLegacyAlertTypes } = await import('./alerts/legacy_alert');
-    const { createDiskUsageAlertType } = await import('./alerts/disk_usage_alert');
-    const { createThreadPoolRejectionsAlertType } = await import(
-      './alerts/thread_pool_rejections_alert'
-    );
-    const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
-    const { createCCRReadExceptionsAlertType } = await import('./alerts/ccr_read_exceptions_alert');
-    const { createLargeShardSizeAlertType } = await import('./alerts/large_shard_size_alert');
-
-    ruleTypeRegistry.register(createCpuUsageAlertType(config));
-    ruleTypeRegistry.register(createDiskUsageAlertType(config));
-    ruleTypeRegistry.register(createMemoryUsageAlertType(config));
+    ruleTypeRegistry.register(createCpuUsageAlertType());
+    ruleTypeRegistry.register(createDiskUsageAlertType());
+    ruleTypeRegistry.register(createMemoryUsageAlertType());
     ruleTypeRegistry.register(createMissingMonitoringDataAlertType());
     ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
         RULE_THREAD_POOL_SEARCH_REJECTIONS,
-        RULE_DETAILS[RULE_THREAD_POOL_SEARCH_REJECTIONS],
-        config
+        RULE_DETAILS[RULE_THREAD_POOL_SEARCH_REJECTIONS]
       )
     );
     ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
         RULE_THREAD_POOL_WRITE_REJECTIONS,
-        RULE_DETAILS[RULE_THREAD_POOL_WRITE_REJECTIONS],
-        config
+        RULE_DETAILS[RULE_THREAD_POOL_WRITE_REJECTIONS]
       )
     );
-    ruleTypeRegistry.register(createCCRReadExceptionsAlertType(config));
-    ruleTypeRegistry.register(createLargeShardSizeAlertType(config));
-    const legacyAlertTypes = createLegacyAlertTypes(config);
+    ruleTypeRegistry.register(createCCRReadExceptionsAlertType());
+    ruleTypeRegistry.register(createLargeShardSizeAlertType());
+    const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       ruleTypeRegistry.register(legacyAlertType);
     }

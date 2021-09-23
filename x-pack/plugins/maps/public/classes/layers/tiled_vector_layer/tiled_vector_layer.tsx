@@ -48,7 +48,7 @@ export class TiledVectorLayer extends VectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(descriptor, mapColors);
-    layerDescriptor.type = LAYER_TYPE.TILED_VECTOR;
+    layerDescriptor.type = TiledVectorLayer.type;
 
     if (!layerDescriptor.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);

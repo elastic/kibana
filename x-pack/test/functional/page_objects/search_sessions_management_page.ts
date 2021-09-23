@@ -38,7 +38,6 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
             mainUrl: $.findTestSubject('sessionManagementNameCol').text(),
             created: $.findTestSubject('sessionManagementCreatedCol').text(),
             expires: $.findTestSubject('sessionManagementExpiresCol').text(),
-            searchesCount: Number($.findTestSubject('sessionManagementNumSearchesCol').text()),
             app: $.findTestSubject('sessionManagementAppIcon').attr('data-test-app-id'),
             view: async () => {
               log.debug('management ui: view the session');

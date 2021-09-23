@@ -17,7 +17,7 @@ import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/ser
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { exceptionListItemToTelemetryEntry, trustedApplicationToTelemetryEntry } from './helpers';
+import { exceptionListItemToEndpointEntry } from './helpers';
 import { TelemetryEvent, ESLicense, ESClusterInfo, GetEndpointListResponse } from './types';
 
 export class TelemetryReceiver {
@@ -202,16 +202,7 @@ export class TelemetryReceiver {
       throw Error('exception list client is unavailable: cannot retrieve trusted applications');
     }
 
-    const results = await getTrustedAppsList(this.exceptionListClient, {
-      page: 1,
-      per_page: 10_000,
-    });
-    return {
-      data: results?.data.map(trustedApplicationToTelemetryEntry),
-      total: results?.total ?? 0,
-      page: results?.page ?? 1,
-      per_page: results?.per_page ?? this.max_records,
-    };
+    return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
   }
 
   public async fetchEndpointList(listId: string): Promise<GetEndpointListResponse> {
@@ -233,7 +224,7 @@ export class TelemetryReceiver {
     });
 
     return {
-      data: results?.data.map(exceptionListItemToTelemetryEntry) ?? [],
+      data: results?.data.map(exceptionListItemToEndpointEntry) ?? [],
       total: results?.total ?? 0,
       page: results?.page ?? 1,
       per_page: results?.per_page ?? this.max_records,

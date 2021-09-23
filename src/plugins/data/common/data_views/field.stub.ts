@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { FieldSpec, DataViewField } from '.';
+import { FieldSpec, IndexPatternField } from '.';
 
-export const createIndexPatternFieldStub = ({ spec }: { spec: FieldSpec }): DataViewField => {
-  return new DataViewField(spec);
+export const createIndexPatternFieldStub = ({ spec }: { spec: FieldSpec }): IndexPatternField => {
+  return new IndexPatternField(spec);
 };
 
 export const stubFieldSpecMap: Record<string, FieldSpec> = {
@@ -71,7 +71,7 @@ export const stubFieldSpecMap: Record<string, FieldSpec> = {
   },
 };
 
-export const stubFields: DataViewField[] = Object.values(stubFieldSpecMap).map((spec) =>
+export const stubFields: IndexPatternField[] = Object.values(stubFieldSpecMap).map((spec) =>
   createIndexPatternFieldStub({ spec })
 );
 
@@ -404,6 +404,6 @@ export const stubLogstashFieldSpecMap: Record<string, FieldSpec> = {
   },
 };
 
-export const stubLogstashFields: DataViewField[] = Object.values(stubLogstashFieldSpecMap).map(
+export const stubLogstashFields: IndexPatternField[] = Object.values(stubLogstashFieldSpecMap).map(
   (spec) => createIndexPatternFieldStub({ spec })
 );

@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.save();
   };
 
-  // Failing: https://github.com/elastic/kibana/issues/111922
-  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
+  describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');

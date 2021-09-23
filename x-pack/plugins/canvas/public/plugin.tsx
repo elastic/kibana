@@ -132,7 +132,8 @@ export class CanvasPlugin
           setupPlugins,
           startPlugins,
           registries,
-          this.appUpdater
+          this.appUpdater,
+          pluginServices
         );
 
         const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });

@@ -51,7 +51,7 @@ export const loadSavedDashboardState = async ({
     notifications.toasts.addWarning(getDashboard60Warning());
     return;
   }
-  await indexPatterns.ensureDefaultDataView();
+  await indexPatterns.ensureDefaultIndexPattern();
   let savedDashboard: DashboardSavedObject | undefined;
   try {
     savedDashboard = (await savedDashboards.get(savedDashboardId)) as DashboardSavedObject;

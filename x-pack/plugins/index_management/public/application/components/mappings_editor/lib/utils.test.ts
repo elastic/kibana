@@ -10,7 +10,7 @@ jest.mock('../constants', () => {
   return { MAIN_DATA_TYPE_DEFINITION: {}, TYPE_DEFINITION };
 });
 
-import { stripUndefinedValues, getTypeLabelFromField, getFieldMeta } from './utils';
+import { stripUndefinedValues, getTypeLabelFromField } from './utils';
 
 describe('utils', () => {
   describe('stripUndefinedValues()', () => {
@@ -75,19 +75,6 @@ describe('utils', () => {
           type: 'hyperdrive',
         })
       ).toBe('Other: hyperdrive');
-    });
-  });
-
-  describe('getFieldMeta', () => {
-    test('returns "canHaveMultiFields:true" for IP data type', () => {
-      expect(getFieldMeta({ name: 'ip_field', type: 'ip' })).toEqual({
-        canHaveChildFields: false,
-        canHaveMultiFields: true,
-        childFieldsName: 'fields',
-        hasChildFields: false,
-        hasMultiFields: false,
-        isExpanded: false,
-      });
     });
   });
 });

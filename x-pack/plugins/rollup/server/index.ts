@@ -13,6 +13,5 @@ export const plugin = (pluginInitializerContext: PluginInitializerContext) =>
   new RollupPlugin(pluginInitializerContext);
 
 export const config: PluginConfigDescriptor<RollupConfig> = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: configSchema,
 };

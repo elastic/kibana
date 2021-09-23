@@ -31,12 +31,12 @@ const getMockSearchSessionsConfig = ({
 
 describe('request utils', () => {
   describe('getIgnoreThrottled', () => {
-    test('does not return `ignore_throttled` when `includeFrozen` is `false`', async () => {
+    test('returns `ignore_throttled` as `true` when `includeFrozen` is `false`', async () => {
       const mockUiSettingsClient = getMockUiSettingsClient({
         [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
       });
       const result = await getIgnoreThrottled(mockUiSettingsClient);
-      expect(result).not.toHaveProperty('ignore_throttled');
+      expect(result.ignore_throttled).toBe(true);
     });
 
     test('returns `ignore_throttled` as `false` when `includeFrozen` is `true`', async () => {

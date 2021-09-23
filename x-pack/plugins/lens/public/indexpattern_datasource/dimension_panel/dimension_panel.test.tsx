@@ -52,13 +52,6 @@ jest.mock('lodash', () => {
   };
 });
 jest.mock('../../id_generator');
-// Mock the Monaco Editor component
-jest.mock('../operations/definitions/formula/editor/formula_editor', () => {
-  return {
-    WrappedFormulaEditor: () => <div />,
-    FormulaEditor: () => <div />,
-  };
-});
 
 const fields = [
   {
@@ -218,7 +211,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dimensionGroups: [],
       groupId: 'a',
       isFullscreen: false,
-      supportStaticValue: false,
       toggleFullscreen: jest.fn(),
     };
 
@@ -410,9 +402,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-    ['math', 'formula', 'static_value'].forEach((hiddenOp) => {
-      expect(items.some(({ id }) => id === hiddenOp)).toBe(false);
-    });
+    expect(items.find(({ id }) => id === 'math')).toBeUndefined();
+    expect(items.find(({ id }) => id === 'formula')).toBeUndefined();
   });
 
   it('should indicate that reference-based operations are not compatible when they are incomplete', () => {
@@ -2225,131 +2216,5 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(wrapper.find('[data-test-subj="lns-indexPatternDimension-differences"]')).toHaveLength(
       0
     );
-  });
-
-  it('should not show tabs when formula and static_value operations are not available', () => {
-    const stateWithInvalidCol: IndexPatternPrivateState = getStateWithColumns({
-      col1: {
-        label: 'Average of memory',
-        dataType: 'number',
-        isBucketed: false,
-        // Private
-        operationType: 'average',
-        sourceField: 'memory',
-        params: {
-          format: { id: 'bytes', params: { decimals: 2 } },
-        },
-      },
-    });
-
-    const props = {
-      ...defaultProps,
-      filterOperations: jest.fn((op) => {
-        // the formula operation will fall into this metadata category
-        return !(op.dataType === 'number' && op.scale === 'ratio');
-      }),
-    };
-
-    wrapper = mount(
-      <IndexPatternDimensionEditorComponent {...props} state={stateWithInvalidCol} />
-    );
-
-    expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
-  });
-
-  it('should show the formula tab when supported', () => {
-    const stateWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
-      col1: {
-        label: 'Formula',
-        dataType: 'number',
-        isBucketed: false,
-        operationType: 'formula',
-        references: ['ref1'],
-        params: {},
-      },
-    });
-
-    wrapper = mount(
-      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithFormulaColumn} />
-    );
-
-    expect(
-      wrapper.find('[data-test-subj="lens-dimensionTabs-formula"]').first().prop('isSelected')
-    ).toBeTruthy();
-  });
-
-  it('should now show the static_value tab when not supported', () => {
-    const stateWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
-      col1: {
-        label: 'Formula',
-        dataType: 'number',
-        isBucketed: false,
-        operationType: 'formula',
-        references: ['ref1'],
-        params: {},
-      },
-    });
-
-    wrapper = mount(
-      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithFormulaColumn} />
-    );
-
-    expect(wrapper.find('[data-test-subj="lens-dimensionTabs-static_value"]').exists()).toBeFalsy();
-  });
-
-  it('should show the static value tab when supported', () => {
-    const staticWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
-      col1: {
-        label: 'Formula',
-        dataType: 'number',
-        isBucketed: false,
-        operationType: 'formula',
-        references: ['ref1'],
-        params: {},
-      },
-    });
-
-    wrapper = mount(
-      <IndexPatternDimensionEditorComponent
-        {...defaultProps}
-        supportStaticValue
-        state={staticWithFormulaColumn}
-      />
-    );
-
-    expect(
-      wrapper.find('[data-test-subj="lens-dimensionTabs-static_value"]').exists()
-    ).toBeTruthy();
-  });
-
-  it('should select the quick function tab by default', () => {
-    const stateWithNoColumn: IndexPatternPrivateState = getStateWithColumns({});
-
-    wrapper = mount(
-      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithNoColumn} />
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="lens-dimensionTabs-quickFunctions"]')
-        .first()
-        .prop('isSelected')
-    ).toBeTruthy();
-  });
-
-  it('should select the static value tab when supported by default', () => {
-    const stateWithNoColumn: IndexPatternPrivateState = getStateWithColumns({});
-
-    wrapper = mount(
-      <IndexPatternDimensionEditorComponent
-        {...defaultProps}
-        supportStaticValue
-        state={stateWithNoColumn}
-      />
-    );
-
-    expect(
-      wrapper.find('[data-test-subj="lens-dimensionTabs-static_value"]').first().prop('isSelected')
-    ).toBeTruthy();
   });
 });

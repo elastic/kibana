@@ -352,14 +352,8 @@ export class SearchInterceptor {
             );
           }),
           tap((response) => {
-            const isSearchInScopeOfSession =
-              sessionId && sessionId === this.deps.session.getSessionId();
-            if (
-              isSearchInScopeOfSession &&
-              this.deps.session.isRestore() &&
-              response.isRestored === false
-            ) {
-              this.showRestoreWarning(sessionId);
+            if (this.deps.session.isRestore() && response.isRestored === false) {
+              this.showRestoreWarning(this.deps.session.getSessionId());
             }
           }),
           finalize(() => {

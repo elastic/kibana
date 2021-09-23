@@ -95,14 +95,10 @@ function buildSuggestion({
 export function getDatasourceSuggestionsForField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
-  field: IndexPatternField,
-  filterLayers?: (layerId: string) => boolean
+  field: IndexPatternField
 ): IndexPatternSuggestion[] {
   const layers = Object.keys(state.layers);
-  let layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
-  if (filterLayers) {
-    layerIds = layerIds.filter(filterLayers);
-  }
+  const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
 
   if (layerIds.length === 0) {
     // The field we're suggesting on does not match any existing layer.

@@ -16,12 +16,12 @@ export interface DataViewCache {
 }
 
 export function createDataViewCache(): DataViewCache {
-  const vals: Record<string, Promise<DataView>> = {};
+  const vals: Record<string, any> = {};
   const cache: DataViewCache = {
     get: (id: string) => {
       return vals[id];
     },
-    set: (id: string, prom: Promise<DataView>) => {
+    set: (id: string, prom: any) => {
       vals[id] = prom;
       return prom;
     },

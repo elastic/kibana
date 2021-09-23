@@ -9,7 +9,7 @@ import { combineReducers } from 'redux';
 import {
   policyDetailsReducer,
   initialPolicyDetailsState,
-} from '../pages/policy/store/policy_details';
+} from '../pages/policy/store/policy_details/reducer';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from './data_view';
+import { IndexPattern } from './data_view';
 
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { flattenHitWrapper } from './flatten_hit';
-import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
+import { stubbedSavedObjectIndexPattern } from '../index_pattern.stub';
 
 class MockFieldFormatter {}
 
@@ -24,7 +24,7 @@ function create(id: string) {
     attributes: { timeFieldName, fields, title },
   } = stubbedSavedObjectIndexPattern(id);
 
-  return new DataView({
+  return new IndexPattern({
     spec: {
       id,
       type,
@@ -41,7 +41,7 @@ function create(id: string) {
 }
 
 describe('flattenHit', () => {
-  let indexPattern: DataView;
+  let indexPattern: IndexPattern;
 
   // create an indexPattern instance for each test
   beforeEach(() => {

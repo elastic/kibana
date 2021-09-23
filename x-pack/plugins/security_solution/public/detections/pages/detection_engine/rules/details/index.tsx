@@ -391,6 +391,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const alertsTableDefaultFilters = useMemo(
     () => [
       ...buildAlertsRuleIdFilter(ruleId),
+      ...filters,
       ...(ruleRegistryEnabled
         ? [
             // TODO: Once we are past experimental phase this code should be removed
@@ -399,7 +400,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         : [...buildShowBuildingBlockFilter(showBuildingBlockAlerts)]),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleId, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [ruleId, filters, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { ExpressionsServiceStart } from '../../../../../src/plugins/expressions/public';
+import { ExpressionsService } from '../../../../../src/plugins/expressions/public';
 
-export type CanvasExpressionsService = ExpressionsServiceStart;
+export type CanvasExpressionsService = ExpressionsService;

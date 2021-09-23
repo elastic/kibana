@@ -59,9 +59,9 @@ export function mockDatasourceStates() {
   };
 }
 
-export function createMockVisualization(id = 'vis1'): jest.Mocked<Visualization> {
+export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
-    id,
+    id: 'TEST_VIS',
     clearLayer: jest.fn((state, _layerId) => state),
     removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
@@ -70,9 +70,9 @@ export function createMockVisualization(id = 'vis1'): jest.Mocked<Visualization>
     visualizationTypes: [
       {
         icon: 'empty',
-        id,
+        id: 'TEST_VIS',
         label: 'TEST',
-        groupLabel: `${id}Group`,
+        groupLabel: 'TEST_VISGroup',
       },
     ],
     getVisualizationTypeId: jest.fn((_state) => 'empty'),
@@ -122,7 +122,7 @@ export function createMockDatasource(id: string): DatasourceMock {
   return {
     id: 'mockindexpattern',
     clearLayer: jest.fn((state, _layerId) => state),
-    getDatasourceSuggestionsForField: jest.fn((_state, _item, filterFn) => []),
+    getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
     getDatasourceSuggestionsForVisualizeField: jest.fn((_state, _indexpatternId, _fieldName) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
     getPersistableState: jest.fn((x) => ({

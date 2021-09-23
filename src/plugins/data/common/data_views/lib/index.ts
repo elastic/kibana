@@ -8,6 +8,7 @@
 
 export { DataViewMissingIndices } from './errors';
 export { getTitle } from './get_title';
+export { isDefault } from './is_default';
 
 export * from './types';
-export { validateDataView } from './validate_data_view';
+export { validateDataView } from './validate_index_pattern';

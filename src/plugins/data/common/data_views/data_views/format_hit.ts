@@ -15,24 +15,24 @@ const partialFormattedCache = new WeakMap();
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
-export function formatHitProvider(dataView: DataView, defaultFormat: any) {
+export function formatHitProvider(indexPattern: DataView, defaultFormat: any) {
   function convert(
     hit: Record<string, any>,
     val: any,
     fieldName: string,
     type: FieldFormatsContentType = 'html'
   ) {
-    const field = dataView.fields.getByName(fieldName);
-    const format = field ? dataView.getFormatterForField(field) : defaultFormat;
+    const field = indexPattern.fields.getByName(fieldName);
+    const format = field ? indexPattern.getFormatterForField(field) : defaultFormat;
 
-    return format.convert(val, type, { field, hit, indexPattern: dataView });
+    return format.convert(val, type, { field, hit, indexPattern });
   }
 
   function formatHit(hit: Record<string, any>, type: string = 'html') {
     if (type === 'text') {
       // formatHit of type text is for react components to get rid of <span ng-non-bindable>
       // since it's currently just used at the discover's doc view table, caching is not necessary
-      const flattened = dataView.flattenHit(hit);
+      const flattened = indexPattern.flattenHit(hit);
       const result: Record<string, any> = {};
       for (const [key, value] of Object.entries(flattened)) {
         result[key] = convert(hit, value, key, type);
@@ -53,7 +53,7 @@ export function formatHitProvider(dataView: DataView, defaultFormat: any) {
     const cache: Record<string, any> = {};
     formattedCache.set(hit, cache);
 
-    _.forOwn(dataView.flattenHit(hit), function (val: any, fieldName?: string) {
+    _.forOwn(indexPattern.flattenHit(hit), function (val: any, fieldName?: string) {
       // sync the formatted and partial cache
       if (!fieldName) {
         return;
@@ -77,7 +77,7 @@ export function formatHitProvider(dataView: DataView, defaultFormat: any) {
       partialFormattedCache.set(hit, partials);
     }
 
-    const val = fieldName === '_source' ? hit._source : dataView.flattenHit(hit)[fieldName];
+    const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
     return convert(hit, val, fieldName);
   };
 

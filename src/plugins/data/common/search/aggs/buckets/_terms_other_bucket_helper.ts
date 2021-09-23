@@ -129,9 +129,7 @@ export const buildOtherBucketAgg = (
   aggWithOtherBucket: IBucketAggConfig,
   response: any
 ) => {
-  const bucketAggs = aggConfigs.aggs.filter(
-    (agg) => agg.type.type === AggGroupNames.Buckets && agg.enabled
-  );
+  const bucketAggs = aggConfigs.aggs.filter((agg) => agg.type.type === AggGroupNames.Buckets);
   const index = bucketAggs.findIndex((agg) => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.aggConfigs.indexPattern;

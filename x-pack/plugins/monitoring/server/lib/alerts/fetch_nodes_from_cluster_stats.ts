@@ -26,8 +26,7 @@ function formatNode(
 export async function fetchNodesFromClusterStats(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
-  filterQuery?: string
+  index: string
 ): Promise<AlertClusterStatsNodes[]> {
   const params = {
     index,
@@ -88,15 +87,6 @@ export async function fetchNodesFromClusterStats(
       },
     },
   };
-
-  try {
-    if (filterQuery) {
-      const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
-    }
-  } catch (e) {
-    // meh
-  }
 
   const { body: response } = await esClient.search(params);
   const nodes: AlertClusterStatsNodes[] = [];

@@ -162,7 +162,7 @@ export class VisualizePlugin
         pluginsStart.data.indexPatterns.clearCache();
         // make sure a default index pattern exists
         // if not, the page will be redirected to management and visualize won't be rendered
-        await pluginsStart.data.indexPatterns.ensureDefaultDataView();
+        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
         appMounted();
 

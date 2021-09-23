@@ -192,6 +192,7 @@ export type EmsQueryRequest = Requests & {
 export interface ContextVarsObject {
   [index: string]: any;
   prop: ContextVarsObjectProps;
+  interval: string;
 }
 
 export interface TooltipConfig {

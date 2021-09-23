@@ -12,8 +12,7 @@ export async function fetchElasticsearchVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
-  size: number,
-  filterQuery?: string
+  size: number
 ): Promise<AlertVersions[]> {
   const params = {
     index,
@@ -60,15 +59,6 @@ export async function fetchElasticsearchVersions(
       },
     },
   };
-
-  try {
-    if (filterQuery) {
-      const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
-    }
-  } catch (e) {
-    // meh
-  }
 
   const result = await esClient.search<ElasticsearchSource>(params);
   const response: ElasticsearchResponse = result.body as ElasticsearchResponse;

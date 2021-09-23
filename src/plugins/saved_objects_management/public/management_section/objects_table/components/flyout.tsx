@@ -43,6 +43,7 @@ import {
   processImportResponse,
   ProcessedImportResponse,
 } from '../../../lib';
+import { ISavedObjectsManagementServiceRegistry } from '../../../services';
 import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
 import { OverwriteModal } from './overwrite_modal';
 import { ImportModeControl, ImportMode } from './import_mode_control';
@@ -52,6 +53,7 @@ const CREATE_NEW_COPIES_DEFAULT = false;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export interface FlyoutProps {
+  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   allowedTypes: string[];
   close: () => void;
   done: () => void;

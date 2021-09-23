@@ -11,7 +11,17 @@ exports[`Intro component renders correctly 1`] = `
 >
   <EuiPageHeader
     bottomBorder={true}
-    pageTitle="Inspect saved object"
+    pageTitle={
+      <FormattedMessage
+        defaultMessage="Edit {title}"
+        id="savedObjectsManagement.view.editItemTitle"
+        values={
+          Object {
+            "title": "search",
+          }
+        }
+      />
+    }
     rightSideItems={
       Array [
         <EuiButton
@@ -25,7 +35,7 @@ exports[`Intro component renders correctly 1`] = `
             id="savedObjectsManagement.view.viewItemButtonLabel"
             values={
               Object {
-                "title": "saved object",
+                "title": "search",
               }
             }
           />
@@ -38,9 +48,13 @@ exports[`Intro component renders correctly 1`] = `
           size="s"
         >
           <FormattedMessage
-            defaultMessage="Delete"
+            defaultMessage="Delete {title}"
             id="savedObjectsManagement.view.deleteItemButtonLabel"
-            values={Object {}}
+            values={
+              Object {
+                "title": "search",
+              }
+            }
           />
         </EuiButton>,
       ]
@@ -50,7 +64,17 @@ exports[`Intro component renders correctly 1`] = `
       className="euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
     >
       <EuiPageHeaderContent
-        pageTitle="Inspect saved object"
+        pageTitle={
+          <FormattedMessage
+            defaultMessage="Edit {title}"
+            id="savedObjectsManagement.view.editItemTitle"
+            values={
+              Object {
+                "title": "search",
+              }
+            }
+          />
+        }
         responsive={true}
         rightSideItems={
           Array [
@@ -65,7 +89,7 @@ exports[`Intro component renders correctly 1`] = `
                 id="savedObjectsManagement.view.viewItemButtonLabel"
                 values={
                   Object {
-                    "title": "saved object",
+                    "title": "search",
                   }
                 }
               />
@@ -78,9 +102,13 @@ exports[`Intro component renders correctly 1`] = `
               size="s"
             >
               <FormattedMessage
-                defaultMessage="Delete"
+                defaultMessage="Delete {title}"
                 id="savedObjectsManagement.view.deleteItemButtonLabel"
-                values={Object {}}
+                values={
+                  Object {
+                    "title": "search",
+                  }
+                }
               />
             </EuiButton>,
           ]
@@ -108,7 +136,17 @@ exports[`Intro component renders correctly 1`] = `
                     <h1
                       className="euiTitle euiTitle--large"
                     >
-                      Inspect saved object
+                      <FormattedMessage
+                        defaultMessage="Edit {title}"
+                        id="savedObjectsManagement.view.editItemTitle"
+                        values={
+                          Object {
+                            "title": "search",
+                          }
+                        }
+                      >
+                        Edit search
+                      </FormattedMessage>
                     </h1>
                   </EuiTitle>
                 </div>
@@ -196,11 +234,11 @@ exports[`Intro component renders correctly 1`] = `
                                         id="savedObjectsManagement.view.viewItemButtonLabel"
                                         values={
                                           Object {
-                                            "title": "saved object",
+                                            "title": "search",
                                           }
                                         }
                                       >
-                                        View saved object
+                                        View search
                                       </FormattedMessage>
                                     </span>
                                   </span>
@@ -278,11 +316,15 @@ exports[`Intro component renders correctly 1`] = `
                                       className="euiButton__text"
                                     >
                                       <FormattedMessage
-                                        defaultMessage="Delete"
+                                        defaultMessage="Delete {title}"
                                         id="savedObjectsManagement.view.deleteItemButtonLabel"
-                                        values={Object {}}
+                                        values={
+                                          Object {
+                                            "title": "search",
+                                          }
+                                        }
                                       >
-                                        Delete
+                                        Delete search
                                       </FormattedMessage>
                                     </span>
                                   </span>

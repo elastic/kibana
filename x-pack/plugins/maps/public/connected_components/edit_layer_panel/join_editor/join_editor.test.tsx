@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { ILayer } from '../../../classes/layers/layer';
 import { JoinEditor } from './join_editor';
 import { shallow } from 'enzyme';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
@@ -48,7 +48,7 @@ const defaultProps = {
 
 test('Should render join editor', () => {
   const component = shallow(
-    <JoinEditor {...defaultProps} layer={new MockLayer(null) as unknown as IVectorLayer} />
+    <JoinEditor {...defaultProps} layer={new MockLayer(null) as unknown as ILayer} />
   );
   expect(component).toMatchSnapshot();
 });
@@ -57,7 +57,7 @@ test('Should render callout when joins are disabled', () => {
   const component = shallow(
     <JoinEditor
       {...defaultProps}
-      layer={new MockLayer('Simulated disabled reason') as unknown as IVectorLayer}
+      layer={new MockLayer('Simulated disabled reason') as unknown as ILayer}
     />
   );
   expect(component).toMatchSnapshot();

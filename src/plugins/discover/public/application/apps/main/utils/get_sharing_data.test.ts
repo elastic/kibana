@@ -7,37 +7,32 @@
  */
 
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import type { IndexPattern } from 'src/plugins/data/public';
-import type { DiscoverServices } from '../../../../build_services';
-import { dataPluginMock } from '../../../../../../data/public/mocks';
+import { IndexPattern } from 'src/plugins/data/public';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
-  let services: DiscoverServices;
+  let mockConfig: IUiSettingsClient;
 
   beforeEach(() => {
-    services = {
-      data: dataPluginMock.createStartContract(),
-      uiSettings: {
-        get: (key: string) => {
-          if (key === SORT_DEFAULT_ORDER_SETTING) {
-            return 'desc';
-          }
-          if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
-            return false;
-          }
+    mockConfig = {
+      get: (key: string) => {
+        if (key === SORT_DEFAULT_ORDER_SETTING) {
+          return 'desc';
+        }
+        if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
           return false;
-        },
+        }
+        return false;
       },
-    } as DiscoverServices;
+    } as unknown as IUiSettingsClient;
   });
 
   test('returns valid data for sharing', async () => {
     const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
-    const result = await getSharingData(searchSourceMock, { columns: [] }, services);
+    const result = await getSharingData(searchSourceMock, { columns: [] }, mockConfig);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [],
@@ -58,7 +53,7 @@ describe('getSharingData', () => {
     const result = await getSharingData(
       searchSourceMock,
       { columns: ['column_a', 'column_b'] },
-      services
+      mockConfig
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -95,7 +90,7 @@ describe('getSharingData', () => {
           'cool-field-6',
         ],
       },
-      services
+      mockConfig
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -121,7 +116,7 @@ describe('getSharingData', () => {
   });
 
   test('fields conditionally do not have prepended timeField', async () => {
-    services.uiSettings = {
+    mockConfig = {
       get: (key: string) => {
         if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
           return true;
@@ -146,7 +141,7 @@ describe('getSharingData', () => {
           'cool-field-6',
         ],
       },
-      services
+      mockConfig
     );
     expect(result).toMatchInlineSnapshot(`
       Object {

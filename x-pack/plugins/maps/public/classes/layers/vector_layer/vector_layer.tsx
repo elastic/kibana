@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import uuid from 'uuid/v4';
 import type {
   Map as MbMap,
   AnyLayer as MbLayer,
@@ -20,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
-  AGG_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
@@ -31,11 +29,8 @@ import {
   FIELD_ORIGIN,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
-  SOURCE_TYPES,
-  STYLE_TYPE,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
   KBN_IS_TILE_COMPLETE,
-  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -53,11 +48,8 @@ import {
   TimesliceMaskConfig,
 } from '../../util/mb_filter_expressions';
 import {
-  AggDescriptor,
   DynamicStylePropertyOptions,
   DataFilters,
-  ESTermSourceDescriptor,
-  JoinDescriptor,
   StyleMetaDescriptor,
   Timeslice,
   VectorLayerDescriptor,
@@ -79,11 +71,6 @@ import { ITermJoinSource } from '../../sources/term_join_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
 import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
-import { getJoinAggKey } from '../../../../common/get_agg_key';
-
-export function isVectorLayer(layer: ILayer) {
-  return (layer as IVectorLayer).canShowTooltip !== undefined;
-}
 
 export interface VectorLayerArguments {
   source: IVectorSource;
@@ -96,13 +83,11 @@ export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getJoins(): InnerJoin[];
-  getJoinsDisabledReason(): string | null;
   getValidJoins(): InnerJoin[];
   getSource(): IVectorSource;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
-  showJoinEditor(): boolean;
   canShowTooltip(): boolean;
   supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
@@ -128,8 +113,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
-    layerDescriptor.type = LAYER_TYPE.VECTOR;
+    const layerDescriptor = super.createDescriptor(options);
+    layerDescriptor.type = VectorLayer.type;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -140,7 +125,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       layerDescriptor.joins = [];
     }
 
-    return layerDescriptor;
+    return layerDescriptor as VectorLayerDescriptor;
   }
 
   constructor({
@@ -160,62 +145,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       this,
       chartsPaletteServiceGetColor
     );
-  }
-
-  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
-    const clonedDescriptor = (await super.cloneDescriptor()) as VectorLayerDescriptor;
-    if (clonedDescriptor.joins) {
-      clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
-        if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
-          throw new Error(
-            'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
-          );
-        }
-        const termSourceDescriptor: ESTermSourceDescriptor =
-          joinDescriptor.right as ESTermSourceDescriptor;
-
-        // todo: must tie this to generic thing
-        const originalJoinId = joinDescriptor.right.id!;
-
-        // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuid();
-
-        // Update all data driven styling properties using join fields
-        if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
-          const metrics =
-            termSourceDescriptor.metrics && termSourceDescriptor.metrics.length
-              ? termSourceDescriptor.metrics
-              : [{ type: AGG_TYPE.COUNT }];
-          metrics.forEach((metricsDescriptor: AggDescriptor) => {
-            const originalJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: originalJoinId,
-            });
-            const newJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: joinDescriptor.right.id!,
-            });
-
-            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
-              const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
-              if ('type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
-                const options = styleProp.options as DynamicStylePropertyOptions;
-                if (
-                  options.field &&
-                  options.field.origin === FIELD_ORIGIN.JOIN &&
-                  options.field.name === originalJoinKey
-                ) {
-                  options.field.name = newJoinKey;
-                }
-              }
-            });
-          });
-        }
-      });
-    }
-    return clonedDescriptor;
   }
 
   getSource(): IVectorSource {
@@ -247,10 +176,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this._joins.slice();
   }
 
-  getJoinsDisabledReason() {
-    return this.getSource().getJoinsDisabledReason();
-  }
-
   getValidJoins() {
     return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
@@ -265,10 +190,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   hasJoins() {
     return this.getValidJoins().length > 0;
-  }
-
-  showJoinEditor(): boolean {
-    return this.getSource().showJoinEditor();
   }
 
   isInitialDataLoadComplete() {

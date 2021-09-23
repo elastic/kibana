@@ -53,6 +53,8 @@ export interface ISource {
   isESSource(): boolean;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
   cloneDescriptor(): AbstractSourceDescriptor;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
@@ -151,6 +153,14 @@ export class AbstractSource implements ISource {
 
   getGeoGridPrecision(zoom: number): number {
     return 0;
+  }
+
+  showJoinEditor(): boolean {
+    return false;
+  }
+
+  getJoinsDisabledReason(): string | null {
+    return null;
   }
 
   isESSource(): boolean {

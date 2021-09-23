@@ -10,8 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { ConfigDeprecationProvider, PluginInitializerContext } from '../../../core/server';
 import { APMOSSPlugin } from './plugin';
 
-const deprecations: ConfigDeprecationProvider = ({ deprecate, unused }) => [
-  deprecate('enabled', '8.0.0'),
+const deprecations: ConfigDeprecationProvider = ({ unused }) => [
   unused('fleetMode'),
   unused('indexPattern'),
 ];

@@ -233,8 +233,8 @@ export interface ReindexSourceToTempClosePit extends PostInitState {
   readonly sourceIndexPitId: string;
 }
 
-export interface ReindexSourceToTempTransform extends PostInitState {
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM';
+export interface ReindexSourceToTempIndex extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX';
   readonly outdatedDocuments: SavedObjectsRawDoc[];
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
@@ -434,7 +434,7 @@ export type State = Readonly<
   | ReindexSourceToTempOpenPit
   | ReindexSourceToTempRead
   | ReindexSourceToTempClosePit
-  | ReindexSourceToTempTransform
+  | ReindexSourceToTempIndex
   | ReindexSourceToTempIndexBulk
   | SetTempWriteBlock
   | CloneTempToSource

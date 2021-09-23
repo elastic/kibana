@@ -17,7 +17,11 @@ export class UpgradeAssistantUIPlugin
 {
   constructor(private ctx: PluginInitializerContext) {}
   setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies) {
-    const { readonly } = this.ctx.config.get<Config>();
+    const { enabled, readonly } = this.ctx.config.get<Config>();
+
+    if (!enabled) {
+      return;
+    }
 
     const appRegistrar = management.sections.section.stack;
     const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);

@@ -49,7 +49,7 @@ export class TypesRegistry implements IRegistry<ExpressionType> {
   }
 
   public get(id: string): ExpressionType | null {
-    return this.executor.getType(id) ?? null;
+    return this.executor.state.selectors.getType(id);
   }
 
   public toJS(): Record<string, ExpressionType> {
@@ -71,7 +71,7 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   }
 
   public get(id: string): ExpressionFunction | null {
-    return this.executor.getFunction(id) ?? null;
+    return this.executor.state.selectors.getFunction(id);
   }
 
   public toJS(): Record<string, ExpressionFunction> {
@@ -95,44 +95,22 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return executor;
   }
 
-  public readonly container: ExecutorContainer<Context>;
+  public readonly state: ExecutorContainer<Context>;
 
   /**
    * @deprecated
    */
-  public readonly functions = new FunctionsRegistry(this);
+  public readonly functions: FunctionsRegistry;
 
   /**
    * @deprecated
    */
-  public readonly types = new TypesRegistry(this);
-
-  protected parent?: Executor<Context>;
+  public readonly types: TypesRegistry;
 
   constructor(state?: ExecutorState<Context>) {
-    this.container = createExecutorContainer<Context>(state);
-  }
-
-  public get state(): ExecutorState<Context> {
-    const parent = this.parent?.state;
-    const state = this.container.get();
-
-    return {
-      ...(parent ?? {}),
-      ...state,
-      types: {
-        ...(parent?.types ?? {}),
-        ...state.types,
-      },
-      functions: {
-        ...(parent?.functions ?? {}),
-        ...state.functions,
-      },
-      context: {
-        ...(parent?.context ?? {}),
-        ...state.context,
-      },
-    };
+    this.state = createExecutorContainer<Context>(state);
+    this.functions = new FunctionsRegistry(this);
+    this.types = new TypesRegistry(this);
   }
 
   public registerFunction(
@@ -141,18 +119,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const fn = new ExpressionFunction(
       typeof functionDefinition === 'object' ? functionDefinition : functionDefinition()
     );
-    this.container.transitions.addFunction(fn);
+    this.state.transitions.addFunction(fn);
   }
 
   public getFunction(name: string): ExpressionFunction | undefined {
-    return this.container.get().functions[name] ?? this.parent?.getFunction(name);
+    return this.state.get().functions[name];
   }
 
   public getFunctions(): Record<string, ExpressionFunction> {
-    return {
-      ...(this.parent?.getFunctions() ?? {}),
-      ...this.container.get().functions,
-    };
+    return { ...this.state.get().functions };
   }
 
   public registerType(
@@ -161,30 +136,23 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const type = new ExpressionType(
       typeof typeDefinition === 'object' ? typeDefinition : typeDefinition()
     );
-
-    this.container.transitions.addType(type);
+    this.state.transitions.addType(type);
   }
 
   public getType(name: string): ExpressionType | undefined {
-    return this.container.get().types[name] ?? this.parent?.getType(name);
+    return this.state.get().types[name];
   }
 
   public getTypes(): Record<string, ExpressionType> {
-    return {
-      ...(this.parent?.getTypes() ?? {}),
-      ...this.container.get().types,
-    };
+    return { ...this.state.get().types };
   }
 
   public extendContext(extraContext: Record<string, unknown>) {
-    this.container.transitions.extendContext(extraContext);
+    this.state.transitions.extendContext(extraContext);
   }
 
   public get context(): Record<string, unknown> {
-    return {
-      ...(this.parent?.context ?? {}),
-      ...this.container.selectors.getContext(),
-    };
+    return this.state.selectors.getContext();
   }
 
   /**
@@ -231,15 +199,18 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   ) {
     for (const link of ast.chain) {
       const { function: fnName, arguments: fnArgs } = link;
-      const fn = getByAlias(this.getFunctions(), fnName);
+      const fn = getByAlias(this.state.get().functions, fnName);
 
       if (fn) {
         // if any of arguments are expressions we should migrate those first
-        link.arguments = mapValues(fnArgs, (asts) =>
-          asts.map((arg) =>
-            arg != null && typeof arg === 'object' ? this.walkAst(arg, action) : arg
-          )
-        );
+        link.arguments = mapValues(fnArgs, (asts, argName) => {
+          return asts.map((arg) => {
+            if (arg && typeof arg === 'object') {
+              return this.walkAst(arg, action);
+            }
+            return arg;
+          });
+        });
 
         action(fn, link);
       }
@@ -304,19 +275,39 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   private migrate(ast: SerializableRecord, version: string) {
     return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
-      if (!fn.migrations[version]) {
-        return;
-      }
-
-      ({ arguments: link.arguments, type: link.type } = fn.migrations[version](
-        link
-      ) as ExpressionAstFunction);
+      if (!fn.migrations[version]) return link;
+      const updatedAst = fn.migrations[version](link) as ExpressionAstFunction;
+      link.arguments = updatedAst.arguments;
+      link.type = updatedAst.type;
     });
   }
 
   public fork(): Executor<Context> {
-    const fork = new Executor<Context>();
-    fork.parent = this;
+    const initialState = this.state.get();
+    const fork = new Executor<Context>(initialState);
+
+    /**
+     * Synchronize registry state - make any new types, functions and context
+     * also available in the forked instance of `Executor`.
+     */
+    this.state.state$.subscribe(({ types, functions, context }) => {
+      const state = fork.state.get();
+      fork.state.set({
+        ...state,
+        types: {
+          ...types,
+          ...state.types,
+        },
+        functions: {
+          ...functions,
+          ...state.functions,
+        },
+        context: {
+          ...context,
+          ...state.context,
+        },
+      });
+    });
 
     return fork;
   }

@@ -9,7 +9,7 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
@@ -18,9 +18,9 @@ export { rangeQuery, kqlQuery } from './utils/queries';
 
 export * from './types';
 
-export const config: PluginConfigDescriptor = {
+export const config = {
   exposeToBrowser: {
-    unsafe: true,
+    unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
   },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -33,7 +33,6 @@ export const config: PluginConfigDescriptor = {
       cases: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),
   }),
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };
 
 export type ObservabilityConfig = TypeOf<typeof config.schema>;

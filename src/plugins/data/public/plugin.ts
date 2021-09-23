@@ -22,9 +22,9 @@ import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import {
-  DataViewsService,
+  IndexPatternsService,
   onRedirectNoIndexPattern,
-  DataViewsApiClient,
+  IndexPatternsApiClient,
   UiSettingsPublicToCommon,
 } from './data_views';
 import {
@@ -145,10 +145,10 @@ export class DataPublicPlugin
     setOverlays(overlays);
     setUiSettings(uiSettings);
 
-    const indexPatterns = new DataViewsService({
+    const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
-      apiClient: new DataViewsApiClient(http),
+      apiClient: new IndexPatternsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields) => {
         notifications.toasts.add(toastInputFields);

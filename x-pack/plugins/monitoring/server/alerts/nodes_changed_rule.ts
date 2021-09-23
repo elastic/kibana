@@ -114,8 +114,7 @@ export class NodesChangedRule extends BaseRule {
     const nodesFromClusterStats = await fetchNodesFromClusterStats(
       esClient,
       clusters,
-      esIndexPattern,
-      params.filterQuery
+      esIndexPattern
     );
     return nodesFromClusterStats.map((nodes) => {
       const { removed, added, restarted } = getNodeStates(nodes);

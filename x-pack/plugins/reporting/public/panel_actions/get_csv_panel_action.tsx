@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
-import { first } from 'rxjs/operators';
-import type { CoreSetup, NotificationsSetup } from 'src/core/public';
+import type { CoreSetup, IUiSettingsClient, NotificationsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
 import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
 import {
@@ -23,7 +22,6 @@ import type { LicensingPluginSetup } from '../../../licensing/public';
 import { CSV_REPORTING_ACTION } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import type { ReportingPublicPluginStartDendencies } from '../plugin';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -38,7 +36,7 @@ export interface ActionContext {
 interface Params {
   apiClient: ReportingAPIClient;
   core: CoreSetup;
-  startServices$: Rx.Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
+  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
   license$: LicensingPluginSetup['license$'];
   usesUiCapabilities: boolean;
 }
@@ -49,16 +47,16 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   public readonly id = CSV_REPORTING_ACTION;
   private licenseHasDownloadCsv: boolean = false;
   private capabilityHasDownloadCsv: boolean = false;
+  private uiSettings: IUiSettingsClient;
   private notifications: NotificationsSetup;
   private apiClient: ReportingAPIClient;
-  private startServices$: Params['startServices$'];
 
   constructor({ core, startServices$, license$, usesUiCapabilities, apiClient }: Params) {
     this.isDownloading = false;
 
+    this.uiSettings = core.uiSettings;
     this.notifications = core.notifications;
     this.apiClient = apiClient;
-    this.startServices$ = startServices$;
 
     license$.subscribe((license) => {
       const results = license.check('reporting', 'basic');
@@ -67,7 +65,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     });
 
     if (usesUiCapabilities) {
-      this.startServices$.subscribe(([{ application }]) => {
+      startServices$.subscribe(([{ application }]) => {
         this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
       });
     } else {
@@ -86,12 +84,11 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
-    const [{ uiSettings }, { data }] = await this.startServices$.pipe(first()).toPromise();
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(
       savedSearch.searchSource,
-      savedSearch, // TODO: get unsaved state (using embeddable.searchScope): https://github.com/elastic/kibana/issues/43977
-      { uiSettings, data }
+      savedSearch, // TODO: get unsaved state (using embeddale.searchScope): https://github.com/elastic/kibana/issues/43977
+      this.uiSettings
     );
   }
 

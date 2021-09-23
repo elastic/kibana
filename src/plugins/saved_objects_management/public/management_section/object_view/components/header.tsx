@@ -9,24 +9,43 @@
 import React from 'react';
 import { EuiButton, EuiPageHeader } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 interface HeaderProps {
+  canEdit: boolean;
   canDelete: boolean;
   canViewInApp: boolean;
+  type: string;
   viewUrl: string;
   onDeleteClick: () => void;
-  title?: string;
 }
 
-export const Header = ({ canDelete, canViewInApp, viewUrl, onDeleteClick, title }: HeaderProps) => {
+const renderConditionalTitle = (canEdit: boolean, type: string) =>
+  canEdit ? (
+    <FormattedMessage
+      id="savedObjectsManagement.view.editItemTitle"
+      defaultMessage="Edit {title}"
+      values={{ title: type }}
+    />
+  ) : (
+    <FormattedMessage
+      id="savedObjectsManagement.view.viewItemTitle"
+      defaultMessage="View {title}"
+      values={{ title: type }}
+    />
+  );
+
+export const Header = ({
+  canEdit,
+  canDelete,
+  canViewInApp,
+  type,
+  viewUrl,
+  onDeleteClick,
+}: HeaderProps) => {
   return (
     <EuiPageHeader
       bottomBorder
-      pageTitle={i18n.translate('savedObjectsManagement.view.inspectItemTitle', {
-        defaultMessage: 'Inspect {title}',
-        values: { title: title || 'saved object' },
-      })}
+      pageTitle={renderConditionalTitle(canEdit, type)}
       rightSideItems={[
         canViewInApp && (
           <EuiButton
@@ -38,7 +57,7 @@ export const Header = ({ canDelete, canViewInApp, viewUrl, onDeleteClick, title 
             <FormattedMessage
               id="savedObjectsManagement.view.viewItemButtonLabel"
               defaultMessage="View {title}"
-              values={{ title: title || 'saved object' }}
+              values={{ title: type }}
             />
           </EuiButton>
         ),
@@ -52,7 +71,8 @@ export const Header = ({ canDelete, canViewInApp, viewUrl, onDeleteClick, title 
           >
             <FormattedMessage
               id="savedObjectsManagement.view.deleteItemButtonLabel"
-              defaultMessage="Delete"
+              defaultMessage="Delete {title}"
+              values={{ title: type }}
             />
           </EuiButton>
         ),

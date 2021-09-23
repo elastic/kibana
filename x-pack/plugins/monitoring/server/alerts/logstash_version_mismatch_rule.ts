@@ -66,8 +66,7 @@ export class LogstashVersionMismatchRule extends BaseRule {
       esClient,
       clusters,
       logstashIndexPattern,
-      Globals.app.config.ui.max_bucket_size,
-      params.filterQuery
+      Globals.app.config.ui.max_bucket_size
     );
 
     return logstashVersions.map((logstashVersion) => {

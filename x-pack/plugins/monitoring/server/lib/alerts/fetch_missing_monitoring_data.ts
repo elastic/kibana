@@ -47,8 +47,7 @@ export async function fetchMissingMonitoringData(
   index: string,
   size: number,
   nowInMs: number,
-  startMs: number,
-  filterQuery?: string
+  startMs: number
 ): Promise<AlertMissingData[]> {
   const endMs = nowInMs;
   const params = {
@@ -117,15 +116,6 @@ export async function fetchMissingMonitoringData(
       },
     },
   };
-
-  try {
-    if (filterQuery) {
-      const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
-    }
-  } catch (e) {
-    // meh
-  }
 
   const { body: response } = await esClient.search(params);
   const clusterBuckets = get(

@@ -36,8 +36,7 @@ export async function fetchThreadPoolRejectionStats(
   index: string,
   size: number,
   threadType: string,
-  duration: string,
-  filterQuery?: string
+  duration: string
 ): Promise<AlertThreadPoolRejectionsStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
   const params = {
@@ -94,15 +93,6 @@ export async function fetchThreadPoolRejectionStats(
       },
     },
   };
-
-  try {
-    if (filterQuery) {
-      const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
-    }
-  } catch (e) {
-    // meh
-  }
 
   const { body: response } = await esClient.search(params);
   const stats: AlertThreadPoolRejectionsStats[] = [];

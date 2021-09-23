@@ -7,5 +7,5 @@
  */
 
 export * from './data_views/field.stub';
-export * from './data_views/data_view.stub';
+export * from './data_views/index_pattern.stub';
 export * from './es_query/stubs';

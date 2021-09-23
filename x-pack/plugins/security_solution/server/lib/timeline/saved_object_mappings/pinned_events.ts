@@ -6,12 +6,14 @@
  */
 
 import { SavedObjectsType } from '../../../../../../../src/core/server';
-import { pinnedEventsMigrations } from './migrations/pinned_events';
 
 export const pinnedEventSavedObjectType = 'siem-ui-timeline-pinned-event';
 
 export const pinnedEventSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
+    timelineId: {
+      type: 'keyword',
+    },
     eventId: {
       type: 'keyword',
     },
@@ -35,5 +37,4 @@ export const pinnedEventType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   mappings: pinnedEventSavedObjectMappings,
-  migrations: pinnedEventsMigrations,
 };

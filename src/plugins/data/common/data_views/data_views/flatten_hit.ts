@@ -103,11 +103,11 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
  *
  * @internal
  */
-export function flattenHitWrapper(dataView: DataView, metaFields = {}, cache = new WeakMap()) {
+export function flattenHitWrapper(indexPattern: DataView, metaFields = {}, cache = new WeakMap()) {
   return function cachedFlatten(hit: Record<string, any>, deep = false) {
     const decorateFlattened = decorateFlattenedWrapper(hit, metaFields);
     const cached = cache.get(hit);
-    const flattened = cached || flattenHit(dataView, hit, deep);
+    const flattened = cached || flattenHit(indexPattern, hit, deep);
     if (!cached) {
       cache.set(hit, { ...flattened });
     }

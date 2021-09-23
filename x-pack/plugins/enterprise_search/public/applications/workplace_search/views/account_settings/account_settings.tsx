@@ -20,12 +20,7 @@ export const AccountSettings: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
 
   useEffect(() => {
-    security.authc
-      .getCurrentUser()
-      .then(setCurrentUser)
-      .catch(() => {
-        setCurrentUser(null);
-      });
+    security.authc.getCurrentUser().then(setCurrentUser);
   }, [security.authc]);
 
   const PersonalInfo = useMemo(() => security.uiApi.components.getPersonalInfo, [security.uiApi]);
