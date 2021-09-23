@@ -11,7 +11,7 @@ import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getLastRecovery } from '../../../../lib/elasticsearch/get_last_recovery';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_overview';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs';
