@@ -6,11 +6,7 @@
  */
 
 import React, { FC, Suspense } from 'react';
-import {
-  EuiDelayRender,
-  EuiErrorBoundary,
-  EuiLoadingContent,
-} from '@elastic/eui';
+import { EuiDelayRender, EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
 
 const Fallback = () => (
   <EuiDelayRender>
@@ -32,4 +28,4 @@ export function LazyWrapper<T>({ getLazyComponent, lazyComponentProps }: Props<T
       </Suspense>
     </EuiErrorBoundary>
   );
-};
+}

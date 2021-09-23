@@ -78,7 +78,7 @@ export class MapDetails extends Component<Props, State> {
             <EuiTableRowCell>
               <FormattedMessage
                 id="xpack.maps.inspector.centerLonLabel"
-                defaultMessage="Center lon test"
+                defaultMessage="Center lon"
               />
             </EuiTableRowCell>
             <EuiTableRowCell data-test-subj="centerLon">{this.props.centerLon}</EuiTableRowCell>

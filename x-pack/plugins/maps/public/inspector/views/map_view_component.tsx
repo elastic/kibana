@@ -20,8 +20,8 @@ interface State {
 }
 
 class MapViewComponent extends Component<Props, State> {
-  state: State = this.props.adapters.map.getMapState()
-  
+  state: State = this.props.adapters.map.getMapState();
+
   _onMapChange = () => {
     this.setState(this.props.adapters.map.getMapState());
   };
