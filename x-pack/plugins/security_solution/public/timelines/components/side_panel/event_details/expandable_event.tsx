@@ -23,6 +23,8 @@ import { EventDetails } from '../../../../common/components/event_details/event_
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
 
+import { HostRiskScore } from '../../../containers/host_risk_score/use_host_risk_score';
+
 export type HandleOnEventClosed = () => void;
 interface Props {
   browserFields: BrowserFields;
@@ -34,6 +36,7 @@ interface Props {
   messageHeight?: number;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
+  hostRisk: HostRiskScore;
 }
 
 interface ExpandableEventTitleProps {
@@ -90,6 +93,7 @@ export const ExpandableEvent = React.memo<Props>(
     isDraggable,
     loading,
     detailsData,
+    hostRisk,
   }) => {
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
@@ -110,6 +114,7 @@ export const ExpandableEvent = React.memo<Props>(
             isDraggable={isDraggable}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
+            hostRisk={hostRisk}
           />
         </StyledEuiFlexItem>
       </StyledFlexGroup>

@@ -10,10 +10,10 @@ import {
   EuiTabbedContentTab,
   EuiSpacer,
   EuiLoadingContent,
-  EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -38,6 +38,8 @@ import {
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 
+import { HostRiskScore } from '../../../timelines/containers/host_risk_score/use_host_risk_score';
+
 type EventViewTab = EuiTabbedContentTab;
 
 export type EventViewId =
@@ -60,6 +62,7 @@ interface Props {
   isDraggable?: boolean;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
+  hostRisk: HostRiskScore;
 }
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
@@ -99,6 +102,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   isDraggable,
   timelineId,
   timelineTabType,
+  hostRisk,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
@@ -151,8 +155,10 @@ const EventDetailsComponent: React.FC<Props> = ({
                     title: i18n.DUCOMENT_SUMMARY,
                   }}
                 />
-                {enrichmentCount > 0 && (
+
+                {(enrichmentCount > 0 || hostRisk) && (
                   <ThreatSummaryView
+                    hostRisk={hostRisk}
                     browserFields={browserFields}
                     data={data}
                     eventId={id}
@@ -179,6 +185,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       enrichmentCount,
       allEnrichments,
       isEnrichmentsLoading,
+      hostRisk,
     ]
   );
 

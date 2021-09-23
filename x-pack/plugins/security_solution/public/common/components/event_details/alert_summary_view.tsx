@@ -324,6 +324,7 @@ const AlertSummaryViewComponent: React.FC<{
 
   return (
     <>
+      <EuiSpacer size="s" />
       <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
       {maybeRule?.note && (
         <>

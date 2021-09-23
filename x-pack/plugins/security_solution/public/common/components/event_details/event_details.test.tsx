@@ -37,6 +37,7 @@ describe('EventDetails', () => {
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
     eventView: EventsViewType.summaryView,
+    hostRisk: { fields: [], loading: true },
   };
 
   const alertsProps = {

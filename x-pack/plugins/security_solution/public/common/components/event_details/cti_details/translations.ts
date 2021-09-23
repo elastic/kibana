@@ -14,17 +14,24 @@ export const PROVIDER_PREPOSITION = i18n.translate(
   }
 );
 
-export const INDICATOR_TOOLTIP_TITLE = i18n.translate(
-  'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTooltipTitle',
+export const INDICATOR_ENRICHMENT_TITLE = i18n.translate(
+  'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTitle',
   {
     defaultMessage: 'Threat Match Detected',
   }
 );
 
-export const INVESTIGATION_TOOLTIP_TITLE = i18n.translate(
-  'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipTitle',
+export const INVESTIGATION_ENRICHMENT_TITLE = i18n.translate(
+  'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTitle',
   {
     defaultMessage: 'Enriched with Threat Intelligence',
+  }
+);
+
+export const HOST_RISK_DATA_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.hostRiskDataTitle',
+  {
+    defaultMessage: 'Host Risk Data',
   }
 );
 
@@ -82,6 +89,13 @@ export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
   }
 );
 
+export const NO_HOST_RISK_DATA_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.alertDetails.noRiskDataDescription',
+  {
+    defaultMessage: 'These is no host risk data found for this alert',
+  }
+);
+
 export const CHECK_DOCS = i18n.translate('xpack.securitySolution.alertDetails.checkDocs', {
   defaultMessage: 'please check out our documentation',
 });
@@ -117,3 +131,10 @@ export const ENRICHMENT_LOOKBACK_END_DATE = i18n.translate(
 export const REFRESH = i18n.translate('xpack.securitySolution.alertDetails.refresh', {
   defaultMessage: 'Refresh',
 });
+
+export const ENRICHED_DATA = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.enrichedDataTitle',
+  {
+    defaultMessage: 'Enriched data',
+  }
+);
