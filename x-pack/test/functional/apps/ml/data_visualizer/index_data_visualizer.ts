@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: false,
           loading: false,
           exampleCount: 1,
-          docCountFormatted: '',
+          docCountFormatted: '0 (0%)',
           viewableInLens: false,
         },
         {
@@ -122,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: false,
           loading: false,
           exampleCount: 1,
-          docCountFormatted: '',
+          docCountFormatted: '0 (0%)',
           viewableInLens: false,
         },
         {
@@ -188,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: false,
           loading: false,
           exampleCount: 1,
-          docCountFormatted: '',
+          docCountFormatted: '0 (0%)',
           viewableInLens: false,
         },
         {
@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: false,
           loading: false,
           exampleCount: 1,
-          docCountFormatted: '',
+          docCountFormatted: '0 (0%)',
           viewableInLens: false,
         },
         {
@@ -284,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: false,
           loading: false,
           exampleCount: 1,
-          docCountFormatted: '',
+          docCountFormatted: '0 (0%)',
           viewableInLens: false,
         },
         {
@@ -314,7 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: false,
           loading: false,
           exampleCount: 1,
-          docCountFormatted: '',
+          docCountFormatted: '0 (0%)',
           viewableInLens: false,
         },
         {
