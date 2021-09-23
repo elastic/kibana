@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import React from 'react';
 
@@ -25,7 +24,7 @@ export function NavigationButton(props: Props) {
       icon={<EuiIcon size="xl" type={iconType} className="discoverLogo__icon" />}
       titleSize="s"
       title={title}
-      onClick={props.onClick}
+      onClick={onClick}
       style={{
         backgroundColor: 'rgba(0, 119, 204, 0.1)',
         color: '#0061a6',

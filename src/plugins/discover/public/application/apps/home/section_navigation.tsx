@@ -59,9 +59,10 @@ export function SectionNavigation(props: Props) {
 
   for (let i = start; i < end; i++) {
     const item = items[i];
-    const grow = (end - start + 1) < itemsPerPage ? false : 3;
+    const grow = end - start < itemsPerPage ? false : 3;
     displayItems.push(<EuiFlexItem grow={grow}>{item}</EuiFlexItem>);
   }
+
   if (end < total) {
     displayItems.push(
       <EuiFlexItem grow={false}>

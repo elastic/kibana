@@ -21,11 +21,9 @@ import { DiscoverServices } from '../../../build_services';
 import { SectionTitle } from './section_title';
 import { SavedSearch } from '../../../saved_searches';
 import { DiscoverView } from './discover_view';
-import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { LastRecentlyAccessedView } from './last_recently_view';
 import { IndexPatternView } from './index_pattern_view';
-import { MoreButton } from './more_button';
-import { SectionNavigation } from "./section_navigation";
+import { SectionNavigation } from './section_navigation';
 
 export interface DiscoverMainProps {
   /**
@@ -38,7 +36,7 @@ export interface DiscoverMainProps {
   services: DiscoverServices;
 }
 
-const DISPLAY_NUMBER_OF_SAVED_SEARCHES = 3;
+const DISPLAY_NUMBER_OF_ITEMS = 3;
 const MAX_NUMBER_OF_SAVED_SEARCHES = 30;
 
 export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
@@ -78,7 +76,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     return (
       <SectionNavigation
         items={savedSearchesToDisplay}
-        itemsPerPage={DISPLAY_NUMBER_OF_SAVED_SEARCHES}
+        itemsPerPage={DISPLAY_NUMBER_OF_ITEMS}
         page={0}
       />
     );
@@ -138,26 +136,30 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
   };
 
   const addNewIndexPattern = (
-    <EuiFlexItem>
-      <EuiCard
-        icon={<EuiIcon size="xxl" type="plusInCircle" />}
-        title={'Add New'}
-        description=""
-        onClick={() => {}}
-      />
-    </EuiFlexItem>
+    <EuiCard
+      icon={<EuiIcon size="xxl" type="plusInCircle" />}
+      title={'Add New'}
+      description=""
+      onClick={() => {}}
+    />
   );
 
   const indexPatternsSection = () => {
-    const displayElements: JSX.Element[] = [];
-    indexPatterns.slice(0, 2).forEach((indexPattern) => {
-      displayElements.push(
-        <EuiFlexItem>
-          <IndexPatternView indexPattern={indexPattern} />
+    const displayElements = indexPatterns.map((indexPattern) => (
+      <IndexPatternView indexPattern={indexPattern} />
+    ));
+    return (
+      <EuiFlexGrid>
+        <EuiFlexItem grow={1} style={{height: '117px'}}>{addNewIndexPattern}</EuiFlexItem>
+        <EuiFlexItem grow={9}>
+          <SectionNavigation
+            items={displayElements}
+            page={0}
+            itemsPerPage={DISPLAY_NUMBER_OF_ITEMS}
+          />
         </EuiFlexItem>
-      );
-    });
-    return displayElements;
+      </EuiFlexGrid>
+    );
   };
 
   const goToDiscover = () => {
@@ -191,10 +193,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <SectionTitle text={'DataViews'} />
-          <EuiFlexGrid columns={3}>
-            {addNewIndexPattern}
-            {indexPatternsSection()}
-          </EuiFlexGrid>
+          {indexPatternsSection()}
         </EuiFlexItem>
       </EuiFlexGrid>
     </EuiPageTemplate>
