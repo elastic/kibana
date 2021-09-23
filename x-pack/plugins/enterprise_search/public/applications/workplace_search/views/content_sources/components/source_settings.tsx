@@ -77,6 +77,7 @@ export const SourceSettings: React.FC = () => {
       custom: isCustom,
       isIndexedSource,
       areThumbnailsConfigEnabled,
+      isOauth1,
       indexing: {
         enabled,
         features: {
@@ -98,10 +99,9 @@ export const SourceSettings: React.FC = () => {
     getSourceConfigData(serviceType);
   }, []);
 
-  const {
-    configuration: { isPublicKey },
-    editPath,
-  } = staticSourceData.find((source) => source.serviceType === serviceType) as SourceDataItem;
+  const { editPath } = staticSourceData.find(
+    (source) => source.serviceType === serviceType
+  ) as SourceDataItem;
 
   const [inputValue, setValue] = useState(name);
   const [confirmModalVisible, setModalVisibility] = useState(false);
@@ -207,10 +207,11 @@ export const SourceSettings: React.FC = () => {
       {showConfig && (
         <ContentSection title={SOURCE_CONFIG_TITLE}>
           <SourceConfigFields
+            isOauth1={isOauth1}
             clientId={clientId}
             clientSecret={clientSecret}
-            publicKey={isPublicKey ? publicKey : undefined}
-            consumerKey={consumerKey || undefined}
+            publicKey={publicKey}
+            consumerKey={consumerKey}
             baseUrl={baseUrl}
           />
           <EuiFormRow>
