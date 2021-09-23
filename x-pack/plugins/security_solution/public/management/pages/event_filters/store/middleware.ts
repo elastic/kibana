@@ -57,7 +57,8 @@ const addNewComments = (
 ): UpdateExceptionListItemSchema | CreateExceptionListItemSchema => {
   if (newComment) {
     if (!entry.comments) entry.comments = [];
-    entry.comments.push({ comment: newComment });
+    const trimmedComment = newComment.trim();
+    if (trimmedComment) entry.comments.push({ comment: trimmedComment });
   }
   return entry;
 };
@@ -231,9 +232,9 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
     dispatch({
       type: 'eventFiltersListPageDataChanged',
       payload: {
-        type: 'LoadingResourceState',
         // Ignore will be fixed with when AsyncResourceState is refactored (#830)
         // @ts-ignore
+        type: 'LoadingResourceState',
         previousState: getCurrentListPageDataState(state),
       },
     });
@@ -348,6 +349,5 @@ export const createEventFiltersPageMiddleware = (
   };
 };
 
-export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> = (
-  coreStart
-) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));
+export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> =
+  (coreStart) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));

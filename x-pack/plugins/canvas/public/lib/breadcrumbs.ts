@@ -6,24 +6,14 @@
  */
 
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
-import { platformService } from '../services';
 
-export const getBaseBreadcrumb = () => ({
+export const getBaseBreadcrumb = (): ChromeBreadcrumb => ({
   text: 'Canvas',
   href: '#/',
 });
 
 export const getWorkpadBreadcrumb = ({
   name = 'Workpad',
-  id,
-}: { name?: string; id?: string } = {}) => {
-  const output: ChromeBreadcrumb = { text: name };
-  if (id != null) {
-    output.href = `#/workpad/${id}`;
-  }
-  return output;
-};
-
-export const setBreadcrumb = (paths: ChromeBreadcrumb | ChromeBreadcrumb[]) => {
-  platformService.getService().setBreadcrumbs(Array.isArray(paths) ? paths : [paths]);
-};
+}: { name?: string } = {}): ChromeBreadcrumb => ({
+  text: name,
+});

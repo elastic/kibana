@@ -24,8 +24,8 @@ export default function ({
 
     before(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.importExport.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -47,10 +47,10 @@ export default function ({
       await PageObjects.discover.clickFieldListItemAdd('agent');
       expect(await getTitles()).to.be('Time (@timestamp) bytes agent');
 
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.discover.clickFieldListItemRemove('bytes');
       expect(await getTitles()).to.be('Time (@timestamp) agent');
 
-      await PageObjects.discover.clickFieldListItemAdd('agent');
+      await PageObjects.discover.clickFieldListItemRemove('agent');
       expect(await getTitles()).to.be('Time (@timestamp) Document');
     });
   });

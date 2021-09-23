@@ -16,6 +16,7 @@ import { HasDataContextValue } from '../../../../context/has_data_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
+import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -28,7 +29,7 @@ jest.mock('react-router-dom', () => ({
 describe('APMSection', () => {
   beforeAll(() => {
     jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
-      hasData: {
+      hasDataMap: {
         apm: {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           hasData: true,
@@ -36,14 +37,14 @@ describe('APMSection', () => {
       },
     } as HasDataContextValue);
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: ({
+      core: {
         uiSettings: { get: jest.fn() },
         http: { basePath: { prepend: jest.fn() } },
-      } as unknown) as CoreStart,
+      } as unknown as CoreStart,
       appMountParameters: {} as AppMountParameters,
-      config: { unsafe: { alertingExperience: { enabled: true } } },
+      config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      plugins: ({
+      plugins: {
         data: {
           query: {
             timefilter: {
@@ -56,7 +57,8 @@ describe('APMSection', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPublicPluginsStart,
+      } as unknown as ObservabilityPublicPluginsStart,
+      ObservabilityPageTemplate: KibanaPageTemplate,
     }));
   });
 

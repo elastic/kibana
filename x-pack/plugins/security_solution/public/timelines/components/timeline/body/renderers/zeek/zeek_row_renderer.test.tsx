@@ -17,6 +17,8 @@ import '../../../../../../common/mock/match_media';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { zeekRowRenderer } from './zeek_row_renderer';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -42,6 +44,7 @@ describe('zeek_row_renderer', () => {
     const children = zeekRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonZeek,
+      isDraggable: true,
       timelineId: 'test',
     });
 
@@ -61,6 +64,7 @@ describe('zeek_row_renderer', () => {
     const children = zeekRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: zeek,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(

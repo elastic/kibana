@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import {
-  KibanaRequest,
-  PluginConfigDescriptor,
-  PluginInitializerContext,
-  RequestHandlerContext,
-} from 'kibana/server';
-import { CasesClient } from './client';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
 export { CasesClient } from './client';
 import { ConfigType, ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
-export { CaseRequestContext } from './types';
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
-  deprecations: ({ renameFromRoot }) => [
+  exposeToBrowser: {
+    markdownPlugins: true,
+  },
+  deprecations: ({ deprecate, renameFromRoot }) => [
+    deprecate('enabled', '8.0.0'),
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);
 
-export interface PluginStartContract {
-  getCasesClientWithRequestAndContext(
-    context: RequestHandlerContext,
-    request: KibanaRequest
-  ): CasesClient;
-}
+export { PluginStartContract } from './plugin';

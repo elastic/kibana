@@ -7,11 +7,11 @@
  */
 
 import { sortBy } from 'lodash';
-import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { InternalApplicationStart } from '../../application';
-import { HttpStart } from '../../http';
+import { InternalApplicationStart, PublicAppDeepLinkInfo, PublicAppInfo } from '../../application';
+import { HttpStart, IBasePath } from '../../http';
 import { ChromeNavLink, NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 
@@ -49,16 +49,6 @@ export interface ChromeNavLinks {
   has(id: string): boolean;
 
   /**
-   * Remove all navlinks except the one matching the given id.
-   *
-   * @remarks
-   * NOTE: this is not reversible.
-   *
-   * @param id
-   */
-  showOnly(id: string): void;
-
-  /**
    * Enable forced navigation mode, which will trigger a page refresh
    * when a nav link is clicked and only the hash is updated.
    *
@@ -78,33 +68,25 @@ export interface ChromeNavLinks {
   getForceAppSwitcherNavigation$(): Observable<boolean>;
 }
 
-type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLinkWrapper>;
-
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
-    const appLinks$ = application.applications$.pipe(
-      map((apps) => {
-        return new Map(
-          [...apps]
-            .filter(([, app]) => !app.chromeless)
-            .map(([appId, app]) => [appId, toNavLink(app, http.basePath)])
-        );
-      })
-    );
-
-    // now that availableApps$ is an observable, we need to keep record of all
-    // manual link modifications to be able to re-apply then after every
-    // availableApps$ changes.
-    // Only in use by `showOnly` API, can be removed once dashboard_mode is removed in 8.0
-    const linkUpdaters$ = new BehaviorSubject<LinksUpdater[]>([]);
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
-
-    combineLatest([appLinks$, linkUpdaters$])
+    application.applications$
       .pipe(
-        map(([appLinks, linkUpdaters]) => {
-          return linkUpdaters.reduce((links, updater) => updater(links), appLinks);
+        map((apps) => {
+          return new Map(
+            [...apps]
+              .filter(([, app]) => !app.chromeless)
+              .reduce((navLinks: Array<[string, NavLinkWrapper]>, [appId, app]) => {
+                navLinks.push(
+                  [appId, toNavLink(app, http.basePath)],
+                  ...toNavDeepLinks(app, app.deepLinks, http.basePath)
+                );
+                return navLinks;
+              }, [])
+          );
         })
       )
       .subscribe((navlinks) => {
@@ -131,17 +113,6 @@ export class NavLinksService {
         return navLinks$.value.has(id);
       },
 
-      showOnly(id: string) {
-        if (!this.has(id)) {
-          return;
-        }
-
-        const updater: LinksUpdater = (navLinks) =>
-          new Map([...navLinks.entries()].filter(([linkId]) => linkId === id));
-
-        linkUpdaters$.next([...linkUpdaters$.value, updater]);
-      },
-
       enableForcedAppSwitcherNavigation() {
         forceAppSwitcherNavigation$.next(true);
       },
@@ -162,4 +133,22 @@ function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
     [...navLinks.values()].map((link) => link.properties),
     'order'
   );
+}
+
+function toNavDeepLinks(
+  app: PublicAppInfo,
+  deepLinks: PublicAppDeepLinkInfo[],
+  basePath: IBasePath
+): Array<[string, NavLinkWrapper]> {
+  if (!deepLinks) {
+    return [];
+  }
+  return deepLinks.reduce((navDeepLinks: Array<[string, NavLinkWrapper]>, deepLink) => {
+    const id = `${app.id}:${deepLink.id}`;
+    if (deepLink.path) {
+      navDeepLinks.push([id, toNavLink(app, basePath, { ...deepLink, id })]);
+    }
+    navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, basePath));
+    return navDeepLinks;
+  }, []);
 }

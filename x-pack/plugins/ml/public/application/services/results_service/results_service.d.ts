@@ -13,16 +13,16 @@ import { EntityField } from '../../../../common/util/anomaly_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
 
 type RecordForInfluencer = AnomalyRecordDoc;
-export function resultsServiceProvider(
-  mlApiServices: MlApiServices
-): {
+export function resultsServiceProvider(mlApiServices: MlApiServices): {
   getScoresByBucket(
     jobIds: string[],
     earliestMs: number,
     latestMs: number,
     intervalMs: number,
     perPage?: number,
-    fromPage?: number
+    fromPage?: number,
+    swimLaneSeverity?: number,
+    influencersFilterQuery?: InfluencersFilterQuery
   ): Promise<any>;
   getTopInfluencers(
     selectedJobIds: string[],
@@ -31,7 +31,7 @@ export function resultsServiceProvider(
     maxFieldValues: number,
     perPage?: number,
     fromPage?: number,
-    influencers?: any[],
+    influencers?: EntityField[],
     influencersFilterQuery?: InfluencersFilterQuery
   ): Promise<any>;
   getTopInfluencerValues(): Promise<any>;
@@ -40,7 +40,8 @@ export function resultsServiceProvider(
     topN: any,
     earliestMs: any,
     latestMs: any,
-    interval?: any
+    interval?: any,
+    overallScore?: number
   ): Promise<any>;
   getInfluencerValueMaxScoreByTime(
     jobIds: string[],
@@ -52,7 +53,8 @@ export function resultsServiceProvider(
     maxResults: number,
     perPage: number,
     fromPage: number,
-    influencersFilterQuery: InfluencersFilterQuery
+    influencersFilterQuery: InfluencersFilterQuery,
+    swimLaneSeverity?: number
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
   getRecordsForDetector(): Promise<any>;

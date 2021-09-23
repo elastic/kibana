@@ -7,9 +7,14 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import apmIndexPattern from './tutorial/index_pattern.json';
-import { PluginInitializerContext } from '../../../core/server';
+import { ConfigDeprecationProvider, PluginInitializerContext } from '../../../core/server';
 import { APMOSSPlugin } from './plugin';
+
+const deprecations: ConfigDeprecationProvider = ({ deprecate, unused }) => [
+  deprecate('enabled', '8.0.0'),
+  unused('fleetMode'),
+  unused('indexPattern'),
+];
 
 export const config = {
   schema: schema.object({
@@ -23,6 +28,7 @@ export const config = {
     indexPattern: schema.string({ defaultValue: 'apm-*' }),
     fleetMode: schema.boolean({ defaultValue: true }),
   }),
+  deprecations,
 };
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -32,20 +38,3 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type APMOSSConfig = TypeOf<typeof config.schema>;
 
 export { APMOSSPluginSetup } from './plugin';
-
-export { apmIndexPattern };
-
-export { APM_STATIC_INDEX_PATTERN_ID } from '../common/index_pattern_constants';
-
-export {
-  createNodeAgentInstructions,
-  createDjangoAgentInstructions,
-  createFlaskAgentInstructions,
-  createRailsAgentInstructions,
-  createRackAgentInstructions,
-  createJsAgentInstructions,
-  createGoAgentInstructions,
-  createJavaAgentInstructions,
-  createDotNetAgentInstructions,
-  createPhpAgentInstructions,
-} from './tutorial/instructions/apm_agent_instructions';

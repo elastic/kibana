@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { exportTimeline, waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { expectedExportedTimeline, timeline } from '../../objects/timeline';
+import { expectedExportedTimeline, getTimeline } from '../../objects/timeline';
 import { cleanKibana } from '../../tasks/common';
 
 describe('Export timelines', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
-    createTimeline(timeline).then((response) => {
+    createTimeline(getTimeline()).then((response) => {
       cy.wrap(response).as('timelineResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
     });
@@ -30,7 +31,9 @@ describe('Export timelines', () => {
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response!.statusCode).should('eql', 200);
-      cy.wrap(response!.body).should('eql', expectedExportedTimeline(this.timelineResponse));
+      const parsedExport = JSON.parse(_.trimEnd(response!.body, '\n'));
+
+      cy.wrap(parsedExport).should('eql', expectedExportedTimeline(this.timelineResponse));
     });
   });
 });

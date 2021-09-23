@@ -94,10 +94,10 @@ export function MachineLearningAlertingProvider(
       await this.assertPreviewCalloutVisible();
     },
 
-    async checkPreview(expectedMessage: string) {
+    async checkPreview(expectedMessagePattern: RegExp) {
       await this.clickPreviewButton();
       const previewMessage = await testSubjects.getVisibleText('mlAnomalyAlertPreviewMessage');
-      expect(previewMessage).to.eql(expectedMessage);
+      expect(previewMessage).to.match(expectedMessagePattern);
     },
 
     async assertPreviewCalloutVisible() {

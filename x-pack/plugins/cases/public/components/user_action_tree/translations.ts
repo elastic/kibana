@@ -49,24 +49,24 @@ export const GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE = (totalCount: number) =>
     defaultMessage: `{totalCount} {totalCount, plural, =1 {alert} other {alerts}}`,
   });
 
-export const ALERT_RULE_DELETED_COMMENT_LABEL = i18n.translate(
-  'xpack.cases.caseView.alertRuleDeletedLabelTitle',
-  {
-    defaultMessage: 'added an alert',
-  }
-);
-
 export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlertTooltip', {
   defaultMessage: 'Show alert details',
 });
 
-export const SEND_ALERT_TO_TIMELINE = i18n.translate(
-  'xpack.cases.caseView.sendAlertToTimelineTooltip',
-  {
-    defaultMessage: 'Investigate in timeline',
-  }
-);
-
 export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.label', {
   defaultMessage: 'Unknown rule',
 });
+
+export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
+  defaultMessage: 'submitted isolate request on host',
+});
+
+export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
+  defaultMessage: 'submitted release request on host',
+});
+
+export const OTHER_ENDPOINTS = (endpoints: number): string =>
+  i18n.translate('xpack.cases.caseView.otherEndpoints', {
+    values: { endpoints },
+    defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
+  });

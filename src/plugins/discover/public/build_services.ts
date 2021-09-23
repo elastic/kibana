@@ -8,7 +8,6 @@
 
 import { History } from 'history';
 
-import type { auto } from 'angular';
 import {
   Capabilities,
   ChromeStart,
@@ -17,6 +16,7 @@ import {
   ToastsStart,
   IUiSettingsClient,
   PluginInitializerContext,
+  HttpStart,
 } from 'kibana/public';
 import {
   FilterManager,
@@ -56,20 +56,19 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id: string) => Promise<SavedSearch>;
+  getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  getEmbeddableInjector: () => Promise<auto.IInjectorService>;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  http: HttpStart;
 }
 
-export async function buildServices(
+export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext,
-  getEmbeddableInjector: () => Promise<auto.IInjectorService>
-): Promise<DiscoverServices> {
+  context: PluginInitializerContext
+): DiscoverServices {
   const services = {
     savedObjectsClient: core.savedObjects.client,
     savedObjects: plugins.savedObjects,
@@ -86,8 +85,7 @@ export async function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
-    getEmbeddableInjector,
-    getSavedSearchById: async (id: string) => savedObjectService.get(id),
+    getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
@@ -104,5 +102,6 @@ export async function buildServices(
     uiSettings: core.uiSettings,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    http: core.http,
   };
 }

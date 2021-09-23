@@ -11,11 +11,14 @@ import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { setSuccessMessage } from '../../../../../shared/flash_messages';
+import { flashSuccessToast } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import { Loading } from '../../../../../shared/loading';
 import { AppLogic } from '../../../../app_logic';
-import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 import { staticSourceData } from '../../source_data';
@@ -54,15 +57,9 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     newCustomSource,
   } = useValues(AddSourceLogic);
 
-  const {
-    serviceType,
-    configuration,
-    features,
-    objTypes,
-    sourceDescription,
-    connectStepDescription,
-    addPath,
-  } = staticSourceData[props.sourceIndex] as SourceDataItem;
+  const { serviceType, configuration, features, objTypes, addPath } = staticSourceData[
+    props.sourceIndex
+  ] as SourceDataItem;
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -70,8 +67,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     initializeAddSource(props);
     return resetSourceState;
   }, []);
-
-  if (dataLoading) return <Loading />;
 
   const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
@@ -95,13 +90,14 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
 
   const goToFormSourceCreated = () => {
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(SOURCES_PATH, isOrganization)}`);
-    setSuccessMessage(FORM_SOURCE_ADDED_SUCCESS_MESSAGE);
+    flashSuccessToast(FORM_SOURCE_ADDED_SUCCESS_MESSAGE);
   };
 
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
+  const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
       )}
@@ -130,8 +126,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
           configuration={configuration}
           features={features}
           objTypes={objTypes}
-          sourceDescription={sourceDescription}
-          connectStepDescription={connectStepDescription}
           needsPermissions={!!needsPermissions}
           onFormCreated={goToFormSourceCreated}
           header={header}
@@ -158,6 +152,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       {addSourceCurrentStep === AddSourceSteps.ReauthenticateStep && (
         <Reauthenticate name={name} header={header} />
       )}
-    </>
+    </Layout>
   );
 };

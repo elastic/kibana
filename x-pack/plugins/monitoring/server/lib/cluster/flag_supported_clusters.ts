@@ -30,8 +30,8 @@ async function findSupportedBasicLicenseCluster(
   const kibanaDataResult: ElasticsearchResponse = (await callWithRequest(req, 'search', {
     index: kbnIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.cluster_uuid', 'hits.hits._source.cluster.id'],
+    ignore_unavailable: true,
+    filter_path: ['hits.hits._source.cluster_uuid', 'hits.hits._source.cluster.id'],
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: {

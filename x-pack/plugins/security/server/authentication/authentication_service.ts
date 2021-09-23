@@ -41,7 +41,7 @@ interface AuthenticationServiceSetupParams {
 }
 
 interface AuthenticationServiceStartParams {
-  http: Pick<HttpServiceStart, 'auth' | 'basePath'>;
+  http: Pick<HttpServiceStart, 'auth' | 'basePath' | 'getServerInfo'>;
   config: ConfigType;
   clusterClient: IClusterClient;
   legacyAuditLogger: SecurityAuditLogger;
@@ -51,7 +51,7 @@ interface AuthenticationServiceStartParams {
   loggers: LoggerFactory;
 }
 
-export interface AuthenticationServiceStart {
+export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
   apiKeys: Pick<
     APIKeys,
     | 'areAPIKeysEnabled'
@@ -63,6 +63,21 @@ export interface AuthenticationServiceStart {
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+}
+
+/**
+ * Authentication services available on the security plugin's start contract.
+ */
+export interface AuthenticationServiceStart {
+  apiKeys: Pick<
+    APIKeys,
+    | 'areAPIKeysEnabled'
+    | 'create'
+    | 'invalidate'
+    | 'grantAsInternalUser'
+    | 'invalidateAsInternalUser'
+  >;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
@@ -212,12 +227,23 @@ export class AuthenticationService {
     legacyAuditLogger,
     loggers,
     session,
-  }: AuthenticationServiceStartParams): AuthenticationServiceStart {
+  }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
     });
+
+    /**
+     * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
+     * to construct a server base URL (deprecated, used by the SAML provider only).
+     */
+    const getServerBaseURL = () => {
+      const { protocol, hostname, port } = http.getServerInfo();
+      const serverConfig = { protocol, hostname, port, ...config.public };
+
+      return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
+    };
 
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
@@ -232,6 +258,7 @@ export class AuthenticationService {
       config: { authc: config.authc },
       getCurrentUser,
       featureUsageService,
+      getServerBaseURL,
       license: this.license,
       session,
     });

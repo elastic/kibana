@@ -53,11 +53,9 @@ export default function ({ getPageObjects, getService }) {
 
       it('should create filters when create filter button is clicked', async () => {
         await testSubjects.click('mapTooltipCreateFilterButton');
-        await testSubjects.click('applyFiltersPopoverButton');
 
-        // TODO: Fix me #64861
-        // const hasSourceFilter = await filterBar.hasFilter('name', 'charlie');
-        // expect(hasSourceFilter).to.be(true);
+        const numFilters = await filterBar.getFilterCount();
+        expect(numFilters).to.be(1);
 
         const hasJoinFilter = await filterBar.hasFilter('runtime_shape_name', 'charlie');
         expect(hasJoinFilter).to.be(true);

@@ -14,7 +14,7 @@ import * as beatsMetrics from '../../../../../plugins/monitoring/server/lib/metr
 import * as apmMetrics from '../../../../../plugins/monitoring/server/lib/metrics/apm/metrics';
 
 export default function ({ getService }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const metricSets = [
     {
@@ -49,7 +49,7 @@ export default function ({ getService }) {
       let mappings;
 
       before('load mappings', async () => {
-        const template = await es.indices.getTemplate({ name: indexTemplate });
+        const { body: template } = await es.indices.getTemplate({ name: indexTemplate });
         mappings = get(template, [indexTemplate, 'mappings', 'properties']);
       });
 

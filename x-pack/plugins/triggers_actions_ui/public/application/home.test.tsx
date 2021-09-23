@@ -37,7 +37,7 @@ describe('home', () => {
     const documentationLink = wrapper.find('[data-test-subj="documentationLink"]');
     expect(documentationLink.exists()).toBeTruthy();
     expect(documentationLink.first().prop('href')).toEqual(
-      'https://www.elastic.co/guide/en/kibana/mocked-test-branch/alert-management.html'
+      'https://www.elastic.co/guide/en/kibana/mocked-test-branch/create-and-manage-rules.html'
     );
   });
 });

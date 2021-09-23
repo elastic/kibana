@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('date_nanos_mixed', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('date_nanos_mixed');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos_mixed');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
       await PageObjects.common.navigateToApp('discover');
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      esArchiver.unload('date_nanos_mixed');
+      esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_mixed');
     });
 
     it('shows a list of records of indices with date & date_nanos fields in the right order', async function () {

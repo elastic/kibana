@@ -185,6 +185,45 @@ describe('BasePathProxyServer', () => {
       });
   });
 
+  test('forwards request cancellation', async () => {
+    let propagated = false;
+
+    let notifyRequestReceived: () => void;
+    const requestReceived = new Promise<void>((resolve) => {
+      notifyRequestReceived = resolve;
+    });
+
+    let notifyRequestAborted: () => void;
+    const requestAborted = new Promise<void>((resolve) => {
+      notifyRequestAborted = resolve;
+    });
+
+    server.route({
+      method: 'GET',
+      path: `${basePath}/foo/{test}`,
+      handler: async (request, h) => {
+        notifyRequestReceived();
+
+        request.raw.req.once('aborted', () => {
+          notifyRequestAborted();
+          propagated = true;
+        });
+        return await new Promise((resolve) => undefined);
+      },
+    });
+    await server.start();
+
+    const request = proxySupertest.get(`${basePath}/foo/some-string`).end();
+
+    await requestReceived;
+
+    request.abort();
+
+    await requestAborted;
+
+    expect(propagated).toEqual(true);
+  });
+
   test('handles putting', async () => {
     server.route({
       method: 'PUT',

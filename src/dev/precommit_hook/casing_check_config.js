@@ -23,8 +23,6 @@ export const IGNORE_FILE_GLOBS = [
   '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
-  '**/Gruntfile.js',
-  'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
@@ -40,6 +38,9 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
+  'packages/kbn-test/jest_integration/jest-preset.js',
+  'test/package/Vagrantfile',
+  '**/test/**/fixtures/**/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -57,15 +58,15 @@ export const IGNORE_FILE_GLOBS = [
   // TODO fix file names in APM to remove these
   'x-pack/plugins/apm/public/**/*',
   'x-pack/plugins/apm/scripts/**/*',
-  'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
-  // packages for the ingest manager's api integration tests could be valid semver which has dashes
-  'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
   '**/BUILD.bazel',
+
+  // Buildkite
+  '.buildkite/**/*',
 ];
 
 /**
@@ -94,8 +95,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'src/legacy/ui/public/flot-charts',
-  'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',

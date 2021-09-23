@@ -14,6 +14,11 @@ import { getAsset, getPathParts } from '../../archive';
 import type { ArchiveEntry } from '../../archive';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
+import {
+  FLEET_FINAL_PIPELINE_CONTENT,
+  FLEET_FINAL_PIPELINE_ID,
+  FLEET_FINAL_PIPELINE_VERSION,
+} from '../../../../constants';
 
 import { deletePipelineRefs } from './remove';
 
@@ -183,6 +188,35 @@ async function installPipeline({
   await esClient.ingest.putPipeline(esClientParams, esClientRequestOptions);
 
   return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
+}
+
+export async function ensureFleetFinalPipelineIsInstalled(esClient: ElasticsearchClient) {
+  const esClientRequestOptions: TransportRequestOptions = {
+    ignore: [404],
+  };
+  const res = await esClient.ingest.getPipeline(
+    { id: FLEET_FINAL_PIPELINE_ID },
+    esClientRequestOptions
+  );
+
+  const installedVersion = res?.body[FLEET_FINAL_PIPELINE_ID]?.version;
+  if (
+    res.statusCode === 404 ||
+    !installedVersion ||
+    installedVersion < FLEET_FINAL_PIPELINE_VERSION
+  ) {
+    await installPipeline({
+      esClient,
+      pipeline: {
+        nameForInstallation: FLEET_FINAL_PIPELINE_ID,
+        contentForInstallation: FLEET_FINAL_PIPELINE_CONTENT,
+        extension: 'yml',
+      },
+    });
+    return { isCreated: true };
+  }
+
+  return { isCreated: false };
 }
 
 const isDirectory = ({ path }: ArchiveEntry) => path.endsWith('/');

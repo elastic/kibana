@@ -6,79 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function TimelionPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
-  const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'header']);
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+export class TimelionPageObject extends FtrService {
+  private readonly testSubjects = this.ctx.getService('testSubjects');
 
-  class TimelionPage {
-    public async initTests() {
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-      });
-
-      log.debug('load kibana index');
-      await esArchiver.load('timelion');
-
-      await PageObjects.common.navigateToApp('timelion');
-    }
-
-    public async setExpression(expression: string) {
-      const input = await testSubjects.find('timelionExpressionTextArea');
-      await input.clearValue();
-      await input.type(expression);
-    }
-
-    public async updateExpression(updates: string) {
-      const input = await testSubjects.find('timelionExpressionTextArea');
-      await input.type(updates);
-      await PageObjects.common.sleep(1000);
-    }
-
-    public async getExpression() {
-      const input = await testSubjects.find('timelionExpressionTextArea');
-      return input.getVisibleText();
-    }
-
-    public async getSuggestionItemsText() {
-      const elements = await testSubjects.findAll('timelionSuggestionListItem');
-      return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
-    }
-
-    public async clickSuggestion(suggestionIndex = 0, waitTime = 1000) {
-      const elements = await testSubjects.findAll('timelionSuggestionListItem');
-      if (suggestionIndex > elements.length) {
-        throw new Error(
-          `Unable to select suggestion ${suggestionIndex}, only ${elements.length} suggestions available.`
-        );
-      }
-      await elements[suggestionIndex].click();
-      // Wait for timelion expression to be updated after clicking suggestions
-      await PageObjects.common.sleep(waitTime);
-    }
-
-    public async saveTimelionSheet() {
-      await testSubjects.click('timelionSaveButton');
-      await testSubjects.click('timelionSaveAsSheetButton');
-      await testSubjects.click('timelionFinishSaveButton');
-      await testSubjects.existOrFail('timelionSaveSuccessToast');
-      await testSubjects.waitForDeleted('timelionSaveSuccessToast');
-    }
-
-    public async expectWriteControls() {
-      await testSubjects.existOrFail('timelionSaveButton');
-      await testSubjects.existOrFail('timelionDeleteButton');
-    }
-
-    public async expectMissingWriteControls() {
-      await testSubjects.missingOrFail('timelionSaveButton');
-      await testSubjects.missingOrFail('timelionDeleteButton');
-    }
+  public async getSuggestionItemsText() {
+    const timelionCodeEditor = await this.testSubjects.find('timelionCodeEditor');
+    const lists = await timelionCodeEditor.findAllByClassName('monaco-list-row');
+    return await Promise.all(lists.map(async (element) => await element.getVisibleText()));
   }
 
-  return new TimelionPage();
+  public async clickSuggestion(suggestionIndex = 0) {
+    const timelionCodeEditor = await this.testSubjects.find('timelionCodeEditor');
+    const lists = await timelionCodeEditor.findAllByCssSelector('.monaco-list-row');
+    if (suggestionIndex > lists.length) {
+      throw new Error(
+        `Unable to select suggestion ${suggestionIndex}, only ${lists.length} suggestions available.`
+      );
+    }
+    await lists[suggestionIndex].click();
+  }
 }

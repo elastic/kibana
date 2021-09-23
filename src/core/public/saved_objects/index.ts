@@ -20,6 +20,7 @@ export type {
   SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
+export type { ResolvedSimpleSavedObject } from './types';
 export type { SavedObjectsStart } from './saved_objects_service';
 export type {
   SavedObjectsBaseOptions,
@@ -41,7 +42,10 @@ export type {
   SavedObjectsImportWarning,
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from '../../server/types';
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsResolveResponse,
+} from '../../server';
 
 export type {
   SavedObject,

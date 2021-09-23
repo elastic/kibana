@@ -12,7 +12,7 @@
   "license": "Elastic License v2",
   "name": "User Added as Owner for Azure Service Principal",
   "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Add owner to service principal\" and event.outcome:(Success or success)",
+  "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Add owner to service principal\" and event.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals"
   ],

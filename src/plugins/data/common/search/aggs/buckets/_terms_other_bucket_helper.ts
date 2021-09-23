@@ -8,7 +8,7 @@
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
-import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '../../../../common';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
 import { IBucketAggConfig } from './bucket_agg_type';
@@ -129,7 +129,9 @@ export const buildOtherBucketAgg = (
   aggWithOtherBucket: IBucketAggConfig,
   response: any
 ) => {
-  const bucketAggs = aggConfigs.aggs.filter((agg) => agg.type.type === AggGroupNames.Buckets);
+  const bucketAggs = aggConfigs.aggs.filter(
+    (agg) => agg.type.type === AggGroupNames.Buckets && agg.enabled
+  );
   const index = bucketAggs.findIndex((agg) => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.aggConfigs.indexPattern;
@@ -156,6 +158,7 @@ export const buildOtherBucketAgg = (
   };
 
   let noAggBucketResults = false;
+  let exhaustiveBuckets = true;
 
   // recursively create filters for all parent aggregation buckets
   const walkBucketTree = (
@@ -166,7 +169,7 @@ export const buildOtherBucketAgg = (
     key: string
   ) => {
     // make sure there are actually results for the buckets
-    if (aggregations[aggId].buckets.length < 1) {
+    if (aggregations[aggId]?.buckets.length < 1) {
       noAggBucketResults = true;
       return;
     }
@@ -175,6 +178,9 @@ export const buildOtherBucketAgg = (
     const newAggIndex = aggIndex + 1;
     const newAgg = bucketAggs[newAggIndex];
     const currentAgg = bucketAggs[aggIndex];
+    if (aggIndex === index && agg && agg.sum_other_doc_count > 0) {
+      exhaustiveBuckets = false;
+    }
     if (aggIndex < index) {
       each(agg.buckets, (bucket: any, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(
@@ -223,7 +229,7 @@ export const buildOtherBucketAgg = (
   walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
 
   // bail if there were no bucket results
-  if (noAggBucketResults) {
+  if (noAggBucketResults || exhaustiveBuckets) {
     return false;
   }
 

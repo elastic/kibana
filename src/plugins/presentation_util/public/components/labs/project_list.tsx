@@ -22,7 +22,20 @@ export interface Props {
   onStatusChange: ProjectListItemProps['onStatusChange'];
 }
 
-const EmptyList = () => <EuiCallOut title={strings.getNoProjectsMessage()} />;
+const EmptyList = ({ solutions }: { solutions?: SolutionName[] }) => {
+  let title = strings.getNoProjectsMessage();
+
+  if (solutions?.length === 1) {
+    const solution = solutions[0];
+    switch (solution) {
+      case 'dashboard':
+        title = strings.getNoProjectsInSolutionMessage('Dashboard');
+      case 'canvas':
+        title = strings.getNoProjectsInSolutionMessage('Canvas');
+    }
+  }
+  return <EuiCallOut title={title} />;
+};
 
 export const ProjectList = (props: Props) => {
   const { solutions, projects, onStatusChange } = props;
@@ -48,7 +61,7 @@ export const ProjectList = (props: Props) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-      {items.length > 0 ? <ul>{items}</ul> : <EmptyList />}
+      {items.length > 0 ? <ul>{items}</ul> : <EmptyList solutions={solutions} />}
     </EuiFlexGroup>
   );
 };

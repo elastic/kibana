@@ -6,7 +6,8 @@
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import {
   TRANSACTION_DURATION,
@@ -18,7 +19,7 @@ export async function getUrlSearch({
   urlQuery,
   percentile,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   urlQuery?: string;
   percentile: number;
 }) {
@@ -56,7 +57,7 @@ export async function getUrlSearch({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_url_search', params);
   const { urls, totalUrls } = response.aggregations ?? {};
 
   const pkey = percentile.toFixed(1);

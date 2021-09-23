@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { Dispatch, useMemo, useReducer, useEffect, useRef } from 'react';
-import { EuiBasicTable } from '@elastic/eui';
-
+import { Dispatch, useReducer, useEffect, useRef } from 'react';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
-
 import { fetchRules } from '../api';
-import { createRulesTableReducer, RulesTableState, RulesTableAction } from './rules_table_reducer';
+import { rulesTableReducer, RulesTableState, RulesTableAction } from './rules_table_reducer';
 import { createRulesTableFacade, RulesTableFacade } from './rules_table_facade';
 
 const INITIAL_SORT_FIELD = 'enabled';
@@ -35,15 +32,14 @@ const initialStateDefaults: RulesTableState = {
   loadingRulesAction: null,
   loadingRuleIds: [],
   selectedRuleIds: [],
-  exportRuleIds: [],
   lastUpdated: 0,
   isRefreshOn: true,
   isRefreshing: false,
+  isAllSelected: false,
   showIdleModal: false,
 };
 
 export interface UseRulesTableParams {
-  tableRef: React.MutableRefObject<EuiBasicTable<unknown> | null>;
   initialStateOverride?: Partial<RulesTableState>;
 }
 
@@ -54,7 +50,7 @@ export interface UseRulesTableReturn extends RulesTableFacade {
 }
 
 export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn => {
-  const { tableRef, initialStateOverride } = params;
+  const { initialStateOverride } = params;
 
   const initialState: RulesTableState = {
     ...initialStateDefaults,
@@ -62,8 +58,7 @@ export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn 
     ...initialStateOverride,
   };
 
-  const reducer = useMemo(() => createRulesTableReducer(tableRef), [tableRef]);
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(rulesTableReducer, initialState);
   const facade = useRef(createRulesTableFacade(dispatch));
   const { addError } = useAppToasts();
 

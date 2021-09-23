@@ -6,10 +6,10 @@
  */
 
 import { existsSync } from 'fs';
+import del from 'del';
 import { BrowserDownload, chromium } from '../';
 import { GenericLevelLogger } from '../../lib/level_logger';
 import { md5 } from './checksum';
-import { clean } from './clean';
 import { download } from './download';
 
 /**
@@ -31,7 +31,12 @@ export async function ensureBrowserDownloaded(logger: GenericLevelLogger) {
 async function ensureDownloaded(browsers: BrowserDownload[], logger: GenericLevelLogger) {
   await Promise.all(
     browsers.map(async ({ paths: pSet }) => {
-      await clean(pSet.archivesPath, pSet.getAllArchiveFilenames(), logger);
+      (
+        await del(`${pSet.archivesPath}/**/*`, {
+          force: true,
+          ignore: pSet.getAllArchiveFilenames(),
+        })
+      ).forEach((path) => logger.warning(`Deleting unexpected file ${path}`));
 
       const invalidChecksums: string[] = [];
       await Promise.all(

@@ -12,6 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { AddToCaseButton } from '.';
+import { SecurityPageName } from '../../../../../common/constants';
 
 jest.mock('../../../../common/components/link_to', () => {
   const original = jest.requireActual('../../../../common/components/link_to');
@@ -61,7 +62,10 @@ describe('AddToCaseButton', () => {
     wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
 
-    expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/create' });
+    expect(navigateToApp).toHaveBeenCalledWith('securitySolution', {
+      path: '/create',
+      deepLinkId: SecurityPageName.case,
+    });
   });
 
   it('navigates to the correct path with id', async () => {
@@ -80,6 +84,9 @@ describe('AddToCaseButton', () => {
     wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
 
-    expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/case-id' });
+    expect(navigateToApp).toHaveBeenCalledWith('securitySolution', {
+      path: '/case-id',
+      deepLinkId: SecurityPageName.case,
+    });
   });
 });

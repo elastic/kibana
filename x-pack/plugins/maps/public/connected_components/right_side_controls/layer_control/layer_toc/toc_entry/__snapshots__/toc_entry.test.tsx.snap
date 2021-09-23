@@ -11,7 +11,7 @@ exports[`TOCEntry is rendered 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
+      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -24,9 +24,11 @@ exports[`TOCEntry is rendered 1`] = `
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
-      supportsFitToBounds={false}
+      openLayerSettings={[Function]}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -39,12 +41,19 @@ exports[`TOCEntry is rendered 1`] = `
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Edit layer"
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
+      />
+      <EuiButtonIcon
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
-        key="edit"
+        key="settings"
         onClick={[Function]}
-        title="Edit layer"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
@@ -85,7 +94,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
+      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -98,9 +107,11 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
-      supportsFitToBounds={false}
+      openLayerSettings={[Function]}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -113,12 +124,19 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Edit layer"
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
+      />
+      <EuiButtonIcon
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
-        key="edit"
+        key="settings"
         onClick={[Function]}
-        title="Edit layer"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
@@ -159,7 +177,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
+      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -172,9 +190,11 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
-      supportsFitToBounds={false}
+      openLayerSettings={[Function]}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -187,12 +207,19 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Edit layer"
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
+      />
+      <EuiButtonIcon
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
-        key="edit"
+        key="settings"
         onClick={[Function]}
-        title="Edit layer"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
@@ -233,7 +260,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
+      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -246,9 +273,11 @@ exports[`TOCEntry props isReadOnly 1`] = `
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
-      supportsFitToBounds={false}
+      openLayerSettings={[Function]}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -259,6 +288,13 @@ exports[`TOCEntry props isReadOnly 1`] = `
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
+      />
+      <EuiButtonIcon
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
       />
     </div>
   </div>
@@ -292,7 +328,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editLayer={[Function]}
+      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -305,9 +341,11 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
-      supportsFitToBounds={false}
+      openLayerSettings={[Function]}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -320,12 +358,19 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
         title="Hide layer"
       />
       <EuiButtonIcon
-        aria-label="Edit layer"
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
+      />
+      <EuiButtonIcon
+        aria-label="Edit layer settings"
         iconType="pencil"
         isDisabled={false}
-        key="edit"
+        key="settings"
         onClick={[Function]}
-        title="Edit layer"
+        title="Edit layer settings"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"

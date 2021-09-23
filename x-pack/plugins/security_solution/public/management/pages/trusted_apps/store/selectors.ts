@@ -7,7 +7,12 @@
 
 import { createSelector } from 'reselect';
 import { ServerApiError } from '../../../../common/types';
-import { Immutable, NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
+import {
+  Immutable,
+  NewTrustedApp,
+  PolicyData,
+  TrustedApp,
+} from '../../../../../common/endpoint/types';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 
 import {
@@ -30,16 +35,17 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
   const freshDataTimestamp = state.listView.freshDataTimestamp;
   const currentPage = state.listView.listResourceState;
   const location = state.location;
+  const forceRefresh = state.forceRefresh;
   return (
     Boolean(state.active) &&
-    isOutdatedResourceState(currentPage, (data) => {
-      return (
-        data.pageIndex === location.page_index &&
-        data.pageSize === location.page_size &&
-        data.timestamp >= freshDataTimestamp &&
-        data.filter === location.filter
-      );
-    })
+    (forceRefresh ||
+      isOutdatedResourceState(currentPage, (data) => {
+        return (
+          data.pageIndex === location.page_index &&
+          data.pageSize === location.page_size &&
+          data.timestamp >= freshDataTimestamp
+        );
+      }))
   );
 };
 
@@ -71,6 +77,18 @@ export const getCurrentLocationPageSize = (state: Immutable<TrustedAppsListPageS
 
 export const getCurrentLocationFilter = (state: Immutable<TrustedAppsListPageState>): string => {
   return state.location.filter;
+};
+
+export const getCurrentLocationIncludedPolicies = (
+  state: Immutable<TrustedAppsListPageState>
+): string => {
+  return state.location.included_policies;
+};
+
+export const getCurrentLocationExcludedPolicies = (
+  state: Immutable<TrustedAppsListPageState>
+): string => {
+  return state.location.excluded_policies;
 };
 
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
@@ -174,11 +192,10 @@ export const entriesExistState: (
   state: Immutable<TrustedAppsListPageState>
 ) => Immutable<TrustedAppsListPageState['entriesExist']> = (state) => state.entriesExist;
 
-export const checkingIfEntriesExist: (
-  state: Immutable<TrustedAppsListPageState>
-) => boolean = createSelector(entriesExistState, (doEntriesExists) => {
-  return !isLoadedResourceState(doEntriesExists);
-});
+export const checkingIfEntriesExist: (state: Immutable<TrustedAppsListPageState>) => boolean =
+  createSelector(entriesExistState, (doEntriesExists) => {
+    return !isLoadedResourceState(doEntriesExists);
+  });
 
 export const entriesExist: (state: Immutable<TrustedAppsListPageState>) => boolean = createSelector(
   entriesExistState,
@@ -186,6 +203,13 @@ export const entriesExist: (state: Immutable<TrustedAppsListPageState>) => boole
     return isLoadedResourceState(doEntriesExists) && doEntriesExists.data;
   }
 );
+
+export const prevEntriesExist: (state: Immutable<TrustedAppsListPageState>) => boolean =
+  createSelector(entriesExistState, (doEntriesExists) => {
+    return (
+      isLoadingResourceState(doEntriesExists) && !!getLastLoadedResourceState(doEntriesExists)?.data
+    );
+  });
 
 export const trustedAppsListPageActive: (state: Immutable<TrustedAppsListPageState>) => boolean = (
   state
@@ -195,15 +219,26 @@ export const policiesState = (
   state: Immutable<TrustedAppsListPageState>
 ): Immutable<TrustedAppsListPageState['policies']> => state.policies;
 
-export const loadingPolicies: (
-  state: Immutable<TrustedAppsListPageState>
-) => boolean = createSelector(policiesState, (policies) => isLoadingResourceState(policies));
+export const loadingPolicies: (state: Immutable<TrustedAppsListPageState>) => boolean =
+  createSelector(policiesState, (policies) => isLoadingResourceState(policies));
 
 export const listOfPolicies: (
   state: Immutable<TrustedAppsListPageState>
 ) => Immutable<GetPolicyListResponse['items']> = createSelector(policiesState, (policies) => {
   return isLoadedResourceState(policies) ? policies.data.items : [];
 });
+
+export const getMapOfPoliciesById: (
+  state: Immutable<TrustedAppsListPageState>
+) => Immutable<Record<string, Immutable<PolicyData>>> = createSelector(
+  listOfPolicies,
+  (policies) => {
+    return policies.reduce<Record<string, Immutable<PolicyData>>>((mapById, policy) => {
+      mapById[policy.id] = policy;
+      return mapById;
+    }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
+  }
+);
 
 export const isEdit: (state: Immutable<TrustedAppsListPageState>) => boolean = createSelector(
   getCurrentLocation,
@@ -212,11 +247,10 @@ export const isEdit: (state: Immutable<TrustedAppsListPageState>) => boolean = c
   }
 );
 
-export const editItemId: (
-  state: Immutable<TrustedAppsListPageState>
-) => string | undefined = createSelector(getCurrentLocation, ({ id }) => {
-  return id;
-});
+export const editItemId: (state: Immutable<TrustedAppsListPageState>) => string | undefined =
+  createSelector(getCurrentLocation, ({ id }) => {
+    return id;
+  });
 
 export const editItemState: (
   state: Immutable<TrustedAppsListPageState>
@@ -224,11 +258,10 @@ export const editItemState: (
   return state.creationDialog.editItem;
 };
 
-export const isFetchingEditTrustedAppItem: (
-  state: Immutable<TrustedAppsListPageState>
-) => boolean = createSelector(editItemState, (editTrustedAppState) => {
-  return editTrustedAppState ? isLoadingResourceState(editTrustedAppState) : false;
-});
+export const isFetchingEditTrustedAppItem: (state: Immutable<TrustedAppsListPageState>) => boolean =
+  createSelector(editItemState, (editTrustedAppState) => {
+    return editTrustedAppState ? isLoadingResourceState(editTrustedAppState) : false;
+  });
 
 export const editTrustedAppFetchError: (
   state: Immutable<TrustedAppsListPageState>

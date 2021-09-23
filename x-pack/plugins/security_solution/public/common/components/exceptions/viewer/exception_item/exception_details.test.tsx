@@ -157,7 +157,7 @@ describe('ExceptionDetails', () => {
   });
 
   test('it renders the operating system if one is specified in the exception item', () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
@@ -173,7 +173,7 @@ describe('ExceptionDetails', () => {
   });
 
   test('it renders the exception item creator', () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
@@ -191,7 +191,7 @@ describe('ExceptionDetails', () => {
   });
 
   test('it renders the exception item creation timestamp', () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
@@ -207,7 +207,7 @@ describe('ExceptionDetails', () => {
   });
 
   test('it renders the description if one is included on the exception item', () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
@@ -223,7 +223,7 @@ describe('ExceptionDetails', () => {
   });
 
   test('it renders with Name and Modified info when showName and showModified props are true', () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
     exceptionItem.comments = [];
 
     const wrapper = mount(

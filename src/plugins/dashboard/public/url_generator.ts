@@ -26,6 +26,9 @@ export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const DASHBOARD_APP_URL_GENERATOR = 'DASHBOARD_APP_URL_GENERATOR';
 
+/**
+ * @deprecated Use dashboard locator instead.
+ */
 export interface DashboardUrlGeneratorState {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
@@ -88,6 +91,9 @@ export interface DashboardUrlGeneratorState {
   savedQuery?: string;
 }
 
+/**
+ * @deprecated Use dashboard locator instead.
+ */
 export const createDashboardUrlGenerator = (
   getStartServices: () => Promise<{
     appBasePath: string;

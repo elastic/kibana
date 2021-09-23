@@ -7,6 +7,8 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
+import semverLte from 'semver/functions/lte';
+import { assertNever } from '@kbn/std';
 import {
   AlertEvent,
   DataStream,
@@ -51,7 +53,7 @@ export const ANCESTRY_LIMIT: number = 2;
 
 const Windows: OSFields[] = [
   {
-    name: 'windows 10.0',
+    name: 'Windows',
     full: 'Windows 10',
     version: '10.0',
     platform: 'Windows',
@@ -61,7 +63,7 @@ const Windows: OSFields[] = [
     },
   },
   {
-    name: 'windows 10.0',
+    name: 'Windows',
     full: 'Windows Server 2016',
     version: '10.0',
     platform: 'Windows',
@@ -71,7 +73,7 @@ const Windows: OSFields[] = [
     },
   },
   {
-    name: 'windows 6.2',
+    name: 'Windows',
     full: 'Windows Server 2012',
     version: '6.2',
     platform: 'Windows',
@@ -81,7 +83,7 @@ const Windows: OSFields[] = [
     },
   },
   {
-    name: 'windows 6.3',
+    name: 'Windows',
     full: 'Windows Server 2012R2',
     version: '6.3',
     platform: 'Windows',
@@ -254,12 +256,13 @@ interface HostInfo {
         version: number;
       };
     };
-    configuration: {
+    configuration?: {
       isolation: boolean;
     };
-    state: {
+    state?: {
       isolation: boolean;
     };
+    capabilities?: string[];
   };
 }
 
@@ -387,6 +390,13 @@ const eventsDefaultDataStream = {
   namespace: 'default',
 };
 
+enum AlertTypes {
+  MALWARE = 'MALWARE',
+  MEMORY_SIGNATURE = 'MEMORY_SIGNATURE',
+  MEMORY_SHELLCODE = 'MEMORY_SHELLCODE',
+  BEHAVIOR = 'BEHAVIOR',
+}
+
 const alertsDefaultDataStream = {
   type: 'logs',
   dataset: 'endpoint.alerts',
@@ -423,6 +433,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
+   * Update the common host metadata - essentially creating an entire new endpoint metadata record
+   * when the `.generateHostMetadata()` is subsequently called
+   */
+  public updateCommonInfo() {
+    this.commonInfo = this.createHostData();
+  }
+
+  /**
    * Parses an index and returns the data stream fields extracted from the index.
    *
    * @param index the index name to parse into the data stream parts
@@ -439,9 +457,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
   private createHostData(): HostInfo {
     const hostName = this.randomHostname();
+    const isIsolated = this.randomBoolean(0.3);
+    const agentVersion = this.randomVersion();
+    const minCapabilitiesVersion = '7.15.0';
+    const capabilities = ['isolation'];
+
     return {
       agent: {
-        version: this.randomVersion(),
+        version: agentVersion,
         id: this.seededUUIDv4(),
         type: 'endpoint',
       },
@@ -465,11 +488,12 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           applied: this.randomChoice(APPLIED_POLICIES),
         },
         configuration: {
-          isolation: false,
+          isolation: isIsolated,
         },
         state: {
-          isolation: false,
+          isolation: isIsolated,
         },
+        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? capabilities : [],
       },
     };
   }
@@ -499,16 +523,15 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       data_stream: metadataDataStream,
     };
   }
-
   /**
-   * Creates an alert from the simulated host represented by this EndpointDocGenerator
+   * Creates a malware alert from the simulated host represented by this EndpointDocGenerator
    * @param ts - Timestamp to put in the event
    * @param entityID - entityID of the originating process
    * @param parentEntityID - optional entityID of the parent process, if it exists
    * @param ancestry - an array of ancestors for the generated alert
    * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
    */
-  public generateAlert({
+  public generateMalwareAlert({
     ts = new Date().getTime(),
     entityID = this.randomString(10),
     parentEntityID,
@@ -609,37 +632,308 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           },
         },
       },
-      dll: [
-        {
-          pe: {
-            architecture: 'x64',
-          },
-          code_signature: {
-            subject_name: 'Cybereason Inc',
-            trusted: true,
-          },
+      dll: this.getAlertsDefaultDll(),
+    };
+  }
 
-          hash: {
-            md5: '1f2d082566b0fc5f2c238a5180db7451',
-            sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
-            sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
+  /**
+   * Creates a memory alert from the simulated host represented by this EndpointDocGenerator
+   * @param ts - Timestamp to put in the event
+   * @param entityID - entityID of the originating process
+   * @param parentEntityID - optional entityID of the parent process, if it exists
+   * @param ancestry - an array of ancestors for the generated alert
+   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
+   */
+  public generateMemoryAlert({
+    ts = new Date().getTime(),
+    entityID = this.randomString(10),
+    parentEntityID,
+    ancestry = [],
+    alertsDataStream = alertsDefaultDataStream,
+    alertType,
+  }: {
+    ts?: number;
+    entityID?: string;
+    parentEntityID?: string;
+    ancestry?: string[];
+    alertsDataStream?: DataStream;
+    alertType?: AlertTypes;
+  } = {}): AlertEvent {
+    const processName = this.randomProcessName();
+    const isShellcode = alertType === AlertTypes.MEMORY_SHELLCODE;
+    const newAlert: AlertEvent = {
+      ...this.commonInfo,
+      data_stream: alertsDataStream,
+      '@timestamp': ts,
+      ecs: {
+        version: '1.6.0',
+      },
+      // disabling naming-convention to accommodate external field
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      Memory_protection: {
+        feature: isShellcode ? 'shellcode_thread' : 'signature',
+        self_injection: true,
+      },
+      event: {
+        action: 'start',
+        kind: 'alert',
+        category: 'malware',
+        code: isShellcode ? 'shellcode_thread' : 'memory_signature',
+        id: this.seededUUIDv4(),
+        dataset: 'endpoint',
+        module: 'endpoint',
+        type: 'info',
+        sequence: this.sequence++,
+      },
+      file: {},
+      process: {
+        pid: 2,
+        name: processName,
+        start: ts,
+        uptime: 0,
+        entity_id: entityID,
+        executable: `C:/fake/${processName}`,
+        parent: parentEntityID ? { entity_id: parentEntityID, pid: 1 } : undefined,
+        hash: {
+          md5: 'fake md5',
+          sha1: 'fake sha1',
+          sha256: 'fake sha256',
+        },
+        Ext: {
+          ancestry,
+          code_signature: [
+            {
+              trusted: false,
+              subject_name: 'bad signer',
+            },
+          ],
+          user: 'SYSTEM',
+          token: {
+            integrity_level_name: 'high',
           },
+          malware_signature: {
+            all_names: 'Windows.Trojan.FakeAgent',
+            identifier: 'diagnostic-malware-signature-v1-fake',
+          },
+        },
+      },
+      dll: this.getAlertsDefaultDll(),
+    };
 
-          path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
-          Ext: {
-            compile_time: 1534424710,
-            mapped_address: 5362483200,
-            mapped_size: 0,
-            malware_classification: {
-              identifier: 'Whitelisted',
-              score: 0,
-              threshold: 0,
-              version: '3.0.0',
+    // shellcode_thread memory alert have an additional process field
+    if (isShellcode) {
+      newAlert.Target = {
+        process: {
+          thread: {
+            Ext: {
+              start_address_allocation_offset: 0,
+              start_address_bytes_disasm_hash: 'a disam hash',
+              start_address_details: {
+                allocation_type: 'PRIVATE',
+                allocation_size: 4000,
+                region_size: 4000,
+                region_protection: 'RWX',
+                memory_pe: {
+                  imphash: 'a hash',
+                },
+              },
             },
           },
         },
-      ],
+      };
+    }
+    return newAlert;
+  }
+  /**
+   * Creates an alert from the simulated host represented by this EndpointDocGenerator
+   * @param ts - Timestamp to put in the event
+   * @param entityID - entityID of the originating process
+   * @param parentEntityID - optional entityID of the parent process, if it exists
+   * @param ancestry - an array of ancestors for the generated alert
+   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
+   */
+  public generateAlert({
+    ts = new Date().getTime(),
+    entityID = this.randomString(10),
+    parentEntityID,
+    ancestry = [],
+    alertsDataStream = alertsDefaultDataStream,
+  }: {
+    ts?: number;
+    entityID?: string;
+    parentEntityID?: string;
+    ancestry?: string[];
+    alertsDataStream?: DataStream;
+  } = {}): AlertEvent {
+    const alertType = this.randomChoice(Object.values(AlertTypes));
+    switch (alertType) {
+      case AlertTypes.MALWARE:
+        return this.generateMalwareAlert({
+          ts,
+          entityID,
+          parentEntityID,
+          ancestry,
+          alertsDataStream,
+        });
+      case AlertTypes.MEMORY_SIGNATURE:
+      case AlertTypes.MEMORY_SHELLCODE:
+        return this.generateMemoryAlert({
+          ts,
+          entityID,
+          parentEntityID,
+          ancestry,
+          alertsDataStream,
+          alertType,
+        });
+      case AlertTypes.BEHAVIOR:
+        return this.generateBehaviorAlert({
+          ts,
+          entityID,
+          parentEntityID,
+          ancestry,
+          alertsDataStream,
+        });
+      default:
+        return assertNever(alertType);
+    }
+  }
+
+  /**
+   * Creates a memory alert from the simulated host represented by this EndpointDocGenerator
+   * @param ts - Timestamp to put in the event
+   * @param entityID - entityID of the originating process
+   * @param parentEntityID - optional entityID of the parent process, if it exists
+   * @param ancestry - an array of ancestors for the generated alert
+   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
+   */
+  public generateBehaviorAlert({
+    ts = new Date().getTime(),
+    entityID = this.randomString(10),
+    parentEntityID,
+    ancestry = [],
+    alertsDataStream = alertsDefaultDataStream,
+  }: {
+    ts?: number;
+    entityID?: string;
+    parentEntityID?: string;
+    ancestry?: string[];
+    alertsDataStream?: DataStream;
+  } = {}): AlertEvent {
+    const processName = this.randomProcessName();
+    const newAlert: AlertEvent = {
+      ...this.commonInfo,
+      data_stream: alertsDataStream,
+      '@timestamp': ts,
+      ecs: {
+        version: '1.6.0',
+      },
+      rule: {
+        id: this.randomUUID(),
+        description: 'Behavior rule description',
+      },
+      event: {
+        action: 'rule_detection',
+        kind: 'alert',
+        category: 'behavior',
+        code: 'behavior',
+        id: this.seededUUIDv4(),
+        dataset: 'endpoint.diagnostic.collection',
+        module: 'endpoint',
+        type: 'info',
+        sequence: this.sequence++,
+      },
+      file: {
+        name: 'fake_behavior.exe',
+        path: 'C:/fake_behavior.exe',
+      },
+      destination: {
+        port: 443,
+        ip: this.randomIP(),
+      },
+      source: {
+        port: 59406,
+        ip: this.randomIP(),
+      },
+      network: {
+        transport: 'tcp',
+        type: 'ipv4',
+        direction: 'outgoing',
+      },
+      registry: {
+        path: 'HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome',
+        value: processName,
+        data: {
+          strings: `C:/fake_behavior/${processName}`,
+        },
+      },
+      process: {
+        pid: 2,
+        name: processName,
+        entity_id: entityID,
+        executable: `C:/fake_behavior/${processName}`,
+        code_signature: {
+          status: 'trusted',
+          subject_name: 'Microsoft Windows',
+        },
+        parent: parentEntityID
+          ? {
+              entity_id: parentEntityID,
+              pid: 1,
+            }
+          : undefined,
+        Ext: {
+          ancestry,
+          code_signature: [
+            {
+              trusted: false,
+              subject_name: 'bad signer',
+            },
+          ],
+          user: 'SYSTEM',
+          token: {
+            integrity_level_name: 'high',
+            elevation_level: 'full',
+          },
+        },
+      },
+      dll: this.getAlertsDefaultDll(),
     };
+    return newAlert;
+  }
+  /**
+   * Returns the default DLLs used in alerts
+   */
+  private getAlertsDefaultDll() {
+    return [
+      {
+        pe: {
+          architecture: 'x64',
+        },
+        code_signature: {
+          subject_name: 'Cybereason Inc',
+          trusted: true,
+        },
+
+        hash: {
+          md5: '1f2d082566b0fc5f2c238a5180db7451',
+          sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
+          sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
+        },
+
+        path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
+        Ext: {
+          compile_time: 1534424710,
+          mapped_address: 5362483200,
+          mapped_size: 0,
+          malware_classification: {
+            identifier: 'Whitelisted',
+            score: 0,
+            threshold: 0,
+            version: '3.0.0',
+          },
+        },
+      },
+    ];
   }
 
   /**
@@ -1302,6 +1596,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateEpmPackage(): GetPackagesResponse['response'][0] {
     return {
+      id: this.seededUUIDv4(),
       name: 'endpoint',
       title: 'Elastic Endpoint',
       version: '0.5.0',
@@ -1557,8 +1852,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
             status: this.commonInfo.Endpoint.policy.applied.status,
             version: policyVersion,
             name: this.commonInfo.Endpoint.policy.applied.name,
-            endpoint_policy_version: this.commonInfo.Endpoint.policy.applied
-              .endpoint_policy_version,
+            endpoint_policy_version:
+              this.commonInfo.Endpoint.policy.applied.endpoint_policy_version,
           },
         },
       },

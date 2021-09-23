@@ -63,8 +63,36 @@ export enum AppNavLinkStatus {
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'deepLinks'
+  'status' | 'navLinkStatus' | 'searchable' | 'tooltip' | 'defaultPath' | 'deepLinks'
 >;
+
+/**
+ * App navigation menu options
+ * @public
+ */
+export interface AppNavOptions {
+  /**
+   * An ordinal used to sort nav links relative to one another for display.
+   */
+  order?: number;
+
+  /**
+   * A tooltip shown when hovering over app link.
+   */
+  tooltip?: string;
+
+  /**
+   * A EUI iconType that will be used for the app's icon. This icon
+   * takes precendence over the `icon` property.
+   */
+  euiIconType?: string;
+
+  /**
+   * A URL to an image file used as an icon. Used as a fallback
+   * if `euiIconType` is not provided.
+   */
+  icon?: string;
+}
 
 /**
  * Updater for applications.
@@ -76,7 +104,7 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 /**
  * @public
  */
-export interface App<HistoryLocationState = unknown> {
+export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   /**
    * The unique identifier of the application
    */
@@ -106,6 +134,12 @@ export interface App<HistoryLocationState = unknown> {
    * See {@link AppNavLinkStatus}
    */
   navLinkStatus?: AppNavLinkStatus;
+
+  /**
+   * The initial flag to determine if the application is searchable in the global search.
+   * Defaulting to `true` if `navLinkStatus` is `visible` or omitted.
+   */
+  searchable?: boolean;
 
   /**
    * Allow to define the default path a user should be directed to when navigating to the app.
@@ -147,28 +181,6 @@ export interface App<HistoryLocationState = unknown> {
    * ```
    */
   updater$?: Observable<AppUpdater>;
-
-  /**
-   * An ordinal used to sort nav links relative to one another for display.
-   */
-  order?: number;
-
-  /**
-   * A tooltip shown when hovering over app link.
-   */
-  tooltip?: string;
-
-  /**
-   * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
-   */
-  euiIconType?: string;
-
-  /**
-   * A URL to an image file used as an icon. Used as a fallback
-   * if `euiIconType` is not provided.
-   */
-  icon?: string;
 
   /**
    * Custom capabilities defined by the app.
@@ -261,11 +273,12 @@ export interface App<HistoryLocationState = unknown> {
  */
 export type PublicAppDeepLinkInfo = Omit<
   AppDeepLink,
-  'deepLinks' | 'keywords' | 'navLinkStatus'
+  'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'
 > & {
   deepLinks: PublicAppDeepLinkInfo[];
   keywords: string[];
   navLinkStatus: AppNavLinkStatus;
+  searchable: boolean;
 };
 
 /**
@@ -285,33 +298,40 @@ export type AppDeepLink = {
   keywords?: string[];
   /** Optional status of the chrome navigation, defaults to `hidden` */
   navLinkStatus?: AppNavLinkStatus;
-} & (
-  | {
-      /** URL path to access this link, relative to the application's appRoute. */
-      path: string;
-      /** Optional array of links that are 'underneath' this section in the hierarchy */
-      deepLinks?: AppDeepLink[];
-    }
-  | {
-      /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
-      path?: string;
-      /** Array links that are 'underneath' this section in this hierarchy. */
-      deepLinks: AppDeepLink[];
-    }
-);
+  /** Optional flag to determine if the link is searchable in the global search. Defaulting to `true` if `navLinkStatus` is `visible` or omitted */
+  searchable?: boolean;
+} & AppNavOptions &
+  (
+    | {
+        /** URL path to access this link, relative to the application's appRoute. */
+        path: string;
+        /** Optional array of links that are 'underneath' this section in the hierarchy */
+        deepLinks?: AppDeepLink[];
+      }
+    | {
+        /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
+        path?: string;
+        /** Array links that are 'underneath' this section in this hierarchy. */
+        deepLinks: AppDeepLink[];
+      }
+  );
 
 /**
  * Public information about a registered {@link App | application}
  *
  * @public
  */
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks'> & {
+export type PublicAppInfo = Omit<
+  App,
+  'mount' | 'updater$' | 'keywords' | 'deepLinks' | 'searchable'
+> & {
   // remove optional on fields populated with default values
   status: AppStatus;
   navLinkStatus: AppNavLinkStatus;
   appRoute: string;
   keywords: string[];
   deepLinks: PublicAppDeepLinkInfo[];
+  searchable: boolean;
 };
 
 /**
@@ -592,6 +612,7 @@ export interface AppLeaveActionFactory {
 export interface Mounter {
   appRoute: string;
   appBasePath: string;
+  deepLinkPaths: Record<string, string>;
   mount: AppMount;
   exactRoute: boolean;
   unmountBeforeMounting?: boolean;
@@ -657,11 +678,17 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
 
 /**
  * Options for the {@link ApplicationStart.navigateToApp | navigateToApp API}
+ * @public
  */
 export interface NavigateToAppOptions {
   /**
+   * optional {@link App.deepLinks | deep link} id inside the application to navigate to.
+   * If an additional {@link NavigateToAppOptions.path | path} is defined it will be appended to the deep link path.
+   */
+  deepLinkId?: string;
+  /**
    * optional path inside application to deep link to.
-   * If undefined, will use {@link App.defaultPath | the app's default path}` as default.
+   * If undefined, will use {@link App.defaultPath | the app's default path} as default.
    */
   path?: string;
   /**
@@ -753,7 +780,10 @@ export interface ApplicationStart {
    * @param options.path - optional path inside application to deep link to
    * @param options.absolute - if true, will returns an absolute url instead of a relative one
    */
-  getUrlForApp(appId: string, options?: { path?: string; absolute?: boolean }): string;
+  getUrlForApp(
+    appId: string,
+    options?: { path?: string; absolute?: boolean; deepLinkId?: string }
+  ): string;
 
   /**
    * An observable that emits the current application id and each subsequent id update.

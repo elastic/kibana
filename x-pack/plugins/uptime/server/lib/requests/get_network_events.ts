@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { NetworkEvent } from '../../../common/runtime_types';
 
@@ -30,7 +30,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
           { term: { 'synthetics.type': 'journey/network_info' } },
           { term: { 'monitor.check_group': checkGroup } },
           { term: { 'synthetics.step.index': Number(stepIndex) } },
-        ] as QueryContainer[],
+        ] as QueryDslQueryContainer[],
       },
     },
     // NOTE: This limit may need tweaking in the future. Users can technically perform multiple

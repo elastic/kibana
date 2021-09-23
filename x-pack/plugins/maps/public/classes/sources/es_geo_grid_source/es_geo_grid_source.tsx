@@ -10,7 +10,7 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import { Feature } from 'geojson';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   convertCompositeRespToGeoJson,
   convertRegularRespToGeoJson,
@@ -45,14 +45,15 @@ import {
   ESGeoGridSourceDescriptor,
   MapExtent,
   VectorSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
+
+type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType'>;
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -106,7 +107,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     );
   }
 
-  getSyncMeta(): VectorSourceSyncMeta {
+  getSyncMeta(): ESGeoGridSourceSyncMeta {
     return {
       requestType: this._descriptor.requestType,
     };
@@ -274,7 +275,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       const requestId: string = afterKey
         ? `${this.getId()} afterKey ${afterKey.geoSplit}`
         : this.getId();
-      const esResponse: SearchResponse<unknown> = await this._runEsQuery({
+      const esResponse: estypes.SearchResponse<unknown> = await this._runEsQuery({
         requestId,
         requestName: `${layerName} (${requestCount})`,
         searchSource,
@@ -291,8 +292,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
 
-      afterKey = esResponse.aggregations.compositeSplit.after_key;
-      if (esResponse.aggregations.compositeSplit.buckets.length < gridsPerRequest) {
+      const aggr = esResponse.aggregations
+        ?.compositeSplit as estypes.AggregationsCompositeBucketAggregate;
+      afterKey = aggr.after_key;
+      if (aggr.buckets.length < gridsPerRequest) {
         // Finished because request did not get full resultset back
         break;
       }

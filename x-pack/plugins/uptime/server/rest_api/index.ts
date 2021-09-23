@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { createGetCertsRoute } from './certs/certs';
-import { createGetOverviewFilters } from './overview_filters';
 import {
   createGetPingHistogramRoute,
   createGetPingsRoute,
   createJourneyRoute,
   createJourneyScreenshotRoute,
+  createJourneyScreenshotBlocksRoute,
 } from './pings';
 import { createGetDynamicSettingsRoute, createPostDynamicSettingsRoute } from './dynamic_settings';
 import { createLogPageViewRoute } from './telemetry';
@@ -23,7 +22,8 @@ import {
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,
 } from './monitors';
-import { createGetIndexPatternRoute, createGetIndexStatusRoute } from './index_state';
+import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
+import { createGetIndexStatusRoute } from './index_state';
 import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
 import { createLastSuccessfulStepRoute } from './synthetics/last_successful_step';
@@ -33,10 +33,7 @@ export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
 
 export const restApiRoutes: UMRestApiRouteFactory[] = [
-  createGetCertsRoute,
-  createGetOverviewFilters,
   createGetPingsRoute,
-  createGetIndexPatternRoute,
   createGetIndexStatusRoute,
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
@@ -47,9 +44,11 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetSnapshotCount,
   createLogPageViewRoute,
   createGetPingHistogramRoute,
+  createGetMonitorDurationRoute,
   createJourneyRoute,
   createJourneyScreenshotRoute,
   createNetworkEventsRoute,
   createJourneyFailedStepsRoute,
   createLastSuccessfulStepRoute,
+  createJourneyScreenshotBlocksRoute,
 ];

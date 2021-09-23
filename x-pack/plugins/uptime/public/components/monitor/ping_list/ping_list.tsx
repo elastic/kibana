@@ -145,7 +145,10 @@ export const PingList = () => {
             field: 'timestamp',
             name: TIMESTAMP_LABEL,
             render: (timestamp: string, item: Ping) => (
-              <PingTimestamp label={getShortTimeStamp(moment(timestamp))} ping={item} />
+              <PingTimestamp
+                checkGroup={item.monitor.check_group}
+                label={getShortTimeStamp(moment(timestamp))}
+              />
             ),
           },
         ]
@@ -185,8 +188,8 @@ export const PingList = () => {
             name: i18n.translate('xpack.uptime.pingList.columns.failedStep', {
               defaultMessage: 'Failed step',
             }),
-            render: (timestamp: string, item: Ping) => (
-              <FailedStep ping={item} failedSteps={failedSteps} />
+            render: (_timestamp: string, item: Ping) => (
+              <FailedStep checkGroup={item.monitor?.check_group} failedSteps={failedSteps} />
             ),
           },
         ]
@@ -248,7 +251,7 @@ export const PingList = () => {
   };
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <PingListHeader />
       <EuiSpacer size="s" />
       <EuiBasicTable

@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
     const transformConfigWithLatest = getLatestTransformConfig('cloning');
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,
@@ -238,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should display the define pivot step');
-          await transform.table.clickTransformRowAction('Clone');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Clone');
           await transform.wizard.assertSelectedTransformFunction(testData.type);
           await transform.wizard.assertDefineStepActive();
         });

@@ -1,0 +1,967 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Columns it renders the expected columns 1`] = `
+<styled.div
+  data-test-subj="data-driven-columns"
+>
+  <TgridTdCell
+    _id="1"
+    ariaRowindex={2}
+    data={
+      Array [
+        Object {
+          "field": "@timestamp",
+          "value": Array [
+            "2018-11-05T19:03:25.937Z",
+          ],
+        },
+        Object {
+          "field": "event.severity",
+          "value": Array [
+            "3",
+          ],
+        },
+        Object {
+          "field": "event.category",
+          "value": Array [
+            "Access",
+          ],
+        },
+        Object {
+          "field": "event.action",
+          "value": Array [
+            "Action",
+          ],
+        },
+        Object {
+          "field": "host.name",
+          "value": Array [
+            "apache",
+          ],
+        },
+        Object {
+          "field": "source.ip",
+          "value": Array [
+            "192.168.0.1",
+          ],
+        },
+        Object {
+          "field": "destination.ip",
+          "value": Array [
+            "192.168.0.3",
+          ],
+        },
+        Object {
+          "field": "destination.bytes",
+          "value": Array [
+            "123456",
+          ],
+        },
+        Object {
+          "field": "user.name",
+          "value": Array [
+            "john.dee",
+          ],
+        },
+      ]
+    }
+    ecsData={
+      Object {
+        "_id": "1",
+        "destination": Object {
+          "ip": Array [
+            "192.168.0.3",
+          ],
+          "port": Array [
+            6343,
+          ],
+        },
+        "event": Object {
+          "action": Array [
+            "Action",
+          ],
+          "category": Array [
+            "Access",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "module": Array [
+            "nginx",
+          ],
+          "severity": Array [
+            3,
+          ],
+        },
+        "geo": Object {
+          "country_iso_code": Array [
+            "xx",
+          ],
+          "region_name": Array [
+            "xx",
+          ],
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": Array [
+            "apache",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "port": Array [
+            80,
+          ],
+        },
+        "timestamp": "2018-11-05T19:03:25.937Z",
+        "user": Object {
+          "id": Array [
+            "1",
+          ],
+          "name": Array [
+            "john.dee",
+          ],
+        },
+      }
+    }
+    hasRowRenderers={false}
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "message",
+        "initialWidth": 180,
+      }
+    }
+    index={0}
+    key="message"
+    renderCellValue={[Function]}
+    timelineId="test"
+  />
+  <TgridTdCell
+    _id="1"
+    ariaRowindex={2}
+    data={
+      Array [
+        Object {
+          "field": "@timestamp",
+          "value": Array [
+            "2018-11-05T19:03:25.937Z",
+          ],
+        },
+        Object {
+          "field": "event.severity",
+          "value": Array [
+            "3",
+          ],
+        },
+        Object {
+          "field": "event.category",
+          "value": Array [
+            "Access",
+          ],
+        },
+        Object {
+          "field": "event.action",
+          "value": Array [
+            "Action",
+          ],
+        },
+        Object {
+          "field": "host.name",
+          "value": Array [
+            "apache",
+          ],
+        },
+        Object {
+          "field": "source.ip",
+          "value": Array [
+            "192.168.0.1",
+          ],
+        },
+        Object {
+          "field": "destination.ip",
+          "value": Array [
+            "192.168.0.3",
+          ],
+        },
+        Object {
+          "field": "destination.bytes",
+          "value": Array [
+            "123456",
+          ],
+        },
+        Object {
+          "field": "user.name",
+          "value": Array [
+            "john.dee",
+          ],
+        },
+      ]
+    }
+    ecsData={
+      Object {
+        "_id": "1",
+        "destination": Object {
+          "ip": Array [
+            "192.168.0.3",
+          ],
+          "port": Array [
+            6343,
+          ],
+        },
+        "event": Object {
+          "action": Array [
+            "Action",
+          ],
+          "category": Array [
+            "Access",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "module": Array [
+            "nginx",
+          ],
+          "severity": Array [
+            3,
+          ],
+        },
+        "geo": Object {
+          "country_iso_code": Array [
+            "xx",
+          ],
+          "region_name": Array [
+            "xx",
+          ],
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": Array [
+            "apache",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "port": Array [
+            80,
+          ],
+        },
+        "timestamp": "2018-11-05T19:03:25.937Z",
+        "user": Object {
+          "id": Array [
+            "1",
+          ],
+          "name": Array [
+            "john.dee",
+          ],
+        },
+      }
+    }
+    hasRowRenderers={false}
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "event.category",
+        "initialWidth": 180,
+      }
+    }
+    index={1}
+    key="event.category"
+    renderCellValue={[Function]}
+    timelineId="test"
+  />
+  <TgridTdCell
+    _id="1"
+    ariaRowindex={2}
+    data={
+      Array [
+        Object {
+          "field": "@timestamp",
+          "value": Array [
+            "2018-11-05T19:03:25.937Z",
+          ],
+        },
+        Object {
+          "field": "event.severity",
+          "value": Array [
+            "3",
+          ],
+        },
+        Object {
+          "field": "event.category",
+          "value": Array [
+            "Access",
+          ],
+        },
+        Object {
+          "field": "event.action",
+          "value": Array [
+            "Action",
+          ],
+        },
+        Object {
+          "field": "host.name",
+          "value": Array [
+            "apache",
+          ],
+        },
+        Object {
+          "field": "source.ip",
+          "value": Array [
+            "192.168.0.1",
+          ],
+        },
+        Object {
+          "field": "destination.ip",
+          "value": Array [
+            "192.168.0.3",
+          ],
+        },
+        Object {
+          "field": "destination.bytes",
+          "value": Array [
+            "123456",
+          ],
+        },
+        Object {
+          "field": "user.name",
+          "value": Array [
+            "john.dee",
+          ],
+        },
+      ]
+    }
+    ecsData={
+      Object {
+        "_id": "1",
+        "destination": Object {
+          "ip": Array [
+            "192.168.0.3",
+          ],
+          "port": Array [
+            6343,
+          ],
+        },
+        "event": Object {
+          "action": Array [
+            "Action",
+          ],
+          "category": Array [
+            "Access",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "module": Array [
+            "nginx",
+          ],
+          "severity": Array [
+            3,
+          ],
+        },
+        "geo": Object {
+          "country_iso_code": Array [
+            "xx",
+          ],
+          "region_name": Array [
+            "xx",
+          ],
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": Array [
+            "apache",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "port": Array [
+            80,
+          ],
+        },
+        "timestamp": "2018-11-05T19:03:25.937Z",
+        "user": Object {
+          "id": Array [
+            "1",
+          ],
+          "name": Array [
+            "john.dee",
+          ],
+        },
+      }
+    }
+    hasRowRenderers={false}
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "event.action",
+        "initialWidth": 180,
+      }
+    }
+    index={2}
+    key="event.action"
+    renderCellValue={[Function]}
+    timelineId="test"
+  />
+  <TgridTdCell
+    _id="1"
+    ariaRowindex={2}
+    data={
+      Array [
+        Object {
+          "field": "@timestamp",
+          "value": Array [
+            "2018-11-05T19:03:25.937Z",
+          ],
+        },
+        Object {
+          "field": "event.severity",
+          "value": Array [
+            "3",
+          ],
+        },
+        Object {
+          "field": "event.category",
+          "value": Array [
+            "Access",
+          ],
+        },
+        Object {
+          "field": "event.action",
+          "value": Array [
+            "Action",
+          ],
+        },
+        Object {
+          "field": "host.name",
+          "value": Array [
+            "apache",
+          ],
+        },
+        Object {
+          "field": "source.ip",
+          "value": Array [
+            "192.168.0.1",
+          ],
+        },
+        Object {
+          "field": "destination.ip",
+          "value": Array [
+            "192.168.0.3",
+          ],
+        },
+        Object {
+          "field": "destination.bytes",
+          "value": Array [
+            "123456",
+          ],
+        },
+        Object {
+          "field": "user.name",
+          "value": Array [
+            "john.dee",
+          ],
+        },
+      ]
+    }
+    ecsData={
+      Object {
+        "_id": "1",
+        "destination": Object {
+          "ip": Array [
+            "192.168.0.3",
+          ],
+          "port": Array [
+            6343,
+          ],
+        },
+        "event": Object {
+          "action": Array [
+            "Action",
+          ],
+          "category": Array [
+            "Access",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "module": Array [
+            "nginx",
+          ],
+          "severity": Array [
+            3,
+          ],
+        },
+        "geo": Object {
+          "country_iso_code": Array [
+            "xx",
+          ],
+          "region_name": Array [
+            "xx",
+          ],
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": Array [
+            "apache",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "port": Array [
+            80,
+          ],
+        },
+        "timestamp": "2018-11-05T19:03:25.937Z",
+        "user": Object {
+          "id": Array [
+            "1",
+          ],
+          "name": Array [
+            "john.dee",
+          ],
+        },
+      }
+    }
+    hasRowRenderers={false}
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "host.name",
+        "initialWidth": 180,
+      }
+    }
+    index={3}
+    key="host.name"
+    renderCellValue={[Function]}
+    timelineId="test"
+  />
+  <TgridTdCell
+    _id="1"
+    ariaRowindex={2}
+    data={
+      Array [
+        Object {
+          "field": "@timestamp",
+          "value": Array [
+            "2018-11-05T19:03:25.937Z",
+          ],
+        },
+        Object {
+          "field": "event.severity",
+          "value": Array [
+            "3",
+          ],
+        },
+        Object {
+          "field": "event.category",
+          "value": Array [
+            "Access",
+          ],
+        },
+        Object {
+          "field": "event.action",
+          "value": Array [
+            "Action",
+          ],
+        },
+        Object {
+          "field": "host.name",
+          "value": Array [
+            "apache",
+          ],
+        },
+        Object {
+          "field": "source.ip",
+          "value": Array [
+            "192.168.0.1",
+          ],
+        },
+        Object {
+          "field": "destination.ip",
+          "value": Array [
+            "192.168.0.3",
+          ],
+        },
+        Object {
+          "field": "destination.bytes",
+          "value": Array [
+            "123456",
+          ],
+        },
+        Object {
+          "field": "user.name",
+          "value": Array [
+            "john.dee",
+          ],
+        },
+      ]
+    }
+    ecsData={
+      Object {
+        "_id": "1",
+        "destination": Object {
+          "ip": Array [
+            "192.168.0.3",
+          ],
+          "port": Array [
+            6343,
+          ],
+        },
+        "event": Object {
+          "action": Array [
+            "Action",
+          ],
+          "category": Array [
+            "Access",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "module": Array [
+            "nginx",
+          ],
+          "severity": Array [
+            3,
+          ],
+        },
+        "geo": Object {
+          "country_iso_code": Array [
+            "xx",
+          ],
+          "region_name": Array [
+            "xx",
+          ],
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": Array [
+            "apache",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "port": Array [
+            80,
+          ],
+        },
+        "timestamp": "2018-11-05T19:03:25.937Z",
+        "user": Object {
+          "id": Array [
+            "1",
+          ],
+          "name": Array [
+            "john.dee",
+          ],
+        },
+      }
+    }
+    hasRowRenderers={false}
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "source.ip",
+        "initialWidth": 180,
+      }
+    }
+    index={4}
+    key="source.ip"
+    renderCellValue={[Function]}
+    timelineId="test"
+  />
+  <TgridTdCell
+    _id="1"
+    ariaRowindex={2}
+    data={
+      Array [
+        Object {
+          "field": "@timestamp",
+          "value": Array [
+            "2018-11-05T19:03:25.937Z",
+          ],
+        },
+        Object {
+          "field": "event.severity",
+          "value": Array [
+            "3",
+          ],
+        },
+        Object {
+          "field": "event.category",
+          "value": Array [
+            "Access",
+          ],
+        },
+        Object {
+          "field": "event.action",
+          "value": Array [
+            "Action",
+          ],
+        },
+        Object {
+          "field": "host.name",
+          "value": Array [
+            "apache",
+          ],
+        },
+        Object {
+          "field": "source.ip",
+          "value": Array [
+            "192.168.0.1",
+          ],
+        },
+        Object {
+          "field": "destination.ip",
+          "value": Array [
+            "192.168.0.3",
+          ],
+        },
+        Object {
+          "field": "destination.bytes",
+          "value": Array [
+            "123456",
+          ],
+        },
+        Object {
+          "field": "user.name",
+          "value": Array [
+            "john.dee",
+          ],
+        },
+      ]
+    }
+    ecsData={
+      Object {
+        "_id": "1",
+        "destination": Object {
+          "ip": Array [
+            "192.168.0.3",
+          ],
+          "port": Array [
+            6343,
+          ],
+        },
+        "event": Object {
+          "action": Array [
+            "Action",
+          ],
+          "category": Array [
+            "Access",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "module": Array [
+            "nginx",
+          ],
+          "severity": Array [
+            3,
+          ],
+        },
+        "geo": Object {
+          "country_iso_code": Array [
+            "xx",
+          ],
+          "region_name": Array [
+            "xx",
+          ],
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": Array [
+            "apache",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "port": Array [
+            80,
+          ],
+        },
+        "timestamp": "2018-11-05T19:03:25.937Z",
+        "user": Object {
+          "id": Array [
+            "1",
+          ],
+          "name": Array [
+            "john.dee",
+          ],
+        },
+      }
+    }
+    hasRowRenderers={false}
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "destination.ip",
+        "initialWidth": 180,
+      }
+    }
+    index={5}
+    key="destination.ip"
+    renderCellValue={[Function]}
+    timelineId="test"
+  />
+  <TgridTdCell
+    _id="1"
+    ariaRowindex={2}
+    data={
+      Array [
+        Object {
+          "field": "@timestamp",
+          "value": Array [
+            "2018-11-05T19:03:25.937Z",
+          ],
+        },
+        Object {
+          "field": "event.severity",
+          "value": Array [
+            "3",
+          ],
+        },
+        Object {
+          "field": "event.category",
+          "value": Array [
+            "Access",
+          ],
+        },
+        Object {
+          "field": "event.action",
+          "value": Array [
+            "Action",
+          ],
+        },
+        Object {
+          "field": "host.name",
+          "value": Array [
+            "apache",
+          ],
+        },
+        Object {
+          "field": "source.ip",
+          "value": Array [
+            "192.168.0.1",
+          ],
+        },
+        Object {
+          "field": "destination.ip",
+          "value": Array [
+            "192.168.0.3",
+          ],
+        },
+        Object {
+          "field": "destination.bytes",
+          "value": Array [
+            "123456",
+          ],
+        },
+        Object {
+          "field": "user.name",
+          "value": Array [
+            "john.dee",
+          ],
+        },
+      ]
+    }
+    ecsData={
+      Object {
+        "_id": "1",
+        "destination": Object {
+          "ip": Array [
+            "192.168.0.3",
+          ],
+          "port": Array [
+            6343,
+          ],
+        },
+        "event": Object {
+          "action": Array [
+            "Action",
+          ],
+          "category": Array [
+            "Access",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "module": Array [
+            "nginx",
+          ],
+          "severity": Array [
+            3,
+          ],
+        },
+        "geo": Object {
+          "country_iso_code": Array [
+            "xx",
+          ],
+          "region_name": Array [
+            "xx",
+          ],
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": Array [
+            "apache",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "port": Array [
+            80,
+          ],
+        },
+        "timestamp": "2018-11-05T19:03:25.937Z",
+        "user": Object {
+          "id": Array [
+            "1",
+          ],
+          "name": Array [
+            "john.dee",
+          ],
+        },
+      }
+    }
+    hasRowRenderers={false}
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "user.name",
+        "initialWidth": 180,
+      }
+    }
+    index={6}
+    key="user.name"
+    renderCellValue={[Function]}
+    timelineId="test"
+  />
+</styled.div>
+`;

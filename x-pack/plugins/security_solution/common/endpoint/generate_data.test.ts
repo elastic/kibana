@@ -87,7 +87,9 @@ describe('data generator', () => {
     expect(event2.event?.sequence).toBe((firstNonNullValue(event1.event?.sequence) ?? 0) + 1);
   });
 
-  it('creates the same documents with same random seed', () => {
+  // Lets run this one multiple times just to ensure that the randomness
+  // is truly predicable based on the seed passed
+  it.each([1, 2, 3, 4, 5])('[%#] creates the same documents with same random seed', () => {
     const generator1 = new EndpointDocGenerator('seed');
     const generator2 = new EndpointDocGenerator('seed');
     const timestamp = new Date().getTime();

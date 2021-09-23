@@ -6,8 +6,9 @@
  */
 
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { environmentQuery, rangeQuery, kqlQuery } from '../../utils/queries';
+import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { rangeQuery, kqlQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -18,8 +19,8 @@ import { ProcessorEvent } from '../../../common/processor_event';
 
 export interface CorrelationsOptions {
   setup: Setup & SetupTimeRange;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;

@@ -7,13 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { buildEsQuery } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 
 import { EsRawResponse } from './es_raw_response';
 import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
 import { ISearchGeneric, KibanaContext } from '..';
-import { buildEsQuery, getEsQueryConfig } from '../../es_query/es_query';
-import { UiSettingsCommon } from '../../index_patterns';
+import { getEsQueryConfig } from '../../es_query';
+import { UiSettingsCommon } from '../..';
 
 const name = 'esdsl';
 

@@ -10,14 +10,26 @@ import { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-io-ts-
 import { getGeneralFilters } from '../get_general_filters';
 import { getSavedObjectTypes } from '../get_saved_object_types';
 import { getTrustedAppsFilter } from '../get_trusted_apps_filter';
+import { getEventFiltersFilter } from '../get_event_filters_filter';
 
-export const getFilters = (
-  filters: ExceptionListFilter,
-  namespaceTypes: NamespaceType[],
-  showTrustedApps: boolean
-): string => {
+export interface GetFiltersParams {
+  filters: ExceptionListFilter;
+  namespaceTypes: NamespaceType[];
+  showTrustedApps: boolean;
+  showEventFilters: boolean;
+}
+
+export const getFilters = ({
+  filters,
+  namespaceTypes,
+  showTrustedApps,
+  showEventFilters,
+}: GetFiltersParams): string => {
   const namespaces = getSavedObjectTypes({ namespaceType: namespaceTypes });
   const generalFilters = getGeneralFilters(filters, namespaces);
   const trustedAppsFilter = getTrustedAppsFilter(showTrustedApps, namespaces);
-  return [generalFilters, trustedAppsFilter].filter((filter) => filter.trim() !== '').join(' AND ');
+  const eventFiltersFilter = getEventFiltersFilter(showEventFilters, namespaces);
+  return [generalFilters, trustedAppsFilter, eventFiltersFilter]
+    .filter((filter) => filter.trim() !== '')
+    .join(' AND ');
 };

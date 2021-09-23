@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-sortOrder?: estypes.SortOrder;
+sortOrder?: estypes.SearchSortOrder;
 ```

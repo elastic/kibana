@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { A11yProvider } from './a11y';
+export * from './a11y';

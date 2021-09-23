@@ -27,8 +27,6 @@ import {
   SET_LAYER_STYLE_META,
   SET_JOINS,
   UPDATE_SOURCE_PROP,
-  SET_REFRESH_CONFIG,
-  TRIGGER_REFRESH_TIMER,
   SET_MOUSE_COORDINATES,
   CLEAR_MOUSE_COORDINATES,
   SET_GOTO,
@@ -46,7 +44,8 @@ import {
   ROLLBACK_MAP_SETTINGS,
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
-} from '../../actions';
+  UPDATE_EDIT_STATE,
+} from '../../actions/map_action_constants';
 
 import { getDefaultMapSettings } from './default_map_settings';
 import {
@@ -73,11 +72,11 @@ export const DEFAULT_MAP_STATE: MapState = {
     extent: undefined,
     mouseCoordinates: undefined,
     timeFilters: undefined,
+    timeslice: undefined,
     query: undefined,
     filters: [],
-    refreshConfig: undefined,
-    refreshTimerLastTriggeredAt: undefined,
     drawState: undefined,
+    editState: undefined,
   },
   selectedLayerId: null,
   layerList: [],
@@ -86,7 +85,7 @@ export const DEFAULT_MAP_STATE: MapState = {
   __rollbackSettings: null,
 };
 
-export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
+export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, any>) {
   switch (action.type) {
     case UPDATE_DRAW_STATE:
       return {
@@ -94,6 +93,14 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           drawState: action.drawState,
+        },
+      };
+    case UPDATE_EDIT_STATE:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          editState: action.editState,
         },
       };
     case REMOVE_TRACKED_LAYER_STATE:
@@ -123,7 +130,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         ...state,
         mapState: {
           ...state.mapState,
-          mouseCoordinates: null,
+          mouseCoordinates: undefined,
         },
       };
     case SET_GOTO:
@@ -142,7 +149,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
     case SET_MAP_SETTINGS:
       return {
         ...state,
-        settings: { ...getDefaultMapSettings(), ...action.settings },
+        settings: { ...state.settings, ...action.settings },
       };
     case ROLLBACK_MAP_SETTINGS:
       return state.__rollbackSettings
@@ -185,7 +192,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         ],
       };
     case UPDATE_SOURCE_DATA_REQUEST:
-      return updateSourceDataRequest(state, action);
+      return updateSourceDataRequest(state, action.layerId, action.newData);
     case LAYER_DATA_LOAD_STARTED:
       return startDataRequest(
         state,
@@ -210,44 +217,20 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
     case MAP_DESTROYED:
       return { ...state, ready: false };
     case MAP_EXTENT_CHANGED:
-      const newMapState = {
-        center: action.mapState.center,
-        zoom: action.mapState.zoom,
-        extent: action.mapState.extent,
-        buffer: action.mapState.buffer,
-      };
-      return { ...state, mapState: { ...state.mapState, ...newMapState } };
+      return { ...state, mapState: { ...state.mapState, ...action.mapViewContext } };
     case SET_QUERY:
-      const { query, timeFilters, filters, searchSessionId, searchSessionMapBuffer } = action;
+      const { query, timeFilters, timeslice, filters, searchSessionId, searchSessionMapBuffer } =
+        action;
       return {
         ...state,
         mapState: {
           ...state.mapState,
           query,
           timeFilters,
+          timeslice,
           filters,
           searchSessionId,
           searchSessionMapBuffer,
-        },
-      };
-    case SET_REFRESH_CONFIG:
-      const { isPaused, interval } = action;
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          refreshConfig: {
-            isPaused,
-            interval,
-          },
-        },
-      };
-    case TRIGGER_REFRESH_TIMER:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          refreshTimerLastTriggeredAt: new Date().toISOString(),
         },
       };
     case SET_SELECTED_LAYER:

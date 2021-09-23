@@ -21,18 +21,21 @@ import { isRight } from 'fp-ts/Either';
 
 import * as i18n from './translations';
 
-import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
-import { AddComment, AddCommentRefObject } from '../add_comment';
+import { AddComment } from '../add_comment';
 import {
   ActionConnector,
+  ActionsCommentRequestRt,
   AlertCommentRequestRt,
+  Case,
+  CaseUserActions,
   CommentType,
   ContextTypeUserRt,
+  Ecs,
 } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseString } from '../../containers/utils';
+import { parseStringAsExternalService } from '../../common/user_actions';
 import { OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
@@ -42,6 +45,9 @@ import {
   getUpdateAction,
   getAlertAttachment,
   getGeneratedAlertsAttachment,
+  RuleDetailsNavigation,
+  ActionsNavigation,
+  getActionAttachment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -49,24 +55,27 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
-import { Ecs } from '../../../common';
+import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
+
 export interface UserActionTreeProps {
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   caseServices: CaseServices;
   caseUserActions: CaseUserActions[];
   connectors: ActionConnector[];
   data: Case;
-  getRuleDetailsHref: (ruleId: string | null | undefined) => string;
   fetchUserActions: () => void;
+  getCaseDetailHrefWithCommentId: (commentId: string) => string;
+  getRuleDetailsHref?: RuleDetailsNavigation['href'];
+  actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
-  onRuleDetailsClick?: (ruleId: string | null | undefined) => void;
+  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
+  onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
+  statusActionButton: JSX.Element | null;
   updateCase: (newCase: Case) => void;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
-  onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -99,12 +108,20 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
       border: ${theme.eui.euiFlyoutBorder};
-      padding: 10px;
+      padding: ${theme.eui.paddingSizes.s};
       border-radius: ${theme.eui.paddingSizes.xs};
     }
 
     & .comment-alert .euiCommentEvent__headerData {
       flex-grow: 1;
+    }
+
+    & .comment-action.empty-comment .euiCommentEvent--regular {
+      box-shadow: none;
+      .euiCommentEvent__header {
+        padding: ${theme.eui.euiSizeM} ${theme.eui.paddingSizes.s};
+        border-bottom: 0;
+      }
     }
   `}
 `;
@@ -114,35 +131,43 @@ const NEW_ID = 'newComment';
 
 export const UserActionTree = React.memo(
   ({
-    data: caseData,
-    getCaseDetailHrefWithCommentId,
     caseServices,
     caseUserActions,
     connectors,
-    getRuleDetailsHref,
+    data: caseData,
     fetchUserActions,
+    getCaseDetailHrefWithCommentId,
+    getRuleDetailsHref,
+    actionsNavigation,
     isLoadingDescription,
     isLoadingUserActions,
     onRuleDetailsClick,
+    onShowAlertDetails,
     onUpdateField,
     renderInvestigateInTimelineActionComponent,
+    statusActionButton,
     updateCase,
     useFetchAlertData,
     userCanCrud,
-    onShowAlertDetails,
   }: UserActionTreeProps) => {
-    const { detailName: caseId, commentId, subCaseId } = useParams<{
+    const {
+      detailName: caseId,
+      commentId,
+      subCaseId,
+    } = useParams<{
       detailName: string;
       commentId?: string;
       subCaseId?: string;
     }>();
     const handlerTimeoutId = useRef(0);
-    const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
-    const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+    const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
+    const commentRefs = useRef<Record<string, any>>({});
+    const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
+      useLensDraftComment();
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
       getManualAlertIdsWithNoRuleId(caseData.comments)
@@ -150,13 +175,14 @@ export const UserActionTree = React.memo(
 
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
-        if (!manageMarkdownEditIds.includes(id)) {
-          setManangeMardownEditIds([...manageMarkdownEditIds, id]);
-        } else {
-          setManangeMardownEditIds(manageMarkdownEditIds.filter((myId) => id !== myId));
-        }
+        clearDraftComment();
+        setManageMarkdownEditIds((prevManageMarkdownEditIds) =>
+          !prevManageMarkdownEditIds.includes(id)
+            ? prevManageMarkdownEditIds.concat(id)
+            : prevManageMarkdownEditIds.filter((myId) => id !== myId)
+        );
       },
-      [manageMarkdownEditIds]
+      [clearDraftComment]
     );
 
     const handleSaveComment = useCallback(
@@ -202,8 +228,8 @@ export const UserActionTree = React.memo(
       (quote: string) => {
         const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
 
-        if (addCommentRef && addCommentRef.current) {
-          addCommentRef.current.addQuote(`> ${addCarrots} \n`);
+        if (commentRefs.current[NEW_ID]) {
+          commentRefs.current[NEW_ID].addQuote(`> ${addCarrots} \n`);
         }
 
         handleOutlineComment('add-comment');
@@ -222,6 +248,7 @@ export const UserActionTree = React.memo(
     const MarkdownDescription = useMemo(
       () => (
         <UserActionMarkdown
+          ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
           id={DESCRIPTION_ID}
           content={caseData.description}
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
@@ -237,16 +264,18 @@ export const UserActionTree = React.memo(
     const MarkdownNewComment = useMemo(
       () => (
         <AddComment
+          id={NEW_ID}
           caseId={caseId}
-          disabled={!userCanCrud}
-          ref={addCommentRef}
+          userCanCrud={userCanCrud}
+          ref={(element) => (commentRefs.current[NEW_ID] = element)}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
+          statusActionButton={statusActionButton}
           subCaseId={subCaseId}
         />
       ),
-      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, subCaseId]
+      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, statusActionButton, subCaseId]
     );
 
     useEffect(() => {
@@ -281,14 +310,15 @@ export const UserActionTree = React.memo(
         }),
         actions: (
           <UserActionContentToolbar
+            commentMarkdown={caseData.description}
             getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
             id={DESCRIPTION_ID}
             editLabel={i18n.EDIT_DESCRIPTION}
             quoteLabel={i18n.QUOTE}
-            disabled={!userCanCrud}
             isLoading={isLoadingDescription}
             onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
             onQuote={handleManageQuote.bind(null, caseData.description)}
+            userCanCrud={userCanCrud}
           />
         ),
       }),
@@ -338,6 +368,7 @@ export const UserActionTree = React.memo(
                     }),
                     children: (
                       <UserActionMarkdown
+                        ref={(element) => (commentRefs.current[comment.id] = element)}
                         id={comment.id}
                         content={comment.comment}
                         isEditable={manageMarkdownEditIds.includes(comment.id)}
@@ -358,12 +389,13 @@ export const UserActionTree = React.memo(
                       <UserActionContentToolbar
                         getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
                         id={comment.id}
+                        commentMarkdown={comment.comment}
                         editLabel={i18n.EDIT_COMMENT}
                         quoteLabel={i18n.QUOTE}
-                        disabled={!userCanCrud}
                         isLoading={isLoadingIds.includes(comment.id)}
                         onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
                         onQuote={handleManageQuote.bind(null, comment.comment)}
+                        userCanCrud={userCanCrud}
                       />
                     ),
                   },
@@ -397,18 +429,22 @@ export const UserActionTree = React.memo(
 
                 return [
                   ...comments,
-                  getAlertAttachment({
-                    action,
-                    alertId,
-                    getCaseDetailHrefWithCommentId,
-                    getRuleDetailsHref,
-                    index: alertIndex,
-                    loadingAlertData,
-                    onRuleDetailsClick,
-                    ruleId,
-                    ruleName,
-                    onShowAlertDetails,
-                  }),
+                  ...(getRuleDetailsHref != null
+                    ? [
+                        getAlertAttachment({
+                          action,
+                          alertId,
+                          getCaseDetailHrefWithCommentId,
+                          getRuleDetailsHref,
+                          index: alertIndex,
+                          loadingAlertData,
+                          onRuleDetailsClick,
+                          ruleId,
+                          ruleName,
+                          onShowAlertDetails,
+                        }),
+                      ]
+                    : []),
                 ];
               } else if (comment != null && comment.type === CommentType.generatedAlert) {
                 // TODO: clean this up
@@ -422,16 +458,40 @@ export const UserActionTree = React.memo(
 
                 return [
                   ...comments,
-                  getGeneratedAlertsAttachment({
-                    action,
-                    alertIds,
-                    getCaseDetailHrefWithCommentId,
-                    getRuleDetailsHref,
-                    onRuleDetailsClick,
-                    renderInvestigateInTimelineActionComponent,
-                    ruleId: comment.rule?.id ?? '',
-                    ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
-                  }),
+                  ...(getRuleDetailsHref != null
+                    ? [
+                        getGeneratedAlertsAttachment({
+                          action,
+                          alertIds,
+                          getCaseDetailHrefWithCommentId,
+                          getRuleDetailsHref,
+                          onRuleDetailsClick,
+                          renderInvestigateInTimelineActionComponent,
+                          ruleId: comment.rule?.id ?? '',
+                          ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
+                        }),
+                      ]
+                    : []),
+                ];
+              } else if (
+                comment != null &&
+                isRight(ActionsCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.actions
+              ) {
+                return [
+                  ...comments,
+                  ...(comment.actions !== null
+                    ? [
+                        getActionAttachment({
+                          comment,
+                          userCanCrud,
+                          isLoadingIds,
+                          getCaseDetailHrefWithCommentId,
+                          actionsNavigation,
+                          action,
+                        }),
+                      ]
+                    : []),
                 ];
               }
             }
@@ -452,10 +512,14 @@ export const UserActionTree = React.memo(
 
             // Pushed information
             if (action.actionField.length === 1 && action.actionField[0] === 'pushed') {
-              const parsedValue = parseString(`${action.newValue}`);
+              const parsedExternalService = parseStringAsExternalService(
+                action.newValConnectorId,
+                action.newValue
+              );
+
               const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
                 caseServices,
-                parsedValue,
+                parsedExternalService,
                 index
               );
 
@@ -545,6 +609,7 @@ export const UserActionTree = React.memo(
         handleManageMarkdownEditId,
         handleSaveComment,
         getCaseDetailHrefWithCommentId,
+        actionsNavigation,
         userCanCrud,
         isLoadingIds,
         handleManageQuote,
@@ -560,21 +625,61 @@ export const UserActionTree = React.memo(
       ]
     );
 
-    const bottomActions = [
-      {
-        username: (
-          <UserActionUsername username={currentUser?.username} fullName={currentUser?.fullName} />
-        ),
-        'data-test-subj': 'add-comment',
-        timelineIcon: (
-          <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
-        ),
-        className: 'isEdit',
-        children: MarkdownNewComment,
-      },
-    ];
+    const bottomActions = userCanCrud
+      ? [
+          {
+            username: (
+              <UserActionUsername
+                username={currentUser?.username}
+                fullName={currentUser?.fullName}
+              />
+            ),
+            'data-test-subj': 'add-comment',
+            timelineIcon: (
+              <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
+            ),
+            className: 'isEdit',
+            children: MarkdownNewComment,
+          },
+        ]
+      : [];
 
     const comments = [...userActions, ...bottomActions];
+
+    useEffect(() => {
+      if (draftComment?.commentId) {
+        setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
+          if (
+            ![NEW_ID].includes(draftComment?.commentId) &&
+            !prevManageMarkdownEditIds.includes(draftComment?.commentId)
+          ) {
+            return [draftComment?.commentId];
+          }
+          return prevManageMarkdownEditIds;
+        });
+
+        if (
+          commentRefs.current &&
+          commentRefs.current[draftComment.commentId] &&
+          commentRefs.current[draftComment.commentId].editor?.textarea &&
+          commentRefs.current[draftComment.commentId].editor?.toolbar
+        ) {
+          commentRefs.current[draftComment.commentId].setComment(draftComment.comment);
+          if (hasIncomingLensState) {
+            openLensModal({ editorRef: commentRefs.current[draftComment.commentId].editor });
+          } else {
+            clearDraftComment();
+          }
+        }
+      }
+    }, [
+      draftComment,
+      openLensModal,
+      commentRefs,
+      hasIncomingLensState,
+      clearDraftComment,
+      manageMarkdownEditIds,
+    ]);
 
     return (
       <>

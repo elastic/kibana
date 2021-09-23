@@ -52,6 +52,7 @@ export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
+export const getSecurityService = () => pluginsStart.security;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
@@ -76,14 +77,6 @@ export const getEMSSettings = () => {
 
 export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
 
-export const getRegionmapLayers = () => {
-  const config = getKibanaCommonConfig();
-  if (config.regionmap && config.regionmap.layers) {
-    return config.regionmap.layers;
-  } else {
-    return [];
-  }
-};
 export const getTilemap = () => {
   const config = getKibanaCommonConfig();
   if (config.tilemap) {
@@ -112,7 +105,7 @@ export async function getChartsPaletteServiceGetColor(): Promise<
   const chartConfiguration = { syncColors: true };
   return (value: string) => {
     const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
-    const color = paletteDefinition.getColor(series, chartConfiguration);
+    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
     return color ? color : '#3d3d3d';
   };
 }

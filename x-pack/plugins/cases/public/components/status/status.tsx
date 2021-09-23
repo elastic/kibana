@@ -14,24 +14,31 @@ import * as i18n from './translations';
 import { CaseStatusWithAllStatus, StatusAll } from '../../../common';
 
 interface Props {
+  disabled?: boolean;
   type: CaseStatusWithAllStatus;
   withArrow?: boolean;
   onClick?: () => void;
 }
 
-const StatusComponent: React.FC<Props> = ({ type, withArrow = false, onClick = noop }) => {
+const StatusComponent: React.FC<Props> = ({
+  type,
+  disabled = false,
+  withArrow = false,
+  onClick = noop,
+}) => {
   const props = useMemo(
     () => ({
       color: type === StatusAll ? allCaseStatus[StatusAll].color : statuses[type].color,
-      ...(withArrow ? { iconType: 'arrowDown', iconSide: 'right' as const } : {}),
+      // if we are disabled, don't show the arrow and don't allow the user to click
+      ...(withArrow && !disabled ? { iconType: 'arrowDown', iconSide: 'right' as const } : {}),
+      ...(!disabled ? { iconOnClick: onClick } : { iconOnClick: noop }),
     }),
-    [withArrow, type]
+    [disabled, onClick, withArrow, type]
   );
 
   return (
     <EuiBadge
       {...props}
-      iconOnClick={onClick}
       iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}
       data-test-subj={`status-badge-${type}`}
     >

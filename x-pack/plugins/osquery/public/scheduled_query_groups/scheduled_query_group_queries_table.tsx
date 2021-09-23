@@ -6,321 +6,30 @@
  */
 
 import { get } from 'lodash/fp';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import {
-  EuiBasicTable,
-  EuiButtonEmpty,
-  EuiCodeBlock,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  TypedLensByValueInput,
-  PersistedIndexPatternLayer,
-  PieVisualizationState,
-} from '../../../lens/public';
-import { PackagePolicy, PackagePolicyInputStream } from '../../../fleet/common';
-import { FilterStateStore } from '../../../../../src/plugins/data/common';
-import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
-
-export enum ViewResultsActionButtonType {
-  icon = 'icon',
-  button = 'button',
-}
-
-interface ViewResultsInDiscoverActionProps {
-  actionId: string;
-  buttonType: ViewResultsActionButtonType;
-  endDate?: string;
-  startDate?: string;
-}
-
-function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'] {
-  const dataLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['8690befd-fd69-4246-af4a-dd485d2a3b38', 'ed999e9d-204c-465b-897f-fe1a125b39ed'],
-    columns: {
-      '8690befd-fd69-4246-af4a-dd485d2a3b38': {
-        sourceField: 'type',
-        isBucketed: true,
-        dataType: 'string',
-        scale: 'ordinal',
-        operationType: 'terms',
-        label: 'Top values of type',
-        params: {
-          otherBucket: true,
-          size: 5,
-          missingBucket: false,
-          orderBy: {
-            columnId: 'ed999e9d-204c-465b-897f-fe1a125b39ed',
-            type: 'column',
-          },
-          orderDirection: 'desc',
-        },
-      },
-      'ed999e9d-204c-465b-897f-fe1a125b39ed': {
-        sourceField: 'Records',
-        isBucketed: false,
-        dataType: 'number',
-        scale: 'ratio',
-        operationType: 'count',
-        label: 'Count of records',
-      },
-    },
-    incompleteColumns: {},
-  };
-
-  const xyConfig: PieVisualizationState = {
-    shape: 'pie',
-    layers: [
-      {
-        legendDisplay: 'default',
-        nestedLegend: false,
-        layerId: 'layer1',
-        metric: 'ed999e9d-204c-465b-897f-fe1a125b39ed',
-        numberDisplay: 'percent',
-        groups: ['8690befd-fd69-4246-af4a-dd485d2a3b38'],
-        categoryDisplay: 'default',
-      },
-    ],
-  };
-
-  return {
-    visualizationType: 'lnsPie',
-    title: `Action ${actionId} results`,
-    references: [
-      {
-        id: 'logs-*',
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: 'logs-*',
-        name: 'indexpattern-datasource-layer-layer1',
-        type: 'index-pattern',
-      },
-      {
-        name: 'filter-index-pattern-0',
-        id: 'logs-*',
-        type: 'index-pattern',
-      },
-    ],
-    state: {
-      datasourceStates: {
-        indexpattern: {
-          layers: {
-            layer1: dataLayer,
-          },
-        },
-      },
-      filters: [
-        {
-          $state: { store: FilterStateStore.APP_STATE },
-          meta: {
-            indexRefName: 'filter-index-pattern-0',
-            negate: false,
-            alias: null,
-            disabled: false,
-            params: {
-              query: actionId,
-            },
-            type: 'phrase',
-            key: 'action_id',
-          },
-          query: {
-            match_phrase: {
-              action_id: actionId,
-            },
-          },
-        },
-      ],
-      query: { language: 'kuery', query: '' },
-      visualization: xyConfig,
-    },
-  };
-}
-
-const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
-  actionId,
-  buttonType,
-  endDate,
-  startDate,
-}) => {
-  const lensService = useKibana().services.lens;
-
-  const handleClick = useCallback(
-    (event) => {
-      const openInNewWindow = !(!isModifiedEvent(event) && isLeftClickEvent(event));
-
-      event.preventDefault();
-
-      lensService?.navigateToPrefilledEditor(
-        {
-          id: '',
-          timeRange: {
-            from: startDate ?? 'now-1d',
-            to: endDate ?? 'now',
-            mode: startDate || endDate ? 'absolute' : 'relative',
-          },
-          attributes: getLensAttributes(actionId),
-        },
-        openInNewWindow
-      );
-    },
-    [actionId, endDate, lensService, startDate]
-  );
-
-  if (buttonType === ViewResultsActionButtonType.button) {
-    return (
-      <EuiButtonEmpty
-        size="xs"
-        iconType="lensApp"
-        onClick={handleClick}
-        disabled={!lensService?.canUseEditor()}
-      >
-        <FormattedMessage
-          id="xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel"
-          defaultMessage="View results in Lens"
-        />
-      </EuiButtonEmpty>
-    );
-  }
-
-  return (
-    <EuiToolTip
-      content={i18n.translate(
-        'xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel',
-        {
-          defaultMessage: 'View results in Lens',
-        }
-      )}
-    >
-      <EuiButtonIcon
-        iconType="lensApp"
-        disabled={!lensService?.canUseEditor()}
-        onClick={handleClick}
-        aria-label={i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel',
-          {
-            defaultMessage: 'View results in Lens',
-          }
-        )}
-      />
-    </EuiToolTip>
-  );
-};
-
-export const ViewResultsInLensAction = React.memo(ViewResultsInLensActionComponent);
-
-const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
-  actionId,
-  buttonType,
-  endDate,
-  startDate,
-}) => {
-  const urlGenerator = useKibana().services.discover?.urlGenerator;
-  const [discoverUrl, setDiscoverUrl] = useState<string>('');
-
-  useEffect(() => {
-    const getDiscoverUrl = async () => {
-      if (!urlGenerator?.createUrl) return;
-
-      const newUrl = await urlGenerator.createUrl({
-        indexPatternId: 'logs-*',
-        filters: [
-          {
-            meta: {
-              index: 'logs-*',
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'action_id',
-              params: { query: actionId },
-            },
-            query: { match_phrase: { action_id: actionId } },
-            $state: { store: FilterStateStore.APP_STATE },
-          },
-        ],
-        refreshInterval: {
-          pause: true,
-          value: 0,
-        },
-        timeRange:
-          startDate && endDate
-            ? {
-                to: endDate,
-                from: startDate,
-                mode: 'absolute',
-              }
-            : {
-                to: 'now',
-                from: 'now-15m',
-                mode: 'relative',
-              },
-      });
-      setDiscoverUrl(newUrl);
-    };
-    getDiscoverUrl();
-  }, [actionId, endDate, startDate, urlGenerator]);
-
-  if (buttonType === ViewResultsActionButtonType.button) {
-    return (
-      <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl}>
-        <FormattedMessage
-          id="xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel"
-          defaultMessage="View results in Discover"
-        />
-      </EuiButtonEmpty>
-    );
-  }
-
-  return (
-    <EuiToolTip
-      content={i18n.translate(
-        'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
-        {
-          defaultMessage: 'View results in Discover',
-        }
-      )}
-    >
-      <EuiButtonIcon
-        iconType="discoverApp"
-        href={discoverUrl}
-        aria-label={i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
-          {
-            defaultMessage: 'View results in Discover',
-          }
-        )}
-      />
-    </EuiToolTip>
-  );
-};
-
-export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActionComponent);
+import { PlatformIcons } from './queries/platforms';
+import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 
 interface ScheduledQueryGroupQueriesTableProps {
-  data: Pick<PackagePolicy, 'inputs'>;
-  editMode?: boolean;
-  onDeleteClick?: (item: PackagePolicyInputStream) => void;
-  onEditClick?: (item: PackagePolicyInputStream) => void;
-  selectedItems?: PackagePolicyInputStream[];
-  setSelectedItems?: (selection: PackagePolicyInputStream[]) => void;
+  data: OsqueryManagerPackagePolicyInputStream[];
+  onDeleteClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
+  onEditClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
+  selectedItems?: OsqueryManagerPackagePolicyInputStream[];
+  setSelectedItems?: (selection: OsqueryManagerPackagePolicyInputStream[]) => void;
 }
 
 const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQueriesTableProps> = ({
   data,
-  editMode = false,
   onDeleteClick,
   onEditClick,
   selectedItems,
   setSelectedItems,
 }) => {
   const renderDeleteAction = useCallback(
-    (item: PackagePolicyInputStream) => (
+    (item: OsqueryManagerPackagePolicyInputStream) => (
       <EuiButtonIcon
         color="danger"
         // @ts-expect-error update types
@@ -342,7 +51,7 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
   );
 
   const renderEditAction = useCallback(
-    (item: PackagePolicyInputStream) => (
+    (item: OsqueryManagerPackagePolicyInputStream) => (
       <EuiButtonIcon
         color="primary"
         // @ts-expect-error update types
@@ -372,23 +81,18 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
     []
   );
 
-  const renderDiscoverResultsAction = useCallback(
-    (item) => (
-      <ViewResultsInDiscoverAction
-        actionId={item.vars?.id.value}
-        buttonType={ViewResultsActionButtonType.icon}
-      />
-    ),
+  const renderPlatformColumn = useCallback(
+    (platform: string) => <PlatformIcons platform={platform} />,
     []
   );
 
-  const renderLensResultsAction = useCallback(
-    (item) => (
-      <ViewResultsInLensAction
-        actionId={item.vars?.id.value}
-        buttonType={ViewResultsActionButtonType.icon}
-      />
-    ),
+  const renderVersionColumn = useCallback(
+    (version: string) =>
+      version
+        ? `${version}`
+        : i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.osqueryVersionAllLabel', {
+            defaultMessage: 'ALL',
+          }),
     []
   );
 
@@ -416,57 +120,57 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
         render: renderQueryColumn,
       },
       {
-        name: editMode
-          ? i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.actionsColumnTitle', {
-              defaultMessage: 'Actions',
-            })
-          : i18n.translate(
-              'xpack.osquery.scheduledQueryGroup.queriesTable.viewResultsColumnTitle',
-              {
-                defaultMessage: 'View results',
-              }
-            ),
+        field: 'vars.platform.value',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.platformColumnTitle', {
+          defaultMessage: 'Platform',
+        }),
+        render: renderPlatformColumn,
+      },
+      {
+        field: 'vars.version.value',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.versionColumnTitle', {
+          defaultMessage: 'Min Osquery version',
+        }),
+        render: renderVersionColumn,
+      },
+      {
+        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
         width: '120px',
-        actions: editMode
-          ? [
-              {
-                render: renderEditAction,
-              },
-              {
-                render: renderDeleteAction,
-              },
-            ]
-          : [
-              {
-                render: renderDiscoverResultsAction,
-              },
-              {
-                render: renderLensResultsAction,
-              },
-            ],
+        actions: [
+          {
+            render: renderEditAction,
+          },
+          {
+            render: renderDeleteAction,
+          },
+        ],
       },
     ],
     [
-      editMode,
       renderDeleteAction,
-      renderDiscoverResultsAction,
       renderEditAction,
-      renderLensResultsAction,
+      renderPlatformColumn,
       renderQueryColumn,
+      renderVersionColumn,
     ]
   );
 
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'vars.id.value' as keyof PackagePolicyInputStream,
+        field: 'vars.id.value' as keyof OsqueryManagerPackagePolicyInputStream,
         direction: 'asc' as const,
       },
     }),
     []
   );
 
-  const itemId = useCallback((item: PackagePolicyInputStream) => get('vars.id.value', item), []);
+  const itemId = useCallback(
+    (item: OsqueryManagerPackagePolicyInputStream) => get('vars.id.value', item),
+    []
+  );
 
   const selection = useMemo(
     () => ({
@@ -477,13 +181,13 @@ const ScheduledQueryGroupQueriesTableComponent: React.FC<ScheduledQueryGroupQuer
   );
 
   return (
-    <EuiBasicTable<PackagePolicyInputStream>
-      items={data.inputs[0].streams}
+    <EuiBasicTable<OsqueryManagerPackagePolicyInputStream>
+      items={data}
       itemId={itemId}
       columns={columns}
       sorting={sorting}
-      selection={editMode ? selection : undefined}
-      isSelectable={editMode}
+      selection={selection}
+      isSelectable
     />
   );
 };

@@ -5,21 +5,33 @@
  * 2.0.
  */
 
-import { CasePostRequest, ConnectorTypeFields } from '../../../common';
-import { FIELD_TYPES, fieldValidators, FormSchema } from '../../common/shared_imports';
+import { CasePostRequest, ConnectorTypeFields, MAX_TITLE_LENGTH } from '../../../common';
+import {
+  FIELD_TYPES,
+  fieldValidators,
+  FormSchema,
+  VALIDATION_TYPES,
+} from '../../common/shared_imports';
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
-const { emptyField } = fieldValidators;
+const { emptyField, maxLengthField } = fieldValidators;
 
 export const schemaTags = {
   type: FIELD_TYPES.COMBO_BOX,
   label: i18n.TAGS,
   helpText: i18n.TAGS_HELP,
   labelAppend: OptionalFieldLabel,
+  validations: [
+    {
+      validator: emptyField(i18n.TAGS_EMPTY_ERROR),
+      type: VALIDATION_TYPES.ARRAY_ITEM,
+      isBlocking: false,
+    },
+  ],
 };
 
-export type FormProps = Omit<CasePostRequest, 'connector' | 'settings'> & {
+export type FormProps = Omit<CasePostRequest, 'connector' | 'settings' | 'owner'> & {
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
@@ -32,6 +44,12 @@ export const schema: FormSchema<FormProps> = {
     validations: [
       {
         validator: emptyField(i18n.TITLE_REQUIRED),
+      },
+      {
+        validator: maxLengthField({
+          length: MAX_TITLE_LENGTH,
+          message: i18n.MAX_LENGTH_ERROR('title', MAX_TITLE_LENGTH),
+        }),
       },
     ],
   },
@@ -49,7 +67,9 @@ export const schema: FormSchema<FormProps> = {
     label: i18n.CONNECTORS,
     defaultValue: 'none',
   },
-  fields: {},
+  fields: {
+    defaultValue: null,
+  },
   syncAlerts: {
     helpText: i18n.SYNC_ALERTS_HELP,
     type: FIELD_TYPES.TOGGLE,

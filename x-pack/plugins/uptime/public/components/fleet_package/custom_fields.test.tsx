@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import 'jest-canvas-mock';
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import {
-  SimpleFieldsContextProvider,
-  HTTPAdvancedFieldsContextProvider,
-  TCPAdvancedFieldsContextProvider,
+  TCPContextProvider,
+  HTTPContextProvider,
+  BrowserContextProvider,
+  ICMPSimpleFieldsContextProvider,
+  MonitorTypeContextProvider,
   TLSFieldsContextProvider,
-  defaultSimpleFields,
-  defaultTLSFields,
-  defaultHTTPAdvancedFields,
-  defaultTCPAdvancedFields,
 } from './contexts';
 import { CustomFields } from './custom_fields';
 import { ConfigKeys, DataStream, ScheduleUnit } from './types';
 import { validate as centralValidation } from './validation';
+import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -29,25 +29,33 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 
 const defaultValidation = centralValidation[DataStream.HTTP];
 
-const defaultConfig = {
-  ...defaultSimpleFields,
-  ...defaultTLSFields,
-  ...defaultHTTPAdvancedFields,
-  ...defaultTCPAdvancedFields,
-};
+const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
+const defaultTCPConfig = defaultConfig[DataStream.TCP];
 
 describe('<CustomFields />', () => {
-  const WrappedComponent = ({ validate = defaultValidation, typeEditable = false }) => {
+  const WrappedComponent = ({
+    validate = defaultValidation,
+    typeEditable = false,
+    dataStreams = [DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER],
+  }) => {
     return (
-      <HTTPAdvancedFieldsContextProvider>
-        <TLSFieldsContextProvider>
-          <TCPAdvancedFieldsContextProvider>
-            <SimpleFieldsContextProvider>
-              <CustomFields validate={validate} typeEditable={typeEditable} />
-            </SimpleFieldsContextProvider>
-          </TCPAdvancedFieldsContextProvider>
-        </TLSFieldsContextProvider>
-      </HTTPAdvancedFieldsContextProvider>
+      <HTTPContextProvider>
+        <MonitorTypeContextProvider>
+          <TCPContextProvider>
+            <BrowserContextProvider>
+              <ICMPSimpleFieldsContextProvider>
+                <TLSFieldsContextProvider>
+                  <CustomFields
+                    validate={validate}
+                    typeEditable={typeEditable}
+                    dataStreams={dataStreams}
+                  />
+                </TLSFieldsContextProvider>
+              </ICMPSimpleFieldsContextProvider>
+            </BrowserContextProvider>
+          </TCPContextProvider>
+        </MonitorTypeContextProvider>
+      </HTTPContextProvider>
     );
   };
 
@@ -63,20 +71,20 @@ describe('<CustomFields />', () => {
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(monitorType).not.toBeInTheDocument();
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
     // expect(tags).toBeInTheDocument();
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
@@ -116,11 +124,15 @@ describe('<CustomFields />', () => {
     expect(verificationMode).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(ca.value).toEqual(defaultConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
-      expect(clientKey.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY].value);
-      expect(clientKeyPassphrase.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value);
-      expect(clientCertificate.value).toEqual(defaultConfig[ConfigKeys.TLS_CERTIFICATE].value);
-      expect(verificationMode.value).toEqual(defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE].value);
+      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
+      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY].value);
+      expect(clientKeyPassphrase.value).toEqual(
+        defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value
+      );
+      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE].value);
+      expect(verificationMode.value).toEqual(
+        defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE].value
+      );
     });
   });
 
@@ -152,26 +164,26 @@ describe('<CustomFields />', () => {
   });
 
   it('handles switching monitor type', () => {
-    const { getByText, getByLabelText, queryByLabelText } = render(
+    const { getByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
       <WrappedComponent typeEditable />
     );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     expect(monitorType).toBeInTheDocument();
-    expect(monitorType.value).toEqual(defaultConfig[ConfigKeys.MONITOR_TYPE]);
+    expect(monitorType.value).toEqual(defaultHTTPConfig[ConfigKeys.MONITOR_TYPE]);
     fireEvent.change(monitorType, { target: { value: DataStream.TCP } });
 
     // expect tcp fields to be in the DOM
     const host = getByLabelText('Host:Port') as HTMLInputElement;
 
     expect(host).toBeInTheDocument();
-    expect(host.value).toEqual(defaultConfig[ConfigKeys.HOSTS]);
+    expect(host.value).toEqual(defaultTCPConfig[ConfigKeys.HOSTS]);
 
     // expect HTTP fields not to be in the DOM
     expect(queryByLabelText('URL')).not.toBeInTheDocument();
     expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
-    const advancedOptionsButton = getByText('Advanced TCP options');
+    let advancedOptionsButton = getByText('Advanced TCP options');
     fireEvent.click(advancedOptionsButton);
 
     expect(queryByLabelText('Request method')).not.toBeInTheDocument();
@@ -184,6 +196,26 @@ describe('<CustomFields />', () => {
 
     // expect TCP fields not to be in the DOM
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
+
+    fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
+
+    // expect browser fields to be in the DOM
+    getAllByLabelText('Zip URL').forEach((node) => {
+      expect(node).toBeInTheDocument();
+    });
+    expect(
+      getByText(
+        /To create a "Browser" monitor, please ensure you are using the elastic-agent-complete Docker container, which contains the dependencies to run these mon/
+      )
+    ).toBeInTheDocument();
+
+    // ensure at least one browser advanced option is present
+    advancedOptionsButton = getByText('Advanced Browser options');
+    fireEvent.click(advancedOptionsButton);
+    expect(getByLabelText('Screenshot options')).toBeInTheDocument();
+
+    // expect ICMP fields not to be in the DOM
+    expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
   });
 
   it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {
@@ -216,7 +248,7 @@ describe('<CustomFields />', () => {
     const urlError = getByText('URL is required');
     const monitorIntervalError = getByText('Monitor interval is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
-    const timeoutError = getByText('Timeout must be 0 or greater and less than schedule interval');
+    const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
     expect(urlError).toBeInTheDocument();
     expect(monitorIntervalError).toBeInTheDocument();
@@ -232,16 +264,35 @@ describe('<CustomFields />', () => {
     expect(queryByText('URL is required')).not.toBeInTheDocument();
     expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
     expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
-    expect(
-      queryByText('Timeout must be 0 or greater and less than schedule interval')
-    ).not.toBeInTheDocument();
+    expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
 
     // create more errors
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } }); // 1 minute
-    fireEvent.change(timeout, { target: { value: '61' } }); // timeout cannot be more than monitor interval
+    fireEvent.change(timeout, { target: { value: '611' } }); // timeout cannot be more than monitor interval
 
-    const timeoutError2 = getByText('Timeout must be 0 or greater and less than schedule interval');
+    const timeoutError2 = getByText('Timeout must be less than the monitor interval');
 
     expect(timeoutError2).toBeInTheDocument();
+  });
+
+  it('does not show monitor options that are not contained in datastreams', async () => {
+    const { getByText, queryByText, queryByLabelText } = render(
+      <WrappedComponent
+        dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]}
+        typeEditable
+      />
+    );
+
+    const monitorType = queryByLabelText('Monitor Type') as HTMLInputElement;
+
+    // resolve errors
+    fireEvent.click(monitorType);
+
+    waitFor(() => {
+      expect(getByText('http')).toBeInTheDocument();
+      expect(getByText('tcp')).toBeInTheDocument();
+      expect(getByText('icmp')).toBeInTheDocument();
+      expect(queryByText('browser')).not.toBeInTheDocument();
+    });
   });
 });

@@ -26,10 +26,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('histogram agg onSearchRequestStart', function () {
     before(async function () {
       // loading back default data
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
 
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('long_window_logstash');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
 
       await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');

@@ -15,12 +15,12 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
     this.tags('ciGroup13');
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic'); // need at least one index pattern
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic'); // need at least one index pattern
     });
 
     after(async () => {
-      await esArchiver.unload('lens/basic');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
     });
 
     loadTestFile(require.resolve('./search_session_example'));

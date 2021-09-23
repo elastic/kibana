@@ -44,13 +44,15 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
     pick(['dataProviders', 'timelineType'], getTimeline(state, timelineId))
   );
 
-  const handleOpenPopover = useCallback(() => setIsAddFilterPopoverOpen(true), [
-    setIsAddFilterPopoverOpen,
-  ]);
+  const handleOpenPopover = useCallback(
+    () => setIsAddFilterPopoverOpen(true),
+    [setIsAddFilterPopoverOpen]
+  );
 
-  const handleClosePopover = useCallback(() => setIsAddFilterPopoverOpen(false), [
-    setIsAddFilterPopoverOpen,
-  ]);
+  const handleClosePopover = useCallback(
+    () => setIsAddFilterPopoverOpen(false),
+    [setIsAddFilterPopoverOpen]
+  );
 
   const handleDataProviderEdited = useCallback(
     ({ andProviderId, excluded, field, id, operator, providerId, value, type }) => {
@@ -201,7 +203,6 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       closePopover={handleClosePopover}
       anchorPosition="downLeft"
       panelPaddingSize="none"
-      ownFocus={true}
       repositionOnScroll
     >
       {content}

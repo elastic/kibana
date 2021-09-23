@@ -19,19 +19,19 @@ describe('buildActiveMappings', () => {
     const properties = {
       aaa: { type: 'text' },
       bbb: { type: 'long' },
-    };
+    } as const;
 
     expect(buildActiveMappings(properties)).toMatchSnapshot();
   });
 
   test('disallows duplicate mappings', () => {
-    const properties = { type: { type: 'long' } };
+    const properties = { type: { type: 'long' } } as const;
 
     expect(() => buildActiveMappings(properties)).toThrow(/Cannot redefine core mapping \"type\"/);
   });
 
   test('disallows mappings with leading underscore', () => {
-    const properties = { _hm: { type: 'keyword' } };
+    const properties = { _hm: { type: 'keyword' } } as const;
 
     expect(() => buildActiveMappings(properties)).toThrow(
       /Invalid mapping \"_hm\"\. Mappings cannot start with _/
@@ -60,7 +60,7 @@ describe('buildActiveMappings', () => {
       aaa: { type: 'keyword', fields: { a: { type: 'keyword' }, b: { type: 'text' } } },
       bbb: { fields: { b: { type: 'text' }, a: { type: 'keyword' } }, type: 'keyword' },
       ccc: { fields: { b: { type: 'text' }, a: { type: 'text' } }, type: 'keyword' },
-    };
+    } as const;
 
     const mappings = buildActiveMappings(properties);
     const hashes = mappings._meta!.migrationMappingPropertyHashes!;

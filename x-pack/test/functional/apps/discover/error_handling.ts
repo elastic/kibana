@@ -15,14 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('errors', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('invalid_scripted_field');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/invalid_scripted_field');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async function () {
-      await esArchiver.unload('invalid_scripted_field');
+      await esArchiver.unload('x-pack/test/functional/es_archives/invalid_scripted_field');
     });
 
     // this is the same test as in OSS but it catches different error message issue in different licences

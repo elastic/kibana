@@ -30,7 +30,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('pagerduty connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         routingKey: 'test',
@@ -43,7 +43,7 @@ describe('pagerduty connector validation', () => {
       },
     } as PagerDutyActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       secrets: {
         errors: {
           routingKey: [],
@@ -53,7 +53,7 @@ describe('pagerduty connector validation', () => {
 
     delete actionConnector.config.apiUrl;
     actionConnector.secrets.routingKey = 'test1';
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       secrets: {
         errors: {
           routingKey: [],
@@ -62,7 +62,7 @@ describe('pagerduty connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid', () => {
+  test('connector validation fails when connector config is not valid', async () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
@@ -73,7 +73,7 @@ describe('pagerduty connector validation', () => {
       },
     } as PagerDutyActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       secrets: {
         errors: {
           routingKey: ['An integration key / routing key is required.'],
@@ -84,7 +84,7 @@ describe('pagerduty connector validation', () => {
 });
 
 describe('pagerduty action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       eventAction: 'trigger',
       dedupKey: 'test',
@@ -97,7 +97,7 @@ describe('pagerduty action params validation', () => {
       class: 'test class',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],

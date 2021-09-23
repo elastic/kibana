@@ -289,7 +289,7 @@ function getSomeNewAlertType() {
   return { ... } as AlertTypeModel;
 }
 
-triggersActionsUi.alertTypeRegistry.register(getSomeNewAlertType());
+triggersActionsUi.ruleTypeRegistry.register(getSomeNewAlertType());
 ```
 
 ## Create and register new alert type UI example
@@ -409,7 +409,7 @@ import { getAlertType as getExampledAlertType } from './example';
 ...
 
 ...
-alertTypeRegistry.register(getExampledAlertType());
+ruleTypeRegistry.register(getExampledAlertType());
 ```
 
 After these four steps, the new `Example Alert Type` is available in UI of Create flyout:
@@ -888,10 +888,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to Server log',
       }
     ),
-    validateConnector: (): ValidationResult => {
+    validateConnector: (): Promise<ValidationResult> => {
       return { errors: {} };
     },
-    validateParams: (actionParams: ServerLogActionParams): ValidationResult => {
+    validateParams: (actionParams: ServerLogActionParams): Promise<ValidationResult> => {
       // validation of action params implementation
     },
     actionConnectorFields: null,
@@ -929,10 +929,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to email',
       }
     ),
-    validateConnector: (action: EmailActionConnector): ValidationResult => {
+    validateConnector: (action: EmailActionConnector): Promise<ValidationResult> => {
       // validation of connector properties implementation
     },
-    validateParams: (actionParams: EmailActionParams): ValidationResult => {
+    validateParams: (actionParams: EmailActionParams): Promise<ValidationResult> => {
       // validation of action params implementation
     },
     actionConnectorFields: EmailActionConnectorFields,
@@ -967,10 +967,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to Slack',
       }
     ),
-    validateConnector: (action: SlackActionConnector): ValidationResult => {
+    validateConnector: (action: SlackActionConnector): Promise<ValidationResult> => {
       // validation of connector properties implementation
     },
-    validateParams: (actionParams: SlackActionParams): ValidationResult => {
+    validateParams: (actionParams: SlackActionParams): Promise<ValidationResult> => {
       // validation of action params implementation 
     },
     actionConnectorFields: SlackActionFields,
@@ -1000,12 +1000,12 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Index data into Elasticsearch.',
       }
     ),
-    validateConnector: (): ValidationResult => {
+    validateConnector: (): Promise<ValidationResult> => {
       return { errors: {} };
     },
     actionConnectorFields: IndexActionConnectorFields,
     actionParamsFields: IndexParamsFields,
-    validateParams: (): ValidationResult => {
+    validateParams: (): Promise<ValidationResult> => {
       return { errors: {} };
     },
   };
@@ -1046,10 +1046,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send a request to a web service.',
       }
     ),
-    validateConnector: (action: WebhookActionConnector): ValidationResult => {
+    validateConnector: (action: WebhookActionConnector): Promise<ValidationResult> => {
       // validation of connector properties implementation
     },
-    validateParams: (actionParams: WebhookActionParams): ValidationResult => {
+    validateParams: (actionParams: WebhookActionParams): Promise<ValidationResult> => {
       // validation of action params implementation
     },
     actionConnectorFields: WebhookActionConnectorFields,
@@ -1086,10 +1086,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to PagerDuty',
       }
     ),
-    validateConnector: (action: PagerDutyActionConnector): ValidationResult => {
+    validateConnector: (action: PagerDutyActionConnector): Promise<ValidationResult> => {
       // validation of connector properties implementation
     },
-    validateParams: (actionParams: PagerDutyActionParams): ValidationResult => {
+    validateParams: (actionParams: PagerDutyActionParams): Promise<ValidationResult> => {
       // validation of action params implementation
     },
     actionConnectorFields: PagerDutyActionConnectorFields,
@@ -1113,8 +1113,8 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
   iconClass: IconType;
   selectMessage: string;
   actionTypeTitle?: string;
-  validateConnector: (connector: any) => ValidationResult;
-  validateParams: (actionParams: any) => ValidationResult;
+  validateConnector: (connector: any) => Promise<ValidationResult>;
+  validateParams: (actionParams: any) => Promise<ValidationResult>;
   actionConnectorFields: React.FunctionComponent<any> | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
 ```
@@ -1186,7 +1186,7 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Example Action',
       }
     ),
-    validateConnector: (action: ExampleActionConnector): ValidationResult => {
+    validateConnector: (action: ExampleActionConnector): Promise<ValidationResult> => {
       const validationResult = { errors: {} };
       const errors = {
         someConnectorField: new Array<string>(),
@@ -1204,7 +1204,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (actionParams: ExampleActionParams): ValidationResult => {
+    validateParams: (actionParams: ExampleActionParams): Promise<ValidationResult> => {
       const validationResult = { errors: {} };
       const errors = {
         message: new Array<string>(),
@@ -1472,7 +1472,7 @@ interface ActionAccordionFormProps {
 |---|---|
 |onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
 |http|HttpSetup needed for executing API calls.|
-|alertTypeRegistry|Registry for alert types.|
+|ruleTypeRegistry|Registry for alert types.|
 |actionTypeRegistry|Registry for action types.|
 |uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
 |docLinks|Documentation Links, needed to link to the documentation from informational callouts.|

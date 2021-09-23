@@ -30,6 +30,7 @@ import {
   EventFilterForDeletion,
   EventFilterDeletionReset,
   EventFilterDeleteStatusChanged,
+  EventFiltersForceRefresh,
 } from './action';
 
 import { initialEventFiltersPageState } from './builders';
@@ -65,18 +66,16 @@ const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDat
   };
 };
 
-const handleEventFiltersListPageDataExistChanges: CaseReducer<EventFiltersListPageDataExistsChanged> = (
-  state,
-  action
-) => {
-  return {
-    ...state,
-    listPage: {
-      ...state.listPage,
-      dataExist: action.payload,
-    },
+const handleEventFiltersListPageDataExistChanges: CaseReducer<EventFiltersListPageDataExistsChanged> =
+  (state, action) => {
+    return {
+      ...state,
+      listPage: {
+        ...state.listPage,
+        dataExist: action.payload,
+      },
+    };
   };
-};
 
 const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) => {
   return {
@@ -86,6 +85,7 @@ const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) 
       entry: action.payload.entry,
       hasNameError: !action.payload.entry.name,
       hasOSError: !action.payload.entry.os_types?.length,
+      newComment: '',
       submissionResourceState: {
         type: 'UninitialisedResourceState',
       },
@@ -98,7 +98,7 @@ const eventFiltersChangeForm: CaseReducer<EventFiltersChangeForm> = (state, acti
     ...state,
     form: {
       ...state.form,
-      entry: action.payload.entry,
+      entry: action.payload.entry !== undefined ? action.payload.entry : state.form.entry,
       hasItemsError:
         action.payload.hasItemsError !== undefined
           ? action.payload.hasItemsError
@@ -219,6 +219,16 @@ const handleEventFilterDeleteStatusChanges: CaseReducer<EventFilterDeleteStatusC
   };
 };
 
+const handleEventFilterForceRefresh: CaseReducer<EventFiltersForceRefresh> = (state, action) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      forceRefresh: action.payload.forceRefresh,
+    },
+  };
+};
+
 export const eventFiltersPageReducer: StateReducer = (
   state = initialEventFiltersPageState(),
   action
@@ -236,6 +246,8 @@ export const eventFiltersPageReducer: StateReducer = (
       return eventFiltersUpdateSuccess(state, action);
     case 'userChangedUrl':
       return userChangedUrl(state, action);
+    case 'eventFiltersForceRefresh':
+      return handleEventFilterForceRefresh(state, action);
   }
 
   // actions only handled if we're on the List Page

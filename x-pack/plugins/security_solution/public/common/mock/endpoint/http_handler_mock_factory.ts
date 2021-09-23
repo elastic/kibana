@@ -7,13 +7,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type {
-  HttpFetchOptions,
-  HttpFetchOptionsWithPath,
-  HttpHandler,
-  HttpStart,
-} from 'kibana/public';
-import { extend } from 'lodash';
+import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from 'kibana/public';
+import { merge } from 'lodash';
 import { act } from '@testing-library/react';
 
 class ApiRouteNotMocked extends Error {}
@@ -30,29 +25,28 @@ export type ResponseProviderCallback<F extends (...args: any) => any = (...args:
  *
  * @example
  *  type FleetSetupResponseProvidersMock = ResponseProvidersInterface<{
- *    fleetSetup: () => PostIngestSetupResponse;
+ *    fleetSetup: () => PostFleetSetupResponse;
  *  }>;
  */
 export type ResponseProvidersInterface<
   I extends Record<string, ResponseProviderCallback> = Record<string, ResponseProviderCallback>
 > = I;
 
-type SingleResponseProvider<
-  F extends ResponseProviderCallback = ResponseProviderCallback
-> = jest.MockedFunction<F> & {
-  /**
-   * Delay responding to the HTTP call until this promise is resolved. Use it to introduce
-   * elongated delays in order to test intermediate UI states.
-   *
-   * @example
-   * apiMocks.responseProvider.someProvider.mockDelay
-   *    // Delay this response by 1/2 second
-   *    .mockImplementation(
-   *      () => new Promise(r => setTimeout(r, 500))
-   *    )
-   */
-  mockDelay: jest.MockedFunction<() => Promise<void>>;
-};
+type SingleResponseProvider<F extends ResponseProviderCallback = ResponseProviderCallback> =
+  jest.MockedFunction<F> & {
+    /**
+     * Delay responding to the HTTP call until this promise is resolved. Use it to introduce
+     * elongated delays in order to test intermediate UI states.
+     *
+     * @example
+     * apiMocks.responseProvider.someProvider.mockDelay
+     *    // Delay this response by 1/2 second
+     *    .mockImplementation(
+     *      () => new Promise(r => setTimeout(r, 500))
+     *    )
+     */
+    mockDelay: jest.MockedFunction<() => Promise<void>>;
+  };
 
 /**
  * The interface for a `core.http` set of mocked API responses.
@@ -72,11 +66,9 @@ interface MockedApi<R extends ResponseProvidersInterface = ResponseProvidersInte
    * available - `mockDelay()` - which can be used to delay the given response being returned by the
    * associated HTTP method.
    */
-  responseProvider: Readonly<
-    {
-      [K in keyof R]: SingleResponseProvider<R[K]>;
-    }
-  >;
+  responseProvider: Readonly<{
+    [K in keyof R]: SingleResponseProvider<R[K]>;
+  }>;
 }
 
 type HttpMethods = keyof Pick<
@@ -87,7 +79,8 @@ type HttpMethods = keyof Pick<
 const HTTP_METHODS: HttpMethods[] = ['delete', 'fetch', 'get', 'post', 'put', 'head', 'patch'];
 
 export type ApiHandlerMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> = (
-  http: jest.Mocked<HttpStart>
+  http: jest.Mocked<HttpStart>,
+  options?: { ignoreUnMockedApiRouteErrors?: boolean }
 ) => MockedApi<R>;
 
 interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> {
@@ -102,7 +95,7 @@ interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInte
    * The handler for providing a response to for this API call.
    * It should return the "raw" value, __NOT__ a `Promise`
    */
-  handler: (...args: Parameters<HttpHandler>) => any;
+  handler: (options: HttpFetchOptionsWithPath) => any;
   /**
    * A function that returns a promise. The API response will be delayed until this promise is
    * resolved. This can be helpful when wanting to test an intermediate UI state while the API
@@ -137,8 +130,9 @@ export type ApiHandlerMockFactoryProps<
 export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}>(
   mocks: ApiHandlerMockFactoryProps<R>
 ): ApiHandlerMock<R> => {
-  return (http) => {
+  return (http, options) => {
     let inflightApiCalls = 0;
+    const { ignoreUnMockedApiRouteErrors = false } = options ?? {};
     const apiDoneListeners: Array<() => void> = [];
     const markApiCallAsHandled = async (delay?: RouteMock['delay']) => {
       inflightApiCalls++;
@@ -158,6 +152,11 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
         apiDoneListeners.splice(0).forEach((listener) => listener());
       }
     };
+
+    // For debugging purposes.
+    // It will provide a stack trace leading back to the location in the test file
+    // where the `core.http` mocks were applied from.
+    const testContextStackTrace = new Error('HTTP MOCK APPLIED FROM:').stack;
 
     const responseProvider: MockedApi<R>['responseProvider'] = mocks.reduce(
       (providers, routeMock) => {
@@ -195,22 +194,40 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
 
       http[method].mockImplementation(async (...args) => {
         const path = isHttpFetchOptionsWithPath(args[0]) ? args[0].path : args[0];
-        const routeMock = methodMocks.find((handler) => handler.path === path);
+        const routeMock = methodMocks.find((handler) => pathMatchesPattern(handler.path, path));
 
         if (routeMock) {
-          markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
-
-          await responseProvider[routeMock.id].mockDelay();
-
           // Use the handler defined for the HTTP Mocked interface (not the one passed on input to
           // the factory) for retrieving the response value because that one could have had its
           // response value manipulated by the individual test case.
-          return responseProvider[routeMock.id](...args);
+
+          markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
+          await responseProvider[routeMock.id].mockDelay();
+
+          const fetchOptions: HttpFetchOptionsWithPath = isHttpFetchOptionsWithPath(args[0])
+            ? args[0]
+            : {
+                // Ignore below is needed because the http service methods are defined via an overloaded interface.
+                // If the first argument is NOT fetch with options, then we know that its a string and `args` has
+                // a potential for being of `.length` 2.
+                // @ts-ignore
+                ...(args[1] || {}),
+                path: args[0],
+              };
+
+          return responseProvider[routeMock.id](fetchOptions);
         } else if (priorMockedFunction) {
           return priorMockedFunction(...args);
         }
 
+        if (ignoreUnMockedApiRouteErrors) {
+          return;
+        }
+
         const err = new ApiRouteNotMocked(`API [${method.toUpperCase()} ${path}] is not MOCKED!`);
+        // Append additional stack calling data from when this API mock was applied
+        err.stack += `\n${testContextStackTrace}`;
+
         // eslint-disable-next-line no-console
         console.error(err);
         throw err;
@@ -219,6 +236,29 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
 
     return mockedApiInterface;
   };
+};
+
+const pathMatchesPattern = (pathPattern: string, path: string): boolean => {
+  // No path params - pattern is single path
+  if (pathPattern === path) {
+    return true;
+  }
+
+  // If pathPattern has params (`{value}`), then see if `path` matches it
+  if (/{.*?}/.test(pathPattern)) {
+    const pathParts = path.split(/\//);
+    const patternParts = pathPattern.split(/\//);
+
+    if (pathParts.length !== patternParts.length) {
+      return false;
+    }
+
+    return pathParts.every((part, index) => {
+      return part === patternParts[index] || /{.*?}/.test(patternParts[index]);
+    });
+  }
+
+  return false;
 };
 
 const isHttpFetchOptionsWithPath = (
@@ -235,12 +275,14 @@ const isHttpFetchOptionsWithPath = (
  * @example
  * import { composeApiHandlerMocks } from './http_handler_mock_factory';
  * import {
+ *   FleetSetupApiMockInterface,
  *   fleetSetupApiMock,
+ *   AgentsSetupApiMockInterface,
  *   agentsSetupApiMock,
  * } from './setup';
  *
- * // Create the new interface as an intersection of all other Api Handler Mocks
- * type ComposedApiHandlerMocks = ReturnType<typeof agentsSetupApiMock> & ReturnType<typeof fleetSetupApiMock>
+ * // Create the new interface as an intersection of all other Api Handler Mock's interfaces
+ * type ComposedApiHandlerMocks = AgentsSetupApiMockInterface & FleetSetupApiMockInterface
  *
  * const newComposedHandlerMock = composeApiHandlerMocks<
  *  ComposedApiHandlerMocks
@@ -267,7 +309,7 @@ export const composeHttpHandlerMocks = <
 
     handlerMocks.forEach((handlerMock) => {
       const { waitForApi, ...otherInterfaceProps } = handlerMock(http);
-      extend(mockedApiInterfaces, otherInterfaceProps);
+      merge(mockedApiInterfaces, otherInterfaceProps);
     });
 
     return mockedApiInterfaces;

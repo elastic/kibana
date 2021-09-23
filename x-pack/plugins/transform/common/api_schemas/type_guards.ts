@@ -74,7 +74,7 @@ export const isEsSearchResponseWithAggregations = (
 
 export const isMultiBucketAggregate = <TBucket = unknown>(
   arg: unknown
-): arg is estypes.MultiBucketAggregate<TBucket> => {
+): arg is estypes.AggregationsMultiBucketAggregate<TBucket> => {
   return isPopulatedObject(arg, ['buckets']);
 };
 

@@ -251,9 +251,9 @@ describe('policy details: ', () => {
 
       expect(http.put).toHaveBeenCalledTimes(2);
 
-      const lastPutCallPayload = ((http.put.mock.calls[
-        http.put.mock.calls.length - 1
-      ] as unknown) as [string, HttpFetchOptions])[1];
+      const lastPutCallPayload = (
+        http.put.mock.calls[http.put.mock.calls.length - 1] as unknown as [string, HttpFetchOptions]
+      )[1];
 
       // license is below platinum in this test, paid features are off
       expect(JSON.parse(lastPutCallPayload.body as string)).toEqual({
@@ -284,6 +284,8 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent' },
+                    memory_protection: { mode: 'off', supported: false },
+                    behavior_protection: { mode: 'off', supported: false },
                     ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
@@ -291,6 +293,14 @@ describe('policy details: ', () => {
                         message: '',
                       },
                       ransomware: {
+                        enabled: false,
+                        message: '',
+                      },
+                      memory_protection: {
+                        enabled: false,
+                        message: '',
+                      },
+                      behavior_protection: {
                         enabled: false,
                         message: '',
                       },
@@ -303,9 +313,14 @@ describe('policy details: ', () => {
                   mac: {
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent' },
+                    behavior_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      behavior_protection: {
+                        enabled: false,
                         message: '',
                       },
                     },
@@ -315,9 +330,14 @@ describe('policy details: ', () => {
                     events: { process: true, file: true, network: true },
                     logging: { file: 'info' },
                     malware: { mode: 'prevent' },
+                    behavior_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      behavior_protection: {
+                        enabled: false,
                         message: '',
                       },
                     },

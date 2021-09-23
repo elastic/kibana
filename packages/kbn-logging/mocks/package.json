@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "main": "../target_node/mocks/index.js",
+  "types": "../target_types/mocks/index.d.ts"
+}

@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { timelineNonValidQuery } from '../../objects/timeline';
+import { getTimelineNonValidQuery } from '../../objects/timeline';
 
-import { NOTES_TEXT, NOTES_TEXT_AREA } from '../../screens/timeline';
+import {
+  NOTES_AUTHOR,
+  NOTES_CODE_BLOCK,
+  NOTES_LINK,
+  NOTES_TEXT,
+  NOTES_TEXT_AREA,
+} from '../../screens/timeline';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../tasks/common';
@@ -16,6 +22,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
   addNotesToTimeline,
   closeTimeline,
+  goToNotesTab,
   openTimelineById,
   refreshTimelinesUntilTimeLinePresent,
 } from '../../tasks/timeline';
@@ -23,13 +30,16 @@ import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
+const text = 'elastic';
+const link = 'https://www.elastic.co/';
+
 describe('Timeline notes tab', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
-    createTimeline(timelineNonValidQuery)
+    createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) =>
         refreshTimelinesUntilTimeLinePresent(timelineId)
@@ -37,19 +47,62 @@ describe('Timeline notes tab', () => {
           // request responses and indeterminism since on clicks to activates URL's.
           .then(() => cy.wait(1000))
           .then(() => openTimelineById(timelineId))
-          .then(() => addNotesToTimeline(timelineNonValidQuery.notes))
+          .then(() => goToNotesTab())
       );
   });
 
   after(() => {
     closeTimeline();
   });
-
-  it('should contain notes', () => {
-    cy.get(NOTES_TEXT).should('have.text', timelineNonValidQuery.notes);
+  it('should render mockdown', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(getTimelineNonValidQuery().notes);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(NOTES_TEXT_AREA).should('exist');
   });
 
-  it('should render mockdown', () => {
-    cy.get(NOTES_TEXT_AREA).should('exist');
+  it('should contain notes', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(getTimelineNonValidQuery().notes);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(NOTES_TEXT).first().should('have.text', getTimelineNonValidQuery().notes);
+  });
+
+  it('should be able to render font in bold', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(`**bold**`);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(`${NOTES_TEXT} strong`).last().should('have.text', `bold`);
+  });
+
+  it('should be able to render font in italics', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(`_italics_`);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(`${NOTES_TEXT} em`).last().should('have.text', `italics`);
+  });
+
+  it('should be able to render code blocks', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(`\`code\``);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(NOTES_CODE_BLOCK).should('exist');
+  });
+
+  it('should render the right author', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(getTimelineNonValidQuery().notes);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(NOTES_AUTHOR).first().should('have.text', text);
+  });
+
+  it('should be able to render a link', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    cy.intercept(link).as(`link`);
+    addNotesToTimeline(`[${text}](${link})`);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(NOTES_LINK).last().should('have.text', `${text}(opens in a new tab or window)`);
+    cy.get(NOTES_LINK).last().click();
+    cy.wait('@link').its('response.statusCode').should('eq', 200);
   });
 });

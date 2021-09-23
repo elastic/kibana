@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../common';
+import { CaseStatuses, SECURITY_SOLUTION_OWNER } from '../../common';
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
@@ -17,6 +18,7 @@ import {
 import { UpdateKey } from './types';
 import { allCases, basicCase } from './mock';
 import * as api from './api';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -30,7 +32,10 @@ describe('useGetCases', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
       await waitForNextUpdate();
       expect(result.current).toEqual({
         data: initialData,
@@ -51,11 +56,13 @@ describe('useGetCases', () => {
   it('calls getCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+      const { waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(spyOnGetCases).toBeCalledWith({
-        filterOptions: DEFAULT_FILTER_OPTIONS,
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
@@ -64,7 +71,9 @@ describe('useGetCases', () => {
 
   it('fetch cases', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -82,6 +91,7 @@ describe('useGetCases', () => {
       });
     });
   });
+
   it('dispatch update case property', async () => {
     const spyOnPatchCase = jest.spyOn(api, 'patchCase');
     await act(async () => {
@@ -92,7 +102,9 @@ describe('useGetCases', () => {
         refetchCasesStatus: jest.fn(),
         version: '99999',
       };
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.dispatchUpdateCaseProperty(updateCase);
@@ -109,7 +121,9 @@ describe('useGetCases', () => {
   it('refetch cases', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.refetchCases();
@@ -119,7 +133,9 @@ describe('useGetCases', () => {
 
   it('set isLoading to true when refetching case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.refetchCases();
@@ -135,7 +151,9 @@ describe('useGetCases', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
 
@@ -154,6 +172,7 @@ describe('useGetCases', () => {
       });
     });
   });
+
   it('set filters', async () => {
     await act(async () => {
       const spyOnGetCases = jest.spyOn(api, 'getCases');
@@ -162,40 +181,61 @@ describe('useGetCases', () => {
         tags: ['new'],
         status: CaseStatuses.closed,
       };
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.setFilters(newFilters);
       await waitForNextUpdate();
+
       expect(spyOnGetCases.mock.calls[1][0]).toEqual({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, ...newFilters },
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          ...newFilters,
+          owner: [SECURITY_SOLUTION_OWNER],
+        },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
     });
   });
+
   it('set query params', async () => {
     await act(async () => {
       const spyOnGetCases = jest.spyOn(api, 'getCases');
       const newQueryParams = {
         page: 2,
       };
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.setQueryParams(newQueryParams);
       await waitForNextUpdate();
+
       expect(spyOnGetCases.mock.calls[1][0]).toEqual({
-        filterOptions: DEFAULT_FILTER_OPTIONS,
-        queryParams: { ...DEFAULT_QUERY_PARAMS, ...newQueryParams },
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
+        queryParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          ...newQueryParams,
+        },
         signal: abortCtrl.signal,
       });
     });
   });
+
   it('set selected cases', async () => {
     await act(async () => {
       const selectedCases = [basicCase];
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.setSelectedCases(selectedCases);

@@ -30,7 +30,7 @@ async function runBazelCommandWithRunner(
   };
 
   if (offline) {
-    bazelArgs.push('--config=offline');
+    bazelArgs = [...bazelArgs, '--config=offline'];
   }
 
   const bazelProc = spawn(bazelCommandRunner, bazelArgs, bazelOpts);

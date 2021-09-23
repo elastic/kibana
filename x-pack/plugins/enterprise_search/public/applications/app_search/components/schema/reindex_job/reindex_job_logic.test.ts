@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -99,7 +103,7 @@ describe('ReindexJobLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/reindex_job/some-job-id'
+          '/internal/app_search/engines/some-engine/reindex_job/some-job-id'
         );
         expect(ReindexJobLogic.actions.onLoadSuccess).toHaveBeenCalledWith(MOCK_RESPONSE);
       });

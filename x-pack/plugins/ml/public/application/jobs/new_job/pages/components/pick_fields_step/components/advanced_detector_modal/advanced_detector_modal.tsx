@@ -119,11 +119,10 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
   const eventRateField = fields.find((f) => f.id === EVENT_RATE_FIELD_ID);
 
-  const onOptionChange = (func: (p: EuiComboBoxOptionOption) => any) => (
-    selectedOptions: EuiComboBoxOptionOption[]
-  ) => {
-    func(selectedOptions[0] || emptyOption);
-  };
+  const onOptionChange =
+    (func: (p: EuiComboBoxOptionOption) => any) => (selectedOptions: EuiComboBoxOptionOption[]) => {
+      func(selectedOptions[0] || emptyOption);
+    };
 
   function getAgg(title: string) {
     return aggs.find((a) => a.id === title) || null;
@@ -173,7 +172,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
       partitionField,
       excludeFrequent:
         excludeFrequentOption.label !== ''
-          ? (excludeFrequentOption.label as estypes.ExcludeFrequent)
+          ? (excludeFrequentOption.label as estypes.MlExcludeFrequent)
           : null,
       description: descriptionOption !== '' ? descriptionOption : null,
       customRules: null,
@@ -349,7 +348,7 @@ function createFieldOption(field: Field | null): EuiComboBoxOptionOption {
 }
 
 function createExcludeFrequentOption(
-  excludeFrequent: estypes.ExcludeFrequent | null
+  excludeFrequent: estypes.MlExcludeFrequent | null
 ): EuiComboBoxOptionOption {
   if (excludeFrequent === null) {
     return emptyOption;

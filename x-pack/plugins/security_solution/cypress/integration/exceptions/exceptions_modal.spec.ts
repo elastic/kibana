@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 
 import { RULE_STATUS } from '../../screens/create_new_rule';
 
@@ -31,7 +31,7 @@ import {
   ADD_EXCEPTIONS_BTN,
 } from '../../screens/exceptions';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 
 // NOTE: You might look at these tests and feel they're overkill,
@@ -42,9 +42,9 @@ import { cleanKibana } from '../../tasks/common';
 describe('Exceptions modal', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule);
+    createCustomRule(getNewRule());
     goToManageAlertsDetectionRules();
     goToRuleDetails();
 

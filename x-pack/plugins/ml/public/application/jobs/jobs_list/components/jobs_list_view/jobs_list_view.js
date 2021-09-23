@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { isEqual, debounce } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -27,6 +27,7 @@ import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
+import { ResetJobModal } from '../reset_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
 import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
@@ -41,7 +42,12 @@ import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 
-let deletingJobsRefreshTimeout = null;
+let blockingJobsRefreshTimeout = null;
+
+const filterJobsDebounce = debounce((jobsSummaryList, filterClauses, callback) => {
+  const ss = filterJobs(jobsSummaryList, filterClauses);
+  callback(ss);
+}, 500);
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsListView extends Component {
@@ -57,7 +63,7 @@ export class JobsListView extends Component {
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
       filterClauses: [],
-      deletingJobIds: [],
+      blockingJobIds: [],
       jobsAwaitingNodeCount: 0,
     };
 
@@ -65,6 +71,7 @@ export class JobsListView extends Component {
 
     this.showEditJobFlyout = () => {};
     this.showDeleteJobModal = () => {};
+    this.showResetJobModal = () => {};
     this.showStartDatafeedModal = () => {};
     this.showCreateAlertFlyout = () => {};
     // work around to keep track of whether the component is mounted
@@ -100,7 +107,7 @@ export class JobsListView extends Component {
 
   componentWillUnmount() {
     if (this.props.isManagementTable === undefined) {
-      deletingJobsRefreshTimeout = null;
+      blockingJobsRefreshTimeout = null;
     }
     this._isMounted = false;
   }
@@ -118,6 +125,9 @@ export class JobsListView extends Component {
       delete itemIdToExpandedRowMap[jobId];
       this.setState({ itemIdToExpandedRowMap });
     } else {
+      // Only show clear notifications button if job has warning icon due to auditMessage
+      const expandedJob = this.state.jobsSummaryList.filter((job) => job.id === jobId);
+      const showClearButton = expandedJob.length > 0 && expandedJob[0].auditMessage !== undefined;
       let itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
 
       if (this.state.fullJobsList[jobId] !== undefined) {
@@ -129,6 +139,7 @@ export class JobsListView extends Component {
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
             refreshJobList={this.onRefreshClick}
+            showClearButton={showClearButton}
           />
         );
       } else {
@@ -139,6 +150,7 @@ export class JobsListView extends Component {
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
             refreshJobList={this.onRefreshClick}
+            showClearButton={showClearButton}
           />
         );
       }
@@ -162,6 +174,7 @@ export class JobsListView extends Component {
                     removeYourself={this.removeUpdateFunction}
                     showFullDetails={this.props.isManagementTable !== true}
                     refreshJobList={this.onRefreshClick}
+                    showClearButton={showClearButton}
                   />
                 );
               }
@@ -198,6 +211,13 @@ export class JobsListView extends Component {
     this.showDeleteJobModal = () => {};
   };
 
+  setShowResetJobModalFunction = (func) => {
+    this.showResetJobModal = func;
+  };
+  unsetShowResetJobModalFunction = () => {
+    this.showResetJobModal = () => {};
+  };
+
   setShowStartDatafeedModalFunction = (func) => {
     this.showStartDatafeedModal = func;
   };
@@ -221,7 +241,7 @@ export class JobsListView extends Component {
 
   refreshSelectedJobs() {
     const selectedJobsIds = this.state.selectedJobs.map((j) => j.id);
-    const filteredJobIds = this.state.filteredJobsSummaryList.map((j) => j.id);
+    const filteredJobIds = (this.state.filteredJobsSummaryList ?? []).map((j) => j.id);
 
     // refresh the jobs stored as selected
     // only select those which are also in the filtered list
@@ -232,9 +252,17 @@ export class JobsListView extends Component {
     this.setState({ selectedJobs });
   }
 
-  setFilters = (query) => {
-    const filterClauses = (query && query.ast && query.ast.clauses) || [];
-    const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+  setFilters = async (query) => {
+    if (query === null) {
+      this.setState(
+        { filteredJobsSummaryList: this.state.jobsSummaryList, filterClauses: [] },
+        () => {
+          this.refreshSelectedJobs();
+        }
+      );
+
+      return;
+    }
 
     this.props.onJobsViewStateUpdate(
       {
@@ -244,11 +272,30 @@ export class JobsListView extends Component {
       this._isFiltersSet === false
     );
 
-    this._isFiltersSet = true;
+    const filterClauses = (query && query.ast && query.ast.clauses) || [];
 
-    this.setState({ filteredJobsSummaryList, filterClauses }, () => {
-      this.refreshSelectedJobs();
-    });
+    if (filterClauses.length === 0) {
+      this.setState({ filteredJobsSummaryList: this.state.jobsSummaryList, filterClauses }, () => {
+        this.refreshSelectedJobs();
+      });
+      return;
+    }
+
+    if (this._isFiltersSet === true) {
+      filterJobsDebounce(this.state.jobsSummaryList, filterClauses, (jobsSummaryList) => {
+        this.setState({ filteredJobsSummaryList: jobsSummaryList, filterClauses }, () => {
+          this.refreshSelectedJobs();
+        });
+      });
+    } else {
+      // first use after page load, do not debounce.
+      const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+      this.setState({ filteredJobsSummaryList, filterClauses }, () => {
+        this.refreshSelectedJobs();
+      });
+    }
+
+    this._isFiltersSet = true;
   };
 
   onRefreshClick = () => {
@@ -315,17 +362,17 @@ export class JobsListView extends Component {
         });
 
         jobs.forEach((job) => {
-          if (job.deleting && this.state.itemIdToExpandedRowMap[job.id]) {
+          if (job.blocked !== undefined && this.state.itemIdToExpandedRowMap[job.id]) {
             this.toggleRow(job.id);
           }
         });
 
         this.isDoneRefreshing();
-        if (jobsSummaryList.some((j) => j.deleting === true)) {
+        if (jobsSummaryList.some((j) => j.blocked !== undefined)) {
           // if there are some jobs in a deleting state, start polling for
           // deleting jobs so we can update the jobs list once the
           // deleting tasks are over
-          this.checkDeletingJobTasks(forceRefresh);
+          this.checkBlockingJobTasks(forceRefresh);
         }
       } catch (error) {
         console.error(error);
@@ -334,18 +381,18 @@ export class JobsListView extends Component {
     }
   }
 
-  async checkDeletingJobTasks(forceRefresh = false) {
+  async checkBlockingJobTasks(forceRefresh = false) {
     if (this._isMounted === false) {
       return;
     }
 
-    const { jobIds: taskJobIds } = await ml.jobs.deletingJobTasks();
-
+    const { jobs } = await ml.jobs.blockingJobTasks();
+    const blockingJobIds = Object.keys(jobs);
     const taskListHasChanged =
-      isEqual(taskJobIds.sort(), this.state.deletingJobIds.sort()) === false;
+      isEqual(blockingJobIds.sort(), this.state.blockingJobIds.sort()) === false;
 
     this.setState({
-      deletingJobIds: taskJobIds,
+      blockingJobIds,
     });
 
     // only reload the jobs list if the contents of the task list has changed
@@ -354,10 +401,10 @@ export class JobsListView extends Component {
       this.refreshJobSummaryList();
     }
 
-    if (taskJobIds.length > 0 && deletingJobsRefreshTimeout === null) {
-      deletingJobsRefreshTimeout = setTimeout(() => {
-        deletingJobsRefreshTimeout = null;
-        this.checkDeletingJobTasks();
+    if (blockingJobIds.length > 0 && blockingJobsRefreshTimeout === null) {
+      blockingJobsRefreshTimeout = setTimeout(() => {
+        blockingJobsRefreshTimeout = null;
+        this.checkBlockingJobTasks();
       }, DELETING_JOBS_REFRESH_INTERVAL_MS);
     }
   }
@@ -477,6 +524,7 @@ export class JobsListView extends Component {
                   allJobIds={jobIds}
                   showStartDatafeedModal={this.showStartDatafeedModal}
                   showDeleteJobModal={this.showDeleteJobModal}
+                  showResetJobModal={this.showResetJobModal}
                   showCreateAlertFlyout={this.showCreateAlertFlyout}
                   refreshJobs={() => this.refreshJobSummaryList(true)}
                 />
@@ -493,6 +541,7 @@ export class JobsListView extends Component {
                 selectJobChange={this.selectJobChange}
                 showEditJobFlyout={this.showEditJobFlyout}
                 showDeleteJobModal={this.showDeleteJobModal}
+                showResetJobModal={this.showResetJobModal}
                 showStartDatafeedModal={this.showStartDatafeedModal}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
                 jobsViewState={this.props.jobsViewState}
@@ -510,6 +559,11 @@ export class JobsListView extends Component {
               <DeleteJobModal
                 setShowFunction={this.setShowDeleteJobModalFunction}
                 unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+                refreshJobs={() => this.refreshJobSummaryList(true)}
+              />
+              <ResetJobModal
+                setShowFunction={this.setShowResetJobModalFunction}
+                unsetShowFunction={this.unsetShowResetJobModalFunction}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
               />
               <StartDatafeedModal

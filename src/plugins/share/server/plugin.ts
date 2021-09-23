@@ -12,11 +12,35 @@ import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { createRoutes } from './routes/create_routes';
 import { url } from './saved_objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
+import { UrlService } from '../common/url_service';
 
-export class SharePlugin implements Plugin {
+/** @public */
+export interface SharePluginSetup {
+  url: UrlService;
+}
+
+/** @public */
+export interface SharePluginStart {
+  url: UrlService;
+}
+
+export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
+  private url?: UrlService;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
+    this.url = new UrlService({
+      baseUrl: core.http.basePath.publicBaseUrl || core.http.basePath.serverBasePath,
+      version: this.initializerContext.env.packageInfo.version,
+      navigate: async () => {
+        throw new Error('Locator .navigate() is not supported on the server.');
+      },
+      getUrl: async () => {
+        throw new Error('Locator .getUrl() currently is not supported on the server.');
+      },
+    });
+
     createRoutes(core, this.initializerContext.logger.get());
     core.savedObjects.registerType(url);
     core.uiSettings.register({
@@ -41,10 +65,18 @@ export class SharePlugin implements Plugin {
         schema: schema.boolean(),
       },
     });
+
+    return {
+      url: this.url,
+    };
   }
 
   public start() {
     this.initializerContext.logger.get().debug('Starting plugin');
+
+    return {
+      url: this.url!,
+    };
   }
 
   public stop() {

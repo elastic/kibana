@@ -5,6 +5,8 @@
 TARGET="${1:-all}"
 if [[ $TARGET && $TARGET != "all" ]]
 then
+  # Strip any leading ./
+  TARGET=${TARGET#./}
   # If this is a file
   if [[ "$TARGET" == *".ts"* ]]; then
     PATH_WITHOUT_EXTENSION=${1%%.*}

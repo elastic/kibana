@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="attach-alert-to-case-button"]';
-
 export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
 
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
@@ -24,6 +22,12 @@ export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
 
 export const REFRESH_BTN = '[data-test-subj="refreshRulesAction"] button';
+
+export const ACTIVATE_RULE_BULK_BTN = '[data-test-subj="activateRuleBulk"]';
+
+export const DEACTIVATE_RULE_BULK_BTN = '[data-test-subj="deactivateRuleBulk"]';
+
+export const EXPORT_RULE_BULK_BTN = '[data-test-subj="exportRuleBulk"]';
 
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
@@ -66,6 +70,8 @@ export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
+export const RULES_MONIROTING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
+
 export const SEVENTH_RULE = 6;
 
 export const SEVERITY = '[data-test-subj="severity"]';
@@ -87,3 +93,13 @@ export const pageSelector = (pageNumber: number) =>
   `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
 
 export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
+
+export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
+
+export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
+
+export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteConfirmationModal"]';
+
+export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+
+export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';

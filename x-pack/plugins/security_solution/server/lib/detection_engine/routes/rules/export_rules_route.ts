@@ -21,7 +21,11 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
 import { buildSiemResponse } from '../utils';
 
-export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const exportRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  isRuleRegistryEnabled: boolean
+) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
@@ -39,9 +43,9 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -53,7 +57,10 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             body: `Can't export more than ${exportSizeLimit} rules`,
           });
         } else {
-          const nonPackagedRulesCount = await getNonPackagedRulesCount({ alertsClient });
+          const nonPackagedRulesCount = await getNonPackagedRulesCount({
+            isRuleRegistryEnabled,
+            rulesClient,
+          });
           if (nonPackagedRulesCount > exportSizeLimit) {
             return siemResponse.error({
               statusCode: 400,
@@ -64,8 +71,8 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
         const exported =
           request.body?.objects != null
-            ? await getExportByObjectIds(alertsClient, request.body.objects)
-            : await getExportAll(alertsClient);
+            ? await getExportByObjectIds(rulesClient, request.body.objects, isRuleRegistryEnabled)
+            : await getExportAll(rulesClient, isRuleRegistryEnabled);
 
         const responseBody = request.query.exclude_export_details
           ? exported.rulesNdjson

@@ -20,16 +20,21 @@ import {
   getLayerList,
   getOpenTooltips,
   getHasLockedTooltips,
-  isDrawingFilter,
+  getGeoFieldNames,
 } from '../../../selectors/map_selectors';
+import { getDrawMode } from '../../../selectors/ui_selectors';
+import { DRAW_MODE } from '../../../../common/constants';
 import { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     layerList: getLayerList(state),
     hasLockedTooltips: getHasLockedTooltips(state),
-    isDrawingFilter: isDrawingFilter(state),
+    filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
+    drawModeActive:
+      getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
     openTooltips: getOpenTooltips(state),
+    geoFieldNames: getGeoFieldNames(state),
   };
 }
 

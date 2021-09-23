@@ -7,6 +7,7 @@
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import styled from 'styled-components';
 import React from 'react';
 import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
@@ -15,15 +16,16 @@ import {
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../accessibility/helpers';
+} from '../../../../../timelines/public';
 import { BrowserField, BrowserFields } from '../../containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
+import { FieldsData } from './types';
 
 import * as i18n from './translations';
+import { ColumnHeaderOptions } from '../../../../common';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -55,22 +57,13 @@ export interface Item {
 export interface AlertSummaryRow {
   title: string;
   description: {
-    contextId: string;
+    data: FieldsData;
     eventId: string;
-    fieldName: string;
-    value: string;
-    fieldType: string;
+    isDraggable?: boolean;
+    fieldFromBrowserField?: BrowserField;
     linkValue: string | undefined;
-  };
-}
-
-export interface ThreatSummaryRow {
-  title: string;
-  description: {
-    contextId: string;
-    eventId: string;
-    fieldName: string;
-    values: string[];
+    timelineId: string;
+    values: string[] | null | undefined;
   };
 }
 
@@ -82,7 +75,7 @@ export interface ThreatDetailsRow {
   };
 }
 
-export type SummaryRow = AlertSummaryRow | ThreatSummaryRow | ThreatDetailsRow;
+export type SummaryRow = AlertSummaryRow | ThreatDetailsRow;
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -206,16 +199,19 @@ export const onEventDetailsTabKeyPressed = ({
   }
 };
 
+const StyledH5 = styled.h5`
+  line-height: 1.7rem;
+`;
+
 const getTitle = (title: string) => (
-  <EuiTitle size="xxs">
-    <h5>{title}</h5>
+  <EuiTitle size="xxxs">
+    <StyledH5>{title}</StyledH5>
   </EuiTitle>
 );
 getTitle.displayName = 'getTitle';
 
 export const getSummaryColumns = (
   DescriptionComponent:
-    | React.FC<ThreatSummaryRow['description']>
     | React.FC<AlertSummaryRow['description']>
     | React.FC<ThreatDetailsRow['description']>
 ): Array<EuiBasicTableColumn<SummaryRow>> => {
@@ -224,10 +220,11 @@ export const getSummaryColumns = (
       field: 'title',
       truncateText: false,
       render: getTitle,
-      width: '160px',
+      width: '220px',
       name: '',
     },
     {
+      className: 'flyoutOverviewDescription',
       field: 'description',
       truncateText: false,
       render: DescriptionComponent,

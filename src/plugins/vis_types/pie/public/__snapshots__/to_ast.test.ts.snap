@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`vis type pie vis toExpressionAst function should match basic snapshot 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggs": Array [],
+        "index": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "id": Array [
+                    "123",
+                  ],
+                },
+                "function": "indexPatternLoad",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "metricsAtAllLevels": Array [
+          true,
+        ],
+        "partialRows": Array [
+          false,
+        ],
+      },
+      "function": "esaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "addLegend": Array [
+          true,
+        ],
+        "addTooltip": Array [
+          true,
+        ],
+        "buckets": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    1,
+                  ],
+                  "format": Array [
+                    "terms",
+                  ],
+                  "formatParams": Array [
+                    "{\\"id\\":\\"string\\",\\"otherBucketLabel\\":\\"Other\\",\\"missingBucketLabel\\":\\"Missing\\",\\"parsedUrl\\":{\\"origin\\":\\"http://localhost:5801\\",\\"pathname\\":\\"/app/visualize\\",\\"basePath\\":\\"\\"}}",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "isDonut": Array [
+          true,
+        ],
+        "labels": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "lastLevel": Array [
+                    true,
+                  ],
+                  "show": Array [
+                    true,
+                  ],
+                  "truncate": Array [
+                    100,
+                  ],
+                  "values": Array [
+                    true,
+                  ],
+                },
+                "function": "pielabels",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "legendPosition": Array [
+          "right",
+        ],
+        "metric": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    0,
+                  ],
+                  "format": Array [
+                    "number",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+      },
+      "function": "pie_vis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

@@ -12,6 +12,7 @@ import * as i18n from './translations';
 import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
 import { ConnectorTypes } from '../../../common';
 import { useToasts } from '../../common/lib/kibana';
+import { useOwnerContext } from '../../components/owner_context/use_owner_context';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];
@@ -24,6 +25,7 @@ export interface State extends ConnectorConfiguration {
   mappings: CaseConnectorMapping[];
   persistLoading: boolean;
   version: string;
+  id: string;
 }
 export type Action =
   | {
@@ -48,6 +50,10 @@ export type Action =
     }
   | {
       type: 'setVersion';
+      payload: string;
+    }
+  | {
+      type: 'setID';
       payload: string;
     }
   | {
@@ -80,6 +86,11 @@ export const configureCasesReducer = (state: State, action: Action) => {
       return {
         ...state,
         version: action.payload,
+      };
+    case 'setID':
+      return {
+        ...state,
+        id: action.payload,
       };
     case 'setCurrentConfiguration': {
       return {
@@ -141,9 +152,11 @@ export const initialState: State = {
   mappings: [],
   persistLoading: false,
   version: '',
+  id: '',
 };
 
 export const useCaseConfigure = (): ReturnUseCaseConfigure => {
+  const owner = useOwnerContext();
   const [state, dispatch] = useReducer(configureCasesReducer, initialState);
   const toasts = useToasts();
   const setCurrentConfiguration = useCallback((configuration: ConnectorConfiguration) => {
@@ -202,6 +215,13 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
+  const setID = useCallback((id: string) => {
+    dispatch({
+      payload: id,
+      type: 'setID',
+    });
+  }, []);
+
   const isCancelledRefetchRef = useRef(false);
   const abortCtrlRefetchRef = useRef(new AbortController());
 
@@ -215,7 +235,10 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       abortCtrlRefetchRef.current = new AbortController();
 
       setLoading(true);
-      const res = await getCaseConfigure({ signal: abortCtrlRefetchRef.current.signal });
+      const res = await getCaseConfigure({
+        signal: abortCtrlRefetchRef.current.signal,
+        owner,
+      });
 
       if (!isCancelledRefetchRef.current) {
         if (res != null) {
@@ -224,6 +247,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
             setClosureType(res.closureType);
           }
           setVersion(res.version);
+          setID(res.id);
           setMappings(res.mappings);
 
           if (!state.firstLoad) {
@@ -274,8 +298,13 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
 
         const res =
           state.version.length === 0
-            ? await postCaseConfigure(connectorObj, abortCtrlPersistRef.current.signal)
+            ? await postCaseConfigure(
+                // The first owner will be used for case creation
+                { ...connectorObj, owner: owner[0] },
+                abortCtrlPersistRef.current.signal
+              )
             : await patchCaseConfigure(
+                state.id,
                 {
                   ...connectorObj,
                   version: state.version,
@@ -288,6 +317,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
             setClosureType(res.closureType);
           }
           setVersion(res.version);
+          setID(res.id);
           setMappings(res.mappings);
           if (setCurrentConfiguration != null) {
             setCurrentConfiguration({
@@ -321,14 +351,17 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       }
     },
     [
-      setClosureType,
-      setConnector,
-      setCurrentConfiguration,
-      setMappings,
       setPersistLoading,
-      setVersion,
-      state.currentConfiguration.connector,
       state.version,
+      state.id,
+      state.currentConfiguration.connector,
+      owner,
+      setConnector,
+      setClosureType,
+      setVersion,
+      setID,
+      setMappings,
+      setCurrentConfiguration,
       toasts,
     ]
   );

@@ -242,6 +242,7 @@ export function getMlClient(
         }>(...p);
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
           'data-frame-analytics',
+          // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
           body.data_frame_analytics,
           'id'
         );
@@ -257,7 +258,7 @@ export function getMlClient(
       // this should use DataFrameAnalyticsStats, but needs a refactor to move DataFrameAnalyticsStats to common
       await jobIdsCheck('data-frame-analytics', p, true);
       try {
-        const { body } = ((await mlClient.getDataFrameAnalyticsStats(...p)) as unknown) as {
+        const { body } = (await mlClient.getDataFrameAnalyticsStats(...p)) as unknown as {
           body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
         };
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
@@ -473,6 +474,10 @@ export function getMlClient(
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateJob(...p);
     },
+    async resetJob(...p: Parameters<MlClient['resetJob']>) {
+      await jobIdsCheck('anomaly-detector', p);
+      return mlClient.resetJob(...p);
+    },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateModelSnapshot(...p);
@@ -494,12 +499,13 @@ function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
 }
 
 function getADJobIdsFromRequest([params]: MlGetADParams): string[] {
-  const ids = params?.job_id?.split(',');
+  const ids = typeof params?.job_id === 'string' ? params?.job_id.split(',') : params?.job_id;
   return ids || [];
 }
 
 function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
-  const ids = params?.datafeed_id?.split(',');
+  const ids =
+    typeof params?.datafeed_id === 'string' ? params?.datafeed_id.split(',') : params?.datafeed_id;
   return ids || [];
 }
 

@@ -8,11 +8,14 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
-import { State, SeriesType, XYLayerConfig } from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import type { State } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '../../common';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { Datatable } from 'src/plugins/expressions';
 
 function exampleState(): State {
   return {
@@ -22,6 +25,7 @@ function exampleState(): State {
     layers: [
       {
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         splitAccessor: 'd',
         xAccessor: 'a',
@@ -31,11 +35,11 @@ function exampleState(): State {
   };
 }
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
-const dataMock = dataPluginMock.createStartContract();
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
-  data: dataMock,
+  fieldFormats: fieldFormatsMock,
 });
 
 describe('xy_visualization', () => {
@@ -52,7 +56,7 @@ describe('xy_visualization', () => {
       };
     }
 
-    it('should show mixed xy chart when multilple series types', () => {
+    it('should show mixed xy chart when multiple series types', () => {
       const desc = xyVisualization.getDescription(mixedState('bar', 'line'));
 
       expect(desc.label).toEqual('Mixed XY');
@@ -132,8 +136,7 @@ describe('xy_visualization', () => {
 
   describe('#initialize', () => {
     it('loads default state', () => {
-      const mockFrame = createMockFramePublicAPI();
-      const initialState = xyVisualization.initialize(mockFrame);
+      const initialState = xyVisualization.initialize(() => 'l1');
 
       expect(initialState.layers).toHaveLength(1);
       expect(initialState.layers[0].xAccessor).not.toBeDefined();
@@ -144,7 +147,8 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
-              "layerId": "",
+              "layerId": "l1",
+              "layerType": "data",
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
@@ -162,9 +166,7 @@ describe('xy_visualization', () => {
     });
 
     it('loads from persisted state', () => {
-      expect(xyVisualization.initialize(createMockFramePublicAPI(), exampleState())).toEqual(
-        exampleState()
-      );
+      expect(xyVisualization.initialize(() => 'first', exampleState())).toEqual(exampleState());
     });
   });
 
@@ -176,6 +178,7 @@ describe('xy_visualization', () => {
           ...exampleState().layers,
           {
             layerId: 'second',
+            layerType: layerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'e',
             xAccessor: 'f',
@@ -190,7 +193,7 @@ describe('xy_visualization', () => {
 
   describe('#appendLayer', () => {
     it('adds a layer', () => {
-      const layers = xyVisualization.appendLayer!(exampleState(), 'foo').layers;
+      const layers = xyVisualization.appendLayer!(exampleState(), 'foo', layerTypes.DATA).layers;
       expect(layers.length).toEqual(exampleState().layers.length + 1);
       expect(layers[layers.length - 1]).toMatchObject({ layerId: 'foo' });
     });
@@ -213,15 +216,61 @@ describe('xy_visualization', () => {
     });
   });
 
+  describe('#getSupportedLayers', () => {
+    it('should return a double layer types', () => {
+      expect(xyVisualization.getSupportedLayers()).toHaveLength(2);
+    });
+
+    it('should return the icon for the visualization type', () => {
+      expect(xyVisualization.getSupportedLayers()[0].icon).not.toBeUndefined();
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      expect(xyVisualization.getLayerType('first', exampleState())).toEqual(layerTypes.DATA);
+      expect(xyVisualization.getLayerType('foo', exampleState())).toBeUndefined();
+    });
+  });
+
   describe('#setDimension', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          rows: [],
+          columns: [],
+        },
+      };
+    });
+
     it('sets the x axis', () => {
       expect(
         xyVisualization.setDimension({
+          frame,
           prevState: {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
@@ -234,6 +283,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
@@ -243,11 +293,13 @@ describe('xy_visualization', () => {
     it('replaces the x axis', () => {
       expect(
         xyVisualization.setDimension({
+          frame,
           prevState: {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
@@ -260,22 +312,88 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
       });
     });
+
+    it('should add a dimension to a threshold layer', () => {
+      expect(
+        xyVisualization.setDimension({
+          frame,
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'threshold',
+                layerType: layerTypes.THRESHOLD,
+                seriesType: 'line',
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'threshold',
+          groupId: 'xThreshold',
+          columnId: 'newCol',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'threshold',
+        layerType: layerTypes.THRESHOLD,
+        seriesType: 'line',
+        accessors: ['newCol'],
+        yConfig: [
+          {
+            axisMode: 'bottom',
+            forAccessor: 'newCol',
+            icon: undefined,
+            lineStyle: 'solid',
+            lineWidth: 1,
+          },
+        ],
+      });
+    });
   });
 
   describe('#removeDimension', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          rows: [],
+          columns: [],
+        },
+      };
+    });
+
     it('removes the x axis', () => {
       expect(
         xyVisualization.removeDimension({
+          frame,
           prevState: {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
@@ -287,6 +405,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         xAccessor: undefined,
         accessors: [],
@@ -332,7 +451,7 @@ describe('xy_visualization', () => {
       expect(options.map((o) => o.groupId)).toEqual(['x', 'y', 'breakdown']);
     });
 
-    it('should return the correct labels for the 3 dimensios', () => {
+    it('should return the correct labels for the 3 dimensions', () => {
       const options = xyVisualization.getConfiguration({
         state: exampleState(),
         frame,
@@ -345,7 +464,7 @@ describe('xy_visualization', () => {
       ]);
     });
 
-    it('should return the correct labels for the 3 dimensios for a horizontal chart', () => {
+    it('should return the correct labels for the 3 dimensions for a horizontal chart', () => {
       const initialState = exampleState();
       const state = {
         ...initialState,
@@ -422,6 +541,300 @@ describe('xy_visualization', () => {
       expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
     });
 
+    describe('thresholds', () => {
+      beforeEach(() => {
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+          threshold: mockDatasource.publicAPIMock,
+        };
+      });
+
+      function getStateWithBaseThreshold(): State {
+        return {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+            {
+              layerId: 'threshold',
+              layerType: layerTypes.THRESHOLD,
+              seriesType: 'line',
+              accessors: [],
+              yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
+            },
+          ],
+        };
+      }
+
+      it('should support static value', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = undefined;
+
+        expect(
+          xyVisualization.getConfiguration({
+            state: getStateWithBaseThreshold(),
+            frame,
+            layerId: 'threshold',
+          }).supportStaticValue
+        ).toBeTruthy();
+      });
+
+      it('should return no threshold groups for a empty data layer', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = undefined;
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should return a group for the vertical left axis', () => {
+        const options = xyVisualization.getConfiguration({
+          state: getStateWithBaseThreshold(),
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(1);
+        expect(options[0].groupId).toBe('yThresholdLeft');
+      });
+
+      it('should return a group for the vertical right axis', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].yConfig = [{ axisMode: 'right', forAccessor: 'a' }];
+        state.layers[1].yConfig![0].axisMode = 'right';
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(1);
+        expect(options[0].groupId).toBe('yThresholdRight');
+      });
+
+      it('should compute no groups for thresholds when the only data accessor available is a date histogram', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = []; // empty the configuration
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should mark horizontal group is invalid when xAccessor is changed to a date histogram', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig![0].axisMode = 'bottom';
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options[0]).toEqual(
+          expect.objectContaining({
+            invalid: true,
+            groupId: 'xThreshold',
+          })
+        );
+      });
+
+      it('should return groups in a specific order (left, right, bottom)', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'c';
+        state.layers[0].accessors = ['a', 'b'];
+        // invert them on purpose
+        state.layers[0].yConfig = [
+          { axisMode: 'right', forAccessor: 'b' },
+          { axisMode: 'left', forAccessor: 'a' },
+        ];
+        state.layers[1].yConfig = [
+          { forAccessor: 'c', axisMode: 'bottom' },
+          { forAccessor: 'b', axisMode: 'right' },
+          { forAccessor: 'a', axisMode: 'left' },
+        ];
+        // set the xAccessor as number histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'c') {
+            return {
+              dataType: 'number',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'histogram',
+            };
+          }
+          return null;
+        });
+
+        const [left, right, bottom] = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(left.groupId).toBe('yThresholdLeft');
+        expect(right.groupId).toBe('yThresholdRight');
+        expect(bottom.groupId).toBe('xThreshold');
+      });
+
+      it('should ignore terms operation for xAccessor', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = []; // empty the configuration
+        // set the xAccessor as top values
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'string',
+              isBucketed: true,
+              scale: 'ordinal',
+              label: 'top values',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should mark horizontal group is invalid when accessor is changed to a terms operation', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig![0].axisMode = 'bottom';
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'string',
+              isBucketed: true,
+              scale: 'ordinal',
+              label: 'top values',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options[0]).toEqual(
+          expect.objectContaining({
+            invalid: true,
+            groupId: 'xThreshold',
+          })
+        );
+      });
+
+      it('differ vertical axis if the formatters are not compatibles between each other', () => {
+        const tables: Record<string, Datatable> = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [
+              {
+                id: 'xAccessorId',
+                name: 'horizontal axis',
+                meta: {
+                  type: 'date',
+                  params: { params: { id: 'date', params: { pattern: 'HH:mm' } } },
+                },
+              },
+              {
+                id: 'yAccessorId',
+                name: 'left axis',
+                meta: {
+                  type: 'number',
+                  params: { id: 'number' },
+                },
+              },
+              {
+                id: 'yAccessorId2',
+                name: 'right axis',
+                meta: {
+                  type: 'number',
+                  params: { id: 'bytes' },
+                },
+              },
+            ],
+          },
+        };
+
+        const state = getStateWithBaseThreshold();
+        state.layers[0].accessors = ['yAccessorId', 'yAccessorId2'];
+        state.layers[1].yConfig = []; // empty the configuration
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame: { ...frame, activeData: tables },
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ groupId: 'yThresholdLeft' }),
+            expect.objectContaining({ groupId: 'yThresholdRight' }),
+          ])
+        );
+      });
+    });
+
     describe('color assignment', () => {
       function callConfig(layerConfigOverride: Partial<XYLayerConfig>) {
         const baseState = exampleState();
@@ -481,12 +894,12 @@ describe('xy_visualization', () => {
 
       it('should query palette to fill in colors for other dimensions', () => {
         const palette = paletteServiceMock.get('default');
-        (palette.getColor as jest.Mock).mockClear();
+        (palette.getCategoricalColor as jest.Mock).mockClear();
         const accessorConfig = callConfigAndFindYConfig({}, 'c');
         expect(accessorConfig.triggerIcon).toEqual('color');
         // black is the color returned from the palette mock
         expect(accessorConfig.color).toEqual('black');
-        expect(palette.getColor).toHaveBeenCalledWith(
+        expect(palette.getCategoricalColor).toHaveBeenCalledWith(
           [
             {
               name: 'c',
@@ -505,9 +918,9 @@ describe('xy_visualization', () => {
           label: 'Overwritten label',
         });
         const palette = paletteServiceMock.get('default');
-        (palette.getColor as jest.Mock).mockClear();
+        (palette.getCategoricalColor as jest.Mock).mockClear();
         callConfigAndFindYConfig({}, 'c');
-        expect(palette.getColor).toHaveBeenCalledWith(
+        expect(palette.getCategoricalColor).toHaveBeenCalledWith(
           [
             expect.objectContaining({
               name: 'Overwritten label',
@@ -526,7 +939,7 @@ describe('xy_visualization', () => {
           },
           'c'
         );
-        expect(palette.getColor).toHaveBeenCalled();
+        expect(palette.getCategoricalColor).toHaveBeenCalled();
       });
 
       it('should not show any indicator as long as there is no data', () => {
@@ -551,7 +964,7 @@ describe('xy_visualization', () => {
       it('should show current palette for break down by dimension', () => {
         const palette = paletteServiceMock.get('mock');
         const customColors = ['yellow', 'green'];
-        (palette.getColors as jest.Mock).mockReturnValue(customColors);
+        (palette.getCategoricalColors as jest.Mock).mockReturnValue(customColors);
         const breakdownConfig = callConfigForBreakdownConfigs({
           palette: { type: 'palette', name: 'mock', params: {} },
           splitAccessor: 'd',
@@ -570,9 +983,9 @@ describe('xy_visualization', () => {
         paletteGetter.mockReturnValue({
           id: 'default',
           title: '',
-          getColors: jest.fn(),
+          getCategoricalColors: jest.fn(),
           toExpression: jest.fn(),
-          getColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
+          getCategoricalColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
         });
 
         const yConfigs = callConfigForYConfigs({});
@@ -611,6 +1024,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
@@ -626,12 +1040,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
@@ -647,12 +1063,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: ['a'],
@@ -669,6 +1087,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -684,6 +1103,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -691,6 +1111,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -707,12 +1128,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: ['a'],
@@ -733,12 +1156,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -746,6 +1171,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'third',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -767,18 +1193,21 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'third',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
@@ -801,6 +1230,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -827,18 +1257,18 @@ describe('xy_visualization', () => {
       };
       datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
         id === 'a'
-          ? (({
+          ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
         id === 'e'
-          ? (({
+          ? ({
               dataType: 'number',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       expect(
@@ -848,6 +1278,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -855,6 +1286,7 @@ describe('xy_visualization', () => {
               },
               {
                 layerId: 'second',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'e',
@@ -869,6 +1301,61 @@ describe('xy_visualization', () => {
           shortMessage: 'Wrong data type for Horizontal axis.',
           longMessage:
             'Data type mismatch for the Horizontal axis. Cannot mix date and number interval types.',
+        },
+      ]);
+    });
+
+    it('should return an error if string and date histogram xAccessors (multiple layers) are used together', () => {
+      // current incompatibility is only for date and numeric histograms as xAccessors
+      const datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+        second: createMockDatasource('testDatasource').publicAPIMock,
+      };
+      datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
+        id === 'a'
+          ? ({
+              dataType: 'date',
+              scale: 'interval',
+            } as unknown as Operation)
+          : null
+      );
+      datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
+        id === 'e'
+          ? ({
+              dataType: 'string',
+              scale: 'ordinal',
+            } as unknown as Operation)
+          : null
+      );
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b'],
+              },
+              {
+                layerId: 'second',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'e',
+                accessors: ['b'],
+              },
+            ],
+          },
+          datasourceLayers
+        )
+      ).toEqual([
+        {
+          shortMessage: 'Wrong data type for Horizontal axis.',
+          longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
         },
       ]);
     });
@@ -919,6 +1406,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['b'],
@@ -929,12 +1417,17 @@ describe('xy_visualization', () => {
       );
       expect(warningMessages).toHaveLength(1);
       expect(warningMessages && warningMessages[0]).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <strong>
-            Label B
-          </strong>
-           contains array values. Your visualization may not render as expected.
-        </React.Fragment>
+        <FormattedMessage
+          defaultMessage="{label} contains array values. Your visualization may not render as expected."
+          id="xpack.lens.xyVisualization.arrayValues"
+          values={
+            Object {
+              "label": <strong>
+                Label B
+              </strong>,
+            }
+          }
+        />
       `);
     });
   });

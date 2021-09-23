@@ -6,22 +6,6 @@
  * Side Public License, v 1.
  */
 
-export interface AnchorLink {
-  /**
-   * The plugin that contains the API being referenced.
-   */
-  pluginName: string;
-  /**
-   * It's possible the client and the server both emit an API with
-   * the same name so we need scope in here to add uniqueness.
-   */
-  scope: ApiScope;
-  /**
-   * The name of the api.
-   */
-  apiName: string;
-}
-
 /**
  * The kinds of typescript types we want to show in the docs. `Unknown` is used if
  * we aren't accounting for a particular type. See {@link getPropertyTypeKind}
@@ -172,7 +156,7 @@ export interface ApiDeclaration {
   /**
    * Used to create links to github to view the code for this API.
    */
-  source: SourceLink;
+  path: string;
 
   /**
    * Other plugins that reference this API item (along with SourceLink info for each reference).
@@ -193,11 +177,6 @@ export interface ApiDeclaration {
    * Is this API deprecated or not?
    */
   deprecated?: boolean;
-}
-
-export interface SourceLink {
-  path: string;
-  lineNumber: number;
 }
 
 /**
@@ -225,9 +204,25 @@ export interface MissingApiItemMap {
 
 export interface ApiReference {
   plugin: string;
-  link: SourceLink;
+  path: string;
 }
 
-export interface ReferencedDeprecations {
+// A mapping of plugin id to a list of every deprecated API it uses, and where it's referenced.
+export interface ReferencedDeprecationsByPlugin {
+  // Key is the plugin id.
   [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
+}
+
+// A mapping of deprecated API id to the places that are still referencing it.
+export interface ReferencedDeprecationsByAPI {
+  [key: string]: { deprecatedApi: ApiDeclaration; references: ApiReference[] };
+}
+
+export interface ApiStats {
+  missingComments: ApiDeclaration[];
+  isAnyType: ApiDeclaration[];
+  noReferences: ApiDeclaration[];
+  apiCount: number;
+  missingExports: number;
+  deprecatedAPIsReferencedCount: number;
 }

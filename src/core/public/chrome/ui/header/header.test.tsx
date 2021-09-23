@@ -61,13 +61,14 @@ describe('Header', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
     const isLocked$ = new BehaviorSubject(false);
     const navLinks$ = new BehaviorSubject([
-      { id: 'kibana', title: 'kibana', baseUrl: '', href: '' },
+      { id: 'kibana', title: 'kibana', baseUrl: '', href: '', url: '' },
     ]);
     const headerBanner$ = new BehaviorSubject(undefined);
     const customNavLink$ = new BehaviorSubject({
       id: 'cloud-deployment-link',
       title: 'Manage cloud deployment',
       baseUrl: '',
+      url: '',
       href: '',
     });
     const recentlyAccessed$ = new BehaviorSubject([
@@ -98,7 +99,7 @@ describe('Header', () => {
 
     act(() => isLocked$.next(true));
     component.update();
-    expect(component.find('nav[aria-label="Primary"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="collapsibleNav"]').exists()).toBeTruthy();
     expect(component).toMatchSnapshot();
 
     act(() =>

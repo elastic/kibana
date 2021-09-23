@@ -12,7 +12,7 @@ import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 import { isTextInput } from '../../lib/is_text_input';
-import { WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
+import { HEADER_BANNER_HEIGHT, WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
 
 export class Workpad extends React.PureComponent {
   static propTypes = {
@@ -37,6 +37,7 @@ export class Workpad extends React.PureComponent {
     zoomIn: PropTypes.func.isRequired,
     zoomOut: PropTypes.func.isRequired,
     resetZoom: PropTypes.func.isRequired,
+    hasHeaderBanner: PropTypes.bool,
   };
 
   _toggleFullscreen = () => {
@@ -80,12 +81,15 @@ export class Workpad extends React.PureComponent {
       registerLayout,
       unregisterLayout,
       zoomScale,
+      hasHeaderBanner = false,
     } = this.props;
 
     const bufferStyle = {
       height: isFullscreen ? height : (height + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
       width: isFullscreen ? width : (width + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
     };
+
+    const headerBannerOffset = hasHeaderBanner ? HEADER_BANNER_HEIGHT : 0;
 
     return (
       <div className="canvasWorkpad__buffer" style={bufferStyle}>
@@ -104,7 +108,11 @@ export class Workpad extends React.PureComponent {
 
           <Fullscreen>
             {({ isFullscreen, windowSize }) => {
-              const scale = Math.min(windowSize.height / height, windowSize.width / width);
+              const scale = Math.min(
+                (windowSize.height - headerBannerOffset) / height,
+                windowSize.width / width
+              );
+
               const fsStyle = isFullscreen
                 ? {
                     transform: `scale3d(${scale}, ${scale}, 1)`,
@@ -112,6 +120,7 @@ export class Workpad extends React.PureComponent {
                     msTransform: `scale3d(${scale}, ${scale}, 1)`,
                     height: windowSize.height < height ? 'auto' : height,
                     width: windowSize.width < width ? 'auto' : width,
+                    top: hasHeaderBanner ? `${headerBannerOffset / 2}px` : undefined,
                   }
                 : {};
 
@@ -123,14 +132,6 @@ export class Workpad extends React.PureComponent {
                   style={fsStyle}
                   data-shared-items-count={totalElementCount}
                 >
-                  {isFullscreen && (
-                    <Shortcuts
-                      name="PRESENTATION"
-                      handler={this.keyHandler}
-                      targetNodeSelector="body"
-                      global
-                    />
-                  )}
                   {pages.map((page, i) => (
                     <WorkpadPage
                       key={page.id}

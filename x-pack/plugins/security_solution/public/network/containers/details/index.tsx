@@ -26,7 +26,7 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkDetailsQuery';
+export const ID = 'networkDetailsQuery';
 
 export interface NetworkDetailsArgs {
   id: string;
@@ -59,10 +59,8 @@ export const useNetworkDetails = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
 
-  const [
-    networkDetailsRequest,
-    setNetworkDetailsRequest,
-  ] = useState<NetworkDetailsRequestOptions | null>(null);
+  const [networkDetailsRequest, setNetworkDetailsRequest] =
+    useState<NetworkDetailsRequestOptions | null>(null);
 
   const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
     networkDetails: {},

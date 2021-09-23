@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { SharePluginSetup } from 'src/plugins/share/public';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
 import { ReportingStart } from '../../reporting/public';
 import {
@@ -15,11 +16,13 @@ import {
   AppMountParameters,
   AppUpdater,
   DEFAULT_APP_CATEGORIES,
+  PluginInitializerContext,
 } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { getSessionStorage } from './lib/storage';
-import { SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
+import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
+import { CanvasAppLocatorDefinition } from '../common/locator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -30,7 +33,9 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
-import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
+import { setupExpressions } from './setup_expressions';
+import { pluginServiceRegistry } from './services/kibana';
+
 export { CoreStart, CoreSetup };
 
 /**
@@ -40,6 +45,7 @@ export { CoreStart, CoreSetup };
 // This interface will be built out as we require other plugins for setup
 export interface CanvasSetupDeps {
   data: DataPublicPluginSetup;
+  share: SharePluginSetup;
   expressions: ExpressionsSetup;
   home?: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -70,60 +76,81 @@ export type CanvasStart = void;
 
 /** @internal */
 export class CanvasPlugin
-  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps>
+{
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-  // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
-  private srcPlugin = new CanvasSrcPlugin();
+  private initContext: PluginInitializerContext;
 
-  public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
-    const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
+  constructor(initContext: PluginInitializerContext) {
+    this.initContext = initContext;
+  }
 
-    this.srcPlugin.setup(core, { canvas: canvasApi });
+  public setup(coreSetup: CoreSetup<CanvasStartDeps>, setupPlugins: CanvasSetupDeps) {
+    const { api: canvasApi, registries } = getPluginApi(setupPlugins.expressions);
 
     // Set the nav link to the last saved url if we have one in storage
     const lastPath = getSessionStorage().get(
-      `${SESSIONSTORAGE_LASTPATH}:${core.http.basePath.get()}`
+      `${SESSIONSTORAGE_LASTPATH}:${coreSetup.http.basePath.get()}`
     );
+
     if (lastPath) {
       this.appUpdater.next(() => ({
         defaultPath: `#${lastPath}`,
       }));
     }
 
-    core.application.register({
+    coreSetup.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
-      id: 'canvas',
+      id: CANVAS_APP,
       title: 'Canvas',
       euiIconType: 'logoKibana',
       order: 3000,
       updater$: this.appUpdater,
       mount: async (params: AppMountParameters) => {
+        const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
+        const srcPlugin = new CanvasSrcPlugin();
+
+        srcPlugin.setup(coreSetup, { canvas: canvasApi });
+        setupExpressions({ coreSetup, setupPlugins });
+
+        // Get start services
+        const [coreStart, startPlugins] = await coreSetup.getStartServices();
+
+        srcPlugin.start(coreStart, startPlugins);
+
+        const { pluginServices } = await import('./services');
+        pluginServices.setRegistry(
+          pluginServiceRegistry.start({ coreStart, startPlugins, initContext: this.initContext })
+        );
+
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
-        // Get start services
-        const [coreStart, depsStart] = await core.getStartServices();
-
         const canvasStore = await initializeCanvas(
-          core,
+          coreSetup,
           coreStart,
-          plugins,
-          depsStart,
+          setupPlugins,
+          startPlugins,
           registries,
-          this.appUpdater
+          this.appUpdater,
+          pluginServices
         );
 
-        const unmount = renderApp(coreStart, depsStart, params, canvasStore);
+        const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });
 
         return () => {
           unmount();
-          teardownCanvas(coreStart, depsStart);
+          teardownCanvas(coreStart);
         };
       },
     });
 
-    if (plugins.home) {
-      plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    if (setupPlugins.home) {
+      setupPlugins.home.featureCatalogue.register(featureCatalogueEntry);
+    }
+
+    if (setupPlugins.share) {
+      setupPlugins.share.url.locators.create(new CanvasAppLocatorDefinition());
     }
 
     canvasApi.addArgumentUIs(async () => {
@@ -131,6 +158,7 @@ export class CanvasPlugin
       const { argTypeSpecs } = await import('./expression_types/arg_types');
       return argTypeSpecs;
     });
+
     canvasApi.addTransitions(async () => {
       const { transitions } = await import('./transitions');
       return transitions;
@@ -141,8 +169,7 @@ export class CanvasPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: CanvasStartDeps) {
-    this.srcPlugin.start(core, plugins);
-    initLoadingIndicator(core.http.addLoadingCountSource);
+  public start(coreStart: CoreStart, startPlugins: CanvasStartDeps) {
+    initLoadingIndicator(coreStart.http.addLoadingCountSource);
   }
 }

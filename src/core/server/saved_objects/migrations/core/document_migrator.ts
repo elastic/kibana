@@ -65,7 +65,7 @@ import { MigrationLogger } from './migration_logger';
 import { TransformSavedObjectDocumentError } from '.';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
-import { DEFAULT_NAMESPACE_STRING } from '../../service/lib/utils';
+import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 const DEFAULT_MINIMUM_CONVERT_VERSION = '8.0.0';
@@ -260,6 +260,7 @@ function validateMigrationsMapObject(
       throw new Error(`${prefix} Got ${obj}.`);
     }
   }
+
   function assertValidSemver(version: string, type: string) {
     if (!Semver.valid(version)) {
       throw new Error(
@@ -272,6 +273,7 @@ function validateMigrationsMapObject(
       );
     }
   }
+
   function assertValidTransform(fn: any, version: string, type: string) {
     if (typeof fn !== 'function') {
       throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
@@ -554,7 +556,7 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
   }
 
   const { id: originId, type } = otherAttrs;
-  const id = deterministicallyRegenerateObjectId(namespace, type, originId!);
+  const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId!);
   if (namespace !== undefined) {
     const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
       id: `${namespace}:${type}:${originId}`,
@@ -614,7 +616,9 @@ function getReferenceTransforms(typeRegistry: ISavedObjectTypeRegistry): Transfo
             references: references.map(({ type, id, ...attrs }) => ({
               ...attrs,
               type,
-              id: types.has(type) ? deterministicallyRegenerateObjectId(namespace, type, id) : id,
+              id: types.has(type)
+                ? SavedObjectsUtils.getConvertedObjectId(namespace, type, id)
+                : id,
             })),
           },
           additionalDocs: [],
@@ -665,6 +669,7 @@ function wrapWithTry(
     log: new MigrationLogger(log),
     migrationVersion: version,
     convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
+    isSingleNamespaceType: type.namespaceType === 'single',
   });
 
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
@@ -680,7 +685,7 @@ function wrapWithTry(
       return { transformedDoc: result, additionalDocs: [] };
     } catch (error) {
       log.error(error);
-      throw new TransformSavedObjectDocumentError(error);
+      throw new TransformSavedObjectDocumentError(error, version);
     }
   };
 }

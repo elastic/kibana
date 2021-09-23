@@ -48,7 +48,7 @@ export interface TableProps {
   filterOptions: any[];
   capabilities: ApplicationStart['capabilities'];
   onDelete: () => void;
-  onActionRefresh: (object: SavedObjectWithMetadata) => void;
+  onActionRefresh: (objects: Array<{ type: string; id: string }>) => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
@@ -243,7 +243,6 @@ export class Table extends PureComponent<TableProps, TableState> {
             type: 'icon',
             icon: 'inspect',
             onClick: (object) => goInspectObject(object),
-            available: (object) => !!object.meta.editUrl,
             'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
@@ -277,10 +276,9 @@ export class Table extends PureComponent<TableProps, TableState> {
                   this.setState({
                     activeAction: undefined,
                   });
-                  const { refreshOnFinish = () => false } = action;
-                  if (refreshOnFinish()) {
-                    onActionRefresh(object);
-                  }
+                  const { refreshOnFinish = () => [] } = action;
+                  const objectsToRefresh = refreshOnFinish();
+                  onActionRefresh(objectsToRefresh);
                 });
 
                 if (action.euiAction.onClick) {

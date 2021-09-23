@@ -39,9 +39,9 @@ import {
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
-import { ExportSelectedData } from '../../common/components/generic_downloader';
 import { ToasterError } from '../../common/components/toasters';
 import {
+  ExportDocumentsProps,
   ImportDataProps,
   ImportDataResponse,
 } from '../../detections/containers/detection_engine/rules';
@@ -219,11 +219,11 @@ export const importTimelines = async ({
   });
 };
 
-export const exportSelectedTimeline: ExportSelectedData = ({
+export const exportSelectedTimeline = ({
   filename = `timelines_export.ndjson`,
   ids = [],
   signal,
-}): Promise<Blob | TimelineErrorResponse> => {
+}: ExportDocumentsProps): Promise<Blob | TimelineErrorResponse> => {
   let requestBody;
   try {
     requestBody = ids.length > 0 ? JSON.stringify({ ids }) : undefined;

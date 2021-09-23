@@ -59,7 +59,7 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
+import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
 import {
   catchError,
   finalize,
@@ -72,35 +72,39 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, Observable } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
-import { AggConfigs, ES_SEARCH_STRATEGY, ISearchGeneric, ISearchOptions } from '../..';
+import { IIndexPattern, IndexPattern, IndexPatternField } from '../..';
+import {
+  AggConfigs,
+  EsQuerySortValue,
+  IEsSearchResponse,
+  ISearchGeneric,
+  ISearchOptions,
+} from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
-  SearchSourceOptions,
   SearchSourceFields,
+  SearchSourceOptions,
 } from './types';
-import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
+import { FetchHandlers, getSearchParamsFromRequest, RequestFailure, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {
   getEsQueryConfig,
-  buildEsQuery,
-  Filter,
-  UI_SETTINGS,
+  IKibanaSearchResponse,
   isErrorResponse,
   isPartialResponse,
-  IKibanaSearchResponse,
+  UI_SETTINGS,
 } from '../../../common';
-import { getHighlightRequest } from '../../../common/field_formats';
+import { getHighlightRequest } from '../../../../field_formats/common';
 import { extractReferences } from './extract_references';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
   'dateFormat:tz',
-  UI_SETTINGS.COURIER_BATCH_SEARCHES,
   UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE,
   UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
   UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS,
@@ -274,15 +278,6 @@ export class SearchSource {
   fetch$(
     options: ISearchOptions = {}
   ): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>> {
-    const { getConfig } = this.dependencies;
-    const syncSearchByDefault = getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES);
-
-    // Use the sync search strategy if legacy search is enabled.
-    // This still uses bfetch for batching.
-    if (!options?.strategy && syncSearchByDefault) {
-      options.strategy = ES_SEARCH_STRATEGY;
-    }
-
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
         const searchRequest = this.flatten();
@@ -307,7 +302,8 @@ export class SearchSource {
 
   /**
    * Fetch this source and reject the returned Promise on error
-   * @deprecated Use fetch$ instead
+   * @deprecated Use the `fetch$` method instead
+   * @removeBy 8.1
    */
   fetch(options: ISearchOptions = {}) {
     return this.fetch$(options)
@@ -414,6 +410,15 @@ export class SearchSource {
     }
   }
 
+  private postFlightTransform(response: IEsSearchResponse<any>) {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      return aggs.postFlightTransform(response);
+    } else {
+      return response;
+    }
+  }
+
   private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
@@ -451,24 +456,26 @@ export class SearchSource {
           if (isErrorResponse(response)) {
             obs.error(response);
           } else if (isPartialResponse(response)) {
-            obs.next(response);
+            obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
-              obs.next(response);
+              obs.next(this.postFlightTransform(response));
               obs.complete();
             } else {
               // Treat the complete response as partial, then run the postFlightRequests.
               obs.next({
-                ...response,
+                ...this.postFlightTransform(response),
                 isPartial: true,
                 isRunning: true,
               });
               const sub = from(this.fetchOthers(response.rawResponse, options)).subscribe({
                 next: (responseWithOther) => {
-                  obs.next({
-                    ...response,
-                    rawResponse: responseWithOther,
-                  });
+                  obs.next(
+                    this.postFlightTransform({
+                      ...response,
+                      rawResponse: responseWithOther!,
+                    })
+                  );
                 },
                 error: (e) => {
                   obs.error(e);
@@ -682,7 +689,7 @@ export class SearchSource {
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
-    const metaFields = getConfig(UI_SETTINGS.META_FIELDS);
+    const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
@@ -736,10 +743,6 @@ export class SearchSource {
         body.script_fields = pick(
           body.script_fields,
           Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
-        );
-        body.runtime_mappings = pick(
-          body.runtime_mappings,
-          Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
         );
       }
 
@@ -814,11 +817,18 @@ export class SearchSource {
       body.fields = filteredDocvalueFields;
     }
 
-    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
+    // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
+    const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
+      sort.hasOwnProperty('_score')
+    );
+    const esQueryConfigs = {
+      ...getEsQueryConfig({ get: getConfig }),
+      filtersInMustClause,
+    };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
+      body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
 

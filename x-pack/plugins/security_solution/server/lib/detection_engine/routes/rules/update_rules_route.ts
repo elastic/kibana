@@ -18,11 +18,13 @@ import { buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRules } from '../../rules/update_rules';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
-export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
+export const updateRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
+) => {
   router.put(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -40,12 +42,11 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const alertsClient = context.alerting?.getAlertsClient();
+        const rulesClient = context.alerting?.getRulesClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
 
-        if (!siemClient || !alertsClient) {
+        if (!siemClient || !rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
@@ -57,34 +58,26 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
         });
         throwHttpError(await mlAuthz.validateRuleType(request.body.type));
 
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const rule = await updateRules({
-          alertsClient,
-          savedObjectsClient,
           defaultOutputIndex: siemClient.getSignalsIndex(),
+          isRuleRegistryEnabled,
+          rulesClient,
+          ruleStatusClient,
           ruleUpdate: request.body,
+          spaceId: context.securitySolution.getSpaceId(),
         });
 
         if (rule != null) {
-          const ruleActions = await updateRulesNotifications({
-            ruleAlertId: rule.id,
-            alertsClient,
-            savedObjectsClient,
-            enabled: request.body.enabled ?? true,
-            actions: request.body.actions ?? [],
-            throttle: request.body.throttle ?? 'no_actions',
-            name: request.body.name,
-          });
           const ruleStatuses = await ruleStatusClient.find({
-            perPage: 1,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: rule.id,
-            searchFields: ['alertId'],
+            logsCount: 1,
+            ruleId: rule.id,
+            spaceId: context.securitySolution.getSpaceId(),
           });
           const [validated, errors] = transformValidate(
             rule,
-            ruleActions,
-            ruleStatuses.saved_objects[0]
+            ruleStatuses[0],
+            isRuleRegistryEnabled
           );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });

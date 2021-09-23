@@ -11,7 +11,7 @@ import { Alert } from '../../../types';
 describe('alert reducer', () => {
   let initialAlert: Alert;
   beforeAll(() => {
-    initialAlert = ({
+    initialAlert = {
       params: {},
       consumer: 'alerts',
       alertTypeId: null,
@@ -21,7 +21,7 @@ describe('alert reducer', () => {
       actions: [],
       tags: [],
       notifyWhen: 'onActionGroupChange',
-    } as unknown) as Alert;
+    } as unknown as Alert;
   });
 
   // setAlert
@@ -141,6 +141,29 @@ describe('alert reducer', () => {
     expect(updatedAlertActionParamsProperty.alert.actions[0].params.testActionParam).toBe(
       'test action params property updated'
     );
+  });
+
+  test('if the existing alert action params property was set to undefined (when other connector was selected)', () => {
+    initialAlert.actions.push({
+      id: '',
+      actionTypeId: 'testId',
+      group: 'Alert',
+      params: {
+        testActionParam: 'some value',
+      },
+    });
+    const updatedAlert = alertReducer(
+      { alert: initialAlert },
+      {
+        command: { type: 'setAlertActionParams' },
+        payload: {
+          key: 'testActionParam',
+          value: undefined,
+          index: 0,
+        },
+      }
+    );
+    expect(updatedAlert.alert.actions[0].params.testActionParam).toBe(undefined);
   });
 
   test('if alert action property was updated', () => {

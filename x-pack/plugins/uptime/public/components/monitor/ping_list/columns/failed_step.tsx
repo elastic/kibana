@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { Ping, SyntheticsJourneyApiResponse } from '../../../../../common/runtime_types/ping';
+import { FailedStepsApiResponse } from '../../../../../common/runtime_types/ping/synthetics';
 
 interface Props {
-  ping: Ping;
-  failedSteps?: SyntheticsJourneyApiResponse;
+  checkGroup?: string;
+  failedSteps?: FailedStepsApiResponse;
 }
 
-export const FailedStep = ({ ping, failedSteps }: Props) => {
+export const FailedStep = ({ checkGroup, failedSteps }: Props) => {
   const thisFailedStep = failedSteps?.steps?.find(
-    (fs) => fs.monitor.check_group === ping.monitor.check_group
+    (fs) => !!checkGroup && fs.monitor.check_group === checkGroup
   );
 
   if (!thisFailedStep) {

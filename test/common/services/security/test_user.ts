@@ -7,7 +7,7 @@
  */
 
 import { format as formatUrl } from 'url';
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 
 import { Role } from './role';
 import { User } from './user';
@@ -110,7 +110,7 @@ export function TestUserSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
-  return supertestAsPromised(
+  return supertest(
     formatUrl({
       ...kibanaServerConfig,
       auth: `${TEST_USER_NAME}:${TEST_USER_PASSWORD}`,

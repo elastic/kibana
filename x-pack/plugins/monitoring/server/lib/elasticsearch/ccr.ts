@@ -27,7 +27,7 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
   const params = {
     index: esIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         type: 'cluster_stats',
@@ -38,7 +38,7 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
       }),
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
-    filterPath: [
+    filter_path: [
       'hits.hits._source.stack_stats.xpack.ccr',
       'hits.hits._source.elasticsearch.cluster.stats.stack.xpack.ccr',
     ],
@@ -50,5 +50,5 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
   const mbCcr = response.hits?.hits[0]?._source?.elasticsearch?.cluster?.stats?.stack?.xpack?.ccr;
   const isEnabled = legacyCcr?.enabled ?? mbCcr?.enabled;
   const isAvailable = legacyCcr?.available ?? mbCcr?.available;
-  return isEnabled && isAvailable;
+  return Boolean(isEnabled && isAvailable);
 }

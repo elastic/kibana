@@ -12,7 +12,7 @@ import type { RequestHandler } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import type { AuthenticationServiceStart } from '../../authentication';
+import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -22,13 +22,13 @@ describe('Create API Key route', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
-    return ({
+    return {
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-    } as unknown) as SecurityRequestHandlerContext;
+    } as unknown as SecurityRequestHandlerContext;
   }
 
   let routeHandler: RequestHandler<any, any, any, any>;
-  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
+  let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   beforeEach(() => {
     authc = authenticationServiceMock.createStart();
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
@@ -84,6 +84,9 @@ describe('Create API Key route', () => {
         expires: '12d',
         role_descriptors: {
           role_1: {},
+        },
+        metadata: {
+          foo: 'bar',
         },
       };
 

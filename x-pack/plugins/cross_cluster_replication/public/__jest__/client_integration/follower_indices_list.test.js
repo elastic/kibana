@@ -45,7 +45,7 @@ describe('<FollowerIndicesList />', () => {
     });
 
     test('should show a loading indicator on component', async () => {
-      expect(exists('followerIndexLoading')).toBe(true);
+      expect(exists('sectionLoading')).toBe(true);
     });
   });
 

@@ -12,16 +12,12 @@ import { Resizable, ResizeCallback } from 're-resizable';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import { useDraggableKeyboardWrapper } from '../../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
-import {
-  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
-  getDraggableFieldId,
-} from '../../../../../common/components/drag_and_drop/helpers';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { getDraggableFieldId } from '../../../../../common/components/drag_and_drop/helpers';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnFilterChange } from '../../events';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
@@ -31,6 +27,7 @@ import { Header } from './header';
 import { timelineActions } from '../../../../store/timeline';
 
 import * as i18n from './translations';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 const ContextMenu = styled(EuiContextMenu)`
   width: 115px;
@@ -75,6 +72,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   const restoreFocus = useCallback(() => keyboardHandlerRef.current?.focus(), []);
 
   const dispatch = useDispatch();
+  const { timelines } = useKibana().services;
   const resizableSize = useMemo(
     () => ({
       width: header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH,
@@ -247,7 +245,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
     setHoverActionsOwnFocus(true);
   }, []);
 
-  const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
+  const { onBlur, onKeyDown } = timelines.getUseDraggableKeyboardWrapper()({
     closePopover: handleClosePopOverTrigger,
     draggableId,
     fieldName: header.id,

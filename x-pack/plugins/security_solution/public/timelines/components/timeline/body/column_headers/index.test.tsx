@@ -24,6 +24,8 @@ import { Direction } from '../../../../../../common/search_strategy';
 import { defaultControlColumn } from '../control_columns';
 import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
 
+jest.mock('../../../../../common/lib/kibana');
+
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');

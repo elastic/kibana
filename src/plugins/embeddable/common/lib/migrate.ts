@@ -6,31 +6,43 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { CommonEmbeddableStartContract } from '../types';
 import { baseEmbeddableMigrations } from './migrate_base_input';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
+
+export type MigrateFunction = (state: SerializableRecord, version: string) => SerializableRecord;
 
 export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) => {
-  return (state: SerializableState, version: string) => {
-    const enhancements = (state.enhancements as SerializableState) || {};
+  const migrateFn: MigrateFunction = (state: SerializableRecord, version: string) => {
+    const enhancements = (state.enhancements as SerializableRecord) || {};
     const factory = embeddables.getEmbeddableFactory(state.type as string);
 
     let updatedInput = baseEmbeddableMigrations[version]
       ? baseEmbeddableMigrations[version](state)
       : state;
 
-    if (factory && factory.migrations[version]) {
+    if (factory?.migrations[version]) {
       updatedInput = factory.migrations[version](updatedInput);
+    }
+
+    if (factory?.isContainerType) {
+      updatedInput.panels = ((state.panels as SerializableRecord[]) || []).map((panel) => {
+        return migrateFn(panel, version);
+      });
     }
 
     updatedInput.enhancements = {};
     Object.keys(enhancements).forEach((key) => {
       if (!enhancements[key]) return;
-      (updatedInput.enhancements! as Record<string, any>)[key] = embeddables
-        .getEnhancement(key)
-        .migrations[version](enhancements[key] as SerializableState);
+      const enhancementDefinition = embeddables.getEnhancement(key);
+      const migratedEnhancement = enhancementDefinition?.migrations?.[version]
+        ? enhancementDefinition.migrations[version](enhancements[key] as SerializableRecord)
+        : enhancements[key];
+      (updatedInput.enhancements! as Record<string, {}>)[key] = migratedEnhancement;
     });
 
     return updatedInput;
   };
+
+  return migrateFn;
 };

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { defer, of, interval, Observable, throwError, timer } from 'rxjs';
-import { catchError, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
+import { catchError, mergeMap, retryWhen, startWith, switchMap } from 'rxjs/operators';
 import {
   Logger,
   SavedObjectsServiceStart,
@@ -73,9 +73,7 @@ const getHealthServiceStatus = async (
   const level =
     doc.state?.health_status === HealthStatus.OK
       ? ServiceStatusLevels.available
-      : doc.state?.health_status === HealthStatus.Warning
-      ? ServiceStatusLevels.degraded
-      : ServiceStatusLevels.unavailable;
+      : ServiceStatusLevels.degraded;
   return {
     level,
     summary: LEVEL_SUMMARY[level.toString()],
@@ -102,10 +100,10 @@ export const getHealthServiceStatusWithRetryAndErrorHandling = (
       );
     }),
     catchError((error) => {
-      logger.warn(`Alerting framework is unavailable due to the error: ${error}`);
+      logger.warn(`Alerting framework is degraded due to the error: ${error}`);
       return of({
-        level: ServiceStatusLevels.unavailable,
-        summary: LEVEL_SUMMARY[ServiceStatusLevels.unavailable.toString()],
+        level: ServiceStatusLevels.degraded,
+        summary: LEVEL_SUMMARY[ServiceStatusLevels.degraded.toString()],
         meta: { error },
       });
     })
@@ -121,6 +119,17 @@ export const getHealthStatusStream = (
   retryDelay?: number
 ): Observable<ServiceStatus<unknown>> =>
   interval(healthStatusInterval ?? HEALTH_STATUS_INTERVAL).pipe(
+    // Emit an initial check
+    startWith(
+      getHealthServiceStatusWithRetryAndErrorHandling(
+        taskManager,
+        logger,
+        savedObjects,
+        config,
+        retryDelay
+      )
+    ),
+    // On each interval do a new check
     switchMap(() =>
       getHealthServiceStatusWithRetryAndErrorHandling(
         taskManager,

@@ -1,0 +1,9 @@
+{
+  "security.saml_invalidate": {
+    "data_autocomplete_rules": {
+      "query_string": "",
+      "acs": "",
+      "realm": ""
+    }
+  }
+}

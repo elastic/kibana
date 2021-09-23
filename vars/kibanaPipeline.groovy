@@ -85,11 +85,14 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def parallelId = env.TASK_QUEUE_PROCESS_ID ?: env.CI_PARALLEL_PROCESS_NUMBER
 
   def kibanaPort = "61${parallelId}1"
-  def esPort = "61${parallelId}2"
-  def esTransportPort = "61${parallelId}3"
-  def fleetPackageRegistryPort = "61${parallelId}4"
-  def alertingProxyPort = "61${parallelId}5"
-  def corsTestServerPort = "61${parallelId}6"
+  def esPort = "62${parallelId}1"
+  // Ports 62x2-62x9 kept open for ES nodes
+  def esTransportPort = "63${parallelId}1-63${parallelId}9"
+  def fleetPackageRegistryPort = "64${parallelId}1"
+  def alertingProxyPort = "64${parallelId}2"
+  def corsTestServerPort = "64${parallelId}3"
+  // needed for https://github.com/elastic/kibana/issues/107246
+  def proxyTestServerPort = "64${parallelId}4"
   def apmActive = githubPr.isPr() ? "false" : "true"
 
   withEnv([
@@ -102,6 +105,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
     "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
     "TEST_CORS_SERVER_PORT=${corsTestServerPort}",
+    "TEST_PROXY_SERVER_PORT=${proxyTestServerPort}",
     "KBN_NP_PLUGINS_BUILT=true",
     "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
     "ALERTING_PROXY_PORT=${alertingProxyPort}",
@@ -347,7 +351,7 @@ def runErrorReporter(workspaces) {
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun} ${globs}
+      node scripts/report_failed_tests --no-index-errors ${dryRun} ${globs}
     """,
     "Report failed tests, if necessary"
   )

@@ -8,15 +8,16 @@
 import React from 'react';
 import { ExecutedStep } from './executed_step';
 import { render } from '../../lib/helper/rtl_helpers';
-import { Ping } from '../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../common/runtime_types/ping';
 
 describe('ExecutedStep', () => {
-  let step: Ping;
+  let step: JourneyStep;
 
   beforeEach(() => {
     step = {
-      docId: 'docID',
+      _id: 'docID',
       monitor: {
+        check_group: 'check_group',
         duration: {
           us: 123,
         },
@@ -29,8 +30,9 @@ describe('ExecutedStep', () => {
           index: 4,
           name: 'STEP_NAME',
         },
+        type: 'step/end',
       },
-      timestamp: 'timestamp',
+      '@timestamp': 'timestamp',
     };
   });
 
@@ -43,6 +45,7 @@ describe('ExecutedStep', () => {
         index: 3,
         name: 'STEP_NAME',
       },
+      type: 'step/end',
     };
 
     const { getByText } = render(<ExecutedStep index={3} step={step} loading={false} />);
@@ -57,6 +60,7 @@ describe('ExecutedStep', () => {
         message: 'There was an error executing the step.',
         stack: 'some.stack.trace.string',
       },
+      type: 'an error type',
     };
 
     const { getByText } = render(<ExecutedStep index={3} step={step} loading={false} />);

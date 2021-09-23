@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('creation_index_pattern', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
@@ -578,6 +578,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
+            type: testData.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
@@ -589,7 +590,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActions(testData.transformId, false);
 
           await transform.testExecution.logTestStep('should navigate to discover');
-          await transform.table.clickTransformRowAction('Discover');
+          await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
 
           if (testData.discoverAdjustSuperDatePicker) {
             await transform.discover.assertNoResults(testData.destinationIndex);

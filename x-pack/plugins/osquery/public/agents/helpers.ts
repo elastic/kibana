@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Aggregate, TermsAggregate } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   PaginationInputPaginated,
@@ -40,11 +40,11 @@ export const getNumOverlapped = (
   });
   return sum;
 };
-export const processAggregations = (aggs: Record<string, Aggregate>) => {
+export const processAggregations = (aggs: Record<string, estypes.AggregationsAggregate>) => {
   const platforms: Group[] = [];
   const overlap: Overlap = {};
-  const platformTerms = aggs.platforms as TermsAggregate<AggregationDataPoint>;
-  const policyTerms = aggs.policies as TermsAggregate<AggregationDataPoint>;
+  const platformTerms = aggs.platforms as estypes.AggregationsTermsAggregate<AggregationDataPoint>;
+  const policyTerms = aggs.policies as estypes.AggregationsTermsAggregate<AggregationDataPoint>;
 
   const policies =
     policyTerms?.buckets.map((o) => ({ name: o.key, id: o.key, size: o.doc_count })) ?? [];

@@ -17,7 +17,7 @@ export default function ({ getService }) {
 
   describe('nodes', () => {
     describe('with green platinum cluster', () => {
-      const archive = 'monitoring/singlecluster_green_platinum';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_green_platinum';
       const timeRange = {
         min: '2018-02-13T17:04:50.000Z',
         max: '2018-02-13T17:51:55.000Z',
@@ -46,7 +46,7 @@ export default function ({ getService }) {
     });
 
     describe('with red platinum cluster', () => {
-      const archive = 'monitoring/singlecluster_red_platinum';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_red_platinum';
       const timeRange = {
         min: '2017-10-06T19:53:06.000Z',
         max: '2017-10-06T20:15:30.000Z',
@@ -75,7 +75,8 @@ export default function ({ getService }) {
     });
 
     describe('with green trial cluster and node in cpu group', () => {
-      const archive = 'monitoring/singlecluster_green_trial_two_nodes_one_cgrouped';
+      const archive =
+        'x-pack/test/functional/es_archives/monitoring/singlecluster_green_trial_two_nodes_one_cgrouped';
       const timeRange = {
         min: '2018-02-13T19:18:02.000Z',
         max: '2018-02-13T19:26:14.000Z',
@@ -104,7 +105,7 @@ export default function ({ getService }) {
     });
 
     describe('with pagination', () => {
-      const archive = 'monitoring/singlecluster_lots_of_nodes';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_lots_of_nodes';
       const timeRange = {
         min: '2019-10-03T19:41:01.402Z',
         max: '2019-10-03T19:41:13.132Z',
@@ -164,7 +165,7 @@ export default function ({ getService }) {
     });
 
     describe('with sorting', () => {
-      const archive = 'monitoring/singlecluster_lots_of_nodes';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_lots_of_nodes';
       const timeRange = {
         min: '2019-10-03T19:41:01.402Z',
         max: '2019-10-03T19:41:13.132Z',
@@ -309,7 +310,7 @@ export default function ({ getService }) {
     });
 
     describe('with filtering', () => {
-      const archive = 'monitoring/singlecluster_lots_of_nodes';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_lots_of_nodes';
       const timeRange = {
         min: '2019-10-03T19:41:01.402Z',
         max: '2019-10-03T19:41:13.132Z',

@@ -14,7 +14,6 @@ const getSpacePrefix = (spaceId: string) => {
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'security',
@@ -22,16 +21,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'spaceSelector',
     'settings',
   ]);
+  const find = getService('find');
 
   const spaceId = 'space_1';
 
+  const textIncludesAll = (text: string, items: string[]) => {
+    const bools = items.map((item) => !!text.includes(item));
+    return bools.every((currBool) => currBool === true);
+  };
+
   describe('spaces integration', () => {
     before(async () => {
-      await esArchiver.load('saved_objects_management/spaces_integration');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/saved_objects_management/spaces_integration'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('saved_objects_management/spaces_integration');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/saved_objects_management/spaces_integration'
+      );
     });
 
     beforeEach(async () => {
@@ -50,9 +59,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.common.waitUntilUrlIncludes(getSpacePrefix(spaceId));
 
-      expect(await testSubjects.getAttribute(`savedObjects-editField-title`, 'value')).to.eql(
-        'A Pie'
-      );
+      const inspectContainer = await find.byClassName('kibanaCodeEditor');
+      const visibleContainerText = await inspectContainer.getVisibleText();
+      expect(
+        textIncludesAll(visibleContainerText, [
+          'A Pie',
+          'title',
+          'id',
+          'type',
+          'attributes',
+          'references',
+        ])
+      ).to.be(true);
+      expect(visibleContainerText.includes('A Pie'));
     });
   });
 }

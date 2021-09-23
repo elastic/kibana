@@ -1,8 +1,54 @@
 [[upgrade]]
 == Upgrade {kib}
 
-Depending on the {kib} version you're upgrading from, the upgrade process to 7.0
-varies.
+Depending on the {kib} version you're upgrading from, the upgrade process to {version}
+varies. The following upgrades are supported:
+
+* Between minor versions
+* From 5.6 to 6.8
+* From 6.8 to {prev-major-version}
+* From {prev-major-version} to {version}
+ifeval::[ "{version}" != "{minor-version}.0" ]
+* From any version since {minor-version}.0 to {version}
+endif::[]
+
+The following table shows the recommended upgrade paths to {version}.
+
+[cols="<1,3",options="header",]
+|====
+|Upgrade from   
+|Recommended upgrade path to {version}
+
+ifeval::[ "{version}" != "{minor-version}.0" ]
+|A previous {minor-version} version (e.g., {minor-version}.0)
+|Upgrade to {version}
+endif::[]
+
+|{prev-major-version}
+|Upgrade to {version}
+
+|7.0–7.7
+a|
+. Upgrade to {prev-major-version}
+. Upgrade to {version}
+
+|6.8
+a|
+. Upgrade to {prev-major-version}
+. Upgrade to {version}
+
+|6.0–6.7
+a|
+
+. Upgrade to 6.8
+. Upgrade to {prev-major-version}
+. Upgrade to {version}
+|====
+
+[WARNING]
+====
+The upgrade path from 6.8 to 7.0 is *not* supported.
+====
 
 [float]
 [[upgrade-before-you-begin]]

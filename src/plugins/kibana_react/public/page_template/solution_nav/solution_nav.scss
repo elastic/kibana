@@ -1,22 +1,30 @@
-.kbnPageTemplateSolutionNav__title {
-  margin-bottom: $euiSizeL;
+$euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
+@import '@elastic/eui/src/components/side_nav/mixins';
+
+// Put the page background color in the flyout version too
+.kbnPageTemplateSolutionNav__flyout {
+  background-color: $euiPageBackgroundColor;
 }
 
-@include euiBreakpoint('xs','s') {
-  .kbnPageTemplateSolutionNav {
-    // TODO: Fix in EUI
-    .euiSideNav__mobileToggle {
-      height: auto;
-      font-size: $euiFontSizeM;
+.kbnPageTemplateSolutionNav {
+  @include euiSideNavEmbellish;
+  @include euiYScroll;
 
-      .euiButtonEmpty__text {
-        overflow: visible;
-      }
-    }
+  @include euiBreakpoint('m' ,'l', 'xl') {
+    width: 248px;
+    padding: $euiSizeL;
   }
 
-  // Rely on the `mobileToggle` of the EuiSideNav component to title the navigation list
-  .kbnPageTemplateSolutionNav__title {
-    display: none;
+  .kbnPageTemplateSolutionNavAvatar {
+    margin-right: $euiSize;
+  }
+}
+
+.kbnPageTemplateSolutionNav--hidden {
+  pointer-events: none;
+  opacity: 0;
+
+  @include euiCanAnimate {
+    transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
   }
 }

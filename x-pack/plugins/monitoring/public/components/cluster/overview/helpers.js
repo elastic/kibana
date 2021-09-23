@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { formatBytesUsage, formatPercentageUsage, formatNumber } from '../../../lib/format_number';
-import {
-  EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiTitle,
-  EuiIcon,
-  EuiHealth,
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
+import React from 'react';
+import { Legacy } from '../../../legacy_shims';
+import { formatBytesUsage, formatNumber, formatPercentageUsage } from '../../../lib/format_number';
 
 export function HealthLabel(props) {
   if (props.status === 'green') {
@@ -42,15 +43,14 @@ export function HealthLabel(props) {
     }
   }
 
-  if (product === 'kb' && status === 'red') {
+  // TODO: Use the actual service level statuses instead of converting them to colors
+  if (product === 'kb' && (status === 'yellow' || status === 'red')) {
     return (
       <EuiText>
         {i18n.translate('xpack.monitoring.cluster.health.pluginIssues', {
-          defaultMessage: 'Some plugins are experiencing issues. Check ',
+          defaultMessage: 'Some plugins may be experiencing issues. Please check ',
         })}
-        <EuiLink href="/status" target="_blank" external={true}>
-          status
-        </EuiLink>
+        <EuiLink href={`${Legacy.shims.getBasePath()}/status`}>the Kibana status page</EuiLink>.
       </EuiText>
     );
   }

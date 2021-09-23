@@ -6,19 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
+import type { KibanaExecutionContext } from 'src/core/public';
 
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
-import { ExecutionContract } from '../execution/execution_contract';
-import { AnyExpressionTypeDefinition } from '../expression_types';
+import { ExecutionContract, ExecutionResult } from '../execution';
+import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
+import { PersistableStateService, VersionedState } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
+import {
+  clog,
+  createTable,
+  font,
+  variableSet,
+  variable,
+  theme,
+  cumulativeSum,
+  derivative,
+  movingAverage,
+  mapColumn,
+  overallMetric,
+  math,
+  mathColumn,
+} from '../expression_functions';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -37,10 +54,12 @@ export type ExpressionsServiceSetup = Pick<
   | 'registerType'
   | 'run'
   | 'fork'
+  | 'extract'
+  | 'inject'
 >;
 
 export interface ExpressionExecutionParams {
-  searchContext?: SerializableState;
+  searchContext?: SerializableRecord;
 
   variables?: Record<string, any>;
 
@@ -63,6 +82,8 @@ export interface ExpressionExecutionParams {
   syncColors?: boolean;
 
   inspectorAdapters?: Adapters;
+
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -122,7 +143,7 @@ export interface ExpressionsServiceStart {
     ast: string | ExpressionAstExpression,
     input: Input,
     params?: ExpressionExecutionParams
-  ) => Promise<Output>;
+  ) => Observable<ExecutionResult<Output | ExpressionValueError>>;
 
   /**
    * Starts expression execution and immediately returns `ExecutionContract`
@@ -229,7 +250,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   ): void => this.renderers.register(definition);
 
   public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
-    this.executor.run(ast, input, params).pipe(take(1)).toPromise<any>();
+    this.executor.run(ast, input, params);
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
@@ -269,7 +290,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   public readonly fork = () => {
     const executor = this.executor.fork();
     const renderers = this.renderers;
-    const fork = new ExpressionsService({ executor, renderers });
+    const fork = new (this.constructor as typeof ExpressionsService)({ executor, renderers });
 
     return fork;
   };
@@ -305,20 +326,43 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   };
 
   /**
-   * Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1)
-   * @param state expression AST to update
-   * @param version defines which migration version to run
-   * @returns new migrated expression AST
+   * gets an object with semver mapped to a migration function
    */
-  public readonly migrate = (state: SerializableState, version: string) => {
-    return this.executor.migrate(state, version);
+  public getAllMigrations = () => {
+    return this.executor.getAllMigrations();
+  };
+
+  /**
+   * migrates an old expression to latest version
+   * @param state
+   */
+  public migrateToLatest = (state: VersionedState) => {
+    return this.executor.migrateToLatest(state);
   };
 
   /**
    * Returns Kibana Platform *setup* life-cycle contract. Useful to return the
    * same contract on server-side and browser-side.
    */
-  public setup(): ExpressionsServiceSetup {
+  public setup(...args: unknown[]): ExpressionsServiceSetup {
+    for (const fn of [
+      clog,
+      createTable,
+      font,
+      variableSet,
+      variable,
+      theme,
+      cumulativeSum,
+      derivative,
+      movingAverage,
+      overallMetric,
+      mapColumn,
+      math,
+      mathColumn,
+    ]) {
+      this.registerFunction(fn);
+    }
+
     return this;
   }
 
@@ -326,7 +370,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
    * Returns Kibana Platform *start* life-cycle contract. Useful to return the
    * same contract on server-side and browser-side.
    */
-  public start(): ExpressionsServiceStart {
+  public start(...args: unknown[]): ExpressionsServiceStart {
     return this;
   }
 

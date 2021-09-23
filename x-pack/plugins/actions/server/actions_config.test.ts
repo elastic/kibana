@@ -27,8 +27,8 @@ const defaultActionsConfig: ActionsConfig = {
   enabledActionTypes: [],
   preconfiguredAlertHistoryEsIndex: false,
   preconfigured: {},
-  proxyRejectUnauthorizedCertificates: true,
-  rejectUnauthorized: true,
+  proxyRejectUnauthorizedCertificates: true, // legacy
+  rejectUnauthorized: true, // legacy
   maxResponseContentLength: new ByteSizeValue(1000000),
   responseTimeout: moment.duration(60000),
   cleanupFailedExecutionsTask: {
@@ -36,6 +36,10 @@ const defaultActionsConfig: ActionsConfig = {
     cleanupInterval: schema.duration().validate('5m'),
     idleInterval: schema.duration().validate('1h'),
     pageSize: 100,
+  },
+  ssl: {
+    proxyVerificationMode: 'full',
+    verificationMode: 'full',
   },
 };
 
@@ -305,22 +309,45 @@ describe('getProxySettings', () => {
     expect(proxySettings?.proxyUrl).toBe(config.proxyUrl);
   });
 
-  test('returns proxyRejectUnauthorizedCertificates', () => {
+  test('returns proper verificationMode values, beased on the legacy config option proxyRejectUnauthorizedCertificates', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
       proxyRejectUnauthorizedCertificates: true,
     };
     let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
-    expect(proxySettings?.proxyRejectUnauthorizedCertificates).toBe(true);
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('full');
 
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
       proxyRejectUnauthorizedCertificates: false,
+      ssl: {},
     };
     proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
-    expect(proxySettings?.proxyRejectUnauthorizedCertificates).toBe(false);
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('none');
+  });
+
+  test('returns proper verificationMode value, based on the SSL proxy configuration', () => {
+    const configTrue: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      ssl: {
+        proxyVerificationMode: 'full',
+      },
+    };
+    let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('full');
+
+    const configFalse: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      ssl: {
+        proxyVerificationMode: 'none',
+      },
+    };
+    proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('none');
   });
 
   test('returns proxy headers', () => {
@@ -405,14 +432,14 @@ describe('getProxySettings', () => {
       customHostSettings: [
         {
           url: 'https://elastic.co',
-          tls: {
-            rejectUnauthorized: true,
+          ssl: {
+            verificationMode: 'full',
           },
         },
         {
           url: 'smtp://elastic.co:123',
-          tls: {
-            rejectUnauthorized: false,
+          ssl: {
+            verificationMode: 'none',
           },
           smtp: {
             ignoreTLS: true,
@@ -435,5 +462,27 @@ describe('getProxySettings', () => {
 
     const chs = getActionsConfigurationUtilities(config).getCustomHostSettings(badUrl);
     expect(chs).toEqual(undefined);
+  });
+});
+
+describe('getSSLSettings', () => {
+  test('returns proper verificationMode value, based on the SSL proxy configuration', () => {
+    const configTrue: ActionsConfig = {
+      ...defaultActionsConfig,
+      ssl: {
+        verificationMode: 'full',
+      },
+    };
+    let sslSettings = getActionsConfigurationUtilities(configTrue).getSSLSettings();
+    expect(sslSettings.verificationMode).toBe('full');
+
+    const configFalse: ActionsConfig = {
+      ...defaultActionsConfig,
+      ssl: {
+        verificationMode: 'none',
+      },
+    };
+    sslSettings = getActionsConfigurationUtilities(configFalse).getSSLSettings();
+    expect(sslSettings.verificationMode).toBe('none');
   });
 });

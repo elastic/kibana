@@ -15,12 +15,14 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -42,11 +44,14 @@ export interface ClientData extends InitialAppData {
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  security: SecurityPluginSetup;
 }
 export interface PluginsStart {
   cloud?: CloudSetup;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  security: SecurityPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -131,11 +136,10 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.registerSolution({
         id: ENTERPRISE_SEARCH_PLUGIN.ID,
         title: ENTERPRISE_SEARCH_PLUGIN.NAME,
-        subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
         icon: 'logoEnterpriseSearch',
         description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
-        appDescriptions: ENTERPRISE_SEARCH_PLUGIN.APP_DESCRIPTIONS,
         path: ENTERPRISE_SEARCH_PLUGIN.URL,
+        order: 100,
       });
 
       plugins.home.featureCatalogue.register({
@@ -187,7 +191,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
-      this.data = await http.get('/api/enterprise_search/config_data');
+      this.data = await http.get('/internal/enterprise_search/config_data');
       this.hasInitialized = true;
     } catch {
       this.data.errorConnecting = true;

@@ -10,7 +10,7 @@ Object {
     "tooManyBuckets": false,
   },
   "id": "test-explorer-charts-embeddable",
-  "mlUrlGenerator": undefined,
+  "mlLocator": undefined,
   "onSelectEntity": [Function],
   "setSeverity": [Function],
   "severity": Object {
@@ -33,6 +33,7 @@ Object {
   "timefilter": Object {
     "calculateBounds": [MockFunction],
     "createFilter": [MockFunction],
+    "createRelativeFilter": [MockFunction],
     "disableAutoRefreshSelector": [MockFunction],
     "disableTimeRangeSelector": [MockFunction],
     "enableAutoRefreshSelector": [MockFunction],

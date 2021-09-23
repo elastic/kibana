@@ -6,6 +6,7 @@
  */
 
 import { AlertingPlugin, AlertingPluginsSetup, PluginSetupContract } from './plugin';
+import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
 import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
@@ -25,6 +26,8 @@ describe('Alerting Plugin', () => {
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let pluginsSetup: jest.Mocked<AlertingPluginsSetup>;
 
+    beforeEach(() => jest.clearAllMocks());
+
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
       const context = coreMock.createPluginInitializerContext<AlertsConfig>({
         healthCheck: {
@@ -34,6 +37,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 10,
       });
       plugin = new AlertingPlugin(context);
 
@@ -57,12 +61,45 @@ describe('Alerting Plugin', () => {
       );
     });
 
+    it('should create usage counter if usageCollection plugin is defined', async () => {
+      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        maxEphemeralActionsPerAlert: 10,
+      });
+      plugin = new AlertingPlugin(context);
+
+      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      const usageCollectionSetup = createUsageCollectionSetupMock();
+
+      const setupMocks = coreMock.createSetup();
+      // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
+      await plugin.setup(setupMocks, {
+        licensing: licensingMock.createSetup(),
+        encryptedSavedObjects: encryptedSavedObjectsSetup,
+        taskManager: taskManagerMock.createSetup(),
+        eventLog: eventLogServiceMock.create(),
+        actions: actionsMock.createSetup(),
+        statusService: statusServiceMock.createSetupContract(),
+        usageCollection: usageCollectionSetup,
+      });
+
+      expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
+      expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
+    });
+
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleAlertType: AlertType<never, never, never, never, 'default'> = {
+      const sampleAlertType: AlertType<never, never, never, never, never, 'default'> = {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         actionGroups: [],
         defaultActionGroupId: 'default',
         producer: 'test',
@@ -109,7 +146,7 @@ describe('Alerting Plugin', () => {
   });
 
   describe('start()', () => {
-    describe('getAlertsClientWithRequest()', () => {
+    describe('getRulesClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           healthCheck: {
@@ -119,6 +156,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -143,7 +181,7 @@ describe('Alerting Plugin', () => {
 
         expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
         expect(() =>
-          startContract.getAlertsClientWithRequest({} as KibanaRequest)
+          startContract.getRulesClientWithRequest({} as KibanaRequest)
         ).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
@@ -158,6 +196,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -183,7 +222,7 @@ describe('Alerting Plugin', () => {
           taskManager: taskManagerMock.createStart(),
         });
 
-        const fakeRequest = ({
+        const fakeRequest = {
           headers: {},
           getBasePath: () => '',
           path: '/',
@@ -197,8 +236,8 @@ describe('Alerting Plugin', () => {
             },
           },
           getSavedObjectsClient: jest.fn(),
-        } as unknown) as KibanaRequest;
-        startContract.getAlertsClientWithRequest(fakeRequest);
+        } as unknown as KibanaRequest;
+        startContract.getRulesClientWithRequest(fakeRequest);
       });
     });
 
@@ -211,6 +250,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       });
       const plugin = new AlertingPlugin(context);
 
@@ -236,7 +276,7 @@ describe('Alerting Plugin', () => {
         taskManager: taskManagerMock.createStart(),
       });
 
-      const fakeRequest = ({
+      const fakeRequest = {
         headers: {},
         getBasePath: () => '',
         path: '/',
@@ -250,7 +290,7 @@ describe('Alerting Plugin', () => {
           },
         },
         getSavedObjectsClient: jest.fn(),
-      } as unknown) as KibanaRequest;
+      } as unknown as KibanaRequest;
       startContract.getAlertingAuthorizationWithRequest(fakeRequest);
     });
   });

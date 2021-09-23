@@ -16,6 +16,48 @@ export function emsBoundariesSpecProvider({
   emsLandingPageUrl: string;
   prependBasePath: (path: string) => string;
 }) {
+  const instructions = {
+    instructionSets: [
+      {
+        instructionVariants: [
+          {
+            id: 'EMS',
+            instructions: [
+              {
+                title: i18n.translate('xpack.maps.tutorials.ems.downloadStepTitle', {
+                  defaultMessage: 'Download Elastic Maps Service boundaries',
+                }),
+                textPre: i18n.translate('xpack.maps.tutorials.ems.downloadStepText', {
+                  defaultMessage:
+                    '1. Navigate to Elastic Maps Service [landing page]({emsLandingPageUrl}/).\n\
+2. In the left sidebar, select an administrative boundary.\n\
+3. Click `Download GeoJSON` button.',
+                  values: {
+                    emsLandingPageUrl,
+                  },
+                }),
+              },
+              {
+                title: i18n.translate('xpack.maps.tutorials.ems.uploadStepTitle', {
+                  defaultMessage: 'Index Elastic Maps Service boundaries',
+                }),
+                textPre: i18n.translate('xpack.maps.tutorials.ems.uploadStepText', {
+                  defaultMessage:
+                    '1. Open [Maps]({newMapUrl}).\n\
+2. Click `Add layer`, then select `Upload GeoJSON`.\n\
+3. Upload the GeoJSON file and click `Import file`.',
+                  values: {
+                    newMapUrl: prependBasePath(getNewMapPath()),
+                  },
+                }),
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
   return () => ({
     id: 'emsBoundaries',
     name: i18n.translate('xpack.maps.tutorials.ems.nameTitle', {
@@ -34,46 +76,7 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
     euiIconType: 'emsApp',
     completionTimeMinutes: 1,
     previewImagePath: '/plugins/maps/assets/boundaries_screenshot.png',
-    onPrem: {
-      instructionSets: [
-        {
-          instructionVariants: [
-            {
-              id: 'EMS',
-              instructions: [
-                {
-                  title: i18n.translate('xpack.maps.tutorials.ems.downloadStepTitle', {
-                    defaultMessage: 'Download Elastic Maps Service boundaries',
-                  }),
-                  textPre: i18n.translate('xpack.maps.tutorials.ems.downloadStepText', {
-                    defaultMessage:
-                      '1. Navigate to Elastic Maps Service [landing page]({emsLandingPageUrl}).\n\
-2. In the left sidebar, select an administrative boundary.\n\
-3. Click `Download GeoJSON` button.',
-                    values: {
-                      emsLandingPageUrl,
-                    },
-                  }),
-                },
-                {
-                  title: i18n.translate('xpack.maps.tutorials.ems.uploadStepTitle', {
-                    defaultMessage: 'Index Elastic Maps Service boundaries',
-                  }),
-                  textPre: i18n.translate('xpack.maps.tutorials.ems.uploadStepText', {
-                    defaultMessage:
-                      '1. Open [Maps]({newMapUrl}).\n\
-2. Click `Add layer`, then select `Upload GeoJSON`.\n\
-3. Upload the GeoJSON file and click `Import file`.',
-                    values: {
-                      newMapUrl: prependBasePath(getNewMapPath()),
-                    },
-                  }),
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
+    onPrem: instructions,
+    elasticCloud: instructions,
   });
 }

@@ -30,6 +30,27 @@
   }
 }
 
+.mapTocEntry-isInEditingMode {
+  background-color: tintOrShade($euiColorPrimary, 90%, 70%) !important;
+  font-size: $euiFontSizeXS;
+  font-weight: $euiFontWeightMedium;
+
+  &__row {
+    margin-left: $euiSizeL;
+    display: inline-flex;
+    align-items: center;
+
+    > * {
+      margin-right: $euiSizeXS;
+    }
+  }
+
+  &__editFeatureText {
+    line-height: 1;
+    padding-right: $euiSizeXS;
+  }
+}
+
 .mapTocEntry-isDragging {
   @include euiBottomShadowMedium;
 }

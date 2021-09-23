@@ -12,7 +12,7 @@ jest.mock('../browsers');
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { fieldFormats } from 'src/plugins/data/server';
+import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
@@ -28,9 +28,9 @@ import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
 import { createMockLevelLogger } from './create_mock_levellogger';
 
-(initializeBrowserDriverFactory as jest.Mock<
-  Promise<HeadlessChromiumDriverFactory>
->).mockImplementation(() => Promise.resolve({} as HeadlessChromiumDriverFactory));
+(
+  initializeBrowserDriverFactory as jest.Mock<Promise<HeadlessChromiumDriverFactory>>
+).mockImplementation(() => Promise.resolve({} as HeadlessChromiumDriverFactory));
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
@@ -141,11 +141,11 @@ export const createMockReportingCore = async (
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
-  const mockReportingCore = ({
+  const mockReportingCore = {
     getConfig: () => createMockConfig(config),
     getEsClient: () => startDepsMock?.esClient,
     getDataService: () => startDepsMock?.data,
-  } as unknown) as ReportingCore;
+  } as unknown as ReportingCore;
 
   if (!setupDepsMock) {
     setupDepsMock = createMockPluginSetup({});
@@ -171,7 +171,7 @@ export const createMockReportingCore = async (
 
   setFieldFormats({
     fieldFormatServiceFactory() {
-      const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+      const fieldFormatsRegistry = new FieldFormatsRegistry();
       return Promise.resolve(fieldFormatsRegistry);
     },
   });

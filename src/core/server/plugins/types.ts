@@ -16,7 +16,7 @@ import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import { CoreSetup, CoreStart } from '..';
+import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 type Maybe<T> = T | undefined;
 
@@ -116,6 +116,18 @@ export type PluginName = string;
 /** @public */
 export type PluginOpaqueId = symbol;
 
+/** @public */
+export enum PluginType {
+  /**
+   * Preboot plugins are special-purpose plugins that only function during preboot stage.
+   */
+  preboot = 'preboot',
+  /**
+   * Standard plugins are plugins that start to function as soon as Kibana is fully booted and are active until it shuts down.
+   */
+  standard = 'standard',
+}
+
 /** @internal */
 export interface PluginDependencies {
   asNames: ReadonlyMap<PluginName, PluginName[]>;
@@ -148,6 +160,11 @@ export interface PluginManifest {
    * The version of Kibana the plugin is compatible with, defaults to "version".
    */
   readonly kibanaVersion: string;
+
+  /**
+   * Type of the plugin, defaults to `standard`.
+   */
+  readonly type: PluginType;
 
   /**
    * Root {@link ConfigPath | configuration path} used by the plugin, defaults
@@ -208,6 +225,24 @@ export interface PluginManifest {
    * folders will cause your plugin API reference to be broken up into sub sections.
    */
   readonly serviceFolders?: readonly string[];
+
+  readonly owner: {
+    /**
+     * The name of the team that currently owns this plugin.
+     */
+    readonly name: string;
+    /**
+     * All internal plugins should have a github team specified. GitHub teams can be viewed here:
+     * https://github.com/orgs/elastic/teams
+     */
+    readonly githubTeam?: string;
+  };
+
+  /**
+   * TODO: make required once all plugins specify this.
+   * A brief description of what this plugin does and any capabilities it provides.
+   */
+  readonly description?: string;
 }
 
 /**
@@ -225,6 +260,11 @@ export interface DiscoveredPlugin {
    * Root configuration path used by the plugin, defaults to "id" in snake_case format.
    */
   readonly configPath: ConfigPath;
+
+  /**
+   * Type of the plugin, defaults to `standard`.
+   */
+  readonly type: PluginType;
 
   /**
    * An optional list of the other plugins that **must be** installed and enabled
@@ -275,7 +315,18 @@ export interface InternalPluginInfo {
 }
 
 /**
- * The interface that should be returned by a `PluginInitializer`.
+ * The interface that should be returned by a `PluginInitializer` for a `preboot` plugin.
+ *
+ * @public
+ */
+export interface PrebootPlugin<TSetup = void, TPluginsSetup extends object = object> {
+  setup(core: CorePreboot, plugins: TPluginsSetup): TSetup;
+
+  stop?(): void;
+}
+
+/**
+ * The interface that should be returned by a `PluginInitializer` for a `standard` plugin.
  *
  * @public
  */
@@ -313,7 +364,7 @@ export interface AsyncPlugin<
 
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
-  kibana: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
+  kibana: ['index'] as const,
   elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
   savedObjects: ['maxImportPayloadBytes'] as const,
@@ -340,6 +391,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     mode: EnvironmentMode;
     packageInfo: Readonly<PackageInfo>;
     instanceUuid: string;
+    configs: readonly string[];
   };
   /**
    * {@link LoggerFactory | logger factory} instance already bound to the plugin's logging context
@@ -450,4 +502,5 @@ export type PluginInitializer<
   core: PluginInitializerContext
 ) =>
   | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  | PrebootPlugin<TSetup, TPluginsSetup>
   | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;

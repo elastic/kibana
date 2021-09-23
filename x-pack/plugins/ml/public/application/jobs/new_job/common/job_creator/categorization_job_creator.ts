@@ -66,7 +66,7 @@ export class CategorizationJobCreator extends JobCreator {
     eventRate: Field | null
   ) {
     if (count === null || rare === null || eventRate === null) {
-      return;
+      throw Error('event_rate field or count or rare aggregations missing');
     }
 
     this._createCountDetector = () => {
@@ -119,12 +119,8 @@ export class CategorizationJobCreator extends JobCreator {
   }
 
   public async loadCategorizationFieldExamples() {
-    const {
-      examples,
-      sampleSize,
-      overallValidStatus,
-      validationChecks,
-    } = await this._examplesLoader.loadExamples();
+    const { examples, sampleSize, overallValidStatus, validationChecks } =
+      await this._examplesLoader.loadExamples();
     this._categoryFieldExamples = examples;
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;

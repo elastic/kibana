@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { SetupUX } from '../routes/rum_client';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
   SERVICE_LANGUAGE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../server/utils/queries';
+import { rangeQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 import { getEsFilter } from '../lib/rum_client/ui_filters/get_es_filter';
@@ -21,7 +22,7 @@ export function getRumPageLoadTransactionsProjection({
   urlQuery,
   checkFetchStartFieldExists = true,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   urlQuery?: string;
   checkFetchStartFieldExists?: boolean;
 }) {
@@ -53,6 +54,7 @@ export function getRumPageLoadTransactionsProjection({
         : []),
       ...getEsFilter(uiFilters),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {
@@ -71,7 +73,7 @@ export function getRumErrorsProjection({
   setup,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   urlQuery?: string;
 }) {
   const { start, end, uiFilters } = setup;
@@ -96,6 +98,7 @@ export function getRumErrorsProjection({
           ]
         : []),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {

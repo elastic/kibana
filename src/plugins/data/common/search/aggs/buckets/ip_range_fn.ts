@@ -6,18 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { groupBy, isEmpty, isNil, map, mapValues, omit, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
+import { CidrOutput, IpRangeOutput } from '../../expressions';
 
 export const aggIpRangeFnName = 'aggIpRange';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.IP_RANGE>;
 
-type Arguments = Assign<AggArgs, { ranges?: string; ipRangeType?: string }>;
+type Arguments = Assign<
+  AggArgs,
+  { ranges?: Array<CidrOutput | IpRangeOutput>; ipRangeType?: string }
+>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -69,9 +73,10 @@ export const aggIpRange = (): FunctionDefinition => ({
       }),
     },
     ranges: {
-      types: ['string'],
+      types: ['cidr', 'ip_range'],
+      multi: true,
       help: i18n.translate('data.search.aggs.buckets.ipRange.ranges.help', {
-        defaultMessage: 'Serialized ranges to use for this aggregation.',
+        defaultMessage: 'Ranges to use for this aggregation.',
       }),
     },
     json: {
@@ -87,8 +92,11 @@ export const aggIpRange = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
+  fn: (input, { id, enabled, schema, ranges, ...params }) => {
+    const { ip_range: fromTo, cidr: mask } = mapValues(groupBy(ranges, 'type'), (items) =>
+      map(items, (item) => omit(item, 'type'))
+    );
+    const rangesParam = omitBy({ fromTo, mask }, isNil);
 
     return {
       type: 'agg_type',
@@ -98,8 +106,8 @@ export const aggIpRange = (): FunctionDefinition => ({
         schema,
         type: BUCKET_TYPES.IP_RANGE,
         params: {
-          ...rest,
-          ranges: getParsedValue(args, 'ranges'),
+          ...params,
+          ranges: isEmpty(rangesParam) ? undefined : rangesParam,
         },
       },
     };

@@ -9,7 +9,8 @@ import { SearchTypes } from '../../../../common/detection_engine/types';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 import { isEventTypeSignal } from './build_event_type_signal';
-import { Signal, Ancestor, BaseSignalHit, ThresholdResult } from './types';
+import { Signal, Ancestor, BaseSignalHit, ThresholdResult, SimpleHit } from './types';
+import { getValidDateFromDoc } from './utils';
 
 /**
  * Takes a parent signal or event document and extracts the information needed for the corresponding entry in the child
@@ -61,7 +62,7 @@ export const buildAncestors = (doc: BaseSignalHit): Ancestor[] => {
 export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
   // @ts-expect-error @elastic/elasticsearch _source is optional
   const { signal, ...noSignal } = doc._source;
-  if (signal == null || isEventTypeSignal(doc)) {
+  if (signal == null || isEventTypeSignal(doc as SimpleHit)) {
     return doc;
   } else {
     return {
@@ -76,7 +77,7 @@ export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
  * @param docs The parent signals/events of the new signal to be built.
  * @param rule The rule that is generating the new signal.
  */
-export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal => {
+export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema, reason: string): Signal => {
   const _meta = {
     version: SIGNALS_TEMPLATE_VERSION,
   };
@@ -93,6 +94,7 @@ export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal =>
     ancestors,
     status: 'open',
     rule,
+    reason,
     depth,
   };
 };
@@ -103,6 +105,7 @@ const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is Thr
 
 /**
  * Creates signal fields that are only available in the special case where a signal has only 1 parent signal/event.
+ * We copy the original time from the document as "original_time" since we override the timestamp with the current date time.
  * @param doc The parent signal/event of the new signal to be built.
  */
 export const additionalSignalFields = (doc: BaseSignalHit) => {
@@ -110,13 +113,18 @@ export const additionalSignalFields = (doc: BaseSignalHit) => {
   if (thresholdResult != null && !isThresholdResult(thresholdResult)) {
     throw new Error(`threshold_result failed to validate: ${thresholdResult}`);
   }
+  const originalTime = getValidDateFromDoc({
+    doc,
+    timestampOverride: undefined,
+  });
   return {
     parent: buildParent(removeClashes(doc)),
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    original_time: doc._source['@timestamp'], // This field has already been replaced with timestampOverride, if provided.
+    original_time: originalTime != null ? originalTime.toISOString() : undefined,
     original_event: doc._source?.event ?? undefined,
     threshold_result: thresholdResult,
     original_signal:
-      doc._source?.signal != null && !isEventTypeSignal(doc) ? doc._source?.signal : undefined,
+      doc._source?.signal != null && !isEventTypeSignal(doc as SimpleHit)
+        ? doc._source?.signal
+        : undefined,
   };
 };

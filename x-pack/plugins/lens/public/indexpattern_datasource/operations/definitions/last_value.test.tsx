@@ -30,6 +30,10 @@ const defaultProps = {
     hasRestrictions: false,
   } as IndexPattern,
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('last_value', () => {
@@ -75,7 +79,8 @@ describe('last_value', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -317,15 +322,15 @@ describe('last_value', () => {
   it('should return disabledStatus if indexPattern does contain date field', () => {
     const indexPattern = createMockedIndexPattern();
 
-    expect(lastValueOperation.getDisabledStatus!(indexPattern, layer)).toEqual(undefined);
+    expect(lastValueOperation.getDisabledStatus!(indexPattern, layer, 'data')).toEqual(undefined);
 
     const indexPatternWithoutTimeFieldName = {
       ...indexPattern,
       timeFieldName: undefined,
     };
-    expect(lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName, layer)).toEqual(
-      undefined
-    );
+    expect(
+      lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName, layer, 'data')
+    ).toEqual(undefined);
 
     const indexPatternWithoutTimefields = {
       ...indexPatternWithoutTimeFieldName,
@@ -334,7 +339,8 @@ describe('last_value', () => {
 
     const disabledStatus = lastValueOperation.getDisabledStatus!(
       indexPatternWithoutTimefields,
-      layer
+      layer,
+      'data'
     );
     expect(disabledStatus).toEqual(
       'This function requires the presence of a date field in your index'

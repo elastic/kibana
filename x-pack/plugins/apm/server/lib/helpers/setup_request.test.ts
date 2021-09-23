@@ -41,7 +41,7 @@ function getMockResources() {
     },
   };
 
-  const mockResources = ({
+  const mockResources = {
     config: new Proxy(
       {},
       {
@@ -81,7 +81,7 @@ function getMockResources() {
         },
       },
     },
-  } as unknown) as APMRouteHandlerResources & {
+  } as unknown as APMRouteHandlerResources & {
     context: {
       core: {
         elasticsearch: {
@@ -109,7 +109,7 @@ describe('setupRequest', () => {
     it('calls callWithRequest', async () => {
       const mockResources = getMockResources();
       const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search({
+      await apmEventClient.search('foo', {
         apm: { events: [ProcessorEvent.transaction] },
         body: { foo: 'bar' },
       });
@@ -131,13 +131,14 @@ describe('setupRequest', () => {
         },
         ignore_unavailable: true,
         ignore_throttled: true,
+        preference: 'any',
       });
     });
 
     it('calls callWithInternalUser', async () => {
       const mockResources = getMockResources();
       const { internalClient } = await setupRequest(mockResources);
-      await internalClient.search({
+      await internalClient.search('foo', {
         index: ['apm-*'],
         body: { foo: 'bar' },
       } as any);
@@ -156,7 +157,7 @@ describe('setupRequest', () => {
     it('adds a range filter for `observer.version_major` to the existing filter', async () => {
       const mockResources = getMockResources();
       const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search({
+      await apmEventClient.search('foo', {
         apm: {
           events: [ProcessorEvent.transaction],
         },
@@ -183,19 +184,15 @@ describe('setupRequest', () => {
     it('does not add a range filter for `observer.version_major` if includeLegacyData=true', async () => {
       const mockResources = getMockResources();
       const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search(
-        {
-          apm: {
-            events: [ProcessorEvent.error],
-          },
-          body: {
-            query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
-          },
-        },
-        {
+      await apmEventClient.search('foo', {
+        apm: {
+          events: [ProcessorEvent.error],
           includeLegacyData: true,
-        }
-      );
+        },
+        body: {
+          query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
+        },
+      });
       const params =
         mockResources.context.core.elasticsearch.client.asCurrentUser.search
           .mock.calls[0][0];
@@ -221,7 +218,7 @@ describe('without a bool filter', () => {
   it('adds a range filter for `observer.version_major`', async () => {
     const mockResources = getMockResources();
     const { apmEventClient } = await setupRequest(mockResources);
-    await apmEventClient.search({
+    await apmEventClient.search('foo', {
       apm: {
         events: [ProcessorEvent.error],
       },
@@ -251,7 +248,7 @@ describe('with includeFrozen=false', () => {
 
     const { apmEventClient } = await setupRequest(mockResources);
 
-    await apmEventClient.search({
+    await apmEventClient.search('foo', {
       apm: {
         events: [],
       },
@@ -273,7 +270,7 @@ describe('with includeFrozen=true', () => {
 
     const { apmEventClient } = await setupRequest(mockResources);
 
-    await apmEventClient.search({
+    await apmEventClient.search('foo', {
       apm: { events: [] },
     });
 

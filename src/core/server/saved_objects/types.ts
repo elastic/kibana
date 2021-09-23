@@ -29,6 +29,7 @@ export type {
 } from './import/types';
 
 import { SavedObject } from '../../types';
+import { ElasticsearchClient } from '../elasticsearch';
 
 type KueryNode = any;
 
@@ -80,7 +81,7 @@ export interface SavedObjectsFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;
-  sortOrder?: estypes.SortOrder;
+  sortOrder?: estypes.SearchSortOrder;
   /**
    * An array of fields to include in the results
    * @example
@@ -137,7 +138,7 @@ export interface SavedObjectsFindOptions {
    *
    * @alpha
    */
-  aggs?: Record<string, estypes.AggregationContainer>;
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
   namespaces?: string[];
   /**
    * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
@@ -253,7 +254,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
  *
  * @public
  */
-export interface SavedObjectsType {
+export interface SavedObjectsType<Attributes = any> {
   /**
    * The name of the type, which is also used as the internal id.
    */
@@ -277,6 +278,11 @@ export interface SavedObjectsType {
    * If defined, will be used to convert the type to an alias.
    */
   convertToAliasScript?: string;
+  /**
+   * If defined, allows a type to exclude unneeded documents from the migration process and effectively be deleted.
+   * See {@link SavedObjectTypeExcludeFromUpgradeFilterHook} for more details.
+   */
+  excludeOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
   /**
    * The {@link SavedObjectsTypeMappingDefinition | mapping definition} for the type.
    */
@@ -337,7 +343,7 @@ export interface SavedObjectsType {
   /**
    * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
    */
-  management?: SavedObjectsTypeManagementDefinition;
+  management?: SavedObjectsTypeManagementDefinition<Attributes>;
 }
 
 /**
@@ -345,11 +351,20 @@ export interface SavedObjectsType {
  *
  * @public
  */
-export interface SavedObjectsTypeManagementDefinition {
+export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
   /**
    * Is the type importable or exportable. Defaults to `false`.
    */
   importableAndExportable?: boolean;
+  /**
+   * When set to false, the type will not be listed or searchable in the SO management section.
+   * Main usage of setting this property to false for a type is when objects from the type should
+   * be included in the export via references or export hooks, but should not directly appear in the SOM.
+   * Defaults to `true`.
+   *
+   * @remarks `importableAndExportable` must be `true` to specify this property.
+   */
+  visibleInManagement?: boolean;
   /**
    * The default search field to use for this type. Defaults to `id`.
    */
@@ -363,12 +378,12 @@ export interface SavedObjectsTypeManagementDefinition {
    * Function returning the title to display in the management table.
    * If not defined, will use the object's type and id to generate a label.
    */
-  getTitle?: (savedObject: SavedObject<any>) => string;
+  getTitle?: (savedObject: SavedObject<Attributes>) => string;
   /**
    * Function returning the url to use to redirect to the editing page of this object.
    * If not defined, editing will not be allowed.
    */
-  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  getEditUrl?: (savedObject: SavedObject<Attributes>) => string;
   /**
    * Function returning the url to use to redirect to this object from the management section.
    * If not defined, redirecting to the object will not be allowed.
@@ -377,7 +392,10 @@ export interface SavedObjectsTypeManagementDefinition {
    *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
-  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
+  getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
+    path: string;
+    uiCapabilitiesPath: string;
+  };
   /**
    * An optional export transform function that can be used transform the objects of the registered type during
    * the export process.
@@ -386,9 +404,14 @@ export interface SavedObjectsTypeManagementDefinition {
    *
    * See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
    *
+   * When implementing both `isExportable` and `onExport`, it is mandatory that
+   * `isExportable` returns the same value for an object before and after going
+   * though the export transform.
+   * E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
+   *
    * @remarks `importableAndExportable` must be `true` to specify this property.
    */
-  onExport?: SavedObjectsExportTransform;
+  onExport?: SavedObjectsExportTransform<Attributes>;
   /**
    * An optional {@link SavedObjectsImportHook | import hook} to use when importing given type.
    *
@@ -431,5 +454,67 @@ export interface SavedObjectsTypeManagementDefinition {
    * @remarks messages returned in the warnings are user facing and must be translated.
    * @remarks `importableAndExportable` must be `true` to specify this property.
    */
-  onImport?: SavedObjectsImportHook;
+  onImport?: SavedObjectsImportHook<Attributes>;
+
+  /**
+   * Optional hook to specify whether an object should be exportable.
+   *
+   * If specified, `isExportable` will be called during export for each
+   * of this type's objects in the export, and the ones not matching the
+   * predicate will be excluded from the export.
+   *
+   * When implementing both `isExportable` and `onExport`, it is mandatory that
+   * `isExportable` returns the same value for an object before and after going
+   * though the export transform.
+   * E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
+   *
+   * @example
+   * Registering a type with a per-object exportability predicate
+   * ```ts
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType({
+   *        ...myType,
+   *        management: {
+   *          ...myType.management,
+   *          isExportable: (object) => {
+   *            if (object.attributes.myCustomAttr === 'foo') {
+   *              return false;
+   *            }
+   *            return true;
+   *          }
+   *        },
+   *     });
+   *   }
+   * }
+   * ```
+   *
+   * @remarks `importableAndExportable` must be `true` to specify this property.
+   */
+  isExportable?: SavedObjectsExportablePredicate<Attributes>;
 }
+
+/**
+ * @public
+ */
+export type SavedObjectsExportablePredicate<Attributes = unknown> = (
+  obj: SavedObject<Attributes>
+) => boolean;
+
+/**
+ * If defined, allows a type to run a search query and return a query filter that may match any documents which may
+ * be excluded from the next migration upgrade process. Useful for cleaning up large numbers of old documents which
+ * are no longer needed and may slow the migration process.
+ *
+ * If this hook fails, the migration will proceed without these documents having been filtered out, so this
+ * should not be used as a guarantee that these documents have been deleted.
+ *
+ * @public
+ * @alpha Experimental and subject to change
+ */
+export type SavedObjectTypeExcludeFromUpgradeFilterHook = (toolkit: {
+  readonlyEsClient: Pick<ElasticsearchClient, 'search'>;
+}) => estypes.QueryDslQueryContainer | Promise<estypes.QueryDslQueryContainer>;

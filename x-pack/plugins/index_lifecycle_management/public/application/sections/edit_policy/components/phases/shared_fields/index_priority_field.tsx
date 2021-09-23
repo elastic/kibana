@@ -10,15 +10,16 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
+import { PhaseExceptDelete } from '../../../../../../../common/types';
+
 import { NumericField } from '../../../../../../shared_imports';
-
 import { useEditPolicyContext } from '../../../edit_policy_context';
-import { UseField } from '../../../form';
 
+import { UseField } from '../../../form';
 import { LearnMoreLink, DescribedFormRow } from '../..';
 
 interface Props {
-  phase: 'hot' | 'warm' | 'cold' | 'frozen';
+  phase: PhaseExceptDelete;
 }
 
 export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {

@@ -19,10 +19,7 @@
           },
           "<TVisParams>"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-          "lineNumber": 24
-        },
+        "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
         "deprecated": false,
         "children": [
           {
@@ -32,10 +29,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -45,10 +39,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -58,10 +49,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -71,10 +59,7 @@
             "tags": [],
             "label": "note",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -85,12 +70,17 @@
             "label": "getSupportedTriggers",
             "description": [],
             "signature": [
-              "(() => string[]) | undefined"
+              "((params?: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              " | undefined) => string[]) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -103,10 +93,7 @@
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -119,10 +106,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -135,10 +119,7 @@
             "signature": [
               "\"experimental\" | \"beta\" | \"production\""
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -157,10 +138,7 @@
                 "text": "VisGroups"
               }
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -170,10 +148,7 @@
             "tags": [],
             "label": "titleInWizard",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -186,10 +161,7 @@
             "signature": [
               "VisTypeOptions"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -202,10 +174,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -218,10 +187,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -231,10 +197,7 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -244,10 +207,7 @@
             "tags": [],
             "label": "requiresSearch",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -260,10 +220,7 @@
             "signature": [
               "boolean | ((vis: { params: TVisParams; }) => boolean)"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -292,10 +249,7 @@
               },
               "<TVisParams>>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -332,10 +286,7 @@
               },
               "[]>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -363,10 +314,7 @@
               },
               ") | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 43
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -411,16 +359,13 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 44
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "visualizations",
-                "id": "def-public.vis",
+                "id": "def-public.BaseVisType.toExpressionAst.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "vis",
@@ -435,15 +380,12 @@
                   },
                   "<TVisParams>"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 50
-                },
+                "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false
               },
               {
                 "parentPluginId": "visualizations",
-                "id": "def-public.params",
+                "id": "def-public.BaseVisType.toExpressionAst.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -457,10 +399,7 @@
                     "text": "VisToExpressionAstParams"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 51
-                },
+                "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false
               }
             ]
@@ -491,10 +430,7 @@
               },
               ">) => React.ReactNode) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 45
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -507,10 +443,7 @@
             "signature": [
               "Schemas"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
           {
@@ -523,10 +456,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-              "lineNumber": 48
-            },
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "children": [
               {
@@ -546,10 +476,7 @@
                   },
                   "<TVisParams>"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-                  "lineNumber": 48
-                },
+                "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -576,10 +503,7 @@
           },
           " extends EventEmitter"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-          "lineNumber": 32
-        },
+        "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
         "deprecated": false,
         "children": [
           {
@@ -592,10 +516,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -608,10 +529,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 40
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -625,10 +543,7 @@
                 "signature": [
                   "string | string[] | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 40
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -645,10 +560,7 @@
             "signature": [
               "(key?: string | string[] | undefined, defaultValue?: any) => any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 57
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -661,10 +573,7 @@
                 "signature": [
                   "string | string[] | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 57
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": false
               },
@@ -678,10 +587,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 57
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -698,10 +604,7 @@
             "signature": [
               "(key: any, value?: any) => this"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 66
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -714,10 +617,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 66
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -731,10 +631,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 66
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -751,10 +648,7 @@
             "signature": [
               "(key: any, value?: any) => this | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 74
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -767,10 +661,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 74
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -784,10 +675,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 74
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -804,10 +692,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 82
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -822,10 +707,7 @@
             "signature": [
               "(path: string | string[]) => void"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 88
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -838,10 +720,7 @@
                 "signature": [
                   "string | string[]"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 88
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -858,10 +737,7 @@
             "signature": [
               "() => any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 105
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -876,10 +752,7 @@
             "signature": [
               "() => any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 109
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -894,10 +767,7 @@
             "signature": [
               "() => string"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 113
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -912,10 +782,7 @@
             "signature": [
               "(input: string) => this"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 117
-            },
+            "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -928,10 +795,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 117
-                },
+                "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -958,10 +822,7 @@
           },
           "<TVisParams>"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis.ts",
-          "lineNumber": 73
-        },
+        "path": "src/plugins/visualizations/public/vis.ts",
         "deprecated": false,
         "children": [
           {
@@ -981,10 +842,7 @@
               },
               "<TVisParams>"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 74
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -997,10 +855,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 75
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -1010,10 +865,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 76
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -1023,10 +875,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 77
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -1039,10 +888,7 @@
             "signature": [
               "TVisParams"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 78
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -1052,10 +898,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 79
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "children": []
           },
@@ -1075,10 +918,7 @@
                 "text": "PersistedState"
               }
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 81
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -1091,10 +931,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 83
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "children": [
               {
@@ -1107,10 +944,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/vis.ts",
-                  "lineNumber": 83
-                },
+                "path": "src/plugins/visualizations/public/vis.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1131,10 +965,7 @@
                   },
                   "<TVisParams>"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/vis.ts",
-                  "lineNumber": 83
-                },
+                "path": "src/plugins/visualizations/public/vis.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1183,10 +1014,7 @@
               },
               ">; }, never>, \"type\" | \"data\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\">) => Promise<void>"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 108
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "children": [
               {
@@ -1231,10 +1059,7 @@
                   },
                   ">; }, never>, \"type\" | \"data\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\">"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/vis.ts",
-                  "lineNumber": 108
-                },
+                "path": "src/plugins/visualizations/public/vis.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1259,10 +1084,7 @@
               },
               "<TVisParams>"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 157
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1293,10 +1115,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 171
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1311,10 +1130,7 @@
             "signature": [
               "() => boolean"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 189
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1351,10 +1167,7 @@
           ") => ",
           "Schemas"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_schemas.ts",
-          "lineNumber": 44
-        },
+        "path": "src/plugins/visualizations/public/vis_schemas.ts",
         "deprecated": false,
         "children": [
           {
@@ -1374,10 +1187,7 @@
               },
               "<TVisParams>"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 45
-            },
+            "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1397,10 +1207,99 @@
                 "text": "VisToExpressionAstParams"
               }
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/visualizations/public/vis_schemas.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.prepareLogTable",
+        "type": "Function",
+        "tags": [],
+        "label": "prepareLogTable",
+        "description": [],
+        "signature": [
+          "(datatable: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", dimensions: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.Dimension",
+            "text": "Dimension"
+          },
+          "[]) => { columns: { meta: { dimensionName: string | undefined; type: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnType",
+            "text": "DatatableColumnType"
+          },
+          "; field?: string | undefined; index?: string | undefined; params?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
+          "SerializableRecord",
+          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: Record<string, any>[]; }"
+        ],
+        "path": "src/plugins/visualizations/common/prepare_log_table.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.prepareLogTable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "datatable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              }
+            ],
+            "path": "src/plugins/visualizations/common/prepare_log_table.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.prepareLogTable.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "dimensions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.Dimension",
+                "text": "Dimension"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/visualizations/common/prepare_log_table.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1425,19 +1324,10 @@
             "text": "SavedVisState"
           },
           "<",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.VisParams",
-            "text": "VisParams"
-          },
+          "SerializableRecord",
           ">"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -1450,10 +1340,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1473,10 +1360,7 @@
           "VisualizationContainerProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
-          "lineNumber": 27
-        },
+        "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
         "deprecated": false,
         "children": [
           {
@@ -1489,10 +1373,7 @@
             "signature": [
               "VisualizationContainerProps"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -1504,15 +1385,134 @@
     "interfaces": [
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.DateHistogramParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateHistogramParams",
+        "description": [],
+        "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.date",
+            "type": "boolean",
+            "tags": [],
+            "label": "date",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.intervalESValue",
+            "type": "number",
+            "tags": [],
+            "label": "intervalESValue",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.intervalESUnit",
+            "type": "string",
+            "tags": [],
+            "label": "intervalESUnit",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.format",
+            "type": "string",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.bounds",
+            "type": "Object",
+            "tags": [],
+            "label": "bounds",
+            "description": [],
+            "signature": [
+              "{ min: React.ReactText; max: React.ReactText; } | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.FakeParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "FakeParams",
+        "description": [],
+        "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.FakeParams.defaultValue",
+            "type": "string",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.HistogramParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "HistogramParams",
+        "description": [],
+        "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.HistogramParams.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.ISavedVis",
         "type": "Interface",
         "tags": [],
         "label": "ISavedVis",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1525,10 +1525,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -1538,10 +1535,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -1554,10 +1548,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -1576,10 +1567,7 @@
                 "text": "SavedVisState"
               }
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -1599,10 +1587,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -1615,10 +1600,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -1631,10 +1613,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -1647,10 +1626,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           }
         ],
@@ -1663,10 +1639,7 @@
         "tags": [],
         "label": "ISchemas",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 24
-        },
+        "path": "src/plugins/visualizations/public/vis_types/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1686,10 +1659,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1709,10 +1679,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1732,112 +1699,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 27
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.SavedVisState",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedVisState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.SavedVisState",
-            "text": "SavedVisState"
-          },
-          "<TVisParams>"
-        ],
-        "source": {
-          "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 16
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.SavedVisState.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.SavedVisState.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 18
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.SavedVisState.params",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "TVisParams"
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 19
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.SavedVisState.aggs",
-            "type": "Array",
-            "tags": [],
-            "label": "aggs",
-            "description": [],
-            "signature": [
-              "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
-              " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IAggType",
-                "text": "IAggType"
-              },
-              "; }, \"type\"> & Pick<{ type: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IAggType",
-                "text": "IAggType"
-              },
-              "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">[]"
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           }
         ],
@@ -1850,10 +1712,7 @@
         "tags": [],
         "label": "Schema",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/visualizations/public/vis_types/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1866,10 +1725,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1880,12 +1736,9 @@
             "label": "group",
             "description": [],
             "signature": [
-              "\"buckets\" | \"metrics\" | \"none\""
+              "\"none\" | \"buckets\" | \"metrics\""
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1895,10 +1748,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1908,10 +1758,7 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1921,10 +1768,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1944,10 +1788,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1957,10 +1798,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1973,10 +1811,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -1989,10 +1824,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -2005,10 +1837,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -2021,10 +1850,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -2037,10 +1863,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -2053,10 +1876,7 @@
             "signature": [
               "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 43
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           }
         ],
@@ -2069,10 +1889,7 @@
         "tags": [],
         "label": "SchemaConfig",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_schemas.ts",
-          "lineNumber": 21
-        },
+        "path": "src/plugins/visualizations/public/vis_schemas.ts",
         "deprecated": false,
         "children": [
           {
@@ -2082,10 +1899,7 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false
           },
           {
@@ -2095,10 +1909,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false
           },
           {
@@ -2118,10 +1929,7 @@
               },
               "<Record<string, any>>"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false
           },
           {
@@ -2134,10 +1942,7 @@
             "signature": [
               "SchemaConfigParams"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false
           },
           {
@@ -2147,10 +1952,7 @@
             "tags": [],
             "label": "aggType",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false
           }
         ],
@@ -2173,10 +1975,7 @@
           },
           "<T>"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis.ts",
-          "lineNumber": 42
-        },
+        "path": "src/plugins/visualizations/public/vis.ts",
         "deprecated": false,
         "children": [
           {
@@ -2189,10 +1988,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 43
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2202,10 +1998,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 44
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2218,10 +2011,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 45
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2231,10 +2021,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2247,10 +2034,7 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 47
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2263,10 +2047,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 48
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2285,10 +2066,7 @@
                 "text": "SerializedVisData"
               }
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 49
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           }
         ],
@@ -2301,10 +2079,7 @@
         "tags": [],
         "label": "SerializedVisData",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis.ts",
-          "lineNumber": 35
-        },
+        "path": "src/plugins/visualizations/public/vis.ts",
         "deprecated": false,
         "children": [
           {
@@ -2317,10 +2092,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2331,30 +2103,11 @@
             "label": "aggs",
             "description": [],
             "signature": [
-              "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
-              " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IAggType",
-                "text": "IAggType"
-              },
-              "; }, \"type\"> & Pick<{ type: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IAggType",
-                "text": "IAggType"
-              },
-              "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">[]"
+              "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+              "SerializableRecord",
+              " | undefined; schema?: string | undefined; }[]"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2373,10 +2126,7 @@
                 "text": "SearchSourceFields"
               }
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2389,10 +2139,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           }
         ],
@@ -2405,10 +2152,7 @@
         "tags": [],
         "label": "VisData",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis.ts",
-          "lineNumber": 52
-        },
+        "path": "src/plugins/visualizations/public/vis.ts",
         "deprecated": false,
         "children": [
           {
@@ -2421,10 +2165,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 53
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2444,10 +2185,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 54
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2467,10 +2205,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 55
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2491,10 +2226,7 @@
               },
               ", \"create\" | \"history\" | \"setPreferredSearchStrategyId\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 56
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           },
           {
@@ -2507,10 +2239,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 57
-            },
+            "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false
           }
         ],
@@ -2533,10 +2262,7 @@
           },
           "<VisParamType>"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 54
-        },
+        "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2555,10 +2281,7 @@
                 "text": "AggConfigs"
               }
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 55
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -2568,10 +2291,7 @@
             "tags": [],
             "label": "hasHistogramAgg",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 56
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -2581,10 +2301,7 @@
             "tags": [],
             "label": "isTabSelected",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 57
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -2597,10 +2314,7 @@
             "signature": [
               "VisParamType"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 58
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -2628,10 +2342,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 59
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -2650,10 +2361,7 @@
                 "text": "PersistedState"
               }
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 60
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -2666,10 +2374,7 @@
             "signature": [
               "<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]) => void"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 61
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2682,10 +2387,7 @@
                 "signature": [
                   "T"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 61
-                },
+                "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2699,10 +2401,7 @@
                 "signature": [
                   "VisParamType[T]"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 61
-                },
+                "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2719,10 +2418,7 @@
             "signature": [
               "(isValid: boolean) => void"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 62
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2735,10 +2431,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 62
-                },
+                "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2755,10 +2448,7 @@
             "signature": [
               "(isTouched: boolean) => void"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 63
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2771,10 +2461,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 63
-                },
+                "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2791,10 +2478,7 @@
         "tags": [],
         "label": "VisParams",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2807,10 +2491,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false
           }
         ],
@@ -2848,10 +2529,7 @@
             "text": "ISavedVis"
           }
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 41
-        },
+        "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
         "children": [],
         "initialIsOpen": false
@@ -2863,10 +2541,7 @@
         "tags": [],
         "label": "VisToExpressionAstParams",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 43
-        },
+        "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2912,13 +2587,7 @@
                 "text": "TimeRange"
               },
               "; setTime: (time: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.InputTimeRange",
-                "text": "InputTimeRange"
-              },
+              "InputTimeRange",
               ") => void; getRefreshInterval: () => ",
               {
                 "pluginId": "data",
@@ -2952,13 +2621,11 @@
                 "text": "TimeRange"
               },
               " | undefined) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.RangeFilter",
-                "text": "RangeFilter"
-              },
+              "RangeFilter",
+              " | ",
+              "ScriptedRangeFilter",
+              " | ",
+              "MatchAllRangeFilter",
               " | undefined; getBounds: () => ",
               {
                 "pluginId": "data",
@@ -3009,10 +2676,7 @@
               },
               "; }"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 44
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -3025,10 +2689,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 45
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           },
           {
@@ -3041,10 +2702,7 @@
             "signature": [
               "AbortSignal | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
           }
         ],
@@ -3057,10 +2715,7 @@
         "tags": [],
         "label": "VisTypeAlias",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-          "lineNumber": 34
-        },
+        "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
         "children": [
           {
@@ -3070,10 +2725,7 @@
             "tags": [],
             "label": "aliasPath",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3083,10 +2735,7 @@
             "tags": [],
             "label": "aliasApp",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3096,10 +2745,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3109,10 +2755,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3122,10 +2765,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3138,10 +2778,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3151,10 +2788,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3167,10 +2801,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3183,11 +2814,10 @@
             "signature": [
               "(() => string[]) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 43
-            },
-            "deprecated": false
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3199,10 +2829,7 @@
             "signature": [
               "\"experimental\" | \"beta\" | \"production\""
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 44
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3217,10 +2844,7 @@
               "VisualizationsAppExtension",
               "; } | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           }
         ],
@@ -3245,10 +2869,7 @@
           },
           "<TVisParams>"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 74
-        },
+        "path": "src/plugins/visualizations/public/vis_types/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3260,10 +2881,7 @@
             "description": [
               "\nVisualization unique name"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 78
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3275,10 +2893,7 @@
             "description": [
               "\nIt is the displayed text on the wizard and the vis listing"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 82
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3293,10 +2908,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 86
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3311,10 +2923,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 90
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3327,13 +2936,42 @@
               "\nIf given, it will return the supported triggers for this vis."
             ],
             "signature": [
-              "(() => string[]) | undefined"
+              "((params?: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              " | undefined) => string[]) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 94
-            },
-            "deprecated": false
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.getSupportedTriggers.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.VisParams",
+                    "text": "VisParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3371,11 +3009,31 @@
               },
               "[]>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 100
-            },
-            "deprecated": false
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.getUsedIndexPattern.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "visParams",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.VisParams",
+                    "text": "VisParams"
+                  }
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3387,10 +3045,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 102
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3405,10 +3060,7 @@
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 106
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3423,10 +3075,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 110
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3443,10 +3092,7 @@
             "signature": [
               "\"experimental\" | \"beta\" | \"production\" | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 115
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3470,10 +3116,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 121
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3488,10 +3131,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 127
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3506,10 +3146,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 133
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3522,10 +3159,7 @@
             "signature": [
               "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 134
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3553,10 +3187,7 @@
               },
               ") | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 135
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3587,11 +3218,40 @@
               },
               ">) => React.ReactNode) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 142
-            },
-            "deprecated": false
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.getInfoMessage.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "vis",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.Vis",
+                    "text": "Vis"
+                  },
+                  "<",
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.VisParams",
+                    "text": "VisParams"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3637,16 +3297,13 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 148
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "visualizations",
-                "id": "def-public.vis",
+                "id": "def-public.VisTypeDefinition.toExpressionAst.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "vis",
@@ -3661,15 +3318,12 @@
                   },
                   "<TVisParams>"
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 50
-                },
+                "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false
               },
               {
                 "parentPluginId": "visualizations",
-                "id": "def-public.params",
+                "id": "def-public.VisTypeDefinition.toExpressionAst.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -3683,10 +3337,7 @@
                     "text": "VisToExpressionAstParams"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 51
-                },
+                "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false
               }
             ]
@@ -3717,11 +3368,32 @@
               },
               "<TVisParams>>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 150
-            },
-            "deprecated": false
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "vis",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.Vis",
+                    "text": "Vis"
+                  },
+                  "<TVisParams>"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3733,10 +3405,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 151
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3751,10 +3420,7 @@
               "VisTypeOptions",
               "> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 153
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3769,10 +3435,7 @@
             "signature": [
               "DefaultEditorConfig<TVisParams> | CustomEditorConfig"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 159
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           },
           {
@@ -3787,10 +3450,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 165
-            },
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
           }
         ],
@@ -3803,10 +3463,7 @@
         "tags": [],
         "label": "VisualizationListItem",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
         "children": [
           {
@@ -3816,10 +3473,7 @@
             "tags": [],
             "label": "editUrl",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3832,10 +3486,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3848,10 +3499,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3861,10 +3509,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3874,10 +3519,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3890,10 +3532,7 @@
             "signature": [
               "\"experimental\" | \"beta\" | \"production\""
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3903,10 +3542,7 @@
             "tags": [],
             "label": "savedObjectType",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3916,10 +3552,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3932,10 +3565,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3948,11 +3578,10 @@
             "signature": [
               "(() => string[]) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 23
-            },
-            "deprecated": false
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3961,10 +3590,7 @@
             "tags": [],
             "label": "typeTitle",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           },
           {
@@ -3977,10 +3603,36 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizationListItem.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.BaseVisType",
+                "text": "BaseVisType"
+              },
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              "> | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
           }
         ],
@@ -4010,10 +3662,7 @@
             "text": "EmbeddableInput"
           }
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-          "lineNumber": 57
-        },
+        "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
         "deprecated": false,
         "children": [
           {
@@ -4026,10 +3675,7 @@
             "signature": [
               "{ colors?: { [key: string]: string; } | undefined; } | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 58
-            },
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
             "deprecated": false
           },
           {
@@ -4057,10 +3703,7 @@
               },
               "> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 61
-            },
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
             "deprecated": false
           },
           {
@@ -4073,10 +3716,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 62
-            },
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
             "deprecated": false
           },
           {
@@ -4087,19 +3727,10 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 63
-            },
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
             "deprecated": false
           },
           {
@@ -4110,19 +3741,10 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 64
-            },
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
             "deprecated": false
           },
           {
@@ -4142,10 +3764,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 65
-            },
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
             "deprecated": false
           }
         ],
@@ -4160,15 +3779,72 @@
         "tags": [],
         "label": "VisGroups",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/vis_groups_enum.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/visualizations/public/vis_types/vis_groups_enum.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.Dimension",
+        "type": "Type",
+        "tags": [],
+        "label": "Dimension",
+        "description": [],
+        "signature": [
+          "[(",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"vis_dimension\", { accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: { id?: string | undefined; params: Record<string, any>; }; }> | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"xy_dimension\", { label: string; aggType: string; params: {} | ",
+          "DateHistogramParams",
+          " | ",
+          "HistogramParams",
+          " | ",
+          "FakeParams",
+          "; accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<Record<string, any>>; }>)[] | undefined, string]"
+        ],
+        "path": "src/plugins/visualizations/common/prepare_log_table.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "visualizations",
         "id": "def-public.ExpressionValueVisDimension",
@@ -4187,10 +3863,59 @@
           },
           "; format: { id?: string | undefined; params: Record<string, any>; }; }"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/expression_functions/vis_dimension.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.ExpressionValueXYDimension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionValueXYDimension",
+        "description": [],
+        "signature": [
+          "{ type: \"xy_dimension\"; } & { label: string; aggType: string; params: {} | ",
+          "DateHistogramParams",
+          " | ",
+          "HistogramParams",
+          " | ",
+          "FakeParams",
+          "; accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<Record<string, any>>; }"
+        ],
+        "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.SavedVisState",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedVisState",
+        "description": [],
+        "signature": [
+          "{ title: string; type: string; params: TVisParams; aggs: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+          "SerializableRecord",
+          " | undefined; schema?: string | undefined; }[]; }"
+        ],
+        "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4236,11 +3961,50 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 49
-        },
+        "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisToExpressionAst.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "vis",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.Vis",
+                "text": "Vis"
+              },
+              "<TVisParams>"
+            ],
+            "path": "src/plugins/visualizations/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisToExpressionAst.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisToExpressionAstParams",
+                "text": "VisToExpressionAstParams"
+              }
+            ],
+            "path": "src/plugins/visualizations/public/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -4253,10 +4017,7 @@
         "signature": [
           "\"experimental\" | \"beta\" | \"production\""
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4270,10 +4031,7 @@
         "signature": [
           "\"visualization\""
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/embeddable/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4287,10 +4045,7 @@
         "signature": [
           "\"visualize:enableLabs\""
         ],
-        "source": {
-          "path": "src/plugins/visualizations/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4364,7 +4119,7 @@
           "VisualizeByValueInput",
           ">; getInputAsRefType: () => Promise<",
           "VisualizeByReferenceInput",
-          ">; readonly runtimeId: number; readonly isContainer: boolean; fatalError?: Error | undefined; getIsContainer: () => this is ",
+          ">; readonly runtimeId: number; readonly isContainer: boolean; readonly deferEmbeddableLoad: boolean; fatalError?: Error | undefined; getIsContainer: () => this is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -4482,10 +4237,7 @@
           },
           ">) => void; }"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/index.ts",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/visualizations/public/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4497,7 +4249,43 @@
         "label": "VisualizeEmbeddableFactoryContract",
         "description": [],
         "signature": [
-          "{ readonly type: \"visualization\"; create: (input: ",
+          "{ readonly type: \"visualization\"; inject: (_state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          ", references: ",
+          "SavedObjectReference",
+          "[]) => ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          "; extract: (_state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          ") => { state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          "; references: ",
+          "SavedObjectReference",
+          "[]; }; create: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -4609,43 +4397,7 @@
             "section": "def-public.SavedObjectMetaData",
             "text": "SavedObjectMetaData"
           },
-          "<VisualizationAttributes>; extract: (_state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          ") => { state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          "; references: ",
-          "SavedObjectReference",
-          "[]; }; inject: (_state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          ", references: ",
-          "SavedObjectReference",
-          "[]) => ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          "; getCurrentAppId: () => Promise<string | undefined>; checkTitle: (props: ",
+          "<VisualizationAttributes>; getCurrentAppId: () => Promise<string | undefined>; checkTitle: (props: ",
           {
             "pluginId": "savedObjects",
             "scope": "public",
@@ -4655,10 +4407,7 @@
           },
           ") => Promise<true>; }"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/public/index.ts",
-          "lineNumber": 29
-        },
+        "path": "src/plugins/visualizations/public/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4671,10 +4420,7 @@
         "tags": [],
         "label": "VIS_EVENT_TO_TRIGGER",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/embeddable/events.ts",
-          "lineNumber": 20
-        },
+        "path": "src/plugins/visualizations/public/embeddable/events.ts",
         "deprecated": false,
         "children": [
           {
@@ -4687,10 +4433,7 @@
             "signature": [
               "\"FILTER_TRIGGER\""
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/events.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/visualizations/public/embeddable/events.ts",
             "deprecated": false
           },
           {
@@ -4703,10 +4446,7 @@
             "signature": [
               "\"SELECT_RANGE_TRIGGER\""
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/events.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/visualizations/public/embeddable/events.ts",
             "deprecated": false
           },
           {
@@ -4719,10 +4459,7 @@
             "signature": [
               "\"VALUE_CLICK_TRIGGER\""
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/events.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/visualizations/public/embeddable/events.ts",
             "deprecated": false
           },
           {
@@ -4735,10 +4472,7 @@
             "signature": [
               "\"ROW_CLICK_TRIGGER\""
             ],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/events.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/visualizations/public/embeddable/events.ts",
             "deprecated": false
           }
         ],
@@ -4773,10 +4507,7 @@
         },
         ") => void; hideTypes: (typeNames: string[]) => void; }"
       ],
-      "source": {
-        "path": "src/plugins/visualizations/public/plugin.ts",
-        "lineNumber": 76
-      },
+      "path": "src/plugins/visualizations/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -4846,10 +4577,7 @@
         },
         "<any>[]; }"
       ],
-      "source": {
-        "path": "src/plugins/visualizations/public/plugin.ts",
-        "lineNumber": 78
-      },
+      "path": "src/plugins/visualizations/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -4871,10 +4599,7 @@
             "FindListItemsOptions",
             " | undefined) => any; }"
           ],
-          "source": {
-            "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 79
-          },
+          "path": "src/plugins/visualizations/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -4919,29 +4644,26 @@
             },
             ">>"
           ],
-          "source": {
-            "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 80
-          },
+          "path": "src/plugins/visualizations/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "visualizations",
-              "id": "def-public.visType",
+              "id": "def-public.VisualizationsStart.createVis.$1",
               "type": "string",
               "tags": [],
               "label": "visType",
               "description": [],
-              "source": {
-                "path": "src/plugins/visualizations/public/plugin.ts",
-                "lineNumber": 80
-              },
-              "deprecated": false
+              "signature": [
+                "string"
+              ],
+              "path": "src/plugins/visualizations/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "visualizations",
-              "id": "def-public.visState",
+              "id": "def-public.VisualizationsStart.createVis.$2",
               "type": "Object",
               "tags": [],
               "label": "visState",
@@ -4964,13 +4686,12 @@
                 },
                 ">"
               ],
-              "source": {
-                "path": "src/plugins/visualizations/public/plugin.ts",
-                "lineNumber": 80
-              },
-              "deprecated": false
+              "path": "src/plugins/visualizations/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "visualizations",
@@ -5006,16 +4727,13 @@
             },
             ">"
           ],
-          "source": {
-            "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 81
-          },
+          "path": "src/plugins/visualizations/public/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
             {
               "parentPluginId": "visualizations",
-              "id": "def-public.savedVis",
+              "id": "def-public.VisualizationsStart.convertToSerializedVis.$1",
               "type": "Object",
               "tags": [],
               "label": "savedVis",
@@ -5029,10 +4747,7 @@
                   "text": "ISavedVis"
                 }
               ],
-              "source": {
-                "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-                "lineNumber": 31
-              },
+              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
               "deprecated": false
             }
           ]
@@ -5070,16 +4785,13 @@
               "text": "ISavedVis"
             }
           ],
-          "source": {
-            "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 82
-          },
+          "path": "src/plugins/visualizations/public/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
             {
               "parentPluginId": "visualizations",
-              "id": "def-public.vis",
+              "id": "def-public.VisualizationsStart.convertFromSerializedVis.$1",
               "type": "Object",
               "tags": [],
               "label": "vis",
@@ -5102,10 +4814,7 @@
                 },
                 ">"
               ],
-              "source": {
-                "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-                "lineNumber": 51
-              },
+              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
               "deprecated": false
             }
           ]
@@ -5122,16 +4831,13 @@
             "ShowNewVisModalParams",
             ") => () => void"
           ],
-          "source": {
-            "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 83
-          },
+          "path": "src/plugins/visualizations/public/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
             {
               "parentPluginId": "visualizations",
-              "id": "def-public.__0",
+              "id": "def-public.VisualizationsStart.showNewVisModal.$1",
               "type": "Object",
               "tags": [],
               "label": "__0",
@@ -5139,10 +4845,7 @@
               "signature": [
                 "ShowNewVisModalParams"
               ],
-              "source": {
-                "path": "src/plugins/visualizations/public/wizard/show_new_vis.tsx",
-                "lineNumber": 42
-              },
+              "path": "src/plugins/visualizations/public/wizard/show_new_vis.tsx",
               "deprecated": false
             }
           ]
@@ -5241,10 +4944,7 @@
             "DisabledLabEmbeddable",
             ">; }"
           ],
-          "source": {
-            "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 84
-          },
+          "path": "src/plugins/visualizations/public/plugin.ts",
           "deprecated": false
         }
       ],
@@ -5257,110 +4957,326 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-server.VISUALIZE_ENABLE_LABS_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_ENABLE_LABS_SETTING",
+        "description": [],
+        "signature": [
+          "\"visualize:enableLabs\""
+        ],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "visualizations",
+      "id": "def-server.VisualizationsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisualizationsPluginSetup",
+      "description": [],
+      "path": "src/plugins/visualizations/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "visualizations",
+      "id": "def-server.VisualizationsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisualizationsPluginStart",
+      "description": [],
+      "path": "src/plugins/visualizations/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
-    "functions": [],
-    "interfaces": [
+    "functions": [
       {
         "parentPluginId": "visualizations",
-        "id": "def-common.SavedVisState",
-        "type": "Interface",
+        "id": "def-common.prepareLogTable",
+        "type": "Function",
         "tags": [],
-        "label": "SavedVisState",
+        "label": "prepareLogTable",
         "description": [],
         "signature": [
+          "(datatable: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", dimensions: ",
           {
             "pluginId": "visualizations",
             "scope": "common",
             "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.SavedVisState",
-            "text": "SavedVisState"
+            "section": "def-common.Dimension",
+            "text": "Dimension"
           },
-          "<TVisParams>"
+          "[]) => { columns: { meta: { dimensionName: string | undefined; type: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnType",
+            "text": "DatatableColumnType"
+          },
+          "; field?: string | undefined; index?: string | undefined; params?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
+          "SerializableRecord",
+          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: Record<string, any>[]; }"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 16
-        },
+        "path": "src/plugins/visualizations/common/prepare_log_table.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.SavedVisState.title",
-            "type": "string",
+            "id": "def-common.prepareLogTable.$1",
+            "type": "Object",
             "tags": [],
-            "label": "title",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.SavedVisState.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 18
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.SavedVisState.params",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "params",
+            "label": "datatable",
             "description": [],
             "signature": [
-              "TVisParams"
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              }
             ],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 19
-            },
-            "deprecated": false
+            "path": "src/plugins/visualizations/common/prepare_log_table.ts",
+            "deprecated": false,
+            "isRequired": true
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.SavedVisState.aggs",
+            "id": "def-common.prepareLogTable.$2",
             "type": "Array",
             "tags": [],
-            "label": "aggs",
+            "label": "dimensions",
             "description": [],
             "signature": [
-              "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
-              " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
-                "pluginId": "data",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IAggType",
-                "text": "IAggType"
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.Dimension",
+                "text": "Dimension"
               },
-              "; }, \"type\"> & Pick<{ type: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IAggType",
-                "text": "IAggType"
-              },
-              "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">[]"
+              "[]"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/visualizations/common/prepare_log_table.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.range",
+        "type": "Function",
+        "tags": [],
+        "label": "range",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"range\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          " | null, Arguments, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Range",
+            "text": "Range"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/visualizations/common/expression_functions/range.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.visDimension",
+        "type": "Function",
+        "tags": [],
+        "label": "visDimension",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"visdimension\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.Arguments",
+            "text": "Arguments"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"vis_dimension\", { accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: { id?: string | undefined; params: Record<string, any>; }; }>, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.Arguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "Arguments",
+        "description": [],
+        "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.Arguments.accessor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.Arguments.format",
+            "type": "string",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.Arguments.formatParams",
+            "type": "string",
+            "tags": [],
+            "label": "formatParams",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
             "deprecated": false
           }
         ],
@@ -5373,10 +5289,7 @@
         "tags": [],
         "label": "VisParams",
         "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -5389,10 +5302,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false
           }
         ],
@@ -5416,10 +5326,7 @@
           " extends ",
           "SavedObjectAttributes"
         ],
-        "source": {
-          "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -5429,10 +5336,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false
           },
           {
@@ -5445,10 +5349,7 @@
             "signature": [
               "{ searchSourceJSON: string; }"
             ],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false
           },
           {
@@ -5458,10 +5359,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false
           },
           {
@@ -5471,10 +5369,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false
           },
           {
@@ -5484,10 +5379,7 @@
             "tags": [],
             "label": "visState",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false
           },
           {
@@ -5497,10 +5389,7 @@
             "tags": [],
             "label": "uiStateJSON",
             "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false
           }
         ],
@@ -5508,7 +5397,106 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.Dimension",
+        "type": "Type",
+        "tags": [],
+        "label": "Dimension",
+        "description": [],
+        "signature": [
+          "[(",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"vis_dimension\", { accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: { id?: string | undefined; params: Record<string, any>; }; }> | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"xy_dimension\", { label: string; aggType: string; params: {} | ",
+          "DateHistogramParams",
+          " | ",
+          "HistogramParams",
+          " | ",
+          "FakeParams",
+          "; accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<Record<string, any>>; }>)[] | undefined, string]"
+        ],
+        "path": "src/plugins/visualizations/common/prepare_log_table.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.ExpressionValueVisDimension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionValueVisDimension",
+        "description": [],
+        "signature": [
+          "{ type: \"vis_dimension\"; } & { accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: { id?: string | undefined; params: Record<string, any>; }; }"
+        ],
+        "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.SavedVisState",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedVisState",
+        "description": [],
+        "signature": [
+          "{ title: string; type: string; params: TVisParams; aggs: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+          "SerializableRecord",
+          " | undefined; schema?: string | undefined; }[]; }"
+        ],
+        "path": "src/plugins/visualizations/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

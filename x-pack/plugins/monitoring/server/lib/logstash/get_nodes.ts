@@ -6,13 +6,9 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
-// @ts-ignore
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
@@ -82,7 +78,7 @@ export async function getNodes(
   const params = {
     index: lsIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         start,

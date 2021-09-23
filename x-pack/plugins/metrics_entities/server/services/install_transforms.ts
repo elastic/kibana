@@ -27,7 +27,7 @@ interface CreateTransformOptions {
   frequency: string;
   logger: Logger;
   query: object;
-  docsPerSecond: number | null;
+  docsPerSecond: number | undefined;
   maxPageSearchSize: number;
   sync: {
     time: {

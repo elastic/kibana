@@ -34,6 +34,7 @@ export const registerMetricAnomalyAlertType = (
    * TODO: Remove this use of `any` by utilizing a proper type
    */
   Record<string, any>,
+  never, // Only use if defining useSavedObjectReferences hook
   Record<string, any>,
   AlertInstanceState,
   AlertInstanceContext,
@@ -64,6 +65,7 @@ export const registerMetricAnomalyAlertType = (
   actionGroups: [FIRED_ACTIONS],
   producer: 'infrastructure',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   executor: createMetricAnomalyExecutor(libs, ml),
   actionVariables: {
     context: [

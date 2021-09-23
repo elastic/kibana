@@ -8,13 +8,14 @@
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
+import { EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
   handleSkipFocus,
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../common/components/accessibility/helpers';
+} from '../../../../../timelines/public';
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
 import {
@@ -24,12 +25,7 @@ import {
   EXISTS_OPERATOR,
 } from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
-import {
-  IIndexPattern,
-  Query,
-  EsQueryConfig,
-  Filter,
-} from '../../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
@@ -161,27 +157,48 @@ export const combineQueries = ({
   kqlQuery: Query;
   kqlMode: string;
   isEventViewer?: boolean;
-}): { filterQuery: string } | null => {
+}): { filterQuery?: string; kqlError?: Error } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
+  } else if (
+    isEmpty(dataProviders) &&
+    isEmpty(kqlQuery.query) &&
+    (isEventViewer || !isEmpty(filters))
+  ) {
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-    };
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
     kuery.query = `(${kqlQuery.query})`;
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
@@ -189,8 +206,15 @@ export const combineQueries = ({
   kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery.query as string
   )})`;
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
+    config,
+    queries: [kuery],
+    indexPattern,
+    filters,
+  });
   return {
-    filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+    filterQuery,
+    kqlError,
   };
 };
 

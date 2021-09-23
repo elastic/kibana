@@ -7,8 +7,7 @@
  */
 
 import { createListIndex } from '@kbn/securitysolution-list-api';
-import { withOptionalSignal } from '../with_optional_signal';
-import { useAsync } from '../use_async';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
 const createListIndexWithOptionalSignal = withOptionalSignal(createListIndex);
 

@@ -5,28 +5,23 @@
  * 2.0.
  */
 
-import {
-  mountWithIntl,
-  mockKibanaValues,
-  setMockActions,
-  setMockValues,
-} from '../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import '../../../../__mocks__/react_router';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ReactWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { EuiPageHeader, EuiBasicTable } from '@elastic/eui';
+import { EuiTab } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
-import { EmptyState } from '../components';
+import { mountWithIntl, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
-import { Curations, CurationsTable } from './curations';
+import { Curations } from './curations';
+import { CurationsOverview } from './curations_overview';
+import { CurationsSettings } from './curations_settings';
 
 describe('Curations', () => {
-  const { navigateToUrl } = mockKibanaValues;
-
   const values = {
     dataLoading: false,
     curations: [
@@ -48,12 +43,13 @@ describe('Curations', () => {
         total_results: 2,
       },
     },
+    selectedPageTab: 'overview',
   };
 
   const actions = {
     loadCurations: jest.fn(),
-    deleteCuration: jest.fn(),
     onPaginate: jest.fn(),
+    onSelectPageTab: jest.fn(),
   };
 
   beforeEach(() => {
@@ -62,118 +58,60 @@ describe('Curations', () => {
     setMockActions(actions);
   });
 
-  it('renders', () => {
+  it('renders with a set of tabs in the page header', () => {
     const wrapper = shallow(<Curations />);
 
-    expect(wrapper.find(EuiPageHeader).prop('pageTitle')).toEqual('Curated results');
-    expect(wrapper.find(CurationsTable)).toHaveLength(1);
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    tabs.at(0).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(1, 'overview');
+
+    tabs.at(1).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(2, 'settings');
   });
 
-  it('renders a loading component on page load', () => {
-    setMockValues({ ...values, dataLoading: true, curations: [] });
+  it('renders an overview view', () => {
+    setMockValues({ ...values, selectedPageTab: 'overview' });
     const wrapper = shallow(<Curations />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(tabs.at(0).prop('isSelected')).toEqual(true);
+
+    expect(wrapper.find(CurationsOverview)).toHaveLength(1);
+  });
+
+  it('renders a settings view', () => {
+    setMockValues({ ...values, selectedPageTab: 'settings' });
+    const wrapper = shallow(<Curations />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(1).prop('isSelected')).toEqual(true);
+
+    expect(wrapper.find(CurationsSettings)).toHaveLength(1);
+  });
+
+  describe('loading state', () => {
+    it('renders a full-page loading state on initial page load', () => {
+      setMockValues({ ...values, dataLoading: true, curations: [] });
+      const wrapper = shallow(<Curations />);
+
+      expect(wrapper.prop('isLoading')).toEqual(true);
+    });
+
+    it('does not re-render a full-page loading state after initial page load (uses component-level loading state instead)', () => {
+      setMockValues({ ...values, dataLoading: true, curations: [{}] });
+      const wrapper = shallow(<Curations />);
+
+      expect(wrapper.prop('isLoading')).toEqual(false);
+    });
   });
 
   it('calls loadCurations on page load', () => {
+    setMockValues({ ...values, myRole: {} }); // Required for AppSearchPageTemplate to load
     mountWithIntl(<Curations />);
 
     expect(actions.loadCurations).toHaveBeenCalledTimes(1);
-  });
-
-  describe('CurationsTable', () => {
-    it('renders an empty state', () => {
-      setMockValues({ ...values, curations: [] });
-      const table = shallow(<CurationsTable />).find(EuiBasicTable);
-      const noItemsMessage = table.prop('noItemsMessage') as React.ReactElement;
-
-      expect(noItemsMessage.type).toEqual(EmptyState);
-    });
-
-    it('passes loading prop based on dataLoading', () => {
-      setMockValues({ ...values, dataLoading: true });
-      const wrapper = shallow(<CurationsTable />);
-
-      expect(wrapper.find(EuiBasicTable).prop('loading')).toEqual(true);
-    });
-
-    describe('populated table render', () => {
-      let wrapper: ReactWrapper;
-
-      beforeAll(() => {
-        wrapper = mountWithIntl(<CurationsTable />);
-      });
-
-      it('renders queries and last updated columns', () => {
-        const tableContent = wrapper.find(EuiBasicTable).text();
-
-        expect(tableContent).toContain('Queries');
-        expect(tableContent).toContain('hiking');
-        expect(tableContent).toContain('mountains, valleys');
-
-        expect(tableContent).toContain('Last updated');
-        expect(tableContent).toContain('Jan 1, 1970 12:00 PM');
-        expect(tableContent).toContain('Jan 2, 1970 12:00 PM');
-      });
-
-      it('renders queries with curation links', () => {
-        expect(
-          wrapper.find('EuiLinkTo[data-test-subj="CurationsTableQueriesLink"]').first().prop('to')
-        ).toEqual('/engines/some-engine/curations/cur-id-1');
-
-        expect(
-          wrapper.find('EuiLinkTo[data-test-subj="CurationsTableQueriesLink"]').last().prop('to')
-        ).toEqual('/engines/some-engine/curations/cur-id-2');
-      });
-
-      describe('action column', () => {
-        it('edit action navigates to curation link', () => {
-          wrapper.find('[data-test-subj="CurationsTableEditButton"]').first().simulate('click');
-          expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/cur-id-1');
-
-          wrapper.find('[data-test-subj="CurationsTableEditButton"]').last().simulate('click');
-          expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/cur-id-2');
-        });
-
-        it('delete action calls deleteCuration', () => {
-          wrapper.find('[data-test-subj="CurationsTableDeleteButton"]').first().simulate('click');
-          expect(actions.deleteCuration).toHaveBeenCalledWith('cur-id-1');
-
-          wrapper.find('[data-test-subj="CurationsTableDeleteButton"]').last().simulate('click');
-          expect(actions.deleteCuration).toHaveBeenCalledWith('cur-id-2');
-        });
-      });
-    });
-
-    describe('pagination', () => {
-      it('passes pagination props from meta.page', () => {
-        setMockValues({
-          ...values,
-          meta: {
-            page: {
-              current: 5,
-              size: 10,
-              total_results: 50,
-            },
-          },
-        });
-        const wrapper = shallow(<CurationsTable />);
-
-        expect(wrapper.find(EuiBasicTable).prop('pagination')).toEqual({
-          pageIndex: 4,
-          pageSize: 10,
-          totalItemCount: 50,
-          hidePerPageOptions: true,
-        });
-      });
-
-      it('calls onPaginate on pagination change', () => {
-        const wrapper = shallow(<CurationsTable />);
-        wrapper.find(EuiBasicTable).simulate('change', { page: { index: 0 } });
-
-        expect(actions.onPaginate).toHaveBeenCalledWith(1);
-      });
-    });
   });
 });

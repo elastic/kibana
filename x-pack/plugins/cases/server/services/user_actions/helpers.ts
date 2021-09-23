@@ -5,37 +5,93 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsUpdateResponse } from 'kibana/server';
+import { SavedObject, SavedObjectReference, SavedObjectsUpdateResponse } from 'kibana/server';
 import { get, isPlainObject, isString } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 
 import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
   CaseUserActionAttributes,
+  OWNER_FIELD,
+  SUB_CASE_SAVED_OBJECT,
+  SubCaseAttributes,
+  User,
   UserAction,
   UserActionField,
-  ESCaseAttributes,
-  User,
-  UserActionFieldType,
-  SubCaseAttributes,
+  CaseAttributes,
 } from '../../../common';
-import {
-  isTwoArraysDifference,
-  transformESConnectorToCaseConnector,
-} from '../../routes/api/cases/helpers';
+import { isTwoArraysDifference } from '../../client/utils';
 import { UserActionItem } from '.';
-import {
-  CASE_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../saved_object_types';
+import { extractConnectorId } from './transform';
+import { UserActionFieldType } from './types';
+import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common';
 
-export const transformNewUserAction = ({
+interface BuildCaseUserActionParams {
+  action: UserAction;
+  actionAt: string;
+  actionBy: User;
+  caseId: string;
+  owner: string;
+  fields: UserActionField;
+  newValue?: Record<string, unknown> | string | null;
+  oldValue?: Record<string, unknown> | string | null;
+  subCaseId?: string;
+}
+
+export const buildCaseUserActionItem = ({
+  action,
+  actionAt,
+  actionBy,
+  caseId,
+  fields,
+  newValue,
+  oldValue,
+  subCaseId,
+  owner,
+}: BuildCaseUserActionParams): UserActionItem => {
+  const { transformedActionDetails: transformedNewValue, references: newValueReferences } =
+    extractConnectorId({
+      action,
+      actionFields: fields,
+      actionDetails: newValue,
+      fieldType: UserActionFieldType.New,
+    });
+
+  const { transformedActionDetails: transformedOldValue, references: oldValueReferences } =
+    extractConnectorId({
+      action,
+      actionFields: fields,
+      actionDetails: oldValue,
+      fieldType: UserActionFieldType.Old,
+    });
+
+  return {
+    attributes: transformNewUserAction({
+      actionField: fields,
+      action,
+      actionAt,
+      owner,
+      ...actionBy,
+      newValue: transformedNewValue,
+      oldValue: transformedOldValue,
+    }),
+    references: [
+      ...createCaseReferences(caseId, subCaseId),
+      ...newValueReferences,
+      ...oldValueReferences,
+    ],
+  };
+};
+
+const transformNewUserAction = ({
   actionField,
   action,
   actionAt,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
+  owner,
   newValue = null,
   oldValue = null,
   username,
@@ -43,6 +99,7 @@ export const transformNewUserAction = ({
   actionField: UserActionField;
   action: UserAction;
   actionAt: string;
+  owner: string;
   email?: string | null;
   full_name?: string | null;
   newValue?: string | null;
@@ -55,100 +112,46 @@ export const transformNewUserAction = ({
   action_by: { email, full_name, username },
   new_value: newValue,
   old_value: oldValue,
+  owner,
 });
 
-interface BuildCaseUserAction {
-  action: UserAction;
-  actionAt: string;
-  actionBy: User;
-  caseId: string;
-  fields: UserActionField | unknown[];
-  newValue?: string | unknown;
-  oldValue?: string | unknown;
-  subCaseId?: string;
-}
+const createCaseReferences = (caseId: string, subCaseId?: string): SavedObjectReference[] => [
+  {
+    type: CASE_SAVED_OBJECT,
+    name: CASE_REF_NAME,
+    id: caseId,
+  },
+  ...(subCaseId
+    ? [
+        {
+          type: SUB_CASE_SAVED_OBJECT,
+          name: SUB_CASE_REF_NAME,
+          id: subCaseId,
+        },
+      ]
+    : []),
+];
 
-interface BuildCommentUserActionItem extends BuildCaseUserAction {
+interface BuildCommentUserActionItem extends BuildCaseUserActionParams {
   commentId: string;
 }
 
-export const buildCommentUserActionItem = ({
-  action,
-  actionAt,
-  actionBy,
-  caseId,
-  commentId,
-  fields,
-  newValue,
-  oldValue,
-  subCaseId,
-}: BuildCommentUserActionItem): UserActionItem => ({
-  attributes: transformNewUserAction({
-    actionField: fields as UserActionField,
-    action,
-    actionAt,
-    ...actionBy,
-    newValue: newValue as string,
-    oldValue: oldValue as string,
-  }),
-  references: [
-    {
-      type: CASE_SAVED_OBJECT,
-      name: `associated-${CASE_SAVED_OBJECT}`,
-      id: caseId,
-    },
-    {
-      type: CASE_COMMENT_SAVED_OBJECT,
-      name: `associated-${CASE_COMMENT_SAVED_OBJECT}`,
-      id: commentId,
-    },
-    ...(subCaseId
-      ? [
-          {
-            type: SUB_CASE_SAVED_OBJECT,
-            id: subCaseId,
-            name: `associated-${SUB_CASE_SAVED_OBJECT}`,
-          },
-        ]
-      : []),
-  ],
-});
+export const buildCommentUserActionItem = (params: BuildCommentUserActionItem): UserActionItem => {
+  const { commentId } = params;
+  const { attributes, references } = buildCaseUserActionItem(params);
 
-export const buildCaseUserActionItem = ({
-  action,
-  actionAt,
-  actionBy,
-  caseId,
-  fields,
-  newValue,
-  oldValue,
-  subCaseId,
-}: BuildCaseUserAction): UserActionItem => ({
-  attributes: transformNewUserAction({
-    actionField: fields as UserActionField,
-    action,
-    actionAt,
-    ...actionBy,
-    newValue: newValue as string,
-    oldValue: oldValue as string,
-  }),
-  references: [
-    {
-      type: CASE_SAVED_OBJECT,
-      name: `associated-${CASE_SAVED_OBJECT}`,
-      id: caseId,
-    },
-    ...(subCaseId
-      ? [
-          {
-            type: SUB_CASE_SAVED_OBJECT,
-            name: `associated-${SUB_CASE_SAVED_OBJECT}`,
-            id: subCaseId,
-          },
-        ]
-      : []),
-  ],
-});
+  return {
+    attributes,
+    references: [
+      ...references,
+      {
+        type: CASE_COMMENT_SAVED_OBJECT,
+        name: COMMENT_REF_NAME,
+        id: commentId,
+      },
+    ],
+  };
+};
 
 const userActionFieldsAllowed: UserActionField = [
   'comment',
@@ -159,6 +162,7 @@ const userActionFieldsAllowed: UserActionField = [
   'status',
   'settings',
   'sub_case',
+  OWNER_FIELD,
 ];
 
 interface CaseSubIDs {
@@ -167,21 +171,23 @@ interface CaseSubIDs {
 }
 
 type GetCaseAndSubID = <T>(so: SavedObjectsUpdateResponse<T>) => CaseSubIDs;
-type GetField = <T>(
-  attributes: Pick<SavedObjectsUpdateResponse<T>, 'attributes'>,
-  field: UserActionFieldType
-) => unknown;
 
 /**
  * Abstraction functions to retrieve a given field and the caseId and subCaseId depending on
  * whether we're interacting with a case or a sub case.
  */
 interface Getters {
-  getField: GetField;
   getCaseAndSubID: GetCaseAndSubID;
 }
 
-const buildGenericCaseUserActions = <T>({
+interface OwnerEntity {
+  owner: string;
+}
+
+/**
+ * The entity associated with the user action must contain an owner field
+ */
+const buildGenericCaseUserActions = <T extends OwnerEntity>({
   actionDate,
   actionBy,
   originalCases,
@@ -196,7 +202,7 @@ const buildGenericCaseUserActions = <T>({
   allowedFields: UserActionField;
   getters: Getters;
 }): UserActionItem[] => {
-  const { getCaseAndSubID, getField } = getters;
+  const { getCaseAndSubID } = getters;
   return updatedCases.reduce<UserActionItem[]>((acc, updatedItem) => {
     const { caseId, subCaseId } = getCaseAndSubID(updatedItem);
     // regardless of whether we're looking at a sub case or case, the id field will always be used to match between
@@ -207,8 +213,8 @@ const buildGenericCaseUserActions = <T>({
       const updatedFields = Object.keys(updatedItem.attributes) as UserActionField;
       updatedFields.forEach((field) => {
         if (allowedFields.includes(field)) {
-          const origValue = getField(originalItem, field);
-          const updatedValue = getField(updatedItem, field);
+          const origValue = get(originalItem, ['attributes', field]);
+          const updatedValue = get(updatedItem, ['attributes', field]);
 
           if (isString(origValue) && isString(updatedValue) && origValue !== updatedValue) {
             userActions = [
@@ -222,6 +228,7 @@ const buildGenericCaseUserActions = <T>({
                 fields: [field],
                 newValue: updatedValue,
                 oldValue: origValue,
+                owner: originalItem.attributes.owner,
               }),
             ];
           } else if (Array.isArray(origValue) && Array.isArray(updatedValue)) {
@@ -237,6 +244,7 @@ const buildGenericCaseUserActions = <T>({
                   subCaseId,
                   fields: [field],
                   newValue: compareValues.addedItems.join(', '),
+                  owner: originalItem.attributes.owner,
                 }),
               ];
             }
@@ -252,6 +260,7 @@ const buildGenericCaseUserActions = <T>({
                   subCaseId,
                   fields: [field],
                   newValue: compareValues.deletedItems.join(', '),
+                  owner: originalItem.attributes.owner,
                 }),
               ];
             }
@@ -269,8 +278,9 @@ const buildGenericCaseUserActions = <T>({
                 caseId,
                 subCaseId,
                 fields: [field],
-                newValue: JSON.stringify(updatedValue),
-                oldValue: JSON.stringify(origValue),
+                newValue: updatedValue,
+                oldValue: origValue,
+                owner: originalItem.attributes.owner,
               }),
             ];
           }
@@ -291,18 +301,12 @@ export const buildSubCaseUserActions = (args: {
   originalSubCases: Array<SavedObject<SubCaseAttributes>>;
   updatedSubCases: Array<SavedObjectsUpdateResponse<SubCaseAttributes>>;
 }): UserActionItem[] => {
-  const getField = (
-    so: Pick<SavedObjectsUpdateResponse<SubCaseAttributes>, 'attributes'>,
-    field: UserActionFieldType
-  ) => get(so, ['attributes', field]);
-
   const getCaseAndSubID = (so: SavedObjectsUpdateResponse<SubCaseAttributes>): CaseSubIDs => {
     const caseId = so.references?.find((ref) => ref.type === CASE_SAVED_OBJECT)?.id ?? '';
     return { caseId, subCaseId: so.id };
   };
 
   const getters: Getters = {
-    getField,
     getCaseAndSubID,
   };
 
@@ -322,24 +326,14 @@ export const buildSubCaseUserActions = (args: {
 export const buildCaseUserActions = (args: {
   actionDate: string;
   actionBy: User;
-  originalCases: Array<SavedObject<ESCaseAttributes>>;
-  updatedCases: Array<SavedObjectsUpdateResponse<ESCaseAttributes>>;
+  originalCases: Array<SavedObject<CaseAttributes>>;
+  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
 }): UserActionItem[] => {
-  const getField = (
-    so: Pick<SavedObjectsUpdateResponse<ESCaseAttributes>, 'attributes'>,
-    field: UserActionFieldType
-  ) => {
-    return field === 'connector' && so.attributes.connector
-      ? transformESConnectorToCaseConnector(so.attributes.connector)
-      : get(so, ['attributes', field]);
-  };
-
   const caseGetIds: GetCaseAndSubID = <T>(so: SavedObjectsUpdateResponse<T>): CaseSubIDs => {
     return { caseId: so.id };
   };
 
   const getters: Getters = {
-    getField,
     getCaseAndSubID: caseGetIds,
   };
 

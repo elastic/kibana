@@ -28,7 +28,6 @@ import {
   applicationServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { serviceRegistryMock } from '../../services/service_registry.mock';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
 import {
@@ -81,9 +80,9 @@ describe('SavedObjectsTable', () => {
   let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
-    return (shallowWithI18nProvider(
+    return shallowWithI18nProvider(
       <SavedObjectsTable {...defaultProps} {...overrides} />
-    ) as unknown) as ShallowWrapper<
+    ) as unknown as ShallowWrapper<
       SavedObjectsTableProps,
       SavedObjectsTableState,
       SavedObjectsTable
@@ -122,7 +121,6 @@ describe('SavedObjectsTable', () => {
 
     defaultProps = {
       allowedTypes,
-      serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),
       columnRegistry: columnServiceMock.createStart(),
       savedObjectsClient: savedObjects.client,
@@ -159,7 +157,6 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MySearch`,
             icon: 'search',
-            editUrl: '/management/kibana/objects/savedSearches/2',
             inAppUrl: {
               path: '/discover/2',
               uiCapabilitiesPath: 'discover.show',
@@ -172,7 +169,6 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyDashboard`,
             icon: 'dashboardApp',
-            editUrl: '/management/kibana/objects/savedDashboards/3',
             inAppUrl: {
               path: '/dashboard/3',
               uiCapabilitiesPath: 'dashboard.show',
@@ -185,7 +181,6 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyViz`,
             icon: 'visualizeApp',
-            editUrl: '/management/kibana/objects/savedVisualizations/4',
             inAppUrl: {
               path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
@@ -258,7 +253,7 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('should display a warning is export contains missing references', async () => {
+    it('should display a warning if the export contains missing references', async () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern' },
         { id: '3', type: 'dashboard' },
@@ -280,6 +275,8 @@ describe('SavedObjectsTable', () => {
         exportedCount: 2,
         missingRefCount: 1,
         missingReferences: [{ id: '7', type: 'visualisation' }],
+        excludedObjectsCount: 0,
+        excludedObjects: [],
       }));
 
       const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
@@ -300,6 +297,53 @@ describe('SavedObjectsTable', () => {
           'Your file is downloading in the background. ' +
           'Some related objects could not be found. ' +
           'Please see the last line in the exported file for a list of missing objects.',
+      });
+    });
+
+    it('should display a specific message if the export contains excluded objects', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' },
+      ] as SavedObjectWithMetadata[];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
+        _id: obj.id,
+        _source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+      };
+
+      extractExportDetailsMock.mockImplementation(() => ({
+        exportedCount: 2,
+        missingRefCount: 0,
+        missingReferences: [],
+        excludedObjectsCount: 1,
+        excludedObjects: [{ id: '7', type: 'visualisation' }],
+      }));
+
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().onExport(true);
+
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title:
+          'Your file is downloading in the background. ' +
+          'Some objects were excluded from the export. ' +
+          'Please see the last line in the exported file for a list of excluded objects.',
       });
     });
 

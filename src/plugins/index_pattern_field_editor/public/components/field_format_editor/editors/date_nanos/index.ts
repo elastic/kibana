@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { DateNanosFormatEditor } from './date_nanos';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
+
+export type { DateNanosFormatEditor } from './date_nanos';
+export const dateNanosFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./date_nanos').then((m) => m.DateNanosFormatEditor);
+dateNanosFormatEditorFactory.formatId = formatId;

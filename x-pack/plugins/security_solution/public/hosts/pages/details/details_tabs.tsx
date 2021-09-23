@@ -70,7 +70,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       deleteQuery,
       endDate: to,
       filterQuery,
-      skip: isInitializing,
+      skip: isInitializing || filterQuery === undefined,
       setQuery,
       startDate: from,
       type,

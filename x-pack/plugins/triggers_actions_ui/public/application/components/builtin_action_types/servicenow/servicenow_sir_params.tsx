@@ -43,10 +43,10 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as ServiceNowSIRActionParams['subActionParams']),
+      } as unknown as ServiceNowSIRActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 
@@ -151,6 +151,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         fullWidth
         error={errors['subActionParams.incident.short_description']}
         isInvalid={
+          errors['subActionParams.incident.short_description'] !== undefined &&
           errors['subActionParams.incident.short_description'].length > 0 &&
           incident.short_description !== undefined
         }

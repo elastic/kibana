@@ -10,7 +10,6 @@ import React, { Fragment, useContext, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -44,7 +43,7 @@ import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { useAppContext } from '../../../../app_context';
 
-import { XJson } from '../../../../shared_imports';
+import { XJson, EuiCodeEditor } from '../../../../shared_imports';
 
 const { useXJsonMode } = XJson;
 

@@ -20,16 +20,8 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   messageVariables,
   errors,
 }) => {
-  const {
-    eventAction,
-    dedupKey,
-    summary,
-    source,
-    severity,
-    timestamp,
-    component,
-    group,
-  } = actionParams;
+  const { eventAction, dedupKey, summary, source, severity, timestamp, component, group } =
+    actionParams;
   const severityOptions = [
     {
       value: 'critical',
@@ -101,6 +93,12 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   const isDedupeKeyRequired = eventAction !== 'trigger';
   const isTriggerPagerDutyEvent = eventAction === 'trigger';
 
+  const isDedupKeyInvalid: boolean = errors.dedupKey !== undefined && errors.dedupKey.length > 0;
+  const isSummaryInvalid: boolean =
+    errors.summary !== undefined && errors.summary.length > 0 && summary !== undefined;
+  const isTimestampInvalid: boolean =
+    errors.timestamp !== undefined && errors.timestamp.length > 0 && timestamp !== undefined;
+
   return (
     <>
       <EuiFlexGroup>
@@ -132,7 +130,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           <EuiFormRow
             fullWidth
             error={errors.dedupKey}
-            isInvalid={errors.dedupKey.length > 0}
+            isInvalid={isDedupKeyInvalid}
             label={
               isDedupeKeyRequired
                 ? i18n.translate(
@@ -166,7 +164,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             id="pagerDutySummary"
             fullWidth
             error={errors.summary}
-            isInvalid={errors.summary.length > 0 && summary !== undefined}
+            isInvalid={isSummaryInvalid}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.summaryFieldLabel',
               {
@@ -180,7 +178,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               messageVariables={messageVariables}
               paramsProperty={'summary'}
               inputTargetValue={summary}
-              errors={errors.summary as string[]}
+              errors={(errors.summary ?? []) as string[]}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
@@ -211,7 +209,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               <EuiFormRow
                 fullWidth
                 error={errors.timestamp}
-                isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
+                isInvalid={isTimestampInvalid}
                 label={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.timestampTextFieldLabel',
                   {

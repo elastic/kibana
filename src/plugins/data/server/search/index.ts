@@ -13,3 +13,4 @@ export * from './strategies/eql_search';
 export { usageProvider, SearchUsage, searchUsageObserver } from './collectors';
 export * from './aggs';
 export * from './session';
+export * from './errors/no_search_id_in_session';

@@ -11,10 +11,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, timePicker, visualize } = getPageObjects([
+  const { visualBuilder, timePicker, visualize, visChart } = getPageObjects([
     'visualBuilder',
     'timePicker',
     'visualize',
+    'visChart',
   ]);
   const retry = getService('retry');
 
@@ -76,6 +77,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(markdownText).to.be(html);
       });
 
+      it('markdown variables should be clickable', async () => {
+        await visualBuilder.clearMarkdown();
+        const [firstVariable] = await visualBuilder.getMarkdownTableVariables();
+        await firstVariable.selector.click();
+        await visChart.waitForVisualizationRenderingStabilized();
+        const markdownText = await visualBuilder.getMarkdownText();
+        expect(markdownText).to.be('46');
+      });
+
       it('should render mustache list', async () => {
         const list = '{{#each _all}}\n{{ data.formatted.[0] }} {{ data.raw.[0] }}\n{{/each}}';
         const expectedRenderer = 'Sep 22, 2015 @ 06:00:00.000,6 1442901600000,6';
@@ -134,6 +144,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await retry.try(async function aggregationCountCheck() {
           const aggregationLength = await visualBuilder.getAggregationCount();
           expect(aggregationLength).to.be.equal(2);
+        });
+      });
+
+      describe('applying field formats from Advanced Settings for values', () => {
+        before(async () => {
+          await visualBuilder.resetPage();
+          await visualBuilder.clickMarkdown();
+          await visualBuilder.markdownSwitchSubTab('markdown');
+          await visualBuilder.enterMarkdown('{{ average_of_bytes.last.formatted }}');
+          await visualBuilder.markdownSwitchSubTab('data');
+          await visualBuilder.selectAggType('Average');
+          await visualBuilder.setFieldForAggregation('bytes');
+          await visualBuilder.clickSeriesOption();
+        });
+
+        it('should apply field formatting by default', async () => {
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('5.588KB');
+        });
+
+        it('should apply TSVB formatting', async () => {
+          await visualBuilder.changeDataFormatter('percent');
+
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('572,241.265%');
         });
       });
     });

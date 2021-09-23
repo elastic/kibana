@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -133,7 +137,7 @@ describe('SynonymsLogic', () => {
         SynonymsLogic.actions.loadSynonyms();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/synonyms', {
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/synonyms', {
           query: {
             'page[current]': 1,
             'page[size]': 12,
@@ -174,9 +178,12 @@ describe('SynonymsLogic', () => {
         SynonymsLogic.actions.createSynonymSet(['a', 'b', 'c']);
         await nextTick();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/some-engine/synonyms', {
-          body: '{"synonyms":["a","b","c"]}',
-        });
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/synonyms',
+          {
+            body: '{"synonyms":["a","b","c"]}',
+          }
+        );
         expect(SynonymsLogic.actions.onSynonymSetSuccess).toHaveBeenCalledWith(
           'Synonym set created'
         );
@@ -217,7 +224,7 @@ describe('SynonymsLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/synonyms/some-synonym-id',
+          '/internal/app_search/engines/some-engine/synonyms/some-synonym-id',
           {
             body: '{"synonyms":["hello","world"]}',
           }
@@ -262,7 +269,7 @@ describe('SynonymsLogic', () => {
         await nextTick();
 
         expect(http.delete).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/synonyms/some-synonym-id'
+          '/internal/app_search/engines/some-engine/synonyms/some-synonym-id'
         );
         expect(SynonymsLogic.actions.onSynonymSetSuccess).toHaveBeenCalledWith(
           'Synonym set deleted'

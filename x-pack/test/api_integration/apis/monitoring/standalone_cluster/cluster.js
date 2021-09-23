@@ -13,7 +13,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('cluster', () => {
-    const archive = 'monitoring/standalone_cluster';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/standalone_cluster';
     const timeRange = {
       min: '2019-02-04T16:52:11.741Z',
       max: '2019-02-04T17:52:11.741Z',

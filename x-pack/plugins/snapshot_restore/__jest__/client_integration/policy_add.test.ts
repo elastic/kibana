@@ -140,7 +140,7 @@ describe('<PolicyAdd />', () => {
 
           await act(async () => {
             // Toggle "All indices" switch
-            form.toggleEuiSwitch('allIndicesToggle', false);
+            form.toggleEuiSwitch('allIndicesToggle');
             await nextTick();
             component.update();
           });
@@ -158,7 +158,7 @@ describe('<PolicyAdd />', () => {
 
           await act(async () => {
             // Toggle "All indices" switch
-            form.toggleEuiSwitch('allIndicesToggle', false);
+            form.toggleEuiSwitch('allIndicesToggle');
             await nextTick();
           });
           component.update();

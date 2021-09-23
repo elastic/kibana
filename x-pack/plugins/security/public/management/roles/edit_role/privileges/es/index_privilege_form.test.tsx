@@ -9,7 +9,12 @@ import { EuiButtonIcon, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
 
+import {
+  CodeEditorField,
+  KibanaContextProvider,
+} from '../../../../../../../../../src/plugins/kibana_react/public';
 import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
@@ -180,9 +185,13 @@ describe(`document level security`, () => {
       ...props,
     };
 
-    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+    const wrapper = mountWithIntl(
+      <KibanaContextProvider services={coreMock.createStart()}>
+        <IndexPrivilegeForm {...testProps} />
+      </KibanaContextProvider>
+    );
     expect(wrapper.find('EuiSwitch[data-test-subj="restrictDocumentsQuery0"]')).toHaveLength(1);
-    expect(wrapper.find(EuiTextArea)).toHaveLength(1);
+    expect(wrapper.find(CodeEditorField)).toHaveLength(1);
   });
 });
 

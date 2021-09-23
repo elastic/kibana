@@ -62,11 +62,11 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
 }
 
 function getSetting<T = any>(key: string): T {
-  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+  return 'MMM D, YYYY @ HH:mm:ss.SSS' as unknown as T;
 }
 
 function setSetting$<T = any>(key: string): T {
-  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+  return of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown as T;
 }
 
 const createMockStore = () => {
@@ -79,6 +79,12 @@ const createMockStore = () => {
   };
 };
 
+const mockAppUrls: Record<string, string> = {
+  uptime: '/app/uptime',
+  observability: '/app/observability',
+  '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
+};
+
 /* default mock core */
 const defaultCore = coreMock.createStart();
 const mockCore: () => Partial<CoreStart> = () => {
@@ -86,7 +92,7 @@ const mockCore: () => Partial<CoreStart> = () => {
     ...defaultCore,
     application: {
       ...defaultCore.application,
-      getUrlForApp: () => '/app/uptime',
+      getUrlForApp: (app: string) => mockAppUrls[app],
       navigateToUrl: jest.fn(),
       capabilities: {
         ...defaultCore.application.capabilities,

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useTrackPageview } from '../../../../observability/public';
 import { useInitApp } from '../../hooks/use_init_app';
 import { StepsList } from '../../components/synthetics/check_steps/steps_list';
@@ -14,6 +13,19 @@ import { useCheckSteps } from '../../components/synthetics/check_steps/use_check
 import { ChecksNavigation } from './checks_navigation';
 import { useMonitorBreadcrumb } from '../../components/monitor/synthetics/step_detail/use_monitor_breadcrumb';
 import { EmptyJourney } from '../../components/synthetics/empty_journey';
+
+export const SyntheticsCheckStepsPageHeader = () => {
+  const { details } = useCheckSteps();
+  return <>{details?.journey?.monitor.name || details?.journey?.monitor.id}</>;
+};
+
+export const SyntheticsCheckStepsPageRightSideItem = () => {
+  const { details } = useCheckSteps();
+
+  if (!details) return null;
+
+  return <ChecksNavigation timestamp={details.timestamp} details={details} />;
+};
 
 export const SyntheticsCheckSteps: React.FC = () => {
   useInitApp();
@@ -26,17 +38,6 @@ export const SyntheticsCheckSteps: React.FC = () => {
 
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h1>{details?.journey?.monitor.name || details?.journey?.monitor.id}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {details && <ChecksNavigation timestamp={details.timestamp} details={details} />}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
       <StepsList data={steps} loading={loading} error={error} />
       {(!steps || steps.length === 0) && !loading && <EmptyJourney checkGroup={checkGroup} />}
     </>

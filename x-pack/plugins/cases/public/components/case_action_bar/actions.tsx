@@ -7,40 +7,34 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
-import { Case } from '../../containers/types';
+import { Case } from '../../../common';
 import { CaseService } from '../../containers/use_get_case_user_actions';
+import { CasesNavigation } from '../links';
 
 interface CaseViewActions {
+  allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
-  disabled?: boolean;
 }
 
 const ActionsComponent: React.FC<CaseViewActions> = ({
+  allCasesNavigation,
   caseData,
   currentExternalIncident,
-  disabled = false,
 }) => {
-  const history = useHistory();
   // Delete case
-  const {
-    handleToggleModal,
-    handleOnDeleteConfirm,
-    isDeleted,
-    isDisplayConfirmDeleteModal,
-  } = useDeleteCases();
+  const { handleToggleModal, handleOnDeleteConfirm, isDeleted, isDisplayConfirmDeleteModal } =
+    useDeleteCases();
 
   const propertyActions = useMemo(
     () => [
       {
-        disabled,
         iconType: 'trash',
-        label: i18n.DELETE_CASE,
+        label: i18n.DELETE_CASE(),
         onClick: handleToggleModal,
       },
       ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
@@ -53,11 +47,11 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
           ]
         : []),
     ],
-    [disabled, handleToggleModal, currentExternalIncident]
+    [handleToggleModal, currentExternalIncident]
   );
 
   if (isDeleted) {
-    history.push('/');
+    allCasesNavigation.onClick(null);
     return null;
   }
   return (
@@ -66,7 +60,6 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
       <ConfirmDeleteCaseModal
         caseTitle={caseData.title}
         isModalVisible={isDisplayConfirmDeleteModal}
-        isPlural={false}
         onCancel={handleToggleModal}
         onConfirm={handleOnDeleteConfirm.bind(null, [
           { id: caseData.id, title: caseData.title, type: caseData.type },

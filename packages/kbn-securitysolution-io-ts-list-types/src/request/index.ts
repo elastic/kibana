@@ -31,6 +31,7 @@ export * from './read_exception_list_item_schema';
 export * from './read_exception_list_schema';
 export * from './read_list_item_schema';
 export * from './read_list_schema';
+export * from './summary_exception_list_schema';
 export * from './update_endpoint_list_item_schema';
 export * from './update_exception_list_item_schema';
 export * from './update_exception_list_item_validation';

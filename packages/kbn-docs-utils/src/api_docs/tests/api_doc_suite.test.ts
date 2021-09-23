@@ -13,7 +13,7 @@ import { Project } from 'ts-morph';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
+import { ApiDeclaration, ApiStats, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
 import { groupPluginApi } from '../utils';
 import { getPluginApiMap } from '../get_plugin_api_map';
@@ -46,6 +46,8 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p1!.isRequired).toBe(true);
   expect(p1!.signature?.length).toBe(1);
   expect(linkCount(p1!.signature!)).toBe(0);
+  expect(p1?.description).toBeDefined();
+  expect(p1?.description?.length).toBe(1);
 
   const p2 = fn?.children!.find((c) => c.label === 'b');
   expect(p2).toBeDefined();
@@ -53,12 +55,15 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p2!.type).toBe(TypeKind.NumberKind);
   expect(p2!.signature?.length).toBe(1);
   expect(linkCount(p2!.signature!)).toBe(0);
+  expect(p2?.description?.length).toBe(1);
 
   const p3 = fn?.children!.find((c) => c.label === 'c');
   expect(p3).toBeDefined();
   expect(p3!.isRequired).toBe(true);
   expect(p3!.type).toBe(TypeKind.ArrayKind);
   expect(linkCount(p3!.signature!)).toBe(1);
+  expect(p3?.description).toBeDefined();
+  expect(p3?.description?.length).toBe(1);
 
   const p4 = fn?.children!.find((c) => c.label === 'd');
   expect(p4).toBeDefined();
@@ -66,6 +71,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p4!.type).toBe(TypeKind.CompoundTypeKind);
   expect(p4!.signature?.length).toBe(1);
   expect(linkCount(p4!.signature!)).toBe(1);
+  expect(p4?.description?.length).toBe(1);
 
   const p5 = fn?.children!.find((c) => c.label === 'e');
   expect(p5).toBeDefined();
@@ -73,6 +79,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p5!.type).toBe(TypeKind.StringKind);
   expect(p5!.signature?.length).toBe(1);
   expect(linkCount(p5!.signature!)).toBe(0);
+  expect(p5?.description?.length).toBe(1);
 }
 
 beforeAll(() => {
@@ -92,11 +99,24 @@ beforeAll(() => {
   const plugins: KibanaPlatformPlugin[] = [pluginA, pluginB];
 
   const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
+  const pluginStats: ApiStats = {
+    deprecatedAPIsReferencedCount: 0,
+    missingComments: [],
+    isAnyType: [],
+    noReferences: [],
+    apiCount: 3,
+    missingExports: 0,
+  };
 
   doc = pluginApiMap.pluginA;
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
-  writePluginDocs(mdxOutputFolder, doc, log);
-  writePluginDocs(mdxOutputFolder, pluginApiMap.pluginB, log);
+  writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats, log });
+  writePluginDocs(mdxOutputFolder, {
+    doc: pluginApiMap.pluginB,
+    plugin: pluginB,
+    pluginStats,
+    log,
+  });
 });
 
 it('Setup type is extracted', () => {
@@ -133,9 +153,7 @@ it('const exported from common folder is correct', () => {
   const fooConst = doc.common.find((c) => c.label === 'commonFoo');
   expect(fooConst).toBeDefined();
 
-  expect(fooConst!.source.path.replace(Path.sep, '/')).toContain(
-    'src/plugin_a/common/foo/index.ts'
-  );
+  expect(fooConst!.path.replace(Path.sep, '/')).toContain('src/plugin_a/common/foo/index.ts');
   expect(fooConst!.signature![0]).toBe('"COMMON VAR!"');
 });
 
@@ -173,13 +191,20 @@ describe('functions', () => {
     const hi = obj?.children?.find((c) => c.label === 'hi');
     expect(hi).toBeDefined();
 
-    const obj2 = fn?.children?.find((c) => c.label === '{ fn }');
+    const obj2 = fn?.children?.find((c) => c.label === '{ fn1, fn2 }');
     expect(obj2).toBeDefined();
-    expect(obj2!.children?.length).toBe(1);
+    expect(obj2!.children?.length).toBe(2);
+    expect(obj2!.id).toBe('def-public.crazyFunction.$2');
 
-    const fn2 = obj2?.children?.find((c) => c.label === 'fn');
-    expect(fn2).toBeDefined();
-    expect(fn2?.type).toBe(TypeKind.FunctionKind);
+    const fn1 = obj2?.children?.find((c) => c.label === 'fn1');
+    expect(fn1).toBeDefined();
+    expect(fn1?.type).toBe(TypeKind.FunctionKind);
+    expect(fn1!.id).toBe('def-public.crazyFunction.$2.fn1');
+
+    const fn3 = fn1?.children?.find((c) => c.label === 'foo');
+    expect(fn3).toBeDefined();
+    expect(fn3?.type).toBe(TypeKind.ObjectKind);
+    expect(fn3!.id).toBe('def-public.crazyFunction.$2.fn1.$1');
   });
 
   it('Fn with internal tag is not exported', () => {
@@ -226,7 +251,49 @@ describe('objects', () => {
   });
 });
 
-describe('Misc types', () => {
+describe('Types', () => {
+  it('Generic type pointing to a function', () => {
+    const api = doc.client.find((c) => c.label === 'FnTypeWithGeneric');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(linkCount(api?.signature!)).toBe(2);
+
+    expect(api?.children).toBeDefined();
+    expect(api?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "(t: T, p: ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.MyProps",
+          "text": "MyProps",
+        },
+        ") => ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.TypeWithGeneric",
+          "text": "TypeWithGeneric",
+        },
+        "<T>",
+      ]
+    `);
+  });
+
+  it('Generic type pointing to an array', () => {
+    const api = doc.client.find((c) => c.label === 'TypeWithGeneric');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(linkCount(api?.signature!)).toBe(0);
+    expect(api?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "T[]",
+      ]
+    `);
+  });
+
   it('Type using ReactElement has the right signature', () => {
     const api = doc.client.find((c) => c.label === 'AReactElementFn');
     expect(api).toBeDefined();
@@ -304,6 +371,14 @@ describe('Misc types', () => {
       ]
     `);
     expect(linkCount(fnType?.signature!)).toBe(1);
+
+    expect(fnType?.children).toBeDefined();
+    expect(fnType?.children?.length).toBe(1);
+    expect(fnType?.children![0].description).toMatchInlineSnapshot(`
+      Array [
+        "This is a generic T type. It can be anything.",
+      ]
+    `);
   });
 
   it('Union type is exported correctly', () => {
@@ -399,6 +474,20 @@ describe('interfaces and classes', () => {
     `);
   });
 
+  /**
+   * Coverage for https://github.com/elastic/kibana/issues/107145
+   */
+  it('Optional function on interface includes children', () => {
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
+    expect(exampleInterface).toBeDefined();
+
+    const fn = exampleInterface!.children?.find((c) => c.label === 'anOptionalFn');
+    expect(fn).toBeDefined();
+    expect(fn?.type).toBe(TypeKind.FunctionKind);
+    expect(fn?.children).toBeDefined();
+    expect(fn?.children?.length).toBe(1);
+  });
+
   it('Non arrow function on interface is exported as function type', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
@@ -444,7 +533,7 @@ describe('interfaces and classes', () => {
     expect(linkCount(clss?.signature!)).toBe(3);
   });
 
-  it('Function with generic inside interface is exported with function type', () => {
+  it('Generic function inside interface is exported as a function', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
 
@@ -461,6 +550,53 @@ describe('interfaces and classes', () => {
     expect(param?.description).toBeDefined();
     expect(param?.description?.length).toBe(1);
     expect(param!.description![0]).toBe('This a parameter.');
+  });
+
+  it('Property on interface pointing to generic function type exported with link', () => {
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
+    expect(exampleInterface).toBeDefined();
+
+    const fn = exampleInterface?.children?.find((c) => c.label === 'fnTypeWithGeneric');
+    expect(fn).toBeDefined();
+    expect(fn!.id).toBe('def-public.ExampleInterface.fnTypeWithGeneric');
+
+    // `fnTypeWithGeneric` is defined as:
+    //  fnTypeWithGeneric: FnTypeWithGeneric<string>;
+    // and `GenericTypeFn` is defined as:
+    // type FnTypeWithGeneric<T> = (t: T, p: MyProps) => TypeWithGeneric<T>;
+    // In get_signature.ts, we use the `TypeFormatFlags.InTypeAlias` flag which ends up expanding the type
+    // to be a function, and thus this doesn't show up as a single referenced type with no kids. If we ever fixed that,
+    // it would be find to change expectations here to be no children and TypeKind instead of FunctionKind.
+    expect(fn?.children).toBeDefined();
+
+    const t = fn!.children?.find((c) => c.label === 't');
+    expect(t).toBeDefined();
+    expect(t!.id).toBe('def-public.ExampleInterface.fnTypeWithGeneric.$1');
+
+    expect(fn?.type).toBe(TypeKind.FunctionKind);
+    expect(fn?.signature).toBeDefined();
+    expect(linkCount(fn!.signature!)).toBe(2);
+    expect(fn?.children?.length).toBe(2);
+
+    // This will fail! It actually shows up as Uncategorized. It would be some effort to get it to show up as string, which may involve
+    // trying to fix the above issue so it's not expanded.
+    // expect(fn?.children[0]!.type).toBe(TypeKind.StringKind);
+  });
+
+  // Optional code path is different than non-optional properties.
+  it('Optional interface property pointing to generic function type', () => {
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
+    expect(exampleInterface).toBeDefined();
+
+    const fn = exampleInterface?.children?.find(
+      (c) => c.label === 'fnTypeWithGenericThatIsOptional'
+    );
+    expect(fn).toBeDefined();
+
+    // Unlike the above, the type is _not_ expanded inline, so we make sure it has no children, but does link to the property.
+    expect(fn?.children).toBeUndefined();
+    expect(fn?.signature).toBeDefined();
+    expect(linkCount(fn!.signature!)).toBe(1);
   });
 
   it('interfaces with internal tags are not exported', () => {

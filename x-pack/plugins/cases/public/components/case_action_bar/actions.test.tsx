@@ -26,7 +26,14 @@ jest.mock('react-router-dom', () => {
     }),
   };
 });
-
+const defaultProps = {
+  allCasesNavigation: {
+    href: 'all-cases-href',
+    onClick: () => {},
+  },
+  caseData: basicCase,
+  currentExternalIncident: null,
+};
 describe('CaseView actions', () => {
   const handleOnDeleteConfirm = jest.fn();
   const handleToggleModal = jest.fn();
@@ -49,7 +56,7 @@ describe('CaseView actions', () => {
   it('clicking trash toggles modal', () => {
     const wrapper = mount(
       <TestProviders>
-        <Actions caseData={basicCase} currentExternalIncident={null} />
+        <Actions {...defaultProps} />
       </TestProviders>
     );
 
@@ -67,7 +74,7 @@ describe('CaseView actions', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <Actions caseData={basicCase} currentExternalIncident={null} />
+        <Actions {...defaultProps} />
       </TestProviders>
     );
 
@@ -82,7 +89,7 @@ describe('CaseView actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          caseData={basicCase}
+          {...defaultProps}
           currentExternalIncident={{
             ...basicPush,
             firstPushIndex: 5,

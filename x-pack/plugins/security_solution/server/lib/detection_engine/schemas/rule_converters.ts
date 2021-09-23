@@ -6,7 +6,6 @@
  */
 
 import uuid from 'uuid';
-import { SavedObject } from 'kibana/server';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
@@ -24,14 +23,20 @@ import {
   FullResponseSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
-import { RuleActions } from '../rule_actions/types';
 import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { Alert } from '../../../../../alerting/common';
-import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
+import { SanitizedAlert } from '../../../../../alerting/common';
+import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  transformFromAlertThrottle,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+} from '../rules/utils';
+import { ruleTypeMappings } from '../signals/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -117,14 +122,15 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
 
 export const convertCreateAPIToInternalSchema = (
   input: CreateRulesSchema,
-  siemClient: AppClient
+  siemClient: AppClient,
+  isRuleRegistryEnabled: boolean
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
     name: input.name,
     tags: addTags(input.tags ?? [], newRuleId, false),
-    alertTypeId: SIGNALS_ID,
+    alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[input.type] : SIGNALS_ID,
     consumer: SERVER_APP_ID,
     params: {
       author: input.author ?? [],
@@ -149,6 +155,7 @@ export const convertCreateAPIToInternalSchema = (
       timestampOverride: input.timestamp_override,
       to: input.to ?? 'now',
       references: input.references ?? [],
+      namespace: input.namespace,
       note: input.note,
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
@@ -156,9 +163,9 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? true,
-    actions: input.throttle === 'rule' ? (input.actions ?? []).map(transformRuleToAlertAction) : [],
-    throttle: null,
-    notifyWhen: null,
+    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
+    throttle: transformToAlertThrottle(input.throttle),
+    notifyWhen: transformToNotifyWhen(input.throttle),
   };
 };
 
@@ -245,6 +252,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     risk_score: params.riskScore,
     severity: params.severity,
     building_block_type: params.buildingBlockType,
+    namespace: params.namespace,
     note: params.note,
     license: params.license,
     output_index: params.outputIndex,
@@ -270,10 +278,10 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: Alert<RuleParams>,
-  ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  rule: SanitizedAlert<RuleParams>,
+  ruleStatus?: IRuleStatusSOAttributes
 ): FullResponseSchema => {
+  const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
   return {
     // Alerting framework params
     id: rule.id,
@@ -290,14 +298,39 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: ruleActions?.ruleThrottle || 'no_actions',
-    actions: ruleActions?.actions ?? [],
+    throttle: transformFromAlertThrottle(rule),
+    actions:
+      rule?.actions.map((action) => ({
+        group: action.group,
+        id: action.id,
+        action_type_id: action.actionTypeId,
+        params: action.params,
+      })) ?? [],
     // Rule status
-    status: ruleStatus?.attributes.status ?? undefined,
-    status_date: ruleStatus?.attributes.statusDate ?? undefined,
-    last_failure_at: ruleStatus?.attributes.lastFailureAt ?? undefined,
-    last_success_at: ruleStatus?.attributes.lastSuccessAt ?? undefined,
-    last_failure_message: ruleStatus?.attributes.lastFailureMessage ?? undefined,
-    last_success_message: ruleStatus?.attributes.lastSuccessMessage ?? undefined,
+    status: mergedStatus?.status ?? undefined,
+    status_date: mergedStatus?.statusDate ?? undefined,
+    last_failure_at: mergedStatus?.lastFailureAt ?? undefined,
+    last_success_at: mergedStatus?.lastSuccessAt ?? undefined,
+    last_failure_message: mergedStatus?.lastFailureMessage ?? undefined,
+    last_success_message: mergedStatus?.lastSuccessMessage ?? undefined,
   };
+};
+
+export const mergeAlertWithSidecarStatus = (
+  alert: SanitizedAlert<RuleParams>,
+  status: IRuleStatusSOAttributes
+): IRuleStatusSOAttributes => {
+  if (
+    new Date(alert.executionStatus.lastExecutionDate) > new Date(status.statusDate) &&
+    alert.executionStatus.status === 'error'
+  ) {
+    return {
+      ...status,
+      lastFailureMessage: `Reason: ${alert.executionStatus.error?.reason} Message: ${alert.executionStatus.error?.message}`,
+      lastFailureAt: alert.executionStatus.lastExecutionDate.toISOString(),
+      statusDate: alert.executionStatus.lastExecutionDate.toISOString(),
+      status: RuleExecutionStatus.failed,
+    };
+  }
+  return status;
 };

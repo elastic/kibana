@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockKibanaValues } from '../../../__mocks__';
+import { mockKibanaValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
@@ -124,9 +124,9 @@ describe('Result', () => {
 
   describe('dragging', () => {
     // In the real world, the drag library sets data attributes, role, tabIndex, etc.
-    const mockDragHandleProps = ({
+    const mockDragHandleProps = {
       someMockProp: true,
-    } as unknown) as DraggableProvidedDragHandleProps;
+    } as unknown as DraggableProvidedDragHandleProps;
 
     it('will render a drag handle with the passed props', () => {
       const wrapper = shallow(<Result {...props} dragHandleProps={mockDragHandleProps} />);

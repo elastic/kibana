@@ -6,15 +6,16 @@
  */
 
 import { Action } from 'redux';
+import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import {
   HostResultList,
   HostInfo,
   GetHostPolicyResponse,
   HostIsolationRequestBody,
+  ISOLATION_ACTIONS,
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { GetPackagesResponse } from '../../../../../../fleet/common';
 import { EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
@@ -37,7 +38,6 @@ export interface ServerFailedToReturnEndpointDetails {
   type: 'serverFailedToReturnEndpointDetails';
   payload: ServerApiError;
 }
-
 export interface ServerReturnedEndpointPolicyResponse {
   type: 'serverReturnedEndpointPolicyResponse';
   payload: GetHostPolicyResponse;
@@ -75,10 +75,9 @@ export interface ServerCancelledPolicyItemsLoading {
   type: 'serverCancelledPolicyItemsLoading';
 }
 
-export interface ServerReturnedEndpointPackageInfo {
-  type: 'serverReturnedEndpointPackageInfo';
-  payload: GetPackagesResponse['response'][0];
-}
+export type EndpointPackageInfoStateChanged = Action<'endpointPackageInfoStateChanged'> & {
+  payload: EndpointState['endpointPackageInfo'];
+};
 
 export interface ServerReturnedEndpointNonExistingPolicies {
   type: 'serverReturnedEndpointNonExistingPolicies';
@@ -137,12 +136,67 @@ export interface ServerFailedToReturnEndpointsTotal {
   payload: ServerApiError;
 }
 
-type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
-  payload: HostIsolationRequestBody;
+export type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
+  payload: {
+    type: ISOLATION_ACTIONS;
+    data: HostIsolationRequestBody;
+  };
 };
 
-type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
+export type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
   payload: EndpointState['isolationRequestState'];
+};
+
+export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
+  payload: EndpointState['endpointDetails']['activityLog']['logData'];
+};
+
+export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
+  payload: EndpointState['endpointPendingActions'];
+};
+
+export interface EndpointDetailsActivityLogUpdatePaging {
+  type: 'endpointDetailsActivityLogUpdatePaging';
+  payload: {
+    // disable paging when no more data after paging
+    disabled?: boolean;
+    page: number;
+    pageSize: number;
+    startDate: string;
+    endDate: string;
+  };
+}
+
+export interface UserUpdatedActivityLogRefreshOptions {
+  type: 'userUpdatedActivityLogRefreshOptions';
+  payload: {
+    autoRefreshOptions: { enabled: boolean; duration: number };
+  };
+}
+
+export interface UserUpdatedActivityLogRecentlyUsedDateRanges {
+  type: 'userUpdatedActivityLogRecentlyUsedDateRanges';
+  payload: EuiSuperDatePickerRecentRange[];
+}
+
+export interface EndpointDetailsLoad {
+  type: 'endpointDetailsLoad';
+  payload: {
+    endpointId: string;
+  };
+}
+
+export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
+  type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange';
+  payload: {
+    isInvalidDateRange?: boolean;
+  };
+}
+
+export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
+
+export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
+  payload: EndpointState['metadataTransformStats'];
 };
 
 export type EndpointAction =
@@ -150,6 +204,12 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
+  | EndpointDetailsActivityLogUpdatePaging
+  | EndpointDetailsActivityLogUpdateIsInvalidDateRange
+  | EndpointDetailsActivityLogChanged
+  | UserUpdatedActivityLogRefreshOptions
+  | UserUpdatedActivityLogRecentlyUsedDateRanges
+  | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
@@ -158,7 +218,7 @@ export type EndpointAction =
   | ServerCancelledEndpointListLoading
   | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
-  | ServerReturnedEndpointPackageInfo
+  | EndpointPackageInfoStateChanged
   | ServerReturnedMetadataPatterns
   | ServerFailedToReturnMetadataPatterns
   | AppRequestedEndpointList
@@ -170,4 +230,7 @@ export type EndpointAction =
   | ServerFailedToReturnAgenstWithEndpointsTotal
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
-  | EndpointIsolationRequestStateChange;
+  | EndpointIsolationRequestStateChange
+  | EndpointPendingActionsStateChanged
+  | LoadMetadataTransformStats
+  | MetadataTransformStatsChanged;

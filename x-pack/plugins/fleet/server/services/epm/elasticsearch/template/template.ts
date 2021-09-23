@@ -10,12 +10,13 @@ import type { ElasticsearchClient } from 'kibana/server';
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
-  TemplateRef,
+  IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
+import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants';
 
 interface Properties {
   [key: string]: any;
@@ -39,8 +40,7 @@ const DEFAULT_IGNORE_ABOVE = 1024;
 const DEFAULT_TEMPLATE_PRIORITY = 200;
 const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 
-const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
-const QUERY_DEFAULT_FIELD_LIMIT = 1024;
+const META_PROP_KEYS = ['metric_type', 'unit'];
 
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
@@ -56,7 +56,6 @@ export function getTemplate({
   packageName,
   composedOfTemplates,
   templatePriority,
-  ilmPolicy,
   hidden,
 }: {
   type: string;
@@ -67,7 +66,6 @@ export function getTemplate({
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
-  ilmPolicy?: string | undefined;
   hidden?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate(
@@ -78,12 +76,20 @@ export function getTemplate({
     packageName,
     composedOfTemplates,
     templatePriority,
-    ilmPolicy,
     hidden
   );
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
+  if (template.template.settings.index.final_pipeline) {
+    throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
+  }
+
+  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
+    // Add fleet global assets
+    template.composed_of = [...(template.composed_of || []), FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME];
+  }
+
   return template;
 }
 
@@ -138,6 +144,12 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
             fieldProps.fields = generateMultiFields(field.multi_fields);
           }
           break;
+        case 'constant_keyword':
+          fieldProps.type = field.type;
+          if (field.value) {
+            fieldProps.value = field.value;
+          }
+          break;
         case 'object':
           fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
           break;
@@ -162,6 +174,22 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
         default:
           fieldProps.type = type;
       }
+
+      const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
+      if (fieldHasMetaProps) {
+        switch (type) {
+          case 'group':
+          case 'group-nested':
+            break;
+          default: {
+            const meta = {};
+            if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
+            if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
+            fieldProps.meta = meta;
+          }
+        }
+      }
+
       props[field.name] = fieldProps;
     });
   }
@@ -243,7 +271,7 @@ function generateTextMapping(field: Field): IndexTemplateMapping {
 function getDefaultProperties(field: Field): Properties {
   const properties: Properties = {};
 
-  if (field.index) {
+  if (field.index !== undefined) {
     properties.index = field.index;
   }
   if (field.doc_values) {
@@ -336,11 +364,8 @@ function getBaseTemplate(
   packageName: string,
   composedOfTemplates: string[],
   templatePriority: number,
-  ilmPolicy?: string | undefined,
   hidden?: boolean
 ): IndexTemplate {
-  const logger = appContextService.getLogger();
-
   // Meta information to identify Ingest Manager's managed templates and indices
   const _meta = {
     package: {
@@ -350,57 +375,13 @@ function getBaseTemplate(
     managed: true,
   };
 
-  // Find all field names to set `index.query.default_field` to, which will be
-  // the first 1024 keyword or text fields
-  const defaultFields = flattenFieldsToNameAndType(fields).filter(
-    (field) => field.type && QUERY_DEFAULT_FIELD_TYPES.includes(field.type)
-  );
-  if (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT) {
-    logger.warn(
-      `large amount of default fields detected for index template ${templateIndexPattern} in package ${packageName}, applying the first ${QUERY_DEFAULT_FIELD_LIMIT} fields`
-    );
-  }
-  const defaultFieldNames = (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT
-    ? defaultFields.slice(0, QUERY_DEFAULT_FIELD_LIMIT)
-    : defaultFields
-  ).map((field) => field.name);
-
   return {
     priority: templatePriority,
     // To be completed with the correct index patterns
     index_patterns: [templateIndexPattern],
     template: {
       settings: {
-        index: {
-          // ILM Policy must be added here, for now point to the default global ILM policy name
-          lifecycle: {
-            name: ilmPolicy ? ilmPolicy : type,
-          },
-          // What should be our default for the compression?
-          codec: 'best_compression',
-          // W
-          mapping: {
-            total_fields: {
-              limit: '10000',
-            },
-          },
-          // This is the default from Beats? So far seems to be a good value
-          refresh_interval: '5s',
-          // Default in the stack now, still good to have it in
-          number_of_shards: '1',
-          // We are setting 30 because it can be devided by several numbers. Useful when shrinking.
-          number_of_routing_shards: '30',
-          // All the default fields which should be queried have to be added here.
-          // So far we add all keyword and text fields here if there are any, otherwise
-          // this setting is skipped.
-          ...(defaultFieldNames.length
-            ? {
-                query: {
-                  default_field: defaultFieldNames,
-                },
-              }
-            : {}),
-        },
+        index: {},
       },
       mappings: {
         // All the dynamic field mappings
@@ -432,7 +413,7 @@ function getBaseTemplate(
 
 export const updateCurrentWriteIndices = async (
   esClient: ElasticsearchClient,
-  templates: TemplateRef[]
+  templates: IndexTemplateEntry[]
 ): Promise<void> => {
   if (!templates.length) return;
 
@@ -447,7 +428,7 @@ function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is Cur
 
 const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
-  templates: TemplateRef[]
+  templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
   const dataStreamPromises = templates.map((template) => {
     return getDataStreams(esClient, template);
@@ -458,7 +439,7 @@ const queryDataStreamsFromTemplates = async (
 
 const getDataStreams = async (
   esClient: ElasticsearchClient,
-  template: TemplateRef
+  template: IndexTemplateEntry
 ): Promise<CurrentDataStream[] | undefined> => {
   const { templateName, indexTemplate } = template;
   const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
@@ -503,7 +484,6 @@ const updateExistingDataStream = async ({
     await esClient.indices.putMapping({
       index: dataStreamName,
       body: mappings,
-      // @ts-expect-error @elastic/elasticsearch doesn't declare it on PutMappingRequest
       write_index_only: true,
     });
     // if update fails, rollover data stream
@@ -525,7 +505,7 @@ const updateExistingDataStream = async ({
   try {
     await esClient.indices.putSettings({
       index: dataStreamName,
-      body: { index: { default_pipeline: settings.index.default_pipeline } },
+      body: { settings: { default_pipeline: settings.index.default_pipeline } },
     });
   } catch (err) {
     throw new Error(`could not update index template settings for ${dataStreamName}`);

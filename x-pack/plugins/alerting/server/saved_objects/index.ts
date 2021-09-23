@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
+  Logger,
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
+  SavedObjectsTypeMappingDefinition,
 } from 'kibana/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
@@ -16,6 +18,8 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawAlert } from '../types';
 import { getImportWarnings } from './get_import_warnings';
+import { isRuleExportable } from './is_rule_exportable';
+import { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateAlert } from './partially_update_alert';
 
 export const AlertAttributesExcludedFromAAD = [
@@ -41,14 +45,18 @@ export type AlertAttributesExcludedFromAADType =
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  ruleTypeRegistry: RuleTypeRegistry,
+  logger: Logger,
+  isPreconfigured: (connectorId: string) => boolean
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
-    namespaceType: 'single',
-    migrations: getMigrations(encryptedSavedObjects),
-    mappings: mappings.alert,
+    namespaceType: 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: '8.0.0',
+    migrations: getMigrations(encryptedSavedObjects, isPreconfigured),
+    mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
     management: {
       importableAndExportable: true,
       getTitle(ruleSavedObject: SavedObject<RawAlert>) {
@@ -64,6 +72,9 @@ export function setupSavedObjects(
         objects: Array<SavedObject<RawAlert>>
       ) {
         return transformRulesForExport(objects);
+      },
+      isExportable<RawAlert>(ruleSavedObject: SavedObject<RawAlert>) {
+        return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
   });

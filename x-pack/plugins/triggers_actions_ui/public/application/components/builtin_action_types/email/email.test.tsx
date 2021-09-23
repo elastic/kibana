@@ -9,6 +9,7 @@ import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '../index';
 import { ActionTypeModel } from '../../../../types';
 import { EmailActionConnector } from '../types';
+import { getEmailServices } from './email';
 
 const ACTION_TYPE_ID = '.email';
 let actionTypeModel: ActionTypeModel;
@@ -29,8 +30,20 @@ describe('actionTypeRegistry.get() works', () => {
   });
 });
 
+describe('getEmailServices', () => {
+  test('should return elastic cloud service if isCloudEnabled is true', () => {
+    const services = getEmailServices(true);
+    expect(services.find((service) => service.value === 'elastic_cloud')).toBeTruthy();
+  });
+
+  test('should not return elastic cloud service if isCloudEnabled is false', () => {
+    const services = getEmailServices(false);
+    expect(services.find((service) => service.value === 'elastic_cloud')).toBeFalsy();
+  });
+});
+
 describe('connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -46,15 +59,17 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        service: 'other',
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
           port: [],
           host: [],
+          service: [],
         },
       },
       secrets: {
@@ -66,7 +81,7 @@ describe('connector validation', () => {
     });
   });
 
-  test('connector validation succeeds when connector config is valid with empty user/password', () => {
+  test('connector validation succeeds when connector config is valid with empty user/password', async () => {
     const actionConnector = {
       secrets: {
         user: null,
@@ -82,15 +97,17 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: false,
+        service: 'other',
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
           port: [],
           host: [],
+          service: [],
         },
       },
       secrets: {
@@ -101,7 +118,7 @@ describe('connector validation', () => {
       },
     });
   });
-  test('connector validation fails when connector config is not valid', () => {
+  test('connector validation fails when connector config is not valid', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -113,15 +130,17 @@ describe('connector validation', () => {
       config: {
         from: 'test@test.com',
         hasAuth: true,
+        service: 'other',
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
           port: ['Port is required.'],
           host: ['Host is required.'],
+          service: [],
         },
       },
       secrets: {
@@ -132,7 +151,7 @@ describe('connector validation', () => {
       },
     });
   });
-  test('connector validation fails when user specified but not password', () => {
+  test('connector validation fails when user specified but not password', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -148,15 +167,17 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        service: 'other',
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
           port: [],
           host: [],
+          service: [],
         },
       },
       secrets: {
@@ -167,7 +188,7 @@ describe('connector validation', () => {
       },
     });
   });
-  test('connector validation fails when password specified but not user', () => {
+  test('connector validation fails when password specified but not user', async () => {
     const actionConnector = {
       secrets: {
         user: null,
@@ -183,15 +204,17 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        service: 'other',
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
           port: [],
           host: [],
+          service: [],
         },
       },
       secrets: {
@@ -202,10 +225,48 @@ describe('connector validation', () => {
       },
     });
   });
+  test('connector validation fails when server type is not selected', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'password',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      isPreconfigured: false,
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        port: 2323,
+        host: 'localhost',
+        test: 'test',
+        hasAuth: true,
+      },
+    };
+
+    expect(
+      await actionTypeModel.validateConnector(actionConnector as unknown as EmailActionConnector)
+    ).toEqual({
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+          service: ['Service is required.'],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
+      },
+    });
+  });
 });
 
 describe('action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       to: [],
       cc: ['test1@test.com'],
@@ -213,7 +274,7 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         to: [],
         cc: [],
@@ -224,13 +285,13 @@ describe('action params validation', () => {
     });
   });
 
-  test('action params validation fails when action params is not valid', () => {
+  test('action params validation fails when action params is not valid', async () => {
     const actionParams = {
       to: ['test@test.com'],
       subject: 'test',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         to: [],
         cc: [],

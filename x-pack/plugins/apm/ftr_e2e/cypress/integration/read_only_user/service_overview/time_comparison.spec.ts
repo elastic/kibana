@@ -7,12 +7,11 @@
 import url from 'url';
 import moment from 'moment';
 import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
 const serviceOverviewPath = '/app/apm/services/opbeans-java/overview';
-const baseUrl = url.format({
+const serviceOverviewHref = url.format({
   pathname: serviceOverviewPath,
   query: { rangeFrom: start, rangeTo: end },
 });
@@ -20,39 +19,33 @@ const baseUrl = url.format({
 const apisToIntercept = [
   {
     endpoint: '/api/apm/services/opbeans-java/transactions/charts/latency',
-    as: 'latencyChartRequest',
+    name: 'latencyChartRequest',
   },
   {
     endpoint: '/api/apm/services/opbeans-java/throughput',
-    as: 'throughputChartRequest',
+    name: 'throughputChartRequest',
   },
   {
     endpoint: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
-    as: 'errorRateChartRequest',
+    name: 'errorRateChartRequest',
   },
   {
     endpoint:
       '/api/apm/services/opbeans-java/transactions/groups/detailed_statistics',
-    as: 'transactionGroupsDetailedRequest',
+    name: 'transactionGroupsDetailedRequest',
   },
   {
     endpoint: '/api/apm/services/opbeans-java/error_groups/detailed_statistics',
-    as: 'errorGroupsDetailedRequest',
+    name: 'errorGroupsDetailedRequest',
   },
   {
     endpoint:
       '/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics',
-    as: 'instancesDetailedRequest',
+    name: 'instancesDetailedRequest',
   },
 ];
 
 describe('Service overview: Time Comparison', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
@@ -64,7 +57,7 @@ describe('Service overview: Time Comparison', () => {
 
   describe('when comparison is toggled off', () => {
     it('disables select box', () => {
-      cy.visit(baseUrl);
+      cy.visit(serviceOverviewHref);
       cy.contains('opbeans-java');
 
       // Comparison is enabled by default
@@ -76,17 +69,17 @@ describe('Service overview: Time Comparison', () => {
     });
 
     it('calls APIs without comparison time range', () => {
-      apisToIntercept.map(({ endpoint, as }) => {
-        cy.intercept('GET', endpoint).as(as);
+      apisToIntercept.map(({ endpoint, name }) => {
+        cy.intercept('GET', endpoint).as(name);
       });
-      cy.visit(baseUrl);
+      cy.visit(serviceOverviewHref);
       cy.contains('opbeans-java');
 
       cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
       const comparisonStartEnd =
-        'comparisonStart=2020-12-08T13%3A26%3A03.865Z&comparisonEnd=2020-12-08T13%3A57%3A00.000Z';
+        'comparisonStart=2021-08-02T06%3A50%3A00.000Z&comparisonEnd=2021-08-02T07%3A20%3A15.910Z';
       // When the page loads it fetches all APIs with comparison time range
-      cy.wait(apisToIntercept.map(({ as }) => `@${as}`)).then(
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
         (interceptions) => {
           interceptions.map((interception) => {
             expect(interception.request.url).include(comparisonStartEnd);
@@ -98,7 +91,7 @@ describe('Service overview: Time Comparison', () => {
       cy.contains('Comparison').click();
       cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
       // When comparison is disabled APIs are called withou comparison time range
-      cy.wait(apisToIntercept.map(({ as }) => `@${as}`)).then(
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
         (interceptions) => {
           interceptions.map((interception) => {
             expect(interception.request.url).not.include(comparisonStartEnd);
@@ -109,8 +102,8 @@ describe('Service overview: Time Comparison', () => {
   });
 
   it('changes comparison type', () => {
-    apisToIntercept.map(({ endpoint, as }) => {
-      cy.intercept('GET', endpoint).as(as);
+    apisToIntercept.map(({ endpoint, name }) => {
+      cy.intercept('GET', endpoint).as(name);
     });
     cy.visit(serviceOverviewPath);
     cy.contains('opbeans-java');
@@ -131,18 +124,8 @@ describe('Service overview: Time Comparison', () => {
     cy.contains('Week before');
 
     cy.changeTimeRange('Today');
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'have.value',
-      'period'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'not.contain.text',
-      'Day before'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'not.contain.text',
-      'Week before'
-    );
+    cy.contains('Day before');
+    cy.contains('Week before');
 
     cy.changeTimeRange('Last 24 hours');
     cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
@@ -177,8 +160,8 @@ describe('Service overview: Time Comparison', () => {
   });
 
   it('hovers over throughput chart shows previous and current period', () => {
-    apisToIntercept.map(({ endpoint, as }) => {
-      cy.intercept('GET', endpoint).as(as);
+    apisToIntercept.map(({ endpoint, name }) => {
+      cy.intercept('GET', endpoint).as(name);
     });
     cy.visit(
       url.format({

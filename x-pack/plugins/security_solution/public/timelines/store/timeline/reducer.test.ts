@@ -7,6 +7,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import {
+  ColumnHeaderOptions,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
@@ -47,10 +48,11 @@ import {
   upsertTimelineColumn,
   updateGraphEventId,
 } from './helpers';
-import { ColumnHeaderOptions, TimelineModel } from './model';
+import { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 import { Direction } from '../../../../common/search_strategy';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 jest.mock('../../../common/utils/default_date_settings', () => {
@@ -61,6 +63,8 @@ jest.mock('../../../common/utils/default_date_settings', () => {
     DEFAULT_TO_MOMENT: new Date('2020-10-28T11:37:31.655Z'),
   };
 });
+
+const mockFilterManager = {} as FilterManager;
 
 const basicDataProvider: DataProvider = {
   and: [],
@@ -79,6 +83,7 @@ const basicTimeline: TimelineModel = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.graph,
   columns: [],
+  defaultColumns: [],
   dataProviders: [{ ...basicDataProvider }],
   dateRange: {
     start: '2020-07-07T08:20:18.966Z',
@@ -86,6 +91,7 @@ const basicTimeline: TimelineModel = {
   },
   deletedEventIds: [],
   description: '',
+  documentType: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
     tiebreakerField: '',
@@ -94,6 +100,7 @@ const basicTimeline: TimelineModel = {
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
   expandedDetail: {},
+  filterManager: mockFilterManager,
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',
@@ -111,7 +118,9 @@ const basicTimeline: TimelineModel = {
   noteIds: [],
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
+  queryFields: [],
   savedObjectId: null,
+  selectAll: false,
   selectedEventIds: {},
   show: true,
   showCheckboxes: false,
@@ -188,6 +197,20 @@ describe('Timeline', () => {
           show: true,
         },
       });
+    });
+
+    test('should contain existing filterManager', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.filterManager).toEqual(mockFilterManager);
     });
   });
 

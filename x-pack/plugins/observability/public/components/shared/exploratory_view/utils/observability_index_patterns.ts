@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { FieldFormat as IFieldFormat } from 'src/plugins/field_formats/common';
 import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
 import {
   DataPublicPluginStart,
   IndexPattern,
-  FieldFormat as IFieldFormat,
   IndexPatternSpec,
 } from '../../../../../../../../src/plugins/data/public';
 import { rumFieldFormats } from '../configurations/rum/field_formats';
@@ -23,6 +23,7 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   ux: rumFieldFormats,
   apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
+  mobile: apmFieldFormats,
 };
 
 function getFieldFormatsForApp(app: AppDataType) {
@@ -35,6 +36,7 @@ export const indexPatternList: Record<AppDataType, string> = {
   ux: 'rum_static_index_pattern_id',
   infra_logs: 'infra_logs_static_index_pattern_id',
   infra_metrics: 'infra_metrics_static_index_pattern_id',
+  mobile: 'mobile_static_index_pattern_id',
 };
 
 const appToPatternMap: Record<AppDataType, string> = {
@@ -43,6 +45,7 @@ const appToPatternMap: Record<AppDataType, string> = {
   ux: '(rum-data-view)*',
   infra_logs: '',
   infra_metrics: '',
+  mobile: '(mobile-data-view)*',
 };
 
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
@@ -60,6 +63,7 @@ export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldForma
   const isSame =
     param1?.inputFormat === param2?.inputFormat &&
     param1?.outputFormat === param2?.outputFormat &&
+    param1?.useShortSuffix === param2?.useShortSuffix &&
     param1?.showSuffix === param2?.showSuffix;
 
   if (param2.outputPrecision !== undefined) {
@@ -96,11 +100,14 @@ export class ObservabilityIndexPatterns {
     if (defaultFieldFormats && defaultFieldFormats.length > 0) {
       let isParamsDifferent = false;
       defaultFieldFormats.forEach(({ field, format }) => {
-        const fieldFormat = indexPattern.getFormatterForField(indexPattern.getFieldByName(field)!);
-        const params = fieldFormat.params();
-        if (!isParamsSame(params, format.params)) {
-          indexPattern.setFieldFormat(field, format);
-          isParamsDifferent = true;
+        const fieldByName = indexPattern.getFieldByName(field);
+        if (fieldByName) {
+          const fieldFormat = indexPattern.getFormatterForField(fieldByName);
+          const params = fieldFormat.params();
+          if (!isParamsSame(params, format.params)) {
+            indexPattern.setFieldFormat(field, format);
+            isParamsDifferent = true;
+          }
         }
       });
       if (isParamsDifferent) {
@@ -123,6 +130,7 @@ export class ObservabilityIndexPatterns {
     if (!this.data) {
       throw new Error('data is not defined');
     }
+
     try {
       const indexPatternId = getAppIndexPatternId(app, indices);
       const indexPatternTitle = getAppIndicesWithPattern(app, indices);

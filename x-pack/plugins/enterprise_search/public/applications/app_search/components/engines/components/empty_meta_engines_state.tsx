@@ -15,12 +15,13 @@ import { DOCS_PREFIX } from '../../../routes';
 export const EmptyMetaEnginesState: React.FC = () => (
   <EuiEmptyPrompt
     title={
-      <h2>
+      <h3>
         {i18n.translate('xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPromptTitle', {
           defaultMessage: 'Create your first meta engine',
         })}
-      </h2>
+      </h3>
     }
+    titleSize="s"
     body={
       <p>
         {i18n.translate(

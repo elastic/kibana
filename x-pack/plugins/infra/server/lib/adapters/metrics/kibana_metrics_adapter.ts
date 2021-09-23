@@ -21,7 +21,7 @@ import {
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { isVisSeriesData } from '../../../../../../../src/plugins/vis_type_timeseries/server';
+import { isVisSeriesData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;
@@ -83,7 +83,10 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
                 return {
                   id: series.id,
                   label: series.label,
-                  data: series.data.map((point) => ({ timestamp: point[0], value: point[1] })),
+                  data: series.data.map((point) => ({
+                    timestamp: point[0] as number,
+                    value: point[1] as number | null,
+                  })),
                 };
               }),
             };

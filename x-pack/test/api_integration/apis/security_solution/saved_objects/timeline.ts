@@ -20,8 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Timeline - Saved Objects', () => {
-    beforeEach(() => esArchiver.load('empty_kibana'));
-    afterEach(() => esArchiver.unload('empty_kibana'));
+    beforeEach(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
+    afterEach(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
 
     describe('Persist a timeline', () => {
       it('Create a timeline just with a title', async () => {

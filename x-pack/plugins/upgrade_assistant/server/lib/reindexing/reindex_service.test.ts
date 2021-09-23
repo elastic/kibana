@@ -793,7 +793,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
         expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
           index: 'myIndex',
-          body: { index: { blocks: { write: true } } },
+          body: { settings: { blocks: { write: true } } },
         });
       });
 
@@ -885,7 +885,7 @@ describe('reindexService', () => {
         // Original index should have been set back to allow reads.
         expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
           index: 'myIndex',
-          body: { index: { blocks: { write: false } } },
+          body: { settings: { blocks: { write: false } } },
         });
       });
     });

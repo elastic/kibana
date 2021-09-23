@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../__mocks__';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiPanel, EuiText } from '@elastic/eui';
 
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { ManageLicenseButton } from '../../../shared/licensing';
 
 import { LicenseCallout } from './';
 
@@ -27,9 +27,7 @@ describe('LicenseCallout', () => {
 
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
     expect(wrapper.find(EuiText)).toHaveLength(2);
-    expect(wrapper.find(EuiButtonTo).prop('to')).toEqual(
-      '/app/management/stack/license_management'
-    );
+    expect(wrapper.find(ManageLicenseButton)).toHaveLength(1);
   });
 
   it('does not render for platinum', () => {

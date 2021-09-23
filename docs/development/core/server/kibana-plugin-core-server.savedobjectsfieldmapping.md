@@ -11,5 +11,7 @@ Please refer to [elasticsearch documentation](https://www.elastic.co/guide/en/el
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjectsComplexFieldMapping;
+export declare type SavedObjectsFieldMapping = estypes.MappingProperty & {
+    dynamic?: false | 'strict';
+};
 ```

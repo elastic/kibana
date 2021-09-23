@@ -20,6 +20,8 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { defaultRowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
 
+jest.mock('../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -52,6 +54,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
+      isDraggable: true,
       timelineId: 'test',
     });
 
@@ -64,6 +67,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -79,6 +83,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -97,6 +102,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -115,6 +121,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: zeek,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -133,6 +140,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: system,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -151,6 +159,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: auditd,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(

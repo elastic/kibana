@@ -46,10 +46,10 @@ const ServiceNowParamsFields: React.FunctionComponent<
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as ServiceNowITSMActionParams['subActionParams']),
+      } as unknown as ServiceNowITSMActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 
@@ -240,6 +240,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         fullWidth
         error={errors['subActionParams.incident.short_description']}
         isInvalid={
+          errors['subActionParams.incident.short_description'] !== undefined &&
           errors['subActionParams.incident.short_description'].length > 0 &&
           incident.short_description !== undefined
         }

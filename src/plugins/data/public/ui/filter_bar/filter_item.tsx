@@ -8,21 +8,20 @@
 
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
+import {
+  Filter,
+  isFilterPinned,
+  toggleFilterNegated,
+  toggleFilterPinned,
+  toggleFilterDisabled,
+} from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { IIndexPattern } from '../..';
-import {
-  Filter,
-  isFilterPinned,
-  getDisplayValueFromFilter,
-  toggleFilterNegated,
-  toggleFilterPinned,
-  toggleFilterDisabled,
-  getIndexPatternFromFilter,
-} from '../../../common';
+import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '../../query';
 import { getIndexPatterns } from '../../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
@@ -37,6 +36,7 @@ export interface FilterItemProps {
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: PanelOptions[];
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 interface LabelOptions {
@@ -254,6 +254,7 @@ export function FilterItem(props: FilterItemProps) {
               onCancel={() => {
                 setIsPopoverOpen(false);
               }}
+              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             />
           </div>
         ),
@@ -354,7 +355,7 @@ export function FilterItem(props: FilterItemProps) {
       valueLabel={valueLabelConfig.title}
       filterLabelStatus={valueLabelConfig.status}
       errorMessage={valueLabelConfig.message}
-      className={getClasses(filter.meta.negate, valueLabelConfig)}
+      className={getClasses(filter.meta.negate ?? false, valueLabelConfig)}
       iconOnClick={() => props.onRemove()}
       onClick={handleBadgeClick}
       data-test-subj={getDataTestSubj(valueLabelConfig)}

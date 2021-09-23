@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -16,7 +15,6 @@
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     // required plugins
-    { "path": "../../../src/plugins/index_pattern_management/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
@@ -24,7 +22,7 @@
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../index_management/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/vis_type_timeseries/tsconfig.json" },
+    { "path": "../../../src/plugins/vis_types/timeseries/tsconfig.json" },
     // required bundles
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },

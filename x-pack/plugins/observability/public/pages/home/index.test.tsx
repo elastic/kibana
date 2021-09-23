@@ -24,32 +24,38 @@ describe('Home page', () => {
   });
 
   it('renders loading component while requests are not returned', () => {
-    jest
-      .spyOn(hasData, 'useHasData')
-      .mockImplementation(
-        () =>
-          ({ hasData: {}, hasAnyData: false, isAllRequestsComplete: false } as HasDataContextValue)
-      );
+    jest.spyOn(hasData, 'useHasData').mockImplementation(
+      () =>
+        ({
+          hasDataMap: {},
+          hasAnyData: false,
+          isAllRequestsComplete: false,
+        } as HasDataContextValue)
+    );
     const { getByText } = render(<HomePage />);
     expect(getByText('Loading Observability')).toBeInTheDocument();
   });
   it('renders landing page', () => {
-    jest
-      .spyOn(hasData, 'useHasData')
-      .mockImplementation(
-        () =>
-          ({ hasData: {}, hasAnyData: false, isAllRequestsComplete: true } as HasDataContextValue)
-      );
+    jest.spyOn(hasData, 'useHasData').mockImplementation(
+      () =>
+        ({
+          hasDataMap: {},
+          hasAnyData: false,
+          isAllRequestsComplete: true,
+        } as HasDataContextValue)
+    );
     render(<HomePage />);
     expect(mockHistoryPush).toHaveBeenCalledWith({ pathname: '/landing' });
   });
   it('renders overview page', () => {
-    jest
-      .spyOn(hasData, 'useHasData')
-      .mockImplementation(
-        () =>
-          ({ hasData: {}, hasAnyData: true, isAllRequestsComplete: false } as HasDataContextValue)
-      );
+    jest.spyOn(hasData, 'useHasData').mockImplementation(
+      () =>
+        ({
+          hasDataMap: {},
+          hasAnyData: true,
+          isAllRequestsComplete: false,
+        } as HasDataContextValue)
+    );
     render(<HomePage />);
     expect(mockHistoryPush).toHaveBeenCalledWith({ pathname: '/overview' });
   });

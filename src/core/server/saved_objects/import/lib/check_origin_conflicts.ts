@@ -58,11 +58,21 @@ const createQuery = (type: string, id: string, rawIdPrefix: string) =>
 const transformObjectsToAmbiguousConflictFields = (
   objects: Array<SavedObject<{ title?: string }>>
 ) =>
-  objects.map(({ id, attributes, updated_at: updatedAt }) => ({
-    id,
-    title: attributes?.title,
-    updatedAt,
-  }));
+  objects
+    .map(({ id, attributes, updated_at: updatedAt }) => ({
+      id,
+      title: attributes?.title,
+      updatedAt,
+    }))
+    // Sort to ensure that integration tests are not flaky
+    .sort((a, b) => {
+      const aUpdatedAt = a.updatedAt ?? '';
+      const bUpdatedAt = b.updatedAt ?? '';
+      if (aUpdatedAt !== bUpdatedAt) {
+        return aUpdatedAt < bUpdatedAt ? 1 : -1; // descending
+      }
+      return a.id < b.id ? -1 : 1; // ascending
+    });
 const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
   `${object.type}:${object.originId || object.id}`;
 

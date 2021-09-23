@@ -16,11 +16,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('actions');
+      await esArchiver.load('x-pack/test/functional/es_archives/actions');
     });
 
     after(async () => {
-      await esArchiver.unload('actions');
+      await esArchiver.unload('x-pack/test/functional/es_archives/actions');
     });
 
     it('7.10.0 migrates the `casesConfiguration` to be the `incidentConfiguration` in `config`, then 7.11.0 removes `incidentConfiguration`', async () => {
@@ -63,6 +63,24 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       expect(responseWithisMissingSecrets.status).to.eql(200);
       expect(responseWithisMissingSecrets.body.isMissingSecrets).to.eql(false);
+    });
+
+    it('7.16.0 migrates email connector configurations to set `service` property if not set', async () => {
+      const connectorWithService = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7c`
+      );
+
+      expect(connectorWithService.status).to.eql(200);
+      expect(connectorWithService.body.config).key('service');
+      expect(connectorWithService.body.config.service).to.eql('someservice');
+
+      const connectorWithoutService = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/1e0824a0-0a59-11ec-9a7c-fd0c2b83ff7c`
+      );
+
+      expect(connectorWithoutService.status).to.eql(200);
+      expect(connectorWithoutService.body.config).key('service');
+      expect(connectorWithoutService.body.config.service).to.eql('other');
     });
   });
 }

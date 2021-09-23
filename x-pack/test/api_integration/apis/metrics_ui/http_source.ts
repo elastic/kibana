@@ -30,8 +30,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Source API via HTTP', () => {
     describe('8.0.0', () => {
-      before(() => esArchiver.load('infra/8.0.0/logs_and_metrics'));
-      after(() => esArchiver.unload('infra/8.0.0/logs_and_metrics'));
+      before(() =>
+        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
+      after(() =>
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
       describe('/api/metrics/source/default', () => {
         it('should just work', async () => {
           const resp = fetchSource();

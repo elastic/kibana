@@ -6,6 +6,10 @@
  */
 
 import rison, { RisonValue } from 'rison-node';
+import {
+  API_GET_ILM_POLICY_STATUS,
+  API_MIGRATE_ILM_POLICY_URL,
+} from '../../../plugins/reporting/common/constants';
 import { JobParamsCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
 import { JobParamsPNG } from '../../../plugins/reporting/server/export_types/png/types';
@@ -22,8 +26,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const log = getService('log');
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
+  const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
@@ -31,12 +37,12 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
 
   const initEcommerce = async () => {
-    await esArchiver.load('reporting/ecommerce');
-    await esArchiver.load('reporting/ecommerce_kibana');
+    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await kibanaServer.importExport.load(ecommerceSOPath);
   };
   const teardownEcommerce = async () => {
-    await esArchiver.unload('reporting/ecommerce');
-    await esArchiver.unload('reporting/ecommerce_kibana');
+    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await kibanaServer.importExport.unload(ecommerceSOPath);
     await deleteAllReports();
   };
 
@@ -111,7 +117,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send(job);
   };
   const generatePdf = async (username: string, password: string, job: JobParamsPDF) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/printablePdf`)
       .auth(username, password)
@@ -119,7 +125,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams });
   };
   const generatePng = async (username: string, password: string, job: JobParamsPNG) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/png`)
       .auth(username, password)
@@ -127,7 +133,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams });
   };
   const generateCsv = async (username: string, password: string, job: JobParamsCSV) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)
       .auth(username, password)
@@ -162,6 +168,33 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  const checkIlmMigrationStatus = async () => {
+    log.debug('ReportingAPI.checkIlmMigrationStatus');
+    const { body } = await supertest
+      .get(API_GET_ILM_POLICY_STATUS)
+      .set('kbn-xsrf', 'xxx')
+      .expect(200);
+    return body.status;
+  };
+
+  const migrateReportingIndices = async () => {
+    log.debug('ReportingAPI.migrateReportingIndices');
+    await supertest.put(API_MIGRATE_ILM_POLICY_URL).set('kbn-xsrf', 'xxx').expect(200);
+  };
+
+  const makeAllReportingIndicesUnmanaged = async () => {
+    log.debug('ReportingAPI.makeAllReportingIndicesUnmanaged');
+    const settings: any = {
+      'index.lifecycle.name': null,
+    };
+    await esSupertest
+      .put('/.reporting*/_settings')
+      .send({
+        settings,
+      })
+      .expect(200);
+  };
+
   return {
     initEcommerce,
     teardownEcommerce,
@@ -169,6 +202,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     DATA_ANALYST_PASSWORD,
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
+    routes: {
+      API_GET_ILM_POLICY_STATUS,
+      API_MIGRATE_ILM_POLICY_URL,
+    },
     createDataAnalystRole,
     createDataAnalyst,
     createTestReportingUserRole,
@@ -180,5 +217,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     postJob,
     postJobJSON,
     deleteAllReports,
+    checkIlmMigrationStatus,
+    migrateReportingIndices,
+    makeAllReportingIndicesUnmanaged,
   };
 }

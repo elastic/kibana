@@ -18,8 +18,8 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
 
   describe('actionType not enabled', () => {
     // loads action PREWRITTEN_ACTION_ID with actionType DISABLED_ACTION_TYPE
-    before(() => esArchiver.load('actions'));
-    after(() => esArchiver.unload('actions'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/actions'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/actions'));
 
     it('should handle create action with disabled actionType request appropriately', async () => {
       const response = await supertest.post(`/api/actions/action`).set('kbn-xsrf', 'foo').send({

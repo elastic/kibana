@@ -23,10 +23,7 @@
           "History",
           "<HistoryLocationState>"
         ],
-        "source": {
-          "path": "src/core/public/application/scoped_history.ts",
-          "lineNumber": 34
-        },
+        "path": "src/core/public/application/scoped_history.ts",
         "deprecated": false,
         "children": [
           {
@@ -39,10 +36,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 59
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -56,10 +50,7 @@
                   "History",
                   "<any>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -73,10 +64,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -103,10 +91,7 @@
               },
               "<SubHistoryLocationState>"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 77
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -115,14 +100,13 @@
                 "type": "string",
                 "tags": [],
                 "label": "basePath",
-                "description": [],
+                "description": [
+                  "the URL path scope for the sub history"
+                ],
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 78
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -138,10 +122,7 @@
             "description": [
               "\nThe number of entries in the history stack, including all entries forwards and backwards from the current location."
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 86
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false
           },
           {
@@ -157,10 +138,7 @@
               "Location",
               "<HistoryLocationState>"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 94
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false
           },
           {
@@ -175,10 +153,7 @@
             "signature": [
               "\"PUSH\" | \"POP\" | \"REPLACE\""
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 102
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false
           },
           {
@@ -195,10 +170,7 @@
               "LocationDescriptorObject",
               "<HistoryLocationState>, state?: HistoryLocationState | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 113
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -207,16 +179,15 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "pathOrLocation",
-                "description": [],
+                "description": [
+                  "a string or location descriptor"
+                ],
                 "signature": [
                   "string | ",
                   "LocationDescriptorObject",
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 114
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -230,10 +201,7 @@
                 "signature": [
                   "HistoryLocationState | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 115
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -254,10 +222,7 @@
               "LocationDescriptorObject",
               "<HistoryLocationState>, state?: HistoryLocationState | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 131
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -266,16 +231,15 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "pathOrLocation",
-                "description": [],
+                "description": [
+                  "a string or location descriptor"
+                ],
                 "signature": [
                   "string | ",
                   "LocationDescriptorObject",
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 132
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -289,10 +253,7 @@
                 "signature": [
                   "HistoryLocationState | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 133
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -311,10 +272,7 @@
             "signature": [
               "(n: number) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 150
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -323,14 +281,13 @@
                 "type": "number",
                 "tags": [],
                 "label": "n",
-                "description": [],
+                "description": [
+                  "number of positions in the stack to go. Negative numbers indicate number of entries backward, positive\nnumbers for forwards. If passed 0, the current location will be reloaded. If `n` exceeds the number of\nentries available, this is a no-op."
+                ],
                 "signature": [
                   "number"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 150
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -349,10 +306,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 168
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -369,10 +323,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 177
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -392,10 +343,7 @@
               ".TransitionPromptHook<HistoryLocationState> | undefined) => ",
               "UnregisterCallback"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 185
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -410,10 +358,7 @@
                   "History",
                   ".TransitionPromptHook<HistoryLocationState> | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 186
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -437,10 +382,7 @@
               ") => void) => ",
               "UnregisterCallback"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 205
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -449,7 +391,9 @@
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
-                "description": [],
+                "description": [
+                  "a function that receives location updates."
+                ],
                 "signature": [
                   "(location: ",
                   "Location",
@@ -457,10 +401,7 @@
                   "Action",
                   ") => void"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 206
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -483,10 +424,7 @@
               "LocationDescriptorObject",
               "<HistoryLocationState>, { prependBasePath }?: { prependBasePath?: boolean | undefined; }) => string"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 222
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -500,29 +438,23 @@
                   "LocationDescriptorObject",
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 223
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue",
+                "id": "def-public.ScopedHistory.createHref.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{ prependBasePath = true }",
                 "description": [],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 224
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue.prependBasePath",
+                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePath",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "prependBasePath",
@@ -530,10 +462,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "source": {
-                      "path": "src/core/public/application/scoped_history.ts",
-                      "lineNumber": 224
-                    },
+                    "path": "src/core/public/application/scoped_history.ts",
                     "deprecated": false
                   }
                 ]
@@ -562,12 +491,16 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<HistoryLocationState>"
+          "<HistoryLocationState> extends ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavOptions",
+            "text": "AppNavOptions"
+          }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 79
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -579,10 +512,7 @@
             "description": [
               "\nThe unique identifier of the application"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 83
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -594,10 +524,7 @@
             "description": [
               "\nThe title of the application."
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 88
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -613,10 +540,7 @@
               "AppCategory",
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 95
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -638,10 +562,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 101
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -663,10 +584,22 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 108
-            },
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.App.searchable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "searchable",
+            "description": [
+              "\nThe initial flag to determine if the application is searchable in the global search.\nDefaulting to `true` if `navLinkStatus` is `visible` or omitted."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -681,10 +614,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 115
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -708,82 +638,7 @@
               },
               "> | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 149
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.App.order",
-            "type": "number",
-            "tags": [],
-            "label": "order",
-            "description": [
-              "\nAn ordinal used to sort nav links relative to one another for display."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 154
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.App.tooltip",
-            "type": "string",
-            "tags": [],
-            "label": "tooltip",
-            "description": [
-              "\nA tooltip shown when hovering over app link."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 159
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.App.euiIconType",
-            "type": "string",
-            "tags": [],
-            "label": "euiIconType",
-            "description": [
-              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precendence over the `icon` property."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 165
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.App.icon",
-            "type": "string",
-            "tags": [],
-            "label": "icon",
-            "description": [
-              "\nA URL to an image file used as an icon. Used as a fallback\nif `euiIconType` is not provided."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 171
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -800,10 +655,7 @@
               "Capabilities",
               "> | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 176
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -818,10 +670,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 182
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -860,16 +709,13 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 187
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.params",
+                "id": "def-public.App.mount.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -884,10 +730,7 @@
                   },
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 339
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false
               }
             ]
@@ -904,10 +747,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 194
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -922,35 +762,44 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 212
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.App.meta",
-            "type": "Object",
+            "id": "def-public.App.keywords",
+            "type": "Array",
             "tags": [],
-            "label": "meta",
+            "label": "keywords",
             "description": [
-              "\nMeta data for an application that represent additional information for the app.\nSee {@link AppMeta}\n"
+              "Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.App.deepLinks",
+            "type": "Array",
+            "tags": [],
+            "label": "deepLinks",
+            "description": [
+              "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible.\n"
             ],
             "signature": [
               {
                 "pluginId": "core",
                 "scope": "public",
                 "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppMeta",
-                "text": "AppMeta"
+                "section": "def-public.AppDeepLink",
+                "text": "AppDeepLink"
               },
-              " | undefined"
+              "[] | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 244
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -965,10 +814,7 @@
         "description": [
           "\nAction to return from a {@link AppLeaveHandler} to show a confirmation\nmessage when trying to leave an application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 565
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -988,10 +834,7 @@
               },
               ".confirm"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 566
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1001,10 +844,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 567
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1017,10 +857,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 568
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1033,11 +870,10 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 569
-            },
-            "deprecated": false
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1051,10 +887,7 @@
         "description": [
           "\nAction to return from a {@link AppLeaveHandler} to execute the default\nbehaviour when leaving the application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 553
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1074,10 +907,7 @@
               },
               ".default"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 554
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -1090,10 +920,7 @@
         "tags": [],
         "label": "ApplicationSetup",
         "description": [],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 620
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1116,10 +943,7 @@
               },
               "<HistoryLocationState>) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 626
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1141,10 +965,7 @@
                   },
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 626
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1173,10 +994,7 @@
               },
               ">) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 655
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1198,10 +1016,7 @@
                   },
                   ">"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 655
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1218,10 +1033,7 @@
         "tags": [],
         "label": "ApplicationStart",
         "description": [],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 696
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1236,10 +1048,7 @@
             "signature": [
               "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 700
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1263,10 +1072,7 @@
               },
               ">>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 709
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1289,10 +1095,7 @@
               },
               " | undefined) => Promise<void>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 717
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1305,10 +1108,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 717
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1331,10 +1131,7 @@
                   },
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 717
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1353,10 +1150,7 @@
             "signature": [
               "(url: string) => Promise<void>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 755
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1371,10 +1165,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 755
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1391,12 +1182,9 @@
               "\nReturns the absolute path (or URL) to a given app, including the global base path.\n\nBy default, it returns the absolute path of the application (e.g `/basePath/app/my-app`).\nUse the `absolute` option to generate an absolute url instead (e.g `http://host:port/basePath/app/my-app`)\n\nNote that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's current location.\n"
             ],
             "signature": [
-              "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; } | undefined) => string"
+              "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 769
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1409,29 +1197,23 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 769
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.ApplicationStart.getUrlForApp.$2.options",
+                "id": "def-public.ApplicationStart.getUrlForApp.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 769
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.path",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -1439,15 +1221,12 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "source": {
-                      "path": "src/core/public/application/types.ts",
-                      "lineNumber": 769
-                    },
+                    "path": "src/core/public/application/types.ts",
                     "deprecated": false
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.absolute",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.absolute",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "absolute",
@@ -1455,10 +1234,20 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "source": {
-                      "path": "src/core/public/application/types.ts",
-                      "lineNumber": 769
-                    },
+                    "path": "src/core/public/application/types.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "core",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.deepLinkId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "deepLinkId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/core/public/application/types.ts",
                     "deprecated": false
                   }
                 ]
@@ -1479,71 +1268,7 @@
               "Observable",
               "<string | undefined>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 774
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-public.AppMeta",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMeta",
-        "description": [
-          "\nInput type for meta data for an application.\n\nMeta fields include `keywords` and `searchDeepLinks`\nKeywords is an array of string with which to associate the app, must include at least one unique string as an array.\n`searchDeepLinks` is an array of links that represent secondary in-app locations for the app."
-        ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 255
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.AppMeta.keywords",
-            "type": "Array",
-            "tags": [],
-            "label": "keywords",
-            "description": [
-              "Keywords to represent this application"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 257
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.AppMeta.searchDeepLinks",
-            "type": "Array",
-            "tags": [],
-            "label": "searchDeepLinks",
-            "description": [
-              "Array of links that represent secondary in-app locations for the app."
-            ],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppSearchDeepLink",
-                "text": "AppSearchDeepLink"
-              },
-              "[] | undefined"
-            ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 259
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -1566,10 +1291,7 @@
           },
           "<HistoryLocationState>"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 349
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1584,10 +1306,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 353
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1609,10 +1328,7 @@
               },
               "<HistoryLocationState>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 399
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1626,74 +1342,60 @@
             "description": [
               "\nThe route path for configuring navigation to the application.\nThis string should not include the base path from HTTP.\n"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 449
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "management",
-                "link": {
-                  "path": "src/plugins/management/public/application.tsx",
-                  "lineNumber": 16
-                }
+                "path": "src/plugins/management/public/application.tsx"
               },
               {
                 "plugin": "fleet",
-                "link": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/index.tsx",
-                  "lineNumber": 67
-                }
-              },
-              {
-                "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts",
-                  "lineNumber": 57
-                }
-              },
-              {
-                "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts",
-                  "lineNumber": 50
-                }
-              },
-              {
-                "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts",
-                  "lineNumber": 48
-                }
-              },
-              {
-                "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts",
-                  "lineNumber": 53
-                }
-              },
-              {
-                "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts",
-                  "lineNumber": 54
-                }
-              },
-              {
-                "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts",
-                  "lineNumber": 55
-                }
+                "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
               },
               {
                 "plugin": "fleet",
-                "link": {
-                  "path": "x-pack/plugins/fleet/target/types/public/applications/fleet/index.d.ts",
-                  "lineNumber": 11
-                }
+                "path": "x-pack/plugins/fleet/public/applications/fleet/index.tsx"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/target/types/public/applications/fleet/index.d.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/target/types/public/applications/integrations/index.d.ts"
+              },
+              {
+                "plugin": "kibanaOverview",
+                "path": "src/plugins/kibana_overview/public/application.tsx"
+              },
+              {
+                "plugin": "management",
+                "path": "src/plugins/management/target/types/public/application.d.ts"
               }
             ]
           },
@@ -1719,174 +1421,149 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 484
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "dashboard",
-                "link": {
-                  "path": "src/plugins/dashboard/public/application/types.ts",
-                  "lineNumber": 82
-                }
+                "path": "src/plugins/dashboard/public/types.ts"
               },
               {
                 "plugin": "dashboard",
-                "link": {
-                  "path": "src/plugins/dashboard/public/application/dashboard_router.tsx",
-                  "lineNumber": 56
-                }
+                "path": "src/plugins/dashboard/public/application/dashboard_router.tsx"
               },
               {
                 "plugin": "dashboard",
-                "link": {
-                  "path": "src/plugins/dashboard/public/plugin.tsx",
-                  "lineNumber": 298
-                }
+                "path": "src/plugins/dashboard/public/plugin.tsx"
               },
               {
                 "plugin": "lens",
-                "link": {
-                  "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 71
-                }
+                "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
               },
               {
                 "plugin": "lens",
-                "link": {
-                  "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx",
-                  "lineNumber": 171
-                }
+                "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/public/render_app.tsx",
-                  "lineNumber": 68
-                }
+                "path": "x-pack/plugins/maps/public/render_app.tsx"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx",
-                  "lineNumber": 59
-                }
+                "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/public/routes/map_page/map_page.tsx",
-                  "lineNumber": 19
-                }
+                "path": "x-pack/plugins/maps/public/routes/map_page/map_page.tsx"
               },
               {
                 "plugin": "ml",
-                "link": {
-                  "path": "x-pack/plugins/ml/public/application/app.tsx",
-                  "lineNumber": 131
-                }
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/app/index.tsx",
-                  "lineNumber": 17
-                }
+                "path": "x-pack/plugins/security_solution/public/app/index.tsx"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts",
-                  "lineNumber": 58
-                }
+                "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/target/types/public/render_app.d.ts",
-                  "lineNumber": 5
-                }
+                "path": "x-pack/plugins/maps/target/types/public/render_app.d.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts",
-                  "lineNumber": 51
-                }
+                "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts",
-                  "lineNumber": 49
-                }
+                "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts",
-                  "lineNumber": 54
-                }
+                "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts",
-                  "lineNumber": 55
-                }
+                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts",
-                  "lineNumber": 56
-                }
+                "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_page.d.ts",
-                  "lineNumber": 9
-                }
+                "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_page.d.ts"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts",
-                  "lineNumber": 13
-                }
+                "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/components/visualize_top_nav.tsx"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/components/visualize_editor_common.tsx"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/app.tsx"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/index.tsx"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/target/types/public/types.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/app.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/index.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/components/visualize_editor_common.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/components/visualize_top_nav.d.ts"
               }
             ],
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.handler",
+                "id": "def-public.AppMountParameters.onAppLeave.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  "(factory: ",
-                  "AppLeaveActionFactory",
-                  ", nextAppId?: string | undefined) => ",
                   {
                     "pluginId": "core",
                     "scope": "public",
                     "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.AppLeaveAction",
-                    "text": "AppLeaveAction"
+                    "section": "def-public.AppLeaveHandler",
+                    "text": "AppLeaveHandler"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 484
-                },
-                "deprecated": false
+                "path": "src/core/public/application/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -1908,16 +1585,12 @@
               },
               "<HTMLElement> | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 515
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.menuMount",
+                "id": "def-public.AppMountParameters.setHeaderActionMenu.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "menuMount",
@@ -1932,13 +1605,87 @@
                   },
                   "<HTMLElement> | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 515
-                },
-                "deprecated": false
+                "path": "src/core/public/application/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.AppNavOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppNavOptions",
+        "description": [
+          "\nApp navigation menu options"
+        ],
+        "path": "src/core/public/application/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppNavOptions.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [
+              "\nAn ordinal used to sort nav links relative to one another for display."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppNavOptions.tooltip",
+            "type": "string",
+            "tags": [],
+            "label": "tooltip",
+            "description": [
+              "\nA tooltip shown when hovering over app link."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppNavOptions.euiIconType",
+            "type": "string",
+            "tags": [],
+            "label": "euiIconType",
+            "description": [
+              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precendence over the `icon` property."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppNavOptions.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [
+              "\nA URL to an image file used as an icon. Used as a fallback\nif `euiIconType` is not provided."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1952,12 +1699,24 @@
         "description": [
           "\nOptions for the {@link ApplicationStart.navigateToApp | navigateToApp API}"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 674
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToAppOptions.deepLinkId",
+            "type": "string",
+            "tags": [],
+            "label": "deepLinkId",
+            "description": [
+              "\noptional {@link App.deepLinks | deep link} id inside the application to navigate to.\nIf an additional {@link NavigateToAppOptions.path | path} is defined it will be appended to the deep link path."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "core",
             "id": "def-public.NavigateToAppOptions.path",
@@ -1965,15 +1724,12 @@
             "tags": [],
             "label": "path",
             "description": [
-              "\noptional path inside application to deep link to.\nIf undefined, will use {@link App.defaultPath | the app's default path}` as default."
+              "\noptional path inside application to deep link to.\nIf undefined, will use {@link App.defaultPath | the app's default path} as default."
             ],
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 679
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1988,10 +1744,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 683
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -2006,10 +1759,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 687
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -2024,10 +1774,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 692
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -2044,10 +1791,7 @@
         "description": [
           "\nPossible type of actions on application leave.\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 540
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2060,10 +1804,7 @@
         "description": [
           "\nStatus of the application's navLink.\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 40
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2076,15 +1817,76 @@
         "description": [
           "\nAccessibility status of an application.\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 24
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "core",
+        "id": "def-public.AppDeepLink",
+        "type": "Type",
+        "tags": [],
+        "label": "AppDeepLink",
+        "description": [
+          "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
+        ],
+        "signature": [
+          "({ id: string; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          " | undefined; searchable?: boolean | undefined; } & ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavOptions",
+            "text": "AppNavOptions"
+          },
+          " & { path: string; deepLinks?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          "[] | undefined; }) | ({ id: string; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          " | undefined; searchable?: boolean | undefined; } & ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavOptions",
+            "text": "AppNavOptions"
+          },
+          " & { path?: string | undefined; deepLinks: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          "[]; })"
+        ],
+        "path": "src/core/public/application/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "core",
         "id": "def-public.AppLeaveAction",
@@ -2111,10 +1913,7 @@
             "text": "AppLeaveConfirmAction"
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 579
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2141,74 +1940,89 @@
             "text": "AppLeaveAction"
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 530
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": true,
         "references": [
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx",
-              "lineNumber": 14
-            }
+            "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx",
-              "lineNumber": 30
-            }
+            "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/home/index.tsx",
-              "lineNumber": 27
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/home/index.tsx",
-              "lineNumber": 44
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/routes.tsx",
-              "lineNumber": 13
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/routes.tsx",
-              "lineNumber": 23
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/app.tsx",
-              "lineNumber": 14
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/app.tsx",
-              "lineNumber": 33
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/app.tsx",
-              "lineNumber": 73
-            }
+            "path": "x-pack/plugins/security_solution/public/app/routes.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/app/routes.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
+          }
+        ],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppLeaveHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "factory",
+            "description": [],
+            "signature": [
+              "AppLeaveActionFactory"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppLeaveHandler.$2",
+            "type": "string",
+            "tags": [],
+            "label": "nextAppId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2249,46 +2063,33 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 338
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-public.AppSearchDeepLink",
-        "type": "Type",
-        "tags": [],
-        "label": "AppSearchDeepLink",
-        "description": [
-          "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
+        "returnComment": [
+          "An unmounting function that will be called to unmount the application. See {@link AppUnmount}."
         ],
-        "signature": [
-          "({ id: string; title: string; } & { path: string; searchDeepLinks?: ",
+        "children": [
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppSearchDeepLink",
-            "text": "AppSearchDeepLink"
-          },
-          "[] | undefined; keywords?: string[] | undefined; }) | ({ id: string; title: string; } & { path?: string | undefined; searchDeepLinks: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppSearchDeepLink",
-            "text": "AppSearchDeepLink"
-          },
-          "[]; keywords?: string[] | undefined; })"
+            "parentPluginId": "core",
+            "id": "def-public.AppMount.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.AppMountParameters",
+                "text": "AppMountParameters"
+              },
+              "<HistoryLocationState>"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 293
-        },
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -2303,11 +2104,10 @@
         "signature": [
           "() => void"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 346
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -2328,15 +2128,15 @@
             "section": "def-public.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; meta?: ",
+          " | undefined; deepLinks?: ",
           {
             "pluginId": "core",
             "scope": "public",
             "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppMeta",
-            "text": "AppMeta"
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
           },
-          " | undefined; navLinkStatus?: ",
+          "[] | undefined; searchable?: boolean | undefined; navLinkStatus?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2346,10 +2146,7 @@
           },
           " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 64
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2379,12 +2176,72 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"meta\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
+          "<unknown>, \"status\" | \"deepLinks\" | \"searchable\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 74
-        },
+        "path": "src/core/public/application/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppUpdater.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.App",
+                "text": "App"
+              },
+              "<unknown>"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.PublicAppDeepLinkInfo",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicAppDeepLinkInfo",
+        "description": [
+          "\nPublic information about a registered app's {@link AppDeepLink | deepLinks}\n"
+        ],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          ", \"title\" | \"id\" | \"order\" | \"path\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { deepLinks: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.PublicAppDeepLinkInfo",
+            "text": "PublicAppDeepLinkInfo"
+          },
+          "[]; keywords: string[]; navLinkStatus: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          "; searchable: boolean; }"
+        ],
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2406,7 +2263,7 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"title\" | \"id\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\" | \"euiIconType\" | \"icon\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\"> & { status: ",
+          "<unknown>, \"status\" | \"title\" | \"id\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2422,90 +2279,17 @@
             "section": "def-public.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          "; appRoute: string; meta: ",
+          "; appRoute: string; keywords: string[]; deepLinks: ",
           {
             "pluginId": "core",
             "scope": "public",
             "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.PublicAppMetaInfo",
-            "text": "PublicAppMetaInfo"
+            "section": "def-public.PublicAppDeepLinkInfo",
+            "text": "PublicAppDeepLinkInfo"
           },
-          "; }"
+          "[]; searchable: boolean; }"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 322
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-public.PublicAppMetaInfo",
-        "type": "Type",
-        "tags": [],
-        "label": "PublicAppMetaInfo",
-        "description": [
-          "\nPublic information about a registered app's {@link AppMeta | keywords }\n"
-        ],
-        "signature": [
-          "Pick<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppMeta",
-            "text": "AppMeta"
-          },
-          ", never> & { keywords: string[]; searchDeepLinks: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.PublicAppSearchDeepLinkInfo",
-            "text": "PublicAppSearchDeepLinkInfo"
-          },
-          "[]; }"
-        ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 267
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-public.PublicAppSearchDeepLinkInfo",
-        "type": "Type",
-        "tags": [],
-        "label": "PublicAppSearchDeepLinkInfo",
-        "description": [
-          "\nPublic information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}\n"
-        ],
-        "signature": [
-          "Pick<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppSearchDeepLink",
-            "text": "AppSearchDeepLink"
-          },
-          ", \"title\" | \"id\" | \"path\"> & { searchDeepLinks: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.PublicAppSearchDeepLinkInfo",
-            "text": "PublicAppSearchDeepLinkInfo"
-          },
-          "[]; keywords: string[]; }"
-        ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 277
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

@@ -9,9 +9,10 @@ import {
   LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
-  expectedAsyncError,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
+
+import { expectedAsyncError } from '../../../test_helpers';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
@@ -22,7 +23,7 @@ import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_l
 
 describe('SourcesLogic', () => {
   const { http } = mockHttpValues;
-  const { flashAPIErrors, setQueuedSuccessMessage } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount, unmount } = new LogicMounter(SourcesLogic);
 
   const contentSource = contentSources[0];
@@ -125,7 +126,7 @@ describe('SourcesLogic', () => {
           additionalConfiguration: false,
           serviceType: 'custom',
         });
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully connected source. ');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Successfully connected source. ');
       });
 
       it('unconfigured', () => {
@@ -137,7 +138,7 @@ describe('SourcesLogic', () => {
           additionalConfiguration: true,
           serviceType: 'custom',
         });
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully connected source. This source requires additional configuration.'
         );
       });
@@ -163,7 +164,7 @@ describe('SourcesLogic', () => {
         http.get.mockReturnValue(promise);
         SourcesLogic.actions.initializeSources();
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/sources');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/sources');
         await promise;
         expect(pollForSourceStatusChangesSpy).toHaveBeenCalled();
         expect(onInitializeSourcesSpy).toHaveBeenCalledWith(contentSources);
@@ -175,7 +176,7 @@ describe('SourcesLogic', () => {
         http.get.mockReturnValue(promise);
         SourcesLogic.actions.initializeSources();
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/sources');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources');
       });
 
       it('handles error', async () => {
@@ -204,9 +205,12 @@ describe('SourcesLogic', () => {
         http.put.mockReturnValue(promise);
         SourcesLogic.actions.setSourceSearchability(id, true);
 
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/searchable', {
-          body: JSON.stringify({ searchable: true }),
-        });
+        expect(http.put).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/searchable',
+          {
+            body: JSON.stringify({ searchable: true }),
+          }
+        );
         await promise;
         expect(onSetSearchability).toHaveBeenCalledWith(id, true);
       });
@@ -218,7 +222,7 @@ describe('SourcesLogic', () => {
         SourcesLogic.actions.setSourceSearchability(id, true);
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/searchable',
+          '/internal/workplace_search/account/sources/123/searchable',
           {
             body: JSON.stringify({ searchable: true }),
           }
@@ -256,7 +260,7 @@ describe('SourcesLogic', () => {
 
         jest.advanceTimersByTime(POLLING_INTERVAL);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/sources/status');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/sources/status');
         await promise;
         expect(setServerSourceStatusesSpy).toHaveBeenCalledWith(contentSources);
       });
@@ -288,7 +292,7 @@ describe('SourcesLogic', () => {
       http.get.mockReturnValue(promise);
       fetchSourceStatuses(true);
 
-      expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/sources/status');
+      expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/sources/status');
       await promise;
       expect(setServerSourceStatusesSpy).toHaveBeenCalledWith(contentSources);
     });
@@ -298,7 +302,7 @@ describe('SourcesLogic', () => {
       http.get.mockReturnValue(promise);
       fetchSourceStatuses(false);
 
-      expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/sources/status');
+      expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources/status');
     });
 
     it('handles error', async () => {

@@ -10,13 +10,15 @@ import { PromiseReturnType } from '../../../observability/typings/common';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
-import { UIFilters } from '../../typings/ui_filters';
+} from '../../../../../src/core/types/elasticsearch';
+import { UxUIFilters } from '../../typings/ui_filters';
 
 interface Options {
   mockResponse?: (
     request: ESSearchRequest
   ) => ESSearchResponse<unknown, ESSearchRequest>;
+  uiFilters?: Record<string, string>;
+  config?: Partial<APMConfig>;
 }
 
 interface MockSetup {
@@ -25,7 +27,7 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFilters: UIFilters;
+  uiFilters: UxUIFilters;
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
@@ -69,7 +71,12 @@ export async function inspectSearchParams(
     config: new Proxy(
       {},
       {
-        get: (_, key) => {
+        get: (_, key: keyof APMConfig) => {
+          const { config } = options;
+          if (config?.[key]) {
+            return config?.[key];
+          }
+
           switch (key) {
             default:
               return 'myIndex';
@@ -86,7 +93,7 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: {},
+    uiFilters: options?.uiFilters ?? {},
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',
@@ -109,7 +116,7 @@ export async function inspectSearchParams(
   }
 
   return {
-    params: spy.mock.calls[0][0],
+    params: spy.mock.calls[0]?.[1],
     response,
     error,
     spy,

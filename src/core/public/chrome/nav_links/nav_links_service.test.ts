@@ -20,6 +20,22 @@ const availableApps = new Map([
       order: -10,
       title: 'App 2',
       euiIconType: 'canvasApp',
+      deepLinks: [
+        {
+          id: 'deepApp1',
+          order: 50,
+          title: 'Deep App 1',
+          path: '/deepapp1',
+          deepLinks: [
+            {
+              id: 'deepApp2',
+              order: 40,
+              title: 'Deep App 2',
+              path: '/deepapp2',
+            },
+          ],
+        },
+      ],
     },
   ],
   ['chromelessApp', { id: 'chromelessApp', order: 20, title: 'Chromless App', chromeless: true }],
@@ -66,17 +82,15 @@ describe('NavLinksService', () => {
             map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'app1']);
+      ).toEqual(['app2', 'app1', 'app2:deepApp2', 'app2:deepApp1']);
     });
 
     it('emits multiple values', async () => {
       const navLinkIds$ = start.getNavLinks$().pipe(map((links) => links.map((l) => l.id)));
       const emittedLinks: string[][] = [];
       navLinkIds$.subscribe((r) => emittedLinks.push(r));
-      start.showOnly('app1');
-
       service.stop();
-      expect(emittedLinks).toEqual([['app2', 'app1'], ['app1']]);
+      expect(emittedLinks).toEqual([['app2', 'app1', 'app2:deepApp2', 'app2:deepApp1']]);
     });
 
     it('completes when service is stopped', async () => {
@@ -98,7 +112,12 @@ describe('NavLinksService', () => {
 
   describe('#getAll()', () => {
     it('returns a sorted array of navlinks', () => {
-      expect(start.getAll().map((l) => l.id)).toEqual(['app2', 'app1']);
+      expect(start.getAll().map((l) => l.id)).toEqual([
+        'app2',
+        'app1',
+        'app2:deepApp2',
+        'app2:deepApp1',
+      ]);
     });
   });
 
@@ -109,61 +128,6 @@ describe('NavLinksService', () => {
 
     it('returns false if it does not exist', () => {
       expect(start.has('phony')).toBe(false);
-    });
-  });
-
-  describe('#showOnly()', () => {
-    it('does nothing if link does not exist', async () => {
-      start.showOnly('fake');
-      expect(
-        await start
-          .getNavLinks$()
-          .pipe(
-            take(1),
-            map((links) => links.map((l) => l.id))
-          )
-          .toPromise()
-      ).toEqual(['app2', 'app1']);
-    });
-
-    it('does nothing on chromeless applications', async () => {
-      start.showOnly('chromelessApp');
-      expect(
-        await start
-          .getNavLinks$()
-          .pipe(
-            take(1),
-            map((links) => links.map((l) => l.id))
-          )
-          .toPromise()
-      ).toEqual(['app2', 'app1']);
-    });
-
-    it('removes all other links', async () => {
-      start.showOnly('app2');
-      expect(
-        await start
-          .getNavLinks$()
-          .pipe(
-            take(1),
-            map((links) => links.map((l) => l.id))
-          )
-          .toPromise()
-      ).toEqual(['app2']);
-    });
-
-    it('still removes all other links when availableApps are re-emitted', async () => {
-      start.showOnly('app2');
-      mockAppService.applications$.next(mockAppService.applications$.value);
-      expect(
-        await start
-          .getNavLinks$()
-          .pipe(
-            take(1),
-            map((links) => links.map((l) => l.id))
-          )
-          .toPromise()
-      ).toEqual(['app2']);
     });
   });
 

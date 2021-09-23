@@ -25,9 +25,7 @@ import {
   getEndpointEventFiltersList,
   getEndpointExceptionList,
   getEndpointTrustedAppsList,
-  isCompressed,
   Manifest,
-  maybeCompressArtifact,
 } from '../../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
@@ -36,6 +34,9 @@ import {
 import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { InvalidInternalManifestError } from '../errors';
+import { wrapErrorIfNeeded } from '../../../utils';
+import { EndpointError } from '../../../errors';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -239,13 +240,16 @@ export class ManifestManager {
    * Writes new artifact SO.
    *
    * @param artifact An InternalArtifactCompleteSchema representing the artifact.
-   * @returns {Promise<Error | null>} An error, if encountered, or null.
+   * @returns {Promise<[Error | null, InternalArtifactCompleteSchema | undefined]>} An array with the error if encountered or null and the generated artifact or null.
    */
-  protected async pushArtifact(artifact: InternalArtifactCompleteSchema): Promise<Error | null> {
+  protected async pushArtifact(
+    artifact: InternalArtifactCompleteSchema
+  ): Promise<[Error | null, InternalArtifactCompleteSchema | undefined]> {
     const artifactId = getArtifactId(artifact);
+    let fleetArtifact;
     try {
       // Write the artifact SO
-      await this.artifactClient.createArtifact(artifact);
+      fleetArtifact = await this.artifactClient.createArtifact(artifact);
 
       // Cache the compressed body of the artifact
       this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
@@ -253,29 +257,35 @@ export class ManifestManager {
       if (this.savedObjectsClient.errors.isConflictError(err)) {
         this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
       } else {
-        return err;
+        return [err, undefined];
       }
     }
 
-    return null;
+    return [null, fleetArtifact];
   }
 
   /**
    * Writes new artifact SOs.
    *
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
+   * @param newManifest A Manifest representing the new manifest
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  public async pushArtifacts(artifacts: InternalArtifactCompleteSchema[]): Promise<Error[]> {
+  public async pushArtifacts(
+    artifacts: InternalArtifactCompleteSchema[],
+    newManifest: Manifest
+  ): Promise<Error[]> {
     const errors: Error[] = [];
     for (const artifact of artifacts) {
       if (internalArtifactCompleteSchema.is(artifact)) {
-        const err = await this.pushArtifact(artifact);
+        const [err, fleetArtifact] = await this.pushArtifact(artifact);
         if (err) {
           errors.push(err);
+        } else if (fleetArtifact) {
+          newManifest.replaceArtifact(fleetArtifact);
         }
       } else {
-        errors.push(new Error(`Incomplete artifact: ${getArtifactId(artifact)}`));
+        errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`, artifact));
       }
     }
     return errors;
@@ -303,8 +313,8 @@ export class ManifestManager {
   }
 
   /**
-   * Returns the last computed manifest based on the state of the
-   * user-artifact-manifest SO.
+   * Returns the last computed manifest based on the state of the user-artifact-manifest SO. If no
+   * artifacts have been created yet (ex. no Endpoint policies are in use), then method return `null`
    *
    * @returns {Promise<Manifest | null>} The last computed manifest, or null if does not exist.
    * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
@@ -314,7 +324,10 @@ export class ManifestManager {
       const manifestSo = await this.getManifestClient().getManifest();
 
       if (manifestSo.version === undefined) {
-        throw new Error('No version returned for manifest.');
+        throw new InvalidInternalManifestError(
+          'Internal Manifest map SavedObject is missing version',
+          manifestSo
+        );
       }
 
       const manifest = new Manifest({
@@ -327,16 +340,21 @@ export class ManifestManager {
         const artifact = await this.artifactClient.getArtifact(entry.artifactId);
 
         if (!artifact) {
-          throw new Error(`artifact id [${entry.artifactId}] not found!`);
+          this.logger.error(
+            new InvalidInternalManifestError(`artifact id [${entry.artifactId}] not found!`, {
+              entry,
+              action: 'removed from internal ManifestManger tracking map',
+            })
+          );
+        } else {
+          manifest.addEntry(artifact, entry.policyId);
         }
-
-        manifest.addEntry(artifact, entry.policyId);
       }
 
       return manifest;
     } catch (error) {
       if (!error.output || error.output.statusCode !== 404) {
-        throw error;
+        throw wrapErrorIfNeeded(error);
       }
       return null;
     }
@@ -372,16 +390,12 @@ export class ManifestManager {
 
     for (const result of results) {
       await iterateArtifactsBuildResult(result, async (artifact, policyId) => {
-        let artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
-
-        if (!isCompressed(artifactToAdd)) {
-          artifactToAdd = await maybeCompressArtifact(artifactToAdd);
-
-          if (!isCompressed(artifactToAdd)) {
-            throw new Error(`Unable to compress artifact: ${getArtifactId(artifactToAdd)}`);
-          } else if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
-            throw new Error(`Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`);
-          }
+        const artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
+        if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
+          throw new EndpointError(
+            `Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`,
+            artifactToAdd
+          );
         }
 
         manifest.addEntry(artifactToAdd, policyId);
@@ -416,7 +430,12 @@ export class ManifestManager {
             const serializedManifest = manifest.toPackagePolicyManifest(packagePolicy.id);
 
             if (!manifestDispatchSchema.is(serializedManifest)) {
-              errors.push(new Error(`Invalid manifest for policy ${packagePolicy.id}`));
+              errors.push(
+                new EndpointError(
+                  `Invalid manifest for policy ${packagePolicy.id}`,
+                  serializedManifest
+                )
+              );
             } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
               newPackagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
 
@@ -443,7 +462,9 @@ export class ManifestManager {
             this.logger.debug(`No change in manifest version for package policy: ${id}`);
           }
         } else {
-          errors.push(new Error(`Package Policy ${id} has no config.`));
+          errors.push(
+            new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, newPackagePolicy)
+          );
         }
       }
     );

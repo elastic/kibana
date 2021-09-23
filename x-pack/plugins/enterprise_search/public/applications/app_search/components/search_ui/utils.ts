@@ -15,7 +15,7 @@ export const generatePreviewUrl = (query: ParsedQuery) => {
   return queryString.stringifyUrl(
     {
       query,
-      url: getAppSearchUrl(`/engines/${engineName}/reference_application/preview`),
+      url: getAppSearchUrl(`/engines/${engineName}/search_experience/preview`),
     },
     { arrayFormat: 'bracket', skipEmptyString: true }
   );

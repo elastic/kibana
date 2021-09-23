@@ -3,6 +3,7 @@
 exports[`get buckets should make the correct query 1`] = `
 Array [
   Array [
+    "get_error_distribution_buckets",
     Object {
       "apm": Object {
         "events": Array [

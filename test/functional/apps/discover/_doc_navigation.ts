@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('doc link in discover', function contextSize() {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': true,
@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
     after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
     });
 
@@ -51,8 +52,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[1].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
+      await retry.waitFor('hit loaded', async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        return !!hasDocHit;
+      });
     });
 
     // no longer relevant as null field won't be returned in the Fields API response

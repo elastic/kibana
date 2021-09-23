@@ -5,4 +5,8 @@
  * 2.0.
  */
 
+import { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
+
 export function deleteJobs(jobs: Array<{ id: string }>, callback?: () => void): Promise<void>;
+export function resetJobs(jobIds: string[], callback?: () => void): Promise<void>;
+export function loadFullJob(jobId: string): Promise<CombinedJobWithStats>;

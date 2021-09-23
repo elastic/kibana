@@ -9,11 +9,9 @@
 import { HttpSetup } from 'kibana/public';
 import React, { createContext, useContext } from 'react';
 
-import { useRequest } from '../../../public';
+import { useRequest } from '../../../public/request';
 
-import { Error as CustomError } from './section_error';
-
-import { Privileges } from '../types';
+import { Privileges, Error as CustomError } from '../types';
 
 interface Authorization {
   isLoading: boolean;
@@ -47,7 +45,11 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, httpClient, children }: Props) => {
-  const { isLoading, error, data: privilegesData } = useRequest<any, CustomError>(httpClient, {
+  const {
+    isLoading,
+    error,
+    data: privilegesData,
+  } = useRequest<any, CustomError>(httpClient, {
     path: privilegesEndpoint,
     method: 'get',
   });

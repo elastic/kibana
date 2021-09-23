@@ -42,11 +42,14 @@ export interface LoggingServiceSetup {
 }
 
 /** @internal */
-export interface InternalLoggingServiceSetup {
+export interface InternalLoggingServicePreboot {
   configure(contextParts: string[], config$: Observable<LoggerContextConfigInput>): void;
 }
 
-interface SetupDeps {
+/** @internal */
+export type InternalLoggingServiceSetup = InternalLoggingServicePreboot;
+
+interface PrebootDeps {
   loggingSystem: ILoggingSystem;
 }
 
@@ -54,13 +57,14 @@ interface SetupDeps {
 export class LoggingService implements CoreService<InternalLoggingServiceSetup> {
   private readonly subscriptions = new Map<string, Subscription>();
   private readonly log: Logger;
+  private internalPreboot?: InternalLoggingServicePreboot;
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('logging');
   }
 
-  public setup({ loggingSystem }: SetupDeps) {
-    return {
+  public preboot({ loggingSystem }: PrebootDeps) {
+    this.internalPreboot = {
       configure: (contextParts: string[], config$: Observable<LoggerContextConfigInput>) => {
         const contextName = LoggingConfig.getLoggerContext(contextParts);
         this.log.debug(`Setting custom config for context [${contextName}]`);
@@ -79,6 +83,14 @@ export class LoggingService implements CoreService<InternalLoggingServiceSetup> 
           })
         );
       },
+    };
+
+    return this.internalPreboot;
+  }
+
+  public setup() {
+    return {
+      configure: this.internalPreboot!.configure,
     };
   }
 

@@ -6,7 +6,8 @@
  */
 
 import { AlertingPublicPlugin } from './plugin';
-export { PluginSetupContract, PluginStartContract } from './plugin';
+export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { AlertNavigationHandler } from './alert_navigation_registry';
 
 export function plugin() {
   return new AlertingPublicPlugin();

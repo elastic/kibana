@@ -15,9 +15,11 @@ async function getDeprecations({
   const { total } = await savedObjectsClient.find({ type: 'test-deprecations-plugin', perPage: 1 });
 
   deprecations.push({
+    title: 'CorePluginDeprecationsPlugin plugin is deprecated',
     message: `CorePluginDeprecationsPlugin is a deprecated feature for testing.`,
     documentationUrl: 'test-url',
     level: 'warning',
+    deprecationType: 'feature',
     correctiveActions: {
       manualSteps: ['Step a', 'Step b'],
     },
@@ -25,10 +27,13 @@ async function getDeprecations({
 
   if (total > 0) {
     deprecations.push({
+      title: 'Detected saved objects in test-deprecations-plugin',
       message: `SavedObject test-deprecations-plugin is still being used.`,
       documentationUrl: 'another-test-url',
       level: 'critical',
-      correctiveActions: {},
+      correctiveActions: {
+        manualSteps: ['Step a', 'Step b'],
+      },
     });
   }
 

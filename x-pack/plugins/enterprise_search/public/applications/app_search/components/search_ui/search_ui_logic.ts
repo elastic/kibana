@@ -7,9 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors, setErrorMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
+
+import { NO_SEARCH_KEY_ERROR } from './i18n';
 
 import { ActiveField } from './types';
 
@@ -18,6 +20,7 @@ interface InitialFieldValues {
   validSortFields: string[];
   validFacetFields: string[];
   urlField?: string;
+  thumbnailField?: string;
   titleField?: string;
 }
 interface SearchUIActions {
@@ -28,6 +31,7 @@ interface SearchUIActions {
   onSortFieldsChange(sortFields: string[]): { sortFields: string[] };
   onTitleFieldChange(titleField: string): { titleField: string };
   onUrlFieldChange(urlField: string): { urlField: string };
+  onThumbnailFieldChange(thumbnailField: string): { thumbnailField: string };
 }
 
 interface SearchUIValues {
@@ -37,6 +41,7 @@ interface SearchUIValues {
   validFacetFields: string[];
   titleField: string;
   urlField: string;
+  thumbnailField: string;
   facetFields: string[];
   sortFields: string[];
   activeField: ActiveField;
@@ -52,6 +57,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     onSortFieldsChange: (sortFields) => ({ sortFields }),
     onTitleFieldChange: (titleField) => ({ titleField }),
     onUrlFieldChange: (urlField) => ({ urlField }),
+    onThumbnailFieldChange: (thumbnailField) => ({ thumbnailField }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -77,6 +83,12 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
         onFieldDataLoaded: (_, { urlField }) => urlField || '',
       },
     ],
+    thumbnailField: [
+      '',
+      {
+        onThumbnailFieldChange: (_, { thumbnailField }) => thumbnailField,
+      },
+    ],
     facetFields: [[], { onFacetFieldsChange: (_, { facetFields }) => facetFields }],
     sortFields: [[], { onSortFieldsChange: (_, { sortFields }) => sortFields }],
     activeField: [ActiveField.None, { onActiveFieldChange: (_, { activeField }) => activeField }],
@@ -84,9 +96,14 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
   listeners: ({ actions }) => ({
     loadFieldData: async () => {
       const { http } = HttpLogic.values;
-      const { engineName } = EngineLogic.values;
+      const { searchKey, engineName } = EngineLogic.values;
 
-      const url = `/api/app_search/engines/${engineName}/search_ui/field_config`;
+      if (!searchKey) {
+        setErrorMessage(NO_SEARCH_KEY_ERROR(engineName));
+        return;
+      }
+
+      const url = `/internal/app_search/engines/${engineName}/search_ui/field_config`;
 
       try {
         const initialFieldValues = await http.get(url);

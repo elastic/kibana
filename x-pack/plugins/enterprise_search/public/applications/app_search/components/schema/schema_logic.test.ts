@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../__mocks__/kea_logic';
 import { mockEngineActions } from '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -136,13 +140,13 @@ describe('SchemaLogic', () => {
 
   describe('selectors', () => {
     describe('hasSchema', () => {
-      it('returns true when the schema obj has items', () => {
-        mountAndSetSchema({ schema: { test: SchemaType.Text } });
+      it('returns true when the cached server schema obj has items', () => {
+        mount({ cachedSchema: { test: SchemaType.Text } });
         expect(SchemaLogic.values.hasSchema).toEqual(true);
       });
 
-      it('returns false when the schema obj is empty', () => {
-        mountAndSetSchema({ schema: {} });
+      it('returns false when the cached server schema obj is empty', () => {
+        mount({ schema: {} });
         expect(SchemaLogic.values.hasSchema).toEqual(false);
       });
     });
@@ -245,7 +249,7 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.updateSchema();
         await nextTick();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/some-engine/schema', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/schema', {
           body: '{}',
         });
         expect(SchemaLogic.actions.onSchemaLoad).toHaveBeenCalledWith(MOCK_RESPONSE);

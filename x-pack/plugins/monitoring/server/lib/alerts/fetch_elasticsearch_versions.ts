@@ -12,11 +12,12 @@ export async function fetchElasticsearchVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertVersions[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.cluster_stats.nodes.versions',
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',
@@ -59,6 +60,15 @@ export async function fetchElasticsearchVersions(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const result = await esClient.search<ElasticsearchSource>(params);
   const response: ElasticsearchResponse = result.body as ElasticsearchResponse;

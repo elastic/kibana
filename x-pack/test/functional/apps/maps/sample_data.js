@@ -135,7 +135,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
     describe('flights', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
+        await PageObjects.maps.loadSavedMap('[Flights] Origin Time Delayed');
         await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
@@ -161,7 +161,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
         await PageObjects.maps.toggleLayerVisibility('Road map');
-        await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
+        await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();

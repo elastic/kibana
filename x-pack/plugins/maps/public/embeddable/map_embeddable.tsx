@@ -26,14 +26,12 @@ import {
   TimeRange,
   Filter,
   Query,
-  RefreshInterval,
 } from '../../../../../src/plugins/data/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
   setMapSettings,
   setQuery,
-  setRefreshConfig,
   disableScrollZoom,
   setReadOnly,
 } from '../actions';
@@ -45,6 +43,7 @@ import {
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
+  areLayersLoaded,
   getGeoFieldNames,
   getMapCenter,
   getMapBuffer,
@@ -56,9 +55,9 @@ import {
 } from '../selectors/map_selectors';
 import {
   APP_ID,
-  getExistingMapPath,
+  getEditPath,
+  getFullPath,
   MAP_SAVED_OBJECT_TYPE,
-  MAP_PATH,
   RawValue,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
@@ -75,6 +74,7 @@ import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
+import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 
 import {
   MapByValueInput,
@@ -94,8 +94,10 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+{
   type = MAP_SAVED_OBJECT_TYPE;
+  deferEmbeddableLoad = true;
 
   private _isActive: boolean;
   private _savedMap: SavedMap;
@@ -106,7 +108,6 @@ export class MapEmbeddable
   private _prevMapExtent?: MapExtent;
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
-  private _prevRefreshConfig?: RefreshInterval;
   private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
   private _prevSearchSessionId?: string;
@@ -114,6 +115,9 @@ export class MapEmbeddable
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
   private _controlledBy: string;
+  private _onInitialRenderComplete?: () => void = undefined;
+  private _hasInitialRenderCompleteFired = false;
+  private _isSharable = true;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -150,6 +154,9 @@ export class MapEmbeddable
       return;
     }
 
+    // deferred loading of this embeddable is complete
+    this.setInitializationFinished();
+
     this._isInitialized = true;
     if (this._domNode) {
       this.render(this._domNode);
@@ -162,13 +169,15 @@ export class MapEmbeddable
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
+    store.dispatch(
+      setMapSettings({
+        showTimesliderToggleButton: false,
+      })
+    );
 
     this._dispatchSetQuery({
       forceRefresh: false,
     });
-    if (this.input.refreshConfig) {
-      this._dispatchSetRefreshConfig(this.input.refreshConfig);
-    }
 
     this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
       this._handleStoreChanges();
@@ -181,13 +190,13 @@ export class MapEmbeddable
       : '';
     const input = this.getInput();
     const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
-    const savedObjectId = (input as MapByReferenceInput).savedObjectId;
+    const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
       ...this.getOutput(),
       defaultTitle: savedMapTitle,
       title,
-      editPath: `/${MAP_PATH}/${savedObjectId}`,
-      editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
+      editPath: getEditPath(savedObjectId),
+      editUrl: getHttp().basePath.prepend(getFullPath(savedObjectId)),
       indexPatterns: await this._getIndexPatterns(),
     });
   }
@@ -227,6 +236,17 @@ export class MapEmbeddable
     this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
 
+  public setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void {
+    this._onInitialRenderComplete = onInitialRenderComplete;
+  }
+
+  /*
+   * Set to false to exclude sharing attributes 'data-*'.
+   */
+  public setIsSharable(isSharable: boolean): void {
+    this._isSharable = isSharable;
+  }
+
   getInspectorAdapters() {
     return getInspectorAdapters(this._savedMap.getStore().getState());
   }
@@ -253,10 +273,6 @@ export class MapEmbeddable
       this._dispatchSetQuery({
         forceRefresh: false,
       });
-    }
-
-    if (this.input.refreshConfig && !_.isEqual(this.input.refreshConfig, this._prevRefreshConfig)) {
-      this._dispatchSetRefreshConfig(this.input.refreshConfig);
     }
 
     if (this.input.syncColors !== this._prevSyncColors) {
@@ -313,16 +329,6 @@ export class MapEmbeddable
     );
   }
 
-  _dispatchSetRefreshConfig(refreshConfig: RefreshInterval) {
-    this._prevRefreshConfig = refreshConfig;
-    this._savedMap.getStore().dispatch(
-      setRefreshConfig({
-        isPaused: refreshConfig.pause,
-        interval: refreshConfig.value,
-      })
-    );
-  }
-
   async _dispatchSetChartsPaletteServiceGetColor(syncColors?: boolean) {
     this._prevSyncColors = syncColors;
     const chartsPaletteServiceGetColor = syncColors
@@ -360,6 +366,8 @@ export class MapEmbeddable
             renderTooltipContent={this._renderTooltipContent}
             title={this.getTitle()}
             description={this.getDescription()}
+            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
+            isSharable={this._isSharable}
           />
         </I18nContext>
       </Provider>,
@@ -456,7 +464,6 @@ export class MapEmbeddable
     this._prevMapExtent = mapExtent;
 
     const mapExtentFilter = createExtentFilter(mapExtent, geoFieldNames);
-    mapExtentFilter.meta.isMultiIndex = true;
     mapExtentFilter.meta.controlledBy = this._controlledBy;
     mapExtentFilter.meta.alias = i18n.translate('xpack.maps.embeddable.boundsFilterLabel', {
       defaultMessage: 'Map bounds at center: {lat}, {lon}, zoom: {zoom}',
@@ -518,6 +525,15 @@ export class MapEmbeddable
   _handleStoreChanges() {
     if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
+    }
+
+    if (
+      this._onInitialRenderComplete &&
+      !this._hasInitialRenderCompleteFired &&
+      areLayersLoaded(this._savedMap.getStore().getState())
+    ) {
+      this._hasInitialRenderCompleteFired = true;
+      this._onInitialRenderComplete();
     }
 
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());

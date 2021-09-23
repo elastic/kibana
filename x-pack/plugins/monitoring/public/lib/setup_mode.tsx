@@ -15,6 +15,8 @@ import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
 import { SetupModeFeature } from '../../common/enums';
 import { ISetupModeContext } from '../components/setup_mode/setup_mode_context';
+import * as setupModeReact from '../application/setup_mode/setup_mode';
+import { isReactMigrationEnabled } from '../external_config';
 
 function isOnPage(hash: string) {
   return includes(window.location.hash, hash);
@@ -157,6 +159,8 @@ export const disableElasticsearchInternalCollection = async () => {
 };
 
 export const toggleSetupMode = (inSetupMode: boolean) => {
+  if (isReactMigrationEnabled()) return setupModeReact.toggleSetupMode(inSetupMode);
+
   checkAngularState();
 
   const globalState = angularState.injector.get('globalState');
@@ -209,6 +213,7 @@ export const initSetupModeState = async ($scope: any, $injector: any, callback?:
 };
 
 export const isInSetupMode = (context?: ISetupModeContext) => {
+  if (isReactMigrationEnabled()) return setupModeReact.isInSetupMode(context);
   if (context?.setupModeSupported === false) {
     return false;
   }
@@ -222,6 +227,7 @@ export const isInSetupMode = (context?: ISetupModeContext) => {
 };
 
 export const isSetupModeFeatureEnabled = (feature: SetupModeFeature) => {
+  if (isReactMigrationEnabled()) return setupModeReact.isSetupModeFeatureEnabled(feature);
   if (!setupModeState.enabled) {
     return false;
   }

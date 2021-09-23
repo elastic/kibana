@@ -151,6 +151,9 @@ export const tlsTranslations = {
   alertFactoryName: i18n.translate('xpack.uptime.alerts.tls', {
     defaultMessage: 'Uptime TLS',
   }),
+  legacyAlertFactoryName: i18n.translate('xpack.uptime.alerts.tlsLegacy', {
+    defaultMessage: 'Uptime TLS (Legacy)',
+  }),
   actionVariables: [
     {
       name: 'count',
@@ -191,7 +194,7 @@ export const tlsTranslations = {
   ],
   validAfterExpiredString: (date: string, relativeDate: number) =>
     i18n.translate('xpack.uptime.alerts.tls.validAfterExpiredString', {
-      defaultMessage: `expired on {date} {relativeDate} days ago.`,
+      defaultMessage: `expired on {date}, {relativeDate} days ago.`,
       values: {
         date,
         relativeDate,
@@ -221,6 +224,18 @@ export const tlsTranslations = {
         relativeDate,
       },
     }),
+  expiredLabel: i18n.translate('xpack.uptime.alerts.tls.expiredLabel', {
+    defaultMessage: 'expired',
+  }),
+  expiringLabel: i18n.translate('xpack.uptime.alerts.tls.expiringLabel', {
+    defaultMessage: 'expiring',
+  }),
+  agingLabel: i18n.translate('xpack.uptime.alerts.tls.agingLabel', {
+    defaultMessage: 'becoming too old',
+  }),
+  invalidLabel: i18n.translate('xpack.uptime.alerts.tls.invalidLabel', {
+    defaultMessage: 'invalid',
+  }),
 };
 
 export const durationAnomalyTranslations = {

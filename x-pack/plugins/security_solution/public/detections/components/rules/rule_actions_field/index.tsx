@@ -21,7 +21,7 @@ import {
   ActionVariables,
 } from '../../../../../../triggers_actions_ui/public';
 import { AlertAction } from '../../../../../../alerting/common';
-import { useKibana } from '../../../../common/lib/kibana';
+import { convertArrayToCamelCase, useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
 interface Props {
@@ -122,7 +122,13 @@ export const RuleActionsField: React.FC<Props> = ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (key: string, value: any, index: number) => {
       const updatedActions = [...actions];
-      updatedActions[index].params[key] = value;
+      updatedActions[index] = {
+        ...updatedActions[index],
+        params: {
+          ...updatedActions[index].params,
+          [key]: value,
+        },
+      };
       field.setValue(updatedActions);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -131,7 +137,7 @@ export const RuleActionsField: React.FC<Props> = ({
 
   useEffect(() => {
     (async function () {
-      const actionTypes = await loadActionTypes({ http });
+      const actionTypes = convertArrayToCamelCase(await loadActionTypes({ http })) as ActionType[];
       const supportedTypes = getSupportedActions(actionTypes, hasErrorOnCreationCaseAction);
       setSupportedActionTypes(supportedTypes);
     })();

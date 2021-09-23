@@ -11,10 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiScreenReaderOnly } from '@elastic/eui';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
-import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
+import type { IndexPattern } from '../../../../../data/common';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
+import { defaultTimeColumnWidth } from './constants';
 
 export function getLeadControlColumns() {
   return [
@@ -53,7 +54,8 @@ export function buildEuiGridColumn(
   columnName: string,
   columnWidth: number | undefined = 0,
   indexPattern: IndexPattern,
-  defaultColumns: boolean
+  defaultColumns: boolean,
+  isSortEnabled: boolean
 ) {
   const timeString = i18n.translate('discover.timeLabel', {
     defaultMessage: 'Time',
@@ -62,7 +64,7 @@ export function buildEuiGridColumn(
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(indexPatternField?.type),
-    isSortable: indexPatternField?.sortable === true,
+    isSortable: isSortEnabled && indexPatternField?.sortable === true,
     display:
       columnName === '_source'
         ? i18n.translate('discover.grid.documentHeader', {
@@ -87,7 +89,7 @@ export function buildEuiGridColumn(
 
   if (column.id === indexPattern.timeFieldName) {
     column.display = `${timeString} (${indexPattern.timeFieldName})`;
-    column.initialWidth = 180;
+    column.initialWidth = defaultTimeColumnWidth;
   }
   if (columnWidth > 0) {
     column.initialWidth = Number(columnWidth);
@@ -100,7 +102,8 @@ export function getEuiGridColumns(
   settings: DiscoverGridSettings | undefined,
   indexPattern: IndexPattern,
   showTimeCol: boolean,
-  defaultColumns: boolean
+  defaultColumns: boolean,
+  isSortEnabled: boolean
 ) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -108,12 +111,12 @@ export function getEuiGridColumns(
   if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];
     return usedColumns.map((column) =>
-      buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns)
+      buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
     );
   }
 
   return columns.map((column) =>
-    buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns)
+    buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
   );
 }
 

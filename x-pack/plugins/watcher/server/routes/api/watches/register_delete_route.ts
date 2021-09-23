@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DeleteWatchResponse } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
@@ -14,7 +14,10 @@ const bodySchema = schema.object({
   watchIds: schema.arrayOf(schema.string()),
 });
 
-type DeleteWatchPromiseArray = Promise<{ success?: DeleteWatchResponse; error?: any }>;
+type DeleteWatchPromiseArray = Promise<{
+  success?: estypes.WatcherDeleteWatchResponse;
+  error?: any;
+}>;
 
 function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
   const deletePromises = watchIds.map<DeleteWatchPromiseArray>((watchId) => {

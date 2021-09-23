@@ -26,6 +26,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         // if you return an empty string here the kibana server will not start properly but an empty array works
         ...getRegistryUrlAsArray(),
+        // always install Endpoint package by default when Fleet sets up
+        `--xpack.fleet.packages.0.name=endpoint`,
+        `--xpack.fleet.packages.0.version=latest`,
       ],
     },
   };

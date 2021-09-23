@@ -15,8 +15,8 @@ export async function getDefaultMetricsCharts({
   serviceName,
   setup,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
 }) {

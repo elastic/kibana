@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Suspicious Hidden Child Process of Launchd",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:.* and process.parent.executable:/sbin/launchd",
+  "query": "event.category:process and event.type:(start or process_started) and\n process.name:.* and process.parent.executable:/sbin/launchd\n",
   "references": [
     "https://objective-see.com/blog/blog_0x61.html",
     "https://www.intezer.com/blog/research/operation-electrorat-attacker-creates-fake-companies-to-drain-your-crypto-wallets/",

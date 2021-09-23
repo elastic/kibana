@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
-
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../__mocks__/kea_logic';
 import { mockEngineValues } from '../../__mocks__';
 
 import { omit } from 'lodash';
@@ -832,7 +835,7 @@ describe('ResultSettingsLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/result_settings/details'
+          '/internal/app_search/engines/test-engine/result_settings/details'
         );
         expect(ResultSettingsLogic.actions.initializeResultFields).toHaveBeenCalledWith(
           serverFieldResultSettings,
@@ -907,7 +910,7 @@ describe('ResultSettingsLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/result_settings',
+          '/internal/app_search/engines/test-engine/result_settings',
           {
             body: JSON.stringify({
               result_fields: serverResultFields,

@@ -15,7 +15,6 @@ describe('buildRuleNameFromMapping', () => {
 
   test('rule name defaults to provided if mapping is incomplete', () => {
     const ruleName = buildRuleNameFromMapping({
-      // @ts-expect-error @elastic/elasticsearch _source is optional
       eventSource: sampleDocNoSortId()._source,
       ruleName: 'rule-name',
       ruleNameMapping: 'message',

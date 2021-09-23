@@ -21,12 +21,11 @@ export function getRootBreadcrumbs() {
   ];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getSavedSearchBreadcrumbs($route: any) {
+export function getSavedSearchBreadcrumbs(id: string) {
   return [
     ...getRootBreadcrumbs(),
     {
-      text: $route.current.locals.savedObjects.savedSearch.id,
+      text: id,
     },
   ];
 }

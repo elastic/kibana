@@ -43,10 +43,7 @@
           },
           ", PluginsSetup, PluginsStart>"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-          "lineNumber": 77
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -59,10 +56,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "lineNumber": 88
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -92,10 +86,7 @@
                 "text": "TriggersAndActionsUIPublicPluginSetup"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "lineNumber": 93
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -115,10 +106,7 @@
                   },
                   "<object, unknown>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                  "lineNumber": 93
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -132,10 +120,7 @@
                 "signature": [
                   "PluginsSetup"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                  "lineNumber": 93
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -159,10 +144,7 @@
                 "text": "TriggersAndActionsUIPublicPluginStart"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "lineNumber": 169
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -177,10 +159,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "lineNumber": 203
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -202,16 +181,13 @@
           "ActionAccordionFormProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ActionForm.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -219,48 +195,7 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertAdd",
-        "type": "Function",
-        "tags": [],
-        "label": "AlertAdd",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "AlertAddProps",
-          "<Record<string, any>>) => JSX.Element"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_form/index.tsx",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false
           }
         ],
@@ -280,16 +215,13 @@
           "AlertConditionsProps",
           "<ConditionProps, ActionGroupIds>>) => JSX.Element; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.AlertConditions.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -297,10 +229,7 @@
             "signature": [
               "P"
             ],
-            "source": {
-              "path": "node_modules/@types/react/index.d.ts",
-              "lineNumber": 359
-            },
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false
           }
         ],
@@ -320,16 +249,13 @@
           "AlertConditionsGroupProps",
           "<ConditionProps>>) => JSX.Element | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.AlertConditionsGroup.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -337,48 +263,7 @@
             "signature": [
               "P"
             ],
-            "source": {
-              "path": "node_modules/@types/react/index.d.ts",
-              "lineNumber": 359
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertEdit",
-        "type": "Function",
-        "tags": [],
-        "label": "AlertEdit",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "AlertEditProps",
-          "<Record<string, any>>) => JSX.Element"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
-          "lineNumber": 17
-        },
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false
           }
         ],
@@ -396,16 +281,13 @@
           "ConnectorAddFlyoutProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ConnectorAddFlyout.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -413,10 +295,7 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false
           }
         ],
@@ -434,16 +313,13 @@
           "ConnectorEditFlyoutProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ConnectorEditFlyout.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -451,10 +327,7 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false
           }
         ],
@@ -472,16 +345,13 @@
           "ForLastExpressionProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ForLastExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -489,67 +359,10 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.getActionType",
-        "type": "Function",
-        "tags": [],
-        "label": "getActionType",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ActionTypeModel",
-          "<",
-          "JiraConfig",
-          ", ",
-          "JiraSecrets",
-          ", ",
-          "JiraActionParams",
-          ">"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/jira/jira.tsx",
-          "lineNumber": 63
-        },
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.getActionType",
-        "type": "Function",
-        "tags": [],
-        "label": "getActionType",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ActionTypeModel",
-          "<",
-          "ResilientConfig",
-          ", ",
-          "ResilientSecrets",
-          ", ",
-          "ResilientActionParams",
-          ">"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/resilient/resilient.tsx",
-          "lineNumber": 68
-        },
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -570,10 +383,7 @@
           },
           ", indexes: string[]) => Promise<{ name: string; type: string; normalizedType: string; searchable: boolean; aggregatable: boolean; }[]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-          "lineNumber": 88
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -592,10 +402,7 @@
                 "text": "HttpSetup"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-              "lineNumber": 88
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -609,10 +416,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-              "lineNumber": 88
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -646,10 +450,7 @@
           },
           "[]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-          "lineNumber": 32
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -668,10 +469,7 @@
                 "text": "HttpSetup"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -685,10 +483,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -702,10 +497,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -723,64 +515,7 @@
         "signature": [
           "() => Promise<any>"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-          "lineNumber": 23
-        },
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.getServiceNowITSMActionType",
-        "type": "Function",
-        "tags": [],
-        "label": "getServiceNowITSMActionType",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ActionTypeModel",
-          "<",
-          "ServiceNowConfig",
-          ", ",
-          "ServiceNowSecrets",
-          ", ",
-          "ServiceNowITSMActionParams",
-          ">"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx",
-          "lineNumber": 64
-        },
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.getServiceNowSIRActionType",
-        "type": "Function",
-        "tags": [],
-        "label": "getServiceNowSIRActionType",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ActionTypeModel",
-          "<",
-          "ServiceNowConfig",
-          ", ",
-          "ServiceNowSecrets",
-          ", ",
-          "ServiceNowSIRActionParams",
-          ">"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx",
-          "lineNumber": 99
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -796,10 +531,7 @@
         "signature": [
           "(fields: { type: string; name: string; }[]) => TimeFieldOptions[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
         "deprecated": false,
         "children": [
           {
@@ -812,10 +544,7 @@
             "signature": [
               "{ type: string; name: string; }[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -841,10 +570,7 @@
           },
           "; }[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
         "deprecated": false,
         "children": [
           {
@@ -857,10 +583,7 @@
             "signature": [
               "number"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -886,10 +609,7 @@
           },
           ", timeValue: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
         "deprecated": false,
         "children": [
           {
@@ -908,10 +628,7 @@
                 "text": "TIME_UNITS"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -925,10 +642,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -948,16 +662,13 @@
           "GroupByExpressionProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.GroupByExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -965,10 +676,7 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false
           }
         ],
@@ -1000,28 +708,22 @@
           },
           "[]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
-          "lineNumber": 29
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadActionTypes.$1.http",
+            "id": "def-public.loadActionTypes.$1",
             "type": "Object",
             "tags": [],
             "label": "{ http }",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadActionTypes.$1.http.http",
+                "id": "def-public.loadActionTypes.$1.http",
                 "type": "Object",
                 "tags": [],
                 "label": "http",
@@ -1035,10 +737,7 @@
                     "text": "HttpSetup"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
-                  "lineNumber": 29
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
                 "deprecated": false
               }
             ]
@@ -1059,16 +758,13 @@
           "OfExpressionProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.OfExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -1076,10 +772,7 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false
           }
         ],
@@ -1097,16 +790,13 @@
           "ThresholdExpressionProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ThresholdExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -1114,10 +804,7 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false
           }
         ],
@@ -1135,16 +822,13 @@
           "ValueExpressionProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.ValueExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -1152,10 +836,7 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false
           }
         ],
@@ -1173,16 +854,13 @@
           "WhenExpressionProps",
           ") => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.props",
+            "id": "def-public.WhenExpression.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -1190,10 +868,7 @@
             "signature": [
               "T"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false
           }
         ],
@@ -1208,10 +883,7 @@
         "tags": [],
         "label": "ActionType",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/common/types.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1221,10 +893,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
           {
@@ -1234,10 +903,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 12
-            },
+            "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
           {
@@ -1247,10 +913,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 13
-            },
+            "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
           {
@@ -1260,10 +923,7 @@
             "tags": [],
             "label": "enabledInConfig",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 14
-            },
+            "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
           {
@@ -1273,10 +933,7 @@
             "tags": [],
             "label": "enabledInLicense",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           },
           {
@@ -1289,10 +946,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           }
         ],
@@ -1305,10 +959,7 @@
         "tags": [],
         "label": "AggregationType",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1318,10 +969,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           },
           {
@@ -1331,10 +979,7 @@
             "tags": [],
             "label": "fieldRequired",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           },
           {
@@ -1344,10 +989,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           },
           {
@@ -1360,10 +1002,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           }
         ],
@@ -1376,10 +1015,7 @@
         "tags": [],
         "label": "AlertAction",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 43
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "children": [
           {
@@ -1389,10 +1025,7 @@
             "tags": [],
             "label": "group",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -1402,10 +1035,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -1415,10 +1045,7 @@
             "tags": [],
             "label": "actionTypeId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 46
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -1431,10 +1058,7 @@
             "signature": [
               "SavedObjectAttributes"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 47
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           }
         ],
@@ -1457,10 +1081,7 @@
           },
           "<Params>"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 234
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1470,10 +1091,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 235
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1483,10 +1101,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 236
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1496,10 +1111,7 @@
             "tags": [],
             "label": "iconClass",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 237
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1520,10 +1132,7 @@
               },
               ") => string) | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 238
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1543,16 +1152,12 @@
                 "text": "ValidationResult"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 239
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.alertParams",
+                "id": "def-public.AlertTypeModel.validate.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "alertParams",
@@ -1560,13 +1165,12 @@
                 "signature": [
                   "Params"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 239
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -1586,16 +1190,13 @@
               },
               "<Params, Record<string, unknown>, string>>>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 240
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.props",
+                "id": "def-public.AlertTypeModel.alertParamsExpression.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1603,10 +1204,7 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "node_modules/@types/react/index.d.ts",
-                  "lineNumber": 359
-                },
+                "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false
               }
             ]
@@ -1618,10 +1216,7 @@
             "tags": [],
             "label": "requiresAppContext",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 243
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1634,10 +1229,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 244
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           }
         ],
@@ -1660,10 +1252,7 @@
           },
           "<Params, MetaData, ActionGroupIds>"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 212
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1676,10 +1265,7 @@
             "signature": [
               "Params"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 217
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1689,10 +1275,7 @@
             "tags": [],
             "label": "alertInterval",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 218
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1702,10 +1285,7 @@
             "tags": [],
             "label": "alertThrottle",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 219
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1718,10 +1298,7 @@
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 220
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1734,16 +1311,12 @@
             "signature": [
               "<Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 221
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.property",
+                "id": "def-public.AlertTypeParamsExpressionProps.setAlertParams.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "property",
@@ -1751,15 +1324,13 @@
                 "signature": [
                   "Key"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 221
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.value",
+                "id": "def-public.AlertTypeParamsExpressionProps.setAlertParams.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
@@ -1767,13 +1338,12 @@
                 "signature": [
                   "Params[Key] | undefined"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 221
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -1783,7 +1353,7 @@
             "label": "setAlertProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
+              "<Prop extends \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -1791,18 +1361,14 @@
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
-              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
+              "<Params>, \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 222
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.key",
+                "id": "def-public.AlertTypeParamsExpressionProps.setAlertProperty.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "key",
@@ -1810,15 +1376,13 @@
                 "signature": [
                   "Prop"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 223
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.value",
+                "id": "def-public.AlertTypeParamsExpressionProps.setAlertProperty.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "value",
@@ -1832,15 +1396,14 @@
                     "section": "def-common.Alert",
                     "text": "Alert"
                   },
-                  "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null"
+                  "<Params>, \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                  "lineNumber": 224
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -1858,10 +1421,7 @@
                 "text": "IErrorObject"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 226
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1871,10 +1431,7 @@
             "tags": [],
             "label": "defaultActionGroupId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 227
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1894,10 +1451,7 @@
               },
               "<ActionGroupIds>[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 228
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1910,10 +1464,7 @@
             "signature": [
               "MetaData | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 229
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1932,10 +1483,7 @@
                 "text": "ChartsPluginSetup"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 230
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           },
           {
@@ -1954,10 +1502,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 231
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           }
         ],
@@ -1970,10 +1515,7 @@
         "tags": [],
         "label": "Comparator",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1983,10 +1525,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 9
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           },
           {
@@ -1996,10 +1535,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 10
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           },
           {
@@ -2009,10 +1545,7 @@
             "tags": [],
             "label": "requiredValues",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           }
         ],
@@ -2025,10 +1558,7 @@
         "tags": [],
         "label": "GroupByType",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2038,10 +1568,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           },
           {
@@ -2051,10 +1578,7 @@
             "tags": [],
             "label": "sizeRequired",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           },
           {
@@ -2064,10 +1588,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           },
           {
@@ -2080,10 +1601,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false
           }
         ],
@@ -2096,10 +1614,7 @@
         "tags": [],
         "label": "IErrorObject",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 247
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2112,10 +1627,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 248
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           }
         ],
@@ -2128,10 +1640,7 @@
         "tags": [],
         "label": "IOption",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -2141,10 +1650,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false
           },
           {
@@ -2157,10 +1663,7 @@
             "signature": [
               "{ value: string; label: string; }[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false
           }
         ],
@@ -2190,10 +1693,7 @@
             "text": "CoreStart"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-          "lineNumber": 34
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
         "deprecated": false,
         "children": [
           {
@@ -2212,16 +1712,13 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           },
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.TriggersAndActionsUiServices.charts",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "charts",
             "description": [],
@@ -2232,12 +1729,12 @@
                 "docId": "kibChartsPluginApi",
                 "section": "def-public.ChartsPluginSetup",
                 "text": "ChartsPluginSetup"
-              }
+              },
+              " & { activeCursor: ",
+              "ActiveCursor",
+              "; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           },
           {
@@ -2257,10 +1754,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           },
           {
@@ -2272,18 +1766,15 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "spacesOss",
+                "pluginId": "spaces",
                 "scope": "public",
-                "docId": "kibSpacesOssPluginApi",
+                "docId": "kibSpacesPluginApi",
                 "section": "def-public.SpacesApi",
                 "text": "SpacesApi"
               },
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           },
           {
@@ -2303,10 +1794,17 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 39
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.isCloud",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloud",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           },
           {
@@ -2321,16 +1819,12 @@
               "EuiBreadcrumb",
               "[]) => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.crumbs",
+                "id": "def-public.TriggersAndActionsUiServices.setBreadcrumbs.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "crumbs",
@@ -2339,13 +1833,12 @@
                   "EuiBreadcrumb",
                   "[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-                  "lineNumber": 40
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -2357,24 +1850,21 @@
             "signature": [
               "{ get: (id: string) => ",
               "ActionTypeModel",
-              "<unknown, unknown, any>; register: (objectType: ",
+              "<unknown, unknown, any>; list: () => ",
               "ActionTypeModel",
-              "<unknown, unknown, any>) => void; list: () => ",
+              "<unknown, unknown, any>[]; register: (objectType: ",
               "ActionTypeModel",
-              "<unknown, unknown, any>[]; has: (id: string) => boolean; }"
+              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 41
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.TriggersAndActionsUiServices.alertTypeRegistry",
+            "id": "def-public.TriggersAndActionsUiServices.ruleTypeRegistry",
             "type": "Object",
             "tags": [],
-            "label": "alertTypeRegistry",
+            "label": "ruleTypeRegistry",
             "description": [],
             "signature": [
               "{ get: (id: string) => ",
@@ -2385,7 +1875,7 @@
                 "section": "def-public.AlertTypeModel",
                 "text": "AlertTypeModel"
               },
-              "<Record<string, unknown>>; register: (objectType: ",
+              "<Record<string, unknown>>; list: () => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -2393,7 +1883,7 @@
                 "section": "def-public.AlertTypeModel",
                 "text": "AlertTypeModel"
               },
-              "<Record<string, unknown>>) => void; list: () => ",
+              "<Record<string, unknown>>[]; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -2401,12 +1891,9 @@
                 "section": "def-public.AlertTypeModel",
                 "text": "AlertTypeModel"
               },
-              "<Record<string, unknown>>[]; has: (id: string) => boolean; }"
+              "<Record<string, unknown>>) => void; has: (id: string) => boolean; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 42
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           },
           {
@@ -2426,10 +1913,7 @@
               },
               "<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 43
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           },
           {
@@ -2449,10 +1933,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           },
           {
@@ -2465,10 +1946,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
           }
         ],
@@ -2481,10 +1959,7 @@
         "tags": [],
         "label": "ValidationResult",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 127
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2497,10 +1972,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 128
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
           }
         ],
@@ -2515,10 +1987,7 @@
         "tags": [],
         "label": "AGGREGATION_TYPES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2529,10 +1998,7 @@
         "tags": [],
         "label": "AlertFlyoutCloseReason",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 79
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2543,10 +2009,7 @@
         "tags": [],
         "label": "COMPARATORS",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2557,10 +2020,7 @@
         "tags": [],
         "label": "TIME_UNITS",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/constants/time_units.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/constants/time_units.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2579,10 +2039,7 @@
           "UserConfiguredActionConnector",
           "<Config, Secrets>"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 161
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2612,10 +2069,7 @@
           },
           "<ActionGroupIds> & { conditions: T; isRequired: true; })"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_form/alert_conditions.tsx",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_form/alert_conditions.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2629,16 +2083,13 @@
         "signature": [
           "{ get: (id: string) => ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>; register: (objectType: ",
+          "<ActionConnector, ActionParams, any>; list: () => ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>) => void; list: () => ",
+          "<ActionConnector, ActionParams, any>[]; register: (objectType: ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>[]; has: (id: string) => boolean; }"
+          "<ActionConnector, ActionParams, any>) => void; has: (id: string) => boolean; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 64
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2652,10 +2103,7 @@
         "signature": [
           "AsActionVariables<\"params\" | \"state\"> & Partial<AsActionVariables<\"context\">>"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 179
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2667,7 +2115,7 @@
         "label": "Alert",
         "description": [],
         "signature": [
-          "{ enabled: boolean; id: string; name: string; params: Record<string, unknown>; actions: ",
+          "{ enabled: boolean; id: string; name: string; tags: string[]; params: Record<string, unknown>; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2675,7 +2123,7 @@
             "section": "def-common.AlertAction",
             "text": "AlertAction"
           },
-          "[]; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
+          "[]; throttle: string | null; alertTypeId: string; consumer: string; schedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2683,7 +2131,7 @@
             "section": "def-common.IntervalSchedule",
             "text": "IntervalSchedule"
           },
-          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
+          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2693,10 +2141,7 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 40
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2710,51 +2155,21 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertTypeRegistryContract",
+        "id": "def-public.AsApiContract",
         "type": "Type",
         "tags": [],
-        "label": "AlertTypeRegistryContract",
+        "label": "AsApiContract",
         "description": [],
         "signature": [
-          "{ get: (id: string) => ",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.AlertTypeModel",
-            "text": "AlertTypeModel"
-          },
-          "<Record<string, unknown>>; register: (objectType: ",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.AlertTypeModel",
-            "text": "AlertTypeModel"
-          },
-          "<Record<string, unknown>>) => void; list: () => ",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.AlertTypeModel",
-            "text": "AlertTypeModel"
-          },
-          "<Record<string, unknown>>[]; has: (id: string) => boolean; }"
+          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 68
-        },
+        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2768,10 +2183,7 @@
         "signature": [
           "string[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2785,10 +2197,45 @@
         "signature": [
           "string[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleTypeRegistryContract",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeRegistryContract",
+        "description": [],
+        "signature": [
+          "{ get: (id: string) => ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.AlertTypeModel",
+            "text": "AlertTypeModel"
+          },
+          "<Record<string, unknown>>; list: () => ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.AlertTypeModel",
+            "text": "AlertTypeModel"
+          },
+          "<Record<string, unknown>>[]; register: (objectType: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.AlertTypeModel",
+            "text": "AlertTypeModel"
+          },
+          "<Record<string, unknown>>) => void; has: (id: string) => boolean; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2802,10 +2249,7 @@
         "signature": [
           "\"https://www.elastic.co/subscriptions\""
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2818,10 +2262,7 @@
         "tags": [],
         "label": "builtInAggregationTypes",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2831,10 +2272,7 @@
             "tags": [],
             "label": "count",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2844,10 +2282,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 20
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -2860,10 +2295,7 @@
                 "signature": [
                   "false"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 21
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -2882,10 +2314,7 @@
                     "text": "AGGREGATION_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 22
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -2898,10 +2327,7 @@
                 "signature": [
                   "never[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 23
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               }
             ]
@@ -2913,10 +2339,7 @@
             "tags": [],
             "label": "avg",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2926,10 +2349,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 26
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -2942,10 +2362,7 @@
                 "signature": [
                   "true"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 27
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -2958,10 +2375,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 28
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -2980,10 +2394,7 @@
                     "text": "AGGREGATION_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 29
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               }
             ]
@@ -2995,10 +2406,7 @@
             "tags": [],
             "label": "sum",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
             "deprecated": false,
             "children": [
               {
@@ -3008,10 +2416,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 32
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -3024,10 +2429,7 @@
                 "signature": [
                   "true"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 33
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -3040,10 +2442,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 34
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -3062,10 +2461,7 @@
                     "text": "AGGREGATION_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 35
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               }
             ]
@@ -3077,10 +2473,7 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
             "deprecated": false,
             "children": [
               {
@@ -3090,10 +2483,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 38
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -3106,10 +2496,7 @@
                 "signature": [
                   "true"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 39
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -3122,10 +2509,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 40
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -3144,10 +2528,7 @@
                     "text": "AGGREGATION_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 41
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               }
             ]
@@ -3159,10 +2540,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-              "lineNumber": 43
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
             "deprecated": false,
             "children": [
               {
@@ -3172,10 +2550,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 44
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -3188,10 +2563,7 @@
                 "signature": [
                   "true"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 45
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -3204,10 +2576,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 46
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               },
               {
@@ -3226,10 +2595,7 @@
                     "text": "AGGREGATION_TYPES"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
-                  "lineNumber": 47
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false
               }
             ]
@@ -3244,10 +2610,7 @@
         "tags": [],
         "label": "builtInComparators",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-          "lineNumber": 19
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
         "deprecated": false,
         "children": [
           {
@@ -3257,10 +2620,7 @@
             "tags": [],
             "label": "[COMPARATORS.GREATER_THAN]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
             "deprecated": false,
             "children": [
               {
@@ -3270,10 +2630,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 21
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3292,10 +2649,7 @@
                     "text": "COMPARATORS"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 24
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3305,10 +2659,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 25
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               }
             ]
@@ -3320,10 +2671,7 @@
             "tags": [],
             "label": "[COMPARATORS.GREATER_THAN_OR_EQUALS]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
             "deprecated": false,
             "children": [
               {
@@ -3333,10 +2681,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 28
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3355,10 +2700,7 @@
                     "text": "COMPARATORS"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 34
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3368,10 +2710,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 35
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               }
             ]
@@ -3383,10 +2722,7 @@
             "tags": [],
             "label": "[COMPARATORS.LESS_THAN]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
             "deprecated": false,
             "children": [
               {
@@ -3396,10 +2732,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 38
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3418,10 +2751,7 @@
                     "text": "COMPARATORS"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 41
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3431,10 +2761,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 42
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               }
             ]
@@ -3446,10 +2773,7 @@
             "tags": [],
             "label": "[COMPARATORS.LESS_THAN_OR_EQUALS]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
             "deprecated": false,
             "children": [
               {
@@ -3459,10 +2783,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 45
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3481,10 +2802,7 @@
                     "text": "COMPARATORS"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 51
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3494,10 +2812,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 52
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               }
             ]
@@ -3509,10 +2824,7 @@
             "tags": [],
             "label": "[COMPARATORS.BETWEEN]",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-              "lineNumber": 54
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
             "deprecated": false,
             "children": [
               {
@@ -3522,10 +2834,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 55
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3544,10 +2853,7 @@
                     "text": "COMPARATORS"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 58
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               },
               {
@@ -3557,10 +2863,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
-                  "lineNumber": 59
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false
               }
             ]
@@ -3575,10 +2878,7 @@
         "tags": [],
         "label": "builtInGroupByTypes",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3588,10 +2888,7 @@
             "tags": [],
             "label": "all",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-              "lineNumber": 12
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
             "deprecated": false,
             "children": [
               {
@@ -3601,10 +2898,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-                  "lineNumber": 13
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false
               },
               {
@@ -3617,10 +2911,7 @@
                 "signature": [
                   "false"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-                  "lineNumber": 19
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false
               },
               {
@@ -3630,10 +2921,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-                  "lineNumber": 20
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false
               },
               {
@@ -3646,10 +2934,7 @@
                 "signature": [
                   "never[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-                  "lineNumber": 21
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false
               }
             ]
@@ -3661,10 +2946,7 @@
             "tags": [],
             "label": "top",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
             "deprecated": false,
             "children": [
               {
@@ -3674,10 +2956,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-                  "lineNumber": 24
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false
               },
               {
@@ -3690,10 +2969,7 @@
                 "signature": [
                   "true"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-                  "lineNumber": 30
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false
               },
               {
@@ -3703,10 +2979,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-                  "lineNumber": 31
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false
               },
               {
@@ -3719,10 +2992,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
-                  "lineNumber": 32
-                },
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false
               }
             ]
@@ -3737,10 +3007,7 @@
         "tags": [],
         "label": "firstFieldOption",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-          "lineNumber": 92
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -3750,10 +3017,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-              "lineNumber": 93
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false
           },
           {
@@ -3763,10 +3027,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
-              "lineNumber": 99
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false
           }
         ],
@@ -3780,10 +3041,7 @@
       "tags": [],
       "label": "TriggersAndActionsUIPublicPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-        "lineNumber": 41
-      },
+      "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -3799,18 +3057,15 @@
             "ActionTypeModel",
             "<any, any, any>>"
           ],
-          "source": {
-            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 42
-          },
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginSetup.alertTypeRegistry",
+          "id": "def-public.TriggersAndActionsUIPublicPluginSetup.ruleTypeRegistry",
           "type": "Object",
           "tags": [],
-          "label": "alertTypeRegistry",
+          "label": "ruleTypeRegistry",
           "description": [],
           "signature": [
             "TypeRegistry",
@@ -3824,10 +3079,7 @@
             },
             "<any>>"
           ],
-          "source": {
-            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 43
-          },
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false
         }
       ],
@@ -3841,10 +3093,7 @@
       "tags": [],
       "label": "TriggersAndActionsUIPublicPluginStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-        "lineNumber": 46
-      },
+      "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -3860,18 +3109,15 @@
             "ActionTypeModel",
             "<any, any, any>>"
           ],
-          "source": {
-            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 47
-          },
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.alertTypeRegistry",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.ruleTypeRegistry",
           "type": "Object",
           "tags": [],
-          "label": "alertTypeRegistry",
+          "label": "ruleTypeRegistry",
           "description": [],
           "signature": [
             "TypeRegistry",
@@ -3885,10 +3131,7 @@
             },
             "<any>>"
           ],
-          "source": {
-            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 48
-          },
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -3905,54 +3148,27 @@
             "ConnectorAddFlyoutProps",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 49
-          },
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.props",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddConnectorFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "{ onClose: () => void; consumer?: string | undefined; actionTypes?: ",
-                {
-                  "pluginId": "actions",
-                  "scope": "common",
-                  "docId": "kibActionsPluginApi",
-                  "section": "def-common.ActionType",
-                  "text": "ActionType"
-                },
-                "[] | undefined; onTestConnector?: ((connector: ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.ActionConnector",
-                  "text": "ActionConnector"
-                },
-                "<Record<string, unknown>, Record<string, unknown>>) => void) | undefined; reloadConnectors?: (() => Promise<void | ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.ActionConnector",
-                  "text": "ActionConnector"
-                },
-                "<Record<string, unknown>, Record<string, unknown>>[]>) | undefined; }"
+                "Pick<",
+                "ConnectorAddFlyoutProps",
+                ", \"onClose\" | \"consumer\" | \"actionTypes\" | \"onTestConnector\" | \"reloadConnectors\">"
               ],
-              "source": {
-                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 50
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "triggersActionsUi",
@@ -3968,48 +3184,27 @@
             "ConnectorEditFlyoutProps",
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 52
-          },
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.props",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditConnectorFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "{ onClose: () => void; consumer?: string | undefined; reloadConnectors?: (() => Promise<void | ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.ActionConnector",
-                  "text": "ActionConnector"
-                },
-                "<Record<string, unknown>, Record<string, unknown>>[]>) | undefined; initialConnector: ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.ActionConnector",
-                  "text": "ActionConnector"
-                },
-                "<Record<string, unknown>, Record<string, unknown>>; tab?: ",
-                "EditConectorTabs",
-                " | undefined; }"
+                "Pick<",
+                "ConnectorEditFlyoutProps",
+                ", \"onClose\" | \"consumer\" | \"reloadConnectors\" | \"initialConnector\" | \"tab\">"
               ],
-              "source": {
-                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 53
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "triggersActionsUi",
@@ -4025,46 +3220,27 @@
             "AlertAddProps",
             "<Record<string, any>>, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
           ],
-          "source": {
-            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 55
-          },
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.props",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddAlertFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "{ onClose: (reason: ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.AlertFlyoutCloseReason",
-                  "text": "AlertFlyoutCloseReason"
-                },
-                ") => void; metadata?: Record<string, any> | undefined; onSave?: (() => Promise<void>) | undefined; alertTypeId?: string | undefined; consumer: string; canChangeTrigger?: boolean | undefined; initialValues?: Partial<Pick<",
-                {
-                  "pluginId": "alerting",
-                  "scope": "common",
-                  "docId": "kibAlertingPluginApi",
-                  "section": "def-common.Alert",
-                  "text": "Alert"
-                },
-                "<Record<string, unknown>>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">> | undefined; reloadAlerts?: (() => Promise<void>) | undefined; }"
+                "Pick<",
+                "AlertAddProps",
+                "<Record<string, any>>, \"onClose\" | \"metadata\" | \"onSave\" | \"alertTypeId\" | \"consumer\" | \"canChangeTrigger\" | \"initialValues\" | \"reloadAlerts\">"
               ],
-              "source": {
-                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 56
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "triggersActionsUi",
@@ -4080,46 +3256,27 @@
             "AlertEditProps",
             "<Record<string, any>>, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
           ],
-          "source": {
-            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 58
-          },
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.props",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "{ onClose: (reason: ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.AlertFlyoutCloseReason",
-                  "text": "AlertFlyoutCloseReason"
-                },
-                ") => void; metadata?: Record<string, any> | undefined; onSave?: (() => Promise<void>) | undefined; reloadAlerts?: (() => Promise<void>) | undefined; initialAlert: Pick<",
-                {
-                  "pluginId": "alerting",
-                  "scope": "common",
-                  "docId": "kibAlertingPluginApi",
-                  "section": "def-common.Alert",
-                  "text": "Alert"
-                },
-                "<Record<string, unknown>>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">; }"
+                "Pick<",
+                "AlertEditProps",
+                "<Record<string, any>>, \"onClose\" | \"metadata\" | \"onSave\" | \"reloadAlerts\" | \"initialAlert\">"
               ],
-              "source": {
-                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 59
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -4139,10 +3296,7 @@
         "signature": [
           "(anyParams: unknown) => string | undefined"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-          "lineNumber": 46
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4155,10 +3309,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 46
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4176,10 +3327,7 @@
         "signature": [
           "(timeWindowUnit: string) => string | undefined"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-          "lineNumber": 128
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4192,10 +3340,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 128
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4215,12 +3360,9 @@
         "label": "CoreQueryParams",
         "description": [],
         "signature": [
-          "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
+          "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-          "lineNumber": 40
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4234,10 +3376,7 @@
         "signature": [
           "100"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4251,10 +3390,7 @@
         "signature": [
           "1000"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
-          "lineNumber": 22
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4268,10 +3404,7 @@
         "signature": [
           "1000"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4283,12 +3416,9 @@
         "label": "TimeSeriesQuery",
         "description": [],
         "signature": [
-          "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
+          "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
-          "lineNumber": 29
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4301,10 +3431,7 @@
         "tags": [],
         "label": "CoreQueryParamsSchemaProperties",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4320,10 +3447,7 @@
               "Type",
               "<string | string[]>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false
           },
           {
@@ -4339,10 +3463,7 @@
               "Type",
               "<string>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false
           },
           {
@@ -4358,10 +3479,7 @@
               "Type",
               "<string>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false
           },
           {
@@ -4377,10 +3495,7 @@
               "Type",
               "<string | undefined>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false
           },
           {
@@ -4396,10 +3511,7 @@
               "Type",
               "<string>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false
           },
           {
@@ -4415,10 +3527,7 @@
               "Type",
               "<string | undefined>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false
           },
           {
@@ -4434,10 +3543,7 @@
               "Type",
               "<number | undefined>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false
           },
           {
@@ -4453,10 +3559,7 @@
               "Type",
               "<number>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false
           },
           {
@@ -4472,10 +3575,7 @@
               "Type",
               "<string>"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false
           }
         ],
@@ -4489,10 +3589,7 @@
       "tags": [],
       "label": "PluginStartContract",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/triggers_actions_ui/server/plugin.ts",
-        "lineNumber": 15
-      },
+      "path": "x-pack/plugins/triggers_actions_ui/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -4515,10 +3612,7 @@
             },
             ">; }"
           ],
-          "source": {
-            "path": "x-pack/plugins/triggers_actions_ui/server/plugin.ts",
-            "lineNumber": 16
-          },
+          "path": "x-pack/plugins/triggers_actions_ui/server/plugin.ts",
           "deprecated": false
         }
       ],
@@ -4537,10 +3631,7 @@
         "tags": [],
         "label": "TimeSeriesResult",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -4560,10 +3651,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
-              "lineNumber": 9
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
             "deprecated": false
           }
         ],
@@ -4576,10 +3664,7 @@
         "tags": [],
         "label": "TimeSeriesResultRow",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -4589,10 +3674,7 @@
             "tags": [],
             "label": "group",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
-              "lineNumber": 13
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
             "deprecated": false
           },
           {
@@ -4612,10 +3694,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
-              "lineNumber": 14
-            },
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
             "deprecated": false
           }
         ],
@@ -4634,10 +3713,7 @@
         "signature": [
           "[string, number]"
         ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

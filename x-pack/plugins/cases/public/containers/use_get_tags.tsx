@@ -7,6 +7,7 @@
 
 import { useEffect, useReducer, useRef, useCallback } from 'react';
 import { useToasts } from '../common/lib/kibana';
+import { useOwnerContext } from '../components/owner_context/use_owner_context';
 import { getTags } from './api';
 import * as i18n from './translations';
 
@@ -52,6 +53,7 @@ const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
 const initialData: string[] = [];
 
 export const useGetTags = (): UseGetTags => {
+  const owner = useOwnerContext();
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: true,
     isError: false,
@@ -68,7 +70,7 @@ export const useGetTags = (): UseGetTags => {
       abortCtrlRef.current = new AbortController();
       dispatch({ type: 'FETCH_INIT' });
 
-      const response = await getTags(abortCtrlRef.current.signal);
+      const response = await getTags(abortCtrlRef.current.signal, owner);
 
       if (!isCancelledRef.current) {
         dispatch({ type: 'FETCH_SUCCESS', payload: response });

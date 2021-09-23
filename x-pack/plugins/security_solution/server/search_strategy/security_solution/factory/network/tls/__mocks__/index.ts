@@ -18,6 +18,7 @@ import {
 export const mockOptions: NetworkTlsRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -61,6 +62,7 @@ export const formattedSearchStrategyResponse = {
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -79,7 +81,7 @@ export const formattedSearchStrategyResponse = {
                   issuers: { terms: { field: 'tls.server.issuer' } },
                   subjects: { terms: { field: 'tls.server.subject' } },
                   not_after: { terms: { field: 'tls.server.not_after' } },
-                  ja3: { terms: { field: 'tls.server.ja3s' } },
+                  ja3: { terms: { field: 'tls.client.ja3s' } },
                 },
               },
             },
@@ -115,6 +117,7 @@ export const expectedDsl = {
   allowNoIndices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -133,7 +136,7 @@ export const expectedDsl = {
           issuers: { terms: { field: 'tls.server.issuer' } },
           subjects: { terms: { field: 'tls.server.subject' } },
           not_after: { terms: { field: 'tls.server.not_after' } },
-          ja3: { terms: { field: 'tls.server.ja3s' } },
+          ja3: { terms: { field: 'tls.client.ja3s' } },
         },
       },
     },

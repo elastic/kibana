@@ -27,14 +27,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('reporting/ecommerce');
-      await esArchiver.loadIfNeeded('reporting/ecommerce_kibana');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
+      });
+
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.load(ecommerceSOPath);
       await browser.setWindowSize(1600, 850);
 
-      await security.role.create('test_reporting_user', {
+      await security.role.create('test_dashboard_user', {
         elasticsearch: {
           cluster: [],
           indices: [
@@ -50,16 +55,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           {
             spaces: ['*'],
             base: [],
-            feature: { dashboard: ['minimal_all', 'generate_report'] },
+            feature: { dashboard: ['minimal_all'] },
           },
         ],
       });
 
-      await security.testUser.setRoles(['test_reporting_user']);
+      await security.testUser.setRoles([
+        'test_dashboard_user',
+        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See the xpack.reporting.roles.enabled setting
+      ]);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.unload(ecommerceSOPath);
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -69,15 +77,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Print PDF button', () => {
-      it('is not available if new', async () => {
+      it('is available if new', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
-      it('becomes available when saved', async () => {
+      it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
         await PageObjects.reporting.openPdfReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
@@ -104,15 +112,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Print PNG button', () => {
-      it('is not available if new', async () => {
+      it('is available if new', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPngReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
-      it('becomes available when saved', async () => {
+      it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
         await PageObjects.reporting.openPngReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
@@ -213,7 +221,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
-        await kibanaServer.uiSettings.replace({ 'doc_table:legacy': false });
+        await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');

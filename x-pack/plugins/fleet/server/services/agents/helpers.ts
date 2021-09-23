@@ -7,17 +7,18 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { SearchHit } from '../../../../../../typings/elasticsearch';
+import type { SearchHit } from '../../../../../../src/core/types/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
+import { getAgentStatus } from '../../../common/services/agent_status';
 
 type FleetServerAgentESResponse =
-  | estypes.MultiGetHit<FleetServerAgent>
+  | estypes.MgetHit<FleetServerAgent>
   | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
   | SearchHit<FleetServerAgent>;
 
 export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
   // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
-  return {
+  const agent: Agent = {
     id: hit._id,
     ...hit._source,
     policy_revision: hit._source?.policy_revision_idx,
@@ -25,6 +26,9 @@ export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
     status: undefined,
     packages: hit._source?.packages ?? [],
   };
+
+  agent.status = getAgentStatus(agent);
+  return agent;
 }
 
 export function agentSOAttributesToFleetServerAgentDoc(

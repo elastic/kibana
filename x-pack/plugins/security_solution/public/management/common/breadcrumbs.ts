@@ -6,13 +6,9 @@
  */
 
 import { ChromeBreadcrumb } from 'kibana/public';
-import { isEmpty } from 'lodash/fp';
 import { AdministrationSubTab } from '../types';
 import { ENDPOINTS_TAB, EVENT_FILTERS_TAB, POLICIES_TAB, TRUSTED_APPS_TAB } from './translations';
 import { AdministrationRouteSpyState } from '../../common/utils/route/types';
-import { GetUrlForApp } from '../../common/components/navigation/types';
-import { ADMINISTRATION } from '../../app/home/translations';
-import { APP_ID, SecurityPageName } from '../../../common/constants';
 
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.endpoints]: ENDPOINTS_TAB,
@@ -21,18 +17,8 @@ const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.eventFilters]: EVENT_FILTERS_TAB,
 };
 
-export function getBreadcrumbs(
-  params: AdministrationRouteSpyState,
-  search: string[],
-  getUrlForApp: GetUrlForApp
-): ChromeBreadcrumb[] {
+export function getBreadcrumbs(params: AdministrationRouteSpyState): ChromeBreadcrumb[] {
   return [
-    {
-      text: ADMINISTRATION,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.administration}`, {
-        path: !isEmpty(search[0]) ? search[0] : '',
-      }),
-    },
     ...(params?.tabName ? [params?.tabName] : []).map((tabName) => ({
       text: TabNameMappedToI18nKey[tabName],
       href: '',

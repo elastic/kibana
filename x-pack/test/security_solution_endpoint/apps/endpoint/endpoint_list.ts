@@ -20,14 +20,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const expectedData = [
     [
-      'Hostname',
-      'Agent Status',
-      'Integration Policy',
-      'Policy Status',
-      'Operating System',
-      'IP Address',
+      'Endpoint',
+      'Agent status',
+      'Policy',
+      'Policy status',
+      'OS',
+      'IP address',
       'Version',
-      'Last Active',
+      'Last active',
       'Actions',
     ],
     [
@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'windows 10.0',
       '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
       '6.8.0',
-      'Apr 19, 2021 @ 14:10:05.309',
+      'Jul 21, 2021 @ 20:04:01.950',
       '',
     ],
     [
@@ -49,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'windows 10.0',
       '10.192.213.130, 10.70.28.129',
       '6.6.1',
-      'Apr 19, 2021 @ 14:10:05.309',
+      'Jul 21, 2021 @ 20:04:01.950',
       '',
     ],
     [
@@ -60,7 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'windows 10.0',
       '10.46.229.234',
       '6.0.0',
-      'Apr 19, 2021 @ 14:10:05.309',
+      'Jul 21, 2021 @ 20:04:01.950',
       '',
     ],
   ];
@@ -84,7 +84,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('finds data after load and polling', async () => {
-        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/endpoint/metadata/destination_index',
+          { useCreate: true }
+        );
         await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 1100);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
@@ -93,7 +96,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/endpoint/metadata/destination_index',
+          { useCreate: true }
+        );
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
@@ -118,8 +124,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('when the hostname is clicked on,', () => {
         it('display the details flyout', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
-          await testSubjects.existOrFail('endpointDetailsUpperList');
-          await testSubjects.existOrFail('endpointDetailsLowerList');
+          await testSubjects.existOrFail('endpointDetailsList');
         });
 
         it('updates the details flyout when a new hostname is selected from the list', async () => {
@@ -181,7 +186,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'Policy Status',
             'IP Address',
             'Hostname',
-            'Sensor Version',
+            'Version',
           ];
           const keys = await pageObjects.endpoint.endpointFlyoutDescriptionKeys(
             'endpointDetailsFlyout'
@@ -210,7 +215,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('displays the correct table data for the kql queries', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/endpoint/metadata/destination_index',
+          { useCreate: true }
+        );
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
@@ -225,14 +233,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
-            'Hostname',
-            'Agent Status',
-            'Integration Policy',
-            'Policy Status',
-            'Operating System',
-            'IP Address',
+            'Endpoint',
+            'Agent status',
+            'Policy',
+            'Policy status',
+            'OS',
+            'IP address',
             'Version',
-            'Last Active',
+            'Last active',
             'Actions',
           ],
           ['No items found'],
@@ -255,14 +263,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
-            'Hostname',
-            'Agent Status',
-            'Integration Policy',
-            'Policy Status',
-            'Operating System',
-            'IP Address',
+            'Endpoint',
+            'Agent status',
+            'Policy',
+            'Policy status',
+            'OS',
+            'IP address',
             'Version',
-            'Last Active',
+            'Last active',
             'Actions',
           ],
           [
@@ -273,7 +281,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'windows 10.0',
             '10.192.213.130, 10.70.28.129',
             '6.6.1',
-            'Apr 19, 2021 @ 14:10:05.309',
+            'Jul 21, 2021 @ 20:04:01.950',
             '',
           ],
           [
@@ -284,7 +292,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'windows 10.0',
             '10.46.229.234',
             '6.0.0',
-            'Apr 19, 2021 @ 14:10:05.309',
+            'Jul 21, 2021 @ 20:04:01.950',
             '',
           ],
         ];

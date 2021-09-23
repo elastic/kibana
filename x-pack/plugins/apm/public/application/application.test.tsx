@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { CoreStart } from 'src/core/public';
+import { CoreStart, DocLinksStart, HttpStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { ApmPluginStartDeps } from '../plugin';
 
 jest.mock('../services/rest/index_pattern', () => ({
   createStaticIndexPattern: () => Promise.resolve(undefined),
@@ -39,15 +41,12 @@ describe('renderApp', () => {
   });
 
   it('renders the app', () => {
-    const {
-      core,
-      config,
-      observabilityRuleTypeRegistry,
-    } = mockApmPluginContextValue;
+    const { core, config, observabilityRuleTypeRegistry } =
+      mockApmPluginContextValue;
+
     const plugins = {
       licensing: { license$: new Observable() },
-      triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
-      usageCollection: { reportUiCounter: () => {} },
+      triggersActionsUi: { actionTypeRegistry: {}, ruleTypeRegistry: {} },
       data: {
         query: {
           timefilter: {
@@ -56,7 +55,7 @@ describe('renderApp', () => {
         },
       },
     };
-    const params = {
+    const appMountParameters = {
       element: document.createElement('div'),
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
@@ -64,18 +63,43 @@ describe('renderApp', () => {
 
     const data = dataPluginMock.createStartContract();
     const embeddable = embeddablePluginMock.createStartContract();
-    const startDeps = {
+
+    const pluginsStart = {
+      data,
+      embeddable,
+      observability: {
+        navigation: {
+          registerSections: () => jest.fn(),
+          PageTemplate: ({ children }: { children: React.ReactNode }) => (
+            <div>hello worlds {children}</div>
+          ),
+        },
+      },
       triggersActionsUi: {
         actionTypeRegistry: {},
-        alertTypeRegistry: {},
+        ruleTypeRegistry: {},
         getAddAlertFlyout: jest.fn(),
         getEditAlertFlyout: jest.fn(),
       },
-      data,
-      embeddable,
-    };
+      usageCollection: { reportUiCounter: () => {} },
+      http: {
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`,
+          get: () => `/basepath`,
+        },
+      } as HttpStart,
+      docLinks: {
+        DOC_LINK_VERSION: '0',
+        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        links: {
+          apm: {},
+          observability: { guide: '' },
+        },
+      } as unknown as DocLinksStart,
+    } as unknown as ApmPluginStartDeps;
+
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
-    createCallApmApi((core as unknown) as CoreStart);
+    createCallApmApi(core as unknown as CoreStart);
 
     jest
       .spyOn(window.console, 'warn')
@@ -93,8 +117,8 @@ describe('renderApp', () => {
       unmount = renderApp({
         coreStart: core as any,
         pluginsSetup: plugins as any,
-        appMountParameters: params as any,
-        pluginsStart: startDeps as any,
+        appMountParameters: appMountParameters as any,
+        pluginsStart,
         config,
         observabilityRuleTypeRegistry,
       });

@@ -18,11 +18,12 @@ import { deleteRules } from '../../rules/delete_rules';
 import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
-import { deleteNotifications } from '../../notifications/delete_notifications';
-import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { readRules } from '../../rules/read_rules';
 
-export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const deleteRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  isRuleRegistryEnabled: boolean
+) => {
   router.delete(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -45,43 +46,38 @@ export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
       try {
         const { id, rule_id: ruleId } = request.query;
 
-        const alertsClient = context.alerting?.getAlertsClient();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const rulesClient = context.alerting?.getRulesClient();
 
-        if (!alertsClient) {
+        if (!rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-        const rule = await deleteRules({
-          alertsClient,
-          id,
-          ruleId,
-        });
-        if (rule != null) {
-          await deleteNotifications({ alertsClient, ruleAlertId: rule.id });
-          await deleteRuleActionsSavedObject({
-            ruleAlertId: rule.id,
-            savedObjectsClient,
-          });
-          const ruleStatuses = await ruleStatusClient.find({
-            perPage: 6,
-            search: rule.id,
-            searchFields: ['alertId'],
-          });
-          ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
-          const transformed = transform(rule, undefined, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
-            return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
-          } else {
-            return response.ok({ body: transformed ?? {} });
-          }
-        } else {
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const rule = await readRules({ isRuleRegistryEnabled, rulesClient, id, ruleId });
+        if (!rule) {
           const error = getIdError({ id, ruleId });
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
+        }
+
+        const ruleStatuses = await ruleStatusClient.find({
+          logsCount: 6,
+          ruleId: rule.id,
+          spaceId: context.securitySolution.getSpaceId(),
+        });
+        await deleteRules({
+          rulesClient,
+          ruleStatusClient,
+          ruleStatuses,
+          id: rule.id,
+        });
+        const transformed = transform(rule, ruleStatuses[0], isRuleRegistryEnabled);
+        if (transformed == null) {
+          return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
+        } else {
+          return response.ok({ body: transformed ?? {} });
         }
       } catch (err) {
         const error = transformError(err);

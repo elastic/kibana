@@ -25,6 +25,11 @@ export interface NewPackagePolicyInputStream {
   data_stream: {
     dataset: string;
     type: string;
+    elasticsearch?: {
+      privileges?: {
+        indices?: string[];
+      };
+    };
   };
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
@@ -37,6 +42,7 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 
 export interface NewPackagePolicyInput {
   type: string;
+  policy_template?: string;
   enabled: boolean;
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
@@ -58,6 +64,7 @@ export interface NewPackagePolicy {
   output_id: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
+  vars?: PackagePolicyConfigRecord;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {
@@ -76,3 +83,8 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
 }
 
 export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
+
+export type DryRunPackagePolicy = NewPackagePolicy & {
+  errors?: Array<{ key: string | undefined; message: string }>;
+  missingVars?: string[];
+};

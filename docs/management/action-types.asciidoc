@@ -43,6 +43,10 @@ a| <<slack-action-type, Slack>>
 
 | Send a message to a Slack channel or user.
 
+a| <<swimlane-action-type, Swimlane>>
+
+| Create an incident in Swimlane.
+
 a| <<webhook-action-type, Webhook>>
 
 | Send a request to a web service.
@@ -70,6 +74,11 @@ image::images/connector-listing.png[Example connector listing in the Rules and C
 === Required permissions
 
 Access to connectors is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
+
+[float]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[connectors-list]]
@@ -110,7 +119,7 @@ image::images/connector-select-type.png[Connector select type]
 [[importing-and-exporting-connectors]]
 === Importing and exporting connectors
 
-To import and export rules, use the <<managing-saved-objects, Saved Objects Management UI>>.
+To import and export connectors, use the <<managing-saved-objects, Saved Objects Management UI>>.
 After a successful import, the proper banner is displayed:
 [role="screenshot"]
 image::images/coonectors-import-banner.png[Connectors import banner, width=50%]
@@ -126,5 +135,14 @@ image::images/connectors-with-missing-secrets.png[Connectors with missing secret
 For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
 before {kib} starts.
 
+[float]
+[[montoring-connectors]]
+=== Monitoring connectors
+
+The <<task-manager-health-monitoring,Task Manager health API>> helps you understand the performance of all tasks in your environment.
+However, if connectors fail to execute, they will report as successful to Task Manager. The failure stats will not
+accurately depict the performance of connectors.
+
+For more information on connector successes and failures, refer to the <<event-log-index,Event log index>>.
 
 include::connectors/index.asciidoc[]

@@ -13,11 +13,13 @@ import {
   getErrorsForDateReference,
   dateBasedOperationToExpression,
   hasDateField,
+  buildLabelFunction,
+  checkForDataLayerType,
 } from './utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
-const ofName = (name?: string) => {
+const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
     defaultMessage: 'Cumulative sum of {name}',
     values: {
@@ -28,7 +30,7 @@ const ofName = (name?: string) => {
         }),
     },
   });
-};
+});
 
 export type CumulativeSumIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -67,7 +69,9 @@ export const cumulativeSumOperation: OperationDefinition<
     return ofName(
       ref && 'sourceField' in ref
         ? indexPattern.getFieldByName(ref.sourceField)?.displayName
-        : undefined
+        : undefined,
+      undefined,
+      column.timeShift
     );
   },
   toExpression: (layer, columnId) => {
@@ -79,12 +83,15 @@ export const cumulativeSumOperation: OperationDefinition<
       label: ofName(
         ref && 'sourceField' in ref
           ? indexPattern.getFieldByName(ref.sourceField)?.displayName
-          : undefined
+          : undefined,
+        undefined,
+        previousColumn?.timeShift
       ),
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,
       scale: 'ratio',
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
       references: referenceIds,
       params: getFormatFromPreviousColumn(previousColumn),
@@ -102,13 +109,34 @@ export const cumulativeSumOperation: OperationDefinition<
       })
     );
   },
-  getDisabledStatus(indexPattern, layer) {
-    return checkForDateHistogram(
-      layer,
-      i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
-        defaultMessage: 'Cumulative sum',
-      })
-    )?.join(', ');
+  getDisabledStatus(indexPattern, layer, layerType) {
+    const opName = i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
+      defaultMessage: 'Cumulative sum',
+    });
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
+    }
+    return checkForDateHistogram(layer, opName)?.join(', ');
   },
   filterable: true,
+  documentation: {
+    section: 'calculation',
+    signature: i18n.translate('xpack.lens.indexPattern.cumulative_sum.signature', {
+      defaultMessage: 'metric: number',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.cumulativeSum.documentation.markdown', {
+      defaultMessage: `
+Calculates the cumulative sum of a metric over time, adding all previous values of a series to each value. To use this function, you need to configure a date histogram dimension as well.
+
+This calculation will be done separately for separate series defined by filters or top values dimensions.
+
+Example: Visualize the received bytes accumulated over time:
+\`cumulative_sum(sum(bytes))\`
+      `,
+    }),
+  },
+  shiftable: true,
 };

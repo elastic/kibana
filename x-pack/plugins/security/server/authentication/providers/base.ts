@@ -26,6 +26,7 @@ import type { Tokens } from '../tokens';
  */
 export interface AuthenticationProviderOptions {
   name: string;
+  getServerBaseURL: () => string;
   basePath: HttpServiceSetup['basePath'];
   getRequestOriginalURL: (
     request: KibanaRequest,
@@ -117,7 +118,7 @@ export abstract class BaseAuthenticationProvider {
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
     return this.authenticationInfoToAuthenticatedUser(
-      // @ts-expect-error @elastic/elasticsearch `AuthenticateResponse` type doesn't define `authentication_type` and `enabled`.
+      // @ts-expect-error Metadata is defined as Record<string, any>
       (
         await this.options.client
           .asScoped({ headers: { ...request.headers, ...authHeaders } })

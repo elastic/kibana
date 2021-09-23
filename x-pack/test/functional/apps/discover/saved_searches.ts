@@ -16,16 +16,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const panelActions = getService('dashboardPanelActions');
   const panelActionsTimeRange = getService('dashboardPanelTimeRange');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   describe('Discover Saved Searches', () => {
     before('initialize tests', async () => {
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.load(ecommerceSOPath);
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.unload(ecommerceSOPath);
       await kibanaServer.uiSettings.unset('doc_table:legacy');
     });
 

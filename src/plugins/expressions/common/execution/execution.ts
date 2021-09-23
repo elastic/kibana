@@ -20,12 +20,12 @@ import {
   Observable,
   ReplaySubject,
 } from 'rxjs';
-import { catchError, finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { abortSignalToPromise, now } from '../../../kibana_utils/common';
-import { RequestAdapter, Adapters } from '../../../inspector/common';
+import { Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstArgument,
@@ -42,8 +42,22 @@ import { ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
-import { TablesAdapter } from '../util/tables_adapter';
-import { ExpressionsInspectorAdapter } from '../util/expressions_inspector_adapter';
+import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
+
+/**
+ * The result returned after an expression function execution.
+ */
+export interface ExecutionResult<Output> {
+  /**
+   * Partial result flag.
+   */
+  partial: boolean;
+
+  /**
+   * The expression function result.
+   */
+  result: Output;
+}
 
 /**
  * AbortController is not available in Node until v15, so we
@@ -75,12 +89,6 @@ export interface ExecutionParams {
   params: ExpressionExecutionParams;
 }
 
-const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
-  requests: new RequestAdapter(),
-  tables: new TablesAdapter(),
-  expression: new ExpressionsInspectorAdapter(),
-});
-
 export class Execution<
   Input = unknown,
   Output = unknown,
@@ -91,7 +99,7 @@ export class Execution<
   /**
    * Dynamic state of the execution.
    */
-  public readonly state: ExecutionContainer<Output | ExpressionValueError>;
+  public readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>;
 
   /**
    * Initial input of the execution.
@@ -137,7 +145,7 @@ export class Execution<
   /**
    * Future that tracks result or error of this execution.
    */
-  public readonly result: Observable<Output | ExpressionValueError>;
+  public readonly result: Observable<ExecutionResult<Output | ExpressionValueError>>;
 
   /**
    * Keeping track of any child executions
@@ -150,11 +158,8 @@ export class Execution<
    * Contract is a public representation of `Execution` instances. Contract we
    * can return to other plugins for their consumption.
    */
-  public readonly contract: ExecutionContract<
-    Input,
-    Output,
-    InspectorAdapters
-  > = new ExecutionContract<Input, Output, InspectorAdapters>(this);
+  public readonly contract: ExecutionContract<Input, Output, InspectorAdapters> =
+    new ExecutionContract<Input, Output, InspectorAdapters>(this);
 
   public readonly expression: string;
 
@@ -174,7 +179,7 @@ export class Execution<
     this.expression = execution.expression || formatExpression(execution.ast!);
     const ast = execution.ast || parseExpression(this.expression);
 
-    this.state = createExecutionContainer<Output | ExpressionValueError>({
+    this.state = createExecutionContainer({
       ...executor.state.get(),
       state: 'not-started',
       ast,
@@ -198,15 +203,44 @@ export class Execution<
       },
       isSyncColorsEnabled: () => execution.params.syncColors,
       ...(execution.params as any).extraContext,
+      getExecutionContext: () => execution.params.executionContext,
     };
 
     this.result = this.input$.pipe(
-      switchMap((input) => this.race(this.invokeChain(this.state.get().ast.chain, input))),
+      switchMap((input) =>
+        this.race(this.invokeChain(this.state.get().ast.chain, input)).pipe(
+          (source) =>
+            new Observable<ExecutionResult<Output>>((subscriber) => {
+              let latest: ExecutionResult<Output> | undefined;
+
+              subscriber.add(
+                source.subscribe({
+                  next: (result) => {
+                    latest = { result, partial: true };
+                    subscriber.next(latest);
+                  },
+                  error: (error) => subscriber.error(error),
+                  complete: () => {
+                    if (latest) {
+                      latest.partial = false;
+                    }
+
+                    subscriber.complete();
+                  },
+                })
+              );
+
+              subscriber.add(() => {
+                latest = undefined;
+              });
+            })
+        )
+      ),
       catchError((error) => {
         if (this.abortController.signal.aborted) {
           this.childExecutions.forEach((childExecution) => childExecution.cancel());
 
-          return of(createAbortErrorValue());
+          return of({ result: createAbortErrorValue(), partial: false });
         }
 
         return throwError(error);
@@ -236,25 +270,25 @@ export class Execution<
    * N.B. `input` is initialized to `null` rather than `undefined` for legacy reasons,
    * because in legacy interpreter it was set to `null` by default.
    */
-  public start(input: Input = null as any): Observable<Output | ExpressionValueError> {
+  public start(
+    input: Input = null as any,
+    isSubExpression?: boolean
+  ): Observable<ExecutionResult<Output | ExpressionValueError>> {
     if (this.hasStarted) throw new Error('Execution already started.');
     this.hasStarted = true;
     this.input = input;
     this.state.transitions.start();
 
+    if (!isSubExpression) {
+      this.context.inspectorAdapters.requests?.reset();
+    }
+
     if (isObservable<Input>(input)) {
-      // `input$` should never complete
-      input.subscribe(
-        (value) => this.input$.next(value),
-        (error) => this.input$.error(error)
-      );
+      input.subscribe(this.input$);
     } else if (isPromise(input)) {
-      input.then(
-        (value) => this.input$.next(value),
-        (error) => this.input$.error(error)
-      );
+      from(input).subscribe(this.input$);
     } else {
-      this.input$.next(input);
+      of(input).subscribe(this.input$);
     }
 
     return this.result;
@@ -437,16 +471,19 @@ export class Execution<
       // Create the functions to resolve the argument ASTs into values
       // These are what are passed to the actual functions if you opt out of resolving
       const resolveArgFns = mapValues(dealiasedArgAsts, (asts, argName) =>
-        asts.map((item) => (subInput = input) =>
-          this.interpret(item, subInput).pipe(
-            map((output) => {
-              if (isExpressionValueError(output)) {
-                throw output.error;
-              }
+        asts.map(
+          (item) =>
+            (subInput = input) =>
+              this.interpret(item, subInput).pipe(
+                pluck('result'),
+                map((output) => {
+                  if (isExpressionValueError(output)) {
+                    throw output.error;
+                  }
 
-              return this.cast(output, argDefs[argName].types);
-            })
-          )
+                  return this.cast(output, argDefs[argName].types);
+                })
+              )
         )
       );
 
@@ -486,7 +523,7 @@ export class Execution<
     });
   }
 
-  public interpret<T>(ast: ExpressionAstNode, input: T): Observable<unknown> {
+  public interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>> {
     switch (getType(ast)) {
       case 'expression':
         const execution = this.execution.executor.createExecution(
@@ -494,12 +531,13 @@ export class Execution<
           this.execution.params
         );
         this.childExecutions.push(execution);
-        return execution.start(input);
+
+        return execution.start(input, true);
       case 'string':
       case 'number':
       case 'null':
       case 'boolean':
-        return of(ast);
+        return of({ result: ast, partial: false });
       default:
         return throwError(new Error(`Unknown AST object: ${JSON.stringify(ast)}`));
     }

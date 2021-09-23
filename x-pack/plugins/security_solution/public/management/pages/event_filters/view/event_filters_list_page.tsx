@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiSpacer, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -32,16 +32,19 @@ import {
   getActionError,
   getFormEntry,
   showDeleteModal,
+  getTotalCountListItems,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { Immutable } from '../../../../../common/endpoint/types';
+import { Immutable, ListPageRouteState } from '../../../../../common/endpoint/types';
 import {
   ExceptionItem,
   ExceptionItemProps,
 } from '../../../../common/components/exceptions/viewer/exception_item';
 import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
-import { SearchBar } from '../../../components/search_bar';
+import { SearchExceptions } from '../../../components/search_exceptions';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { ABOUT_EVENT_FILTERS } from './translations';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -59,11 +62,13 @@ const AdministrationListPage = styled(_AdministrationListPage)`
 `;
 
 export const EventFiltersListPage = memo(() => {
+  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const history = useHistory();
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const isActionError = useEventFiltersSelector(getActionError);
   const formEntry = useEventFiltersSelector(getFormEntry);
   const listItems = useEventFiltersSelector(getListItems);
+  const totalCountListItems = useEventFiltersSelector(getTotalCountListItems);
   const pagination = useEventFiltersSelector(getListPagination);
   const isLoading = useEventFiltersSelector(getListIsLoading);
   const fetchError = useEventFiltersSelector(getListFetchError);
@@ -102,6 +107,13 @@ export const EventFiltersListPage = memo(() => {
       });
     }
   }, [dispatch, formEntry, history, isActionError, location, navigateCallback]);
+
+  const backButton = useMemo(() => {
+    if (routeState && routeState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...routeState} />;
+    }
+    return null;
+  }, [routeState]);
 
   const handleAddButtonClick = useCallback(
     () =>
@@ -166,24 +178,24 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleOnSearch = useCallback((query: string) => navigateCallback({ filter: query }), [
-    navigateCallback,
-  ]);
+  const handleOnSearch = useCallback(
+    (query: string) => {
+      dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
+      navigateCallback({ filter: query });
+    },
+    [navigateCallback, dispatch]
+  );
 
   return (
     <AdministrationListPage
-      beta={false}
+      headerBackComponent={backButton}
       title={
         <FormattedMessage
           id="xpack.securitySolution.eventFilters.list.pageTitle"
-          defaultMessage="Event Filters"
+          defaultMessage="Event filters"
         />
       }
-      subtitle={i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
-        defaultMessage:
-          'Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch. Event ' +
-          'filters are processed by the Endpoint Security integration, and are applied to hosts running this integration on their agents.',
-      })}
+      subtitle={ABOUT_EVENT_FILTERS}
       actions={
         doesDataExist && (
           <EuiButton
@@ -195,7 +207,7 @@ export const EventFiltersListPage = memo(() => {
           >
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.pageAddButton"
-              defaultMessage="Add Endpoint Event Filter"
+              defaultMessage="Add event filter"
             />
           </EuiButton>
         )
@@ -213,7 +225,7 @@ export const EventFiltersListPage = memo(() => {
 
       {doesDataExist && (
         <>
-          <SearchBar
+          <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
@@ -224,11 +236,11 @@ export const EventFiltersListPage = memo(() => {
           <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.totalCount"
-              defaultMessage="{total, plural, one {# event filter} other {# event filters}}"
-              values={{ total: listItems.length }}
+              defaultMessage="Showing {total, plural, one {# event filter} other {# event filters}}"
+              values={{ total: totalCountListItems }}
             />
           </EuiText>
-          <EuiHorizontalRule margin="m" />
+          <EuiSpacer size="s" />
         </>
       )}
 

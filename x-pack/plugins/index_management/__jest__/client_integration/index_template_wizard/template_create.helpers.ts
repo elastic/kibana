@@ -11,17 +11,23 @@ import { WithAppDependencies } from '../helpers';
 
 import { formSetup, TestSubjects } from './template_form.helpers';
 
-const testBedConfig: TestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`/create_template`],
-    componentRoutePath: `/create_template`,
-  },
-  doMountAsync: true,
+export const setup: any = (isLegacy: boolean = false) => {
+  const route = isLegacy
+    ? { pathname: '/create_template', search: '?legacy=true' }
+    : { pathname: '/create_template' };
+
+  const testBedConfig: TestBedConfig = {
+    memoryRouter: {
+      initialEntries: [route],
+      componentRoutePath: route,
+    },
+    doMountAsync: true,
+  };
+
+  const initTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(TemplateCreate),
+    testBedConfig
+  );
+
+  return formSetup.call(null, initTestBed);
 };
-
-const initTestBed = registerTestBed<TestSubjects>(
-  WithAppDependencies(TemplateCreate),
-  testBedConfig
-);
-
-export const setup: any = formSetup.bind(null, initTestBed);

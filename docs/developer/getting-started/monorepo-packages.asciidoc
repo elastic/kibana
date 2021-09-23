@@ -28,23 +28,13 @@ yarn kbn run build -i PACKAGE_NAME
 ----
 
 [discrete]
-=== Watching Non Bazel Packages
-
-Non Bazel packages can be watched independently with
-
-[source,bash]
-----
-yarn kbn watch -i PACKAGE_NAME
-----
-
-[discrete]
 === Building Bazel Packages
 
 Bazel packages are built as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn build-bazel
+yarn kbn build
 ----
 
 [discrete]
@@ -54,7 +44,7 @@ Bazel packages are watched as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn watch-bazel
+yarn kbn watch
 ----
 
 
@@ -70,22 +60,33 @@ yarn kbn watch-bazel
 - @kbn/apm-utils
 - @kbn/babel-code-parser
 - @kbn/babel-preset
+- @kbn/cli-dev-mode
 - @kbn/config
 - @kbn/config-schema
 - @kbn/crypto
 - @kbn/dev-utils
 - @kbn/docs-utils
 - @kbn/es
+- @kbn/es-archiver
 - @kbn/eslint-import-resolver-kibana
 - @kbn/eslint-plugin-eslint
 - @kbn/expect
 - @kbn/i18n
+- @kbn/interpreter
+- @kbn/io-ts-utils
 - @kbn/legacy-logging
 - @kbn/logging
+- @kbn/mapbox-gl
+- @kbn/monaco
+- @kbn/optimizer
+- @kbn/plugin-helpers
+- @kbn/rule-data-utils
+- @kbn/securitysolution-autocomplete
 - @kbn/securitysolution-es-utils
-- kbn/securitysolution-io-ts-alerting-types
-- kbn/securitysolution-io-ts-list-types
-- kbn/securitysolution-io-ts-types
+- @kbn/securitysolution-hook-utils
+- @kbn/securitysolution-io-ts-alerting-types
+- @kbn/securitysolution-io-ts-list-types
+- @kbn/securitysolution-io-ts-types
 - @kbn/securitysolution-io-ts-utils
 - @kbn/securitysolution-list-api
 - @kbn/securitysolution-list-constants
@@ -93,8 +94,16 @@ yarn kbn watch-bazel
 - @kbn/securitysolution-list-utils
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
+- @kbn/server-route-repository
+- @kbn/spec-to-console
 - @kbn/std
+- @kbn/storybook
 - @kbn/telemetry-utils
+- @kbn/test
+- @kbn/test-subj-selector
 - @kbn/tinymath
+- @kbn/ui-framework
+- @kbn/ui-shared-deps-npm
+- @kbn/ui-shared-deps-src
 - @kbn/utility-types
 - @kbn/utils

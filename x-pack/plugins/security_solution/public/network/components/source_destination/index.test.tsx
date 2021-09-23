@@ -49,6 +49,8 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

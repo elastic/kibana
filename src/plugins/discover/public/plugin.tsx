@@ -8,10 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import angular, { auto } from 'angular';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-
 import {
   AppMountParameters,
   AppUpdater,
@@ -29,6 +27,7 @@ import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
+import { EuiLoadingContent } from '@elastic/eui';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
@@ -36,19 +35,15 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
-import { DocViewTable } from './application/components/table/table';
-import { JsonCodeEditor } from './application/components/json_code_editor/json_code_editor';
 import {
   setDocViewsRegistry,
   setUrlTracker,
-  setAngularModule,
   setServices,
   setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
-  getServices,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
@@ -59,16 +54,24 @@ import {
   DiscoverUrlGenerator,
   SEARCH_SESSION_ID_QUERY_PARAM,
 } from './url_generator';
+import { DiscoverAppLocatorDefinition, DiscoverAppLocator } from './locator';
 import { SearchEmbeddableFactory } from './application/embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
+import { DeferredSpinner } from './shared';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
     [DISCOVER_APP_URL_GENERATOR]: UrlGeneratorState<DiscoverUrlGeneratorState>;
   }
 }
+
+const DocViewerTable = React.lazy(() => import('./application/components/table/table'));
+
+const SourceViewer = React.lazy(
+  () => import('./application/components/source_viewer/source_viewer')
+);
 
 /**
  * @public
@@ -77,22 +80,31 @@ export interface DiscoverSetup {
   docViews: {
     /**
      * Add new doc view shown along with table view and json view in the details of each document in Discover.
-     * Both react and angular doc views are supported.
      * @param docViewRaw
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
   };
-}
-
-export interface DiscoverStart {
-  savedSearchLoader: SavedObjectLoader;
 
   /**
-   * `share` plugin URL generator for Discover app. Use it to generate links into
-   * Discover application, example:
+   * `share` plugin URL locator for Discover app. Use it to generate links into
+   * Discover application, for example, navigate:
    *
    * ```ts
-   * const url = await plugins.discover.urlGenerator.createUrl({
+   * await plugins.discover.locator.navigate({
+   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   timeRange: {
+   *     to: 'now',
+   *     from: 'now-15m',
+   *     mode: 'relative',
+   *   },
+   * });
+   * ```
+   *
+   * Generate a location:
+   *
+   * ```ts
+   * const location = await plugins.discover.locator.getLocation({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
    *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
@@ -103,7 +115,48 @@ export interface DiscoverStart {
    * });
    * ```
    */
+  readonly locator: undefined | DiscoverAppLocator;
+}
+
+export interface DiscoverStart {
+  savedSearchLoader: SavedObjectLoader;
+
+  /**
+   * @deprecated Use URL locator instead. URL generator will be removed.
+   */
   readonly urlGenerator: undefined | UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
+
+  /**
+   * `share` plugin URL locator for Discover app. Use it to generate links into
+   * Discover application, for example, navigate:
+   *
+   * ```ts
+   * await plugins.discover.locator.navigate({
+   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   timeRange: {
+   *     to: 'now',
+   *     from: 'now-15m',
+   *     mode: 'relative',
+   *   },
+   * });
+   * ```
+   *
+   * Generate a location:
+   *
+   * ```ts
+   * const location = await plugins.discover.locator.getLocation({
+   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   timeRange: {
+   *     to: 'now',
+   *     from: 'now-15m',
+   *     mode: 'relative',
+   *   },
+   * });
+   * ```
+   */
+  readonly locator: undefined | DiscoverAppLocator;
 }
 
 /**
@@ -137,32 +190,24 @@ export interface DiscoverStartPlugins {
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
-const innerAngularName = 'app/discover';
-const embeddableAngularName = 'app/discoverEmbeddable';
-
 /**
  * Contains Discover, one of the oldest parts of Kibana
- * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
- * Discover provides embeddables, those contain a slimmer Angular
+ * Discover provides embeddables for Dashboards
  */
 export class DiscoverPlugin
-  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
+  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
-  private embeddableInjector: auto.IInjectorService | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
-  private servicesInitialized: boolean = false;
-  private innerAngularInitialized: boolean = false;
-  private urlGenerator?: DiscoverStart['urlGenerator'];
 
   /**
-   * why are those functions public? they are needed for some mocha tests
-   * can be removed once all is Jest
+   * @deprecated
    */
-  public initializeInnerAngular?: () => void;
-  public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
+  private urlGenerator?: DiscoverStart['urlGenerator'];
+  private locator?: DiscoverAppLocator;
 
   setup(
     core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
@@ -179,6 +224,14 @@ export class DiscoverPlugin
       );
     }
 
+    if (plugins.share) {
+      this.locator = plugins.share.url.locators.create(
+        new DiscoverAppLocatorDefinition({
+          useHash: core.uiSettings.get('state:storeInSessionStorage'),
+        })
+      );
+    }
+
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
@@ -186,15 +239,39 @@ export class DiscoverPlugin
         defaultMessage: 'Table',
       }),
       order: 10,
-      component: DocViewTable,
+      component: (props) => (
+        <React.Suspense
+          fallback={
+            <DeferredSpinner>
+              <EuiLoadingContent />
+            </DeferredSpinner>
+          }
+        >
+          <DocViewerTable {...props} />
+        </React.Suspense>
+      ),
     });
     this.docViewsRegistry.addDocView({
       title: i18n.translate('discover.docViews.json.jsonTitle', {
         defaultMessage: 'JSON',
       }),
       order: 20,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      component: ({ hit }) => <JsonCodeEditor json={hit as any} hasLineNumbers />,
+      component: ({ hit, indexPattern }) => (
+        <React.Suspense
+          fallback={
+            <DeferredSpinner>
+              <EuiLoadingContent />
+            </DeferredSpinner>
+          }
+        >
+          <SourceViewer
+            index={hit._index}
+            id={hit._id}
+            indexPatternId={indexPattern?.id || ''}
+            hasLineNumbers
+          />
+        </React.Suspense>
+      ),
     });
 
     const {
@@ -246,7 +323,6 @@ export class DiscoverPlugin
       stopUrlTracker();
     };
 
-    this.docViewsRegistry.setAngularInjectorGetter(this.getEmbeddableInjector);
     core.application.register({
       id: 'discover',
       title: 'Discover',
@@ -256,28 +332,23 @@ export class DiscoverPlugin
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        if (!this.initializeServices) {
-          throw Error('Discover plugin method initializeServices is undefined');
-        }
-        if (!this.initializeInnerAngular) {
-          throw Error('Discover plugin method initializeInnerAngular is undefined');
-        }
+        const [, depsStart] = await core.getStartServices();
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
-        const {
-          plugins: { data: dataStart },
-        } = await this.initializeServices();
-        await this.initializeInnerAngular();
-
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
         // make sure the index pattern list is up to date
-        await dataStart.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
-        params.element.classList.add('dscAppWrapper');
-        const unmount = await renderApp(innerAngularName, params.element);
+        await depsStart.data.indexPatterns.clearCache();
+
+        const { renderApp } = await import('./application');
+        const unmount = renderApp(params.element);
         return () => {
-          params.element.classList.remove('dscAppWrapper');
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };
@@ -316,50 +387,24 @@ export class DiscoverPlugin
       docViews: {
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
       },
+      locator: this.locator,
     };
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
     // we need to register the application service at setup, but to render it
     // there are some start dependencies necessary, for this reason
-    // initializeInnerAngular + initializeServices are assigned at start and used
+    // initializeServices are assigned at start and used
     // when the application/embeddable is mounted
-    this.initializeInnerAngular = async () => {
-      if (this.innerAngularInitialized) {
-        return;
-      }
-      // this is used by application mount and tests
-      const { getInnerAngularModule } = await import('./get_inner_angular');
-      const module = getInnerAngularModule(
-        innerAngularName,
-        core,
-        plugins,
-        this.initializerContext
-      );
-      setAngularModule(module);
-      this.innerAngularInitialized = true;
-    };
 
     setUiActions(plugins.uiActions);
 
-    this.initializeServices = async () => {
-      if (this.servicesInitialized) {
-        return { core, plugins };
-      }
-      const services = await buildServices(
-        core,
-        plugins,
-        this.initializerContext,
-        this.getEmbeddableInjector
-      );
-      setServices(services);
-      this.servicesInitialized = true;
-
-      return { core, plugins };
-    };
+    const services = buildServices(core, plugins, this.initializerContext);
+    setServices(services);
 
     return {
       urlGenerator: this.urlGenerator,
+      locator: this.locator,
       savedSearchLoader: createSavedSearchesLoader({
         savedObjectsClient: core.savedObjects.client,
         savedObjects: plugins.savedObjects,
@@ -373,14 +418,7 @@ export class DiscoverPlugin
     }
   }
 
-  /**
-   * register embeddable with a slimmer embeddable version of inner angular
-   */
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
-    if (!this.getEmbeddableInjector) {
-      throw Error('Discover plugin method getEmbeddableInjector is undefined');
-    }
-
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
       return {
@@ -389,23 +427,7 @@ export class DiscoverPlugin
       };
     };
 
-    const factory = new SearchEmbeddableFactory(getStartServices, this.getEmbeddableInjector);
+    const factory = new SearchEmbeddableFactory(getStartServices);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
-
-  private getEmbeddableInjector = async () => {
-    if (!this.embeddableInjector) {
-      if (!this.initializeServices) {
-        throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
-      }
-      const { core, plugins } = await this.initializeServices();
-      getServices().kibanaLegacy.loadFontAwesome();
-      const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
-      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
-      const mountpoint = document.createElement('div');
-      this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);
-    }
-
-    return this.embeddableInjector;
-  };
 }

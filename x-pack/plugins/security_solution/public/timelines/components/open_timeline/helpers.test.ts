@@ -36,7 +36,6 @@ import {
   formatTimelineResultToModel,
 } from './helpers';
 import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
-import { KueryFilterQueryKind } from '../../../common/store';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
@@ -45,12 +44,14 @@ import {
   TimelineType,
   TimelineStatus,
   TimelineTabs,
+  KueryFilterQueryKind,
 } from '../../../../common/types/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
 import { getTimeline } from '../../containers/api';
+import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
@@ -236,6 +237,49 @@ describe('helpers', () => {
   });
 
   describe('#defaultTimelineToTimelineModel', () => {
+    const columns = [
+      {
+        columnHeaderType: 'not-filtered',
+        id: '@timestamp',
+        type: 'number',
+        initialWidth: 190,
+      },
+      {
+        columnHeaderType: 'not-filtered',
+        id: 'message',
+        initialWidth: 180,
+      },
+      {
+        columnHeaderType: 'not-filtered',
+        id: 'event.category',
+        initialWidth: 180,
+      },
+      {
+        columnHeaderType: 'not-filtered',
+        id: 'event.action',
+        initialWidth: 180,
+      },
+      {
+        columnHeaderType: 'not-filtered',
+        id: 'host.name',
+        initialWidth: 180,
+      },
+      {
+        columnHeaderType: 'not-filtered',
+        id: 'source.ip',
+        initialWidth: 180,
+      },
+      {
+        columnHeaderType: 'not-filtered',
+        id: 'destination.ip',
+        initialWidth: 180,
+      },
+      {
+        columnHeaderType: 'not-filtered',
+        id: 'user.name',
+        initialWidth: 180,
+      },
+    ];
     test('if title is null, we should get the default title', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
@@ -247,52 +291,12 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
+        columns,
+        defaultColumns: defaultHeaders,
         dataProviders: [],
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
+        documentType: '',
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
@@ -325,7 +329,9 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        queryFields: [],
         savedObjectId: 'savedObject-1',
+        selectAll: false,
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
@@ -358,52 +364,12 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
+        columns,
+        defaultColumns: defaultHeaders,
         dataProviders: [],
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
+        documentType: '',
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
@@ -436,7 +402,9 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        queryFields: [],
         savedObjectId: 'savedObject-1',
+        selectAll: false,
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
@@ -469,52 +437,12 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
+        columns,
+        defaultColumns: defaultHeaders,
         dataProviders: [],
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
+        documentType: '',
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
@@ -547,7 +475,9 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        queryFields: [],
         savedObjectId: 'savedObject-1',
+        selectAll: false,
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
@@ -578,52 +508,12 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
+        columns,
+        defaultColumns: defaultHeaders,
         dataProviders: [],
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
+        documentType: '',
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
@@ -656,7 +546,9 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        queryFields: [],
         savedObjectId: 'savedObject-1',
+        selectAll: false,
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
@@ -677,9 +569,12 @@ describe('helpers', () => {
     });
 
     test('should merge columns when event.action is deleted without two extra column names of user.name', () => {
+      const columnsWithoutEventAction = timelineDefaults.columns.filter(
+        (column) => column.id !== 'event.action'
+      );
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
+        columns: columnsWithoutEventAction,
         version: '1',
       };
 
@@ -688,89 +583,13 @@ describe('helpers', () => {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
-        columns: [
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: '@timestamp',
-            placeholder: undefined,
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'message',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'event.category',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'host.name',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'source.ip',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'destination.ip',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'user.name',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-        ],
+        columns: columnsWithoutEventAction,
+        defaultColumns: defaultHeaders,
         version: '1',
         dataProviders: [],
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
+        documentType: '',
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
@@ -806,6 +625,8 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        queryFields: [],
+        selectAll: false,
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
@@ -822,9 +643,12 @@ describe('helpers', () => {
     });
 
     test('should merge filters object back with json object', () => {
+      const columnsWithoutEventAction = timelineDefaults.columns.filter(
+        (column) => column.id !== 'event.action'
+      );
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
+        columns: columnsWithoutEventAction,
         filters: [
           {
             meta: {
@@ -865,48 +689,13 @@ describe('helpers', () => {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
+        columns: columnsWithoutEventAction,
+        defaultColumns: defaultHeaders,
         version: '1',
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         dataProviders: [],
         description: '',
+        documentType: '',
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
@@ -985,6 +774,8 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        queryFields: [],
+        selectAll: false,
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
@@ -1013,52 +804,12 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
+        columns,
+        defaultColumns: defaultHeaders,
         dataProviders: [],
         dateRange: { end: '2020-10-28T11:37:31.655Z', start: '2020-10-27T11:37:31.655Z' },
         description: '',
+        documentType: '',
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
@@ -1091,7 +842,9 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        queryFields: [],
         savedObjectId: 'savedObject-1',
+        selectAll: false,
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
@@ -1124,52 +877,12 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
+        columns,
+        defaultColumns: defaultHeaders,
         dataProviders: [],
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
         description: '',
+        documentType: '',
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
@@ -1202,7 +915,9 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
+        queryFields: [],
         savedObjectId: 'savedObject-1',
+        selectAll: false,
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
@@ -1243,7 +958,7 @@ describe('helpers', () => {
 
       beforeAll(async () => {
         (getTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
-        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {
@@ -1297,7 +1012,7 @@ describe('helpers', () => {
 
       beforeAll(async () => {
         (getTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
-        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {
@@ -1365,7 +1080,7 @@ describe('helpers', () => {
 
       beforeAll(async () => {
         (getTimeline as jest.Mock).mockResolvedValue(template);
-        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {

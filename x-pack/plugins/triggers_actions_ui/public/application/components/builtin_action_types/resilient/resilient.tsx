@@ -6,6 +6,7 @@
  */
 
 import { lazy } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   GenericValidationResult,
   ActionTypeModel,
@@ -17,12 +18,12 @@ import {
   ResilientSecrets,
   ResilientActionParams,
 } from './types';
-import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
 
-const validateConnector = (
+const validateConnector = async (
   action: ResilientActionConnector
-): ConnectorValidationResult<ResilientConfig, ResilientSecrets> => {
+): Promise<ConnectorValidationResult<ResilientConfig, ResilientSecrets>> => {
+  const translations = await import('./translations');
   const configErrors = {
     apiUrl: new Array<string>(),
     orgId: new Array<string>(),
@@ -38,31 +39,48 @@ const validateConnector = (
   };
 
   if (!action.config.apiUrl) {
-    configErrors.apiUrl = [...configErrors.apiUrl, i18n.API_URL_REQUIRED];
+    configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRED];
   }
 
   if (action.config.apiUrl) {
     if (!isValidUrl(action.config.apiUrl)) {
-      configErrors.apiUrl = [...configErrors.apiUrl, i18n.API_URL_INVALID];
+      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_INVALID];
     } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
-      configErrors.apiUrl = [...configErrors.apiUrl, i18n.API_URL_REQUIRE_HTTPS];
+      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRE_HTTPS];
     }
   }
 
   if (!action.config.orgId) {
-    configErrors.orgId = [...configErrors.orgId, i18n.ORG_ID_REQUIRED];
+    configErrors.orgId = [...configErrors.orgId, translations.ORG_ID_REQUIRED];
   }
 
   if (!action.secrets.apiKeyId) {
-    secretsErrors.apiKeyId = [...secretsErrors.apiKeyId, i18n.API_KEY_ID_REQUIRED];
+    secretsErrors.apiKeyId = [...secretsErrors.apiKeyId, translations.API_KEY_ID_REQUIRED];
   }
 
   if (!action.secrets.apiKeySecret) {
-    secretsErrors.apiKeySecret = [...secretsErrors.apiKeySecret, i18n.API_KEY_SECRET_REQUIRED];
+    secretsErrors.apiKeySecret = [
+      ...secretsErrors.apiKeySecret,
+      translations.API_KEY_SECRET_REQUIRED,
+    ];
   }
 
   return validationResult;
 };
+
+export const DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.selectMessageText',
+  {
+    defaultMessage: 'Create an incident in IBM Resilient.',
+  }
+);
+
+export const TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.actionTypeTitle',
+  {
+    defaultMessage: 'Resilient',
+  }
+);
 
 export function getActionType(): ActionTypeModel<
   ResilientConfig,
@@ -72,11 +90,14 @@ export function getActionType(): ActionTypeModel<
   return {
     id: '.resilient',
     iconClass: lazy(() => import('./logo')),
-    selectMessage: i18n.DESC,
-    actionTypeTitle: i18n.TITLE,
+    selectMessage: DESC,
+    actionTypeTitle: TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./resilient_connectors')),
-    validateParams: (actionParams: ResilientActionParams): GenericValidationResult<unknown> => {
+    validateParams: async (
+      actionParams: ResilientActionParams
+    ): Promise<GenericValidationResult<unknown>> => {
+      const translations = await import('./translations');
       const errors = {
         'subActionParams.incident.name': new Array<string>(),
       };
@@ -88,7 +109,7 @@ export function getActionType(): ActionTypeModel<
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.name?.length
       ) {
-        errors['subActionParams.incident.name'].push(i18n.NAME_REQUIRED);
+        errors['subActionParams.incident.name'].push(translations.NAME_REQUIRED);
       }
       return validationResult;
     },

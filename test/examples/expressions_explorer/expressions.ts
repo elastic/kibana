@@ -22,7 +22,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('expressionResult');
         expect(text).to.be(
-          '{\n "type": "render",\n "as": "markdown",\n "value": {\n  "content": "## expressions explorer",\n  "font": {\n   "type": "style",\n   "spec": {\n    "fontFamily": "\'Open Sans\', Helvetica, Arial, sans-serif",\n    "fontWeight": "normal",\n    "fontStyle": "normal",\n    "textDecoration": "none",\n    "textAlign": "left",\n    "fontSize": "14px",\n    "lineHeight": "1"\n   },\n   "css": "font-family:\'Open Sans\', Helvetica, Arial, sans-serif;font-weight:normal;font-style:normal;text-decoration:none;text-align:left;font-size:14px;line-height:1"\n  },\n  "openLinksInNewTab": false\n }\n}'
+          '{\n "type": "render",\n "as": "markdown_vis",\n "value": {\n  "visType": "markdown",\n  "visParams": {\n   "markdown": "## expressions explorer",\n   "openLinksInNewTab": false,\n   "fontSize": 12\n  }\n }\n}'
         );
       });
     });

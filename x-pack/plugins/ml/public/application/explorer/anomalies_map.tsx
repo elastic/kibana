@@ -16,27 +16,25 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { VectorLayerDescriptor } from '../../../../maps/common/descriptor_types';
 import {
   FIELD_ORIGIN,
+  LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
-} from '../../../../maps/common/constants';
+  VectorLayerDescriptor,
+} from '../../../../maps/common';
 import { useMlKibana } from '../contexts/kibana';
 import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
 import { EMSTermJoinConfig } from '../../../../maps/public';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
-import { COMMON_EMS_LAYER_IDS } from '../../../common/constants/embeddable_map';
 
 const MAX_ENTITY_VALUES = 3;
 
 function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
-  const anomalyRows: Record<
-    string,
-    { count: number; entityValue: string; max_severity: number }
-  > = {};
+  const anomalyRows: Record<string, { count: number; entityValue: string; max_severity: number }> =
+    {};
   for (let i = 0; i < anomalies.length; i++) {
     const anomaly = anomalies[i];
     const location = anomaly.entityValue;
@@ -128,7 +126,7 @@ export const getChoroplethAnomaliesLayer = (
       isTimeAware: true,
     },
     visible: false,
-    type: 'VECTOR',
+    type: LAYER_TYPE.VECTOR,
   };
 };
 
@@ -177,7 +175,6 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
         }
 
         const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
-          emsLayerIds: COMMON_EMS_LAYER_IDS,
           sampleValues: Array.from(entityValues),
           sampleValuesColumnName: entityName || '',
         });

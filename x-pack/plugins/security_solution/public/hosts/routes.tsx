@@ -6,14 +6,20 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
-
 import { HostsContainer } from './pages';
-import { NotFoundPage } from '../app/404';
+import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
+import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { HOSTS_PATH } from '../../common/constants';
 
 export const HostsRoutes = () => (
-  <Switch>
-    <Route path="/" render={({ match }) => <HostsContainer url={match.url} />} />
-    <Route render={() => <NotFoundPage />} />
-  </Switch>
+  <TrackApplicationView viewId={SecurityPageName.hosts}>
+    <HostsContainer />
+  </TrackApplicationView>
 );
+
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: HOSTS_PATH,
+    render: HostsRoutes,
+  },
+];

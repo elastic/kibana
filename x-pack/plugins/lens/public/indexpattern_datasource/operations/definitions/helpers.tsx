@@ -5,34 +5,10 @@
  * 2.0.
  */
 
-import { useRef } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternColumn, operationDefinitionMap } from '.';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import { FieldBasedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern } from '../../types';
-
-export const useDebounceWithOptions = (
-  fn: Function,
-  { skipFirstRender }: { skipFirstRender: boolean } = { skipFirstRender: false },
-  ms?: number | undefined,
-  deps?: React.DependencyList | undefined
-) => {
-  const isFirstRender = useRef(true);
-  const newDeps = [...(deps || []), isFirstRender];
-
-  return useDebounce(
-    () => {
-      if (skipFirstRender && isFirstRender.current) {
-        isFirstRender.current = false;
-        return;
-      }
-      return fn();
-    },
-    ms,
-    newDeps
-  );
-};
 
 export function getInvalidFieldMessage(
   column: FieldBasedIndexPatternColumn,
@@ -105,8 +81,7 @@ export function isValidNumber(
   const inputValueAsNumber = Number(inputValue);
   return (
     inputValue !== '' &&
-    inputValue !== null &&
-    inputValue !== undefined &&
+    inputValue != null &&
     !Number.isNaN(inputValueAsNumber) &&
     Number.isFinite(inputValueAsNumber) &&
     (!integer || Number.isInteger(inputValueAsNumber)) &&
@@ -115,7 +90,9 @@ export function isValidNumber(
   );
 }
 
-export function getFormatFromPreviousColumn(previousColumn: IndexPatternColumn | undefined) {
+export function getFormatFromPreviousColumn(
+  previousColumn: IndexPatternColumn | ReferenceBasedIndexPatternColumn | undefined
+) {
   return previousColumn?.dataType === 'number' &&
     previousColumn.params &&
     'format' in previousColumn.params &&

@@ -10,6 +10,7 @@ import { sortBy } from 'lodash';
 import { AssetReference } from '../../../../plugins/fleet/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -35,8 +36,10 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('installs and uninstalls all assets', async () => {
+    skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
+
     describe('installs all assets when installing a package for the first time', async () => {
-      skipIfNoDockerRegistry(providerContext);
       before(async () => {
         if (!server.enabled) return;
         await installPackage(pkgKey);
@@ -56,7 +59,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('uninstalls all assets when uninstalling a package', async () => {
-      skipIfNoDockerRegistry(providerContext);
       before(async () => {
         if (!server.enabled) return;
         // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
@@ -86,6 +88,40 @@ export default function (providerContext: FtrProviderContext) {
           }
         );
         expect(resMetricsTemplate.statusCode).equal(404);
+      });
+      it('should have uninstalled the component templates', async function () {
+        const resMappings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}@mappings`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resMappings.statusCode).equal(404);
+
+        const resSettings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}@settings`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resSettings.statusCode).equal(404);
+
+        const resUserSettings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}@custom`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resUserSettings.statusCode).equal(404);
       });
       it('should have uninstalled the pipelines', async function () {
         const res = await es.transport.request(
@@ -253,7 +289,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('reinstalls all assets', async () => {
-      skipIfNoDockerRegistry(providerContext);
       before(async () => {
         if (!server.enabled) return;
         await installPackage(pkgKey);
@@ -328,17 +363,22 @@ const expectAssetsInstalled = ({
     });
     expect(resPipeline2.statusCode).equal(200);
   });
-  it('should have installed the template components', async function () {
-    const res = await es.transport.request({
+  it('should have installed the component templates', async function () {
+    const resMappings = await es.transport.request({
       method: 'GET',
-      path: `/_component_template/${logsTemplateName}-mappings`,
+      path: `/_component_template/${logsTemplateName}@mappings`,
     });
-    expect(res.statusCode).equal(200);
+    expect(resMappings.statusCode).equal(200);
     const resSettings = await es.transport.request({
       method: 'GET',
-      path: `/_component_template/${logsTemplateName}-settings`,
+      path: `/_component_template/${logsTemplateName}@settings`,
     });
     expect(resSettings.statusCode).equal(200);
+    const resUserSettings = await es.transport.request({
+      method: 'GET',
+      path: `/_component_template/${logsTemplateName}@custom`,
+    });
+    expect(resUserSettings.statusCode).equal(200);
   });
   it('should have installed the transform components', async function () {
     const res = await es.transport.request({
@@ -487,6 +527,26 @@ const expectAssetsInstalled = ({
         },
       ],
       installed_es: [
+        {
+          id: 'logs-all_assets.test_logs@mappings',
+          type: 'component_template',
+        },
+        {
+          id: 'logs-all_assets.test_logs@settings',
+          type: 'component_template',
+        },
+        {
+          id: 'logs-all_assets.test_logs@custom',
+          type: 'component_template',
+        },
+        {
+          id: 'metrics-all_assets.test_metrics@settings',
+          type: 'component_template',
+        },
+        {
+          id: 'metrics-all_assets.test_metrics@custom',
+          type: 'component_template',
+        },
         {
           id: 'logs-all_assets.test_logs-all_assets',
           type: 'data_stream_ilm_policy',

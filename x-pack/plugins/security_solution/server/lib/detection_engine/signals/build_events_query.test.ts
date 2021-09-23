@@ -24,12 +24,6 @@ describe('create_signals', () => {
       size: 100,
       ignore_unavailable: true,
       body: {
-        docvalue_fields: [
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
         query: {
           bool: {
             filter: [
@@ -67,6 +61,10 @@ describe('create_signals', () => {
             field: '*',
             include_unmapped: true,
           },
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
         ],
         sort: [
           {
@@ -96,16 +94,6 @@ describe('create_signals', () => {
       size: 100,
       ignore_unavailable: true,
       body: {
-        docvalue_fields: [
-          {
-            field: 'event.ingested',
-            format: 'strict_date_optional_time',
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
         query: {
           bool: {
             filter: [
@@ -167,6 +155,14 @@ describe('create_signals', () => {
             field: '*',
             include_unmapped: true,
           },
+          {
+            field: 'event.ingested',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
         ],
         sort: [
           {
@@ -203,12 +199,6 @@ describe('create_signals', () => {
       size: 100,
       ignore_unavailable: true,
       body: {
-        docvalue_fields: [
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
         query: {
           bool: {
             filter: [
@@ -245,6 +235,10 @@ describe('create_signals', () => {
           {
             field: '*',
             include_unmapped: true,
+          },
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
           },
         ],
         search_after: [fakeSortId],
@@ -276,12 +270,6 @@ describe('create_signals', () => {
       size: 100,
       ignore_unavailable: true,
       body: {
-        docvalue_fields: [
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
         query: {
           bool: {
             filter: [
@@ -318,6 +306,10 @@ describe('create_signals', () => {
           {
             field: '*',
             include_unmapped: true,
+          },
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
           },
         ],
         search_after: [fakeSortIdNumber],
@@ -348,12 +340,6 @@ describe('create_signals', () => {
       size: 100,
       ignore_unavailable: true,
       body: {
-        docvalue_fields: [
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
         query: {
           bool: {
             filter: [
@@ -390,6 +376,10 @@ describe('create_signals', () => {
           {
             field: '*',
             include_unmapped: true,
+          },
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
           },
         ],
         sort: [
@@ -427,7 +417,6 @@ describe('create_signals', () => {
       size: 100,
       ignore_unavailable: true,
       body: {
-        docvalue_fields: [{ field: '@timestamp', format: 'strict_date_optional_time' }],
         query: {
           bool: {
             filter: [
@@ -465,6 +454,10 @@ describe('create_signals', () => {
             field: '*',
             include_unmapped: true,
           },
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
         ],
         aggregations: {
           tags: {
@@ -481,6 +474,65 @@ describe('create_signals', () => {
             },
           },
         ],
+      },
+    });
+  });
+
+  test('if trackTotalHits is provided it should be included', () => {
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortIds: undefined,
+      timestampOverride: undefined,
+      trackTotalHits: false,
+    });
+    expect(query.track_total_hits).toEqual(false);
+  });
+
+  test('if sortOrder is provided it should be included', () => {
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortIds: undefined,
+      timestampOverride: undefined,
+      sortOrder: 'desc',
+      trackTotalHits: false,
+    });
+    expect(query.body.sort[0]).toEqual({
+      '@timestamp': {
+        order: 'desc',
+        unmapped_type: 'date',
+      },
+    });
+  });
+
+  test('it respects sort order for timestampOverride', () => {
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortIds: undefined,
+      timestampOverride: 'event.ingested',
+      sortOrder: 'desc',
+    });
+    expect(query.body.sort[0]).toEqual({
+      'event.ingested': {
+        order: 'desc',
+        unmapped_type: 'date',
+      },
+    });
+    expect(query.body.sort[1]).toEqual({
+      '@timestamp': {
+        order: 'desc',
+        unmapped_type: 'date',
       },
     });
   });

@@ -20,84 +20,122 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
-import React from 'react';
+import type {
+  ALERT_DURATION as ALERT_DURATION_TYPED,
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
+  ALERT_UUID as ALERT_UUID_TYPED,
+  ALERT_RULE_CATEGORY as ALERT_RULE_CATEGORY_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+} from '@kbn/rule-data-utils';
 import {
-  ALERT_DURATION,
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_SEVERITY_LEVEL,
-  RULE_CATEGORY,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
-import { TopAlert } from '../';
-import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
+  ALERT_UUID as ALERT_UUID_NON_TYPED,
+  ALERT_RULE_CATEGORY as ALERT_RULE_CATEGORY_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
+import moment from 'moment-timezone';
+import React, { useMemo } from 'react';
+import type { TopAlert } from '../';
+import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { SeverityBadge } from '../severity_badge';
+import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import { parseAlert } from '../parse_alert';
 
-type AlertsFlyoutProps = { alert: TopAlert } & EuiFlyoutProps;
+type AlertsFlyoutProps = {
+  alert?: TopAlert;
+  alerts?: Array<Record<string, unknown>>;
+  isInApp?: boolean;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  selectedAlertId?: string;
+} & EuiFlyoutProps;
 
-export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
+const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
+const ALERT_RULE_CATEGORY: typeof ALERT_RULE_CATEGORY_TYPED = ALERT_RULE_CATEGORY_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
+
+export function AlertsFlyout({
+  alert,
+  alerts,
+  isInApp = false,
+  observabilityRuleTypeRegistry,
+  onClose,
+  selectedAlertId,
+}: AlertsFlyoutProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
-  const { core } = usePluginContext();
-  const { prepend } = core.http.basePath;
+  const { services } = useKibana();
+  const { http } = services;
+  const prepend = http?.basePath.prepend;
+  const decoratedAlerts = useMemo(() => {
+    const parseObservabilityAlert = parseAlert(observabilityRuleTypeRegistry);
+    return (alerts ?? []).map(parseObservabilityAlert);
+  }, [alerts, observabilityRuleTypeRegistry]);
+
+  let alertData = alert;
+  if (!alertData) {
+    alertData = decoratedAlerts?.find((a) => a.fields[ALERT_UUID] === selectedAlertId);
+  }
+  if (!alertData) {
+    return null;
+  }
 
   const overviewListItems = [
     {
       title: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
         defaultMessage: 'Status',
       }),
-      description: alert.active ? 'Active' : 'Recovered',
+      description: alertData.active ? 'Active' : 'Recovered',
     },
     {
-      title: i18n.translate('xpack.observability.alertsFlyout.severityLabel', {
-        defaultMessage: 'Severity',
-      }),
-      description: <SeverityBadge severityLevel={alert.fields[ALERT_SEVERITY_LEVEL]} />,
-    },
-    {
-      title: i18n.translate('xpack.observability.alertsFlyout.triggeredLabel', {
-        defaultMessage: 'Triggered',
+      title: i18n.translate('xpack.observability.alertsFlyout.lastUpdatedLabel', {
+        defaultMessage: 'Last updated',
       }),
       description: (
-        <span title={alert.start.toString()}>{moment(alert.start).format(dateFormat)}</span>
+        <span title={alertData.start.toString()}>{moment(alertData.start).format(dateFormat)}</span>
       ),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.durationLabel', {
         defaultMessage: 'Duration',
       }),
-      description: asDuration(alert.fields[ALERT_DURATION], { extended: true }),
+      description: asDuration(alertData.fields[ALERT_DURATION], { extended: true }),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.expectedValueLabel', {
         defaultMessage: 'Expected value',
       }),
-      description: alert.fields[ALERT_EVALUATION_THRESHOLD] ?? '-',
+      description: alertData.fields[ALERT_EVALUATION_THRESHOLD] ?? '-',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.actualValueLabel', {
         defaultMessage: 'Actual value',
       }),
-      description: alert.fields[ALERT_EVALUATION_VALUE] ?? '-',
+      description: alertData.fields[ALERT_EVALUATION_VALUE] ?? '-',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.ruleTypeLabel', {
         defaultMessage: 'Rule type',
       }),
-      description: alert.fields[RULE_CATEGORY] ?? '-',
+      description: alertData.fields[ALERT_RULE_CATEGORY] ?? '-',
     },
   ];
 
   return (
-    <EuiFlyout onClose={onClose} size="s">
+    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2>{alert.fields[RULE_NAME]}</h2>
+        <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
+          <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="s">{alert.reason}</EuiText>
+        <EuiText size="s">{alertData.reason}</EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiSpacer size="s" />
@@ -105,13 +143,27 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
           compressed={true}
           type="responsiveColumn"
           listItems={overviewListItems}
+          titleProps={
+            {
+              'data-test-subj': 'alertsFlyoutDescriptionListTitle',
+            } as any // NOTE / TODO: This "any" is a temporary workaround: https://github.com/elastic/eui/issues/5148
+          }
+          descriptionProps={
+            {
+              'data-test-subj': 'alertsFlyoutDescriptionListDescription',
+            } as any // NOTE / TODO: This "any" is a temporary workaround: https://github.com/elastic/eui/issues/5148
+          }
         />
       </EuiFlyoutBody>
-      {alert.link && (
+      {alertData.link && !isInApp && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton href={prepend(alert.link)} fill>
+              <EuiButton
+                href={prepend && prepend(alertData.link)}
+                data-test-subj="alertsFlyoutViewInAppButton"
+                fill
+              >
                 View in app
               </EuiButton>
             </EuiFlexItem>
@@ -121,3 +173,6 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     </EuiFlyout>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default AlertsFlyout;

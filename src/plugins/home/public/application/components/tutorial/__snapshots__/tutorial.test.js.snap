@@ -31,6 +31,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
               },
             ]
           }
+          isCloudEnabled={false}
           key="0"
           offset={1}
           onStatusCheck={[Function]}
@@ -107,6 +108,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
               },
             ]
           }
+          isCloudEnabled={false}
           key="0"
           offset={1}
           onStatusCheck={[Function]}
@@ -154,6 +156,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
               },
             ]
           }
+          isCloudEnabled={true}
           key="0"
           offset={1}
           onStatusCheck={[Function]}

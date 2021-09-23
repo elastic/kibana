@@ -29,10 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
-      await kibanaServer.importExport.load('discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should modify the time range when the histogram is brushed', async function () {
         // this is the number of renderings of the histogram needed when new data is fetched
         // this needs to be improved
-        const renderingCountInc = 1;
+        const renderingCountInc = 2;
         const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -120,6 +120,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           return actualCount === expectedCount;
         });
+        const prevRowData = await PageObjects.discover.getDocTableField(1);
+        log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete after being brushed', async () => {
@@ -133,12 +135,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(Math.round(newDurationHours)).to.be(26);
 
-        await retry.waitFor('doc table to contain the right search result', async () => {
+        await retry.waitFor('doc table containing the documents of the brushed range', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table: ${rowData}`);
-          const dateParsed = Date.parse(rowData);
-          // compare against the parsed date of Sep 20, 2015 @ 17:30:00.000 and Sep 20, 2015 @ 23:30:00.000
-          return dateParsed >= 1442770200000 && dateParsed <= 1442791800000;
+          log.debug(`The first timestamp value in doc table after brushing: ${rowData}`);
+          return prevRowData !== rowData;
         });
       });
 
@@ -172,6 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // reset to persisted state
+        await queryBar.clearQuery();
         await PageObjects.discover.clickResetSavedSearchButton();
         const expectedHitCount = '14,004';
         await retry.try(async function () {
@@ -181,8 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/89550
-    describe.skip('query #2, which has an empty time range', () => {
+    describe('query #2, which has an empty time range', () => {
       const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
       const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 
@@ -193,8 +193,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show "no results"', async () => {
-        const isVisible = await PageObjects.discover.hasNoResults();
-        expect(isVisible).to.be(true);
+        await retry.waitFor('no results screen is displayed', async function () {
+          const isVisible = await PageObjects.discover.hasNoResults();
+          return isVisible === true;
+        });
       });
 
       it('should suggest a new time range is picked', async () => {
@@ -228,10 +230,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           await PageObjects.discover.loadSavedSearch(expected.title);
-          const {
-            title,
-            description,
-          } = await PageObjects.common.getSharedItemTitleAndDescription();
+          const { title, description } =
+            await PageObjects.common.getSharedItemTitleAndDescription();
           expect(title).to.eql(expected.title);
           expect(description).to.eql(expected.description);
         });
@@ -266,8 +266,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
-
-        expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
+        await retry.waitFor('number of fetches to be 1', async () => {
+          const nrOfFetches = await PageObjects.discover.getNrOfFetches();
+          return nrOfFetches === 1;
+        });
       });
     });
 
@@ -306,7 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
-        await PageObjects.discover.clickFieldListItemAdd('_score');
+        await PageObjects.discover.clickFieldListItemRemove('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
       });
@@ -327,10 +329,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const intervalS = 5;
         await PageObjects.timePicker.startAutoRefresh(intervalS);
 
-        // check inspector panel request stats for timestamp
-        await inspector.open();
-
         const getRequestTimestamp = async () => {
+          // check inspector panel request stats for timestamp
+          await inspector.open();
           const requestStats = await inspector.getTableData();
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')
@@ -338,6 +339,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
             return '';
           }
+          await inspector.close();
           return requestStatsRow[0][1];
         };
 

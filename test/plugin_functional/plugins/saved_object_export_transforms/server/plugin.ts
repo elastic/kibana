@@ -152,6 +152,66 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
         getTitle: (obj) => obj.attributes.title,
       },
     });
+
+    // example of a SO type implementing the `isExportable` API
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-is-exportable',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle: (obj) => obj.attributes.title,
+        isExportable: (obj) => {
+          if (obj.id === 'error') {
+            throw new Error('something went wrong');
+          }
+          return obj.attributes.enabled === true;
+        },
+      },
+    });
+
+    // example of a SO type with `visibleInManagement: false`
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-not-visible-in-management',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        visibleInManagement: false,
+      },
+    });
+
+    // example of a SO type with `visibleInManagement: true`
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-visible-in-management',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        visibleInManagement: true,
+      },
+    });
   }
 
   public start() {}

@@ -10,7 +10,7 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
@@ -23,7 +23,7 @@ describe('DocumentDetailLogic', () => {
   const { mount } = new LogicMounter(DocumentDetailLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -65,7 +65,7 @@ describe('DocumentDetailLogic', () => {
 
         DocumentDetailLogic.actions.getDocumentDetails('1');
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/engine1/documents/1');
         await nextTick();
         expect(DocumentDetailLogic.actions.setFields).toHaveBeenCalledWith(fields);
       });
@@ -99,11 +99,11 @@ describe('DocumentDetailLogic', () => {
         mount();
         DocumentDetailLogic.actions.deleteDocument('1');
 
-        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
-        await nextTick();
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
-          'Successfully marked document for deletion. It will be deleted momentarily.'
+        expect(http.delete).toHaveBeenCalledWith(
+          '/internal/app_search/engines/engine1/documents/1'
         );
+        await nextTick();
+        expect(flashSuccessToast).toHaveBeenCalledWith('Your document was deleted');
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
       });
 

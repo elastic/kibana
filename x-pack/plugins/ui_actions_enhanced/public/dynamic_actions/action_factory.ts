@@ -32,7 +32,8 @@ export class ActionFactory<
 > implements
     Omit<Presentable<FactoryContext>, 'getHref'>,
     Configurable<Config, FactoryContext>,
-    PersistableState<SerializedEvent> {
+    PersistableState<SerializedEvent>
+{
   constructor(
     protected readonly def: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>,
     protected readonly deps: ActionFactoryDeps
@@ -122,8 +123,11 @@ export class ActionFactory<
       });
   }
 
-  public telemetry(state: SerializedEvent, telemetryData: Record<string, any>) {
-    return this.def.telemetry ? this.def.telemetry(state, telemetryData) : {};
+  public telemetry(
+    state: SerializedEvent,
+    telemetryData: Record<string, string | number | boolean>
+  ) {
+    return this.def.telemetry ? this.def.telemetry(state, telemetryData) : telemetryData;
   }
 
   public extract(state: SerializedEvent) {

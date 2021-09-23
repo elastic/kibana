@@ -17,7 +17,7 @@ const API_URI = 'api/triggers_actions_ui/data/_fields';
 export default function fieldsEndpointTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('fields endpoint', () => {

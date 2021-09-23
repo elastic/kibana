@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { NumberFormatEditor } from './number';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
+
+export type { NumberFormatEditor } from './number';
+export const numberFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./number').then((m) => m.NumberFormatEditor);
+numberFormatEditorFactory.formatId = formatId;

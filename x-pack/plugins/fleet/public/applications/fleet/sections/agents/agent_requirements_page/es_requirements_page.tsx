@@ -24,6 +24,7 @@ import {
 
 import { WithoutHeaderLayout } from '../../../layouts';
 import type { GetFleetStatusResponse } from '../../../types';
+import { useStartServices } from '../../../hooks';
 
 export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = ({
   isMissing,
@@ -50,6 +51,8 @@ export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = 
 export const MissingESRequirementsPage: React.FunctionComponent<{
   missingRequirements: GetFleetStatusResponse['missing_requirements'];
 }> = ({ missingRequirements }) => {
+  const { docLinks } = useStartServices();
+
   return (
     <WithoutHeaderLayout>
       <EuiPageBody restrictWidth={820}>
@@ -69,7 +72,8 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
           <EuiSpacer size="m" />
           <FormattedMessage
             id="xpack.fleet.setupPage.missingRequirementsElasticsearchTitle"
-            defaultMessage="In your Elasticsearch policy, enable:"
+            defaultMessage="In your Elasticsearch configuration ({esConfigFile}), enable:"
+            values={{ esConfigFile: <EuiCode>elasticsearch.yml</EuiCode> }}
           />
           <EuiSpacer size="l" />
           <RequirementItem isMissing={false}>
@@ -79,7 +83,7 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
               values={{
                 esSecurityLink: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-security.html"
+                    href={docLinks.links.security.elasticsearchEnableSecurity}
                     target="_blank"
                     external
                   >
@@ -104,7 +108,7 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
                 true: <EuiCode>true</EuiCode>,
                 apiKeyLink: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/security-settings.html#api-key-service-settings"
+                    href={docLinks.links.security.apiKeyServiceSettings}
                     target="_blank"
                     external
                   >
@@ -128,11 +132,7 @@ xpack.security.authc.api_key.enabled: true`}
             defaultMessage="For more information, read our {link} guide."
             values={{
               link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/fleet/current/index.html"
-                  target="_blank"
-                  external
-                >
+                <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
                   <FormattedMessage
                     id="xpack.fleet.setupPage.gettingStartedLink"
                     defaultMessage="Getting Started"

@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { coreMock } from 'src/core/public/mocks';
 import { createKibanaReactContext } from '../../../../../../kibana_react/public';
-import { FieldFormat } from 'src/plugins/data/public';
+import { FieldFormat } from 'src/plugins/field_formats/common';
 
 import { PercentFormatEditor } from './percent';
 
@@ -51,7 +51,7 @@ describe('PercentFormatEditor', () => {
     const component = shallow(
       <PercentFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

@@ -14,13 +14,25 @@ import {
 import type { SavedObjectsClient, SavedObjectsUpdateResponse } from 'src/core/server';
 import type { KibanaRequest } from 'kibana/server';
 
-import type { PackageInfo, PackagePolicySOAttributes, AgentPolicySOAttributes } from '../types';
+import type {
+  PackageInfo,
+  PackagePolicySOAttributes,
+  AgentPolicySOAttributes,
+  PostPackagePolicyDeleteCallback,
+  RegistryDataStream,
+  PackagePolicyInputStream,
+} from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
-import type { ExternalCallback } from '..';
+
+import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } from '..';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
-import { packagePolicyService } from './package_policy';
+import type { DeletePackagePoliciesResponse } from '../../common';
+
+import { IngestManagerError } from '../errors';
+
+import { packagePolicyService, _applyIndexPrivileges } from './package_policy';
 import { appContextService } from './app_context';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
@@ -34,6 +46,12 @@ paths:
 {{#each paths}}
 - {{this}}
 {{/each}}
+{{#if hosts}}
+hosts:
+{{#each hosts}}
+- {{this}}
+{{/each}}
+{{/if}}
 `),
       },
     ];
@@ -99,11 +117,13 @@ jest.mock('./agent_policy', () => {
   };
 });
 
+type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
+
 describe('Package policy service', () => {
   describe('compilePackagePolicyInputs', () => {
     it('should work with config variables from the stream', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+        {
           data_streams: [
             {
               type: 'logs',
@@ -117,7 +137,8 @@ describe('Package policy service', () => {
               inputs: [{ type: 'log' }],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -165,7 +186,7 @@ describe('Package policy service', () => {
 
     it('should work with a two level dataset name', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+        {
           data_streams: [
             {
               type: 'logs',
@@ -179,7 +200,8 @@ describe('Package policy service', () => {
               inputs: [{ type: 'log' }],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -216,7 +238,7 @@ describe('Package policy service', () => {
 
     it('should work with config variables at the input level', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+        {
           data_streams: [
             {
               dataset: 'package.dataset1',
@@ -230,7 +252,8 @@ describe('Package policy service', () => {
               inputs: [{ type: 'log' }],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -276,16 +299,85 @@ describe('Package policy service', () => {
       ]);
     });
 
+    it('should work with config variables at the package level', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        {
+          data_streams: [
+            {
+              dataset: 'package.dataset1',
+              type: 'logs',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log' }],
+            },
+          ],
+        } as unknown as PackageInfo,
+        {
+          hosts: {
+            value: ['localhost'],
+          },
+        },
+        [
+          {
+            type: 'log',
+            enabled: true,
+            vars: {
+              paths: {
+                value: ['/var/log/set.log'],
+              },
+            },
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          vars: {
+            paths: {
+              value: ['/var/log/set.log'],
+            },
+          },
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1', type: 'logs' },
+              enabled: true,
+              compiled_stream: {
+                metricset: ['dataset1'],
+                paths: ['/var/log/set.log'],
+                type: 'log',
+                hosts: ['localhost'],
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should work with an input with a template and no streams', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+        {
           data_streams: [],
           policy_templates: [
             {
               inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -319,7 +411,7 @@ describe('Package policy service', () => {
 
     it('should work with an input with a template and streams', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+        {
           data_streams: [
             {
               dataset: 'package.dataset1',
@@ -330,13 +422,20 @@ describe('Package policy service', () => {
           ],
           policy_templates: [
             {
+              name: 'template_1',
+              inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
+            },
+            {
+              name: 'template_2',
               inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         [
           {
             type: 'log',
+            policy_template: 'template_1',
             enabled: true,
             vars: {
               hosts: {
@@ -354,12 +453,24 @@ describe('Package policy service', () => {
               },
             ],
           },
+          {
+            type: 'log',
+            policy_template: 'template_2',
+            enabled: true,
+            vars: {
+              hosts: {
+                value: ['localhost'],
+              },
+            },
+            streams: [],
+          },
         ]
       );
 
       expect(inputs).toEqual([
         {
           type: 'log',
+          policy_template: 'template_1',
           enabled: true,
           vars: {
             hosts: {
@@ -380,23 +491,39 @@ describe('Package policy service', () => {
               compiled_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
+                hosts: ['localhost'],
                 type: 'log',
               },
             },
           ],
+        },
+        {
+          type: 'log',
+          policy_template: 'template_2',
+          enabled: true,
+          vars: {
+            hosts: {
+              value: ['localhost'],
+            },
+          },
+          compiled_input: {
+            hosts: ['localhost'],
+          },
+          streams: [],
         },
       ]);
     });
 
     it('should work with a package without input', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+        {
           policy_templates: [
             {
               inputs: undefined,
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         []
       );
 
@@ -405,13 +532,14 @@ describe('Package policy service', () => {
 
     it('should work with a package with a empty inputs array', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+        {
           policy_templates: [
             {
               inputs: [],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         []
       );
 
@@ -574,6 +702,201 @@ describe('Package policy service', () => {
       expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
       expect(modifiedStream.vars!.period.value).toEqual('12mo');
     });
+
+    it('should add new input vars when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: inputsUpdate }
+      );
+
+      const [modifiedInput] = result.inputs;
+      expect(modifiedInput.enabled).toEqual(true);
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('siamese');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+  });
+
+  describe('runDeleteExternalCallbacks', () => {
+    let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callingOrder: string[];
+    let deletedPackagePolicies: DeletePackagePoliciesResponse;
+
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+      callingOrder = [];
+      deletedPackagePolicies = [
+        { id: 'a', success: true },
+        { id: 'a', success: true },
+      ];
+      callbackOne = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('one');
+      });
+      callbackTwo = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('two');
+      });
+      appContextService.addExternalCallback('postPackagePolicyDelete', callbackOne);
+      appContextService.addExternalCallback('postPackagePolicyDelete', callbackTwo);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should execute external callbacks', async () => {
+      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
+
+      expect(callbackOne).toHaveBeenCalledWith(deletedPackagePolicies);
+      expect(callbackTwo).toHaveBeenCalledWith(deletedPackagePolicies);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it("should execute all external callbacks even if one throw's", async () => {
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw new Error('foo');
+      });
+      await expect(
+        packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies)
+      ).rejects.toThrow(IngestManagerError);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it('should provide an array of errors encountered by running external callbacks', async () => {
+      let error: IngestManagerError;
+      const callbackOneError = new Error('foo 1');
+      const callbackTwoError = new Error('foo 2');
+
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw callbackOneError;
+      });
+      callbackTwo.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('two');
+        throw callbackTwoError;
+      });
+
+      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies).catch((e) => {
+        error = e;
+      });
+
+      expect(error!.message).toEqual(
+        '2 encountered while executing package delete external callbacks'
+      );
+      expect(error!.meta).toEqual([callbackOneError, callbackTwoError]);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
   });
 
   describe('runExternalCallbacks', () => {
@@ -598,7 +921,7 @@ describe('Package policy service', () => {
     const callbackCallingOrder: string[] = [];
 
     // Callback one adds an input that includes a `config` property
-    const callbackOne: ExternalCallback[1] = jest.fn(async (ds) => {
+    const callbackOne: CombinedExternalCallback = jest.fn(async (ds) => {
       callbackCallingOrder.push('one');
       return {
         ...ds,
@@ -618,7 +941,7 @@ describe('Package policy service', () => {
     });
 
     // Callback two adds an additional `input[0].config` property
-    const callbackTwo: ExternalCallback[1] = jest.fn(async (ds) => {
+    const callbackTwo: CombinedExternalCallback = jest.fn(async (ds) => {
       callbackCallingOrder.push('two');
       return {
         ...ds,
@@ -649,12 +972,12 @@ describe('Package policy service', () => {
     });
 
     it('should call external callbacks in expected order', async () => {
-      const callbackA: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackA: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('a');
         return ds;
       });
 
-      const callbackB: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackB: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('b');
         return ds;
       });
@@ -690,12 +1013,12 @@ describe('Package policy service', () => {
     });
 
     describe('with a callback that throws an exception', () => {
-      const callbackThree: ExternalCallback[1] = jest.fn(async () => {
+      const callbackThree: CombinedExternalCallback = jest.fn(async () => {
         callbackCallingOrder.push('three');
         throw new Error('callbackThree threw error on purpose');
       });
 
-      const callbackFour: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackFour: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('four');
         return {
           ...ds,
@@ -750,5 +1073,121 @@ describe('Package policy service', () => {
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
     });
+  });
+});
+
+describe('_applyIndexPrivileges()', () => {
+  function createPackageStream(indexPrivileges?: string[]): RegistryDataStream {
+    const stream: RegistryDataStream = {
+      type: '',
+      dataset: '',
+      title: '',
+      release: '',
+      package: '',
+      path: '',
+    };
+
+    if (indexPrivileges) {
+      stream.elasticsearch = {
+        privileges: {
+          indices: indexPrivileges,
+        },
+      };
+    }
+
+    return stream;
+  }
+
+  function createInputStream(
+    opts: Partial<PackagePolicyInputStream> = {}
+  ): PackagePolicyInputStream {
+    return {
+      id: '',
+      enabled: true,
+      data_stream: {
+        dataset: '',
+        type: '',
+      },
+      ...opts,
+    };
+  }
+
+  beforeAll(async () => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  it('should do nothing if packageStream has no privileges', () => {
+    const packageStream = createPackageStream();
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should not apply privileges if all privileges are forbidden', () => {
+    const forbiddenPrivileges = ['write', 'delete', 'delete_index', 'all'];
+    const packageStream = createPackageStream(forbiddenPrivileges);
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should not apply privileges if all privileges are unrecognized', () => {
+    const unrecognizedPrivileges = ['idnotexist', 'invalidperm'];
+    const packageStream = createPackageStream(unrecognizedPrivileges);
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should apply privileges if all privileges are valid', () => {
+    const validPrivileges = [
+      'auto_configure',
+      'create_doc',
+      'maintenance',
+      'monitor',
+      'read',
+      'read_cross_cluster',
+    ];
+
+    const packageStream = createPackageStream(validPrivileges);
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          privileges: {
+            indices: validPrivileges,
+          },
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
+  });
+
+  it('should only apply valid privileges when there is a  mix of valid and invalid', () => {
+    const mixedPrivileges = ['auto_configure', 'read_cross_cluster', 'idontexist', 'delete'];
+
+    const packageStream = createPackageStream(mixedPrivileges);
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          privileges: {
+            indices: ['auto_configure', 'read_cross_cluster'],
+          },
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
   });
 });

@@ -10,7 +10,6 @@ import React, { memo, useMemo } from 'react';
 import { CasesNavigation, LinkButton } from '../links';
 
 // TODO: Potentially move into links component?
-
 export interface ConfigureCaseButtonProps {
   configureCasesNavigation: CasesNavigation;
   isDisabled: boolean;

@@ -16,14 +16,15 @@ import { FieldMappingRowStatic } from './field_mapping_row_static';
 describe('FieldMappingRow', () => {
   let wrapper: ReactWrapper;
   const props: FieldMappingProps = {
+    actionTypeName: 'ServiceNow ITSM',
     isLoading: false,
     mappings,
-    connectorActionTypeId: '.servicenow',
   };
 
   beforeAll(() => {
     wrapper = mount(<FieldMapping {...props} />, { wrappingComponent: TestProviders });
   });
+
   test('it renders', () => {
     expect(
       wrapper.find('[data-test-subj="case-configure-field-mappings-row-wrapper"]').first().exists()
@@ -51,5 +52,14 @@ describe('FieldMappingRow', () => {
       expect(row.prop('selectedActionType')).toEqual(mappings[index].actionType);
       expect(row.prop('selectedThirdParty')).toEqual(mappings[index].target);
     });
+  });
+
+  test('displays the label of the second column correctly', () => {
+    expect(
+      wrapper
+        .find('[data-test-subj="case-configure-field-mappings-second-col-label"]')
+        .first()
+        .text()
+    ).toBe('ServiceNow ITSM field');
   });
 });

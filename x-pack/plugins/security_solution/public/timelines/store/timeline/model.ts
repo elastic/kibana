@@ -5,63 +5,30 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
-
-import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/public';
-
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
-import { Sort } from '../../components/timeline/body/sort';
-import {
-  EqlOptionsSelected,
-  TimelineNonEcsData,
-} from '../../../../common/search_strategy/timeline';
-import { SerializedFilterQuery } from '../../../common/store/types';
+import { EqlOptionsSelected } from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
-  TimelineExpandedDetail,
   TimelineType,
   TimelineStatus,
-  RowRendererId,
   TimelineTabs,
+  ScrollToTopEvent,
 } from '../../../../common/types/timeline';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type { TGridModelForTimeline } from '../../../../../timelines/public';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
-/** Uniquely identifies a column */
-export type ColumnId = string;
-
-/** The specification of a column header */
-export type ColumnHeaderOptions = Pick<
-  EuiDataGridColumn,
-  'display' | 'displayAsText' | 'id' | 'initialWidth'
-> & {
-  aggregatable?: boolean;
-  category?: string;
-  columnHeaderType: ColumnHeaderType;
-  description?: string;
-  example?: string;
-  format?: string;
-  linkField?: string;
-  placeholder?: string;
-  subType?: IFieldSubType;
-  type?: string;
-};
-
-export interface TimelineModel {
+export type TimelineModel = TGridModelForTimeline & {
   /** The selected tab to displayed in the timeline */
   activeTab: TimelineTabs;
   prevActiveTab: TimelineTabs;
-  /** The columns displayed in the timeline */
-  columns: ColumnHeaderOptions[];
+
+  /** Used for scrolling to top when swiching tabs. It includes the timestamp of when the event happened */
+  scrollToTop?: ScrollToTopEvent;
   /** Timeline saved object owner */
   createdBy?: string;
-  /** The sources of the event data shown in the timeline */
-  dataProviders: DataProvider[];
-  /** Events to not be rendered **/
-  deletedEventIds: string[];
   /** A summary of the events and notes in this timeline */
   description: string;
   eqlOptions: EqlOptionsSelected;
@@ -69,40 +36,16 @@ export interface TimelineModel {
   eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
-  /** A list of Ids of excluded Row Renderers */
-  excludedRowRendererIds: RowRendererId[];
-  /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
-  expandedDetail: TimelineExpandedDetail;
-  filters?: Filter[];
-  /** When non-empty, display a graph view for this event */
-  graphEventId?: string;
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
   highlightedDropAndProviderId: string;
-  /** Uniquely identifies the timeline */
-  id: string;
-  /** TO DO sourcerer @X define this */
-  indexNames: string[];
-  /** If selectAll checkbox in header is checked **/
-  isSelectAllChecked: boolean;
-  /** Events to be rendered as loading **/
-  loadingEventIds: string[];
-  savedObjectId: string | null;
   /** When true, this timeline was marked as "favorite" by the user */
   isFavorite: boolean;
   /** When true, the timeline will update as new data arrives */
   isLive: boolean;
-  /** The number of items to show in a single page of results */
-  itemsPerPage: number;
-  /** Displays a series of choices that when selected, become the value of `itemsPerPage` */
-  itemsPerPageOptions: number[];
   /** determines the behavior of the KQL bar */
   kqlMode: KqlMode;
-  /** the KQL query in the KQL bar */
-  kqlQuery: {
-    filterQuery: SerializedFilterQuery | null;
-  };
   /** Title */
   title: string;
   /** timelineType: default | template */
@@ -116,30 +59,21 @@ export interface TimelineModel {
   /** Events pinned to this timeline */
   pinnedEventIds: Record<string, boolean>;
   pinnedEventsSaveObject: Record<string, PinnedEvent>;
-  /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
-  dateRange: {
-    start: string;
-    end: string;
-  };
   showSaveModal?: boolean;
   savedQueryId?: string | null;
-  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
-  selectedEventIds: Record<string, TimelineNonEcsData[]>;
   /** When true, show the timeline flyover */
   show: boolean;
-  /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
-  showCheckboxes: boolean;
-  /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
-  sort: Sort[];
   /** status: active | draft */
   status: TimelineStatus;
   /** updated saved object timestamp */
   updated?: number;
+  /** updated saved object user */
+  updatedBy?: string | null;
   /** timeline is saving */
   isSaving: boolean;
-  isLoading: boolean;
   version: string | null;
-}
+  initialized?: boolean;
+};
 
 export type SubsetTimelineModel = Readonly<
   Pick<
@@ -147,13 +81,16 @@ export type SubsetTimelineModel = Readonly<
     | 'activeTab'
     | 'prevActiveTab'
     | 'columns'
+    | 'defaultColumns'
     | 'dataProviders'
     | 'deletedEventIds'
     | 'description'
+    | 'documentType'
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
     | 'expandedDetail'
+    | 'footerText'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
@@ -165,15 +102,18 @@ export type SubsetTimelineModel = Readonly<
     | 'itemsPerPageOptions'
     | 'kqlMode'
     | 'kqlQuery'
+    | 'queryFields'
     | 'title'
     | 'timelineType'
     | 'templateTimelineId'
     | 'templateTimelineVersion'
     | 'loadingEventIds'
+    | 'loadingText'
     | 'noteIds'
     | 'pinnedEventIds'
     | 'pinnedEventsSaveObject'
     | 'dateRange'
+    | 'selectAll'
     | 'selectedEventIds'
     | 'show'
     | 'showCheckboxes'
@@ -181,6 +121,7 @@ export type SubsetTimelineModel = Readonly<
     | 'isSaving'
     | 'isLoading'
     | 'savedObjectId'
+    | 'unit'
     | 'version'
     | 'status'
   >

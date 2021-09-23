@@ -52,6 +52,7 @@ describe('Search Sessions Management API', () => {
                 status: 'complete',
                 initialState: {},
                 restoreState: {},
+                idMapping: [],
               },
             },
           ],
@@ -78,10 +79,12 @@ describe('Search Sessions Management API', () => {
             "id": "hello-pizza-123",
             "initialState": Object {},
             "name": "Veggie",
+            "numSearches": 0,
             "reloadUrl": "hello-cool-undefined-url",
             "restoreState": Object {},
             "restoreUrl": "hello-cool-undefined-url",
             "status": "complete",
+            "version": undefined,
           },
         ]
       `);
@@ -100,6 +103,7 @@ describe('Search Sessions Management API', () => {
                 expires: moment().subtract(3, 'days'),
                 initialState: {},
                 restoreState: {},
+                idMapping: {},
               },
             },
           ],

@@ -9,6 +9,7 @@ import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { LensPublicStart } from '../../../plugins/lens/public';
 import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
@@ -23,18 +24,23 @@ import {
 } from '../../triggers_actions_ui/public';
 import { CasesUiStart } from '../../cases/public';
 import { SecurityPluginSetup } from '../../security/public';
+import { TimelinesUIStart } from '../../timelines/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 
 import { Detections } from './detections';
 import { Cases } from './cases';
+import { Exceptions } from './exceptions';
 import { Hosts } from './hosts';
 import { Network } from './network';
 import { Overview } from './overview';
+import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
+import { Ueba } from './ueba';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -49,13 +55,16 @@ export interface SetupPlugins {
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
+  dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
+  timelines: TimelinesUIStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
 }
@@ -79,11 +88,30 @@ export interface AppObservableLibs {
 export type InspectResponse = Inspect & { response: string[] };
 
 export interface SubPlugins {
-  detections: Detections;
+  alerts: Detections;
+  rules: Rules;
+  exceptions: Exceptions;
   cases: Cases;
   hosts: Hosts;
   network: Network;
+  // TODO: Steph/ueba require ueba once no longer experimental
+  ueba?: Ueba;
   overview: Overview;
   timelines: Timelines;
   management: Management;
+}
+
+// TODO: find a better way to defined these types
+export interface StartedSubPlugins {
+  alerts: ReturnType<Detections['start']>;
+  rules: ReturnType<Rules['start']>;
+  exceptions: ReturnType<Exceptions['start']>;
+  cases: ReturnType<Cases['start']>;
+  hosts: ReturnType<Hosts['start']>;
+  network: ReturnType<Network['start']>;
+  // TODO: Steph/ueba require ueba once no longer experimental
+  ueba?: ReturnType<Ueba['start']>;
+  overview: ReturnType<Overview['start']>;
+  timelines: ReturnType<Timelines['start']>;
+  management: ReturnType<Management['start']>;
 }

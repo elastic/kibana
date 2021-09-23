@@ -14,12 +14,12 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { RefreshTypes } from '../types';
-import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
+import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
-import { AlertAttributes } from './types';
+import { AlertAttributes, BulkCreate, WrapHits } from './types';
 import { MachineLearningRuleParams } from '../schemas/rule_schemas';
+import { buildReasonMessageForMlAlert } from './reason_formatters';
 
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
@@ -28,8 +28,9 @@ interface BulkCreateMlSignalsParams {
   logger: Logger;
   id: string;
   signalsIndex: string;
-  refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 interface EcsAnomaly extends Anomaly {
@@ -53,8 +54,8 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
   }
 
   const omitDottedFields = omit(errantFields.map((field) => field.name));
-  const setNestedFields = errantFields.map((field) => (_anomaly: Anomaly) =>
-    set(_anomaly, field.name, field.value)
+  const setNestedFields = errantFields.map(
+    (field) => (_anomaly: Anomaly) => set(_anomaly, field.name, field.value)
   );
   const setTimestamp = (_anomaly: Anomaly) =>
     set(_anomaly, '@timestamp', new Date(timestamp).toISOString());
@@ -85,9 +86,10 @@ const transformAnomalyResultsToEcs = (
 
 export const bulkCreateMlSignals = async (
   params: BulkCreateMlSignalsParams
-): Promise<SingleBulkCreateResponse> => {
+): Promise<GenericBulkCreateResponse<{}>> => {
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
-  const buildRuleMessage = params.buildRuleMessage;
-  return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
+
+  const wrappedDocs = params.wrapHits(ecsResults.hits.hits, buildReasonMessageForMlAlert);
+  return params.bulkCreate(wrappedDocs);
 };

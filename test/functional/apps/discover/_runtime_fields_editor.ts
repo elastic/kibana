@@ -10,12 +10,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const fieldEditor = getService('fieldEditor');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -31,14 +31,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.save();
   };
 
-  describe('discover integration with runtime fields editor', function describeIndexTests() {
+  // Failing: https://github.com/elastic/kibana/issues/111922
+  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.savedObjects.clean({ types: ['saved-search'] });
     });
 
     it('allows adding custom label to existing fields', async function () {
@@ -56,7 +63,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows creation of a new field', async function () {
       await createRuntimeField('runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield')).to.be(true);
+      await retry.waitFor('fieldNames to include runtimefield', async () => {
+        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        return fieldNames.includes('runtimefield');
+      });
     });
 
     it('allows editing of a newly created field', async function () {
@@ -65,10 +75,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.save();
       await fieldEditor.confirmSave();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield')).to.be(false);
-      expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield edited')).to.be(
-        true
-      );
+
+      await retry.waitFor('fieldNames to include edits', async () => {
+        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        return fieldNames.includes('runtimefield edited');
+      });
     });
 
     it('allows creation of a new field and use it in a saved search', async function () {
@@ -94,7 +105,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.removeField('delete');
       await fieldEditor.confirmDelete();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect((await PageObjects.discover.getAllFieldNames()).includes('delete')).to.be(false);
+      await retry.waitFor('fieldNames to include edits', async () => {
+        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        return !fieldNames.includes('delete');
+      });
     });
 
     it('doc view includes runtime fields', async function () {
@@ -113,10 +127,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[idxToClick].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
-      const runtimeFieldsRow = await testSubjects.exists('tableDocViewRow-discover runtimefield');
-      expect(runtimeFieldsRow).to.be(true);
+      await retry.waitFor('doc viewer is displayed with runtime field', async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        if (!hasDocHit) {
+          // Maybe loading has not completed
+          throw new Error('test subject doc-hit is not yet displayed');
+        }
+        const runtimeFieldsRow = await testSubjects.exists('tableDocViewRow-discover runtimefield');
+
+        return hasDocHit && runtimeFieldsRow;
+      });
     });
   });
 }

@@ -29,6 +29,7 @@ describe('agg_expression_functions', () => {
               "customLabel": undefined,
               "customMetric": undefined,
               "json": undefined,
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "min_bucket",
@@ -42,11 +43,13 @@ describe('agg_expression_functions', () => {
               "customLabel": undefined,
               "customMetric": undefined,
               "json": undefined,
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "min_bucket",
           },
           "json": undefined,
+          "timeShift": undefined,
         }
       `);
     });

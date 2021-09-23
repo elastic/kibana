@@ -7,8 +7,6 @@
  */
 
 // @ts-ignore
-export { PromiseServiceCreator } from './promises';
-// @ts-ignore
 export { watchMultiDecorator } from './watch_multi';
 export * from './angular_config';
 // @ts-ignore

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../../../__mocks__';
+import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 import { mockRecursivelyFetchEngines } from '../../../../__mocks__/recursively_fetch_engines.mock';
 
 import { EngineDetails } from '../../../engine/types';
@@ -138,7 +138,7 @@ describe('MetaEnginesTableLogic', () => {
 
         expect(mockRecursivelyFetchEngines).toHaveBeenCalledWith(
           expect.objectContaining({
-            endpoint: '/api/app_search/engines/test-engine-1/source_engines',
+            endpoint: '/internal/app_search/engines/test-engine-1/source_engines',
           })
         );
         expect(MetaEnginesTableLogic.actions.addSourceEngines).toHaveBeenCalledWith({

@@ -11,7 +11,7 @@ import { get, groupBy } from 'lodash';
 // @ts-ignore
 import { handleError } from '../../../../lib/errors/handle_error';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import {
   ElasticsearchResponse,
@@ -99,7 +99,7 @@ function buildRequest(
   return {
     index: esIndexPattern,
     size: maxBucketSize,
-    filterPath: [
+    filter_path: [
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.read_exceptions',
       'hits.hits.inner_hits.by_shard.hits.hits._source.elasticsearch.ccr.read_exceptions',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.follower_index',

@@ -15,7 +15,7 @@ import type { ElasticsearchClient } from '../../../elasticsearch';
 import { Root } from '../../../root';
 import { deterministicallyRegenerateObjectId } from '../../migrations/core/document_migrator';
 
-const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
+const logFilePath = Path.join(__dirname, 'rewriting_id.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {
@@ -89,7 +89,7 @@ function createRoot() {
 }
 
 // FAILING: https://github.com/elastic/kibana/issues/98351
-describe.skip('migration v2', () => {
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
@@ -114,7 +114,7 @@ describe.skip('migration v2', () => {
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
-          license: 'trial',
+          license: 'basic',
           // original SO:
           // [
           //   { id: 'foo:1', type: 'foo', foo: { name: 'Foo 1 default' } },
@@ -133,7 +133,7 @@ describe.skip('migration v2', () => {
           //     namespace: 'spacex',
           //   },
           // ];
-          dataArchive: Path.join(__dirname, 'archives', '7.13.0_so_with_multiple_namespaces.zip'),
+          dataArchive: Path.join(__dirname, 'archives', '7.13.2_so_with_multiple_namespaces.zip'),
         },
       },
     });
@@ -141,6 +141,7 @@ describe.skip('migration v2', () => {
     root = createRoot();
 
     esServer = await startES();
+    await root.preboot();
     const coreSetup = await root.setup();
 
     coreSetup.savedObjects.registerType({

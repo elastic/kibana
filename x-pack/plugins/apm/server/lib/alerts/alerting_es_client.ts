@@ -8,7 +8,7 @@
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../typings/elasticsearch';
+} from '../../../../../../src/core/types/elasticsearch';
 import { AlertServices } from '../../../../alerting/server';
 
 export async function alertingEsClient<TParams extends ESSearchRequest>({
@@ -27,5 +27,5 @@ export async function alertingEsClient<TParams extends ESSearchRequest>({
     ignore_unavailable: true,
   });
 
-  return (response.body as unknown) as ESSearchResponse<unknown, TParams>;
+  return response.body as unknown as ESSearchResponse<unknown, TParams>;
 }

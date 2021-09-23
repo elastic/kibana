@@ -50,12 +50,14 @@ export const AddNote = React.memo<{
   newNote: string;
   onCancelAddNote?: () => void;
   updateNewNote: UpdateInternalNewNote;
-}>(({ associateNote, newNote, onCancelAddNote, updateNewNote }) => {
+  autoFocusDisabled?: boolean;
+}>(({ associateNote, newNote, onCancelAddNote, updateNewNote, autoFocusDisabled = false }) => {
   const dispatch = useDispatch();
 
-  const updateNote = useCallback((note: Note) => dispatch(appActions.updateNote({ note })), [
-    dispatch,
-  ]);
+  const updateNote = useCallback(
+    (note: Note) => dispatch(appActions.updateNote({ note })),
+    [dispatch]
+  );
 
   const handleClick = useCallback(
     () =>
@@ -87,7 +89,12 @@ export const AddNote = React.memo<{
         <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
           <p>{i18n.YOU_ARE_EDITING_A_NOTE}</p>
         </EuiScreenReaderOnly>
-        <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
+        <NewNote
+          note={newNote}
+          noteInputHeight={200}
+          updateNewNote={updateNewNote}
+          autoFocusDisabled={autoFocusDisabled}
+        />
         <ButtonsContainer gutterSize="none">
           {onCancelAddNote != null ? (
             <EuiFlexItem grow={false}>

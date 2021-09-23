@@ -50,7 +50,7 @@ export const SetupGuide: React.FC = () => (
       <p>
         <FormattedMessage
           id="xpack.enterpriseSearch.appSearch.setupGuide.description"
-          defaultMessage="Elastic App Search provides tools to design and deploy a powerful search to your websites and mobile applications."
+          defaultMessage="Get tools to design and deploy a powerful search to your websites and mobile applications."
         />
       </p>
     </EuiTitle>

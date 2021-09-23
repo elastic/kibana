@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Path from 'path';
 import { castArray, groupBy } from 'lodash';
 import callsites from 'callsites';
 import { maybe } from '../../../plugins/apm/common/utils/maybe';
@@ -108,6 +109,9 @@ export const registry = {
     running = true;
     const esArchiver = context.getService('esArchiver');
     const logger = context.getService('log');
+
+    const supertest = context.getService('legacySupertestAsApmWriteUser');
+
     const logWithTimer = () => {
       const start = process.hrtime();
 
@@ -140,7 +144,16 @@ export const registry = {
             const log = logWithTimer();
             for (const archiveName of condition.archives) {
               log(`Loading ${archiveName}`);
-              await esArchiver.load(archiveName);
+
+              await esArchiver.load(
+                Path.join(
+                  'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
+                  archiveName
+                )
+              );
+
+              // sync jobs from .ml-config to .kibana SOs
+              await supertest.get('/api/ml/saved_objects/sync').set('kbn-xsrf', 'foo');
             }
             if (condition.archives.length) {
               log('Loaded all archives');
@@ -151,7 +164,12 @@ export const registry = {
             const log = logWithTimer();
             for (const archiveName of condition.archives) {
               log(`Unloading ${archiveName}`);
-              await esArchiver.unload(archiveName);
+              await esArchiver.unload(
+                Path.join(
+                  'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
+                  archiveName
+                )
+              );
             }
             if (condition.archives.length) {
               log('Unloaded all archives');

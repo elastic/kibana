@@ -22,6 +22,8 @@ import {
   getModelSnapshotsSchema,
   updateModelSnapshotsSchema,
   updateModelSnapshotBodySchema,
+  forceQuerySchema,
+  jobResetQuerySchema,
 } from './schemas/anomaly_detectors_schema';
 
 /**
@@ -270,13 +272,14 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiDescription Closes an anomaly detection job.
    *
    * @apiSchema (params) jobIdSchema
+   * @apiSchema (query) forceQuerySchema
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_close',
       validate: {
         params: jobIdSchema,
-        query: schema.object({ force: schema.maybe(schema.boolean()) }),
+        query: forceQuerySchema,
       },
       options: {
         tags: ['access:ml:canCloseJob'],
@@ -284,7 +287,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: estypes.CloseJobRequest = {
+        const options: estypes.MlCloseJobRequest = {
           job_id: request.params.jobId,
         };
         const force = request.query.force;
@@ -304,18 +307,59 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/_reset Reset specified job
+   * @apiName ResetAnomalyDetectorsJob
+   * @apiDescription Resets an anomaly detection job.
+   *
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (query) jobResetQuerySchema
+   */
+  router.post(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/_reset',
+      validate: {
+        params: jobIdSchema,
+        query: jobResetQuerySchema,
+      },
+      options: {
+        tags: ['access:ml:canCloseJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const options: { job_id: string; wait_for_completion?: boolean } = {
+          // TODO change this to correct resetJob request type
+          job_id: request.params.jobId,
+          ...(request.query.wait_for_completion !== undefined
+            ? { wait_for_completion: request.query.wait_for_completion }
+            : {}),
+        };
+        const { body } = await mlClient.resetJob(options);
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
    * @api {delete} /api/ml/anomaly_detectors/:jobId Delete specified job
    * @apiName DeleteAnomalyDetectorsJob
    * @apiDescription Deletes specified anomaly detection job.
    *
    * @apiSchema (params) jobIdSchema
+   * @apiSchema (query) forceQuerySchema
    */
   router.delete(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
         params: jobIdSchema,
-        query: schema.object({ force: schema.maybe(schema.boolean()) }),
+        query: forceQuerySchema,
       },
       options: {
         tags: ['access:ml:canDeleteJob'],
@@ -323,7 +367,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: estypes.DeleteJobRequest = {
+        const options: estypes.MlDeleteJobRequest = {
           job_id: request.params.jobId,
           wait_for_completion: false,
         };
@@ -517,12 +561,11 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       try {
         const { body } = await mlClient.getOverallBuckets({
           job_id: request.params.jobId,
-          body: {
-            top_n: request.body.topN,
-            bucket_span: request.body.bucketSpan,
-            start: request.body.start !== undefined ? String(request.body.start) : undefined,
-            end: request.body.end !== undefined ? String(request.body.end) : undefined,
-          },
+          top_n: request.body.topN,
+          bucket_span: request.body.bucketSpan,
+          start: request.body.start !== undefined ? String(request.body.start) : undefined,
+          end: request.body.end !== undefined ? String(request.body.end) : undefined,
+          overall_score: request.body.overall_score ?? 0,
         });
         return response.ok({
           body,
@@ -637,7 +680,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {post} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId/_update update model snapshot by snapshot ID
+   * @api {post} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId/_update Update model snapshot by snapshot ID
    * @apiName UpdateModelSnapshotsById
    * @apiDescription Updates the model snapshot for the specified snapshot ID
    *

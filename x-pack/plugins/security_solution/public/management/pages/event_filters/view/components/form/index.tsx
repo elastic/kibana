@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import {
@@ -18,8 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
+
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
@@ -31,16 +32,10 @@ import { ExceptionBuilder } from '../../../../../../shared_imports';
 
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
-import {
-  FORM_DESCRIPTION,
-  NAME_LABEL,
-  NAME_ERROR,
-  NAME_PLACEHOLDER,
-  OS_LABEL,
-  RULE_NAME,
-} from './translations';
+import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL, RULE_NAME } from './translations';
 import { OS_TITLES } from '../../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
+import { ABOUT_EVENT_FILTERS } from '../../translations';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -58,6 +53,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const exception = useEventFiltersSelector(getFormEntryStateMutable);
     const hasNameError = useEventFiltersSelector(getHasNameError);
     const newComment = useEventFiltersSelector(getNewComment);
+    const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
 
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
@@ -70,17 +66,22 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     const handleOnBuilderChange = useCallback(
       (arg: ExceptionBuilder.OnChangeProps) => {
-        if (isEmpty(arg.exceptionItems)) return;
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
-            entry: {
-              ...arg.exceptionItems[0],
-              name: exception?.name ?? '',
-              comments: exception?.comments ?? [],
-              os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
-            },
-            hasItemsError: arg.errorExists || !arg.exceptionItems[0].entries.length,
+            ...(arg.exceptionItems[0] !== undefined
+              ? {
+                  entry: {
+                    ...arg.exceptionItems[0],
+                    name: exception?.name ?? '',
+                    comments: exception?.comments ?? [],
+                    os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
+                  },
+                  hasItemsError: arg.errorExists || !arg.exceptionItems[0]?.entries?.length,
+                }
+              : {
+                  hasItemsError: true,
+                }),
           },
         });
       },
@@ -90,11 +91,12 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const handleOnChangeName = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!exception) return;
+        const name = e.target.value.toString().trim();
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
-            entry: { ...exception, name: e.target.value.toString() },
-            hasNameError: !e.target.value,
+            entry: { ...exception, name },
+            hasNameError: !name,
           },
         });
       },
@@ -118,7 +120,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const exceptionBuilderComponentMemo = useMemo(
       () =>
         ExceptionBuilder.getExceptionBuilderComponentLazy({
-          allowLargeValueLists: true,
+          allowLargeValueLists: false,
           httpService: http,
           autocompleteService: data.autocomplete,
           exceptionListItems: [exception as ExceptionListItemSchema],
@@ -134,13 +136,19 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           idAria: 'alert-exception-builder',
           onChange: handleOnBuilderChange,
           listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+          operatorsList: EVENT_FILTERS_OPERATORS,
         }),
       [data, handleOnBuilderChange, http, indexPatterns, exception]
     );
 
     const nameInputMemo = useMemo(
       () => (
-        <EuiFormRow label={NAME_LABEL} fullWidth isInvalid={hasNameError} error={NAME_ERROR}>
+        <EuiFormRow
+          label={NAME_LABEL}
+          fullWidth
+          isInvalid={hasNameError && hasBeenInputNameVisited}
+          error={NAME_ERROR}
+        >
           <EuiFieldText
             id="eventFiltersFormInputName"
             placeholder={NAME_PLACEHOLDER}
@@ -148,12 +156,13 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
             onChange={handleOnChangeName}
             fullWidth
             aria-label={NAME_PLACEHOLDER}
-            required
+            required={hasBeenInputNameVisited}
             maxLength={256}
+            onBlur={() => !hasBeenInputNameVisited && setHasBeenInputNameVisited(true)}
           />
         </EuiFormRow>
       ),
-      [hasNameError, exception?.name, handleOnChangeName]
+      [hasNameError, exception?.name, handleOnChangeName, hasBeenInputNameVisited]
     );
 
     const osInputMemo = useMemo(
@@ -197,8 +206,12 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     return !isIndexPatternLoading && exception ? (
       <EuiForm component="div">
-        <EuiText size="s">{FORM_DESCRIPTION}</EuiText>
-        <EuiSpacer size="s" />
+        {!exception || !exception.item_id ? (
+          <EuiText color="subdued" size="xs">
+            {ABOUT_EVENT_FILTERS}
+            <EuiSpacer size="m" />
+          </EuiText>
+        ) : null}
         {nameInputMemo}
         <EuiSpacer size="m" />
         {allowSelectOs ? (

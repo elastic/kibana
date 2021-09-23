@@ -12,10 +12,10 @@ describe('Snapshot serialization and deserialization', () => {
     test('deserializes a snapshot', () => {
       expect(
         deserializeSnapshotDetails(
-          'repositoryName',
           {
             snapshot: 'snapshot name',
             uuid: 'UUID',
+            repository: 'repositoryName',
             version_id: 5,
             version: 'version',
             indices: ['index2', 'index3', 'index1'],
@@ -55,6 +55,7 @@ describe('Snapshot serialization and deserialization', () => {
             {
               snapshot: 'last_successful_snapshot',
               uuid: 'last_successful_snapshot_UUID',
+              repository: 'repositoryName',
               version_id: 5,
               version: 'version',
               indices: ['index2', 'index3', 'index1'],

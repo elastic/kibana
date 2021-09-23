@@ -17,8 +17,8 @@ export class ListingTableService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
-  private readonly common = this.ctx.getPageObjects(['common']).common;
-  private readonly header = this.ctx.getPageObjects(['header']).header;
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
 
   private async getSearchFilter() {
     return await this.testSubjects.find('tableListSearchBox');

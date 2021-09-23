@@ -37,8 +37,10 @@ import {
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
-import { MlUrlGenerator } from '../../../../../ml/public';
+import { MlLocatorDefinition } from '../../../../../ml/public';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { MockUrlService } from 'src/plugins/share/common/mocks';
+import { fleetMock } from '../../../../../fleet/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -66,17 +68,19 @@ const mockUiSettings: Record<string, unknown> = {
   },
 };
 
-export const createUseUiSettingMock = () => (key: string, defaultValue?: unknown): unknown => {
-  const result = mockUiSettings[key];
+export const createUseUiSettingMock =
+  () =>
+  (key: string, defaultValue?: unknown): unknown => {
+    const result = mockUiSettings[key];
 
-  if (typeof result != null) return result;
+    if (typeof result != null) return result;
 
-  if (defaultValue != null) {
-    return defaultValue;
-  }
+    if (defaultValue != null) {
+      return defaultValue;
+    }
 
-  throw new TypeError(`Unexpected config key: ${key}`);
-};
+    throw new TypeError(`Unexpected config key: ${key}`);
+  };
 
 export const createUseUiSetting$Mock = () => {
   const useUiSettingMock = createUseUiSettingMock();
@@ -93,8 +97,11 @@ export const createStartServicesMock = (): StartServices => {
   const { storage } = createSecuritySolutionStorageMock();
   const data = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
+  const urlService = new MockUrlService();
+  const locator = urlService.locators.create(new MlLocatorDefinition());
+  const fleet = fleetMock.createStartMock();
 
-  return ({
+  return {
     ...core,
     cases: {
       getAllCases: jest.fn(),
@@ -138,13 +145,11 @@ export const createStartServicesMock = (): StartServices => {
     },
     security,
     storage,
+    fleet,
     ml: {
-      urlGenerator: new MlUrlGenerator({
-        appBasePath: '/app/ml',
-        useHash: false,
-      }),
+      locator,
     },
-  } as unknown) as StartServices;
+  } as unknown as StartServices;
 };
 
 export const createWithKibanaMock = () => {

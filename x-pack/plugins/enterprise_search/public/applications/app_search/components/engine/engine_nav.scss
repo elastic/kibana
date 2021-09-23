@@ -6,21 +6,17 @@
  */
 
 .appSearchNavEngineLabel {
-  padding-top: $euiSizeS;
+  margin-left: $euiSizeS;
+  padding-top: $euiSizeXS;
   padding-bottom: $euiSizeS;
 
-  .euiText {
-    font-weight: $euiFontWeightMedium;
-  }
   .euiBadge {
     margin-top: $euiSizeXS;
   }
 }
 
-.appSearchNavIcons {
-  // EUI override
-  &.euiFlexItem {
-    flex-grow: 0;
-    flex-direction: row;
-  }
+.appSearchNavIcon {
+  // EuiSideNav renders icons to the left of the nav link by default, but we use icons
+  // as warning or error indicators & prefer to render them on the right side of the nav
+  order: 1;
 }

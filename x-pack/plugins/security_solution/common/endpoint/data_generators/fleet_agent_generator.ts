@@ -9,7 +9,19 @@ import { estypes } from '@elastic/elasticsearch';
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
-import { Agent, AGENTS_INDEX, FleetServerAgent } from '../../../../fleet/common';
+import { Agent, AGENTS_INDEX, AgentStatus, FleetServerAgent } from '../../../../fleet/common';
+
+const agentStatusList: readonly AgentStatus[] = [
+  'offline',
+  'error',
+  'online',
+  'inactive',
+  'warning',
+  'enrolling',
+  'unenrolling',
+  'updating',
+  'degraded',
+];
 
 export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
   /**
@@ -40,7 +52,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
         id: hit._id,
         policy_revision: hit._source?.policy_revision_idx,
         access_api_key: undefined,
-        status: undefined,
+        status: this.randomAgentStatus(),
         packages: hit._source?.packages ?? [],
       },
       overrides
@@ -51,13 +63,16 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
    * @param [overrides] any partial value to the full document
    */
   generateEsHit(
-    overrides: DeepPartial<estypes.Hit<FleetServerAgent>> = {}
-  ): estypes.Hit<FleetServerAgent> {
+    overrides: DeepPartial<estypes.SearchHit<FleetServerAgent>> = {}
+  ): estypes.SearchHit<FleetServerAgent> {
     const hostname = this.randomHostname();
     const now = new Date().toISOString();
     const osFamily = this.randomOSFamily();
 
-    return merge<estypes.Hit<FleetServerAgent>, DeepPartial<estypes.Hit<FleetServerAgent>>>(
+    return merge<
+      estypes.SearchHit<FleetServerAgent>,
+      DeepPartial<estypes.SearchHit<FleetServerAgent>>
+    >(
       {
         _index: AGENTS_INDEX,
         _id: this.randomUUID(),
@@ -67,6 +82,10 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
           action_seq_no: -1,
           active: true,
           enrolled_at: now,
+          agent: {
+            id: this.randomUUID(),
+            version: this.randomVersion(),
+          },
           local_metadata: {
             elastic: {
               agent: {
@@ -112,5 +131,9 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
       },
       overrides
     );
+  }
+
+  private randomAgentStatus() {
+    return this.randomChoice(agentStatusList);
   }
 }

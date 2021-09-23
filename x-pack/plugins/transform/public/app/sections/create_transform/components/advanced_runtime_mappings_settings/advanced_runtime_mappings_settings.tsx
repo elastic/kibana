@@ -46,7 +46,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     },
   } = props.runtimeMappingsEditor;
   const {
-    actions: { deleteAggregation, deleteGroupBy },
+    actions: { deleteAggregation, deleteGroupBy, updateAggregation },
     state: { groupByList, aggList },
   } = props.pivotConfig;
 
@@ -54,6 +54,9 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     const nextConfig =
       advancedRuntimeMappingsConfig === '' ? {} : JSON.parse(advancedRuntimeMappingsConfig);
     const previousConfig = runtimeMappings;
+
+    const isFieldDeleted = (field: string) =>
+      previousConfig?.hasOwnProperty(field) && !nextConfig.hasOwnProperty(field);
 
     applyRuntimeMappingsEditorChanges();
 
@@ -71,13 +74,16 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     });
     Object.keys(aggList).forEach((aggName) => {
       const agg = aggList[aggName] as PivotAggsConfigWithUiSupport;
-      if (
-        isPivotAggConfigWithUiSupport(agg) &&
-        agg.field !== undefined &&
-        previousConfig?.hasOwnProperty(agg.field) &&
-        !nextConfig.hasOwnProperty(agg.field)
-      ) {
-        deleteAggregation(aggName);
+
+      if (isPivotAggConfigWithUiSupport(agg)) {
+        if (Array.isArray(agg.field)) {
+          const newFields = agg.field.filter((f) => !isFieldDeleted(f));
+          updateAggregation(aggName, { ...agg, field: newFields });
+        } else {
+          if (agg.field !== undefined && isFieldDeleted(agg.field)) {
+            deleteAggregation(aggName);
+          }
+        }
       }
     });
   };

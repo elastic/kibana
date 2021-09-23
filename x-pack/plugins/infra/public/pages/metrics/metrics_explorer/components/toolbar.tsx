@@ -23,10 +23,8 @@ import { MetricsExplorerMetrics } from './metrics';
 import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
-import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
-import { ToolbarPanel } from '../../../../components/toolbar_panel';
 
 interface Props {
   derivedIndexPattern: IIndexPattern;
@@ -60,7 +58,7 @@ export const MetricsExplorerToolbar = ({
   const commonlyUsedRanges = mapKibanaQuickRangesToDatePickerRanges(timepickerQuickRanges);
 
   return (
-    <ToolbarPanel>
+    <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={options.aggregation === 'count' ? 2 : false}>
           <MetricsExplorerAggregationPicker
@@ -115,16 +113,6 @@ export const MetricsExplorerToolbar = ({
             chartOptions={chartOptions}
           />
         </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <SavedViewsToolbarControls
-            viewState={{
-              options,
-              chartOptions,
-              currentTimerange: timeRange,
-            }}
-          />
-        </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ marginRight: 5 }}>
           <EuiSuperDatePicker
             start={timeRange.from}
@@ -135,6 +123,6 @@ export const MetricsExplorerToolbar = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </ToolbarPanel>
+    </>
   );
 };

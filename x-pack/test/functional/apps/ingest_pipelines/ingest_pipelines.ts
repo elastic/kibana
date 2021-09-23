@@ -18,10 +18,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'ingestPipelines']);
   const log = getService('log');
   const es = getService('es');
+  const security = getService('security');
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
+      await security.testUser.setRoles(['ingest_pipelines_user']);
       await pageObjects.common.navigateToApp('ingestPipelines');
     });
 
@@ -46,6 +48,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     after(async () => {
       // Delete the pipeline that was created
       await es.ingest.deletePipeline({ id: PIPELINE.name });
+      await security.testUser.restoreDefaults();
     });
   });
 };

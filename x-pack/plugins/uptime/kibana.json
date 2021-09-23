@@ -8,7 +8,6 @@
   "optionalPlugins": [
     "data",
     "home",
-    "observability",
     "ml",
     "fleet"
   ],
@@ -18,6 +17,8 @@
     "features",
     "licensing",
     "triggersActionsUi",
+    "ruleRegistry",
+    "observability",
     "usageCollection",
     "lens"
   ],
@@ -30,6 +31,12 @@
     "kibanaUtils",
     "home",
     "data",
-    "ml"
-  ]
+    "ml",
+    "fleet"
+  ],
+  "owner": {
+    "name": "Uptime",
+    "githubTeam": "uptime"
+  },
+  "description": "This plugin visualizes data from Synthetics and Heartbeat, and integrates with other Observability solutions."
 }

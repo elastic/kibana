@@ -34,6 +34,9 @@
             "__pagerduty": {
               "type": "long"
             },
+            "__swimlane": {
+              "type": "long"
+            },
             "__server-log": {
               "type": "long"
             },
@@ -69,6 +72,9 @@
               "type": "long"
             },
             "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
               "type": "long"
             },
             "__server-log": {
@@ -222,6 +228,9 @@
             },
             "xpack_ml_anomaly_detection_alert": {
               "type": "long"
+            },
+            "xpack_ml_anomaly_detection_jobs_health": {
+              "type": "long"
             }
           }
         },
@@ -301,6 +310,9 @@
             },
             "xpack_ml_anomaly_detection_alert": {
               "type": "long"
+            },
+            "xpack_ml_anomaly_detection_jobs_health": {
+              "type": "long"
             }
           }
         }
@@ -311,6 +323,9 @@
         "services_per_agent": {
           "properties": {
             "dotnet": {
+              "type": "long"
+            },
+            "iOS/swift": {
               "type": "long"
             },
             "go": {
@@ -367,6 +382,9 @@
             "opentelemetry/ruby": {
               "type": "long"
             },
+            "opentelemetry/swift": {
+              "type": "long"
+            },
             "opentelemetry/webjs": {
               "type": "long"
             }
@@ -375,6 +393,90 @@
         "agents": {
           "properties": {
             "dotnet": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "iOS/swift": {
               "properties": {
                 "agent": {
                   "properties": {
@@ -1254,6 +1356,20 @@
             }
           }
         },
+        "host": {
+          "properties": {
+            "os": {
+              "properties": {
+                "platform": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
         "counts": {
           "properties": {
             "transaction": {
@@ -1536,6 +1652,17 @@
               }
             },
             "cloud": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
               "properties": {
                 "took": {
                   "properties": {
@@ -1924,9 +2051,6 @@
             "create_first_engine_button": {
               "type": "long"
             },
-            "header_launch_button": {
-              "type": "long"
-            },
             "engine_table_link": {
               "type": "long"
             }
@@ -2041,6 +2165,12 @@
                 "description": "The total number of enrolled agents in an unhealthy state"
               }
             },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an updating state"
+              }
+            },
             "offline": {
               "type": "long",
               "_meta": {
@@ -2051,6 +2181,52 @@
               "type": "long",
               "_meta": {
                 "description": "The total number of agents in any state, both enrolled and inactive"
+              }
+            }
+          }
+        },
+        "fleet_server": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents, in any state"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Fleet Server agents in any state, both enrolled and inactive."
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in a healthy state."
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently offline"
+              }
+            },
+            "num_host_urls": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of Fleet Server hosts configured in Fleet settings."
               }
             }
           }
@@ -2110,6 +2286,24 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "error_fix_action": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user used the fix action of an error displayed in the workspace."
+              }
+            },
+            "open_formula_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
+              }
+            },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2318,6 +2512,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2333,6 +2533,24 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "error_fix_action": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user used the fix action of an error displayed in the workspace."
+              }
+            },
+            "open_formula_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
+              }
+            },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2541,6 +2759,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the moving average function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the formula function was selected"
               }
             }
           }
@@ -2614,6 +2838,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2657,6 +2887,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         },
@@ -2700,6 +2936,12 @@
             },
             "lnsMetric": {
               "type": "long"
+            },
+            "formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one formula"
+              }
             }
           }
         }
@@ -2707,13 +2949,6 @@
     },
     "maps": {
       "properties": {
-        "settings": {
-          "properties": {
-            "showMapVisualizationTypes": {
-              "type": "boolean"
-            }
-          }
-        },
         "indexPatternsWithGeoFieldCount": {
           "type": "long"
         },
@@ -2982,34 +3217,6 @@
                   "type": "long",
                   "_meta": {
                     "description": "total number of es track layers in cluster"
-                  }
-                }
-              }
-            },
-            "kbn_region": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of kbn region layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of kbn region layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of kbn region layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of kbn region layers in cluster"
                   }
                 }
               }
@@ -3575,6 +3782,38 @@
                   }
                 }
               }
+            },
+            "xpack.ml.anomaly_detection_jobs_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "datafeed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started datafeed health check"
+                      }
+                    },
+                    "mml": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the model memory limit health check"
+                      }
+                    },
+                    "delayedData": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the delayed data health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error messages health check"
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -3679,6 +3918,126 @@
         }
       }
     },
+    "osquery": {
+      "properties": {
+        "live_query_usage": {
+          "properties": {
+            "session": {
+              "properties": {
+                "count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of osquery action requests"
+                  }
+                },
+                "errors": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of osquery action requests that resulted in errors"
+                  }
+                }
+              }
+            },
+            "cumulative": {
+              "properties": {
+                "queries": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of osquery actions stored in Elasticsearch"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "scheduled_queries": {
+          "properties": {
+            "queryGroups": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of osquery policies/query groups"
+                  }
+                },
+                "empty": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of empty osquery policies/query groups"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "agent_info": {
+          "properties": {
+            "enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of agents enrolled in a policy with an osquery integration"
+              }
+            }
+          }
+        },
+        "beat_metrics": {
+          "properties": {
+            "usage": {
+              "properties": {
+                "cpu": {
+                  "properties": {
+                    "latest": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Latest cpu usage sample in ms"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Max cpu usage sample over 24 hours in ms"
+                      }
+                    },
+                    "avg": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Mean cpu usage over 24 hours in ms"
+                      }
+                    }
+                  }
+                },
+                "memory": {
+                  "properties": {
+                    "rss": {
+                      "properties": {
+                        "latest": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Latest resident set size sample"
+                          }
+                        },
+                        "max": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Max resident set size sample over 24 hours"
+                          }
+                        },
+                        "avg": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Mean resident set size sample over 24 hours"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "reporting": {
       "properties": {
         "csv": {
@@ -3688,39 +4047,15 @@
             },
             "total": {
               "type": "long"
-            }
-          }
-        },
-        "csv_searchsource": {
-          "properties": {
-            "available": {
-              "type": "boolean"
             },
-            "total": {
-              "type": "long"
-            }
-          }
-        },
-        "PNG": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            }
-          }
-        },
-        "printable_pdf": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
+            "deprecated": {
               "type": "long"
             },
             "app": {
               "properties": {
+                "search": {
+                  "type": "long"
+                },
                 "canvas workpad": {
                   "type": "long"
                 },
@@ -3734,6 +4069,261 @@
             },
             "layout": {
               "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "csv_searchsource": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "csv_searchsource_immediate": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "PNG": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "PNGV2": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "printable_pdf": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "printable_pdf_v2": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
                 "print": {
                   "type": "long"
                 },
@@ -3749,9 +4339,6 @@
         },
         "status": {
           "properties": {
-            "cancelled": {
-              "type": "long"
-            },
             "completed": {
               "type": "long"
             },
@@ -3771,66 +4358,13 @@
         },
         "statuses": {
           "properties": {
-            "cancelled": {
-              "properties": {
-                "csv": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_searchsource": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNG": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "completed": {
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3844,6 +4378,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3857,6 +4410,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3870,6 +4442,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3887,6 +4478,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3900,6 +4494,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3913,6 +4526,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3926,6 +4558,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3943,6 +4594,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3956,6 +4610,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3969,6 +4642,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3982,6 +4674,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -3999,6 +4710,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4012,6 +4726,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4025,6 +4758,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4038,6 +4790,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4055,6 +4826,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4068,6 +4842,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4081,6 +4874,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4094,6 +4906,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4127,39 +4958,15 @@
                 },
                 "total": {
                   "type": "long"
-                }
-              }
-            },
-            "csv_searchsource": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
                 },
-                "total": {
-                  "type": "long"
-                }
-              }
-            },
-            "PNG": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                }
-              }
-            },
-            "printable_pdf": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
+                "deprecated": {
                   "type": "long"
                 },
                 "app": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4173,6 +4980,261 @@
                 },
                 "layout": {
                   "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "csv_searchsource": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "csv_searchsource_immediate": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "PNG": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "PNGV2": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "printable_pdf": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "printable_pdf_v2": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
                     "print": {
                       "type": "long"
                     },
@@ -4188,9 +5250,6 @@
             },
             "status": {
               "properties": {
-                "cancelled": {
-                  "type": "long"
-                },
                 "completed": {
                   "type": "long"
                 },
@@ -4210,66 +5269,13 @@
             },
             "statuses": {
               "properties": {
-                "cancelled": {
-                  "properties": {
-                    "csv": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_searchsource": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNG": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
                 "completed": {
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4283,6 +5289,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4296,6 +5321,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4309,6 +5353,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4326,6 +5389,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4339,6 +5405,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4352,6 +5437,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4365,6 +5469,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4382,6 +5505,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4395,6 +5521,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4408,6 +5553,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4421,6 +5585,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4438,6 +5621,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4451,6 +5637,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4464,6 +5669,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4477,6 +5701,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4494,6 +5737,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4507,6 +5753,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4520,6 +5785,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4533,6 +5817,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4664,82 +5967,6 @@
     },
     "security_solution": {
       "properties": {
-        "detections": {
-          "properties": {
-            "detection_rules": {
-              "properties": {
-                "custom": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of custom detection rules enabled"
-                      }
-                    },
-                    "disabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of custom detection rules disabled"
-                      }
-                    }
-                  }
-                },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of elastic prebuilt detection rules enabled"
-                      }
-                    },
-                    "disabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of elastic prebuilt detection rules disabled"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "ml_jobs": {
-              "properties": {
-                "custom": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of custom ML jobs rules enabled"
-                      }
-                    },
-                    "disabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of custom ML jobs rules disabled"
-                      }
-                    }
-                  }
-                },
-                "elastic": {
-                  "properties": {
-                    "enabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of elastic provided ML jobs rules enabled"
-                      }
-                    },
-                    "disabled": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of elastic provided ML jobs rules disabled"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
         "detectionMetrics": {
           "properties": {
             "detection_rules": {
@@ -5014,273 +6241,240 @@
               }
             },
             "ml_jobs": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "job_id": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "Identifier for the anomaly detection job"
-                    }
-                  },
-                  "open_time": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "For open jobs only, the elapsed time for which the job has been open"
-                    }
-                  },
-                  "create_time": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The time the job was created"
-                    }
-                  },
-                  "finished_time": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "If the job closed or failed, this is the time the job finished"
-                    }
-                  },
-                  "state": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The status of the anomaly detection job"
-                    }
-                  },
-                  "data_counts": {
-                    "properties": {
-                      "bucket_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of buckets processed"
+              "properties": {
+                "ml_job_usage": {
+                  "properties": {
+                    "custom": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of custom ML jobs rules disabled"
+                          }
                         }
-                      },
-                      "empty_bucket_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of buckets which did not contain any data"
-                        }
-                      },
-                      "input_bytes": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of bytes of input data posted to the anomaly detection job"
-                        }
-                      },
-                      "input_record_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of input documents posted to the anomaly detection job"
-                        }
-                      },
-                      "last_data_time": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The timestamp at which data was last analyzed, according to server time"
-                        }
-                      },
-                      "processed_record_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of input documents that have been processed by the anomaly detection job"
+                      }
+                    },
+                    "elastic": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "The number of elastic provided ML jobs rules disabled"
+                          }
                         }
                       }
                     }
-                  },
-                  "model_size_stats": {
+                  }
+                },
+                "ml_job_metrics": {
+                  "type": "array",
+                  "items": {
                     "properties": {
-                      "bucket_allocation_failures_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of buckets for which new entities in incoming data were not processed due to insufficient model memory"
-                        }
-                      },
-                      "model_bytes": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of bytes of memory used by the models"
-                        }
-                      },
-                      "model_bytes_exceeded": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of bytes over the high limit for memory usage at the last allocation failure"
-                        }
-                      },
-                      "model_bytes_memory_limit": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The upper limit for model memory usage, checked on increasing values"
-                        }
-                      },
-                      "peak_model_bytes": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The peak number of bytes of memory ever used by the models"
-                        }
-                      }
-                    }
-                  },
-                  "timing_stats": {
-                    "properties": {
-                      "bucket_count": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "The number of buckets processed"
-                        }
-                      },
-                      "exponential_average_bucket_processing_time_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Exponential moving average of all bucket processing times, in milliseconds"
-                        }
-                      },
-                      "exponential_average_bucket_processing_time_per_hour_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Exponentially-weighted moving average of bucket processing times calculated in a 1 hour time window, in milliseconds"
-                        }
-                      },
-                      "maximum_bucket_processing_time_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Maximum among all bucket processing times, in milliseconds"
-                        }
-                      },
-                      "minimum_bucket_processing_time_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Minimum among all bucket processing times, in milliseconds"
-                        }
-                      },
-                      "total_bucket_processing_time_ms": {
-                        "type": "long",
-                        "_meta": {
-                          "description": "Sum of all bucket processing times, in milliseconds"
-                        }
-                      }
-                    }
-                  },
-                  "datafeed": {
-                    "properties": {
-                      "datafeed_id": {
+                      "job_id": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "A numerical character string that uniquely identifies the datafeed"
+                          "description": "Identifier for the anomaly detection job"
+                        }
+                      },
+                      "open_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "For open jobs only, the elapsed time for which the job has been open"
+                        }
+                      },
+                      "create_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "The time the job was created"
+                        }
+                      },
+                      "finished_time": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "If the job closed or failed, this is the time the job finished"
                         }
                       },
                       "state": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "The status of the datafeed"
+                          "description": "The status of the anomaly detection job"
                         }
                       },
-                      "timing_stats": {
+                      "data_counts": {
                         "properties": {
-                          "average_search_time_per_bucket_ms": {
-                            "type": "long",
-                            "_meta": {
-                              "description": "The average search time per bucket, in milliseconds"
-                            }
-                          },
                           "bucket_count": {
                             "type": "long",
                             "_meta": {
                               "description": "The number of buckets processed"
                             }
                           },
-                          "exponential_average_search_time_per_hour_ms": {
+                          "empty_bucket_count": {
                             "type": "long",
                             "_meta": {
-                              "description": "The exponential average search time per hour, in milliseconds"
+                              "description": "The number of buckets which did not contain any data"
                             }
                           },
-                          "search_count": {
+                          "input_bytes": {
                             "type": "long",
                             "_meta": {
-                              "description": "The number of searches run by the datafeed"
+                              "description": "The number of bytes of input data posted to the anomaly detection job"
                             }
                           },
-                          "total_search_time_ms": {
+                          "input_record_count": {
                             "type": "long",
                             "_meta": {
-                              "description": "The total time the datafeed spent searching, in milliseconds"
+                              "description": "The number of input documents posted to the anomaly detection job"
+                            }
+                          },
+                          "last_data_time": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The timestamp at which data was last analyzed, according to server time"
+                            }
+                          },
+                          "processed_record_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of input documents that have been processed by the anomaly detection job"
                             }
                           }
                         }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "endpoints": {
-          "properties": {
-            "total_installed": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of installed endpoints"
-              }
-            },
-            "active_within_last_24_hours": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of active endpoints"
-              }
-            },
-            "os": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "full_name": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "Full name of the operating system"
-                    }
-                  },
-                  "platform": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "OS Platform. eg Centos, Ubuntu"
-                    }
-                  },
-                  "version": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)"
-                    }
-                  },
-                  "count": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The total number of endpoints from that platform"
-                    }
-                  }
-                }
-              }
-            },
-            "policies": {
-              "properties": {
-                "malware": {
-                  "properties": {
-                    "active": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of active malware policies"
-                      }
-                    },
-                    "inactive": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of inactive malware policies"
-                      }
-                    },
-                    "failure": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of failing malware policies"
+                      },
+                      "model_size_stats": {
+                        "properties": {
+                          "bucket_allocation_failures_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets for which new entities in incoming data were not processed due to insufficient model memory"
+                            }
+                          },
+                          "model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes of memory used by the models"
+                            }
+                          },
+                          "model_bytes_exceeded": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of bytes over the high limit for memory usage at the last allocation failure"
+                            }
+                          },
+                          "model_bytes_memory_limit": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The upper limit for model memory usage, checked on increasing values"
+                            }
+                          },
+                          "peak_model_bytes": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The peak number of bytes of memory ever used by the models"
+                            }
+                          }
+                        }
+                      },
+                      "timing_stats": {
+                        "properties": {
+                          "bucket_count": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "The number of buckets processed"
+                            }
+                          },
+                          "exponential_average_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponential moving average of all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "exponential_average_bucket_processing_time_per_hour_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Exponentially-weighted moving average of bucket processing times calculated in a 1 hour time window, in milliseconds"
+                            }
+                          },
+                          "maximum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Maximum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "minimum_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Minimum among all bucket processing times, in milliseconds"
+                            }
+                          },
+                          "total_bucket_processing_time_ms": {
+                            "type": "long",
+                            "_meta": {
+                              "description": "Sum of all bucket processing times, in milliseconds"
+                            }
+                          }
+                        }
+                      },
+                      "datafeed": {
+                        "properties": {
+                          "datafeed_id": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "A numerical character string that uniquely identifies the datafeed"
+                            }
+                          },
+                          "state": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "The status of the datafeed"
+                            }
+                          },
+                          "timing_stats": {
+                            "properties": {
+                              "average_search_time_per_bucket_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The average search time per bucket, in milliseconds"
+                                }
+                              },
+                              "bucket_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of buckets processed"
+                                }
+                              },
+                              "exponential_average_search_time_per_hour_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The exponential average search time per hour, in milliseconds"
+                                }
+                              },
+                              "search_count": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The number of searches run by the datafeed"
+                                }
+                              },
+                              "total_search_time_ms": {
+                                "type": "long",
+                                "_meta": {
+                                  "description": "The total time the datafeed spent searching, in milliseconds"
+                                }
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }
@@ -5297,6 +6491,12 @@
           "type": "boolean",
           "_meta": {
             "description": "Indicates if audit logging is both enabled and supported by the current license."
+          }
+        },
+        "auditLoggingType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy)."
           }
         },
         "loginSelectorEnabled": {
@@ -5333,6 +6533,24 @@
             "_meta": {
               "description": "The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy."
             }
+          }
+        },
+        "sessionIdleTimeoutInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionLifespanInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionCleanupInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
           }
         }
       }
@@ -5432,12 +6650,6 @@
               }
             },
             "savedObjectsManagement": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of spaces which have this feature disabled."
-              }
-            },
-            "timelion": {
               "type": "long",
               "_meta": {
                 "description": "The number of spaces which have this feature disabled."
@@ -5582,6 +6794,83 @@
           "_meta": {
             "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
           }
+        },
+        "apiCalls.disableLegacyUrlAliases.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
+          }
+        }
+      }
+    },
+    "task_manager": {
+      "properties": {
+        "ephemeral_tasks_enabled": {
+          "type": "boolean"
+        },
+        "ephemeral_request_capacity": {
+          "type": "short"
+        },
+        "ephemeral_stats": {
+          "properties": {
+            "status": {
+              "type": "keyword"
+            },
+            "queued_tasks": {
+              "properties": {
+                "p50": {
+                  "type": "long"
+                },
+                "p90": {
+                  "type": "long"
+                },
+                "p95": {
+                  "type": "long"
+                },
+                "p99": {
+                  "type": "long"
+                }
+              }
+            },
+            "load": {
+              "properties": {
+                "p50": {
+                  "type": "long"
+                },
+                "p90": {
+                  "type": "long"
+                },
+                "p95": {
+                  "type": "long"
+                },
+                "p99": {
+                  "type": "long"
+                }
+              }
+            },
+            "executions_per_cycle": {
+              "properties": {
+                "p50": {
+                  "type": "long"
+                },
+                "p90": {
+                  "type": "long"
+                },
+                "p95": {
+                  "type": "long"
+                },
+                "p99": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "task_type_exclusion": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         }
       }
     },
@@ -5603,16 +6892,10 @@
         },
         "ui_open": {
           "properties": {
-            "cluster": {
+            "elasticsearch": {
               "type": "long",
               "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch cluster deprecations."
-              }
-            },
-            "indices": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch index deprecations."
+                "description": "Number of times a user viewed the list of Elasticsearch deprecations."
               }
             },
             "overview": {

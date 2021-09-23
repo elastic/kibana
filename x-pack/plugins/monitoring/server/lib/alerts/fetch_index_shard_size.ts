@@ -35,11 +35,12 @@ export async function fetchIndexShardSize(
   index: string,
   threshold: number,
   shardIndexPatterns: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<IndexShardSizeStats[]> {
   const params = {
     index,
-    filterPath: ['aggregations.clusters.buckets'],
+    filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,
       query: {
@@ -104,8 +105,17 @@ export async function fetchIndexShardSize(
     },
   };
 
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.must.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
+
   const { body: response } = await esClient.search(params);
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
+  // @ts-expect-error declare aggegations type explicitly
   const { buckets: clusterBuckets } = response.aggregations?.clusters;
   const stats: IndexShardSizeStats[] = [];
   if (!clusterBuckets?.length) {
@@ -120,11 +130,7 @@ export async function fetchIndexShardSize(
     for (const indexBucket of indexBuckets) {
       const shardIndex = indexBucket.key;
       const topHit = indexBucket.hits?.hits?.hits[0] as TopHitType;
-      if (
-        !topHit ||
-        shardIndex.charAt() === '.' ||
-        !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)
-      ) {
+      if (!topHit || !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
         continue;
       }
       const {

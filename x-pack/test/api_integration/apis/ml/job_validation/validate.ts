@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Validate job', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.length).to.eql(
         expectedResponse.length,
-        `Response body should have ${expectedResponse.length} entries (got ${body})`
+        `Response body should have ${expectedResponse.length} entries (got ${JSON.stringify(body)})`
       );
       for (const entry of expectedResponse) {
         const responseEntry = body.find((obj: any) => obj.id === entry.id);

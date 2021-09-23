@@ -138,7 +138,6 @@ export interface UsageData extends UsageStats {
     graph?: number;
     uptime?: number;
     savedObjectsManagement?: number;
-    timelion?: number;
     dev_tools?: number;
     advancedSettings?: number;
     infrastructure?: number;
@@ -264,12 +263,6 @@ export function getSpacesUsageCollector(
           },
         },
         savedObjectsManagement: {
-          type: 'long',
-          _meta: {
-            description: 'The number of spaces which have this feature disabled.',
-          },
-        },
-        timelion: {
           type: 'long',
           _meta: {
             description: 'The number of spaces which have this feature disabled.',
@@ -423,6 +416,12 @@ export function getSpacesUsageCollector(
         _meta: {
           description:
             'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "createNewCopies" set to false.',
+        },
+      },
+      'apiCalls.disableLegacyUrlAliases.total': {
+        type: 'long',
+        _meta: {
+          description: 'The number of times the "Disable Legacy URL Aliases" API has been called.',
         },
       },
     },

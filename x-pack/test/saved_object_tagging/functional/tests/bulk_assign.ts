@@ -19,12 +19,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       assignFlyout = tagManagementPage.assignFlyout;
-      await esArchiver.load('bulk_assign');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign'
+      );
       await tagManagementPage.navigateTo();
     });
 
     afterEach(async () => {
-      await esArchiver.unload('bulk_assign');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign'
+      );
     });
 
     it('can bulk assign tags to objects', async () => {

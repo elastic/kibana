@@ -17,7 +17,7 @@ interface SelectOptions {
 export class DocTableService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
-  private readonly PageObjects = this.ctx.getPageObjects(['common', 'header']);
+  private readonly header = this.ctx.getPageObject('header');
 
   public async getTable(selector?: string) {
     return await this.testSubjects.find(selector ? selector : 'docTable');
@@ -126,7 +126,7 @@ export class DocTableService extends FtrService {
     const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
     const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
     await addInclusiveFilterButton.click();
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async getRemoveInclusiveFilterButton(
@@ -142,7 +142,7 @@ export class DocTableService extends FtrService {
     const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
     const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
     await addInclusiveFilterButton.click();
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async getAddExistsFilterButton(
@@ -155,7 +155,7 @@ export class DocTableService extends FtrService {
     const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
     const addInclusiveFilterButton = await this.getAddExistsFilterButton(tableDocViewRow);
     await addInclusiveFilterButton.click();
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async toggleRowExpanded({
@@ -163,7 +163,7 @@ export class DocTableService extends FtrService {
     rowIndex = 0,
   }: SelectOptions = {}): Promise<WebElementWrapper> {
     await this.clickRowToggle({ isAnchorRow, rowIndex });
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
     return await this.retry.try(async () => {
       const row = isAnchorRow ? await this.getAnchorRow() : (await this.getBodyRows())[rowIndex];
       const detailsRow = await row.findByXpath(

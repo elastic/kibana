@@ -13,18 +13,12 @@ const chalk = require('chalk');
 const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
-const {
-  log: defaultLog,
-  parseEsLog,
-  extractConfigFiles,
-  decompress,
-  NativeRealm,
-} = require('./utils');
+const { log: defaultLog, parseEsLog, extractConfigFiles, NativeRealm } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD } = require('@kbn/dev-utils');
+const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD, extract } = require('@kbn/dev-utils');
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
@@ -133,23 +127,28 @@ exports.Cluster = class Cluster {
   }
 
   /**
-   * Unpakcs a tar or zip file containing the data directory for an
+   * Unpacks a tar or zip file containing the data directory for an
    * ES cluster.
    *
    * @param {String} installPath
    * @param {String} archivePath
+   * @param {String} [extractDirName]
    */
-  async extractDataDirectory(installPath, archivePath) {
+  async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
     this._log.info(chalk.bold(`Extracting data directory`));
     this._log.indent(4);
 
-    // decompress excludes the root directory as that is how our archives are
+    // stripComponents=1 excludes the root directory as that is how our archives are
     // structured. This works in our favor as we can explicitly extract into the data dir
-    const extractPath = path.resolve(installPath, 'data');
+    const extractPath = path.resolve(installPath, extractDirName);
     this._log.info(`Data archive: ${archivePath}`);
     this._log.info(`Extract path: ${extractPath}`);
 
-    await decompress(archivePath, extractPath);
+    await extract({
+      archivePath,
+      targetDir: extractPath,
+      stripComponents: 1,
+    });
 
     this._log.indent(-4);
   }
@@ -237,9 +236,12 @@ exports.Cluster = class Cluster {
    * @param {Object} options
    * @property {string|Array} options.esArgs
    * @property {string} options.esJavaOpts
+   * @property {Boolean} options.skipNativeRealmSetup
    * @return {undefined}
    */
-  _exec(installPath, options = {}) {
+  _exec(installPath, opts = {}) {
+    const { skipNativeRealmSetup = false, ...options } = opts;
+
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
     }
@@ -276,7 +278,8 @@ exports.Cluster = class Cluster {
     // especially because we currently run many instances of ES on the same machine during CI
     // inital and max must be the same, so we only need to check the max
     if (!esJavaOpts.includes('Xmx')) {
-      esJavaOpts += ' -Xms1g -Xmx1g';
+      // 1536m === 1.5g
+      esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
 
     this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());
@@ -303,6 +306,10 @@ exports.Cluster = class Cluster {
 
     // once the http port is available setup the native realm
     this._nativeRealmSetup = httpPort.then(async (port) => {
+      if (skipNativeRealmSetup) {
+        return;
+      }
+
       const caCert = await this._caCertPromise;
       const nativeRealm = new NativeRealm({
         port,

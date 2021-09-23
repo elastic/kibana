@@ -21,9 +21,10 @@ export interface FeaturePrivilegeIteratorOptions {
   augmentWithSubFeaturePrivileges: boolean;
 
   /**
-   * The current license type. Controls which sub-features are returned, as they may have different license terms than the overall feature.
+   * Function that returns whether the current license is equal to or greater than the given license type.
+   * Controls which sub-features are returned, as they may have different license terms than the overall feature.
    */
-  licenseType: LicenseType;
+  licenseHasAtLeast: (licenseType: LicenseType) => boolean | undefined;
 
   /**
    * Optional predicate to filter the returned set of privileges.
@@ -59,7 +60,7 @@ const featurePrivilegeIterator: FeaturePrivilegeIterator = function* featurePriv
     if (options.augmentWithSubFeaturePrivileges) {
       yield {
         privilegeId,
-        privilege: mergeWithSubFeatures(privilegeId, privilege, feature, options.licenseType),
+        privilege: mergeWithSubFeatures(privilegeId, privilege, feature, options.licenseHasAtLeast),
       };
     } else {
       yield { privilegeId, privilege };
@@ -71,10 +72,10 @@ function mergeWithSubFeatures(
   privilegeId: string,
   privilege: FeatureKibanaPrivileges,
   feature: KibanaFeature,
-  licenseType: LicenseType
+  licenseHasAtLeast: FeaturePrivilegeIteratorOptions['licenseHasAtLeast']
 ) {
   const mergedConfig = _.cloneDeep(privilege);
-  for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, licenseType)) {
+  for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, licenseHasAtLeast)) {
     if (subFeaturePrivilege.includeIn !== 'read' && subFeaturePrivilege.includeIn !== privilegeId) {
       continue;
     }
@@ -110,11 +111,31 @@ function mergeWithSubFeatures(
     );
 
     mergedConfig.alerting = {
-      all: mergeArrays(mergedConfig.alerting?.all ?? [], subFeaturePrivilege.alerting?.all ?? []),
-      read: mergeArrays(
-        mergedConfig.alerting?.read ?? [],
-        subFeaturePrivilege.alerting?.read ?? []
-      ),
+      rule: {
+        all: mergeArrays(
+          mergedConfig.alerting?.rule?.all ?? [],
+          subFeaturePrivilege.alerting?.rule?.all ?? []
+        ),
+        read: mergeArrays(
+          mergedConfig.alerting?.rule?.read ?? [],
+          subFeaturePrivilege.alerting?.rule?.read ?? []
+        ),
+      },
+      alert: {
+        all: mergeArrays(
+          mergedConfig.alerting?.alert?.all ?? [],
+          subFeaturePrivilege.alerting?.alert?.all ?? []
+        ),
+        read: mergeArrays(
+          mergedConfig.alerting?.alert?.read ?? [],
+          subFeaturePrivilege.alerting?.alert?.read ?? []
+        ),
+      },
+    };
+
+    mergedConfig.cases = {
+      all: mergeArrays(mergedConfig.cases?.all ?? [], subFeaturePrivilege.cases?.all ?? []),
+      read: mergeArrays(mergedConfig.cases?.read ?? [], subFeaturePrivilege.cases?.read ?? []),
     };
   }
   return mergedConfig;

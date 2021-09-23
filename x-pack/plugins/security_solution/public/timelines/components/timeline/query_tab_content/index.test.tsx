@@ -25,6 +25,7 @@ import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
+import * as helpers from '../helpers';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -58,6 +59,16 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         savedObjects: {
           client: {},
+        },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getLoadingPanel: jest.fn(),
+          getFieldBrowser: jest.fn(),
+          getUseDraggableKeyboardWrapper: () =>
+            jest.fn().mockReturnValue({
+              onBlur: jest.fn(),
+              onKeyDown: jest.fn(),
+            }),
         },
       },
     }),
@@ -106,7 +117,7 @@ describe('Timeline', () => {
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
-      kqlQueryExpression: '',
+      kqlQueryExpression: ' ',
       onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
@@ -123,6 +134,27 @@ describe('Timeline', () => {
   });
 
   describe('rendering', () => {
+    let spyCombineQueries: jest.SpyInstance;
+
+    beforeEach(() => {
+      spyCombineQueries = jest.spyOn(helpers, 'combineQueries');
+    });
+    afterEach(() => {
+      spyCombineQueries.mockClear();
+    });
+
+    test('should trim kqlQueryExpression', () => {
+      mount(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(spyCombineQueries.mock.calls[0][0].kqlQuery.query).toEqual(
+        props.kqlQueryExpression.trim()
+      );
+    });
+
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>

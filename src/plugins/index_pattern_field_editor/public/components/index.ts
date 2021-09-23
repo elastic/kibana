@@ -6,17 +6,6 @@
  * Side Public License, v 1.
  */
 
-export {
-  FieldEditorFlyoutContent,
-  Props as FieldEditorFlyoutContentProps,
-} from './field_editor_flyout_content';
-
-export {
-  FieldEditorFlyoutContentContainer,
-  Props as FieldEditorFlyoutContentContainerProps,
-  FieldEditorContext,
-} from './field_editor_flyout_content_container';
-
 export { getDeleteFieldProvider, Props as DeleteFieldProviderProps } from './delete_field_provider';
 
 export * from './field_format_editor';

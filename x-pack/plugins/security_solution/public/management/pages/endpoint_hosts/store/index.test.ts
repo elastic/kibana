@@ -12,6 +12,7 @@ import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { EndpointAction } from './action';
 import { endpointListReducer } from './reducer';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
+import { createUninitialisedResourceState } from '../../../state';
 
 describe('EndpointList store concerns', () => {
   let store: Store<EndpointState>;
@@ -41,9 +42,29 @@ describe('EndpointList store concerns', () => {
         total: 0,
         loading: false,
         error: undefined,
-        details: undefined,
-        detailsLoading: false,
-        detailsError: undefined,
+        endpointDetails: {
+          activityLog: {
+            paging: {
+              disabled: false,
+              page: 1,
+              pageSize: 50,
+              startDate: 'now-1d',
+              endDate: 'now',
+              isInvalidDateRange: false,
+              autoRefreshOptions: {
+                enabled: false,
+                duration: DEFAULT_POLL_INTERVAL,
+              },
+              recentlyUsedDateRanges: [],
+            },
+            logData: { type: 'UninitialisedResourceState' },
+          },
+          hostDetails: {
+            details: undefined,
+            detailsLoading: false,
+            detailsError: undefined,
+          },
+        },
         policyResponse: undefined,
         policyResponseLoading: false,
         policyResponseError: undefined,
@@ -51,7 +72,9 @@ describe('EndpointList store concerns', () => {
         policyItems: [],
         selectedPolicyId: undefined,
         policyItemsLoading: false,
-        endpointPackageInfo: undefined,
+        endpointPackageInfo: {
+          type: 'UninitialisedResourceState',
+        },
         nonExistingPolicies: {},
         agentPolicies: {},
         endpointsExist: true,
@@ -68,6 +91,11 @@ describe('EndpointList store concerns', () => {
         isolationRequestState: {
           type: 'UninitialisedResourceState',
         },
+        endpointPendingActions: {
+          data: new Map(),
+          type: 'LoadedResourceState',
+        },
+        metadataTransformStats: createUninitialisedResourceState(),
       });
     });
 

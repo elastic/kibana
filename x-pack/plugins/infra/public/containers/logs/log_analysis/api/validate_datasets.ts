@@ -19,7 +19,7 @@ interface RequestArgs {
   timestampField: string;
   startTime: number;
   endTime: number;
-  runtimeMappings: estypes.RuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }
 
 export const callValidateDatasetsAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {

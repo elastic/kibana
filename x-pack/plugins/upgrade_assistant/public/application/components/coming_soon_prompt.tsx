@@ -16,7 +16,7 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
   const { ELASTIC_WEBSITE_URL } = docLinks;
 
   return (
-    <EuiPageContent>
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
       <EuiEmptyPrompt
         iconType="wrench"
         data-test-subj="comingSoonPrompt"

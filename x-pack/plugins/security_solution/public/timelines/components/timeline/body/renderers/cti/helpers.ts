@@ -8,13 +8,13 @@
 import { get, isEmpty } from 'lodash';
 import styled from 'styled-components';
 
-import { INDICATOR_DESTINATION_PATH } from '../../../../../../../common/constants';
+import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
 import { INDICATOR_MATCH_SUBFIELDS } from '../../../../../../../common/cti/constants';
 import { Ecs } from '../../../../../../../common/ecs';
 import { ThreatIndicatorEcs } from '../../../../../../../common/ecs/threat';
 
 const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] => {
-  const threatData = get(data, INDICATOR_DESTINATION_PATH);
+  const threatData = get(data, ENRICHMENT_DESTINATION_PATH);
   if (threatData == null) {
     return [];
   } else if (!Array.isArray(threatData)) {

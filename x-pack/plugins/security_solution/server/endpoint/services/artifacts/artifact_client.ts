@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { inflate as _inflate } from 'zlib';
-import { promisify } from 'util';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server';
-
-const inflateAsync = promisify(_inflate);
 
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
@@ -56,12 +52,8 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
   async createArtifact(
     artifact: InternalArtifactCompleteSchema
   ): Promise<InternalArtifactCompleteSchema> {
-    // FIXME:PT refactor to make this more efficient by passing through the uncompressed artifact content
-    // Artifact `.body` is compressed/encoded. We need it decoded and as a string
-    const artifactContent = await inflateAsync(Buffer.from(artifact.body, 'base64'));
-
     const createdArtifact = await this.fleetArtifacts.createArtifact({
-      content: artifactContent.toString(),
+      content: Buffer.from(artifact.body, 'base64').toString(),
       identifier: artifact.identifier,
       type: this.parseArtifactId(artifact.identifier).type,
     });

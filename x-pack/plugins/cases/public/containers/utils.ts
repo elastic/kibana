@@ -22,6 +22,8 @@ import {
   CasesStatusResponseRt,
   CasesStatusResponse,
   throwErrors,
+  CasesConfigurationsResponse,
+  CaseConfigurationsResponseRt,
   CasesConfigureResponse,
   CaseConfigureResponseRt,
   CaseUserActionsResponse,
@@ -33,14 +35,6 @@ import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
-
-export const parseString = (params: string) => {
-  try {
-    return JSON.parse(params);
-  } catch {
-    return null;
-  }
-};
 
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
@@ -91,6 +85,13 @@ export const decodeCasesResponse = (respCase?: CasesResponse) =>
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
+
+export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
+  return pipe(
+    CaseConfigurationsResponseRt.decode(respCase),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+};
 
 export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =>
   pipe(

@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -17,11 +17,13 @@ import { HttpStart } from '../../../../../../../src/core/public';
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
-  buildAlertStatusFilter,
   buildAlertsRuleIdFilter,
+  buildAlertStatusesFilter,
+  buildAlertStatusesFilterRuleRegistry,
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
 import { useKibana } from '../../lib/kibana';
 
@@ -82,6 +84,8 @@ export const useAddOrUpdateException = ({
     },
     []
   );
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   useEffect(() => {
     let isSubscribed = true;
@@ -116,8 +120,8 @@ export const useAddOrUpdateException = ({
 
       try {
         setIsLoading(true);
-        let alertIdResponse: UpdateDocumentByQueryResponse | undefined;
-        let bulkResponse: UpdateDocumentByQueryResponse | undefined;
+        let alertIdResponse: estypes.UpdateByQueryResponse | undefined;
+        let bulkResponse: estypes.UpdateByQueryResponse | undefined;
         if (alertIdToClose != null) {
           alertIdResponse = await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),
@@ -127,10 +131,15 @@ export const useAddOrUpdateException = ({
         }
 
         if (bulkCloseIndex != null) {
+          // TODO: Once we are past experimental phase this code should be removed
+          const alertStatusFilter = ruleRegistryEnabled
+            ? buildAlertStatusesFilterRuleRegistry(['open', 'acknowledged', 'in-progress'])
+            : buildAlertStatusesFilter(['open', 'acknowledged', 'in-progress']);
+
           const filter = getQueryFilter(
             '',
             'kuery',
-            [...buildAlertsRuleIdFilter(ruleId), ...buildAlertStatusFilter('open')],
+            [...buildAlertsRuleIdFilter(ruleId), ...alertStatusFilter],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
@@ -176,7 +185,14 @@ export const useAddOrUpdateException = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [http, onSuccess, onError, updateExceptionListItem, addExceptionListItem]);
+  }, [
+    addExceptionListItem,
+    http,
+    onSuccess,
+    onError,
+    ruleRegistryEnabled,
+    updateExceptionListItem,
+  ]);
 
   return [{ isLoading }, addOrUpdateException];
 };

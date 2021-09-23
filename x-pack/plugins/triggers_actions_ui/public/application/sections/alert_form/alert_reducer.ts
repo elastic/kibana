@@ -157,7 +157,7 @@ export const alertReducer = <AlertPhase extends InitialAlert | Alert>(
       if (
         index === undefined ||
         alert.actions[index] == null ||
-        isEqual(alert.actions[index][key], value)
+        (!!alert.actions[index][key] && isEqual(alert.actions[index][key], value))
       ) {
         return state;
       } else {

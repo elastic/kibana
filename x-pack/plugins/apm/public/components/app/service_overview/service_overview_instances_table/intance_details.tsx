@@ -24,25 +24,22 @@ import {
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { pct } from '../../../../style/variables';
-import { getAgentIcon } from '../../../shared/AgentIcon/get_agent_icon';
+import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
-import { pushNewItemToKueryBar } from '../../../shared/KueryBar/utils';
-import {
-  getCloudIcon,
-  getContainerIcon,
-} from '../../service_details/service_icons';
+import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
+import { getCloudIcon, getContainerIcon } from '../../../shared/service_icons';
 import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
 
-type ServiceInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+type ServiceInstanceDetails =
+  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 interface Props {
   serviceName: string;
   serviceNodeName: string;
+  kuery: string;
 }
 
 function toKeyValuePairs(keys: string[], data: ServiceInstanceDetails) {
@@ -64,12 +61,13 @@ const cloudDetailsKeys = [
   CLOUD_PROVIDER,
 ];
 
-export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
+export function InstanceDetails({
+  serviceName,
+  serviceNodeName,
+  kuery,
+}: Props) {
   const theme = useTheme();
   const history = useHistory();
-  const {
-    urlParams: { kuery },
-  } = useUrlParams();
 
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
@@ -81,7 +79,7 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
     status === FETCH_STATUS.NOT_INITIATED
   ) {
     return (
-      <div style={{ width: pct(50) }}>
+      <div style={{ width: '50%' }}>
         <EuiLoadingContent data-test-subj="loadingSpinner" />
       </div>
     );

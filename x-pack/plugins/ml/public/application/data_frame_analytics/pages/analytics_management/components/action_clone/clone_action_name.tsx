@@ -133,6 +133,9 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               optional: true,
               formKey: 'etaGrowthRatePerTree',
             },
+            feature_processors: {
+              optional: true,
+            },
             max_optimization_rounds_per_hyperparameter: {
               optional: true,
               formKey: 'maxOptimizationRoundsPerHyperparameter',
@@ -233,6 +236,9 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               defaultValue: 'mse',
             },
             loss_function_parameter: {
+              optional: true,
+            },
+            feature_processors: {
               optional: true,
             },
             early_stopping_enabled: {
@@ -374,14 +380,14 @@ export function extractCloningConfig({
   id,
   ...configToClone
 }: DeepReadonly<DataFrameAnalyticsConfig>): CloneDataFrameAnalyticsConfig {
-  return (cloneDeep({
+  return cloneDeep({
     ...configToClone,
     dest: {
       ...configToClone.dest,
       // Reset the destination index
       index: '',
     },
-  }) as unknown) as CloneDataFrameAnalyticsConfig;
+  }) as unknown as CloneDataFrameAnalyticsConfig;
 }
 
 export const cloneActionNameText = i18n.translate(

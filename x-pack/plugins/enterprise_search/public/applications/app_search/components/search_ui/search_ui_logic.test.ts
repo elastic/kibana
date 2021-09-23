@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
-
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../__mocks__/kea_logic';
 import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
@@ -18,7 +21,7 @@ import { SearchUILogic } from './';
 describe('SearchUILogic', () => {
   const { mount } = new LogicMounter(SearchUILogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -27,6 +30,7 @@ describe('SearchUILogic', () => {
     validFacetFields: [],
     titleField: '',
     urlField: '',
+    thumbnailField: '',
     facetFields: [],
     sortFields: [],
     activeField: ActiveField.None,
@@ -35,6 +39,7 @@ describe('SearchUILogic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockEngineValues.engineName = 'engine1';
+    mockEngineValues.searchKey = 'search-abc123';
   });
 
   it('has expected default values', () => {
@@ -85,6 +90,17 @@ describe('SearchUILogic', () => {
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
           urlField: 'foo',
+        });
+      });
+    });
+
+    describe('onThumbnailFieldChange', () => {
+      it('sets the thumbnailField value', () => {
+        mount({ thumbnailField: '' });
+        SearchUILogic.actions.onThumbnailFieldChange('foo');
+        expect(SearchUILogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          thumbnailField: 'foo',
         });
       });
     });
@@ -144,7 +160,7 @@ describe('SearchUILogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/engine1/search_ui/field_config'
+          '/internal/app_search/engines/engine1/search_ui/field_config'
         );
         expect(SearchUILogic.actions.onFieldDataLoaded).toHaveBeenCalledWith({
           validFields: ['test'],
@@ -153,6 +169,17 @@ describe('SearchUILogic', () => {
           urlField: 'url',
           titleField: 'title',
         });
+      });
+
+      it('will short circuit the call if there is no searchKey available for this engine', async () => {
+        mockEngineValues.searchKey = '';
+        mount();
+
+        SearchUILogic.actions.loadFieldData();
+
+        expect(setErrorMessage).toHaveBeenCalledWith(
+          "It looks like you don't have any Public Search Keys with access to the 'engine1' engine. Please visit the Credentials page to set one up."
+        );
       });
 
       it('handles errors', async () => {

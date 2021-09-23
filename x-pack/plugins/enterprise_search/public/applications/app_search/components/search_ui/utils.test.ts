@@ -33,7 +33,7 @@ describe('generatePreviewUrl', () => {
         empty2: [''], // Empty fields should be stripped
       })
     ).toEqual(
-      'http://localhost:3002/as/engines/national-parks-demo/reference_application/preview?facets[]=baz&facets[]=qux&sortFields[]=quux&sortFields[]=quuz&titleField=foo&urlField=bar'
+      'http://localhost:3002/as/engines/national-parks-demo/search_experience/preview?facets[]=baz&facets[]=qux&sortFields[]=quux&sortFields[]=quuz&titleField=foo&urlField=bar'
     );
   });
 });

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { validateRegExpString } from './utils';
+import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
+import { validateRegExpString, getDeprecationsUpperLimit } from './utils';
 
 describe('validRegExpString', () => {
   it('correctly returns false for invalid strings', () => {
@@ -18,5 +19,19 @@ describe('validRegExpString', () => {
     expect(validateRegExpString('asd')).toBe('');
     expect(validateRegExpString('.*asd')).toBe('');
     expect(validateRegExpString('')).toBe('');
+  });
+});
+
+describe('getDeprecationsUpperLimit', () => {
+  it('correctly returns capped number if it goes above limit', () => {
+    expect(getDeprecationsUpperLimit(1000000)).toBe(`${DEPRECATION_WARNING_UPPER_LIMIT}+`);
+    expect(getDeprecationsUpperLimit(2000000)).toBe(`${DEPRECATION_WARNING_UPPER_LIMIT}+`);
+  });
+
+  it('correctly returns true for valid strings', () => {
+    expect(getDeprecationsUpperLimit(10)).toBe('10');
+    expect(getDeprecationsUpperLimit(DEPRECATION_WARNING_UPPER_LIMIT)).toBe(
+      DEPRECATION_WARNING_UPPER_LIMIT.toString()
+    );
   });
 });

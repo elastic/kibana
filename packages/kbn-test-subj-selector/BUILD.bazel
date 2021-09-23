@@ -1,0 +1,48 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+
+PKG_BASE_NAME = "kbn-test-subj-selector"
+PKG_REQUIRE_NAME = "@kbn/test-subj-selector"
+
+SOURCE_FILES = glob([
+  "index.d.ts",
+  "index.js"
+])
+
+SRCS = SOURCE_FILES
+
+filegroup(
+  name = "srcs",
+  srcs = SRCS,
+)
+
+NPM_MODULE_EXTRA_FILES = [
+  "package.json",
+  "README.md",
+]
+
+DEPS = []
+
+js_library(
+  name = PKG_BASE_NAME,
+  srcs = NPM_MODULE_EXTRA_FILES + [
+    ":srcs",
+  ],
+  deps = DEPS,
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "npm_module",
+  deps = [
+    ":%s" % PKG_BASE_NAME,
+  ]
+)
+
+filegroup(
+  name = "build",
+  srcs = [
+    ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)

@@ -5,37 +5,8 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '../../../security/common/model';
 export { ConfigType as Configuration } from '../config';
-import type { SecuritySolutionRequestHandlerContext } from '../types';
-
-import { FrameworkAdapter, FrameworkRequest } from './framework';
-import { IndexFields } from './index_fields';
-import { SourceStatus } from './source_status';
-import { Sources } from './sources';
-import { Notes } from './timeline/saved_object/notes';
-import { PinnedEvent } from './timeline/saved_object/pinned_events';
-import { Timeline } from './timeline/saved_object/timelines';
 import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
-
-export interface AppDomainLibs {
-  fields: IndexFields;
-}
-
-export interface AppBackendLibs extends AppDomainLibs {
-  framework: FrameworkAdapter;
-  sources: Sources;
-  sourceStatus: SourceStatus;
-  timeline: Timeline;
-  note: Notes;
-  pinnedEvent: PinnedEvent;
-}
-
-export interface SiemContext {
-  req: FrameworkRequest;
-  context: SecuritySolutionRequestHandlerContext;
-  user: AuthenticatedUser | null;
-}
 
 export interface ShardsResponse {
   total: number;
@@ -111,36 +82,4 @@ export interface TermAggregationBucket {
   cardinality_count?: {
     value: number;
   };
-}
-
-export interface TermAggregation {
-  [agg: string]: {
-    buckets: TermAggregationBucket[];
-  };
-}
-
-export interface TotalHit {
-  value: number;
-  relation: string;
-}
-
-export interface Hit {
-  _index: string;
-  _type: string;
-  _id: string;
-  _score: number | null;
-}
-
-export interface Hits<T, U> {
-  hits: {
-    total: T;
-    max_score: number | null;
-    hits: U[];
-  };
-}
-
-export interface MSearchHeader {
-  index: string[] | string;
-  allowNoIndices?: boolean;
-  ignoreUnavailable?: boolean;
 }

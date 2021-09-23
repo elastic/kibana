@@ -9,13 +9,11 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiPageHeader, EuiPageContent } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 import { getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
 import { AddSourceEnginesButton, AddSourceEnginesModal, SourceEnginesTable } from './components';
 import { SOURCE_ENGINES_TITLE } from './i18n';
@@ -33,20 +31,19 @@ export const SourceEngines: React.FC = () => {
     fetchSourceEngines();
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   return (
-    <>
-      <SetPageChrome trail={getEngineBreadcrumbs([SOURCE_ENGINES_TITLE])} />
-      <EuiPageHeader
-        pageTitle={SOURCE_ENGINES_TITLE}
-        rightSideItems={canManageMetaEngineSourceEngines ? [<AddSourceEnginesButton />] : []}
-      />
-      <FlashMessages />
-      <EuiPageContent hasBorder>
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs([SOURCE_ENGINES_TITLE])}
+      pageHeader={{
+        pageTitle: SOURCE_ENGINES_TITLE,
+        rightSideItems: canManageMetaEngineSourceEngines ? [<AddSourceEnginesButton />] : [],
+      }}
+      isLoading={dataLoading}
+    >
+      <EuiPanel hasBorder>
         <SourceEnginesTable />
         {isModalOpen && <AddSourceEnginesModal />}
-      </EuiPageContent>
-    </>
+      </EuiPanel>
+    </AppSearchPageTemplate>
   );
 };

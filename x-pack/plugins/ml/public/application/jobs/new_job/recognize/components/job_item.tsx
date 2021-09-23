@@ -87,7 +87,7 @@ export const JobItem: FC<JobItemProps> = memo(
           </EuiText>
 
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {jobGroups.map((group) => (
+            {(jobGroups ?? []).map((group) => (
               <EuiFlexItem grow={false} key={group}>
                 <EuiBadge color={tabColor(group)}>{group}</EuiBadge>
               </EuiFlexItem>
@@ -173,10 +173,10 @@ export const JobItem: FC<JobItemProps> = memo(
   }
 );
 
-function getDatafeedStartedIcon({
-  awaitingMlNodeAllocation,
-  success,
-}: DatafeedResponse): { type: string; color: string } {
+function getDatafeedStartedIcon({ awaitingMlNodeAllocation, success }: DatafeedResponse): {
+  type: string;
+  color: string;
+} {
   if (awaitingMlNodeAllocation === true) {
     return { type: 'alert', color: 'warning' };
   }

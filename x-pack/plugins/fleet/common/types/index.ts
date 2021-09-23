@@ -7,7 +7,12 @@
 
 export * from './models';
 export * from './rest_spec';
-import type { PreconfiguredAgentPolicy, PreconfiguredPackage } from './models/preconfiguration';
+
+import type {
+  PreconfiguredAgentPolicy,
+  PreconfiguredPackage,
+  PreconfiguredOutput,
+} from './models/preconfiguration';
 
 export interface FleetConfigType {
   enabled: boolean;
@@ -16,7 +21,7 @@ export interface FleetConfigType {
   agents: {
     enabled: boolean;
     elasticsearch: {
-      host?: string;
+      hosts?: string[];
       ca_sha256?: string;
     };
     fleet_server?: {
@@ -25,6 +30,8 @@ export interface FleetConfigType {
   };
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
+  outputs?: PreconfiguredOutput[];
+  agentIdVerificationEnabled?: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

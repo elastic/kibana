@@ -6,7 +6,8 @@
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import { getRumErrorsProjection } from '../../projections/rum_page_load_transactions';
 import {
   ERROR_EXC_MESSAGE,
@@ -23,7 +24,7 @@ export async function getJSErrors({
   pageIndex,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   pageSize: number;
   pageIndex: number;
   urlQuery?: string;
@@ -94,7 +95,7 @@ export async function getJSErrors({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_js_errors', params);
 
   const { totalErrorGroups, totalErrorPages, errors } =
     response.aggregations ?? {};
@@ -107,9 +108,11 @@ export async function getJSErrors({
       return {
         count: impactedPages.pageCount.value,
         errorGroupId: key,
-        errorMessage: (sample.hits.hits[0]._source as {
-          error: { exception: Array<{ message: string }> };
-        }).error.exception?.[0].message,
+        errorMessage: (
+          sample.hits.hits[0]._source as {
+            error: { exception: Array<{ message: string }> };
+          }
+        ).error.exception?.[0].message,
       };
     }),
   };

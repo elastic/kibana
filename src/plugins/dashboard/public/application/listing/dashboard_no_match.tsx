@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
+
 import { useKibana, toMountPoint } from '../../services/kibana_react';
-import { DashboardAppServices } from '../types';
+import { DashboardAppServices } from '../../types';
 import { DashboardConstants } from '../..';
 
 let bannerId: string | undefined;
@@ -23,9 +23,8 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
   useEffect(() => {
     services.restorePreviousUrl();
-
     const { navigated } = services.urlForwarding.navigateToLegacyKibanaUrl(
-      history.location.pathname
+      history.location.pathname + history.location.search
     );
 
     if (!navigated) {

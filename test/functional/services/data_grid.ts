@@ -10,7 +10,7 @@ import { chunk } from 'lodash';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
-interface TabbedGridData {
+export interface TabbedGridData {
   columns: string[];
   rows: string[][];
 }
@@ -22,7 +22,7 @@ interface SelectOptions {
 export class DataGridService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly PageObjects = this.ctx.getPageObjects(['common', 'header']);
+  private readonly header = this.ctx.getPageObject('header');
   private readonly retry = this.ctx.getService('retry');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
@@ -135,6 +135,7 @@ export class DataGridService extends FtrService {
     if (!table) {
       return [];
     }
+
     const cells = await table.findAllByCssSelector('.euiDataGridRowCell');
 
     const rows: WebElementWrapper[][] = [];
@@ -173,14 +174,13 @@ export class DataGridService extends FtrService {
   }
 
   public async getHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell__content');
+    const result = await this.find.allByCssSelector(
+      '.euiDataGridHeaderCell__button > .euiDataGridHeaderCell__content'
+    );
+
     const textArr = [];
-    let idx = 0;
     for (const cell of result) {
-      if (idx > 1) {
-        textArr.push(await cell.getVisibleText());
-      }
-      idx++;
+      textArr.push(await cell.getVisibleText());
     }
     return Promise.resolve(textArr);
   }
@@ -200,7 +200,7 @@ export class DataGridService extends FtrService {
     });
   }
 
-  public async clickDocSortAsc(field?: string, sortText = 'Sort New-Old') {
+  public async clickDocSortAsc(field?: string, sortText = 'Sort Old-New') {
     if (field) {
       await this.openColMenuByField(field);
     } else {
@@ -209,7 +209,7 @@ export class DataGridService extends FtrService {
     await this.find.clickByButtonText(sortText);
   }
 
-  public async clickDocSortDesc(field?: string, sortText = 'Sort Old-New') {
+  public async clickDocSortDesc(field?: string, sortText = 'Sort New-Old') {
     if (field) {
       await this.openColMenuByField(field);
     } else {
@@ -234,7 +234,7 @@ export class DataGridService extends FtrService {
     const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
     const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
     await addInclusiveFilterButton.click();
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async getAddInclusiveFilterButton(
@@ -263,7 +263,7 @@ export class DataGridService extends FtrService {
     const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
     const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
     await addInclusiveFilterButton.click();
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async hasNoResults() {

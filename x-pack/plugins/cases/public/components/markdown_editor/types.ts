@@ -8,7 +8,6 @@
 import { FunctionComponent } from 'react';
 import { Plugin, PluggableList } from 'unified';
 // Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import rehype2react from 'rehype-react';
@@ -23,7 +22,7 @@ export type TemporaryProcessingPluginsType = [
   [
     typeof rehype2react,
     Parameters<typeof rehype2react>[0] & {
-      components: { a: FunctionComponent<EuiLinkAnchorProps>; timeline: unknown };
+      components: { a: FunctionComponent<EuiLinkAnchorProps>; lens: unknown; timeline: unknown };
     }
   ],
   ...PluggableList

@@ -6,7 +6,6 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ApplicationStart } from 'kibana/public';
 
 import {
   DeleteTrustedAppsRequestSchema,
@@ -14,6 +13,7 @@ import {
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
   PutTrustedAppUpdateRequestSchema,
+  GetTrustedAppsSummaryRequestSchema,
 } from '../schema/trusted_apps';
 import { OperatingSystem } from './os';
 
@@ -28,6 +28,9 @@ export interface GetOneTrustedAppResponse {
 
 /** API request params for retrieving a list of Trusted Apps */
 export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
+
+/** API request params for retrieving summary of Trusted Apps */
+export type GetTrustedAppsSummaryRequest = TypeOf<typeof GetTrustedAppsSummaryRequestSchema.query>;
 
 export interface GetTrustedListAppsResponse {
   per_page: number;
@@ -133,15 +136,3 @@ export type TrustedApp = NewTrustedApp & {
   updated_at: string;
   updated_by: string;
 };
-
-/**
- * Supported React-Router state for the Trusted Apps List page
- */
-export interface TrustedAppsListPageRouteState {
-  /** Where the user should be redirected to when the `Back` button is clicked */
-  onBackButtonNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
-  /** The URL for the `Back` button */
-  backButtonUrl?: string;
-  /** The label for the button */
-  backButtonLabel?: string;
-}

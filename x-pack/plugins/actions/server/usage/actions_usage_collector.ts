@@ -18,6 +18,7 @@ const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
   __email: { type: 'long' },
   __index: { type: 'long' },
   __pagerduty: { type: 'long' },
+  __swimlane: { type: 'long' },
   '__server-log': { type: 'long' },
   __slack: { type: 'long' },
   __webhook: { type: 'long' },

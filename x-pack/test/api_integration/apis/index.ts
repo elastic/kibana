@@ -22,7 +22,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./metrics_ui'));
-    loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./console'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));

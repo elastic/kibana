@@ -6,17 +6,20 @@
  */
 
 import type { StartServicesAccessor } from 'src/core/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
 import type { PluginsStart } from '../plugin';
 import { createRedirectLegacyUrl } from '../share_saved_objects_to_space';
+import { useSpaces } from '../spaces_context';
 import type { SpacesManager } from '../spaces_manager';
 import { getComponents } from './components';
+import type { LazyComponentFn, SpacesApiUi, SpacesApiUiComponent } from './types';
 
 interface GetUiApiOptions {
   spacesManager: SpacesManager;
   getStartServices: StartServicesAccessor<PluginsStart>;
 }
+
+export type { LazyComponentFn, SpacesApiUi, SpacesApiUiComponent };
 
 export const getUiApi = ({ spacesManager, getStartServices }: GetUiApiOptions): SpacesApiUi => {
   const components = getComponents({ spacesManager, getStartServices });
@@ -24,5 +27,6 @@ export const getUiApi = ({ spacesManager, getStartServices }: GetUiApiOptions): 
   return {
     components,
     redirectLegacyUrl: createRedirectLegacyUrl(getStartServices),
+    useSpaces,
   };
 };

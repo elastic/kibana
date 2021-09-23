@@ -20,6 +20,7 @@ import type {
   RegistryPackage,
   RegistrySearchResults,
   RegistrySearchResult,
+  GetCategoriesRequest,
 } from '../../../types';
 import {
   getArchiveFilelist,
@@ -45,18 +46,20 @@ export interface SearchParams {
   experimental?: boolean;
 }
 
-export interface CategoriesParams {
-  experimental?: boolean;
-}
-
 /**
  * Extract the package name and package version from a string.
  *
  * @param pkgkey a string containing the package name delimited by the package version
  */
 export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
-  // this will return an empty string if `indexOf` returns -1
-  const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
+  // If no version is provided, use the provided package key as the
+  // package name and return an empty version value
+  if (!pkgkey.includes('-')) {
+    return { pkgName: pkgkey, pkgVersion: '' };
+  }
+
+  const pkgName = pkgkey.includes('-') ? pkgkey.substr(0, pkgkey.indexOf('-')) : pkgkey;
+
   if (pkgName === '') {
     throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
   }
@@ -150,12 +153,17 @@ function setKibanaVersion(url: URL) {
   }
 }
 
-export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
+export async function fetchCategories(
+  params?: GetCategoriesRequest['query']
+): Promise<CategorySummaryList> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
     if (params.experimental) {
       url.searchParams.set('experimental', params.experimental.toString());
+    }
+    if (params.include_policy_templates) {
+      url.searchParams.set('include_policy_templates', params.include_policy_templates.toString());
     }
   }
 
@@ -252,4 +260,16 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     kibana: assets.kibana,
     elasticsearch: assets.elasticsearch,
   };
+}
+
+export function getNoticePath(paths: string[]): string | undefined {
+  for (const path of paths) {
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
+    if (parts.type === 'notice') {
+      const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
+      return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
+    }
+  }
+
+  return undefined;
 }

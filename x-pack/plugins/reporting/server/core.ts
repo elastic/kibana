@@ -25,14 +25,13 @@ import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { ReportingConfig } from './';
+import { ReportingConfig, ReportingSetup } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
-import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import { ReportingPluginRouter, ReportingStart } from './types';
+import { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -58,6 +57,7 @@ export interface ReportingInternalStart {
 }
 
 export class ReportingCore {
+  private kibanaVersion: string;
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
@@ -69,21 +69,24 @@ export class ReportingCore {
   private config?: ReportingConfig; // final config, includes dynamic values based on OS type
   private executing: Set<string>;
 
-  public getStartContract: () => ReportingStart;
+  public getContract: () => ReportingSetup;
 
   constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
+    this.kibanaVersion = context.env.packageInfo.version;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
     this.monitorTask = new MonitorReportsTask(this, syncConfig, this.logger);
 
-    this.getStartContract = (): ReportingStart => {
-      return {
-        usesUiCapabilities: () => syncConfig.roles.enabled === false,
-      };
-    };
+    this.getContract = () => ({
+      usesUiCapabilities: () => syncConfig.roles.enabled === false,
+    });
 
     this.executing = new Set();
+  }
+
+  public getKibanaVersion() {
+    return this.kibanaVersion;
   }
 
   /*
@@ -231,12 +234,6 @@ export class ReportingCore {
         first()
       )
       .toPromise();
-  }
-
-  public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
-    const config = this.getConfig();
-    const { browserDriverFactory } = await this.getPluginStartDeps();
-    return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
   }
 
   public getEnableScreenshotMode() {

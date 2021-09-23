@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
@@ -21,10 +19,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
-
-    esArchiver: {
-      directory: resolve(__dirname, 'es_archives'),
-    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
@@ -43,6 +37,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        // retrieve rules from the filesystem but not from fleet for Cypress tests
+        '--xpack.securitySolution.prebuiltRulesFromFileSystem=true',
+        '--xpack.securitySolution.prebuiltRulesFromSavedObjects=false',
+        `--home.disableWelcomeScreen=true`,
       ],
     },
   };

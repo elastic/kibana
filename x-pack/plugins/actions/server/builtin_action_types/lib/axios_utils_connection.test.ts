@@ -81,23 +81,25 @@ describe('axios connections', () => {
       await expect(fn()).rejects.toThrow('certificate');
     });
 
-    test('it works with rejectUnauthorized false config', async () => {
+    test('it works with verificationMode "none" config', async () => {
       const { url, server } = await createServer(true);
       testServer = server;
 
       const configurationUtilities = getACUfromConfig({
-        rejectUnauthorized: false,
+        ssl: {
+          verificationMode: 'none',
+        },
       });
       const res = await request({ axios, url, logger, configurationUtilities });
       expect(res.status).toBe(200);
     });
 
-    test('it works with rejectUnauthorized custom host config', async () => {
+    test('it works with verificationMode "none" for custom host config', async () => {
       const { url, server } = await createServer(true);
       testServer = server;
 
       const configurationUtilities = getACUfromConfig({
-        customHostSettings: [{ url, tls: { rejectUnauthorized: false } }],
+        customHostSettings: [{ url, ssl: { verificationMode: 'none' } }],
       });
       const res = await request({ axios, url, logger, configurationUtilities });
       expect(res.status).toBe(200);
@@ -108,7 +110,7 @@ describe('axios connections', () => {
       testServer = server;
 
       const configurationUtilities = getACUfromConfig({
-        customHostSettings: [{ url, tls: { certificateAuthoritiesData: CA } }],
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: CA } }],
       });
       const res = await request({ axios, url, logger, configurationUtilities });
       expect(res.status).toBe(200);
@@ -119,13 +121,13 @@ describe('axios connections', () => {
       testServer = server;
 
       const configurationUtilities = getACUfromConfig({
-        customHostSettings: [{ url, tls: { certificateAuthoritiesData: KIBANA_CRT } }],
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: KIBANA_CRT } }],
       });
       const fn = async () => await request({ axios, url, logger, configurationUtilities });
       await expect(fn()).rejects.toThrow('certificate');
     });
 
-    test('it works with incorrect ca in custom host config but rejectUnauthorized false', async () => {
+    test('it works with incorrect ca in custom host config but verificationMode "none"', async () => {
       const { url, server } = await createServer(true);
       testServer = server;
 
@@ -133,9 +135,9 @@ describe('axios connections', () => {
         customHostSettings: [
           {
             url,
-            tls: {
+            ssl: {
               certificateAuthoritiesData: CA,
-              rejectUnauthorized: false,
+              verificationMode: 'none',
             },
           },
         ],
@@ -144,16 +146,18 @@ describe('axios connections', () => {
       expect(res.status).toBe(200);
     });
 
-    test('it works with incorrect ca in custom host config but rejectUnauthorized config true', async () => {
+    test('it works with incorrect ca in custom host config but verificationMode config "full"', async () => {
       const { url, server } = await createServer(true);
       testServer = server;
 
       const configurationUtilities = getACUfromConfig({
-        rejectUnauthorized: false,
+        ssl: {
+          verificationMode: 'none',
+        },
         customHostSettings: [
           {
             url,
-            tls: {
+            ssl: {
               certificateAuthoritiesData: CA,
             },
           },
@@ -169,7 +173,7 @@ describe('axios connections', () => {
       testServer = server;
 
       const configurationUtilities = getACUfromConfig({
-        customHostSettings: [{ url: otherUrl, tls: { rejectUnauthorized: false } }],
+        customHostSettings: [{ url: otherUrl, ssl: { verificationMode: 'none' } }],
       });
       const fn = async () => await request({ axios, url, logger, configurationUtilities });
       await expect(fn()).rejects.toThrow('certificate');
@@ -180,7 +184,7 @@ describe('axios connections', () => {
       testServer = server;
 
       const configurationUtilities = getACUfromConfig({
-        customHostSettings: [{ url, tls: { certificateAuthoritiesData: 'garbage' } }],
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: 'garbage' } }],
       });
       const fn = async () => await request({ axios, url, logger, configurationUtilities });
       await expect(fn()).rejects.toThrow('certificate');
@@ -192,7 +196,7 @@ describe('axios connections', () => {
 
       const ca = '-----BEGIN CERTIFICATE-----\ngarbage\n-----END CERTIFICATE-----\n';
       const configurationUtilities = getACUfromConfig({
-        customHostSettings: [{ url, tls: { certificateAuthoritiesData: ca } }],
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: ca } }],
       });
       const fn = async () => await request({ axios, url, logger, configurationUtilities });
       await expect(fn()).rejects.toThrow('certificate');
@@ -251,6 +255,10 @@ const BaseActionsConfig: ActionsConfig = {
   proxyUrl: undefined,
   proxyHeaders: undefined,
   proxyRejectUnauthorizedCertificates: true,
+  ssl: {
+    proxyVerificationMode: 'full',
+    verificationMode: 'full',
+  },
   proxyBypassHosts: undefined,
   proxyOnlyHosts: undefined,
   rejectUnauthorized: true,

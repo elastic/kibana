@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
-import { AbstractVectorSource, BoundsFilters } from '../vector_source';
+import { Filter, IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import type { Query } from 'src/plugins/data/common';
+import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
@@ -26,7 +27,6 @@ import {
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
-  MapQuery,
   VectorJoinSourceRequestMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -60,7 +60,7 @@ export interface IESSource extends IVectorSource {
     style: IVectorStyle;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     registerCancelCallback: (callback: () => void) => void;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     timeFilters: TimeRange;
     searchSessionId?: string;
   }): Promise<object>;
@@ -88,6 +88,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
       applyGlobalTime:
         typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
+      applyForceRefresh:
+        typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
     };
   }
 
@@ -108,11 +110,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return this._descriptor.applyGlobalTime;
   }
 
-  isFieldAware(): boolean {
-    return true;
+  getApplyForceRefresh(): boolean {
+    return this._descriptor.applyForceRefresh;
   }
 
-  isRefreshTimerAware(): boolean {
+  isFieldAware(): boolean {
     return true;
   }
 
@@ -197,7 +199,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async makeSearchSource(
-    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | BoundsFilters,
+    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | BoundsRequestMeta,
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource> {
@@ -218,7 +220,14 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       allFilters.push(extentFilter);
     }
     if (searchFilters.applyGlobalTime && (await this.isTimeAware())) {
-      const filter = getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters);
+      const timeRange = searchFilters.timeslice
+        ? {
+            from: new Date(searchFilters.timeslice.from).toISOString(),
+            to: new Date(searchFilters.timeslice.to).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : searchFilters.timeFilters;
+      const filter = getTimeFilter().createFilter(indexPattern, timeRange);
       if (filter) {
         allFilters.push(filter);
       }
@@ -246,7 +255,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
@@ -357,7 +366,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     }
   }
 
-  async _getGeoField(): Promise<IFieldType> {
+  async _getGeoField(): Promise<IndexPatternField> {
     const indexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this.getGeoFieldName());
     if (!geoField) {
@@ -414,7 +423,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     style: IVectorStyle;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     registerCancelCallback: (callback: () => void) => void;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     timeFilters: TimeRange;
     searchSessionId?: string;
   }): Promise<object> {

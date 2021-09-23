@@ -27,9 +27,11 @@ export async function rollupServiceProvider(
   const rollupIndexPatternObject = await loadRollupIndexPattern(indexPattern, savedObjectsClient);
   let jobIndexPatterns: string[] = [indexPattern];
 
-  async function getRollupJobs(): Promise<estypes.RollupIndexCapabilitiesJob[] | null> {
+  async function getRollupJobs(): Promise<
+    estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[] | null
+  > {
     if (rollupIndexPatternObject !== null) {
-      const parsedTypeMetaData = JSON.parse(rollupIndexPatternObject.attributes.typeMeta);
+      const parsedTypeMetaData = JSON.parse(rollupIndexPatternObject.attributes.typeMeta!);
       const rollUpIndex: string = parsedTypeMetaData.params.rollup_index;
       const { body: rollupCaps } = await asCurrentUser.rollup.getRollupIndexCaps({
         index: rollUpIndex,

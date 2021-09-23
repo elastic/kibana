@@ -5,31 +5,46 @@
  * 2.0.
  */
 
-import { CanvasServices, services } from '../';
-import { embeddablesService } from './embeddables';
-import { expressionsService } from './expressions';
-import { reportingService } from './reporting';
-import { navLinkService } from './nav_link';
-import { notifyService } from './notify';
-import { labsService } from './labs';
-import { platformService } from './platform';
-import { searchService } from './search';
+export * from '../legacy/stubs';
 
-export const stubs: CanvasServices = {
-  embeddables: embeddablesService,
-  expressions: expressionsService,
-  reporting: reportingService,
-  navLink: navLinkService,
-  notify: notifyService,
-  platform: platformService,
-  search: searchService,
-  labs: labsService,
+import {
+  PluginServiceProviders,
+  PluginServiceProvider,
+  PluginServiceRegistry,
+} from '../../../../../../src/plugins/presentation_util/public';
+
+import { CanvasPluginServices } from '..';
+import { customElementServiceFactory } from './custom_element';
+import { embeddablesServiceFactory } from './embeddables';
+import { expressionsServiceFactory } from './expressions';
+import { labsServiceFactory } from './labs';
+import { navLinkServiceFactory } from './nav_link';
+import { notifyServiceFactory } from './notify';
+import { platformServiceFactory } from './platform';
+import { reportingServiceFactory } from './reporting';
+import { workpadServiceFactory } from './workpad';
+
+export { customElementServiceFactory } from './custom_element';
+export { expressionsServiceFactory } from './expressions';
+export { labsServiceFactory } from './labs';
+export { navLinkServiceFactory } from './nav_link';
+export { notifyServiceFactory } from './notify';
+export { platformServiceFactory } from './platform';
+export { reportingServiceFactory } from './reporting';
+export { workpadServiceFactory } from './workpad';
+
+export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
+  customElement: new PluginServiceProvider(customElementServiceFactory),
+  embeddables: new PluginServiceProvider(embeddablesServiceFactory),
+  expressions: new PluginServiceProvider(expressionsServiceFactory),
+  labs: new PluginServiceProvider(labsServiceFactory),
+  navLink: new PluginServiceProvider(navLinkServiceFactory),
+  notify: new PluginServiceProvider(notifyServiceFactory),
+  platform: new PluginServiceProvider(platformServiceFactory),
+  reporting: new PluginServiceProvider(reportingServiceFactory),
+  workpad: new PluginServiceProvider(workpadServiceFactory),
 };
 
-export const startServices = async (providedServices: Partial<CanvasServices> = {}) => {
-  Object.entries(services).forEach(([key, provider]) => {
-    // @ts-expect-error Object.entries isn't strongly typed
-    const stub = providedServices[key] || stubs[key];
-    provider.setService(stub);
-  });
-};
+export const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices>(
+  pluginServiceProviders
+);

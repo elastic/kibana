@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { SerializedConcreteTaskInstance } from '../../../../plugins/task_manager/server/task';
+
+export interface TaskManagerDoc {
+  type: string;
+  task: SerializedConcreteTaskInstance;
+}
 export class TaskManagerUtils {
   private readonly es: any;
   private readonly retry: any;
@@ -39,8 +45,8 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.hits.total.value) {
-        throw new Error(`Expected 0 tasks but received ${searchResult.hits.total.value}`);
+      if (searchResult.body.hits.total.value) {
+        throw new Error(`Expected 0 tasks but received ${searchResult.body.hits.total.value}`);
       }
     });
   }
@@ -77,8 +83,10 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.hits.total.value) {
-        throw new Error(`Expected 0 non-idle tasks but received ${searchResult.hits.total.value}`);
+      if (searchResult.body.hits.total.value) {
+        throw new Error(
+          `Expected 0 non-idle tasks but received ${searchResult.body.hits.total.value}`
+        );
       }
     });
   }
@@ -108,9 +116,9 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.hits.total.value) {
+      if (searchResult.body.hits.total.value) {
         throw new Error(
-          `Expected 0 action_task_params objects but received ${searchResult.hits.total.value}`
+          `Expected 0 action_task_params objects but received ${searchResult.body.hits.total.value}`
         );
       }
     });

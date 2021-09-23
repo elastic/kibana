@@ -26,9 +26,14 @@ import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 
+export const isDetectionsPages = (pageName: string) =>
+  pageName === SecurityPageName.alerts ||
+  pageName === SecurityPageName.rules ||
+  pageName === SecurityPageName.exceptions;
+
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
-    return value ? ((decode(value) as unknown) as T) : null;
+    return value ? (decode(value) as unknown as T) : null;
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('rison decoder error')) {
       return null;
@@ -49,27 +54,27 @@ export const getParamFromQueryString = (queryString: string, key: string) => {
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
-export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) => (
-  queryString: string
-): string => {
-  const previousQueryValues = parse(queryString, { sort: false });
-  if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
-    delete previousQueryValues[stateKey];
+export const replaceStateKeyInQueryString =
+  <T>(stateKey: string, urlState: T) =>
+  (queryString: string): string => {
+    const previousQueryValues = parse(queryString, { sort: false });
+    if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
+      delete previousQueryValues[stateKey];
 
-    return stringify(url.encodeQuery(previousQueryValues), { sort: false, encode: false });
-  }
+      return stringify(url.encodeQuery(previousQueryValues), { sort: false, encode: false });
+    }
 
-  // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
-  // Remove this if these utilities are promoted to kibana core
-  const newValue =
-    typeof urlState === 'undefined'
-      ? previousQueryValues
-      : {
-          ...previousQueryValues,
-          [stateKey]: encodeRisonUrlState(urlState),
-        };
-  return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
-};
+    // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
+    // Remove this if these utilities are promoted to kibana core
+    const newValue =
+      typeof urlState === 'undefined'
+        ? previousQueryValues
+        : {
+            ...previousQueryValues,
+            [stateKey]: encodeRisonUrlState(urlState),
+          };
+    return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
+  };
 
 export const replaceQueryStringInLocation = (
   location: H.Location,
@@ -92,8 +97,12 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
     return 'network';
-  } else if (pageName === SecurityPageName.detections) {
-    return 'detections';
+  } else if (pageName === SecurityPageName.alerts) {
+    return 'alerts';
+  } else if (pageName === SecurityPageName.rules) {
+    return 'rules';
+  } else if (pageName === SecurityPageName.exceptions) {
+    return 'exceptions';
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {

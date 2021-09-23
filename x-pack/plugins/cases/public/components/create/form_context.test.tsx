@@ -10,7 +10,8 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostComment } from '../../containers/use_post_comment';
@@ -54,6 +55,7 @@ jest.mock('../connectors/jira/use_get_fields_by_issue_type');
 jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
 jest.mock('../connectors/servicenow/use_get_choices');
+jest.mock('../../common/lib/kibana');
 
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
@@ -67,6 +69,7 @@ const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
 const postCase = jest.fn();
 const pushCaseToExternalService = jest.fn();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const defaultPostCase = {
   isLoading: false,
@@ -77,6 +80,7 @@ const defaultPostCase = {
 const defaultCreateCaseForm = {
   isLoadingConnectors: false,
   connectors: [],
+  owner: SECURITY_SOLUTION_OWNER,
 };
 
 const defaultPostPushToService = {
@@ -97,9 +101,11 @@ const fillForm = (wrapper: ReactWrapper) => {
     .simulate('change', { target: { value: sampleData.description } });
 
   act(() => {
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange(sampleTags.map((tag) => ({ label: tag })));
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange(sampleTags.map((tag) => ({ label: tag })));
   });
 };
 
@@ -129,7 +135,12 @@ describe('Create case', () => {
       tags: sampleTags,
       fetchTags,
     }));
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
   });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -172,6 +183,36 @@ describe('Create case', () => {
       fillForm(wrapper);
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
       await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
+    });
+
+    it('it does not submits the title when the length is longer than 64 characters', async () => {
+      const longTitle =
+        'This is a title that should not be saved as it is longer than 64 characters.';
+
+      const wrapper = mount(
+        <TestProviders>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseForm {...defaultCreateCaseForm} />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      act(() => {
+        wrapper
+          .find(`[data-test-subj="caseTitle"] input`)
+          .first()
+          .simulate('change', { target: { value: longTitle } });
+        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+      });
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('[data-test-subj="caseTitle"] .euiFormErrorText').text()).toBe(
+          'The length of the title is too long. The maximum length is 64.'
+        );
+      });
+      expect(postCase).not.toHaveBeenCalled();
     });
 
     it('should toggle sync settings', async () => {
@@ -377,9 +418,11 @@ describe('Create case', () => {
       });
 
       act(() => {
-        ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }).onChange([{ value: '19', label: 'Denial of Service' }]);
+        (
+          wrapper.find(EuiComboBox).at(1).props() as unknown as {
+            onChange: (a: EuiComboBoxOptionOption[]) => void;
+          }
+        ).onChange([{ value: '19', label: 'Denial of Service' }]);
       });
 
       wrapper

@@ -5,43 +5,24 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPageTemplate,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_START,
-  ALERT_STATUS,
-  RULE_ID,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { format, parse } from 'url';
-import {
-  ParsedTechnicalFields,
-  parseTechnicalFields,
-} from '../../../../rule_registry/common/parse_technical_fields';
-import type { AlertStatus } from '../../../common/typings';
-import { asDuration, asPercent } from '../../../common/utils/formatters';
+import useAsync from 'react-use/lib/useAsync';
+import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
+import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
-import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
-import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
-import { AlertsTable } from './alerts_table';
-import { StatusFilter } from './status_filter';
-
-export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
+import { AlertsTableTGrid } from './alerts_table_t_grid';
+import './styles.scss';
+import { WorkflowStatusFilter } from './workflow_status_filter';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -56,82 +37,112 @@ interface AlertsPageProps {
 }
 
 export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const { core, observabilityRuleTypeRegistry } = usePluginContext();
+  const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
   const { prepend } = core.http.basePath;
   const history = useHistory();
+  const refetch = useRef<() => void>();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', workflowStatus = 'open' },
   } = routeParams;
+
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+    },
+  ]);
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
-  const manageDetectionRulesHref = prepend(
-    '/app/management/insightsAndAlerting/triggersActions/alerts'
-  );
+  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
-  const { data: topAlerts } = useFetcher(
-    ({ signal }) => {
-      const { start, end } = getAbsoluteDateRange({ rangeFrom, rangeTo });
-
-      if (!start || !end) {
-        return;
-      }
-      return callObservabilityApi({
-        signal,
-        endpoint: 'GET /api/observability/rules/alerts/top',
-        params: {
-          query: {
-            start,
-            end,
-            kuery,
-            status,
-          },
+  const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
+    return callObservabilityApi({
+      signal,
+      endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
+      params: {
+        query: {
+          namespace: 'default',
+          registrationContexts: [
+            'observability.apm',
+            'observability.logs',
+            'observability.metrics',
+            'observability.uptime',
+          ],
         },
-      }).then((alerts) => {
-        return alerts.map((alert) => {
-          const parsedFields = parseTechnicalFields(alert);
-          const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
-          const formatted = {
-            link: undefined,
-            reason: parsedFields[RULE_NAME]!,
-            ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
-          };
+      },
+    });
+  }, []);
 
-          const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
+  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<IndexPatternBase[]> => {
+    if (indexNames.length === 0) {
+      return [];
+    }
 
-          return {
-            ...formatted,
-            fields: parsedFields,
-            link: parsedLink
-              ? format({
-                  ...parsedLink,
-                  query: {
-                    ...parsedLink.query,
-                    rangeFrom,
-                    rangeTo,
-                  },
-                })
-              : undefined,
-            active: parsedFields[ALERT_STATUS] !== 'closed',
-            start: new Date(parsedFields[ALERT_START]!).getTime(),
-          };
-        });
+    return [
+      {
+        id: 'dynamic-observability-alerts-table-index-pattern',
+        title: indexNames.join(','),
+        fields: await plugins.data.indexPatterns.getFieldsForWildcard({
+          pattern: indexNames.join(','),
+          allowNoIndex: true,
+        }),
+      },
+    ];
+  }, [indexNames]);
+
+  const setWorkflowStatusFilter = useCallback(
+    (value: AlertWorkflowStatus) => {
+      const nextSearchParams = new URLSearchParams(history.location.search);
+      nextSearchParams.set('workflowStatus', value);
+      history.push({
+        ...history.location,
+        search: nextSearchParams.toString(),
       });
     },
-    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo, status]
+    [history]
   );
 
-  function setStatusFilter(value: AlertStatus) {
-    const nextSearchParams = new URLSearchParams(history.location.search);
-    nextSearchParams.set('status', value);
-    history.push({
-      ...history.location,
-      search: nextSearchParams.toString(),
-    });
-  }
+  const onQueryChange = useCallback(
+    ({ dateRange, query }) => {
+      if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
+        return refetch.current && refetch.current();
+      }
+      const nextSearchParams = new URLSearchParams(history.location.search);
+
+      nextSearchParams.set('rangeFrom', dateRange.from);
+      nextSearchParams.set('rangeTo', dateRange.to);
+      nextSearchParams.set('kuery', query ?? '');
+
+      history.push({
+        ...history.location,
+        search: nextSearchParams.toString(),
+      });
+    },
+    [history, rangeFrom, rangeTo, kuery]
+  );
+
+  const addToQuery = useCallback(
+    (value: string) => {
+      let output = value;
+      if (kuery !== '') {
+        output = `${kuery} and ${value}`;
+      }
+      onQueryChange({
+        dateRange: { from: rangeFrom, to: rangeTo },
+        query: output,
+      });
+    },
+    [kuery, onQueryChange, rangeFrom, rangeTo]
+  );
+
+  const setRefetch = useCallback((ref) => {
+    refetch.current = ref;
+  }, []);
 
   return (
-    <EuiPageTemplate
+    <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: (
           <>
@@ -139,17 +150,16 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             <ExperimentalBadge />
           </>
         ),
-
         rightSideItems: [
-          <EuiButton fill href={manageDetectionRulesHref} iconType="gear">
-            {i18n.translate('xpack.observability.alerts.manageDetectionRulesButtonLabel', {
-              defaultMessage: 'Manage detection rules',
+          <EuiButtonEmpty href={manageRulesHref}>
+            {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+              defaultMessage: 'Manage Rules',
             })}
-          </EuiButton>,
+          </EuiButtonEmpty>,
         ],
       }}
     >
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiCallOut
             title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
@@ -161,13 +171,11 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             <p>
               {i18n.translate('xpack.observability.alertsDisclaimerText', {
                 defaultMessage:
-                  'This page shows an experimental alerting view. The data shown here will probably not be an accurate representation of alerts. A non-experimental list of alerts is available in the Alerts and Actions settings in Stack Management.',
+                  'This page shows an experimental list of alerts. The data might not be accurate. All alerts are available in the ',
               })}
-            </p>
-            <p>
               <EuiLink href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}>
                 {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'Alerts and Actions',
+                  defaultMessage: 'Rules and Connectors settings.',
                 })}
               </EuiLink>
             </p>
@@ -175,37 +183,37 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
+            dynamicIndexPatterns={dynamicIndexPatternsAsyncState.value ?? NO_INDEX_PATTERNS}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             query={kuery}
-            onQueryChange={({ dateRange, query }) => {
-              const nextSearchParams = new URLSearchParams(history.location.search);
-
-              nextSearchParams.set('rangeFrom', dateRange.from);
-              nextSearchParams.set('rangeTo', dateRange.to);
-              nextSearchParams.set('kuery', query ?? '');
-
-              history.push({
-                ...history.location,
-                search: nextSearchParams.toString(),
-              });
-            }}
+            onQueryChange={onQueryChange}
           />
         </EuiFlexItem>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <StatusFilter status={status} onChange={setStatusFilter} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <AlertsTable items={topAlerts ?? []} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <WorkflowStatusFilter status={workflowStatus} onChange={setWorkflowStatusFilter} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <AlertsTableTGrid
+            indexNames={indexNames}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            kuery={kuery}
+            workflowStatus={workflowStatus}
+            setRefetch={setRefetch}
+            addToQuery={addToQuery}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageTemplate>
+    </ObservabilityPageTemplate>
   );
 }
+
+const NO_INDEX_NAMES: string[] = [];
+const NO_INDEX_PATTERNS: IndexPatternBase[] = [];

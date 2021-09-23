@@ -16,6 +16,7 @@ import { render } from '../../../../utils/test_helper';
 import { UXSection } from './';
 import { response } from './mock_data/ux.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
+import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -27,21 +28,22 @@ jest.mock('react-router-dom', () => ({
 describe('UXSection', () => {
   beforeAll(() => {
     jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
-      hasData: {
+      hasDataMap: {
         ux: {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          hasData: { hasData: true, serviceName: 'elastic-co-frontend' },
+          hasData: true,
+          serviceName: 'elastic-co-frontend',
         },
       },
     } as HasDataContextValue);
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: ({
+      core: {
         uiSettings: { get: jest.fn() },
         http: { basePath: { prepend: jest.fn() } },
-      } as unknown) as CoreStart,
+      } as unknown as CoreStart,
       appMountParameters: {} as AppMountParameters,
-      config: { unsafe: { alertingExperience: { enabled: true } } },
-      plugins: ({
+      config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
+      plugins: {
         data: {
           query: {
             timefilter: {
@@ -54,8 +56,9 @@ describe('UXSection', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPublicPluginsStart,
+      } as unknown as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+      ObservabilityPageTemplate: KibanaPageTemplate,
     }));
   });
   it('renders with core web vitals', () => {

@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiLink,
   EuiCallOut,
-  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,6 +25,7 @@ import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
+import { getTags } from '../utils';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
@@ -56,13 +56,8 @@ const confirmModalOptionsDelete = {
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const {
-      uiSettings,
-      indexPatternManagementStart,
-      overlays,
-      chrome,
-      data,
-    } = useKibana<IndexPatternManagmentContext>().services;
+    const { uiSettings, overlays, chrome, data } =
+      useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
@@ -78,13 +73,8 @@ export const EditIndexPattern = withRouter(
     }, [indexPattern]);
 
     useEffect(() => {
-      const indexPatternTags =
-        indexPatternManagementStart.list.getIndexPatternTags(
-          indexPattern,
-          indexPattern.id === defaultIndex
-        ) || [];
-      setTags(indexPatternTags);
-    }, [defaultIndex, indexPattern, indexPatternManagementStart.list]);
+      setTags(getTags(indexPattern, indexPattern.id === defaultIndex));
+    }, [defaultIndex, indexPattern]);
 
     const setDefaultPattern = useCallback(() => {
       uiSettings.set('defaultIndex', indexPattern.id);
@@ -94,7 +84,7 @@ export const EditIndexPattern = withRouter(
     const removePattern = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
-          const indexPatterns = await data.indexPatterns.getIdsWithTitle();
+          const indexPatterns = await data.dataViews.getIdsWithTitle();
           uiSettings.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;
@@ -105,7 +95,7 @@ export const EditIndexPattern = withRouter(
           }
         }
         if (indexPattern.id) {
-          Promise.resolve(data.indexPatterns.delete(indexPattern.id)).then(function () {
+          Promise.resolve(data.dataViews.delete(indexPattern.id)).then(function () {
             history.push('');
           });
         }
@@ -145,15 +135,13 @@ export const EditIndexPattern = withRouter(
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     return (
-      <EuiPanel paddingSize={'l'}>
-        <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
-          <IndexHeader
-            indexPattern={indexPattern}
-            setDefault={setDefaultPattern}
-            deleteIndexPatternClick={removePattern}
-            defaultIndex={defaultIndex}
-          />
-          <EuiSpacer size="s" />
+      <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
+        <IndexHeader
+          indexPattern={indexPattern}
+          setDefault={setDefaultPattern}
+          deleteIndexPatternClick={removePattern}
+          defaultIndex={defaultIndex}
+        >
           {showTagsSection && (
             <EuiFlexGroup wrap>
               {Boolean(indexPattern.timeFieldName) && (
@@ -193,19 +181,19 @@ export const EditIndexPattern = withRouter(
               </EuiCallOut>
             </>
           )}
-          <EuiSpacer />
-          <Tabs
-            indexPattern={indexPattern}
-            saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
-            fields={fields}
-            history={history}
-            location={location}
-            refreshFields={() => {
-              setFields(indexPattern.getNonScriptedFields());
-            }}
-          />
-        </div>
-      </EuiPanel>
+        </IndexHeader>
+        <EuiSpacer />
+        <Tabs
+          indexPattern={indexPattern}
+          saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
+          fields={fields}
+          history={history}
+          location={location}
+          refreshFields={() => {
+            setFields(indexPattern.getNonScriptedFields());
+          }}
+        />
+      </div>
     );
   }
 );

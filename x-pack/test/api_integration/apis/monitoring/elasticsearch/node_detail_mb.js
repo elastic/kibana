@@ -16,7 +16,8 @@ export default function ({ getService }) {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 
-    const archive = 'monitoring/singlecluster_three_nodes_shard_relocation_mb';
+    const archive =
+      'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation_mb';
     const timeRange = {
       min: '2017-10-05T20:31:48.000Z',
       max: '2017-10-05T20:35:12.000Z',

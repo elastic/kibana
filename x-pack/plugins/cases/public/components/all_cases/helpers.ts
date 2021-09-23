@@ -26,22 +26,20 @@ export const isIndividual = (theCase: Case | SubCase | null | undefined) =>
 
 export const getSubCasesStatusCountsBadges = (
   subCases: SubCase[]
-): Array<{ name: CaseStatuses; color: string; count: number }> => {
-  return [
-    {
-      name: CaseStatuses.open,
-      color: statuses[CaseStatuses.open].color,
-      count: filter({ status: CaseStatuses.open }, subCases).length,
-    },
-    {
-      name: CaseStatuses['in-progress'],
-      color: statuses[CaseStatuses['in-progress']].color,
-      count: filter({ status: CaseStatuses['in-progress'] }, subCases).length,
-    },
-    {
-      name: CaseStatuses.closed,
-      color: statuses[CaseStatuses.closed].color,
-      count: filter({ status: CaseStatuses.closed }, subCases).length,
-    },
-  ];
-};
+): Array<{ name: CaseStatuses; color: string; count: number }> => [
+  {
+    color: statuses[CaseStatuses.open].color,
+    count: filter({ status: CaseStatuses.open }, subCases).length,
+    name: CaseStatuses.open,
+  },
+  {
+    color: statuses[CaseStatuses['in-progress']].color,
+    count: filter({ status: CaseStatuses['in-progress'] }, subCases).length,
+    name: CaseStatuses['in-progress'],
+  },
+  {
+    color: statuses[CaseStatuses.closed].color,
+    count: filter({ status: CaseStatuses.closed }, subCases).length,
+    name: CaseStatuses.closed,
+  },
+];

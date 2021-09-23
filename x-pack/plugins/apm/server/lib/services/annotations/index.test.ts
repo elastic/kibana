@@ -8,7 +8,7 @@
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../../typings/elasticsearch';
+} from '../../../../../../../src/core/types/elasticsearch';
 import {
   inspectSearchParams,
   SearchParamsMock,
@@ -95,7 +95,7 @@ describe('getServiceAnnotations', () => {
           }),
         {
           mockResponse: () =>
-            (responses.shift() as unknown) as ESSearchResponse<
+            responses.shift() as unknown as ESSearchResponse<
               unknown,
               ESSearchRequest,
               {

@@ -6,7 +6,7 @@
  */
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { DataType, ValueOf } from '../../types';
+import type { MonitoringType, ValueOf } from '../../types';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -20,8 +20,11 @@ export interface NewAgentPolicy {
   is_default?: boolean;
   is_default_fleet_server?: boolean; // Optional when creating a policy
   is_managed?: boolean; // Optional when creating a policy
-  monitoring_enabled?: Array<ValueOf<DataType>>;
+  monitoring_enabled?: MonitoringType;
+  unenroll_timeout?: number;
   is_preconfigured?: boolean;
+  data_output_id?: string;
+  monitoring_output_id?: string;
 }
 
 export interface AgentPolicy extends NewAgentPolicy {
@@ -61,21 +64,23 @@ export interface FullAgentPolicyInput {
 }
 
 export interface FullAgentPolicyOutputPermissions {
-  [role: string]: {
-    cluster: string[];
-    indices: Array<{
+  [packagePolicyName: string]: {
+    cluster?: string[];
+    indices?: Array<{
       names: string[];
       privileges: string[];
     }>;
   };
 }
 
+export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'api_key'> & {
+  [key: string]: any;
+};
+
 export interface FullAgentPolicy {
   id: string;
   outputs: {
-    [key: string]: Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'api_key'> & {
-      [key: string]: any;
-    };
+    [key: string]: FullAgentPolicyOutput;
   };
   output_permissions?: {
     [output: string]: FullAgentPolicyOutputPermissions;
@@ -138,4 +143,8 @@ export interface FleetServerPolicy {
    * True when this policy is the default policy to start Fleet Server
    */
   default_fleet_server: boolean;
+  /**
+   * Auto unenroll any Elastic Agents which have not checked in for this many seconds
+   */
+  unenroll_timeout?: number;
 }

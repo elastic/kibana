@@ -42,7 +42,7 @@ export const getFilteredMetricAgg = () => {
     getValue(agg, bucket) {
       const customMetric = agg.getParam('customMetric');
       const customBucket = agg.getParam('customBucket');
-      return customMetric.getValue(bucket[customBucket.id]);
+      return bucket && bucket[customBucket.id] && customMetric.getValue(bucket[customBucket.id]);
     },
     getValueBucketPath(agg) {
       const customBucket = agg.getParam('customBucket');

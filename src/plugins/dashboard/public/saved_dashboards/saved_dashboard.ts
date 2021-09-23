@@ -14,6 +14,7 @@ import { createDashboardEditUrl } from '../dashboard_constants';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
 
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
+import { DashboardOptions } from '../types';
 
 export interface DashboardSavedObject extends SavedObject {
   id?: string;
@@ -97,9 +98,10 @@ export function createSavedDashboardClass(
           panelsJSON: '[]',
           optionsJSON: JSON.stringify({
             // for BWC reasons we can't default dashboards that already exist without this setting to true.
-            useMargins: !id,
+            useMargins: true,
+            syncColors: false,
             hidePanelTitles: false,
-          }),
+          } as DashboardOptions),
           version: 1,
           timeRestore: false,
           timeTo: undefined,
@@ -125,5 +127,5 @@ export function createSavedDashboardClass(
 
   // Unfortunately this throws a typescript error without the casting.  I think it's due to the
   // convoluted way SavedObjects are created.
-  return (SavedDashboard as unknown) as new (id: string) => DashboardSavedObject;
+  return SavedDashboard as unknown as new (id: string) => DashboardSavedObject;
 }

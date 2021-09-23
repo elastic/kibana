@@ -8,7 +8,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { SUPPORTED_CONNECTORS } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
@@ -24,13 +25,11 @@ import { ActionConnectorTableItem } from '../../../../triggers_actions_ui/public
 import { SectionWrapper } from '../wrappers';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import {
-  getConnectorById,
-  getNoneConnector,
-  normalizeActionConnector,
-  normalizeCaseConnector,
-} from './utils';
+import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
 import * as i18n from './translations';
+import { Owner } from '../../types';
+import { OwnerProvider } from '../owner_context';
+import { getConnectorById } from '../utils';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -50,11 +49,11 @@ const FormWrapper = styled.div`
   `}
 `;
 
-export interface ConfigureCasesProps {
+export interface ConfigureCasesProps extends Owner {
   userCanCrud: boolean;
 }
 
-const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud }) => {
+const ConfigureCasesComponent: React.FC<Omit<ConfigureCasesProps, 'owner'>> = ({ userCanCrud }) => {
   const { triggersActionsUi } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
@@ -96,9 +95,10 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
     setEditFlyoutVisibility(true);
   }, []);
 
-  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
-    setAddFlyoutVisibility,
-  ]);
+  const onCloseAddFlyout = useCallback(
+    () => setAddFlyoutVisibility(false),
+    [setAddFlyoutVisibility]
+  );
 
   const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), []);
 
@@ -194,7 +194,17 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
             iconType="help"
             data-test-subj="configure-cases-warning-callout"
           >
-            {i18n.WARNING_NO_CONNECTOR_MESSAGE}
+            <FormattedMessage
+              defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+              id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+              values={{
+                appropriateLicense: (
+                  <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                    {i18n.LINK_APPROPRIATE_LICENSE}
+                  </EuiLink>
+                ),
+              }}
+            />
           </EuiCallOut>
         </SectionWrapper>
       )}
@@ -207,6 +217,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
       </SectionWrapper>
       <SectionWrapper>
         <Connectors
+          actionTypes={actionTypes}
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           handleShowEditFlyout={onClickUpdateConnector}
@@ -223,6 +234,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
   );
 };
 
-export const ConfigureCases = React.memo(ConfigureCasesComponent);
+export const ConfigureCases: React.FC<ConfigureCasesProps> = React.memo((props) => {
+  return (
+    <OwnerProvider owner={props.owner}>
+      <ConfigureCasesComponent {...props} />
+    </OwnerProvider>
+  );
+});
+
 // eslint-disable-next-line import/no-default-export
 export default ConfigureCases;

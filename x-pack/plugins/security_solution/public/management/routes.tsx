@@ -6,19 +6,23 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { MANAGEMENT_PATH } from '../../common/constants';
 import { ManagementContainer } from './pages';
-import { NotFoundPage } from '../app/404';
+import { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
 
 /**
  * Returns the React Router Routes for the management area
  */
-export const ManagementRoutes = () => (
+const ManagementRoutes = () => (
   <CurrentLicense>
-    <Switch>
-      <Route path="/" component={ManagementContainer} />
-      <Route render={() => <NotFoundPage />} />
-    </Switch>
+    <ManagementContainer />
   </CurrentLicense>
 );
+
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: MANAGEMENT_PATH,
+    render: ManagementRoutes,
+  },
+];

@@ -58,10 +58,10 @@ export default function ({ getService }: FtrProviderContext) {
         }
       }
 
-      await esArchiver.load('fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     it('should return a 403 if user lacks fleet-write permissions', async () => {

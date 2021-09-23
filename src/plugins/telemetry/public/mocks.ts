@@ -22,18 +22,19 @@ import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } fro
 export interface TelemetryServiceMockOptions {
   reportOptInStatusChange?: boolean;
   currentKibanaVersion?: string;
+  isScreenshotMode?: boolean;
   config?: Partial<TelemetryPluginConfig>;
 }
 
 export function mockTelemetryService({
   reportOptInStatusChange,
   currentKibanaVersion = 'mockKibanaVersion',
+  isScreenshotMode = false,
   config: configOverride = {},
 }: TelemetryServiceMockOptions = {}) {
   const config = {
     enabled: true,
-    url: 'http://localhost',
-    optInStatusUrl: 'http://localhost',
+    sendUsageTo: 'staging' as const,
     sendUsageFrom: 'browser' as const,
     optIn: true,
     banner: true,
@@ -47,6 +48,7 @@ export function mockTelemetryService({
     config,
     http: httpServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    isScreenshotMode,
     currentKibanaVersion,
     reportOptInStatusChange,
   });

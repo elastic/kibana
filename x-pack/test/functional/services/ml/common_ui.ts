@@ -12,14 +12,19 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
 
-interface SetValueOptions {
+export interface SetValueOptions {
   clearWithKeyboard?: boolean;
   typeCharByChar?: boolean;
 }
 
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;
 
-export function MachineLearningCommonUIProvider({ getService }: FtrProviderContext) {
+export function MachineLearningCommonUIProvider({
+  getPageObjects,
+  getService,
+}: FtrProviderContext) {
+  const PageObjects = getPageObjects(['spaceSelector']);
+
   const canvasElement = getService('canvasElement');
   const log = getService('log');
   const retry = getService('retry');
@@ -98,14 +103,6 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       });
     },
 
-    async assertKibanaHomeFileDataVisLinkExists() {
-      await testSubjects.existOrFail('homeSynopsisLinkml_file_data_visualizer');
-    },
-
-    async assertKibanaHomeFileDataVisLinkNotExists() {
-      await testSubjects.missingOrFail('homeSynopsisLinkml_file_data_visualizer');
-    },
-
     async assertRadioGroupValue(testSubject: string, expectedValue: string) {
       const assertRadioGroupValue = await testSubjects.find(testSubject);
       const input = await assertRadioGroupValue.findByCssSelector(':checked');
@@ -121,6 +118,25 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
       await label.click();
       await this.assertRadioGroupValue(testSubject, value);
+    },
+
+    async assertSelectSelectedOptionVisibleText(testSubject: string, visibleText: string) {
+      // Need to validate the selected option text, as the option value may be different to the visible text.
+      const selectControl = await testSubjects.find(testSubject);
+      const selectedValue = await selectControl.getAttribute('value');
+      const selectedOption = await selectControl.findByCssSelector(`[value="${selectedValue}"]`);
+      const selectedOptionText = await selectedOption.getVisibleText();
+      expect(selectedOptionText).to.eql(
+        visibleText,
+        `Expected selected option visible text to be '${visibleText}' (got '${selectedOptionText}')`
+      );
+    },
+
+    async selectSelectValueByVisibleText(testSubject: string, visibleText: string) {
+      // Cannot use await testSubjects.selectValue as the option value may be different to the text.
+      const selectControl = await testSubjects.find(testSubject);
+      await selectControl.type(visibleText);
+      await this.assertSelectSelectedOptionVisibleText(testSubject, visibleText);
     },
 
     async setMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
@@ -225,6 +241,11 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       channelTolerance = 10,
       valueTolerance = 10
     ) {
+      if (process.env.TEST_CLOUD) {
+        log.warning('Not running color assertions in cloud');
+        return;
+      }
+
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail(dataTestSubj);
 
@@ -267,6 +288,26 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       await this.ensurePagePopupOpen(testSubj);
       await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
       await this.assertRowsNumberPerPage(testSubj, rowsNumber);
+    },
+
+    async getEuiDescriptionListDescriptionFromTitle(testSubj: string, title: string) {
+      const subj = await testSubjects.find(testSubj);
+      const titles = await subj.findAllByTagName('dt');
+      const descriptions = await subj.findAllByTagName('dd');
+
+      for (let i = 0; i < titles.length; i++) {
+        const titleText = (await titles[i].parseDomContent()).html();
+        if (titleText === title) {
+          return (await descriptions[i].parseDomContent()).html();
+        }
+      }
+      return null;
+    },
+
+    async changeToSpace(spaceId: string) {
+      await PageObjects.spaceSelector.openSpacesNav();
+      await PageObjects.spaceSelector.goToSpecificSpace(spaceId);
+      await PageObjects.spaceSelector.expectHomePage(spaceId);
     },
   };
 }

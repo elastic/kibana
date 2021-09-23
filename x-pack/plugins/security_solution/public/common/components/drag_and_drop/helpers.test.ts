@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import { DropResult } from 'react-beautiful-dnd';
+import { getTimelineIdFromColumnDroppableId } from '../../../../../timelines/public';
 
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 
@@ -33,7 +34,6 @@ import {
   getDroppableId,
   getFieldIdFromDraggable,
   getProviderIdFromDraggable,
-  getTimelineIdFromColumnDroppableId,
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
   providerWasDroppedOnTimeline,
@@ -655,6 +655,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: aggregatableAllowedType,
           fieldName: aggregatableAllowedType.name,
+          hideTopN: false,
         })
       ).toBe(true);
     });
@@ -664,6 +665,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: undefined,
           fieldName: 'signal.rule.name',
+          hideTopN: false,
         })
       ).toBe(true);
     });
@@ -678,6 +680,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: nonAggregatableAllowedType,
           fieldName: nonAggregatableAllowedType.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -692,6 +695,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: aggregatableNotAllowedType,
           fieldName: aggregatableNotAllowedType.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -703,6 +707,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: missingAggregatable,
           fieldName: missingAggregatable.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -714,6 +719,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: missingType,
           fieldName: missingType.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -723,6 +729,17 @@ describe('helpers', () => {
         allowTopN({
           browserField: undefined,
           fieldName: 'non-allowlisted',
+          hideTopN: false,
+        })
+      ).toBe(false);
+    });
+
+    test('it returns false when hideTopN is true', () => {
+      expect(
+        allowTopN({
+          browserField: aggregatableAllowedType,
+          fieldName: aggregatableAllowedType.name,
+          hideTopN: true, // <-- the Top N action shall not be shown for this (otherwise valid) field
         })
       ).toBe(false);
     });

@@ -47,10 +47,8 @@ export const useTimelineKpis = ({
   const [timelineKpiRequest, setTimelineKpiRequest] = useState<TimelineRequestBasicOptions | null>(
     null
   );
-  const [
-    timelineKpiResponse,
-    setTimelineKpiResponse,
-  ] = useState<TimelineKpiStrategyResponse | null>(null);
+  const [timelineKpiResponse, setTimelineKpiResponse] =
+    useState<TimelineKpiStrategyResponse | null>(null);
   const { addError, addWarning } = useAppToasts();
 
   const timelineKpiSearch = useCallback(
@@ -64,7 +62,7 @@ export const useTimelineKpis = ({
 
         searchSubscription$.current = data.search
           .search<TimelineRequestBasicOptions, TimelineKpiStrategyResponse>(request, {
-            strategy: 'securitySolutionTimelineSearchStrategy',
+            strategy: 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({

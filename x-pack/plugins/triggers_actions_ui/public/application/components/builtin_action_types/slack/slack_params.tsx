@@ -49,7 +49,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
           defaultMessage: 'Message',
         }
       )}
-      errors={errors.message as string[]}
+      errors={(errors.message ?? []) as string[]}
     />
   );
 };

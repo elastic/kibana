@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isJavaAgentName, isRumAgentName } from './agent_name';
+import { isJavaAgentName, isRumAgentName, isIosAgentName } from './agent_name';
 
 describe('agent name helpers', () => {
   describe('isJavaAgentName', () => {
@@ -14,8 +14,15 @@ describe('agent name helpers', () => {
         expect(isJavaAgentName('java')).toEqual(true);
       });
     });
-    describe('when the agent name is not java', () => {
+
+    describe('when the agent name is opentelemetry/java', () => {
       it('returns true', () => {
+        expect(isJavaAgentName('opentelemetry/java')).toEqual(true);
+      });
+    });
+
+    describe('when the agent name is not java', () => {
+      it('returns false', () => {
         expect(isJavaAgentName('not java')).toEqual(false);
       });
     });
@@ -40,9 +47,35 @@ describe('agent name helpers', () => {
       });
     });
 
-    describe('when the agent name something else', () => {
+    describe('when the agent name is something else', () => {
+      it('returns false', () => {
+        expect(isRumAgentName('not rum')).toEqual(false);
+      });
+    });
+  });
+
+  describe('isIosAgentName', () => {
+    describe('when the agent name is js-base', () => {
       it('returns true', () => {
-        expect(isRumAgentName('java')).toEqual(false);
+        expect(isIosAgentName('iOS/swift')).toEqual(true);
+      });
+    });
+
+    describe('when the agent name is rum-js', () => {
+      it('returns true', () => {
+        expect(isIosAgentName('ios/swift')).toEqual(true);
+      });
+    });
+
+    describe('when the agent name is opentelemetry/swift', () => {
+      it('returns true', () => {
+        expect(isIosAgentName('opentelemetry/swift')).toEqual(true);
+      });
+    });
+
+    describe('when the agent name is something else', () => {
+      it('returns false', () => {
+        expect(isIosAgentName('not ios')).toEqual(false);
       });
     });
   });

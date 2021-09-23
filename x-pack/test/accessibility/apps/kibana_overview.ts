@@ -11,16 +11,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
 
-  describe('Kibana overview', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/98463
+  describe.skip('Kibana overview', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('kibanaOverview');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     it('Kibana overview', async () => {

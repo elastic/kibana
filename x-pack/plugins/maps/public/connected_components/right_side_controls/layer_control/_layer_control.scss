@@ -9,6 +9,12 @@
 
 .mapLayerControl__addLayerButton {
   flex-shrink: 0;
+
+  // overrides disabled color that is transparent and doesn't work well on top of the map
+  &.euiButton-isDisabled {
+    // sass-lint:disable-block no-important
+    background-color: $euiColorLightShade !important;
+  }
 }
 
 .mapLayerControl__addLayerButton,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import BroadcastChannel from 'broadcast-channel';
+import { enforceOptions } from 'broadcast-channel';
 import { Observable } from 'rxjs';
 
 import type { CoreSetup } from 'src/core/public';
@@ -19,14 +19,13 @@ import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
 import type { PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
-import { SessionTimeout } from './session';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
-    BroadcastChannel.enforceOptions({ type: 'simulate' });
+    enforceOptions({ type: 'simulate' });
   });
   afterAll(() => {
-    BroadcastChannel.enforceOptions(null);
+    enforceOptions(null);
   });
 
   describe('#setup', () => {
@@ -43,16 +42,14 @@ describe('Security Plugin', () => {
           }
         )
       ).toEqual({
-        __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
-          getType: expect.any(Function),
           getFeatures: expect.any(Function),
+          hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
         },
-        sessionTimeout: expect.any(SessionTimeout),
       });
     });
 
@@ -77,8 +74,8 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
-          getType: expect.any(Function),
           getFeatures: expect.any(Function),
+          hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
         },
         management: managementSetupMock,
@@ -103,6 +100,12 @@ describe('Security Plugin', () => {
           features: {} as FeaturesPluginStart,
         })
       ).toEqual({
+        uiApi: {
+          components: {
+            getChangePassword: expect.any(Function),
+            getPersonalInfo: expect.any(Function),
+          },
+        },
         authc: {
           getCurrentUser: expect.any(Function),
           areAPIKeysEnabled: expect.any(Function),

@@ -22,12 +22,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
     'savedObjects',
   ]);
-
-  describe('dashboard time zones', function () {
+  // Legacy imports are no longer supported https://github.com/elastic/kibana/issues/103921
+  describe.skip('dashboard time zones', function () {
     this.tags('includeFirefox');
 
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });

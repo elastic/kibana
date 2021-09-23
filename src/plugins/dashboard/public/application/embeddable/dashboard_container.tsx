@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient } from 'src/core/public';
+import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 
 import { UiActionsStart } from '../../services/ui_actions';
@@ -20,7 +21,6 @@ import {
   Container,
   PanelState,
   IEmbeddable,
-  ContainerInput,
   EmbeddableInput,
   EmbeddableStart,
   EmbeddableOutput,
@@ -36,30 +36,13 @@ import {
   KibanaReactContextValue,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
-import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
-import { DashboardCapabilities } from '../types';
+import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
+import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 
-export interface DashboardContainerInput extends ContainerInput {
-  dashboardCapabilities?: DashboardCapabilities;
-  refreshConfig?: RefreshInterval;
-  isEmbeddedExternally?: boolean;
-  isFullScreenMode: boolean;
-  expandedPanelId?: string;
-  timeRange: TimeRange;
-  description?: string;
-  useMargins: boolean;
-  syncColors?: boolean;
-  viewMode: ViewMode;
-  filters: Filter[];
-  title: string;
-  query: Query;
-  panels: {
-    [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
-  };
-}
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
+  presentationUtil: PresentationUtilPluginStart;
   SavedObjectFinder: React.ComponentType<any>;
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
@@ -69,7 +52,6 @@ export interface DashboardContainerServices {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   http: CoreStart['http'];
-  presentationUtil: PresentationUtilPluginStart;
 }
 
 interface IndexSignature {
@@ -86,17 +68,18 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  executionContext?: KibanaExecutionContext;
 }
 
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
 export type DashboardReactContext = KibanaReactContext<DashboardContainerServices>;
 
-const defaultCapabilities: DashboardCapabilities = {
+const defaultCapabilities: DashboardAppCapabilities = {
   show: false,
   createNew: false,
   saveQuery: false,
   createShortUrl: false,
-  hideWriteControls: true,
+  showWriteControls: false,
   mapsCapabilities: { save: false },
   visualizeCapabilities: { save: false },
   storeSearchSession: true,
@@ -104,7 +87,6 @@ const defaultCapabilities: DashboardCapabilities = {
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
-  public switchViewMode?: (newViewMode: ViewMode) => void;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -134,7 +116,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     partial: Partial<TEmbeddableInput> = {}
   ): DashboardPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
-    return createPanelState(panelState, this.input.panels);
+    const { newPanel } = createPanelState(panelState, this.input.panels);
+    return newPanel;
   }
 
   public showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacementArgs>(
@@ -155,7 +138,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         ],
       },
     } as PanelState<EmbeddableInput>;
-    const placeholderPanelState = createPanelState(
+
+    const { otherPanels, newPanel: placeholderPanelState } = createPanelState(
       originalPanelState,
       this.input.panels,
       placementMethod,
@@ -164,7 +148,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     this.updateInput({
       panels: {
-        ...this.input.panels,
+        ...otherPanels,
         [placeholderPanelState.explicitInput.id]: placeholderPanelState,
       },
     });
@@ -248,7 +232,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <this.services.presentationUtil.ContextProvider>
-            <DashboardViewport container={this} switchViewMode={this.switchViewMode} />
+            <DashboardViewport container={this} />
           </this.services.presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </I18nProvider>,
@@ -266,6 +250,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       filters,
       searchSessionId,
       syncColors,
+      executionContext,
     } = this.input;
     return {
       filters,
@@ -277,6 +262,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       id,
       searchSessionId,
       syncColors,
+      executionContext,
     };
   }
 }

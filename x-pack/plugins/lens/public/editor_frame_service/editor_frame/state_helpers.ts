@@ -7,33 +7,37 @@
 
 import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
+import memoizeOne from 'memoize-one';
 import {
   Datasource,
+  DatasourceMap,
   DatasourcePublicAPI,
   FramePublicAPI,
   InitializationOptions,
   Visualization,
   VisualizationDimensionGroupConfig,
+  VisualizationMap,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
-import { getActiveDatasourceIdFromDoc } from './state_management';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { ErrorMessage } from '../types';
 import {
   getMissingCurrentDatasource,
   getMissingIndexPatterns,
   getMissingVisualizationTypeError,
 } from '../error_helper';
+import { DatasourceStates } from '../../state_management';
 
 export async function initializeDatasources(
-  datasourceMap: Record<string, Datasource>,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
+  datasourceMap: DatasourceMap,
+  datasourceStates: DatasourceStates,
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext,
   options?: InitializationOptions
 ) {
-  const states: Record<string, { isLoading: boolean; state: unknown }> = {};
+  const states: DatasourceStates = {};
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId]) {
@@ -53,9 +57,9 @@ export async function initializeDatasources(
   return states;
 }
 
-export function createDatasourceLayers(
-  datasourceMap: Record<string, Datasource>,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>
+export const createDatasourceLayers = memoizeOne(function createDatasourceLayers(
+  datasourceStates: DatasourceStates,
+  datasourceMap: DatasourceMap
 ) {
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
   Object.keys(datasourceMap)
@@ -73,11 +77,11 @@ export function createDatasourceLayers(
       });
     });
   return datasourceLayers;
-}
+});
 
 export async function persistedStateToExpression(
-  datasources: Record<string, Datasource>,
-  visualizations: Record<string, Visualization>,
+  datasourceMap: DatasourceMap,
+  visualizations: VisualizationMap,
   doc: Document
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {
@@ -95,7 +99,7 @@ export async function persistedStateToExpression(
   }
   const visualization = visualizations[visualizationType!];
   const datasourceStates = await initializeDatasources(
-    datasources,
+    datasourceMap,
     Object.fromEntries(
       Object.entries(persistedDatasourceStates).map(([id, state]) => [
         id,
@@ -107,7 +111,7 @@ export async function persistedStateToExpression(
     { isFullEditor: false }
   );
 
-  const datasourceLayers = createDatasourceLayers(datasources, datasourceStates);
+  const datasourceLayers = createDatasourceLayers(datasourceStates, datasourceMap);
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
@@ -118,7 +122,7 @@ export async function persistedStateToExpression(
   }
 
   const indexPatternValidation = validateRequiredIndexPatterns(
-    datasources[datasourceId],
+    datasourceMap[datasourceId],
     datasourceStates[datasourceId]
   );
 
@@ -130,7 +134,7 @@ export async function persistedStateToExpression(
   }
 
   const validationResult = validateDatasourceAndVisualization(
-    datasources[datasourceId],
+    datasourceMap[datasourceId],
     datasourceStates[datasourceId].state,
     visualization,
     visualizationState,
@@ -143,7 +147,7 @@ export async function persistedStateToExpression(
       description,
       visualization,
       visualizationState,
-      datasourceMap: datasources,
+      datasourceMap,
       datasourceStates,
       datasourceLayers,
     }),

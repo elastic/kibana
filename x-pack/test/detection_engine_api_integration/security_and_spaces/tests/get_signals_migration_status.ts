@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../../../plugi
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteSignalsIndex, getIndexNameFromLoad } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -19,18 +19,17 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/99915
-  describe.skip('Signals migration status', () => {
+  describe('Signals migration status', () => {
     let legacySignalsIndexName: string;
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/legacy_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('signals/legacy_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteSignalsIndex(supertest);
     });
 
@@ -59,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it("returns the mappings version and a breakdown of signals' version", async () => {
       const outdatedIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/outdated_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
       const { body } = await supertest
@@ -95,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       ]);
 
-      await esArchiver.unload('signals/outdated_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {

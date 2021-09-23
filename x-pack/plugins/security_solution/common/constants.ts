@@ -7,6 +7,7 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
+import { metadataTransformPattern } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -25,6 +26,7 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
+export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_LISTS_INDEX = '.lists';
 export const DEFAULT_ITEMS_INDEX = '.items';
@@ -43,7 +45,8 @@ export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const DEFAULT_TRANSFORMS = 'securitySolution:transforms';
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
-export const GLOBAL_HEADER_HEIGHT = 98; // px
+export const GLOBAL_HEADER_HEIGHT = 96; // px
+export const GLOBAL_HEADER_HEIGHT_WITH_GLOBAL_BANNER = 128; // px
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
@@ -52,42 +55,80 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
-export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
+export const SECURITY_FEATURE_ID = 'Security';
+export const DEFAULT_SPACE_ID = 'default';
 
 // Document path where threat indicator fields are expected. Fields are used
-// to enrich signals, and are copied to threat.indicator.
+// to enrich signals, and are copied to threat.enrichments.
 export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
-export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
+export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
+export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
+export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
 
 export enum SecurityPageName {
+  administration = 'administration',
+  alerts = 'alerts',
+  case = 'case',
   detections = 'detections',
-  overview = 'overview',
+  endpoints = 'endpoints',
+  eventFilters = 'event_filters',
+  exceptions = 'exceptions',
   hosts = 'hosts',
   network = 'network',
+  overview = 'overview',
+  policies = 'policies',
+  rules = 'rules',
   timelines = 'timelines',
-  case = 'case',
-  administration = 'administration',
+  trustedApps = 'trusted_apps',
+  ueba = 'ueba',
 }
 
-export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
-export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
-export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
-export const APP_NETWORK_PATH = `${APP_PATH}/network`;
-export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
-export const APP_CASES_PATH = `${APP_PATH}/cases`;
-export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
+export const TIMELINES_PATH = '/timelines';
+export const CASES_PATH = '/cases';
+export const OVERVIEW_PATH = '/overview';
+export const DETECTIONS_PATH = '/detections';
+export const ALERTS_PATH = '/alerts';
+export const RULES_PATH = '/rules';
+export const EXCEPTIONS_PATH = '/exceptions';
+export const HOSTS_PATH = '/hosts';
+export const UEBA_PATH = '/ueba';
+export const NETWORK_PATH = '/network';
+export const MANAGEMENT_PATH = '/administration';
+export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints`;
+export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps`;
+export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters`;
 
-export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;
+export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
+export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}`;
+
+export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}`;
+export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}`;
+export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}`;
+
+export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}`;
+export const APP_UEBA_PATH = `${APP_PATH}${UEBA_PATH}`;
+export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}`;
+export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}`;
+export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}`;
+export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}`;
+export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}`;
+export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',
+  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
+];
+
+export const DEFAULT_INDEX_PATTERN_EXPERIMENTAL = [
+  // TODO: Steph/ueba TEMP for testing UEBA data
+  'ml_host_risk_score_*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
@@ -146,7 +187,17 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
 /**
  * Id for the signals alerting type
  */
-export const SIGNALS_ID = `siem.signals`;
+export const SIGNALS_ID = `siem.signals` as const;
+
+/**
+ * IDs for RAC rule types
+ */
+const RULE_TYPE_PREFIX = `siem` as const;
+export const EQL_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.eqlRule` as const;
+export const INDICATOR_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.indicatorRule` as const;
+export const ML_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.mlRule` as const;
+export const QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.queryRule` as const;
+export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as const;
 
 /**
  * Id for the notifications alerting type
@@ -173,6 +224,7 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
+export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
 
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINES_URL = '/api/timelines';
@@ -196,6 +248,9 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
 export const DETECTION_ENGINE_SIGNALS_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration`;
 export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration_status`;
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration`;
+
+export const ALERTS_AS_DATA_URL = '/internal/rac/alerts';
+export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find`;
 
 /**
  * Common naming convention for an unauthenticated user
@@ -221,6 +276,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
   '.pagerduty',
+  '.swimlane',
   '.webhook',
   '.servicenow',
   '.jira',
@@ -235,11 +291,6 @@ if (ENABLE_CASE_CONNECTOR) {
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
 
-/**
- * Histograms for fields named in this list should be displayed with an
- * "All others" bucket, to count events that don't specify a value for
- * the field being counted
- */
 export const showAllOthersBucket: string[] = [
   'destination.ip',
   'event.action',
@@ -258,3 +309,5 @@ export const showAllOthersBucket: string[] = [
  * than use it from here.
  */
 export const ELASTIC_NAME = 'estc';
+
+export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;

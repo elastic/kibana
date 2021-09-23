@@ -14,12 +14,7 @@ import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { cleanKibanaIndices } from './kibana_index';
 
-export function createDeleteIndexStream(
-  client: KibanaClient,
-  stats: Stats,
-  log: ToolingLog,
-  kibanaPluginIds: string[]
-) {
+export function createDeleteIndexStream(client: KibanaClient, stats: Stats, log: ToolingLog) {
   return new Transform({
     readableObjectMode: true,
     writableObjectMode: true,
@@ -29,7 +24,7 @@ export function createDeleteIndexStream(
           const { index } = record.value;
 
           if (index.startsWith('.kibana')) {
-            await cleanKibanaIndices({ client, stats, log, kibanaPluginIds });
+            await cleanKibanaIndices({ client, stats, log });
           } else {
             await deleteIndex({ client, stats, log, index });
           }

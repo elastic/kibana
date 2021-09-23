@@ -7,10 +7,10 @@
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import styled from 'styled-components';
-import { EuiPage, EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from 'kibana/public';
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -32,6 +32,7 @@ import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { UptimeIndexPatternContextProvider } from '../contexts/uptime_index_pattern_context';
 
 export interface UptimeAppColors {
   danger: string;
@@ -61,18 +62,6 @@ export interface UptimeAppProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
 }
-
-const StyledPage = styled(EuiPage)`
-  display: flex;
-  flex-grow: 1;
-  flex-shrink: 0;
-  flex-basis: auto;
-  flex-direction: column;
-
-  > * {
-    flex-shrink: 0;
-  }
-`;
 
 const Application = (props: UptimeAppProps) => {
   const {
@@ -123,6 +112,7 @@ const Application = (props: UptimeAppProps) => {
               data: startPlugins.data,
               lens: startPlugins.lens,
               triggersActionsUi: startPlugins.triggersActionsUi,
+              observability: startPlugins.observability,
             }}
           >
             <Router history={appMountParameters.history}>
@@ -131,15 +121,20 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <StyledPage data-test-subj="uptimeApp">
-                          <RedirectAppLinks application={core.application}>
-                            <main>
-                              <UptimeAlertsFlyoutWrapper />
-                              <PageRouter />
-                              <ActionMenu appMountParameters={appMountParameters} />
-                            </main>
-                          </RedirectAppLinks>
-                        </StyledPage>
+                        <UptimeIndexPatternContextProvider data={startPlugins.data}>
+                          <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
+                            <RedirectAppLinks
+                              className={APP_WRAPPER_CLASS}
+                              application={core.application}
+                            >
+                              <main>
+                                <UptimeAlertsFlyoutWrapper />
+                                <PageRouter />
+                                <ActionMenu appMountParameters={appMountParameters} />
+                              </main>
+                            </RedirectAppLinks>
+                          </div>
+                        </UptimeIndexPatternContextProvider>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>

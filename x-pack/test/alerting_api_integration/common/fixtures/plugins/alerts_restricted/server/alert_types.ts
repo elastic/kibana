@@ -13,23 +13,25 @@ export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerting }: Pick<FixtureSetupDeps, 'alerting'>
 ) {
-  const noopRestrictedAlertType: AlertType<{}, {}, {}, {}, 'default', 'restrictedRecovered'> = {
+  const noopRestrictedAlertType: AlertType<{}, {}, {}, {}, {}, 'default', 'restrictedRecovered'> = {
     id: 'test.restricted-noop',
     name: 'Test: Restricted Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     recoveryActionGroup: { id: 'restrictedRecovered', name: 'Restricted Recovery' },
     async executor() {},
   };
-  const noopUnrestrictedAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
+  const noopUnrestrictedAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.unrestricted-noop',
     name: 'Test: Unrestricted Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {},
   };
   alerting.registerType(noopRestrictedAlertType);

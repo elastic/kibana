@@ -8,22 +8,27 @@
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
-
 import { i18n } from '@kbn/i18n';
-import { IFieldType, IndexPattern } from 'src/plugins/data/public';
-import { GeoJsonProperties } from 'geojson';
+import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
-import { getHttp, getSearchService } from '../../../kibana_services';
+import {
+  getHttp,
+  getSearchService,
+  getSecurityService,
+  getTimeFilter,
+} from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
   hitsToGeoJson,
   isTotalHitsGreaterThan,
   PreIndexedShape,
+  TotalHits,
 } from '../../../../common/elasticsearch_util';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
-
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   ES_GEO_FIELD_TYPE,
@@ -38,18 +43,18 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
-import { loadIndexSettings } from './load_index_settings';
-
+import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-
 import { registerSource } from '../source_registry';
 import {
+  DataRequestMeta,
   ESSearchSourceDescriptor,
+  Timeslice,
   VectorSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
@@ -59,8 +64,34 @@ import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
-import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
+import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
+import {
+  addFeatureToIndex,
+  deleteFeatureFromIndex,
+  getIsDrawLayer,
+  getMatchingIndexes,
+} from './util/feature_edit';
+
+type ESSearchSourceSyncMeta = Pick<
+  ESSearchSourceDescriptor,
+  | 'filterByMapBounds'
+  | 'sortField'
+  | 'sortOrder'
+  | 'scalingType'
+  | 'topHitsSplitField'
+  | 'topHitsSize'
+>;
+
+export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
+  const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
+  return timeRangeBounds.min !== undefined && timeRangeBounds.max !== undefined
+    ? {
+        from: timeRangeBounds.min.valueOf(),
+        to: timeRangeBounds.max.valueOf(),
+      }
+    : undefined;
+}
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -161,17 +192,15 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async getFields(): Promise<IField[]> {
     try {
       const indexPattern = await this.getIndexPattern();
-      const fields: IFieldType[] = indexPattern.fields.filter((field) => {
+      const fields: IndexPatternField[] = indexPattern.fields.filter((field) => {
         // Ensure fielddata is enabled for field.
         // Search does not request _source
         return field.aggregatable;
       });
 
-      return fields.map(
-        (field): IField => {
-          return this.createField({ fieldName: field.name });
-        }
-      );
+      return fields.map((field): IField => {
+        return this.createField({ fieldName: field.name });
+      });
     } catch (error) {
       // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
       return [];
@@ -278,7 +307,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       };
     }
 
-    const topHitsSplitField: IFieldType = getField(indexPattern, topHitsSplitFieldName);
+    const topHitsSplitField: IndexPatternField = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -300,6 +329,18 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         },
       },
     });
+    if (topHitsSplitField.type === 'string') {
+      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(
+        topHitsSplitField,
+        '',
+        indexPattern
+      );
+      entityIsNotEmptyFilter.meta.negate = true;
+      searchSource.setField('filter', [
+        ...(searchSource.getField('filter') as Filter[]),
+        entityIsNotEmptyFilter,
+      ]);
+    }
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
@@ -341,7 +382,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async _getSearchHits(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
-    maxResultWindow: number,
     registerCancelCallback: (callback: () => void) => void
   ) {
     const indexPattern = await this.getIndexPattern();
@@ -353,8 +393,18 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     );
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
+
+    // Use Kibana global time extent instead of timeslice extent when all documents for global time extent can be loaded
+    // to allow for client-side masking of timeslice
+    const searchFiltersWithoutTimeslice = { ...searchFilters };
+    delete searchFiltersWithoutTimeslice.timeslice;
+    const useSearchFiltersWithoutTimeslice =
+      searchFilters.timeslice !== undefined &&
+      (await this.canLoadAllDocuments(searchFiltersWithoutTimeslice, registerCancelCallback));
+
+    const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(
-      searchFilters,
+      useSearchFiltersWithoutTimeslice ? searchFiltersWithoutTimeslice : searchFilters,
       maxResultWindow,
       initialSearchContext
     );
@@ -378,11 +428,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchSessionId: searchFilters.searchSessionId,
     });
 
+    const isTimeExtentForTimeslice =
+      searchFilters.timeslice !== undefined && !useSearchFiltersWithoutTimeslice;
     return {
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
         resultsCount: resp.hits.hits.length,
         areResultsTrimmed: isTotalHitsGreaterThan(resp.hits.total, resp.hits.hits.length),
+        timeExtent: isTimeExtentForTimeslice
+          ? searchFilters.timeslice
+          : timerangeToTimeextent(searchFilters.timeFilters),
+        isTimeExtentForTimeslice,
       },
     };
   }
@@ -390,6 +446,50 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   _isTopHits(): boolean {
     const { scalingType, topHitsSplitField } = this._descriptor;
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
+  }
+
+  async getSourceIndexList(): Promise<string[]> {
+    await this.getIndexPattern();
+    if (!(this.indexPattern && this.indexPattern.title)) {
+      return [];
+    }
+    let success;
+    let matchingIndexes;
+    try {
+      ({ success, matchingIndexes } = await getMatchingIndexes(this.indexPattern.title));
+    } catch (e) {
+      // Fail silently
+    }
+    return success ? matchingIndexes : [];
+  }
+
+  async supportsFeatureEditing(): Promise<boolean> {
+    const matchingIndexes = await this.getSourceIndexList();
+    // For now we only support 1:1 index-pattern:index matches
+    return matchingIndexes.length === 1;
+  }
+
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    if (!(await this._isDrawingIndex())) {
+      return {};
+    }
+    const user = await getSecurityService()?.authc.getCurrentUser();
+    const timestamp = new Date().toISOString();
+    return {
+      created: {
+        ...(user ? { user: user.username } : {}),
+        '@timestamp': timestamp,
+      },
+    };
+  }
+
+  async _isDrawingIndex(): Promise<boolean> {
+    await this.getIndexPattern();
+    if (!(this.indexPattern && this.indexPattern.title)) {
+      return false;
+    }
+    const { success, isDrawingIndex } = await getIsDrawLayer(this.indexPattern.title);
+    return success && isDrawingIndex;
   }
 
   _hasSort(): boolean {
@@ -411,16 +511,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
 
-    const indexSettings = await loadIndexSettings(indexPattern.title);
-
     const { hits, meta } = this._isTopHits()
       ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
-      : await this._getSearchHits(
-          layerName,
-          searchFilters,
-          indexSettings.maxResultWindow,
-          registerCancelCallback
-        );
+      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
 
     const unusedMetaFields = indexPattern.metaFields.filter((metaField) => {
       return !['_id', '_index'].includes(metaField);
@@ -550,11 +643,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async getLeftJoinFields(): Promise<IField[]> {
     const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
-    return getSourceFields(indexPattern.fields).map(
-      (field): IField => {
-        return this.createField({ fieldName: field.name });
-      }
-    );
+    return getSourceFields(indexPattern.fields).map((field): IField => {
+      return this.createField({ fieldName: field.name });
+    });
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
@@ -588,17 +679,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         ? i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
             defaultMessage: `Results limited to first {entityCount} entities of ~{totalEntities}.`,
             values: {
-              entityCount: meta.entityCount,
-              totalEntities: meta.totalEntities,
+              entityCount: meta.entityCount?.toLocaleString(),
+              totalEntities: meta.totalEntities?.toLocaleString(),
             },
           })
         : i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
             defaultMessage: `Found {entityCount} entities.`,
-            values: { entityCount: meta.entityCount },
+            values: { entityCount: meta.entityCount?.toLocaleString() },
           });
       const docsPerEntityMsg = i18n.translate('xpack.maps.esSearch.topHitsSizeMsg', {
         defaultMessage: `Showing top {topHitsSize} documents per entity.`,
-        values: { topHitsSize: this._descriptor.topHitsSize },
+        values: { topHitsSize: this._descriptor.topHitsSize?.toLocaleString() },
       });
 
       return {
@@ -613,7 +704,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {
         tooltipContent: i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
           defaultMessage: `Results limited to first {count} documents.`,
-          values: { count: meta.resultsCount },
+          values: { count: meta.resultsCount?.toLocaleString() },
         }),
         areResultsTrimmed: true,
       };
@@ -622,13 +713,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       tooltipContent: i18n.translate('xpack.maps.esSearch.featureCountMsg', {
         defaultMessage: `Found {count} documents.`,
-        values: { count: meta.resultsCount },
+        values: { count: meta.resultsCount?.toLocaleString() },
       }),
       areResultsTrimmed: false,
     };
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): ESSearchSourceSyncMeta {
     return {
       filterByMapBounds: this._descriptor.filterByMapBounds,
       sortField: this._descriptor.sortField,
@@ -669,6 +760,38 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getLayerName(): string {
     return MVT_SOURCE_LAYER_NAME;
+  }
+
+  async _getEditableIndex(): Promise<string> {
+    const indexList = await this.getSourceIndexList();
+    if (indexList.length === 0) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
+          defaultMessage: `Your index pattern doesn't point to any indices.`,
+        })
+      );
+    }
+    if (indexList.length > 1) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexOverOneLengthEditError', {
+          defaultMessage: `Your index pattern points to multiple indices. Only one index is allowed per index pattern.`,
+        })
+      );
+    }
+    return indexList[0];
+  }
+
+  async addFeature(
+    geometry: Geometry | Position[],
+    defaultFields: Record<string, Record<string, string>>
+  ) {
+    const index = await this._getEditableIndex();
+    await addFeatureToIndex(index, geometry, this.getGeoFieldName(), defaultFields);
+  }
+
+  async deleteFeature(featureId: string) {
+    const index = await this._getEditableIndex();
+    await deleteFeatureFromIndex(index, featureId);
   }
 
   async getUrlTemplateWithMeta(
@@ -724,6 +847,62 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         ? urlTemplate + `&searchSessionId=${searchFilters.searchSessionId}`
         : urlTemplate,
     };
+  }
+
+  async getTimesliceMaskFieldName(): Promise<string | null> {
+    if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
+      return null;
+    }
+
+    const indexPattern = await this.getIndexPattern();
+    return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+  }
+
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
+    if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
+      return true;
+    }
+
+    if (
+      prevMeta.timeExtent === undefined ||
+      prevMeta.areResultsTrimmed === undefined ||
+      prevMeta.areResultsTrimmed
+    ) {
+      return true;
+    }
+
+    const isTimeExtentForTimeslice =
+      prevMeta.isTimeExtentForTimeslice !== undefined ? prevMeta.isTimeExtentForTimeslice : false;
+    if (!timeslice) {
+      return isTimeExtentForTimeslice
+        ? // Previous request only covers timeslice extent. Will need to re-fetch data to cover global time extent
+          true
+        : // Previous request covers global time extent.
+          // No need to re-fetch data since previous request already has data for the entire global time extent.
+          false;
+    }
+
+    const isWithin = isTimeExtentForTimeslice
+      ? timeslice.from >= prevMeta.timeExtent.from && timeslice.to <= prevMeta.timeExtent.to
+      : true;
+    return !isWithin;
+  }
+
+  async canLoadAllDocuments(
+    searchFilters: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void
+  ) {
+    const abortController = new AbortController();
+    registerCancelCallback(() => abortController.abort());
+    const maxResultWindow = await this.getMaxResultWindow();
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    searchSource.setField('trackTotalHits', maxResultWindow + 1);
+    const resp = await searchSource.fetch({
+      abortSignal: abortController.signal,
+      sessionId: searchFilters.searchSessionId,
+      legacyHitsTotal: false,
+    });
+    return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
 }
 

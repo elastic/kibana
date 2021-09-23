@@ -25,7 +25,7 @@ import {
   JiraSecretConfigurationType,
   JiraExecutorResultData,
   ExecutorSubActionGetFieldsByIssueTypeParams,
-  ExecutorSubActionGetIssueTypesParams,
+  ExecutorSubActionCommonFieldsParams,
   ExecutorSubActionGetIssuesParams,
   ExecutorSubActionGetIssueParams,
   ExecutorSubActionGetIncidentParams,
@@ -137,7 +137,7 @@ async function executor(
   }
 
   if (subAction === 'issueTypes') {
-    const getIssueTypesParams = subActionParams as ExecutorSubActionGetIssueTypesParams;
+    const getIssueTypesParams = subActionParams as ExecutorSubActionCommonFieldsParams;
     data = await api.issueTypes({
       externalService,
       params: getIssueTypesParams,
@@ -145,7 +145,8 @@ async function executor(
   }
 
   if (subAction === 'fieldsByIssueType') {
-    const getFieldsByIssueTypeParams = subActionParams as ExecutorSubActionGetFieldsByIssueTypeParams;
+    const getFieldsByIssueTypeParams =
+      subActionParams as ExecutorSubActionGetFieldsByIssueTypeParams;
     data = await api.fieldsByIssueType({
       externalService,
       params: getFieldsByIssueTypeParams,

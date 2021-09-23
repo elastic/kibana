@@ -22,9 +22,9 @@ const ComponentId = 'property-actions';
 const PropertyActionButton = React.memo<PropertyActionButtonProps>(
   ({ disabled = false, onClick, iconType, label }) => (
     <EuiButtonEmpty
-      data-test-subj={`${ComponentId}-${iconType}`}
       aria-label={label}
       color="text"
+      data-test-subj={`${ComponentId}-${iconType}`}
       iconSide="left"
       iconType={iconType}
       isDisabled={disabled}
@@ -56,44 +56,43 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
   }, []);
 
   return (
-    <EuiFlexGroup alignItems="flexStart" data-test-subj={ComponentId} gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          anchorPosition="downRight"
-          ownFocus
-          button={
-            <EuiButtonIcon
-              data-test-subj={`${ComponentId}-ellipses`}
-              aria-label={i18n.ACTIONS_ARIA}
-              iconType="boxesHorizontal"
-              onClick={onButtonClick}
-            />
-          }
-          id="settingsPopover"
-          isOpen={showActions}
-          closePopover={onClosePopover}
-          repositionOnScroll
-        >
-          <EuiFlexGroup
-            alignItems="flexStart"
-            data-test-subj={`${ComponentId}-group`}
-            direction="column"
-            gutterSize="none"
-          >
-            {propertyActions.map((action, key) => (
-              <EuiFlexItem grow={false} key={`${action.label}${key}`}>
-                <PropertyActionButton
-                  disabled={action.disabled}
-                  iconType={action.iconType}
-                  label={action.label}
-                  onClick={() => onClosePopover(action.onClick)}
-                />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPopover
+      anchorPosition="downRight"
+      data-test-subj={ComponentId}
+      ownFocus
+      button={
+        <EuiButtonIcon
+          data-test-subj={`${ComponentId}-ellipses`}
+          aria-label={i18n.ACTIONS_ARIA}
+          iconType="boxesHorizontal"
+          onClick={onButtonClick}
+        />
+      }
+      id="settingsPopover"
+      isOpen={showActions}
+      closePopover={onClosePopover}
+      repositionOnScroll
+    >
+      <EuiFlexGroup
+        alignItems="flexStart"
+        data-test-subj={`${ComponentId}-group`}
+        direction="column"
+        gutterSize="none"
+      >
+        {propertyActions.map((action, key) => (
+          <EuiFlexItem grow={false} key={`${action.label}${key}`}>
+            <span>
+              <PropertyActionButton
+                disabled={action.disabled}
+                iconType={action.iconType}
+                label={action.label}
+                onClick={() => onClosePopover(action.onClick)}
+              />
+            </span>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiPopover>
   );
 });
 

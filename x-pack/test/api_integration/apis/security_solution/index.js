@@ -8,6 +8,7 @@
 export default function ({ loadTestFile }) {
   describe('SecuritySolution Endpoints', () => {
     loadTestFile(require.resolve('./authentications'));
+    loadTestFile(require.resolve('./cases_privileges'));
     loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./hosts'));
     loadTestFile(require.resolve('./host_details'));
@@ -24,6 +25,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./saved_objects/timeline'));
     loadTestFile(require.resolve('./sources'));
     loadTestFile(require.resolve('./timeline'));
+    loadTestFile(require.resolve('./timeline_migrations'));
     loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./uncommon_processes'));
     loadTestFile(require.resolve('./users'));

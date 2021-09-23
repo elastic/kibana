@@ -20,6 +20,7 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/index_pattern_field_editor/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
@@ -237,7 +238,7 @@ const initialState: IndexPatternPrivateState = {
   isFirstExistenceFetch: false,
 };
 
-const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
+const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
 
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {
@@ -251,6 +252,7 @@ describe('IndexPattern Data Panel', () => {
       indexPatternRefs: [],
       existingFields: {},
       data: dataPluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onUpdateIndexPattern: jest.fn(),
       dragDropContext: createMockedDragDropContext(),
@@ -329,7 +331,7 @@ describe('IndexPattern Data Panel', () => {
     function testProps() {
       const setState = jest.fn();
       core.http.post.mockImplementation(async (path) => {
-        const parts = ((path as unknown) as string).split('/');
+        const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
           indexPatternTitle: `${indexPatternTitle}_testtitle`,
@@ -394,7 +396,7 @@ describe('IndexPattern Data Panel', () => {
 
       if (stateChanges || propChanges) {
         await act(async () => {
-          ((inst.setProps as unknown) as (props: unknown) => {})({
+          (inst.setProps as unknown as (props: unknown) => {})({
             ...props,
             ...((propChanges as object) || {}),
             state: {
@@ -559,7 +561,7 @@ describe('IndexPattern Data Panel', () => {
         }
         ++queryCount;
 
-        const parts = ((path as unknown) as string).split('/');
+        const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         const result = Promise.resolve({
           indexPatternTitle,
@@ -578,7 +580,7 @@ describe('IndexPattern Data Panel', () => {
       inst.update();
 
       act(() => {
-        ((inst.setProps as unknown) as (props: unknown) => {})({
+        (inst.setProps as unknown as (props: unknown) => {})({
           ...props,
           dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
         });
@@ -586,7 +588,7 @@ describe('IndexPattern Data Panel', () => {
       });
 
       await act(async () => {
-        ((inst.setProps as unknown) as (props: unknown) => {})({
+        (inst.setProps as unknown as (props: unknown) => {})({
           ...props,
           dateRange: { fromDate: '2019-01-01', toDate: '2020-01-03' },
         });
@@ -662,7 +664,14 @@ describe('IndexPattern Data Panel', () => {
               ...props.indexPatterns['1'],
               fields: [
                 ...props.indexPatterns['1'].fields,
-                { name: '_id', displayName: '_id', meta: true, type: 'string' },
+                {
+                  name: '_id',
+                  displayName: '_id',
+                  meta: true,
+                  type: 'string',
+                  searchable: true,
+                  aggregatable: true,
+                },
               ],
             },
           }}
@@ -847,10 +856,12 @@ describe('IndexPattern Data Panel', () => {
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
         act(() => {
-          (wrapper
-            .find('[data-test-subj="lnsIndexPatternActions-popover"]')
-            .first()
-            .prop('children') as ReactElement).props.items[0].props.onClick();
+          (
+            wrapper
+              .find('[data-test-subj="lnsIndexPatternActions-popover"]')
+              .first()
+              .prop('children') as ReactElement
+          ).props.items[0].props.onClick();
         });
 
         // wait for indx pattern to be loaded
@@ -881,10 +892,12 @@ describe('IndexPattern Data Panel', () => {
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
         act(() => {
-          (wrapper
-            .find('[data-test-subj="lnsIndexPatternActions-popover"]')
-            .first()
-            .prop('children') as ReactElement).props.items[0].props.onClick();
+          (
+            wrapper
+              .find('[data-test-subj="lnsIndexPatternActions-popover"]')
+              .first()
+              .prop('children') as ReactElement
+          ).props.items[0].props.onClick();
         });
         // wait for indx pattern to be loaded
         await act(async () => await new Promise((r) => setTimeout(r, 0)));

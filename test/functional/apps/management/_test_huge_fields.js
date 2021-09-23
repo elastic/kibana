@@ -14,14 +14,14 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/89031
-  describe.skip('test large number of fields', function () {
+  describe('test large number of fields', function () {
     this.tags(['skipCloud']);
 
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'], false);
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.loadIfNeeded('large_fields');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/large_fields');
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('large_fields');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/large_fields');
     });
   });
 }

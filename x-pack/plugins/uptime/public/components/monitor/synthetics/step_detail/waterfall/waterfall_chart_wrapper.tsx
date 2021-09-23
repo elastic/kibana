@@ -81,6 +81,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     );
   }, [flyoutData, isFlyoutVisible, onFlyoutClose]);
 
+  const highestSideBarIndex = Math.max(...series.map((sr) => sr.x));
+
   const renderSidebarItem: RenderItem<SidebarItem> = useCallback(
     (item) => {
       return (
@@ -88,10 +90,11 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
           item={item}
           renderFilterScreenReaderText={hasFilters && !onlyHighlighted}
           onClick={onSidebarClick}
+          highestIndex={highestSideBarIndex}
         />
       );
     },
-    [hasFilters, onlyHighlighted, onSidebarClick]
+    [hasFilters, onlyHighlighted, onSidebarClick, highestSideBarIndex]
   );
 
   useTrackMetric({ app: 'uptime', metric: 'waterfall_chart_view', metricType: METRIC_TYPE.COUNT });

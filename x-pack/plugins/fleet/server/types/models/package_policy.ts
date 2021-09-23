@@ -45,6 +45,7 @@ const PackagePolicyBaseSchema = {
   inputs: schema.arrayOf(
     schema.object({
       type: schema.string(),
+      policy_template: schema.maybe(schema.string()),
       enabled: schema.boolean(),
       keep_enabled: schema.maybe(schema.boolean()),
       vars: schema.maybe(ConfigRecordSchema),
@@ -62,7 +63,19 @@ const PackagePolicyBaseSchema = {
           id: schema.maybe(schema.string()), // BWC < 7.11
           enabled: schema.boolean(),
           keep_enabled: schema.maybe(schema.boolean()),
-          data_stream: schema.object({ dataset: schema.string(), type: schema.string() }),
+          data_stream: schema.object({
+            dataset: schema.string(),
+            type: schema.string(),
+            elasticsearch: schema.maybe(
+              schema.object({
+                privileges: schema.maybe(
+                  schema.object({
+                    indices: schema.maybe(schema.arrayOf(schema.string())),
+                  })
+                ),
+              })
+            ),
+          }),
           vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(
             schema.recordOf(
@@ -77,10 +90,12 @@ const PackagePolicyBaseSchema = {
       ),
     })
   ),
+  vars: schema.maybe(ConfigRecordSchema),
 };
 
 export const NewPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
+  id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
 });
 

@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "GCP Firewall Rule Creation",
   "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:v*.compute.firewalls.insert",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:v*.compute.firewalls.insert\n",
   "references": [
     "https://cloud.google.com/vpc/docs/firewalls"
   ],

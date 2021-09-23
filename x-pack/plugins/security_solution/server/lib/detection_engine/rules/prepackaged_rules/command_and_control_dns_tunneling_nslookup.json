@@ -12,7 +12,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential DNS Tunneling via NsLookup",
-  "query": "event.category:process and event.type:start and process.name:nslookup.exe and process.args:(-querytype=* or -qt=* or -q=* or -type=*)",
+  "query": "event.category:process and event.type:start and process.name:nslookup.exe and process.args:(-querytype=* or -qt=* or -q=* or -type=*)\n",
   "references": [
     "https://unit42.paloaltonetworks.com/dns-tunneling-in-the-wild-overview-of-oilrigs-dns-tunneling/"
   ],

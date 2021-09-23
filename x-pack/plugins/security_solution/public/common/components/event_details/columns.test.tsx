@@ -11,10 +11,12 @@ import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { EventFieldsData } from './types';
+import { get } from 'lodash/fp';
 
+jest.mock('../../lib/kibana');
 interface Column {
   field: string;
-  name: string;
+  name: string | JSX.Element;
   sortable: boolean;
   render: (field: string, data: EventFieldsData) => JSX.Element;
 }
@@ -42,39 +44,97 @@ describe('getColumns', () => {
     });
   });
 
-  describe('column checkbox', () => {
-    let checkboxColumn: Column;
+  describe('column actions', () => {
+    let actionsColumn: Column;
     const mockDataToUse = mockBrowserFields.agent;
+    const testValue = 'testValue';
     const testData = {
       type: 'someType',
       category: 'agent',
+      field: 'agent.id',
       ...mockDataToUse,
     } as EventFieldsData;
 
     beforeEach(() => {
-      checkboxColumn = getColumns(defaultProps)[0] as Column;
+      actionsColumn = getColumns(defaultProps)[0] as Column;
     });
 
-    test('should be enabled when the field does not exist', () => {
-      const testField = 'nonExistingField';
-      const wrapper = mount(
-        <TestProviders>{checkboxColumn.render(testField, testData)}</TestProviders>
-      ) as ReactWrapper;
-      expect(
-        wrapper.find(`[data-test-subj="toggle-field-${testField}"]`).first().prop('disabled')
-      ).toBe(false);
+    describe('filter in', () => {
+      test('it renders a filter for (+) button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(wrapper.find('[data-test-subj="hover-actions-filter-for"]').exists()).toBeTruthy();
+      });
     });
 
-    test('should be enabled when the field does exist', () => {
-      const testField = mockDataToUse.fields
-        ? Object.keys(mockDataToUse.fields)[0]
-        : 'agent.hostname';
-      const wrapper = mount(
-        <TestProviders>{checkboxColumn.render(testField, testData)}</TestProviders>
-      ) as ReactWrapper;
-      expect(
-        wrapper.find(`[data-test-subj="toggle-field-${testField}"]`).first().prop('disabled')
-      ).toBe(false);
+    describe('filter out', () => {
+      test('it renders a filter out (-) button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(wrapper.find('[data-test-subj="hover-actions-filter-out"]').exists()).toBeTruthy();
+      });
+    });
+
+    describe('overflow button', () => {
+      test('it renders an overflow button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(wrapper.find('[data-test-subj="more-actions-agent.id"]').exists()).toBeTruthy();
+      });
+    });
+
+    describe('column toggle', () => {
+      test('it renders a column toggle button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(
+          get(['items', 0, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
+        ).toEqual('hover-actions-toggle-column');
+      });
+    });
+
+    describe('add to timeline', () => {
+      test('it renders an add to timeline button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(
+          get(['items', 1, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
+        ).toEqual('hover-actions-add-timeline');
+      });
+    });
+
+    describe('topN', () => {
+      test('it renders a show topN button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(
+          get(['items', 2, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
+        ).toEqual('hover-actions-show-top-n');
+      });
+    });
+
+    describe('copy', () => {
+      test('it renders a copy button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(
+          get(['items', 3, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
+        ).toEqual('hover-actions-copy-button');
+      });
     });
   });
 });

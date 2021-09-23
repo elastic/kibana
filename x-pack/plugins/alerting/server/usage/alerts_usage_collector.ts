@@ -46,6 +46,7 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   '__geo-containment': { type: 'long' },
   // ML
   xpack_ml_anomaly_detection_alert: { type: 'long' },
+  xpack_ml_anomaly_detection_jobs_health: { type: 'long' },
 };
 
 export function createAlertsUsageCollector(

@@ -32,6 +32,10 @@ const defaultProps = {
     hasRestrictions: false,
   } as IndexPattern,
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('percentile', () => {
@@ -77,6 +81,7 @@ describe('percentile', () => {
           displayName: 'bytes',
           type: 'number',
           esTypes: ['long'],
+          searchable: true,
           aggregatable: true,
         })
       ).toEqual({
@@ -93,6 +98,7 @@ describe('percentile', () => {
           displayName: 'response_time',
           type: 'histogram',
           esTypes: ['histogram'],
+          searchable: true,
           aggregatable: true,
         })
       ).toEqual({
@@ -109,6 +115,7 @@ describe('percentile', () => {
           displayName: 'origin',
           type: 'string',
           esTypes: ['keyword'],
+          searchable: true,
           aggregatable: true,
         })
       ).toBeUndefined();
@@ -123,7 +130,8 @@ describe('percentile', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

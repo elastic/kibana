@@ -7,4 +7,3 @@
 
 export { Overview } from './components/overview';
 export { SourcesRouter } from './sources_router';
-export { PrivateSourcesLayout } from './private_sources_layout';
