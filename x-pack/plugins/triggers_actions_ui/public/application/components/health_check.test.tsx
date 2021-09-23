@@ -114,7 +114,7 @@ describe('health check', () => {
     );
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
-      `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/configuring-tls.html"`
+      `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-basic-setup.html#encrypt-internode-communication"`
     );
   });
 
