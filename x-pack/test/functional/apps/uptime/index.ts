@@ -80,5 +80,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./ml_anomaly'));
       loadTestFile(require.resolve('./feature_controls'));
     });
+
+    describe('mappings error state', () => {
+      loadTestFile(require.resolve('./missing_mappings'));
+    });
   });
 };
