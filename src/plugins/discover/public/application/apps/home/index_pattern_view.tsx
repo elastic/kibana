@@ -21,13 +21,17 @@ export function IndexPatternView(props: IndexPatternViewProps) {
   if (!indexPattern) {
     return <LoadingIndicator />;
   }
+  const { description } = indexPattern;
+  const descriptionText =
+    description && description.length > 0 ? description : '[Data View without description]';
+
   return (
     <EuiCard
       layout="horizontal"
       icon={<EuiIcon size="m" type={'discoverApp'} className="discoverLogo__icon" />}
       titleSize="s"
       title={indexPattern.title}
-      description={indexPattern.description}
+      description={descriptionText}
       onClick={() => {}}
     />
   );
