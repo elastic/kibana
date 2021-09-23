@@ -196,9 +196,13 @@ export function LayerPanel(
         let previousColumn =
           typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
 
-        // make it inherit only for moving, not for duplicate
+        // make it inherit only for moving and duplicate
         if (!previousColumn) {
-          previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
+          if (dropType === 'duplicate_compatible' && typeof droppedItem.columnId === 'string') {
+            previousColumn = droppedItem.columnId;
+          } else {
+            previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
+          }
         }
         const newVisState = setDimension({
           columnId,
