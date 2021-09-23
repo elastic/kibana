@@ -8,7 +8,7 @@
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import {
@@ -26,6 +26,7 @@ import { PaginatedContent, PaginatedContentProps } from '../../../components/pag
 import { Immutable } from '../../../../../common/endpoint/types';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { SearchExceptions } from '../../../components/search_exceptions';
+import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -41,38 +42,16 @@ export const HostIsolationExceptions = () => {
 
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
-  const handleItemEdit = useCallback(() => {
-    // TODO - Will be implemented in a follow up PR
-  }, []);
-  const handleItemDelete = useCallback(() => {
-    // TODO - Will be implemented in a follow up PR
-  }, []);
-
-  const handleAddButtonClick = () => {
-    // TODO - Will be implemented in a follow up PR
-  };
   const handleOnSearch = useCallback(
     (query: string) => {
-      // TODO
-      // dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
       navigateCallback({ filter: query });
     },
     [navigateCallback]
   );
-  const handleItemComponentProps: HostIsolationExceptionPaginatedContent['itemComponentProps'] =
-    useCallback(
-      (exceptionItem) => ({
-        exceptionItem: exceptionItem as ExceptionListItemSchema,
-        loadingItemIds: [],
-        commentsAccordionId: '',
-        onEditException: handleItemEdit,
-        onDeleteException: handleItemDelete,
-        showModified: true,
-        showName: true,
-        'data-test-subj': `eventFilterCard`,
-      }),
-      [handleItemDelete, handleItemEdit]
-    );
+
+  const handleItemComponentProps = (element: ExceptionListItemSchema): ArtifactEntryCardProps => ({
+    item: element,
+  });
 
   const handlePaginatedContentChange: HostIsolationExceptionPaginatedContent['onChange'] =
     useCallback(
@@ -84,7 +63,6 @@ export const HostIsolationExceptions = () => {
       },
       [navigateCallback]
     );
-  const showFlyout = false;
 
   return (
     <AdministrationListPage
@@ -93,20 +71,6 @@ export const HostIsolationExceptions = () => {
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
           defaultMessage="Host Isolation Exceptions"
         />
-      }
-      actions={
-        <EuiButton
-          fill
-          iconType="plusInCircle"
-          isDisabled={showFlyout}
-          onClick={handleAddButtonClick}
-          data-test-subj="eventFiltersPageAddButton"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.hostIsolationExceptions.list.pageAddButton"
-            defaultMessage="Add Host Isolation Exception"
-          />
-        </EuiButton>
       }
     >
       <SearchExceptions
@@ -121,9 +85,9 @@ export const HostIsolationExceptions = () => {
       />
       <EuiSpacer size="m" />
       <EuiSpacer size="s" />
-      <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
+      <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
         items={listItems}
-        ItemComponent={ExceptionItem}
+        ItemComponent={ArtifactEntryCard}
         itemComponentProps={handleItemComponentProps}
         onChange={handlePaginatedContentChange}
         error={fetchError?.message}
