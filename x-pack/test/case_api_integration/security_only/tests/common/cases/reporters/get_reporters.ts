@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // sort reporters to prevent order failure
-        expect(sortReporters(reporters as unknown as UserInfo[])).to.eql(
+        expect(sortReporters((reporters as unknown) as UserInfo[])).to.eql(
           sortReporters(scenario.expectedReporters)
         );
       }
