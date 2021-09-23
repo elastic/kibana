@@ -37,10 +37,13 @@ let persistAlertInstances = false; // eslint-disable-line prefer-const
 
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;
+  groups: string[];
+  groupBy?: string | string[];
 };
 
 const initialRuleState: TestRuleState = {
   aRuleStateKey: 'INITIAL_RULE_STATE_VALUE',
+  groups: [],
 };
 
 const mockOptions = {
@@ -90,6 +93,7 @@ const mockOptions = {
 
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
@@ -157,20 +161,29 @@ describe('The metric threshold alert type', () => {
   });
 
   describe('querying with a groupBy parameter', () => {
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    afterAll(() => clearInstances());
+    const execute = (
+      comparator: Comparator,
+      threshold: number[],
+      groupBy: string[] = ['something'],
+      metric?: string,
+      state?: any
+    ) =>
       executor({
         ...mockOptions,
         services,
         params: {
-          groupBy: 'something',
+          groupBy,
           criteria: [
             {
               ...baseNonCountCriterion,
               comparator,
               threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
             },
           ],
         },
+        state: state ?? mockOptions.state.wrapped,
       });
     const instanceIdA = 'a';
     const instanceIdB = 'b';
@@ -194,9 +207,35 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceIdA).action.group).toBe('a');
       expect(mostRecentAction(instanceIdB).action.group).toBe('b');
     });
+    test('reports previous groups and the groupBy parameter in its state', async () => {
+      const stateResult = await execute(Comparator.GT, [0.75]);
+      expect(stateResult.groups).toEqual(expect.arrayContaining(['a', 'b']));
+      expect(stateResult.groupBy).toEqual(['something']);
+    });
+    test('persists previous groups that go missing, until the groupBy param changes', async () => {
+      const stateResult1 = await execute(Comparator.GT, [0.75], ['something'], 'test.metric.2');
+      expect(stateResult1.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult2 = await execute(
+        Comparator.GT,
+        [0.75],
+        ['something'],
+        'test.metric.1',
+        stateResult1
+      );
+      expect(stateResult2.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult3 = await execute(
+        Comparator.GT,
+        [0.75],
+        ['something', 'something-else'],
+        'test.metric.1',
+        stateResult2
+      );
+      expect(stateResult3.groups).toEqual(expect.arrayContaining(['a', 'b']));
+    });
   });
 
   describe('querying with multiple criteria', () => {
+    afterAll(() => clearInstances());
     const execute = (
       comparator: Comparator,
       thresholdA: number[],
@@ -257,6 +296,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the count aggregator', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
@@ -279,8 +319,47 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.LT, [0.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
+    describe('with a groupBy parameter', () => {
+      const executeGroupBy = (
+        comparator: Comparator,
+        threshold: number[],
+        sourceId: string = 'default',
+        state?: any
+      ) =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId,
+            groupBy: 'something',
+            criteria: [
+              {
+                ...baseCountCriterion,
+                comparator,
+                threshold,
+              },
+            ],
+          },
+          state: state ?? mockOptions.state.wrapped,
+        });
+      const instanceIdA = 'a';
+      const instanceIdB = 'b';
+
+      test('successfully detects and alerts on a document count of 0', async () => {
+        const resultState = await executeGroupBy(Comparator.LT_OR_EQ, [0]);
+        expect(mostRecentAction(instanceIdA)).toBe(undefined);
+        expect(mostRecentAction(instanceIdB)).toBe(undefined);
+        await executeGroupBy(Comparator.LT_OR_EQ, [0], 'empty-response', resultState);
+        expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+        expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+        await executeGroupBy(Comparator.LT_OR_EQ, [0]);
+        expect(mostRecentAction(instanceIdA)).toBe(undefined);
+        expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      });
+    });
   });
   describe('querying with the p99 aggregator', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
@@ -306,6 +385,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the p95 aggregator', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
@@ -332,6 +412,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe("querying a metric that hasn't reported data", () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
       executor({
@@ -360,7 +441,51 @@ describe('The metric threshold alert type', () => {
     });
   });
 
+  describe('querying a groupBy alert that starts reporting no data, and then later reports data', () => {
+    afterAll(() => clearInstances());
+    const instanceID = '*';
+    const instanceIdA = 'a';
+    const instanceIdB = 'b';
+    const execute = (metric: string, state?: any) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy: 'something',
+          sourceId: 'default',
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [0],
+              metric,
+            },
+          ],
+          alertOnNoData: true,
+        },
+        state: state ?? mockOptions.state.wrapped,
+      });
+    const resultState: any[] = [];
+    test('first sends a No Data alert with the * group, but then reports groups when data is available', async () => {
+      resultState.push(await execute('test.metric.3'));
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      resultState.push(await execute('test.metric.3', resultState.pop()));
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      resultState.push(await execute('test.metric.1', resultState.pop()));
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+    });
+    test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
+      await execute('test.metric.3', resultState.pop());
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+    });
+  });
+
   describe("querying a rate-aggregated metric that hasn't reported data", () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (sourceId: string = 'default') =>
       executor({
@@ -439,6 +564,7 @@ describe('The metric threshold alert type', () => {
   */
 
   describe('querying a metric with a percentage metric', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = () =>
       executor({
@@ -497,7 +623,15 @@ const services: AlertServicesMock &
 services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
   const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
   if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
+  if (params.index === 'empty-response') return mocks.emptyMetricResponse;
   const metric = params?.body.query.bool.filter[1]?.exists.field;
+  if (metric === 'test.metric.3') {
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      params?.body.aggs.aggregatedIntervals?.aggregations.aggregatedValueMax
+        ? mocks.emptyRateResponse
+        : mocks.emptyMetricResponse
+    );
+  }
   if (params?.body.aggs.groupings) {
     if (params?.body.aggs.groupings.composite.after) {
       return elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -517,12 +651,6 @@ services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: a
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
       mocks.alternateMetricResponse()
     );
-  } else if (metric === 'test.metric.3') {
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      params?.body.aggs.aggregatedIntervals.aggregations.aggregatedValueMax
-        ? mocks.emptyRateResponse
-        : mocks.emptyMetricResponse
-    );
   }
   return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse());
 });
@@ -531,6 +659,13 @@ services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId
     return {
       id: 'alternate',
       attributes: { metricAlias: 'alternatebeat-*' },
+      type,
+      references: [],
+    };
+  if (sourceId === 'empty-response')
+    return {
+      id: 'empty',
+      attributes: { metricAlias: 'empty-response' },
       type,
       references: [],
     };
@@ -561,7 +696,13 @@ services.alertInstanceFactory.mockImplementation((instanceID: string) => {
 });
 
 function mostRecentAction(id: string) {
-  return alertInstances.get(id)!.actionQueue.pop();
+  const instance = alertInstances.get(id);
+  if (!instance) return undefined;
+  return instance.actionQueue.pop();
+}
+
+function clearInstances() {
+  alertInstances.clear();
 }
 
 const baseNonCountCriterion: Pick<
