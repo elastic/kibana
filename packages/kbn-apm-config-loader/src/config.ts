@@ -16,7 +16,8 @@ import type { AgentConfigOptions } from 'elastic-apm-node';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 const DEFAULT_CONFIG: AgentConfigOptions = {
-  active: false,
+  active: true,
+  disableSend: true,
   environment: 'development',
   logUncaughtExceptions: true,
   globalLabels: {},
@@ -143,7 +144,12 @@ export class ApmConfiguration {
    * default config.
    */
   private getConfigFromKibanaConfig(): AgentConfigOptions {
-    return this.rawKibanaConfig?.elastic?.apm ?? {};
+    const config: AgentConfigOptions = this.rawKibanaConfig?.elastic?.apm ?? {};
+
+    return {
+      ...config,
+      disableSend: config.disableSend ?? (config.active === true ? false : true),
+    };
   }
 
   /**
