@@ -82,6 +82,13 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
             ],
           },
         });
+        return {
+          unset: [
+            {
+              path: `xpack.actions.customHostSettings.ssl.rejectUnauthorized`,
+            },
+          ],
+        };
       }
     },
     (settings, fromPath, addDeprecation) => {
@@ -101,6 +108,13 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
             ],
           },
         });
+        return {
+          unset: [
+            {
+              path: `xpack.actions.rejectUnauthorized`,
+            },
+          ],
+        };
       }
     },
     (settings, fromPath, addDeprecation) => {
@@ -120,6 +134,13 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
             ],
           },
         });
+        return {
+          unset: [
+            {
+              path: `xpack.actions.proxyRejectUnauthorizedCertificates`,
+            },
+          ],
+        };
       }
     },
     (settings, fromPath, addDeprecation) => {

@@ -14,7 +14,7 @@ const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => 
   const _config = {
     [CONFIG_PATH]: settings,
   };
-  const { config: migrated } = applyDeprecations(
+  const { config: migrated, changedPaths } = applyDeprecations(
     _config,
     deprecations.map((deprecation) => ({
       deprecation,
@@ -27,6 +27,7 @@ const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => 
   return {
     messages: deprecationMessages,
     migrated,
+    changedPaths,
   };
 };
 
@@ -39,6 +40,29 @@ describe('index', () => {
           "\\"xpack.actions.enabled\\" is deprecated. The ability to disable this plugin will be removed in 8.0.0.",
         ]
       `);
+    });
+
+    it('should properly unset deprecated configs', () => {
+      const { messages, changedPaths } = applyStackAlertDeprecations({
+        customHostSettings: [{ ssl: { rejectUnauthorized: true } }],
+        rejectUnauthorized: true,
+        proxyRejectUnauthorizedCertificates: true,
+      });
+      expect(changedPaths.unset).toStrictEqual([
+        'xpack.actions.customHostSettings.ssl.rejectUnauthorized',
+        'xpack.actions.rejectUnauthorized',
+        'xpack.actions.proxyRejectUnauthorizedCertificates',
+      ]);
+      expect(messages.length).toBe(3);
+      expect(messages[0]).toBe(
+        '"xpack.actions.customHostSettings[<index>].ssl.rejectUnauthorized" is deprecated.Use "xpack.actions.customHostSettings[<index>].ssl.verificationMode" instead, with the setting "verificationMode:full" eql to "rejectUnauthorized:true", and "verificationMode:none" eql to "rejectUnauthorized:false".'
+      );
+      expect(messages[1]).toBe(
+        '"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, with the setting "verificationMode:full" eql to "rejectUnauthorized:true", and "verificationMode:none" eql to "rejectUnauthorized:false".'
+      );
+      expect(messages[2]).toBe(
+        '"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".'
+      );
     });
   });
 });
