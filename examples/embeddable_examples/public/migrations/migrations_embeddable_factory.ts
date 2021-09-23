@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EmbeddableStateWithType } from '../../../../src/plugins/embeddable/common';
 import {
   IContainer,
   EmbeddableInput,
@@ -34,6 +35,16 @@ export class SimpleEmbeddableFactoryDefinition
   public readonly migrations = {
     '7.3.0': migration730,
   };
+
+  public extract(state: EmbeddableStateWithType) {
+    // this embeddable does not store references to other saved objects
+    return { state, references: [] };
+  }
+
+  public inject(state: EmbeddableStateWithType) {
+    // this embeddable does not store references to other saved objects
+    return state;
+  }
 
   /**
    * In our simple example, we let everyone have permissions to edit this. Most
