@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { jsonRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceCount } from '../lib/observability_overview/get_service_count';
 import { getTransactionsPerMinute } from '../lib/observability_overview/get_transactions_per_minute';
@@ -31,7 +31,7 @@ const observabilityOverviewRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([
       rangeRt,
-      t.type({ bucketSize: jsonRt.pipe(t.number), intervalString: t.string }),
+      t.type({ bucketSize: toNumberRt, intervalString: t.string }),
     ]),
   }),
   options: { tags: ['access:apm'] },
