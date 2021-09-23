@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useMemo } from 'react';
 import {
   CommonProps,
   EuiPanel,
   EuiText,
   EuiAccordion,
-  EuiCheckableCard,
   EuiTitle,
-  EuiHorizontalRule,
+  EuiCheckbox,
+  EuiSplitPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { getEmptyValue } from '../../../common/components/empty_value';
@@ -22,7 +25,7 @@ import { AnyArtifact } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
-const CardContainerPanel = styled(EuiCheckableCard)`
+const CardContainerPanel = styled(EuiSplitPanel.Outer)`
   &.artifactEntryCardMinified + &.artifactEntryCardMinified {
     margin-top: ${({ theme }) => theme.eui.spacerSizes.l};
   }
@@ -60,16 +63,26 @@ export const ArtifactEntryCardMinified = memo(
       [accordionTrigger]
     );
 
-    const getCardTitle = useCallback(
+    const cardTitle = useMemo(
       () => (
-        <>
-          <EuiTitle size="xxs">
-            <h5 data-test-subj={getTestId('title')}>{artifact.name}</h5>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiCheckbox
+                id={artifact.name}
+                checked={isSelected}
+                onChange={() => onToggleSelectedArtifact(!isSelected)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5 data-test-subj={getTestId('title')}>{artifact.name}</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiSplitPanel.Inner>
       ),
-      [artifact.name, getTestId]
+      [artifact.name, getTestId, isSelected, onToggleSelectedArtifact]
     );
 
     return (
@@ -78,38 +91,44 @@ export const ArtifactEntryCardMinified = memo(
         data-test-subj={dataTestSubj}
         className="artifactEntryCardMinified"
         id={artifact.name}
-        label={getCardTitle()}
-        checkableType="checkbox"
-        value="checkbox1"
-        checked={isSelected}
-        onChange={() => onToggleSelectedArtifact(!isSelected)}
+        hasShadow={false}
+        hasBorder
       >
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-          <EuiTitle size="xxs">
-            <h5 data-test-subj={getTestId('descriptionTitle')}>{'Description'}</h5>
-          </EuiTitle>
-          <EuiText>
-            <p data-test-subj={getTestId('description')}>
-              {artifact.description || getEmptyValue()}
-            </p>
-          </EuiText>
-        </EuiPanel>
+        {cardTitle}
+        <EuiSplitPanel.Inner paddingSize="s">
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+            <EuiTitle size="xxs">
+              <h5 data-test-subj={getTestId('descriptionTitle')}>{'Description'}</h5>
+            </EuiTitle>
+            <EuiText>
+              <p data-test-subj={getTestId('description')}>
+                {artifact.description || getEmptyValue()}
+              </p>
+            </EuiText>
+          </EuiPanel>
 
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-          <EuiAccordion
-            id="showDetails"
-            buttonContent={getAccordionTitle()}
-            arrowDisplay="right"
-            forceState={accordionTrigger}
-            onToggle={handleOnToggleAccordion}
-          >
-            <CriteriaConditions
-              os={artifact.os as CriteriaConditionsProps['os']}
-              entries={artifact.entries}
-              data-test-subj={getTestId('criteriaConditions')}
-            />
-          </EuiAccordion>
-        </EuiPanel>
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+            <EuiButtonEmpty
+              color="primary"
+              size="s"
+              flush="left"
+              iconType={accordionTrigger === 'open' ? 'arrowUp' : 'arrowDown'}
+              iconSide="right"
+              iconSize="m"
+              onClick={handleOnToggleAccordion}
+              style={{ fontWeight: 400 }}
+            >
+              {getAccordionTitle()}
+            </EuiButtonEmpty>
+            <EuiAccordion id="showDetails" arrowDisplay="none" forceState={accordionTrigger}>
+              <CriteriaConditions
+                os={artifact.os as CriteriaConditionsProps['os']}
+                entries={artifact.entries}
+                data-test-subj={getTestId('criteriaConditions')}
+              />
+            </EuiAccordion>
+          </EuiPanel>
+        </EuiSplitPanel.Inner>
       </CardContainerPanel>
     );
   }
