@@ -1,4 +1,4 @@
-[[index-patterns]]
+[[data-views]]
 === Create a data view
 
 {kib} requires a data view to access the {es} data that you want to explore. 
@@ -9,11 +9,11 @@ For example, a data view can point to your log data from yesterday,
 or all indices that contain your data.
 
 [float]
-[[index-patterns-read-only-access]]
+[[data-views-read-only-access]]
 === Required permissions
 
 * Access to *Data Views* requires the <<xpack-kibana-role-management, {kib} privilege>>
-`Index Pattern Management`.
+`Data View Management`.
 
 * To create a data view, you must have the <<xpack-kibana-role-management,{es} privilege>>
 `view_index_metadata`.
@@ -37,7 +37,7 @@ If you loaded your own data, follow these steps to create a data view.
 . Click *Create data view*.
 
 [role="screenshot"]
-image:management/index-patterns/images/create-index-pattern.png["Create {data-source}"]
+image:management/index-patterns/images/create-index-pattern.png["Create data view"]
 
 . Start typing in the *name* field, and {kib} looks for the names of
 indices, data streams, and aliases that match your input.
@@ -71,7 +71,7 @@ move between {kib} apps.
 . Select this data view when you search and visualize your data.
 
 [float]
-[[rollup-index-pattern]]
+[[rollup-data-view]]
 ==== Create a data view for rolled up data
 
 A data view can match one rollup index.  For a combination rollup
@@ -133,7 +133,7 @@ Once you configure a data view to use the {ccs} syntax, all searches and
 aggregations using that data view in {kib} take advantage of {ccs}.
 
 [float]
-[[delete-index-pattern]]
+[[delete-data-view]]
 === Delete data views
 
 When you delete a data view, you cannot recover the associated field formatters, runtime fields, source filters,

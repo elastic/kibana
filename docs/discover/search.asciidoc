@@ -3,7 +3,7 @@
 
 You can search your data in any app that has a query bar, or by clicking on
 elements in a visualization.  A search matches indices in the current
-<<index-patterns, index pattern>> and in the current <<set-time-filter,time frame>>.
+<<data-views, data view>> and in the current <<set-time-filter,time frame>>.
 
 
 [float]
