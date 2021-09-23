@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { run, REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
+import { run, REPO_ROOT } from '@kbn/dev-utils';
 import del from 'del';
 
 import { RefOutputCache } from './ref_output_cache';
@@ -30,14 +30,18 @@ const isTypeFailure = (error: any) =>
 
 export async function runBuildRefsCli() {
   run(
-    async ({ log, flags, procRunner }) => {
-      const startTime = Date.now();
-      const reporter = CiStatsReporter.fromEnv(log);
+    async ({ log, flags, procRunner, statsMeta }) => {
       const enabled = process.env.BUILD_TS_REFS_DISABLE === 'true' && !flags.force;
       const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;
       const doCapture = process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true';
       const doClean = !!flags.clean || doCapture;
       const doInitCache = cacheEnabled && !doCapture;
+
+      statsMeta.set('buildTsRefsEnabled', enabled);
+      statsMeta.set('statsMeta.buildTsRefsCacheEnabled', cacheEnabled);
+      statsMeta.set('statsMeta.buildTsRefsDoCapture', doCapture);
+      statsMeta.set('statsMeta.buildTsRefsDoClean', doClean);
+      statsMeta.set('statsMeta.buildTsRefsDoInitCache', doInitCache);
 
       if (enabled) {
         log.info(
@@ -101,24 +105,6 @@ export async function runBuildRefsCli() {
           await outputCache.cleanup();
         }
       }
-
-      await reporter.timings({
-        timings: [
-          {
-            group: 'build_ts_refs',
-            id: 'total time',
-            ms: Date.now() - startTime,
-            meta: {
-              success: true,
-              buildTsRefsEnabled: enabled,
-              buildTsRefsCacheEnabled: cacheEnabled,
-              buildTsRefsDoCapture: doCapture,
-              buildTsRefsDoClean: doClean,
-              buildTsRefsDoInitCache: doInitCache,
-            },
-          },
-        ],
-      });
     },
     {
       description: 'Build TypeScript projects',

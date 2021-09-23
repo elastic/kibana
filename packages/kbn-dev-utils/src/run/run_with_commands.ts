@@ -57,6 +57,8 @@ export class RunWithCommands<T> {
       writeTo: process.stdout,
     });
 
+    const statsMeta = new Map();
+
     const globalHelp = getHelpForAllCommands({
       description: this.options.description,
       usage: this.options.usage,
@@ -111,6 +113,7 @@ export class RunWithCommands<T> {
           log,
           flags: commandFlags,
           procRunner,
+          statsMeta,
           addCleanupTask: cleanup.add.bind(cleanup),
         };
 
