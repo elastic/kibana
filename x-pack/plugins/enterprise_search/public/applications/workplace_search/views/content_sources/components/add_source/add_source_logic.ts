@@ -25,7 +25,7 @@ import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../co
 import {
   SOURCES_PATH,
   ADD_GITHUB_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   getSourcesPath,
 } from '../../../../routes';
 import { CustomSource } from '../../../../types';
@@ -62,11 +62,7 @@ export interface OauthParams {
 
 export interface AddSourceActions {
   initializeAddSource: (addSourceProps: AddSourceProps) => { addSourceProps: AddSourceProps };
-  setAddSourceProps: ({
-    addSourceProps,
-  }: {
-    addSourceProps: AddSourceProps;
-  }) => {
+  setAddSourceProps: ({ addSourceProps }: { addSourceProps: AddSourceProps }) => {
     addSourceProps: AddSourceProps;
   };
   setAddSourceStep(addSourceCurrentStep: AddSourceSteps): AddSourceSteps;
@@ -521,7 +517,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         app home page and display the error message, and not persist the other query params to the server.
       */
       if (params.error_description) {
-        navigateToUrl(isOrganization ? '/' : PERSONAL_SOURCES_PATH);
+        navigateToUrl(isOrganization ? '/' : PRIVATE_SOURCES_PATH);
         setErrorMessage(
           isOrganization
             ? params.error_description
@@ -532,13 +528,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       try {
         const response = await http.get(route, { query });
-        const {
-          serviceName,
-          indexPermissions,
-          serviceType,
-          preContentSourceId,
-          hasConfigureStep,
-        } = response;
+        const { serviceName, indexPermissions, serviceType, preContentSourceId, hasConfigureStep } =
+          response;
 
         // GitHub requires an intermediate configuration step, where we collect the repos to index.
         if (hasConfigureStep && !values.oauthConfigCompleted) {
