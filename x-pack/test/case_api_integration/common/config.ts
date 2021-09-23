@@ -93,7 +93,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         .isDirectory()
     );
 
-    const casesConfig = ['--xpack.cases.enabled'];
+    const casesConfig = ['--xpack.cases.enabled=true'];
 
     return {
       testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
