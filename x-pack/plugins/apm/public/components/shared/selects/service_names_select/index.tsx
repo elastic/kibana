@@ -59,27 +59,45 @@ export function ServiceNamesSelect({
   const serviceNames = data?.serviceNames ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
-    ...(allowAll ? [allOption] : []),
+    ...(allowAll &&
+    (searchValue === '' || searchValue.toLowerCase() === allOption.label)
+      ? [allOption]
+      : []),
     ...serviceNames.map((name) => {
       return { label: name, value: name };
     }),
   ];
 
-  const handleChange: (
+  const handleChange = (
     changedOptions: Array<EuiComboBoxOptionOption<string>>
-  ) => void = (changedOptions) => {
+  ) => {
     setSelectedOptions(changedOptions);
     if (changedOptions.length === 1) {
-      onChange(changedOptions[0].value);
+      onChange(
+        changedOptions[0].value
+          ? changedOptions[0].value.trim()
+          : changedOptions[0].value
+      );
     }
+  };
+
+  const handleCreateOption = (value: string) => {
+    handleChange([{ label: value, value }]);
   };
 
   return (
     <EuiComboBox
       async={true}
       compressed={compressed}
+      customOptionText={i18n.translate(
+        'xpack.apm.serviceNamesSelectCustomOptionText',
+        {
+          defaultMessage: 'Add \\{searchValue\\} as a new service name',
+        }
+      )}
       isLoading={status === FETCH_STATUS.LOADING}
       onChange={handleChange}
+      onCreateOption={handleCreateOption}
       onSearchChange={setSearchValue}
       options={options}
       placeholder={i18n.translate('xpack.apm.serviceNamesSelectPlaceholder', {

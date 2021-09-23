@@ -49,7 +49,7 @@ export function EnvironmentField({
   onChange,
 }: {
   currentValue: string;
-  onChange: (value: string) => void;
+  onChange: (value?: string) => void;
 }) {
   return (
     <PopoverExpression
@@ -72,7 +72,7 @@ export function TransactionTypeField({
   onChange,
 }: {
   currentValue?: string;
-  onChange: (value: string) => void;
+  onChange: (value?: string) => void;
 }) {
   const label = i18n.translate('xpack.apm.alerting.fields.type', {
     defaultMessage: 'Type',

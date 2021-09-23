@@ -13,7 +13,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 interface TransactionTypesSelectProps {
   compressed?: boolean;
   defaultValue?: string;
-  onChange: (value: string) => void;
+  onChange: (value?: string) => void;
 }
 
 const allOption: EuiComboBoxOptionOption<string> = {
@@ -54,32 +54,52 @@ export function TransactionTypesSelect({
   const transactionTypes = data?.transactionTypes ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
-    allOption,
+    ...(searchValue === '' || searchValue.toLowerCase() === allOption.label
+      ? [allOption]
+      : []),
     ...transactionTypes.map((name) => {
       return { label: name, value: name };
     }),
   ];
 
-  const handleChange: (
+  const handleChange = (
     changedOptions: Array<EuiComboBoxOptionOption<string>>
-  ) => void = (changedOptions) => {
+  ) => {
     setSelectedOptions(changedOptions);
-    if (changedOptions.length === 1 && changedOptions[0].value) {
-      onChange(changedOptions[0].value);
+    if (changedOptions.length === 1) {
+      onChange(
+        changedOptions[0].value
+          ? changedOptions[0].value.trim()
+          : changedOptions[0].value
+      );
     }
+  };
+
+  const handleCreateOption = (value: string) => {
+    handleChange([{ label: value, value }]);
   };
 
   return (
     <EuiComboBox
       async={true}
       compressed={compressed}
+      customOptionText={i18n.translate(
+        'xpack.apm.transactionTypesSelectCustomOptionText',
+        {
+          defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
+        }
+      )}
       isLoading={status === FETCH_STATUS.LOADING}
       onChange={handleChange}
+      onCreateOption={handleCreateOption}
       onSearchChange={setSearchValue}
       options={options}
-      placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
-        defaultMessage: 'Select environment',
-      })}
+      placeholder={i18n.translate(
+        'xpack.apm.transactionTypesSelectPlaceholder',
+        {
+          defaultMessage: 'Select transaction type',
+        }
+      )}
       selectedOptions={selectedOptions}
       singleSelection={{ asPlainText: true }}
       style={{ minWidth: '256px' }}
