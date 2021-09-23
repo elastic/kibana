@@ -10,6 +10,7 @@ export {
   AuthorizationProvider,
   AuthorizationContext,
   useAuthorizationContext,
+  Authorization,
 } from './authorization_provider';
 
 export { WithPrivileges } from './with_privileges';

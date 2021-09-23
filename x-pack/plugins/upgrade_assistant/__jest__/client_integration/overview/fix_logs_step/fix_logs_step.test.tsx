@@ -22,10 +22,13 @@ jest.mock('../../../../public/application/lib/logs_checkpoint', () => {
 });
 
 import { DeprecationLoggingStatus } from '../../../../common/types';
-import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../common/constants';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { setupEnvironment, advanceTime } from '../../helpers';
-import { DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS } from '../../../../common/constants';
+import {
+  DEPRECATION_LOGS_INDEX,
+  DEPRECATION_LOGS_SOURCE_ID,
+  DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
+} from '../../../../common/constants';
 
 const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
   isDeprecationLogIndexingEnabled: toggle,
@@ -387,6 +390,41 @@ describe('Overview - Fix deprecation logs step', () => {
       component.update();
 
       expect(exists('apiCompatibilityNoteTitle')).toBe(true);
+    });
+  });
+
+  describe('Privileges check', () => {
+    test(`permissions warning callout is hidden if user has the right privileges`, async () => {
+      const { exists } = testBed;
+
+      // Index privileges warning callout should not be shown
+      expect(exists('noIndexPermissionsCallout')).toBe(false);
+      // Analyze logs and Resolve logs sections should be shown
+      expect(exists('externalLinksTitle')).toBe(true);
+      expect(exists('deprecationsCountTitle')).toBe(true);
+    });
+
+    test(`doesn't show analyze and resolve logs if it doesn't have the right privileges`, async () => {
+      await act(async () => {
+        testBed = await setupOverviewPage({
+          privileges: {
+            hasAllPrivileges: false,
+            missingPrivileges: {
+              index: [DEPRECATION_LOGS_INDEX],
+            },
+          },
+        });
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      // No index privileges warning callout should be shown
+      expect(exists('noIndexPermissionsCallout')).toBe(true);
+      // Analyze logs and Resolve logs sections should be hidden
+      expect(exists('externalLinksTitle')).toBe(false);
+      expect(exists('deprecationsCountTitle')).toBe(false);
     });
   });
 });
