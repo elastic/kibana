@@ -179,11 +179,11 @@ describe('Sourcerer Hooks', () => {
       });
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch.mock.calls[2][0]).toEqual({
+      expect(mockDispatch.mock.calls[3][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
         payload: { signalIndexName: DEFAULT_SIGNALS_INDEX },
       });
-      expect(mockDispatch.mock.calls[3][0]).toEqual({
+      expect(mockDispatch.mock.calls[2][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',
@@ -208,7 +208,7 @@ describe('Sourcerer Hooks', () => {
       );
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch.mock.calls[2][0]).toEqual({
+      expect(mockDispatch.mock.calls[3][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'detections',
@@ -224,12 +224,12 @@ describe('getScopeFromPath', () => {
   it('should return default scope', async () => {
     expect(getScopeFromPath('/')).toBe(SourcererScopeName.default);
     expect(getScopeFromPath('/exceptions')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/rules')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/rules/create')).toBe(SourcererScopeName.default);
   });
 
   it('should return detections scope', async () => {
     expect(getScopeFromPath('/alerts')).toBe(SourcererScopeName.detections);
+    expect(getScopeFromPath('/rules')).toBe(SourcererScopeName.detections);
+    expect(getScopeFromPath('/rules/create')).toBe(SourcererScopeName.detections);
     expect(getScopeFromPath('/rules/id/foo')).toBe(SourcererScopeName.detections);
     expect(getScopeFromPath('/rules/id/foo/edit')).toBe(SourcererScopeName.detections);
   });
