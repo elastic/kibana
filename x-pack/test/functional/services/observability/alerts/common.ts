@@ -7,8 +7,8 @@
 
 import querystring from 'querystring';
 import { chunk } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
@@ -19,20 +19,14 @@ const DATE_WITH_DATA = {
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const COPY_TO_CLIPBOARD_BUTTON_SELECTOR = 'copy-to-clipboard';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
-const ALERTS_ROWS_PER_PAGE_SELECTOR = 'tablePaginationPopoverButton';
-const ALERTS_PAGINATION_BUTTON_PREVIOUS = 'pagination-button-previous';
-const ALERTS_PAGINATION_BUTTON_NEXT = 'pagination-button-next';
-const ALERTS_PAGINATION_TEN_ROWS = 'tablePagination-10-rows';
-const ALERTS_PAGINATION_TWENTY_FIVE_ROWS = 'tablePagination-25-rows';
-const ALERTS_PAGINATION_FIFTY_ROWS = 'tablePagination-50-rows';
-const ALERTS_PAGINATION_BUTTON_ONE = 'pagination-button-0';
-const ALERTS_PAGINATION_BUTTON_TWO = 'pagination-button-1';
-
 const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
-export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrProviderContext) {
+export function ObservabilityAlertsCommonProvider({
+  getPageObjects,
+  getService,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
   const pageObjects = getPageObjects(['common']);
@@ -186,59 +180,6 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     await buttonGroupButton.click();
   };
 
-  // Pagination
-  const getPageSizeSelector = async () => {
-    return await testSubjects.find(ALERTS_ROWS_PER_PAGE_SELECTOR);
-  };
-
-  const getPageSizeSelectorOrFail = async () => {
-    return await testSubjects.existOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
-  };
-
-  const missingPageSizeSelectorOrFail = async () => {
-    return await testSubjects.missingOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
-  };
-
-  const getTenRowsPageSelector = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_TEN_ROWS);
-  };
-
-  const getTwentyFiveRowsPageSelector = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_TWENTY_FIVE_ROWS);
-  };
-
-  const getFiftyRowsPageSelector = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_FIFTY_ROWS);
-  };
-
-  const getPrevPaginationButton = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_PREVIOUS);
-  };
-
-  const getPrevPaginationButtonOrFail = async () => {
-    return await testSubjects.existOrFail(ALERTS_PAGINATION_BUTTON_PREVIOUS);
-  };
-
-  const missingPrevPaginationButtonOrFail = async () => {
-    return await testSubjects.missingOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
-  };
-
-  const getNextPaginationButton = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_NEXT, 20000);
-  };
-
-  const getNextPaginationButtonOrFail = async () => {
-    return await testSubjects.existOrFail(ALERTS_PAGINATION_BUTTON_NEXT);
-  };
-
-  const getPaginationButtonOne = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_ONE);
-  };
-
-  const getPaginationButtonTwo = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_TWO);
-  };
-
   return {
     getQueryBar,
     clearQueryBar,
@@ -263,18 +204,5 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     setWorkflowStatusFilter,
     submitQuery,
     typeInQueryBar,
-    getPageSizeSelector,
-    getPageSizeSelectorOrFail,
-    missingPageSizeSelectorOrFail,
-    getTenRowsPageSelector,
-    getTwentyFiveRowsPageSelector,
-    getFiftyRowsPageSelector,
-    getPrevPaginationButton,
-    getPrevPaginationButtonOrFail,
-    missingPrevPaginationButtonOrFail,
-    getNextPaginationButton,
-    getNextPaginationButtonOrFail,
-    getPaginationButtonOne,
-    getPaginationButtonTwo,
   };
 }
