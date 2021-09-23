@@ -6,3 +6,4 @@
  */
 
 export const ElasticsearchOverview: FunctionComponent<Props>;
+export const ElasticsearchNodes: FunctionComponent<Props>;
