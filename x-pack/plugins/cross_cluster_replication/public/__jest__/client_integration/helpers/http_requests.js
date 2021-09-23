@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
+import { fakeServer } from 'sinon';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server) => {
@@ -124,7 +124,7 @@ const registerHttpRequestMockHelpers = (server) => {
 };
 
 export const init = () => {
-  const server = sinon.fakeServer.create();
+  const server = fakeServer.create();
   server.respondImmediately = true;
 
   // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
