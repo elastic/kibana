@@ -49,7 +49,7 @@ describe('EngineLogic', () => {
     dataLoading: true,
     engine: {},
     engineName: '',
-    isEngineEmpty: true,
+    hasNoDocuments: true,
     isEngineSchemaEmpty: true,
     isMetaEngine: false,
     isSampleEngine: false,
@@ -64,7 +64,7 @@ describe('EngineLogic', () => {
   const DEFAULT_VALUES_WITH_ENGINE = {
     ...DEFAULT_VALUES,
     engine: mockEngineData,
-    isEngineEmpty: false,
+    hasNoDocuments: false,
     isEngineSchemaEmpty: false,
   };
 
@@ -312,7 +312,7 @@ describe('EngineLogic', () => {
   });
 
   describe('selectors', () => {
-    describe('isEngineEmpty', () => {
+    describe('hasNoDocuments', () => {
       it('returns true if the engine contains no documents', () => {
         const engine = { ...mockEngineData, document_count: 0 };
         mount({ engine });
@@ -320,7 +320,7 @@ describe('EngineLogic', () => {
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
-          isEngineEmpty: true,
+          hasNoDocuments: true,
         });
       });
 
@@ -329,7 +329,7 @@ describe('EngineLogic', () => {
 
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          isEngineEmpty: true,
+          hasNoDocuments: true,
         });
       });
     });
