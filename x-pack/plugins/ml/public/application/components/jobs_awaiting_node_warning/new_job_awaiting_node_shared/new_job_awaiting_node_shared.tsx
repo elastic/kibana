@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { JOB_STATE } from '../../../../../common/constants/states';
 import { mlApiServicesProvider } from '../../../services/ml_api_service';
 import { HttpService } from '../../../services/http_service';
+import { extractDeploymentId, CloudInfo } from '../../../services/ml_server_info';
 
 interface Props {
   jobIds: string[];
@@ -25,9 +26,10 @@ function isJobAwaitingNodeAssignment(job: estypes.MlJobStats) {
 
 const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
   const { http } = useKibana().services;
-  const ml = mlApiServicesProvider(new HttpService(http!));
+  const ml = useMemo(() => mlApiServicesProvider(new HttpService(http!)), [http]);
 
   const [unassignedJobCount, setUnassignedJobCount] = useState<number>(0);
+  const [cloudInfo, setCloudInfo] = useState<CloudInfo | null>(null);
 
   const checkNodes = useCallback(async () => {
     try {
@@ -51,6 +53,30 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
       console.error('Could not determine ML node information', error);
     }
   }, [jobIds]);
+
+  const checkCloudInfo = useCallback(async () => {
+    if (unassignedJobCount === 0) {
+      return;
+    }
+
+    try {
+      const resp = await ml.mlInfo();
+      const cloudId = resp.cloudId ?? null;
+      setCloudInfo({
+        isCloud: cloudId !== null,
+        cloudId,
+        deploymentId: cloudId === null ? null : extractDeploymentId(cloudId),
+      });
+    } catch (error) {
+      setCloudInfo(null);
+      // eslint-disable-next-line no-console
+      console.error('Could not determine cloud information', error);
+    }
+  }, [unassignedJobCount]);
+
+  useEffect(() => {
+    checkCloudInfo();
+  }, [unassignedJobCount]);
 
   useEffect(() => {
     checkNodes();
@@ -80,6 +106,39 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
               jobCount: unassignedJobCount,
             }}
           />
+          <EuiSpacer size="s" />
+          {cloudInfo &&
+            (cloudInfo.isCloud ? (
+              <>
+                <FormattedMessage
+                  id="xpack.ml.jobsAwaitingNodeWarningShared.isCloud"
+                  defaultMessage="Elastic Cloud will autoscale to add more ML capacity. This may take 5-20 minutes. "
+                />
+                {cloudInfo.deploymentId === null ? null : (
+                  <FormattedMessage
+                    id="xpack.ml.jobsAwaitingNodeWarningShared.isCloud"
+                    defaultMessage="You can monitor progress in the {link}."
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={`https://cloud.elastic.co/deployments?q=${cloudInfo.deploymentId}`}
+                        >
+                          <FormattedMessage
+                            id="xpack.ml.jobsAwaitingNodeWarningShared.linkToCloud.linkText"
+                            defaultMessage="Elastic Cloud admin console"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.jobsAwaitingNodeWarningShared.notCloud"
+                defaultMessage="You are not running in Elastic Cloud. Your administrator is responsible for adding an ML node."
+              />
+            ))}
         </div>
       </EuiCallOut>
       <EuiSpacer size="m" />
