@@ -79,15 +79,6 @@ function mapToCard(
     uiInternalPathUrl = url;
   }
 
-  const betaBadgeLabel =
-    item.type !== 'ui_link' && item.release && item.release !== 'ga'
-      ? RELEASE_BADGE_LABEL[item.release]
-      : undefined;
-  const betaBadgeLabelTooltipContent =
-    item.type !== 'ui_link' && item.release && item.release !== 'ga'
-      ? RELEASE_BADGE_DESCRIPTION[item.release]
-      : undefined;
-
   return {
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}-${item.id}`,
     description: item.description,
@@ -96,9 +87,8 @@ function mapToCard(
     name: item.name,
     title: item.title,
     version: 'version' in item ? item.version || '' : '',
+    release: 'release' in item ? item.release : undefined,
     uiInternalPathUrl,
-    betaBadgeLabel,
-    betaBadgeLabelTooltipContent,
   };
 }
 

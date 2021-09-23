@@ -26,12 +26,12 @@ const args: Args = {
   title: 'Title',
   description: 'Description',
   name: 'beats',
-  // @ts-expect-error
   release: 'ga',
   id: 'id',
   version: '1.0.0',
-  download: '/',
-  path: 'path',
+  uiInternalPathUrl: '/',
+  icons: [],
+  integration: '',
 };
 
 const argTypes = {

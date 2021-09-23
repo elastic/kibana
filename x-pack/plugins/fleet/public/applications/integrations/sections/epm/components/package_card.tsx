@@ -12,6 +12,8 @@ import { EuiCard } from '@elastic/eui';
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
 
+import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge';
+
 export type PackageCardProps = IntegrationCardItem;
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
@@ -28,9 +30,12 @@ export function PackageCard({
   icons,
   integration,
   uiInternalPathUrl,
-  betaBadgeLabel,
-  betaBadgeLabelTooltipContent,
+  release,
 }: PackageCardProps) {
+  const betaBadgeLabel = release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined;
+  const betaBadgeLabelTooltipContent =
+    release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined;
+
   return (
     <Card
       title={title || ''}

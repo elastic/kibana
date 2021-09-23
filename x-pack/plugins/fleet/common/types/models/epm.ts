@@ -363,8 +363,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
 
 export interface IntegrationCardItem {
   uiInternalPathUrl: string;
-  betaBadgeLabel?: string;
-  betaBadgeLabelTooltipContent?: string;
+  release?: 'beta' | 'experimental' | 'ga';
   description: string;
   name: string;
   title: string;
