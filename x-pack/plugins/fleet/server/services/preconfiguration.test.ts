@@ -15,6 +15,7 @@ import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import * as agentPolicy from './agent_policy';
+import * as packagePolicy from './package_policy';
 
 import {
   ensurePreconfiguredPackagesAndPolicies,
@@ -131,6 +132,7 @@ jest.mock('./package_policy', () => ({
   ...jest.requireActual('./package_policy'),
   packagePolicyService: {
     getByIDs: jest.fn().mockReturnValue([]),
+    listIds: jest.fn().mockReturnValue({ items: [] }),
     create(soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) {
       return {
         id: 'mocked',
@@ -156,6 +158,7 @@ jest.mock('./app_context', () => ({
 }));
 
 const spyAgentPolicyServiceUpdate = jest.spyOn(agentPolicy.agentPolicyService, 'update');
+const spyPackagePolicyServiceUpgrade = jest.spyOn(packagePolicy.packagePolicyService, 'upgrade');
 
 describe('policy preconfiguration', () => {
   beforeEach(() => {
@@ -478,5 +481,31 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
       basePackagePolicy
     );
     expect(hasChanged).toBe(false);
+  });
+
+  it('should upgrade package policies if package is set as AUTO_UPDATE', async () => {
+    const soClient = getPutPreconfiguredPackagesMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      [] as PreconfiguredAgentPolicy[],
+      [],
+      mockDefaultOutput
+    );
+  });
+
+  it('should upgrade package policies if package has `keep_policies_up_to_date: true`', async () => {
+    const soClient = getPutPreconfiguredPackagesMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      [] as PreconfiguredAgentPolicy[],
+      [],
+      mockDefaultOutput
+    );
   });
 });

@@ -17,6 +17,7 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
   PreconfigurationError,
+  PackagePolicy,
 } from '../../common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 
@@ -230,16 +231,47 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  // Upgrade package policies for any packages designated as AUTO_UPDATE
-  const policyIdsToUpgrade = await packagePolicyService.listIds(soClient, {
-    page: 1,
-    perPage: 10000,
-    kuery: `ingest-package-policies.package.name:${AUTO_UPDATE_PACKAGES.map(
-      ({ name }) => name
-    ).join(' or ')}`,
-  });
+  // Upgrade package policies for any packages designated as AUTO_UPDATE or that have `keep_policies_up_to_date: true`
+  const policyIdsToUpgrade: string[] = [];
+  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies.flatMap<string>(
+    ({ policy }) => policy?.package_policies as string[]
+  );
 
-  await packagePolicyService.upgrade(soClient, esClient, policyIdsToUpgrade.items);
+  for (const packagePolicyId of fulfilledPolicyPackagePolicyIds) {
+    const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
+
+    if (!packagePolicy || !packagePolicy.package) {
+      continue;
+    }
+
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+      pkgVersion: packagePolicy.package.version,
+    });
+
+    const shouldUpgradePolicies =
+      AUTO_UPDATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
+      packageInfo.keepPoliciesUpToDate;
+
+    if (shouldUpgradePolicies) {
+      policyIdsToUpgrade.push(packagePolicy.id);
+    }
+  }
+
+  if (policyIdsToUpgrade.length) {
+    appContextService
+      .getLogger()
+      .debug(
+        `Upgrading ${policyIdsToUpgrade.length} package policies: ${policyIdsToUpgrade.join(', ')}`
+      );
+    try {
+      await packagePolicyService.upgrade(soClient, esClient, policyIdsToUpgrade);
+      // Swallow errors from upgrades
+    } catch (error) {
+      appContextService.getLogger().error(error);
+    }
+  }
 
   return {
     policies: fulfilledPolicies.map((p) =>
