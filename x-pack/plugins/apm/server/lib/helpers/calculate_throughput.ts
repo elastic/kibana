@@ -17,13 +17,13 @@ export function calculateThroughputWithRange({
 }
 
 export function calculateThroughputWithInterval({
-  durationAsSeconds,
+  bucketSize,
   value,
 }: {
-  durationAsSeconds: number;
+  bucketSize: number;
   value: number;
 }) {
-  const durationAsMinutes = durationAsSeconds / 60;
+  const durationAsMinutes = bucketSize / 60;
   return value / durationAsMinutes;
 }
 

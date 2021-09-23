@@ -79,7 +79,7 @@ export async function getThroughputChartsForBackend({
       return {
         x: bucket.key + offsetInMs,
         y: calculateThroughputWithInterval({
-          durationAsSeconds: bucketSize,
+          bucketSize,
           value: bucket.doc_count,
         }),
       };

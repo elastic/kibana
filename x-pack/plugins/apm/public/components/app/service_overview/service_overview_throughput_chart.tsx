@@ -144,7 +144,7 @@ export function ServiceOverviewThroughputChart({
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={(y) => asExactTransactionRate(y)}
+        yLabelFormat={asExactTransactionRate}
         customTheme={comparisonChartTheme}
       />
     </EuiPanel>

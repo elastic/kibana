@@ -91,7 +91,7 @@ export async function getThroughput({
       return {
         x: bucket.key,
         y: calculateThroughputWithInterval({
-          durationAsSeconds: bucketSize,
+          bucketSize,
           value: bucket.doc_count,
         }),
       };

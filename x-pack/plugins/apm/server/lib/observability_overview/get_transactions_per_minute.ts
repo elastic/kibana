@@ -97,7 +97,7 @@ export async function getTransactionsPerMinute({
       topTransactionTypeBucket?.timeseries.buckets.map((bucket) => ({
         x: bucket.key,
         y: calculateThroughputWithInterval({
-          durationAsSeconds: bucketSize,
+          bucketSize,
           value: bucket.doc_count,
         }),
       })) || [],
