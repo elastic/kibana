@@ -100,7 +100,9 @@ export const SourceSettings: React.FC = () => {
     getSourceConfigData(serviceType);
   }, []);
 
-  const { editPath } = staticSourceData.find(source => source.serviceType === serviceType) as SourceDataItem;
+  const { editPath } = staticSourceData.find(
+    (source) => source.serviceType === serviceType
+  ) as SourceDataItem;
 
   const [inputValue, setValue] = useState(name);
   const [confirmModalVisible, setModalVisibility] = useState(false);
