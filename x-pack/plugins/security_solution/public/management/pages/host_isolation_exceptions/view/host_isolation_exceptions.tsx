@@ -27,6 +27,7 @@ import { Immutable } from '../../../../../common/endpoint/types';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
+import { HostIsolationExceptionsEmptyState } from './components/empty';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -51,6 +52,7 @@ export const HostIsolationExceptions = () => {
 
   const handleItemComponentProps = (element: ExceptionListItemSchema): ArtifactEntryCardProps => ({
     item: element,
+    'data-test-subj': `hostIsolationExceptionsCard`,
   });
 
   const handlePaginatedContentChange: HostIsolationExceptionPaginatedContent['onChange'] =
@@ -72,6 +74,7 @@ export const HostIsolationExceptions = () => {
           defaultMessage="Host Isolation Exceptions"
         />
       }
+      actions={[]}
     >
       <SearchExceptions
         defaultValue={location.filter}
@@ -94,9 +97,11 @@ export const HostIsolationExceptions = () => {
         loading={isLoading}
         pagination={pagination}
         contentClassName="host-isolation-exceptions-container"
-        data-test-subj="HostIsolationExceptionsContent"
-        noItemsMessage={<h1>{' Nothing yet'}</h1>}
+        data-test-subj="hostIsolationExceptionsContent"
+        noItemsMessage={<HostIsolationExceptionsEmptyState />}
       />
     </AdministrationListPage>
   );
 };
+
+HostIsolationExceptions.displayName = 'HostIsolationExceptions';
