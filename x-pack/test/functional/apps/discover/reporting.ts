@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker']);
   const filterBar = getService('filterBar');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
@@ -155,7 +156,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('generates a report with data', async () => {
         await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
-        expect(await PageObjects.discover.getHitCount()).to.equal('740');
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getHitCount()).to.equal('740');
+        });
 
         const { text: csvFile } = await getReport();
         expectSnapshot(csvFile).toMatch();
@@ -164,10 +167,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('generates a report with filtered data', async () => {
         await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
-        expect(await PageObjects.discover.getHitCount()).to.equal('740');
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getHitCount()).to.equal('740');
+        });
 
         // filter
         await filterBar.addFilter('category', 'is', `Men's Shoes`);
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getHitCount()).to.equal('154');
+        });
 
         const { text: csvFile } = await getReport();
         expectSnapshot(csvFile).toMatch();
@@ -176,7 +184,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('generates a report with discover:searchFieldsFromSource = true', async () => {
         await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
-        expect(await PageObjects.discover.getHitCount()).to.equal('740');
+
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getHitCount()).to.equal('740');
+        });
 
         await setFieldsFromSource(true);
         await browser.refresh();
@@ -193,7 +204,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
-        expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
+        });
 
         const { text: csvFile } = await getReport();
         expectSnapshot(csvFile.length).toMatchInline(`760798`);
