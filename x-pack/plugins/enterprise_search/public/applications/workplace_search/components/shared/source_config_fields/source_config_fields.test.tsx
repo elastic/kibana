@@ -41,7 +41,7 @@ describe('SourceConfigFields', () => {
   it('shows API keys', () => {
     const wrapper = shallow(
       <SourceConfigFields
-        isOauth1={true}
+        isOauth1
         clientSecret="456"
         publicKey="abc"
         consumerKey="def"
