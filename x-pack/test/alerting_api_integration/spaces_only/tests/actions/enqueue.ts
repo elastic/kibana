@@ -24,7 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   // Failing: See https://github.com/elastic/kibana/issues/111812
-  describe('enqueue', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('enqueue', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
