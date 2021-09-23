@@ -51,6 +51,7 @@ export const validateSelectedPatterns = (
             self.indexOf(value) === index && dataView.patternList.includes(value)
         )
       : [];
+
   return {
     [id]: {
       ...state.sourcererScopes[id],
@@ -61,6 +62,7 @@ export const validateSelectedPatterns = (
           ? defaultDataViewByEventType({ state, eventType })
           : { selectedPatterns: getScopePatternListSelection(dataView, id, state.signalIndexName) }
         : {}),
+      loading: false,
     },
   };
 };

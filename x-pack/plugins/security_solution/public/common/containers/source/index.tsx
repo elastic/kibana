@@ -282,6 +282,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                         sourcererScopeName === SourcererScopeName.detections
                           ? signalIndexName != null &&
                             response.indicesExist.includes(signalIndexName)
+                          : sourcererScopeName === SourcererScopeName.default
+                          ? response.indicesExist.filter((i) => i !== signalIndexName).length > 0
                           : response.indicesExist.length > 0,
                       loading: false,
                       runtimeMappings: response.runtimeMappings,
