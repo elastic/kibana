@@ -218,8 +218,8 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
 
     const isGlobal = isGlobalEffectScope(trustedApp.effectScope);
 
-    const showAssignmentSection = useMemo(() => {
-      return isPlatinumPlus || (isEditMode && !isGlobal);
+    const hideAssignmentSection = useMemo(() => {
+      return !isPlatinumPlus && (!isEditMode || isGlobal);
     }, [isEditMode, isGlobal, isPlatinumPlus]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
@@ -547,7 +547,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
-        {isTrustedAppsByPolicyEnabled && showAssignmentSection ? (
+        {isTrustedAppsByPolicyEnabled && !hideAssignmentSection ? (
           <>
             <EuiHorizontalRule />
             <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>

@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -45,6 +46,10 @@ import { defaultNewTrustedApp } from '../../store/builders';
 import { getTrustedAppsListPath } from '../../../../common/routing';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { isGlobalEffectScope } from '../../state/type_guards';
+import { NewTrustedApp } from '../../../../../../common/endpoint/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -63,6 +68,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const trustedAppFetchError = useTrustedAppsSelector(editTrustedAppFetchError);
     const formValues = useTrustedAppsSelector(getCreationDialogFormEntry) || defaultNewTrustedApp();
     const location = useTrustedAppsSelector(getCurrentLocation);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
@@ -115,6 +121,12 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       },
       [dispatch]
     );
+
+    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
+      'trustedAppsByPolicyEnabled'
+    );
+
+    const isGlobal = isGlobalEffectScope((formValues as NewTrustedApp).effectScope);
 
     // If there was a failure trying to retrieve the Trusted App for edit item,
     // then redirect back to the list ++ show toast message.
@@ -169,7 +181,21 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-
+        {isTrustedAppsByPolicyEnabled && !isPlatinumPlus && isEdit && !isGlobal && (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseTitle',
+              { defaultMessage: 'Expire License' }
+            )}
+            color="warning"
+            iconType="help"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
+              defaultMessage="Please update your license to modify associated policy selection."
+            />
+          </EuiCallOut>
+        )}
         <EuiFlyoutBody>
           <EuiText size="xs">
             <h3>
