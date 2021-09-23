@@ -49,16 +49,10 @@ const configSchema = schema.object({
   }),
 });
 
-type ConfigType = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<ConfigType> = {
-  exposeToBrowser: {
-    serviceMapEnabled: true,
-    ui: true,
-    profilingEnabled: true,
-  },
-  schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+// plugin config
+export const config: PluginConfigDescriptor<APMXPackConfig> = {
+  deprecations: ({ deprecate, renameFromRoot }) => [
+    deprecate('enabled', '8.0.0'),
     renameFromRoot(
       'xpack.apm.maxServiceEnvironments',
       `uiSettings.overrides[${maxSuggestions}]`
@@ -68,9 +62,15 @@ export const config: PluginConfigDescriptor<ConfigType> = {
       `uiSettings.overrides[${maxSuggestions}]`
     ),
   ],
+  exposeToBrowser: {
+    serviceMapEnabled: true,
+    ui: true,
+    profilingEnabled: true,
+  },
+  schema: configSchema,
 };
 
-export type APMXPackConfig = TypeOf<typeof config.schema>;
+export type APMXPackConfig = TypeOf<typeof configSchema>;
 export type APMConfig = ReturnType<typeof mergeConfigs>;
 
 // plugin config and ui indices settings
