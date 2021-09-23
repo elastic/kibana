@@ -31,7 +31,7 @@ export const legacyRulesNotificationAlertType = ({
   logger: Logger;
 }): LegacyNotificationAlertTypeDefinition => ({
   id: LEGACY_NOTIFICATIONS_ID,
-  name: 'SIEM notification',
+  name: 'Security Solution notification (Legacy)',
   actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',
   producer: SERVER_APP_ID,
@@ -43,15 +43,30 @@ export const legacyRulesNotificationAlertType = ({
   minimumLicenseRequired: 'basic',
   isExportable: false,
   async executor({ startedAt, previousStartedAt, alertId, services, params }) {
+    // TODO: Change this to be a link to documentation on how to migrate: https://github.com/elastic/kibana/issues/113055
+    logger.warn(
+      'Security Solution notification (Legacy) system detected still running. Please see documentation on how to the new notification system.'
+    );
     const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',
       params.ruleAlertId
     );
 
     if (!ruleAlertSavedObject.attributes.params) {
-      logger.error(`Saved object for alert ${params.ruleAlertId} was not found`);
+      logger.error(
+        `Security Solution notification (Legacy) Saved object for alert ${params.ruleAlertId} was not found`
+      );
       return;
     }
+    logger.warn(
+      [
+        'Security Solution notification (Legacy) system still active for alert with',
+        `name: "${ruleAlertSavedObject.attributes.name}"`,
+        `description: "${ruleAlertSavedObject.attributes.params.description}"`,
+        `id: "${ruleAlertSavedObject.id}".`,
+        `Please see documentation on how to migrate to the new notification system.`,
+      ].join(' ')
+    );
 
     const { params: ruleAlertParams, name: ruleName } = ruleAlertSavedObject.attributes;
     const ruleParams = { ...ruleAlertParams, name: ruleName, id: ruleAlertSavedObject.id };
@@ -85,8 +100,8 @@ export const legacyRulesNotificationAlertType = ({
         ?.kibana_siem_app_url,
     });
 
-    logger.info(
-      `Found ${signalsCount} signals using signal rule name: "${ruleParams.name}", id: "${params.ruleAlertId}", rule_id: "${ruleParams.ruleId}" in "${ruleParams.outputIndex}" index`
+    logger.debug(
+      `Security Solution notification (Legacy) found ${signalsCount} signals using signal rule name: "${ruleParams.name}", id: "${params.ruleAlertId}", rule_id: "${ruleParams.ruleId}" in "${ruleParams.outputIndex}" index`
     );
 
     if (signalsCount !== 0) {

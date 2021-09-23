@@ -83,7 +83,7 @@ export const legacyCreateLegacyNotificationRoute = (router: SecuritySolutionPlug
         } else {
           await legacyCreateNotifications({
             rulesClient,
-            actions: [],
+            actions,
             enabled: true,
             ruleAlertId,
             interval,
