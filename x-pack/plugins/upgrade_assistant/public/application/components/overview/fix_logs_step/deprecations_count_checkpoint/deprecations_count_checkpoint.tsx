@@ -8,10 +8,12 @@
 import React, { FunctionComponent, useEffect } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
-
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
+
 import { useAppContext } from '../../../../app_context';
+import { uiMetricService, UIM_RESET_LOGS_COUNTER_CLICK } from '../../../../lib/ui_metric';
 
 const i18nTexts = {
   calloutTitle: (warningsCount: number, previousCheck: string) => (
@@ -72,6 +74,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
 
   const onResetClick = () => {
     const now = moment().toISOString();
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_RESET_LOGS_COUNTER_CLICK);
     setCheckpoint(now);
   };
 

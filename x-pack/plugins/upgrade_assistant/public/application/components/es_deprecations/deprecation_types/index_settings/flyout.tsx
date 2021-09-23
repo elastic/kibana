@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { EnrichedDeprecationInfo, IndexSettingAction } from '../../../../../../common/types';
 import type { ResponseError } from '../../../../lib/api';
+import { uiMetricService, UIM_INDEX_SETTINGS_DELETE_CLICK } from '../../../../lib/ui_metric';
 import type { Status } from '../../../types';
 import { DeprecationBadge } from '../../../shared';
 
@@ -106,6 +108,11 @@ export const RemoveIndexSettingsFlyout = ({
 
   // Flag used to hide certain parts of the UI if the deprecation has been resolved or is in progress
   const isResolvable = ['idle', 'error'].includes(statusType);
+
+  const onRemoveSettings = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_INDEX_SETTINGS_DELETE_CLICK);
+    removeIndexSettings(index!, (correctiveAction as IndexSettingAction).deprecatedSettings);
+  }, [correctiveAction, index, removeIndexSettings]);
 
   return (
     <>
@@ -190,12 +197,7 @@ export const RemoveIndexSettingsFlyout = ({
                 fill
                 data-test-subj="deleteSettingsButton"
                 color="danger"
-                onClick={() =>
-                  removeIndexSettings(
-                    index!,
-                    (correctiveAction as IndexSettingAction).deprecatedSettings
-                  )
-                }
+                onClick={onRemoveSettings}
               >
                 {statusType === 'error'
                   ? i18nTexts.retryRemoveButtonLabel
