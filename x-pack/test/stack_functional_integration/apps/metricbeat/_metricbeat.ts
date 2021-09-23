@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
@@ -27,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.selectIndexPattern('metricbeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('Today');
       await retry.try(async function () {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount());
+        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
     });
