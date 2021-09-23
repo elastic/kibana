@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useGetCase, UseGetCase } from './use_get_case';
-import { basicCase } from './mock';
+import { basicCase, basicResolvedCase } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
@@ -28,6 +28,7 @@ describe('useGetCase', () => {
       await waitForNextUpdate();
       expect(result.current).toEqual({
         data: null,
+        resolveOutcome: null,
         isLoading: false,
         isError: false,
         fetchCase: result.current.fetchCase,
@@ -36,13 +37,13 @@ describe('useGetCase', () => {
     });
   });
 
-  it('calls getCase with correct arguments', async () => {
-    const spyOnGetCase = jest.spyOn(api, 'getCase');
+  it('calls resolveCase with correct arguments', async () => {
+    const spyOnResolveCase = jest.spyOn(api, 'resolveCase');
     await act(async () => {
       const { waitForNextUpdate } = renderHook<string, UseGetCase>(() => useGetCase(basicCase.id));
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(spyOnGetCase).toBeCalledWith(basicCase.id, true, abortCtrl.signal);
+      expect(spyOnResolveCase).toBeCalledWith(basicCase.id, true, abortCtrl.signal);
     });
   });
 
@@ -55,6 +56,8 @@ describe('useGetCase', () => {
       await waitForNextUpdate();
       expect(result.current).toEqual({
         data: basicCase,
+        resolveOutcome: basicResolvedCase.outcome,
+        resolveAliasId: basicResolvedCase.aliasTargetId,
         isLoading: false,
         isError: false,
         fetchCase: result.current.fetchCase,
@@ -64,7 +67,7 @@ describe('useGetCase', () => {
   });
 
   it('refetch case', async () => {
-    const spyOnGetCase = jest.spyOn(api, 'getCase');
+    const spyOnResolveCase = jest.spyOn(api, 'resolveCase');
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCase>(() =>
         useGetCase(basicCase.id)
@@ -72,7 +75,7 @@ describe('useGetCase', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.fetchCase();
-      expect(spyOnGetCase).toHaveBeenCalledTimes(2);
+      expect(spyOnResolveCase).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -103,8 +106,8 @@ describe('useGetCase', () => {
   });
 
   it('unhappy path', async () => {
-    const spyOnGetCase = jest.spyOn(api, 'getCase');
-    spyOnGetCase.mockImplementation(() => {
+    const spyOnResolveCase = jest.spyOn(api, 'resolveCase');
+    spyOnResolveCase.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
@@ -117,6 +120,7 @@ describe('useGetCase', () => {
 
       expect(result.current).toEqual({
         data: null,
+        resolveOutcome: null,
         isLoading: false,
         isError: true,
         fetchCase: result.current.fetchCase,
