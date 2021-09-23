@@ -29,6 +29,7 @@ export enum ReindexStatus {
   failed,
   paused,
   cancelled,
+  error,
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';

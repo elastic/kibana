@@ -70,6 +70,9 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 }> = ({ closeFlyout, reindexState, startReindex, cancelReindex, renderGlobalCallouts }) => {
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
+  const hasError = status === ReindexStatus.error;
+  const isCompleted = status === ReindexStatus.completed;
+  const hasReindexingFailure = status === ReindexStatus.failed;
 
   return (
     <Fragment>
@@ -100,7 +103,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </p>
         </EuiCallOut>
-        {!hasRequiredPrivileges && (
+        {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
             <EuiCallOut
@@ -113,6 +116,40 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               color="danger"
               iconType="alert"
             />
+          </Fragment>
+        )}
+        {hasError && (
+          <Fragment>
+            <EuiSpacer />
+            <EuiCallOut
+              color="danger"
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.errorCalloutTitle"
+                  defaultMessage="Reindex status not available"
+                />
+              }
+            >
+              {reindexState.errorMessage}
+            </EuiCallOut>
+          </Fragment>
+        )}
+        {hasReindexingFailure && (
+          <Fragment>
+            <EuiSpacer />
+            <EuiCallOut
+              color="danger"
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.failureCalloutTitle"
+                  defaultMessage="Reindexing error"
+                />
+              }
+            >
+              {reindexState.errorMessage}
+            </EuiCallOut>
           </Fragment>
         )}
         <EuiSpacer />
@@ -136,7 +173,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {status !== ReindexStatus.completed && (
+          {!hasError && !hasReindexingFailure && !isCompleted && hasRequiredPrivileges && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
