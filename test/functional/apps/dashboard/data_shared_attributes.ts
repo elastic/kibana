@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should have panels with expected data-shared-item title', async () => {
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
-        originalPanelTitles = await PageObjects.dashboard.getPanelTitles();
+        originalPanelTitles = await PageObjects.dashboard.getVisiblePanelTitles();
         expect(sharedData.map((item) => item.title)).to.eql(originalPanelTitles);
       });
     });
