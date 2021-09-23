@@ -9,7 +9,6 @@ import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
-import { getIndexExists } from '@kbn/securitysolution-es-utils';
 import {
   IndexPatternsFetcher,
   ISearchStrategy,
@@ -67,7 +66,6 @@ export const findExistingIndices = async (
           allow_no_indices: false,
         });
         return searchResponse.body.indices.length > 0;
-        // return get(searchResponse, 'body.hits.total.value', 0) > 0;
       })
       .map((p) => p.catch((e) => false))
   );

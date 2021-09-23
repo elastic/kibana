@@ -28,6 +28,7 @@ import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { SelectedDataView } from '../../store/sourcerer/selectors';
+import { useUserInfo } from '../../../detections/components/user_info';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -233,13 +234,15 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     },
     [dispatch, sourcererScopeName]
   );
+
   const getSignalIndexNameSelector = useMemo(
     () => sourcererSelectors.signalIndexNameSelector(),
     []
   );
   const signalIndexNameSelector = useDeepEqualSelector(getSignalIndexNameSelector);
+
   const indexFieldsSearch = useCallback(
-    (selectedDataViewId: string) => {
+    (selectedDataViewId: string, newSignalsIndex?: string) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -263,7 +266,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                   patternList.includes(pattern)
                 );
                 const patternString = newSelectedPatterns.sort().join();
-                console.log('response', response);
+                const signalIndexName = signalIndexNameSelector ?? newSignalsIndex;
                 dispatch(
                   sourcererActions.setSource({
                     id: sourcererScopeName,
@@ -278,8 +281,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       indicesExist:
                         // TODO: Steph/sourcerer needs test
                         sourcererScopeName === SourcererScopeName.detections
-                          ? signalIndexNameSelector != null &&
-                            response.indicesExist.includes(signalIndexNameSelector)
+                          ? signalIndexName != null &&
+                            response.indicesExist.includes(signalIndexName)
                           : response.indicesExist.length > 0,
                       loading: false,
                       runtimeMappings: response.runtimeMappings,

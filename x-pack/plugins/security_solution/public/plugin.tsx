@@ -346,7 +346,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       } catch {
         signal = { name: null };
       }
-      console.log('signal', signal);
+
       const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       let defaultDataView: KibanaDataView;
       let kibanaDataViews: KibanaDataView[];

@@ -13,7 +13,6 @@ export interface GetSourcererDataView {
   signal: AbortSignal;
   body: {
     patternList: string[];
-    forceSignalsIndex: string;
   };
 }
 

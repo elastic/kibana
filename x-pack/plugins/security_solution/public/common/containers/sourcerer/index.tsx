@@ -64,55 +64,8 @@ export const useInitSourcerer = (
     getTimelineSelector(state, TimelineId.active)
   );
 
-  const updateSourcererDataView = useCallback(
-    (newSignalsIndex: string) => {
-      const asyncSearch = async (newPatternList: string[]) => {
-        abortCtrl.current = new AbortController();
-        dispatch(sourcererActions.setSourcererScopeLoading({ loading: true }));
-        try {
-          const response = await postSourcererDataView({
-            body: { patternList: newPatternList, forceSignalsIndex: newSignalsIndex },
-            signal: abortCtrl.current.signal,
-          });
-          dispatch(sourcererActions.setSourcererDataViews(response));
-          dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
-        } catch (err) {
-          addError(err, {
-            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
-              defaultMessage: 'Error updating Security Data View',
-            }),
-            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
-              defaultMessage: 'Refresh the page',
-            }),
-          });
-          dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
-        }
-      };
-      if (defaultDataView.title.indexOf(newSignalsIndex) === -1) {
-        abortCtrl.current.abort();
-        asyncSearch([...defaultDataView.title.split(','), newSignalsIndex]);
-      }
-    },
-    [addError, dispatch, defaultDataView.title]
-  );
-
-  useIndexFields(scopeId);
+  const { indexFieldsSearch } = useIndexFields(scopeId);
   useIndexFields(SourcererScopeName.timeline);
-
-  useEffect(() => {
-    if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
-      // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted and signals index is ALWAYS string
-      // update signal name also updates sourcerer
-      updateSourcererDataView(signalIndexName);
-      dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
-    }
-  }, [
-    dispatch,
-    loadingSignalIndex,
-    signalIndexName,
-    signalIndexNameSelector,
-    updateSourcererDataView,
-  ]);
 
   // Related to timeline
   useEffect(() => {
@@ -162,6 +115,59 @@ export const useInitSourcerer = (
     signalIndexNameSelector,
   ]);
 
+  const updateSourcererDataView = useCallback(
+    (newSignalsIndex: string) => {
+      const asyncSearch = async (newPatternList: string[]) => {
+        abortCtrl.current = new AbortController();
+        dispatch(sourcererActions.setSourcererScopeLoading({ loading: true }));
+        try {
+          const response = await postSourcererDataView({
+            body: { patternList: newPatternList },
+            signal: abortCtrl.current.signal,
+          });
+          if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
+            indexFieldsSearch(response.defaultDataView.id, newSignalsIndex);
+          }
+          // if (newPattern)
+          dispatch(sourcererActions.setSourcererDataViews(response));
+          dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
+        } catch (err) {
+          addError(err, {
+            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+              defaultMessage: 'Error updating Security Data View',
+            }),
+            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+              defaultMessage: 'Refresh the page',
+            }),
+          });
+          dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
+        }
+      };
+      if (defaultDataView.title.indexOf(newSignalsIndex) === -1) {
+        abortCtrl.current.abort();
+        asyncSearch([...defaultDataView.title.split(','), newSignalsIndex]);
+      }
+    },
+    [defaultDataView.title, dispatch, indexFieldsSearch, addError]
+  );
+  useEffect(() => {
+    if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
+      // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted and signals index is ALWAYS string
+      // update signal name also updates sourcerer
+      // we hit this the first time signal index is created
+      updateSourcererDataView(signalIndexName);
+      dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
+    }
+  }, [
+    defaultDataView.id,
+    dispatch,
+    indexFieldsSearch,
+    isSignalIndexExists,
+    loadingSignalIndex,
+    signalIndexName,
+    signalIndexNameSelector,
+    updateSourcererDataView,
+  ]);
   // Related to the detection page
   useEffect(() => {
     if (
