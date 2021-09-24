@@ -94,6 +94,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
 
+    // TODO: this is a contract leak and an issue.  We shouldn't be setting a module-level
+    // variable from plugin setup.  Refactor to an abstraction, if necessary.
     // Set up http client
     setHttpClient(core.http);
 
