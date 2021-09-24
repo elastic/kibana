@@ -76,7 +76,7 @@ describe('Detection rules', function () {
   const expectedNumberOfRules = 1;
   const expectedNumberOfAlerts = '100 alerts';
 
-  beforeEach(function () {
+  before('Prepare the index and the EQL rule', function () {
     cleanKibana();
     esArchiverCCSLoad('run-parts');
     createTimeline(getCCSEqlRule().timeline).then((response) => {
@@ -90,11 +90,11 @@ describe('Detection rules', function () {
     });
   });
 
-  afterEach(function () {
+  after('Clean up the EQL rule and the index', function () {
     esArchiverCCSUnload('run-parts');
   });
 
-  it('Creates and activates a new EQL rule', function () {
+  it('EQL rule on remote indices generates alerts', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
