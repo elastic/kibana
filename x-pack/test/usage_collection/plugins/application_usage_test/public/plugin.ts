@@ -12,8 +12,12 @@ import './types';
 export class ApplicationUsageTest implements Plugin {
   public setup(core: CoreSetup) {}
 
-  public async start(core: CoreStart) {
-    const applications = await core.application.applications$.pipe(first()).toPromise();
-    window.__applicationIds__ = [...applications.keys()];
+  public start(core: CoreStart) {
+    core.application.applications$
+      .pipe(first())
+      .toPromise()
+      .then((applications) => {
+        window.__applicationIds__ = [...applications.keys()];
+      });
   }
 }
