@@ -10,8 +10,7 @@ import { toArray } from 'lodash';
 import { getFormatService } from '../../../services';
 import { Table } from '../../types';
 import type { Dimensions } from '../../../../../pie/public';
-import { getColumnByAccessor } from '../accessor';
-import { getNextToAccessorColumn } from '../accessor/accessor';
+import { getColumnByAccessor, getNextToAccessorColumn } from '../accessor';
 
 interface Slice {
   name: string;

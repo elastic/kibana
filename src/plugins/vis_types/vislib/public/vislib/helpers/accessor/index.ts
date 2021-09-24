@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getColumnByAccessor, getValueByAccessor } from './accessor';
+export { getColumnByAccessor, getValueByAccessor, getNextToAccessorColumn } from './accessor';

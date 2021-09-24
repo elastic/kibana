@@ -25,7 +25,7 @@ export const getNextToAccessorColumn = <T extends BaseColumn>(
     return getNextValue(accessor, columns);
   }
   const colIndex = columns.findIndex((column) => column.id === accessor.id);
-  return getNextValue(colIndex, columns);
+  return colIndex !== -1 ? getNextValue(colIndex, columns) : undefined;
 };
 
 export const getValueByAccessor = <T extends Record<string, any>>(
