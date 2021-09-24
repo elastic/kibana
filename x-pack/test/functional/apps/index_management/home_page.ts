@@ -15,7 +15,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
   const security = getService('security');
-  const es = getService('es');
 
   describe('Home page', function () {
     before(async () => {
