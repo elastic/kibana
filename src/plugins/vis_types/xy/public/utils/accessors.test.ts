@@ -12,6 +12,7 @@ import {
   getComplexAccessor,
   getValueByAccessor,
   getXAccessor,
+  isPercentileIdEqualToSeriesId,
 } from './accessors';
 import { Accessor, AccessorFn, Datum } from '@elastic/charts';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -287,5 +288,39 @@ describe('getXAccessor', () => {
     const accessor = getXAccessor(aspect);
     expect(typeof accessor).toBe('function');
     expect((accessor as AccessorFn)?.(null)).toBe(accessorValue);
+  });
+});
+
+describe('isPercentileIdEqualToSeriesId', () => {
+  it('should be equal for plain column ids', () => {
+    const seriesColumnId = 'col-0-1';
+    const columnId = `${seriesColumnId}`;
+
+    const isEqual = isPercentileIdEqualToSeriesId(columnId, seriesColumnId);
+    expect(isEqual).toBeTruthy();
+  });
+
+  it('should be equal for column with percentile', () => {
+    const seriesColumnId = '1';
+    const columnId = `${seriesColumnId}.95`;
+
+    const isEqual = isPercentileIdEqualToSeriesId(columnId, seriesColumnId);
+    expect(isEqual).toBeTruthy();
+  });
+
+  it('should not be equal for column with percentile equal to seriesColumnId', () => {
+    const seriesColumnId = '1';
+    const columnId = `2.1`;
+
+    const isEqual = isPercentileIdEqualToSeriesId(columnId, seriesColumnId);
+    expect(isEqual).toBeFalsy();
+  });
+
+  it('should not be equal for column with percentile, where columnId contains seriesColumnId', () => {
+    const seriesColumnId = '1';
+    const columnId = `${seriesColumnId}2.1`;
+
+    const isEqual = isPercentileIdEqualToSeriesId(columnId, seriesColumnId);
+    expect(isEqual).toBeFalsy();
   });
 });
