@@ -10,6 +10,7 @@ import { HttpSetup } from 'kibana/public';
 import { isEmpty } from 'lodash';
 import { EmailConfig } from '../types';
 import { getServiceConfig } from './api';
+import { AdditionalEmailServices } from '../../../../../../actions/common';
 
 export function useEmailConfig(
   http: HttpSetup,
@@ -39,9 +40,12 @@ export function useEmailConfig(
   useEffect(() => {
     (async () => {
       if (emailService) {
+        editActionConfig('service', emailService);
+        if (emailService === AdditionalEmailServices.EXCHANGE) {
+          return;
+        }
         const serviceConfig = await getEmailServiceConfig(emailService);
 
-        editActionConfig('service', emailService);
         editActionConfig('host', serviceConfig?.host ? serviceConfig.host : '');
         editActionConfig('port', serviceConfig?.port ? serviceConfig.port : 0);
         editActionConfig('secure', null != serviceConfig?.secure ? serviceConfig.secure : false);

@@ -17,6 +17,7 @@ import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
+import { AdditionalEmailServices } from '../../common';
 
 export type EmailActionType = ActionType<
   ActionTypeConfigType,
@@ -32,13 +33,6 @@ export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
 
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
-
-// supported values for `service` in addition to nodemailer's list of well-known services
-export enum AdditionalEmailServices {
-  ELASTIC_CLOUD = 'elastic_cloud',
-  EXCHANGE = 'exchange_server',
-  OTHER = 'other',
-}
 
 // these values for `service` require users to fill in host/port/secure
 export const CUSTOM_HOST_PORT_SERVICES: string[] = [AdditionalEmailServices.OTHER];

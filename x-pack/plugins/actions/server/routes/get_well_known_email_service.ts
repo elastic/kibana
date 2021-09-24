@@ -10,10 +10,10 @@ import { IRouter } from 'kibana/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { ILicenseState } from '../lib';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import { AdditionalEmailServices, INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { AdditionalEmailServices, ELASTIC_CLOUD_SERVICE } from '../builtin_action_types/email';
+import { ELASTIC_CLOUD_SERVICE } from '../builtin_action_types/email';
 
 const paramSchema = schema.object({
   service: schema.string(),
