@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, timeFrame);
+          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should alert on the last value when the end date is the same as the last event', async () => {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, timeFrame);
+          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -160,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, timeFrame);
+          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               dev: {
@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, timeFrame);
+          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               dev: {
@@ -234,6 +234,53 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+
+        it('should report no data when one of the groups has a data gap', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['env'],
+          };
+          const timeFrame = { end: gauge.midpoint };
+          const results = await evaluateAlert(
+            esClient,
+            params,
+            configuration,
+            ['dev', 'prod'],
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              dev: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'sum',
+                metric: 'value',
+                currentValue: null,
+                timestamp: '2021-01-01T00:25:00.000Z',
+                shouldFire: [false],
+                shouldWarn: [false],
+                isNoData: [true],
+                isError: false,
+              },
+              prod: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'sum',
+                metric: 'value',
+                currentValue: 0,
+                timestamp: '2021-01-01T00:25:00.000Z',
+                shouldFire: [false],
+                shouldWarn: [false],
+                isNoData: [false],
+                isError: false,
+              },
+            },
+          ]);
+        });
       });
     });
 
@@ -254,7 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const results = await evaluateAlert(esClient, params, configuration, timeFrame);
+          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -294,7 +341,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const results = await evaluateAlert(esClient, params, configuration, timeFrame);
+          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
           expect(results).to.eql([
             {
               dev: {
