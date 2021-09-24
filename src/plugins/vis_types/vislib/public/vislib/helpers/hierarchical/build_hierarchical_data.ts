@@ -7,11 +7,11 @@
  */
 
 import { toArray } from 'lodash';
-import { ExpressionValueVisDimension } from '../../../../../../visualizations/common';
 import { getFormatService } from '../../../services';
 import { Table } from '../../types';
 import type { Dimensions } from '../../../../../pie/public';
 import { getColumnByAccessor } from '../accessor';
+import { getNextToAccessorColumn } from '../accessor/accessor';
 
 interface Slice {
   name: string;
@@ -25,17 +25,6 @@ interface Slice {
     value: string | number | object;
   };
 }
-
-const getNextToAccessorColumn = (
-  columns: Table['columns'],
-  accessor: ExpressionValueVisDimension['accessor']
-) => {
-  if (typeof accessor === 'number') {
-    return columns[accessor + 1];
-  }
-  const colIndex = columns.findIndex((column) => column.id === accessor.id);
-  return columns[colIndex + 1];
-};
 
 export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Dimensions) => {
   let slices: Slice[];
@@ -62,7 +51,7 @@ export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Di
         const bucketValueColumn = getNextToAccessorColumn(table.columns, bucket.accessor);
         const bucketFormatter = getFormatService().deserialize(bucket.format);
         const name = bucketFormatter.convert(row[bucketColumn.id]);
-        const size = row[bucketValueColumn.id] as number;
+        const size = bucketValueColumn ? (row[bucketValueColumn.id] as number) : 0;
         names[name] = name;
 
         let slice = dataLevel.find((dataLevelSlice) => dataLevelSlice.name === name);
