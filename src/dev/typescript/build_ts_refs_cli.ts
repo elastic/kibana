@@ -120,9 +120,6 @@ export async function runBuildRefsCli() {
           --ignore-type-failures  If tsc reports type errors, ignore them and just log a small warning
         `,
       },
-      log: {
-        defaultLevel: 'debug',
-      },
     }
   );
 }

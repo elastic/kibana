@@ -132,7 +132,7 @@ export const BootstrapCommand: ICommand = {
 
     await spawnStreaming(
       process.execPath,
-      ['scripts/build_ts_refs', '--ignore-type-failures', '--info'],
+      ['scripts/build_ts_refs', '--ignore-type-failures'],
       {
         cwd: kbn.getAbsolute(),
         env: process.env,
