@@ -28,8 +28,8 @@ export const BootstrapCommand: ICommand = {
   name: 'bootstrap',
 
   reportTiming: {
-    group: 'bootstrap',
-    id: 'overall time',
+    group: 'scripts/kbn bootstrap',
+    id: 'total',
   },
 
   async run(projects, projectGraph, { options, kbn, rootPath }) {
@@ -68,7 +68,7 @@ export const BootstrapCommand: ICommand = {
       const forceInstallStartTime = Date.now();
       await runBazel(['run', '@nodejs//:yarn'], runOffline);
       timings.push({
-        id: 'yarn install',
+        id: 'force install dependencies',
         ms: Date.now() - forceInstallStartTime,
       });
     }
@@ -132,7 +132,7 @@ export const BootstrapCommand: ICommand = {
 
     await spawnStreaming(
       process.execPath,
-      ['scripts/build_ts_refs', '--ignore-type-failures', '--info'],
+      ['scripts/build_ts_refs', '--ignore-type-failures'],
       {
         cwd: kbn.getAbsolute(),
         env: process.env,
@@ -145,7 +145,7 @@ export const BootstrapCommand: ICommand = {
       upstreamBranch: kbn.kibanaProject.json.branch,
       // prevent loading @kbn/utils by passing null
       kibanaUuid: kbn.getUuid() || null,
-      timings: timings.map((t) => ({ group: 'bootstrap', ...t })),
+      timings: timings.map((t) => ({ group: 'scripts/kbn bootstrap', ...t })),
     });
   },
 };

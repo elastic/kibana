@@ -8911,8 +8911,8 @@ const BootstrapCommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
   reportTiming: {
-    group: 'bootstrap',
-    id: 'overall time'
+    group: 'scripts/kbn bootstrap',
+    id: 'total'
   },
 
   async run(projects, projectGraph, {
@@ -8950,7 +8950,7 @@ const BootstrapCommand = {
       const forceInstallStartTime = Date.now();
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_8__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
       timings.push({
-        id: 'yarn install',
+        id: 'force install dependencies',
         ms: Date.now() - forceInstallStartTime
       });
     } // build packages
@@ -9001,7 +9001,7 @@ const BootstrapCommand = {
       prefix: '[vscode]',
       debug: false
     });
-    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_3__["spawnStreaming"])(process.execPath, ['scripts/build_ts_refs', '--ignore-type-failures', '--info'], {
+    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_3__["spawnStreaming"])(process.execPath, ['scripts/build_ts_refs', '--ignore-type-failures'], {
       cwd: kbn.getAbsolute(),
       env: process.env
     }, {
@@ -9014,7 +9014,7 @@ const BootstrapCommand = {
       // prevent loading @kbn/utils by passing null
       kibanaUuid: kbn.getUuid() || null,
       timings: timings.map(t => _objectSpread({
-        group: 'bootstrap'
+        group: 'scripts/kbn bootstrap'
       }, t))
     });
   }
@@ -9121,6 +9121,7 @@ class CiStatsReporter {
       isElasticCommitter: email ? email.endsWith('@elastic.co') : undefined,
       kibanaUuid
     };
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
     return await this.req({
       auth: !!buildId,
       path: '/v1/timings',
@@ -58099,8 +58100,8 @@ const BuildCommand = {
   description: 'Runs a build in the Bazel built packages',
   name: 'build',
   reportTiming: {
-    group: 'kbn build',
-    id: 'overall time'
+    group: 'scripts/kbn build',
+    id: 'total'
   },
 
   async run(projects, projectGraph, {
@@ -58149,8 +58150,8 @@ const CleanCommand = {
   description: 'Deletes output directories, node_modules and resets internal caches.',
   name: 'clean',
   reportTiming: {
-    group: 'kbn clean',
-    id: 'overall time'
+    group: 'scripts/kbn clean',
+    id: 'total'
   },
 
   async run(projects) {
@@ -62849,8 +62850,8 @@ const ResetCommand = {
   description: 'Deletes node_modules and output directories, resets internal and disk caches, and stops Bazel server',
   name: 'reset',
   reportTiming: {
-    group: 'kbn reset',
-    id: 'overall time'
+    group: 'scripts/kbn reset',
+    id: 'total'
   },
 
   async run(projects) {
@@ -62964,6 +62965,10 @@ __webpack_require__.r(__webpack_exports__);
 const RunCommand = {
   description: 'Run script defined in package.json in each package that contains that script (only works on packages not using Bazel yet)',
   name: 'run',
+  reportTiming: {
+    group: 'scripts/kbn run',
+    id: 'total'
+  },
 
   async run(projects, projectGraph, {
     extraArgs,
