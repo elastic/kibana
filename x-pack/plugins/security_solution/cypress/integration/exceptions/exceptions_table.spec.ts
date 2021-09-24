@@ -72,6 +72,20 @@ describe('Exceptions Table', () => {
     esArchiverUnload('auditbeat_for_exceptions');
   });
 
+  it('Exports exception list', function () {
+    cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
+
+    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    waitForExceptionsTableToBeLoaded();
+    exportExceptionList();
+
+    cy.wait('@export').then(({ response }) =>
+      cy
+        .wrap(response?.body!)
+        .should('eql', expectedExportedExceptionList(this.exceptionListResponse))
+    );
+  });
+
   it('Filters exception lists on search', () => {
     waitForPageWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
@@ -109,21 +123,6 @@ describe('Exceptions Table', () => {
     clearSearchSelection();
 
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
-  });
-
-  it('Exports exception list', function () {
-    cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
-
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
-    waitForExceptionsTableToBeLoaded();
-
-    exportExceptionList();
-
-    cy.wait('@export').then(({ response }) =>
-      cy
-        .wrap(response?.body!)
-        .should('eql', expectedExportedExceptionList(this.exceptionListResponse))
-    );
   });
 
   it('Deletes exception list without rule reference', () => {
