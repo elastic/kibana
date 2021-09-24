@@ -17,10 +17,9 @@
     "features",
     "licensing",
     "triggersActionsUi",
-    "ruleRegistry",
-    "observability",
     "usageCollection",
-    "lens"
+    "ruleRegistry",
+    "observability"
   ],
   "server": true,
   "ui": true,

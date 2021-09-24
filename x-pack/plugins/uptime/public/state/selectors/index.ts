@@ -65,6 +65,8 @@ export const isMLJobDeletedSelector = ({ ml }: AppState) => ml.deleteJob;
 
 export const anomaliesSelector = ({ ml }: AppState) => ml.anomalies.data;
 
+export const selectDurationLines = ({ monitorDuration }: AppState) => monitorDuration;
+
 export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppState) =>
   alertFlyoutVisible;
 

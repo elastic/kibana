@@ -11,4 +11,5 @@ export * from './monitor_list';
 export * from './monitor_status';
 export * from './ping';
 export * from './ml_anomaly';
+export * from './monitor_duration';
 export * from './index_status';

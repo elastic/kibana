@@ -110,7 +110,6 @@ const Application = (props: UptimeAppProps) => {
               ...plugins,
               storage,
               data: startPlugins.data,
-              lens: startPlugins.lens,
               triggersActionsUi: startPlugins.triggersActionsUi,
               observability: startPlugins.observability,
             }}
