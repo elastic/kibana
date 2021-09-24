@@ -20,10 +20,15 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 describe('Overview Page', () => {
   before(() => {
     cleanKibana();
+    esArchiverLoad('overview');
+    loginAndWaitForPage(OVERVIEW_URL);
+  });
+
+  after(() => {
+    esArchiverLoad('overview');
   });
 
   it('Host stats render with correct values', () => {
-    loginAndWaitForPage(OVERVIEW_URL);
     expandHostStats();
 
     HOST_STATS.forEach((stat) => {
@@ -32,7 +37,6 @@ describe('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
-    loginAndWaitForPage(OVERVIEW_URL);
     expandNetworkStats();
 
     NETWORK_STATS.forEach((stat) => {
