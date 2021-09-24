@@ -10320,7 +10320,6 @@
     "xpack.features.devToolsFeatureName": "開発ツール",
     "xpack.features.devToolsPrivilegesTooltip": "また、ユーザーに適切な Elasticsearch クラスターとインデックスの権限が与えられている必要があります。",
     "xpack.features.discoverFeatureName": "Discover",
-    "xpack.features.indexPatternFeatureName": "インデックスパターン管理",
     "xpack.features.ossFeatures.dashboardCreateShortUrlPrivilegeName": "短い URL を作成",
     "xpack.features.ossFeatures.dashboardSearchSessionsFeatureName": "検索セッションの保存",
     "xpack.features.ossFeatures.dashboardShortUrlSubFeatureName": "短い URL",
