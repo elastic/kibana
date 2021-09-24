@@ -16,7 +16,12 @@
     "hits": [
       {
         "_source": {
-          "@timestamp": "2018-06-04T12:00:00.000Z"
+          "@timestamp": "2018-06-04T12:00:00.000Z",
+          "service": {
+            "node": {
+              "name": "node"
+            }
+          }
         }
       }
     ]

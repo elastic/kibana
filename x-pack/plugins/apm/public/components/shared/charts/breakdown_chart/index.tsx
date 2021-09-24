@@ -19,7 +19,6 @@ import {
   TickFormatter,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -125,9 +124,7 @@ export function BreakdownChart({
             dataValues={annotations.map((annotation) => ({
               dataValue: annotation['@timestamp'],
               header: asAbsoluteDateTime(annotation['@timestamp']),
-              details: `${i18n.translate('xpack.apm.chart.annotation.version', {
-                defaultMessage: 'Version',
-              })} ${annotation.text}`,
+              details: annotation.text,
             }))}
             style={{
               line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },

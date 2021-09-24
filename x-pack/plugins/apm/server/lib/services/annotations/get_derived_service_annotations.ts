@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import {
+  AGENT_EPHEMERAL_ID,
   SERVICE_NAME,
-  SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -41,7 +42,7 @@ export async function getDerivedServiceAnnotations({
     ...environmentQuery(environment),
   ];
 
-  const versions =
+  const agents =
     (
       await apmEventClient.search('get_derived_service_annotations', {
         apm: {
@@ -59,44 +60,41 @@ export async function getDerivedServiceAnnotations({
             },
           },
           aggs: {
-            versions: {
+            agents: {
               terms: {
-                field: SERVICE_VERSION,
+                field: AGENT_EPHEMERAL_ID,
               },
             },
           },
         },
       })
-    ).aggregations?.versions.buckets.map((bucket) => bucket.key) ?? [];
+    ).aggregations?.agents.buckets.map((bucket) => bucket.key) ?? [];
 
-  if (versions.length <= 1) {
-    return [];
-  }
-  const annotations = await Promise.all(
-    versions.map(async (version) => {
-      const response = await apmEventClient.search(
-        'get_first_seen_of_version',
-        {
-          apm: {
-            events: [
-              getProcessorEventForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
-            ],
-          },
-          body: {
-            size: 1,
-            query: {
-              bool: {
-                filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
+    const annotations = await Promise.all(
+      agents.map(async (agent) => {
+        const response = await apmEventClient.search(
+          'get_first_seen_of_agent',
+          {
+            apm: {
+              events: [
+                getProcessorEventForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
+              ],
+            },
+            body: {
+              size: 1,
+              query: {
+                bool: {
+                  filter: [...filter, { term: { [AGENT_EPHEMERAL_ID]: agent } }],
+                },
+              },
+              sort: {
+                '@timestamp': 'asc',
               },
             },
-            sort: {
-              '@timestamp': 'asc',
-            },
-          },
-        }
-      );
+          }
+        );
 
       const firstSeen = new Date(
         response.hits.hits[0]._source['@timestamp']
@@ -104,7 +102,7 @@ export async function getDerivedServiceAnnotations({
 
       if (!isFiniteNumber(firstSeen)) {
         throw new Error(
-          'First seen for version was unexpectedly undefined or null.'
+          'First seen for agent was unexpectedly undefined or null.'
         );
       }
 
@@ -112,11 +110,37 @@ export async function getDerivedServiceAnnotations({
         return null;
       }
 
+      const node = response.hits.hits[0]._source.service?.node?.name;
+      const version = response.hits.hits[0]._source.service?.version;
+
+      const annotationText =
+        version !== undefined
+          ? i18n.translate(
+              'xpack.apm.chart.annotation.nodeStartedWithVersion',
+              {
+                defaultMessage:
+                  'Started {serviceNode} with Version {serviceVersion}',
+                values: {
+                  serviceNode: node,
+                  serviceVersion: version,
+                },
+              }
+            )
+          : i18n.translate(
+              'xpack.apm.chart.annotation.nodeStartedWithoutVersion',
+              {
+                defaultMessage: 'Started {serviceNode}',
+                values: {
+                  serviceNode: node,
+                },
+              }
+            );
+
       return {
-        type: AnnotationType.VERSION,
-        id: version,
+        type: AnnotationType.NODE_STARTED,
+        id: agent,
         '@timestamp': firstSeen,
-        text: version,
+        text: annotationText,
       };
     })
   );

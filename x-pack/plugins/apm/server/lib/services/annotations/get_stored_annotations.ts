@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { rangeQuery } from '../../../../../observability/server';
@@ -68,7 +69,12 @@ export function getStoredAnnotations({
           type: AnnotationType.VERSION,
           id: hit._id as string,
           '@timestamp': new Date(hit._source['@timestamp']).getTime(),
-          text: hit._source.message,
+          text:
+            i18n.translate('xpack.apm.chart.annotation.version', {
+              defaultMessage: 'Version',
+            }) +
+            ' ' +
+            hit._source.message,
         };
       });
     } catch (error) {

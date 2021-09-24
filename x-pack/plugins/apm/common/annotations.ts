@@ -6,6 +6,7 @@
  */
 
 export enum AnnotationType {
+  NODE_STARTED = 'node-started',
   VERSION = 'version',
 }
 

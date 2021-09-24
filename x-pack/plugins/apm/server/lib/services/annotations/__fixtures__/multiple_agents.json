@@ -12,16 +12,20 @@
       "value": 10000,
       "relation": "gte"
     },
-    "max_score": 0,
+    "max_score": null,
     "hits": []
   },
   "aggregations": {
-    "versions": {
+    "agents": {
       "doc_count_error_upper_bound": 0,
       "sum_other_doc_count": 0,
       "buckets": [
         {
-          "key": "8.0.0",
+          "key": "agent2",
+          "doc_count": 615285
+        },
+        {
+          "key": "agent1",
           "doc_count": 615285
         }
       ]

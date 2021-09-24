@@ -14,10 +14,11 @@ import {
   SearchParamsMock,
 } from '../../../utils/test_helpers';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
-import multipleVersions from './__fixtures__/multiple_versions.json';
-import noVersions from './__fixtures__/no_versions.json';
-import oneVersion from './__fixtures__/one_version.json';
-import versionsFirstSeen from './__fixtures__/versions_first_seen.json';
+import multipleAgents from './__fixtures__/multiple_agents.json';
+import noAgents from './__fixtures__/no_agents.json';
+import oneAgent from './__fixtures__/one_agent.json';
+import nodeFirstSeen from './__fixtures__/node_first_seen.json';
+import nodeFirstSeenWithVersion from './__fixtures__/node_first_seen_with_version.json';
 
 describe('getServiceAnnotations', () => {
   let mock: SearchParamsMock;
@@ -26,7 +27,7 @@ describe('getServiceAnnotations', () => {
     mock.teardown();
   });
 
-  describe('with 0 versions', () => {
+  describe('with 0 agents', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
         (setup) =>
@@ -38,7 +39,7 @@ describe('getServiceAnnotations', () => {
           }),
         {
           mockResponse: () =>
-            noVersions as ESSearchResponse<
+            noAgents as ESSearchResponse<
               unknown,
               ESSearchRequest,
               {
@@ -52,8 +53,12 @@ describe('getServiceAnnotations', () => {
     });
   });
 
-  describe('with 1 version', () => {
-    it('returns no annotations', async () => {
+  describe('with 1 agent', () => {
+    it('returns one annotation', async () => {
+      const responses = [
+        oneAgent,
+        nodeFirstSeen,
+      ];
       mock = await inspectSearchParams(
         (setup) =>
           getDerivedServiceAnnotations({
@@ -64,7 +69,7 @@ describe('getServiceAnnotations', () => {
           }),
         {
           mockResponse: () =>
-            oneVersion as ESSearchResponse<
+            (responses.shift() as unknown) as ESSearchResponse<
               unknown,
               ESSearchRequest,
               {
@@ -74,16 +79,25 @@ describe('getServiceAnnotations', () => {
         }
       );
 
-      expect(mock.response).toEqual([]);
+      expect(mock.spy.mock.calls.length).toBe(2);
+
+      expect(mock.response).toEqual([
+        {
+          id: 'agent2',
+          text: 'Started node',
+          '@timestamp': new Date('2018-06-04T12:00:00.000Z').getTime(),
+          type: 'node-started',
+        },
+      ]);
     });
   });
 
-  describe('with more than 1 version', () => {
+  describe('with more than 1 agent', () => {
     it('returns two annotations', async () => {
       const responses = [
-        multipleVersions,
-        versionsFirstSeen,
-        versionsFirstSeen,
+        multipleAgents,
+        nodeFirstSeen,
+        nodeFirstSeen,
       ];
       mock = await inspectSearchParams(
         (setup) =>
@@ -109,16 +123,55 @@ describe('getServiceAnnotations', () => {
 
       expect(mock.response).toEqual([
         {
-          id: '8.0.0',
-          text: '8.0.0',
+          id: 'agent2',
+          text: 'Started node',
           '@timestamp': new Date('2018-06-04T12:00:00.000Z').getTime(),
-          type: 'version',
+          type: 'node-started',
         },
         {
-          id: '7.5.0',
-          text: '7.5.0',
+          id: 'agent1',
+          text: 'Started node',
           '@timestamp': new Date('2018-06-04T12:00:00.000Z').getTime(),
-          type: 'version',
+          type: 'node-started',
+        },
+      ]);
+    });
+  });
+
+  describe('with 1 agent with version', () => {
+    it('returns one annotation', async () => {
+      const responses = [
+        oneAgent,
+        nodeFirstSeenWithVersion,
+      ];
+      mock = await inspectSearchParams(
+        (setup) =>
+          getDerivedServiceAnnotations({
+            setup,
+            serviceName: 'foo',
+            environment: 'bar',
+            searchAggregatedTransactions: false,
+          }),
+        {
+          mockResponse: () =>
+            (responses.shift() as unknown) as ESSearchResponse<
+              unknown,
+              ESSearchRequest,
+              {
+                restTotalHitsAsInt: false;
+              }
+            >,
+        }
+      );
+
+      expect(mock.spy.mock.calls.length).toBe(2);
+
+      expect(mock.response).toEqual([
+        {
+          id: 'agent2',
+          text: 'Started node with Version 1.0',
+          '@timestamp': new Date('2018-06-04T12:00:00.000Z').getTime(),
+          type: 'node-started',
         },
       ]);
     });

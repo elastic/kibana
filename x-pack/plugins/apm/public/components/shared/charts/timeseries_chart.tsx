@@ -22,7 +22,6 @@ import {
   YDomainRange,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Suspense, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -160,9 +159,7 @@ export function TimeseriesChart({
             dataValues={annotations.map((annotation) => ({
               dataValue: annotation['@timestamp'],
               header: asAbsoluteDateTime(annotation['@timestamp']),
-              details: `${i18n.translate('xpack.apm.chart.annotation.version', {
-                defaultMessage: 'Version',
-              })} ${annotation.text}`,
+              details: annotation.text,
             }))}
             style={{
               line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
