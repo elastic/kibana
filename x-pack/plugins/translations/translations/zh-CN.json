@@ -10422,7 +10422,6 @@
     "xpack.features.devToolsFeatureName": "开发工具",
     "xpack.features.devToolsPrivilegesTooltip": "还应向用户授予适当的 Elasticsearch 集群和索引权限",
     "xpack.features.discoverFeatureName": "Discover",
-    "xpack.features.indexPatternFeatureName": "索引模式管理",
     "xpack.features.ossFeatures.dashboardCreateShortUrlPrivilegeName": "创建短 URL",
     "xpack.features.ossFeatures.dashboardSearchSessionsFeatureName": "存储搜索会话",
     "xpack.features.ossFeatures.dashboardShortUrlSubFeatureName": "短 URL",
