@@ -516,7 +516,7 @@ export default async function ({ readConfigFile }) {
 
         index_management_user: {
           elasticsearch: {
-            cluster: ['monitor', 'manage_index_templates', 'manage_ilm', 'manage'],
+            cluster: ['monitor', 'manage_index_templates'],
             indices: [
               {
                 names: ['*'],
