@@ -14,9 +14,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
+  const security = getService('security');
+  const es = getService('es');
 
   describe('Home page', function () {
     before(async () => {
+      await security.testUser.setRoles(['index_management_user', 'kibana_admin']);
       await pageObjects.common.navigateToApp('indexManagement');
     });
 

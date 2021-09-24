@@ -516,14 +516,22 @@ export default async function ({ readConfigFile }) {
 
         index_management_user: {
           elasticsearch: {
-            cluster: ['monitor', 'manage_index_templates'],
+            cluster: ['monitor', 'manage_index_templates', 'manage_ilm', 'manage'],
             indices: [
               {
-                names: ['geo_shapes*'],
+                names: ['*'],
                 privileges: ['all'],
               },
             ],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         ingest_pipelines_user: {
