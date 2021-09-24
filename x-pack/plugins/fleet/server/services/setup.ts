@@ -25,7 +25,7 @@ import { outputService } from './output';
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { ensureAgentActionPolicyChangeExists } from './agents';
+import { ensureFleetServerAgentPoliciesExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
@@ -38,7 +38,7 @@ export interface SetupStatus {
   nonFatalErrors: Array<PreconfigurationError | DefaultPackagesInstallationError>;
 }
 
-export async function setupIngestManager(
+export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
@@ -101,7 +101,7 @@ async function createSetupSideEffects(
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
-  await ensureAgentActionPolicyChangeExists(soClient, esClient);
+  await ensureFleetServerAgentPoliciesExists(soClient, esClient);
 
   return {
     isInitialized: true,
