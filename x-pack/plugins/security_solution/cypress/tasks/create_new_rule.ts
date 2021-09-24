@@ -473,6 +473,7 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRul
     indexField: rule.indicatorMappingField,
     indicatorIndexField: rule.indicatorIndexField,
   });
+  getCustomIndicatorQueryInput().type('{selectall}{enter}*:*');
   getDefineContinueButton().should('exist').click({ force: true });
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
