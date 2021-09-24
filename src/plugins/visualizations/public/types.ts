@@ -53,6 +53,7 @@ export interface VisSavedObject extends ISavedVis {
   searchSource?: any;
   version?: string;
   isSaving?: boolean;
+  __tags?: string[];
 }
 
 export interface VisToExpressionAstParams {

@@ -12,7 +12,7 @@
     "savedObjects"
   ],
   "optionalPlugins": ["usageCollection", "spaces"],
-  "requiredBundles": ["kibanaUtils", "discover"],
+  "requiredBundles": ["kibanaUtils", "discover", "savedObjectsTaggingOss"],
   "extraPublicDirs": ["common/constants", "common/prepare_log_table", "common/expression_functions"],
   "owner": {
     "name": "Vis Editors",

@@ -29,5 +29,5 @@ export interface SavedObjectDecorator<T extends SavedObject = SavedObject> {
 }
 
 export type SavedObjectDecoratorFactory<T extends SavedObject = SavedObject> = (
-  services: SavedObjectKibanaServices
+  services?: SavedObjectKibanaServices
 ) => SavedObjectDecorator<T>;

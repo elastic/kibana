@@ -26,7 +26,8 @@ import {
   saveWithConfirmation,
   isErrorNonFatal,
 } from '../../../../plugins/saved_objects/public';
-import { getTypes, getSpaces, getSavedSearchLoader } from '../services';
+import { tagDecoratorConfig } from '../../../../plugins/saved_objects_tagging_oss/public';
+import { getTypes, getSpaces } from '../services';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type { VisSavedObject, SerializedVis, ISavedVis } from '../types';
 // @ts-ignore
@@ -200,13 +201,17 @@ export async function getSavedVisualization(
     getEsType: () => SAVED_VIS_TYPE,
     getDisplayName: () => SAVED_VIS_TYPE,
     searchSource: opts.searchSource ? services.search.searchSource.createEmpty() : undefined,
-  } as { [key: string]: any };
+  } as VisSavedObject & { _source: any };
+  const config = { injectReferences };
 
   const defaultsProps = getDefaults(opts);
+  const tagDecorator = tagDecoratorConfig.factory();
+  tagDecorator.decorateObject(savedObject);
+  tagDecorator.decorateConfig(config);
 
   if (!id) {
     _.assign(savedObject, defaultsProps);
-    return Promise.resolve(savedObject as VisSavedObject);
+    return Promise.resolve(savedObject);
   }
 
   const {
@@ -265,7 +270,7 @@ export async function getSavedVisualization(
   }
 
   if (resp.references && resp.references.length > 0) {
-    injectReferences(savedObject as VisSavedObject, resp.references);
+    config.injectReferences(savedObject, resp.references);
   }
 
   savedObject.visState = await updateOldState(savedObject.visState);
@@ -273,11 +278,7 @@ export async function getSavedVisualization(
     await services.dataViews.get(savedObject.searchSourceFields.index as any);
   }
 
-  if (savedObject.savedSearchId && getSavedSearchLoader()) {
-    await getSavedSearchLoader().get(savedObject.savedSearchId);
-  }
-
-  return savedObject as VisSavedObject;
+  return savedObject;
 }
 
 export async function saveVisualization(
@@ -309,6 +310,11 @@ export async function saveVisualization(
     delete savedObject.id;
   }
 
+  const config = { extractReferences };
+
+  const tagDecorator = tagDecoratorConfig.factory();
+  tagDecorator.decorateConfig(config);
+
   const attributes: any = {
     visState: JSON.stringify(savedObject.visState),
     title: savedObject.title,
@@ -316,6 +322,7 @@ export async function saveVisualization(
     description: savedObject.description,
     savedSearchId: savedObject.savedSearchId,
     version: savedObject.version,
+    __tags: savedObject.__tags,
   };
   const references: any = [];
 
@@ -337,7 +344,7 @@ export async function saveVisualization(
     references.push(...searchSourceReferences);
   }
 
-  const extractedRefs = extractReferences({ attributes, references });
+  let extractedRefs = config.extractReferences({ attributes, references });
 
   if (!extractedRefs.references) {
     throw new Error('References not returned from extractReferences');

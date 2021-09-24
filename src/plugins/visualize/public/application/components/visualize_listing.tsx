@@ -114,7 +114,7 @@ export const VisualizeListing = () => {
 
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return findListItems(savedObjects.client, searchTerm, listingLimit, references).then(
-        ({ total, hits }: { total: number; hits: object[] }) => ({
+        ({ total, hits }: { total: number; hits: Record<string, unknown>[] }) => ({
           total,
           hits: hits.filter(
             (result: any) => isLabsEnabled || result.type?.stage !== 'experimental'

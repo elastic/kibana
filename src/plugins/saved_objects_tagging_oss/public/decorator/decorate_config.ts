@@ -10,7 +10,7 @@ import { SavedObjectConfig } from '../../../saved_objects/public';
 import { injectTagReferences } from './inject_tag_references';
 import { extractTagReferences } from './extract_tag_references';
 
-export const decorateConfig = (config: SavedObjectConfig) => {
+export const decorateConfig = (config: SavedObjectConfig | any) => {
   config.mapping = {
     ...config.mapping,
     __tags: 'text',
@@ -19,14 +19,14 @@ export const decorateConfig = (config: SavedObjectConfig) => {
   const initialExtractReferences = config.extractReferences;
   const initialInjectReferences = config.injectReferences;
 
-  config.injectReferences = (object, references) => {
+  config.injectReferences = (object: any, references: any) => {
     if (initialInjectReferences) {
       initialInjectReferences(object, references);
     }
     injectTagReferences(object, references);
   };
 
-  config.extractReferences = (attrsAndRefs) => {
+  config.extractReferences = (attrsAndRefs: any) => {
     if (initialExtractReferences) {
       attrsAndRefs = initialExtractReferences(attrsAndRefs);
     }
