@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
 
-  describe('dashboard in space', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/112732
+  describe.skip('dashboard in space', () => {
     describe('Storing search sessions in space', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/dashboard/session_in_space');

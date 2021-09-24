@@ -12,6 +12,7 @@ import { API_URLS } from '../../common/constants';
 
 export enum UptimePage {
   Overview = 'Overview',
+  MappingError = 'MappingError',
   Monitor = 'Monitor',
   Settings = 'Settings',
   Certificates = 'Certificates',
