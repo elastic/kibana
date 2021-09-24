@@ -267,21 +267,22 @@
                         }
                     }
                 },
-              "alert": {
-                "properties": {
-                  "rule": {
-                    "properties": {
-                      "execution": {
-                        "properties": {
-                          "uuid": {
-                            "type": "keyword"
+                "alert": {
+                  "properties": {
+                    "rule": {
+                      "properties": {
+                        "execution": {
+                          "properties": {
+                            "uuid": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
                           }
                         }
                       }
                     }
                   }
-                }
-              },
+                },
                 "saved_objects": {
                     "type": "nested",
                     "properties": {
