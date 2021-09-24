@@ -95,7 +95,7 @@ export const getSplitSeriesAccessorFnMap = (
   return m;
 };
 
-// For percentile aggregation id is comming in the form `%d.%d`, where first `%d` is `id` and the second - `percents`
+// For percentile aggregation id is coming in the form `%d.%d`, where first `%d` is `id` and the second - `percents`
 export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
   columnId.toString().split('.')[0] === seriesColumnId;
 

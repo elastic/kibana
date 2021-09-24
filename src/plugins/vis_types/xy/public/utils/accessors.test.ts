@@ -11,8 +11,9 @@ import {
   getColumnByAccessor,
   getComplexAccessor,
   getValueByAccessor,
+  getXAccessor,
 } from './accessors';
-import { AccessorFn, Datum } from '@elastic/charts';
+import { Accessor, AccessorFn, Datum } from '@elastic/charts';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DatatableColumn } from '../../../../expressions';
 
@@ -129,7 +130,7 @@ describe('getColumnByAccessor', () => {
     expect(column.id).toBe('col-0-2');
   });
 
-  it('should not find a column by the number accessor with wrong index ', () => {
+  it('should not find a column by the number accessor with a wrong index ', () => {
     const accessor = columns.length;
 
     const column = getColumnByAccessor(columns, accessor);
@@ -210,5 +211,54 @@ describe('getValueByAccessor', () => {
 
     const value = getValueByAccessor(data, accessor);
     expect(value).toBeUndefined();
+  });
+});
+
+describe('getXAccessor', () => {
+  const formatter = (val: Datum) => JSON.stringify(val);
+  const aspectBase = {
+    accessor: 'col-0-2',
+    formatter,
+    id: '',
+    title: '',
+    params: {},
+  };
+
+  it('should return x-accessor with formatter', () => {
+    const aspect = {
+      ...aspectBase,
+      format: { id: 'range' },
+    };
+    const accessor = getXAccessor(aspect);
+    const val = { data: 'result' };
+    const datum = { 'col-0-2': val };
+    expect(typeof accessor).toBe('function');
+    expect((accessor as AccessorFn)?.(datum)).toBe(formatter(val));
+  });
+
+  it('should return x-accessor which returns dafaultValue form aspect.params if the accessor is null', () => {
+    const accessorValue = 'accessorValue';
+    const aspect = {
+      ...aspectBase,
+      accessor: null,
+      params: { defaultValue: accessorValue },
+    };
+
+    const accessor = getXAccessor(aspect);
+    expect(typeof accessor).toBe('function');
+    expect((accessor as AccessorFn)?.(null)).toBe(accessorValue);
+  });
+
+  it('should return x-accessor which returns dafaultValue form aspect.params if the title is "shard_delay"', () => {
+    const accessorValue = 'accessorValue';
+    const aspect = {
+      ...aspectBase,
+      title: 'shard_delay',
+      params: { defaultValue: accessorValue },
+    };
+
+    const accessor = getXAccessor(aspect);
+    expect(typeof accessor).toBe('function');
+    expect((accessor as AccessorFn)?.(null)).toBe(accessorValue);
   });
 });
