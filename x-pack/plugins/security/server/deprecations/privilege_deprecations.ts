@@ -7,21 +7,21 @@
 
 import type { SecurityLicense } from '../../common/licensing';
 import type {
-  DeprecationsKibanaRolesByFeatureId,
-  PrivilegeDeprecationsRolesByFeature,
+  PrivilegeDeprecationsRolesByFeatureIdRequest,
+  PrivilegeDeprecationsRolesByFeatureIdResponse,
 } from '../../common/model';
 import { transformElasticsearchRoleToRole } from '../authorization';
-import type { AuthorizationServiceSetup, ElasticsearchRole } from '../authorization';
+import type { AuthorizationServiceSetupInternal, ElasticsearchRole } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
 export const getPrivilegeDeprecationsServices = (
-  authz: Pick<AuthorizationServiceSetup, 'applicationName'>,
+  authz: AuthorizationServiceSetupInternal,
   license: SecurityLicense
 ) => {
   const getKibanaRolesByFeatureId = async ({
     context,
     featureId,
-  }: DeprecationsKibanaRolesByFeatureId): Promise<PrivilegeDeprecationsRolesByFeature> => {
+  }: PrivilegeDeprecationsRolesByFeatureIdRequest): Promise<PrivilegeDeprecationsRolesByFeatureIdResponse> => {
     // Nothing to do if security is disabled
     if (!license.isEnabled()) {
       return {

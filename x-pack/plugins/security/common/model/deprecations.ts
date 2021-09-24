@@ -9,17 +9,17 @@
 import type { DeprecationsDetails, GetDeprecationsContext } from '../../../../../src/core/server';
 import type { Role } from './role';
 
-export interface PrivilegeDeprecationsRolesByFeature {
+export interface PrivilegeDeprecationsRolesByFeatureIdResponse {
   roles?: Role[];
   errors?: DeprecationsDetails[];
 }
 
-export interface DeprecationsKibanaRolesByFeatureId {
+export interface PrivilegeDeprecationsRolesByFeatureIdRequest {
   context: GetDeprecationsContext;
   featureId: string;
 }
 export interface PrivilegeDeprecationsServices {
   getKibanaRolesByFeatureId: (
-    args: DeprecationsKibanaRolesByFeatureId
-  ) => Promise<PrivilegeDeprecationsRolesByFeature>;
+    args: PrivilegeDeprecationsRolesByFeatureIdRequest
+  ) => Promise<PrivilegeDeprecationsRolesByFeatureIdResponse>;
 }

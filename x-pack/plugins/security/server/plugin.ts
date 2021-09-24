@@ -30,7 +30,7 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
-import type { AuthenticatedUser } from '../common/model';
+import type { AuthenticatedUser, PrivilegeDeprecationsServices } from '../common/model';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
@@ -44,7 +44,6 @@ import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } fro
 import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
-import type { PrivilegeDeprecationsServices } from './deprecations';
 import { getPrivilegeDeprecationsServices } from './deprecations';
 import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';

@@ -34,7 +34,7 @@ export {
   RoleMapping,
 } from './role_mapping';
 export {
-  DeprecationsKibanaRolesByFeatureId,
-  PrivilegeDeprecationsRolesByFeature,
+  PrivilegeDeprecationsRolesByFeatureIdRequest,
+  PrivilegeDeprecationsRolesByFeatureIdResponse,
   PrivilegeDeprecationsServices,
 } from './deprecations';
