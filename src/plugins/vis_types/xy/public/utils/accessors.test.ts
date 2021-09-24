@@ -92,7 +92,7 @@ describe('XY chart datum accessors', () => {
       ...aspectBase,
       formatter: undefined,
     };
-    const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
+    const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(aspect);
 
     const val = 'data';
     const datum = { 'col-0-2': val };
@@ -100,10 +100,37 @@ describe('XY chart datum accessors', () => {
     expect(accessor?.(datum)).toBe(val);
   });
 
+  it('should apply formatter for not complex field with `shouldApplyFormatter=true`', () => {
+    const formatterResult = 'formatted';
+    const aspect = {
+      ...aspectBase,
+      formatter: () => formatterResult,
+      format: { id: KBN_FIELD_TYPES.STRING },
+    };
+    const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(aspect);
+
+    const val = 'data';
+    const datum = { 'col-0-2': val };
+
+    expect(accessor?.(datum)).toBe(formatterResult);
+  });
+
   it('should return undefined when aspect has no accessor', () => {
     const aspect = {
       ...aspectBase,
       accessor: null,
+    };
+    const datum = { 'col-0-2': 'data' };
+
+    const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
+
+    expect(accessor?.(datum)).toBeUndefined();
+  });
+
+  it('should return undefined when aspect title is "shard_delay"', () => {
+    const aspect = {
+      ...aspectBase,
+      title: 'shard_delay',
     };
     const datum = { 'col-0-2': 'data' };
 
