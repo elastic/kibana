@@ -12,6 +12,11 @@ import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { ExpressionValueVisDimension, FakeParams } from '../../../../visualizations/public';
 import { Aspect } from '../types';
 
+interface Dimension {
+  id?: string | number;
+  accessor?: string | number | DatatableColumn | null;
+}
+
 export const COMPLEX_X_ACCESSOR = '__customXAccessor__';
 export const COMPLEX_SPLIT_ACCESSOR = '__complexSplitAccessor__';
 const SHARD_DELAY = 'shard_delay';
@@ -99,17 +104,9 @@ export const getSplitSeriesAccessorFnMap = (
 export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
   columnId.toString().split('.')[0] === seriesColumnId;
 
-export const isValidSeriesForDimension =
-  (seriesColumnId: string) =>
-  ({
-    id,
-    accessor,
-  }: {
-    id?: string | number;
-    accessor?: string | number | DatatableColumn | null;
-  }) =>
-    (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
-    accessor !== null;
+export const isValidSeriesForDimension = (seriesColumnId: string, { id, accessor }: Dimension) =>
+  (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
+  accessor !== null;
 
 export const getValueByAccessor = (
   data: Datatable['rows'][0],

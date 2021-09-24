@@ -80,7 +80,7 @@ export const renderAllSeries = (
       type,
     }) => {
       const yAspects = aspects.y.filter(({ id, accessor }) =>
-        isValidSeriesForDimension(paramId)({ id, accessor })
+        isValidSeriesForDimension(paramId, { id, accessor })
       );
 
       if (!show || !yAspects.length) {
