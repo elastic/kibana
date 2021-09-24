@@ -26,7 +26,7 @@ const deepExactRt: typeof deepExactRtTyped = deepExactRtNonTyped;
 const mergeRt: typeof mergeRtTyped = mergeRtNonTyped;
 
 function toReactRouterPath(path: string) {
-  return path.replace(/(?:{([^\/]+)})/, ':$1');
+  return path.replace(/(?:{([^\/]+)})/g, ':$1');
 }
 
 export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
