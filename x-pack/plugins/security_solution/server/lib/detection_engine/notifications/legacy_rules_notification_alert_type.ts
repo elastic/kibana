@@ -54,7 +54,7 @@ export const legacyRulesNotificationAlertType = ({
 
     if (!ruleAlertSavedObject.attributes.params) {
       logger.error(
-        `Security Solution notification (Legacy) Saved object for alert ${params.ruleAlertId} was not found`
+        `Security Solution notification (Legacy) saved object for alert ${params.ruleAlertId} was not found`
       );
       return;
     }

@@ -88,7 +88,7 @@ describe('legacyRules_notification_alert_type', () => {
       });
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalledWith(
-        `Saved object for alert ${payload.params.ruleAlertId} was not found`
+        `Security Solution notification (Legacy) saved object for alert ${payload.params.ruleAlertId} was not found`
       );
     });
 
