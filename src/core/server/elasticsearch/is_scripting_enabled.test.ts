@@ -7,10 +7,10 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_service.mock';
-import { isInlineScriptingDisabled } from './is_scripting_disabled';
+import { elasticsearchServiceMock } from './elasticsearch_service.mock';
+import { isInlineScriptingEnabled } from './is_scripting_enabled';
 
-describe('isInlineScriptingDisabled', () => {
+describe('isInlineScriptingEnabled', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
@@ -23,17 +23,17 @@ describe('isInlineScriptingDisabled', () => {
     );
   };
 
-  it('returns `false` if all settings are empty', async () => {
+  it('returns `true` if all settings are empty', async () => {
     mockSettingsValue({
       transient: {},
       persistent: {},
       defaults: {},
     });
 
-    expect(await isInlineScriptingDisabled({ client })).toEqual(false);
+    expect(await isInlineScriptingEnabled({ client })).toEqual(true);
   });
 
-  it('returns `false` if `defaults.script.allowed_types` is `inline`', async () => {
+  it('returns `true` if `defaults.script.allowed_types` is `inline`', async () => {
     mockSettingsValue({
       transient: {},
       persistent: {},
@@ -42,10 +42,10 @@ describe('isInlineScriptingDisabled', () => {
       },
     });
 
-    expect(await isInlineScriptingDisabled({ client })).toEqual(false);
+    expect(await isInlineScriptingEnabled({ client })).toEqual(true);
   });
 
-  it('returns `true` if `defaults.script.allowed_types` is `none`', async () => {
+  it('returns `false` if `defaults.script.allowed_types` is `none`', async () => {
     mockSettingsValue({
       transient: {},
       persistent: {},
@@ -54,10 +54,10 @@ describe('isInlineScriptingDisabled', () => {
       },
     });
 
-    expect(await isInlineScriptingDisabled({ client })).toEqual(true);
+    expect(await isInlineScriptingEnabled({ client })).toEqual(false);
   });
 
-  it('returns `true` if `defaults.script.allowed_types` is `stored`', async () => {
+  it('returns `false` if `defaults.script.allowed_types` is `stored`', async () => {
     mockSettingsValue({
       transient: {},
       persistent: {},
@@ -66,7 +66,7 @@ describe('isInlineScriptingDisabled', () => {
       },
     });
 
-    expect(await isInlineScriptingDisabled({ client })).toEqual(true);
+    expect(await isInlineScriptingEnabled({ client })).toEqual(false);
   });
 
   it('respect the persistent->defaults priority', async () => {
@@ -80,7 +80,7 @@ describe('isInlineScriptingDisabled', () => {
       },
     });
 
-    expect(await isInlineScriptingDisabled({ client })).toEqual(false);
+    expect(await isInlineScriptingEnabled({ client })).toEqual(true);
   });
 
   it('respect the transient->persistent priority', async () => {
@@ -94,6 +94,6 @@ describe('isInlineScriptingDisabled', () => {
       defaults: {},
     });
 
-    expect(await isInlineScriptingDisabled({ client })).toEqual(true);
+    expect(await isInlineScriptingEnabled({ client })).toEqual(false);
   });
 });

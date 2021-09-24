@@ -16,8 +16,9 @@ jest.mock('./version_check/ensure_es_version', () => ({
   pollEsNodesVersion: jest.fn(),
 }));
 
+import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_service.test.mocks';
+
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { MockClusterClient } from './elasticsearch_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/dev-utils';
@@ -30,7 +31,6 @@ import { executionContextServiceMock } from '../execution_context/execution_cont
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService, SetupDeps } from './elasticsearch_service';
 import { elasticsearchClientMock } from './client/mocks';
-import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 import { duration } from 'moment';
 import { isValidConnection as isValidConnectionMock } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
@@ -50,15 +50,11 @@ let coreContext: CoreContext;
 let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
 let mockConfig$: BehaviorSubject<any>;
 let setupDeps: SetupDeps;
-let deprecationsSetup: ReturnType<typeof deprecationsServiceMock.createInternalSetupContract>;
 
 beforeEach(() => {
-  deprecationsSetup = deprecationsServiceMock.createInternalSetupContract();
-
   setupDeps = {
     http: httpServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
-    deprecations: deprecationsSetup,
   };
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -78,15 +74,20 @@ beforeEach(() => {
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   elasticsearchService = new ElasticsearchService(coreContext);
 
-  MockClusterClient.mockClear();
   mockClusterClientInstance = elasticsearchClientMock.createCustomClusterClient();
   MockClusterClient.mockImplementation(() => mockClusterClientInstance);
+
+  isScriptingEnabledMock.mockResolvedValue(true);
 
   // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
   pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
 });
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => {
+  jest.clearAllMocks();
+  MockClusterClient.mockClear();
+  isScriptingEnabledMock.mockReset();
+});
 
 describe('#preboot', () => {
   describe('#config', () => {
@@ -179,22 +180,6 @@ describe('#setup', () => {
     await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
     );
-  });
-
-  it('registers its deprecation provider', async () => {
-    const registry = deprecationsServiceMock.createSetupContract();
-
-    deprecationsSetup.getRegistry.mockReturnValue(registry);
-
-    await elasticsearchService.setup(setupDeps);
-
-    expect(deprecationsSetup.getRegistry).toHaveBeenCalledTimes(1);
-    expect(deprecationsSetup.getRegistry).toHaveBeenCalledWith('elasticsearch');
-
-    expect(registry.registerDeprecations).toHaveBeenCalledTimes(1);
-    expect(registry.registerDeprecations).toHaveBeenCalledWith({
-      getDeprecations: expect.any(Function),
-    });
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
@@ -299,6 +284,39 @@ describe('#start', () => {
       expect(isValidConnectionMock).not.toHaveBeenCalled();
       await elasticsearchService.start();
       expect(isValidConnectionMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isInlineScriptingEnabled', () => {
+    it('does not throw error when scripting is enabled', async () => {
+      isScriptingEnabledMock.mockResolvedValue(true);
+
+      await elasticsearchService.setup(setupDeps);
+      expect(isScriptingEnabledMock).not.toHaveBeenCalled();
+
+      await expect(elasticsearchService.start()).resolves.toBeDefined();
+      expect(isScriptingEnabledMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws an error if scripting is disabled', async () => {
+      isScriptingEnabledMock.mockResolvedValue(false);
+
+      await elasticsearchService.setup(setupDeps);
+
+      await expect(elasticsearchService.start()).rejects.toThrowError(
+        'Inline scripting is disabled'
+      );
+    });
+
+    it('does not throw error when `skipStartupConnectionCheck` is true', async () => {
+      isScriptingEnabledMock.mockResolvedValue(false);
+      mockConfig$.next({
+        ...(await mockConfig$.pipe(first()).toPromise()),
+        skipStartupConnectionCheck: true,
+      });
+
+      await elasticsearchService.setup(setupDeps);
+      await expect(elasticsearchService.start()).resolves.toBeDefined();
     });
   });
 
