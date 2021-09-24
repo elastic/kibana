@@ -9,7 +9,12 @@
 import { AccessorFn, Accessor } from '@elastic/charts';
 import { BUCKET_TYPES } from '../../../../data/public';
 import { FakeParams } from '../../../../visualizations/public';
-import { Aspect } from '../types';
+import type { Aspect } from '../types';
+
+interface Dimension {
+  id?: Aspect['aggId'];
+  accessor?: Aspect['accessor'];
+}
 
 export const COMPLEX_X_ACCESSOR = '__customXAccessor__';
 export const COMPLEX_SPLIT_ACCESSOR = '__complexSplitAccessor__';
@@ -77,3 +82,11 @@ export const getSplitSeriesAccessorFnMap = (
 
   return m;
 };
+
+// For percentile aggregation id is coming in the form `%d.%d`, where first `%d` is `id` and the second - `percents`
+export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
+  columnId.toString().split('.')[0] === seriesColumnId;
+
+export const isValidSeriesForDimension = (seriesColumnId: string, { id, accessor }: Dimension) =>
+  (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
+  accessor !== null;
