@@ -56,5 +56,5 @@ export {
   saveVisualization,
   findListItems,
   urlFor,
-  getFullPath
+  getFullPath,
 } from './utils/saved_visualize_utils';

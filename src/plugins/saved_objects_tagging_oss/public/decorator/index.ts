@@ -12,8 +12,9 @@ import { InternalTagDecoratedSavedObject } from './types';
 
 export { TagDecoratedSavedObject } from './types';
 
-export const tagDecoratorConfig: SavedObjectDecoratorConfig<InternalTagDecoratedSavedObject> | any = {
-  id: decoratorId,
-  priority: 100,
-  factory: tagDecoratorFactory,
-};
+export const tagDecoratorConfig: SavedObjectDecoratorConfig<InternalTagDecoratedSavedObject> | any =
+  {
+    id: decoratorId,
+    priority: 100,
+    factory: tagDecoratorFactory,
+  };

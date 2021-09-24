@@ -327,10 +327,8 @@ export async function saveVisualization(
   const references: any = [];
 
   if (savedObject.searchSource) {
-    const {
-      searchSourceJSON,
-      references: searchSourceReferences,
-    } = savedObject.searchSource.serialize();
+    const { searchSourceJSON, references: searchSourceReferences } =
+      savedObject.searchSource.serialize();
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }
@@ -344,7 +342,7 @@ export async function saveVisualization(
     references.push(...searchSourceReferences);
   }
 
-  let extractedRefs = config.extractReferences({ attributes, references });
+  const extractedRefs = config.extractReferences({ attributes, references });
 
   if (!extractedRefs.references) {
     throw new Error('References not returned from extractReferences');

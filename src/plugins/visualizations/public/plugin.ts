@@ -42,10 +42,7 @@ import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visuali
 import type { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
 
-import {
-  convertFromSerializedVis,
-  convertToSerializedVis,
-} from './utils/saved_visualize_utils';
+import { convertFromSerializedVis, convertToSerializedVis } from './utils/saved_visualize_utils';
 
 import { createSavedSearchesLoader } from '../../discover/public';
 

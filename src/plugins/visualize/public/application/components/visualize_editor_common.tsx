@@ -82,7 +82,7 @@ export const VisualizeEditorCommon = ({
     }
 
     aliasMatchRedirect();
-  }, [visInstance?.savedVis.sharingSavedObjectProps, services]);
+  }, [visInstance?.savedVis.sharingSavedObjectProps, visInstance?.vis?.type.title, services]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario

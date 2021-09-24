@@ -72,7 +72,7 @@ export interface SavedObjectsTaggingApiUi {
    *
    * @param object
    */
-  hasTagDecoration(object: SavedObjectClass): object is TagDecoratedSavedObject;
+  hasTagDecoration(object: SavedObjectClass | any): object is TagDecoratedSavedObject;
 
   /**
    * Return a filter that can be used to filter by tag with `EuiSearchBar` or EUI tables using `EuiSearchBar`.
