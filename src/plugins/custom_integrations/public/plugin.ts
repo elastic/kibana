@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
 import { CustomIntegration, ROUTES_ADDABLECUSTOMINTEGRATIONS } from '../common';
 
-export class CustomIntegrationPlugin
+export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
 {
   public setup(core: CoreSetup): CustomIntegrationsSetup {

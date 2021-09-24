@@ -112,7 +112,6 @@ describe('TutorialsRegistry', () => {
       expect(mockCustomIntegrationsPluginSetup.registerCustomIntegration.mock.calls).toEqual([
         [
           {
-            name: 'new tutorial provider',
             id: 'test',
             title: 'new tutorial provider',
             categories: [],

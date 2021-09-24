@@ -94,5 +94,24 @@ describe('CustomIntegrationsRegistry', () => {
         },
       ]);
     });
+    test('should ignore integrations without category', () => {
+      const registry = new CustomIntegrationRegistry(mockLogger, true);
+      registry.registerCustomIntegration(integration);
+      registry.registerCustomIntegration({ ...integration, id: 'bar', categories: [] });
+
+      expect(registry.getAppendCustomIntegrations()).toEqual([
+        {
+          categories: ['upload_file'],
+          description: 'test integration',
+          icons: [],
+          id: 'foo',
+          isBeta: false,
+          shipper: 'tests',
+          title: 'Foo',
+          type: 'ui_link',
+          uiInternalPath: '/path/to/foo',
+        },
+      ]);
+    });
   });
 });

@@ -58,4 +58,4 @@ export interface CustomIntegration {
   shipper: string;
 }
 
-export const ROUTES_ADDABLECUSTOMINTEGRATIONS = `/api/${PLUGIN_ID}/addableCustomIntegrations`;
+export const ROUTES_ADDABLECUSTOMINTEGRATIONS = `/api/${PLUGIN_ID}/appendCustomIntegrations`;

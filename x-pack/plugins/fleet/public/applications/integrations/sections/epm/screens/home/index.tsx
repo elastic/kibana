@@ -300,7 +300,7 @@ const AvailablePackages: React.FC = memo(() => {
     ...filteredAddableIntegrations,
   ];
   eprAndCustomPackages.sort((a, b) => {
-    return a.name.localeCompare(b.name);
+    return a.title.localeCompare(b.title);
   });
 
   const categories = useMemo(() => {

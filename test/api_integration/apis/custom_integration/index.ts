@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegrationsPlugin } from './plugin';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
-export function plugin() {
-  return new CustomIntegrationsPlugin();
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('custom integrations', () => {
+    loadTestFile(require.resolve('./integrations'));
+  });
 }
-export { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
