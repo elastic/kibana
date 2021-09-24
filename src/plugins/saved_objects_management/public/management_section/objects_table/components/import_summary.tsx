@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './import_summary.scss';
 import _ from 'lodash';
 import React, { Fragment, FC, useMemo } from 'react';
 import {
@@ -30,6 +29,7 @@ import type {
   IBasePath,
 } from 'kibana/public';
 import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
+import './import_summary.scss';
 
 const DEFAULT_ICON = 'apps';
 
