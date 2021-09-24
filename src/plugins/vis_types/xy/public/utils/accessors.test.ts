@@ -14,7 +14,7 @@ import {
   getXAccessor,
   isPercentileIdEqualToSeriesId,
 } from './accessors';
-import { Accessor, AccessorFn, Datum } from '@elastic/charts';
+import { AccessorFn, Datum } from '@elastic/charts';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DatatableColumn } from '../../../../expressions';
 
@@ -292,7 +292,7 @@ describe('getXAccessor', () => {
 });
 
 describe('isPercentileIdEqualToSeriesId', () => {
-  it('should be equal for plain column ids', () => {
+  it('should be equal if applied to the plain columnId', () => {
     const seriesColumnId = 'col-0-1';
     const columnId = `${seriesColumnId}`;
 
@@ -300,7 +300,7 @@ describe('isPercentileIdEqualToSeriesId', () => {
     expect(isEqual).toBeTruthy();
   });
 
-  it('should be equal for column with percentile', () => {
+  it('should be equal if applied to the column with percentile', () => {
     const seriesColumnId = '1';
     const columnId = `${seriesColumnId}.95`;
 
@@ -308,7 +308,7 @@ describe('isPercentileIdEqualToSeriesId', () => {
     expect(isEqual).toBeTruthy();
   });
 
-  it('should not be equal for column with percentile equal to seriesColumnId', () => {
+  it('should not be equal if applied to the column with percentile equal to seriesColumnId', () => {
     const seriesColumnId = '1';
     const columnId = `2.1`;
 
@@ -316,7 +316,7 @@ describe('isPercentileIdEqualToSeriesId', () => {
     expect(isEqual).toBeFalsy();
   });
 
-  it('should not be equal for column with percentile, where columnId contains seriesColumnId', () => {
+  it('should not be equal if applied to the column with percentile, where columnId contains seriesColumnId', () => {
     const seriesColumnId = '1';
     const columnId = `${seriesColumnId}2.1`;
 
