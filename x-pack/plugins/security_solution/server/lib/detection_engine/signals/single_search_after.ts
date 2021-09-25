@@ -74,6 +74,8 @@ export const singleSearchAfter = async ({
         searchAfterQuery as estypes.SearchRequest
       );
     const end = performance.now();
+    // console.log('SEARCH AFTER RESULT');
+    // console.log(JSON.stringify(nextSearchAfterResult));
 
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],

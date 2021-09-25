@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { buildEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { SignalSourceHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
 
 export const filterSource = (doc: SignalSourceHit): Partial<RACAlert> => {
-  const eventFields = buildEventTypeSignal(doc);
-
   const docSource = doc._source ?? {};
   const {
     event,
@@ -21,8 +18,5 @@ export const filterSource = (doc: SignalSourceHit): Partial<RACAlert> => {
     threshold_result: null,
   };
 
-  return {
-    ...filteredSource,
-    ...eventFields,
-  };
+  return filteredSource;
 };

@@ -10,6 +10,8 @@ import type { ApiResponse } from '@elastic/elasticsearch';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { ALERT_RULE_RULE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+
 import type SuperTest from 'supertest';
 import type {
   ListArray,
@@ -262,7 +264,7 @@ export const getQuerySignalIds = (signalIds: SignalIds) => ({
 export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
   query: {
     terms: {
-      'signal.rule.rule_id': ruleIds,
+      [ALERT_RULE_RULE_ID]: ruleIds,
     },
   },
 });
@@ -276,7 +278,7 @@ export const getQuerySignalsId = (ids: string[], size = 10) => ({
   size,
   query: {
     terms: {
-      'kibana.alert.rule.uuid': ids,
+      [ALERT_RULE_UUID]: ids,
     },
   },
 });

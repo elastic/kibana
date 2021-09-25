@@ -20,7 +20,6 @@ import {
 import { createHash } from 'crypto';
 
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
-import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import {
   getField,
@@ -28,7 +27,6 @@ import {
   isWrappedRACAlert,
   isWrappedSignalHit,
 } from '../../../signals/utils';
-import { invariant } from '../../../../../../common/utils/invariant';
 import { RACAlert } from '../../types';
 import { flattenWithPrefix } from './flatten_with_prefix';
 import {
@@ -43,7 +41,7 @@ import { SearchTypes } from '../../../../telemetry/types';
 export const generateAlertId = (alert: RACAlert) => {
   return createHash('sha256')
     .update(
-      (alert['kibana.alert.ancestors'] as Ancestor[])
+      (alert[ALERT_ANCESTORS] as Ancestor[])
         .reduce((acc, ancestor) => acc.concat(ancestor.id, ancestor.index), '')
         .concat(alert[ALERT_RULE_UUID] as string)
     )
@@ -81,28 +79,6 @@ export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
 };
 
 /**
- * This removes any alert name clashes such as if a source index has
- * "signal" but is not a signal object we put onto the object. If this
- * is our "signal object" then we don't want to remove it.
- * @param doc The source index doc to a signal.
- */
-export const removeClashes = (doc: SimpleHit) => {
-  if (isWrappedSignalHit(doc)) {
-    invariant(doc._source, '_source field not found');
-    const { signal, ...noSignal } = doc._source;
-    if (signal == null || isEventTypeSignal(doc)) {
-      return doc;
-    } else {
-      return {
-        ...doc,
-        _source: { ...noSignal },
-      };
-    }
-  }
-  return doc;
-};
-
-/**
  * Builds the `kibana.alert.*` fields that are common across all alerts.
  * @param docs The parent alerts/events of the new alert to be built.
  * @param rule The rule that is generating the new alert.
@@ -113,13 +89,9 @@ export const buildAlert = (
   spaceId: string | null | undefined,
   reason: string
 ): RACAlert => {
-  const removedClashes = docs.map(removeClashes);
-  const parents = removedClashes.map(buildParent);
+  const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
-  const ancestors = removedClashes.reduce(
-    (acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)),
-    []
-  );
+  const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);
 
   const { id, output_index: outputIndex, ...mappedRule } = rule;
   mappedRule.uuid = id;
@@ -159,12 +131,11 @@ export const additionalAlertFields = (doc: BaseSignalHit) => {
     [ALERT_ORIGINAL_TIME]: originalTime != null ? originalTime.toISOString() : undefined,
     threshold_result: thresholdResult,
   };
-  const event = doc._source?.event;
-  if (event != null) {
-    return {
-      ...additionalFields,
-      ...flattenWithPrefix(ALERT_ORIGINAL_EVENT, event),
-    };
+
+  for (const [key, val] of Object.entries(doc._source ?? {})) {
+    if (key.startsWith('event.')) {
+      additionalFields[`${ALERT_ORIGINAL_EVENT}.${key.replace('event.', '')}`] = val;
+    }
   }
   return additionalFields;
 };
