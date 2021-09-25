@@ -36,7 +36,13 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
           }
         )}
       >
-        <EuiButton>
+        <EuiButton
+          onClick={() => {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('code');
+            window.location.replace(url.href);
+          }}
+        >
           <FormattedMessage
             id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredSubmitButton"
             defaultMessage="Continue to Elastic"
