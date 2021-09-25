@@ -150,7 +150,9 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     ));
     return (
       <EuiFlexGrid>
-        <EuiFlexItem grow={1} style={{height: '117px'}}>{addNewIndexPattern}</EuiFlexItem>
+        <EuiFlexItem grow={1} style={{ height: '121px' }}>
+          {addNewIndexPattern}
+        </EuiFlexItem>
         <EuiFlexItem grow={9}>
           <SectionNavigation
             items={displayElements}
