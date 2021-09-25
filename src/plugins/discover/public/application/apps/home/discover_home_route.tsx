@@ -146,7 +146,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
 
   const indexPatternsSection = () => {
     const displayElements = indexPatterns.map((indexPattern) => (
-      <IndexPatternView indexPattern={indexPattern} />
+      <IndexPatternView indexPattern={indexPattern} services={services} />
     ));
     return (
       <EuiFlexGrid>

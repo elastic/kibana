@@ -391,7 +391,6 @@ export class DataViewsService {
         createdAt,
       },
     } = savedObject;
-    debugger;
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
@@ -555,7 +554,6 @@ export class DataViewsService {
   async createAndSave(spec: DataViewSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
     const createdIndexPattern = await this.createSavedObject(indexPattern, override);
-    debugger;
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;
   }

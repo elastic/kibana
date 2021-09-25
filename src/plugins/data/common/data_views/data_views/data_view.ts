@@ -337,7 +337,7 @@ export class DataView implements IIndexPattern {
       : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
-    debugger;
+
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
