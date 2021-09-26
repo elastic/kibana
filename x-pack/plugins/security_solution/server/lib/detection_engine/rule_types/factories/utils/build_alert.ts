@@ -129,7 +129,7 @@ export const additionalAlertFields = (doc: BaseSignalHit) => {
   });
   const additionalFields: Record<string, unknown> = {
     [ALERT_ORIGINAL_TIME]: originalTime != null ? originalTime.toISOString() : undefined,
-    threshold_result: thresholdResult,
+    ...(thresholdResult != null ? { threshold_result: thresholdResult } : {}),
   };
 
   for (const [key, val] of Object.entries(doc._source ?? {})) {

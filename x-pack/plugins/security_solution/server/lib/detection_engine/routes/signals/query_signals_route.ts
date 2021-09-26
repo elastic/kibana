@@ -62,22 +62,6 @@ export const querySignalsRoute = (
           },
           ignore_unavailable: true,
         });
-        /*
-        const { body } = await esClient.search({
-          index: isRuleRegistryEnabled
-            ? `.internal${DEFAULT_ALERTS_INDEX}-default-*`
-            : siemClient.getSignalsIndex(),
-          body: {
-            query,
-            // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
-            aggs: { ...aggs },
-            _source,
-            track_total_hits,
-            size,
-          },
-          ignore_unavailable: true,
-        });
-        */
         return response.ok({ body: result });
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals

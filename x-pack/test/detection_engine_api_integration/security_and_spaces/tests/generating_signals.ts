@@ -51,7 +51,6 @@ import {
   ALERT_GROUP_ID,
   ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_EVENT_CATEGORY,
-  ALERT_ORIGINAL_EVENT_KIND,
   ALERT_ORIGINAL_TIME,
 } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
 import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';

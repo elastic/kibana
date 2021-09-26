@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import { SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
 
 import { ActionResult } from '../../../../../../actions/server';
-import { SignalSearchResponse } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -42,6 +42,7 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
+import { ESSearchResponse } from '../../../../../../../../src/core/types/elasticsearch';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -59,7 +60,7 @@ export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
 });
 
 export const typicalSignalsQueryAggs = (): QuerySignalsSchemaDecoded => ({
-  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+  aggs: { statuses: { terms: { field: ALERT_WORKFLOW_STATUS, size: 10 } } },
 });
 
 export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
@@ -540,7 +541,7 @@ export const getFindBulkResultStatus = (): FindBulkExecutionLogResponse => ({
   ],
 });
 
-export const getEmptySignalsResponse = (): SignalSearchResponse => ({
+export const getEmptySignalsResponse = (): ESSearchResponse<unknown> => ({
   took: 1,
   timed_out: false,
   _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
