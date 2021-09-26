@@ -25,7 +25,7 @@ describe('Overview Page', () => {
   });
 
   after(() => {
-    esArchiverLoad('overview');
+    esArchiverUnload('overview');
   });
 
   it('Host stats render with correct values', () => {
@@ -44,21 +44,6 @@ describe('Overview Page', () => {
     });
   });
 
-  describe('with no data', () => {
-    before(() => {
-      esArchiverUnload('auditbeat');
-    });
-
-    after(() => {
-      esArchiverLoad('auditbeat');
-    });
-
-    it('Splash screen should be here', () => {
-      loginAndWaitForPage(OVERVIEW_URL);
-      cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
-    });
-  });
-
   describe('Favorite Timelines', () => {
     it('should appear on overview page', () => {
       createTimeline(getTimeline())
@@ -73,5 +58,19 @@ describe('Overview Page', () => {
           });
         });
     });
+  });
+});
+
+describe('Overview page with no data', () => {
+  before(() => {
+    esArchiverUnload('auditbeat');
+  });
+  after(() => {
+    esArchiverLoad('auditbeat');
+  });
+
+  it('Splash screen should be here', () => {
+    loginAndWaitForPage(OVERVIEW_URL);
+    cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
   });
 });
