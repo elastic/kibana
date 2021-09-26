@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
@@ -371,7 +372,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const signals = await getSignalsByIds(supertest, [id]);
 
         const alert = signals.hits.hits[0];
-        expect(alert._source?.signal.status).eql('open');
+        expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
         await createComment({
           supertest,
@@ -396,7 +397,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getQuerySignalIds([alert._id]))
           .expect(200);
 
-        expect(updatedAlert.hits.hits[0]._source.signal.status).eql('acknowledged');
+        expect(updatedAlert.hits.hits[0]._source[ALERT_WORKFLOW_STATUS]).eql('acknowledged');
       });
 
       it('should NOT change the status of the alert if sync alert is off', async () => {
@@ -426,7 +427,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const signals = await getSignalsByIds(supertest, [id]);
 
         const alert = signals.hits.hits[0];
-        expect(alert._source?.signal.status).eql('open');
+        expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
         await createComment({
           supertest,
@@ -451,7 +452,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getQuerySignalIds([alert._id]))
           .expect(200);
 
-        expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
+        expect(updatedAlert.hits.hits[0]._source[ALERT_WORKFLOW_STATUS]).eql('open');
       });
     });
 

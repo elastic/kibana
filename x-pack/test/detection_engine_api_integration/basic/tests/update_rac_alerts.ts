@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import type { estypes } from '@elastic/elasticsearch';
 import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
@@ -62,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const everySignalOpen = signalsOpen.hits.hits.every(
-          (hit) => hit._source?.signal?.status === 'open'
+          (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'open'
         );
         expect(everySignalOpen).to.eql(true);
       });
