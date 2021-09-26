@@ -7,13 +7,16 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { AgentPolicy, NewAgentPolicy } from '../types';
+import type { AgentPolicy, FullAgentPolicy, NewAgentPolicy } from '../types';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
+import { appContextService } from './app_context';
+import { outputService } from './output';
+import { getFullAgentPolicy } from './agent_policies';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
@@ -47,9 +50,18 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
   return mock;
 }
 
+jest.mock('./output');
 jest.mock('./agent_policy_update');
 jest.mock('./agents');
 jest.mock('./package_policy');
+jest.mock('./app_context');
+jest.mock('./agent_policies/full_agent_policy');
+
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedGetFullAgentPolicy = getFullAgentPolicy as jest.Mock<
+  ReturnType<typeof getFullAgentPolicy>
+>;
 
 function getAgentPolicyUpdateMock() {
   return agentPolicyUpdateEventHandler as unknown as jest.Mock<
@@ -212,6 +224,66 @@ describe('agent policy', () => {
       // soClient.update is called with updated values
       calledWith = soClient.update.mock.calls[1];
       expect(calledWith[2]).toHaveProperty('is_managed', true);
+    });
+  });
+
+  describe('createFleetServerPolicy', () => {
+    beforeEach(() => {
+      mockedGetFullAgentPolicy.mockReset();
+    });
+    it('should not create a .fleet-policy document if we cannot get the full policy', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultOutputId.mockResolvedValue('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue(null);
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'policy123',
+        type: 'mocked',
+        references: [],
+      });
+      await agentPolicyService.createFleetServerPolicy(soClient, 'policy123');
+
+      expect(esClient.create).not.toBeCalled();
+    });
+
+    it('should create a .fleet-policy document if we can get the full policy', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultOutputId.mockResolvedValue('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue({
+        id: 'policy123',
+        revision: 1,
+        inputs: [
+          {
+            id: 'input-123',
+          },
+        ],
+      } as FullAgentPolicy);
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'policy123',
+        type: 'mocked',
+        references: [],
+      });
+      await agentPolicyService.createFleetServerPolicy(soClient, 'policy123');
+
+      expect(esClient.create).toBeCalledWith(
+        expect.objectContaining({
+          index: '.fleet-policies',
+          body: expect.objectContaining({
+            '@timestamp': expect.anything(),
+            data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
+            default_fleet_server: false,
+            policy_id: 'policy123',
+            revision_idx: 1,
+          }),
+        })
+      );
     });
   });
 });

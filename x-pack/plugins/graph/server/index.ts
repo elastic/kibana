@@ -18,4 +18,5 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     savePolicy: true,
   },
   schema: configSchema,
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };
