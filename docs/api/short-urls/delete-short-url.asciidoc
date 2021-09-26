@@ -1,0 +1,39 @@
+[[short-urls-api-delete]]
+=== Delete short URL API
+++++
+<titleabbrev>Delete short URL</titleabbrev>
+++++
+
+experimental[] Delete a {kib} short URL.
+
+
+[[short-urls-api-delete-request]]
+==== Request
+
+`DELETE <kibana host>:<port>/api/short_url/<id>`
+
+
+[[short-urls-api-delete-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The short URL ID that you want to remove.
+
+
+[[short-urls-api-delete-response-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+
+[[short-urls-api-delete-example]]
+==== Example
+
+Delete a short URL `12345` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X DELETE api/short_url/12345
+--------------------------------------------------
+// KIBANA
