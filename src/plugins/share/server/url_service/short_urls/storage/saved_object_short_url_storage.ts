@@ -111,13 +111,6 @@ export class SavedObjectShortUrlStorage implements ShortUrlStorage {
     const { savedObjects, savedObjectType } = this.dependencies;
     const attributes = createAttributes(data);
 
-    if (attributes.slug) {
-      const isSlugTaken = await this.exists(attributes.slug);
-      if (isSlugTaken) {
-        throw new Error(`Slug "${attributes.slug}" already exists.`);
-      }
-    }
-
     const savedObject = await savedObjects.create(savedObjectType, attributes, {
       refresh: true,
     });

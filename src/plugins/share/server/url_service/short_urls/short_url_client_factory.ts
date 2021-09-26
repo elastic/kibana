@@ -7,6 +7,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { ShortUrlStorage } from './types';
 import type { IShortUrlClientFactory } from '../../../common/url_service';
 import { ServerShortUrlClient } from './short_url_client';
 import { SavedObjectShortUrlStorage } from './storage/saved_object_short_url_storage';
@@ -22,7 +23,8 @@ export interface ServerShortUrlClientFactoryDependencies {
 }
 
 export interface ServerShortUrlClientFactoryCreateParams {
-  savedObjects: SavedObjectsClientContract;
+  savedObjects?: SavedObjectsClientContract;
+  storage?: ShortUrlStorage;
 }
 
 export class ServerShortUrlClientFactory
@@ -30,11 +32,13 @@ export class ServerShortUrlClientFactory
 {
   constructor(private readonly dependencies: ServerShortUrlClientFactoryDependencies) {}
 
-  public get({ savedObjects }: ServerShortUrlClientFactoryCreateParams): ServerShortUrlClient {
-    const storage = new SavedObjectShortUrlStorage({
-      savedObjects,
-      savedObjectType: 'url',
-    });
+  public get(params: ServerShortUrlClientFactoryCreateParams): ServerShortUrlClient {
+    const storage =
+      params.storage ??
+      new SavedObjectShortUrlStorage({
+        savedObjects: params.savedObjects!,
+        savedObjectType: 'url',
+      });
     const client = new ServerShortUrlClient({
       storage,
       currentVersion: this.dependencies.currentVersion,

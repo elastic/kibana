@@ -56,6 +56,14 @@ export class ServerShortUrlClient implements IShortUrlClient {
     }
 
     const { storage, currentVersion } = this.dependencies;
+
+    if (slug) {
+      const isSlugTaken = await storage.exists(slug);
+      if (isSlugTaken) {
+        throw new Error(`Slug "${slug}" already exists.`);
+      }
+    }
+
     const now = Date.now();
     const data = await storage.create({
       accessCount: 0,

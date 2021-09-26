@@ -43,6 +43,15 @@ export class MemoryShortUrlStorage implements ShortUrlStorage {
     throw new Error(`No short url with slug "${slug}".`);
   }
 
+  public async exists(slug: string): Promise<boolean> {
+    for (const url of this.urls.values()) {
+      if (url.slug === slug) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public async delete(id: string): Promise<void> {
     this.urls.delete(id);
   }

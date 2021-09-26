@@ -33,9 +33,12 @@ export interface ShortUrlStorage {
   ): Promise<ShortUrlData<P>>;
 
   /**
+   * Checks if a short URL exists by slug.
+   */
+  exists(slug: string): Promise<boolean>;
+
+  /**
    * Delete an existing short URL entry.
-   *
-   * @returns True if the short URL was deleted, false otherwise.
    */
   delete(id: string): Promise<void>;
 }
