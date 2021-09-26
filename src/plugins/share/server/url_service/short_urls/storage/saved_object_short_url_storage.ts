@@ -67,7 +67,7 @@ const createShortUrlData = <P extends SerializableRecord = SerializableRecord>(
       slug: savedObject.id,
       locator: {
         id: LEGACY_SHORT_URL_LOCATOR_ID,
-        version: 'FILL_THIS_IN',
+        version: '7.15.0',
         state,
       },
       ...rest,
