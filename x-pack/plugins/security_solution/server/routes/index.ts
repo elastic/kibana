@@ -64,7 +64,6 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
-  // isRuleRegistryEnabled: boolean
   ruleDataClient: IRuleDataClient | null
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;

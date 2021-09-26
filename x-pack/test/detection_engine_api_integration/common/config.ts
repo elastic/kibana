@@ -48,7 +48,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/generating_signals`)],
+      testFiles: [require.resolve(`../${name}/tests/`)],
       servers,
       services,
       junit: {

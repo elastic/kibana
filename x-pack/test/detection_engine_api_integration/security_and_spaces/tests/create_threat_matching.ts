@@ -48,41 +48,13 @@ const assertContains = (subject: unknown[], expected: unknown[]) =>
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
-  // const config = getService('config');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  /*
-  const isRuleRegistryEnabled = config
-    .get('xpack.securitySolution.enableExperimental')
-    .contains('ruleRegistryEnabled');
-  const testIfRuleRegistryDisabled = isRuleRegistryEnabled ? it.skip : it;
-  */
 
   /**
    * Specific api integration tests for threat matching rule type
    */
   describe('create_threat_matching', () => {
-    /*
-    describe('validation errors', () => {
-      testIfRuleRegistryDisabled(
-        'should give an error that the index must exist first if it does not exist before creating a rule',
-        async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getCreateThreatMatchRulesSchemaMock())
-            .expect(400);
-
-          expect(body).to.eql({
-            message:
-              'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-            status_code: 400,
-          });
-        }
-      );
-    });
-    */
-
     describe('creating threat match rule', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');

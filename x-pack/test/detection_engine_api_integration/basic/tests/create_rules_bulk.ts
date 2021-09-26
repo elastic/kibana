@@ -23,15 +23,8 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  // const config = getService('config');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-
-  /*
-  const isRuleRegistryEnabled = config
-    .get('xpack.securitySolution.enableExperimental')
-    .contains('ruleRegistryEnabled');
-  */
 
   describe('create_rules_bulk', () => {
     describe('creating rules in bulk', () => {
