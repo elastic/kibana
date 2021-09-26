@@ -1,0 +1,56 @@
+[[short-urls-api-resolve]]
+=== Resolve short URL API
+++++
+<titleabbrev>Resolve short URL</titleabbrev>
+++++
+
+experimental[] Resolve a single {kib} short URL by its slug.
+
+[[short-urls-api-resolve-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/short_url/_slug/<slug>`
+
+
+[[short-urls-api-resolve-params]]
+==== Path parameters
+
+`slug`::
+  (Required, string) The slug of the short URL.
+
+
+[[short-urls-api-resolve-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+
+[[short-urls-api-resolve-example]]
+==== Example
+
+Retrieve the short URL with the `hello-world` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/short_url/_slug/hello-world
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "12345",
+  "slug": "hello-world",
+  "locator": {
+    "id": "LOCATOR_ID",
+    "version": "x.x.x",
+    "state": {}
+  },
+  "accessCount": 0,
+  "accessDate": 1632680100000,
+  "createDate": 1632680100000
+}
+--------------------------------------------------
