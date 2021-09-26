@@ -72,7 +72,7 @@ The API returns the following:
   "locator": {
     "id": "LOCATOR_ID",
     "version": "x.x.x", <3>
-    "state": {}, <4>
+    "state": {} <4>
   },
   "accessCount": 0,
   "accessDate": 1632680100000,
