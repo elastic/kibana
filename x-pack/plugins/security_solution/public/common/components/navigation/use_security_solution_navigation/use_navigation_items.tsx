@@ -83,10 +83,6 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       },
       {
         ...securityNavGroup.manage,
-        // NOTE: The following ternary had been purporsely made redundant to simplify
-        // the logic and the the clean up required of the temporal hostIsolationExceptionsTabEnabled
-        // feature flag.
-        // This flag will be temporal as per the development of version 7.16
         items: [
           navTabs.endpoints,
           navTabs.trusted_apps,
