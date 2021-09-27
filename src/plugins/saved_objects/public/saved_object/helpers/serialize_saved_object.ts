@@ -31,10 +31,8 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
   });
 
   if (savedObject.searchSource) {
-    const {
-      searchSourceJSON,
-      references: searchSourceReferences,
-    } = savedObject.searchSource.serialize();
+    const { searchSourceJSON, references: searchSourceReferences } =
+      savedObject.searchSource.serialize();
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }

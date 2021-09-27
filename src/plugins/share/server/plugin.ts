@@ -31,8 +31,10 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
   public setup(core: CoreSetup) {
     this.url = new UrlService({
+      baseUrl: core.http.basePath.publicBaseUrl || core.http.basePath.serverBasePath,
+      version: this.initializerContext.env.packageInfo.version,
       navigate: async () => {
-        throw new Error('Locator .navigate() currently is not supported on the server.');
+        throw new Error('Locator .navigate() is not supported on the server.');
       },
       getUrl: async () => {
         throw new Error('Locator .getUrl() currently is not supported on the server.');

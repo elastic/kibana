@@ -33,9 +33,8 @@ const RecentCasesComponent = ({
   hasWritePermissions,
 }: Omit<RecentCasesProps, 'owner'>) => {
   const currentUser = useCurrentUser();
-  const [recentCasesFilterBy, setRecentCasesFilterBy] = useState<RecentCasesFilterMode>(
-    'recentlyCreated'
-  );
+  const [recentCasesFilterBy, setRecentCasesFilterBy] =
+    useState<RecentCasesFilterMode>('recentlyCreated');
 
   const recentCasesFilterOptions = useMemo(
     () =>

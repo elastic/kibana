@@ -6,6 +6,7 @@
  */
 
 import querystring from 'querystring';
+import { chunk } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -16,12 +17,19 @@ const DATE_WITH_DATA = {
 };
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
+const COPY_TO_CLIPBOARD_BUTTON_SELECTOR = 'copy-to-clipboard';
+const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
+
+const ACTION_COLUMN_INDEX = 1;
+
+type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
 export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
   const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
+  const toasts = getService('toasts');
 
   const navigateToTimeWithData = async () => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
@@ -31,13 +39,29 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     );
   };
 
+  const getTableColumnHeaders = async () => {
+    const table = await testSubjects.find(ALERTS_TABLE_CONTAINER_SELECTOR);
+    const tableHeaderRow = await testSubjects.findDescendant('dataGridHeader', table);
+    const columnHeaders = await tableHeaderRow.findAllByXpath('./div');
+    return columnHeaders;
+  };
+
   const getTableCells = async () => {
     // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
     return await testSubjects.findAll('dataGridRowCell');
   };
 
+  const getTableCellsInRows = async () => {
+    const columnHeaders = await getTableColumnHeaders();
+    if (columnHeaders.length <= 0) {
+      return [];
+    }
+    const cells = await getTableCells();
+    return chunk(cells, columnHeaders.length);
+  };
+
   const getTableOrFail = async () => {
-    return await testSubjects.existOrFail('events-viewer-panel');
+    return await testSubjects.existOrFail(ALERTS_TABLE_CONTAINER_SELECTOR);
   };
 
   const getNoDataStateOrFail = async () => {
@@ -54,7 +78,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   const clearQueryBar = async () => {
-    return await (await getQueryBar()).clearValueWithKeyboard({ charByChar: true });
+    return await (await getQueryBar()).clearValueWithKeyboard();
   };
 
   const typeInQueryBar = async (query: string) => {
@@ -109,21 +133,73 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListDescription', flyout);
   };
 
+  // Cell actions
+
+  const copyToClipboardButtonExists = async () => {
+    return await testSubjects.exists(COPY_TO_CLIPBOARD_BUTTON_SELECTOR);
+  };
+
+  const getCopyToClipboardButton = async () => {
+    return await testSubjects.find(COPY_TO_CLIPBOARD_BUTTON_SELECTOR);
+  };
+
+  const getFilterForValueButton = async () => {
+    return await testSubjects.find('filter-for-value');
+  };
+
+  const openActionsMenuForRow = async (rowIndex: number) => {
+    const rows = await getTableCellsInRows();
+    const actionsOverflowButton = await testSubjects.findDescendant(
+      'alerts-table-row-action-more',
+      rows[rowIndex][ACTION_COLUMN_INDEX]
+    );
+    await actionsOverflowButton.click();
+  };
+
+  const setWorkflowStatusForRow = async (rowIndex: number, workflowStatus: WorkflowStatus) => {
+    await openActionsMenuForRow(rowIndex);
+
+    if (workflowStatus === 'closed') {
+      await testSubjects.click('close-alert-status');
+    } else {
+      await testSubjects.click(`${workflowStatus}-alert-status`);
+    }
+
+    // wait for a confirmation toast (the css index is 1-based)
+    await toasts.getToastElement(1);
+    await toasts.dismissAllToasts();
+  };
+
+  const setWorkflowStatusFilter = async (workflowStatus: WorkflowStatus) => {
+    const buttonGroupButton = await testSubjects.find(
+      `workflow-status-filter-${workflowStatus}-button`
+    );
+    await buttonGroupButton.click();
+  };
+
   return {
+    getQueryBar,
     clearQueryBar,
-    typeInQueryBar,
-    submitQuery,
-    getTableCells,
-    getTableOrFail,
-    getNoDataStateOrFail,
-    openAlertsFlyout,
-    getAlertsFlyout,
-    getAlertsFlyoutTitle,
     closeAlertsFlyout,
-    navigateToTimeWithData,
-    getAlertsFlyoutOrFail,
-    getAlertsFlyoutViewInAppButtonOrFail,
-    getAlertsFlyoutDescriptionListTitles,
+    getAlertsFlyout,
     getAlertsFlyoutDescriptionListDescriptions,
+    getAlertsFlyoutDescriptionListTitles,
+    getAlertsFlyoutOrFail,
+    getAlertsFlyoutTitle,
+    getAlertsFlyoutViewInAppButtonOrFail,
+    getCopyToClipboardButton,
+    getFilterForValueButton,
+    copyToClipboardButtonExists,
+    getNoDataStateOrFail,
+    getTableCells,
+    getTableCellsInRows,
+    getTableColumnHeaders,
+    getTableOrFail,
+    navigateToTimeWithData,
+    openAlertsFlyout,
+    setWorkflowStatusForRow,
+    setWorkflowStatusFilter,
+    submitQuery,
+    typeInQueryBar,
   };
 }

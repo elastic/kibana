@@ -27,7 +27,7 @@ const renderOptions = {
 
 describe('MetadataTable', () => {
   it('shows sections', () => {
-    const sectionsWithRows = ([
+    const sectionsWithRows = [
       { key: 'foo', label: 'Foo', required: true },
       {
         key: 'bar',
@@ -39,7 +39,7 @@ describe('MetadataTable', () => {
           { key: 'props.B', value: 'B' },
         ],
       },
-    ] as unknown) as SectionsWithRows;
+    ] as unknown as SectionsWithRows;
     const output = render(
       <MetadataTable sections={sectionsWithRows} />,
       renderOptions
@@ -56,13 +56,13 @@ describe('MetadataTable', () => {
   });
   describe('required sections', () => {
     it('shows "empty state message" if no data is available', () => {
-      const sectionsWithRows = ([
+      const sectionsWithRows = [
         {
           key: 'foo',
           label: 'Foo',
           required: true,
         },
-      ] as unknown) as SectionsWithRows;
+      ] as unknown as SectionsWithRows;
       const output = render(
         <MetadataTable sections={sectionsWithRows} />,
         renderOptions

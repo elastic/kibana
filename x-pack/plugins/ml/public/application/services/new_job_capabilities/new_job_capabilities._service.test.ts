@@ -20,10 +20,10 @@ jest.mock('../ml_api_service', () => ({
   },
 }));
 
-const indexPattern = ({
+const indexPattern = {
   id: 'cloudwatch-*',
   title: 'cloudwatch-*',
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 describe('new_job_capabilities_service', () => {
   describe('cloudwatch newJobCaps()', () => {

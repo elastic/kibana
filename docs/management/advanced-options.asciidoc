@@ -142,6 +142,9 @@ The default placeholder value to use in
 Fields that exist outside of `_source`. Kibana merges these fields into the
 document when displaying it.
 
+[[metrics:allowStringIndices]]`metrics:allowStringIndices`::
+Enables you to use {es} indices in *TSVB* visualizations.
+
 [[metrics-maxbuckets]]`metrics:max_buckets`::
 Affects the *TSVB* histogram density. Must be set higher than `histogram:maxBars`.
 
@@ -511,10 +514,6 @@ Enables the legacy charts library for timelion charts in Visualize.
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in charts using the *Compatibility* palette.
-
-[[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
-The opacity of the chart items that are dimmed when highlighting another element
-of the chart. Use numbers between 0 and 1. The lower the number, the more the highlighted element stands out.
 
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.

@@ -33,9 +33,9 @@ interface SampleResponseValues {
 
 interface SampleResponseActions {
   queryChanged: (query: string) => { query: string };
-  getSearchResultsSuccess: (
-    response: SampleSearchResponse | string
-  ) => { response: SampleSearchResponse | string };
+  getSearchResultsSuccess: (response: SampleSearchResponse | string) => {
+    response: SampleSearchResponse | string;
+  };
   getSearchResultsFailure: (response: string) => { response: string };
   getSearchResults: (
     query: string,

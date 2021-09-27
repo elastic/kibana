@@ -117,6 +117,7 @@ const getDescription = ({
   data,
   eventId,
   fieldFromBrowserField,
+  isDraggable,
   linkValue,
   timelineId,
   values,
@@ -133,6 +134,7 @@ const getDescription = ({
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
+        isDraggable={isDraggable}
         values={values}
       />
       <ActionCell
@@ -181,11 +183,13 @@ export const getSummaryRows = ({
   browserFields,
   timelineId,
   eventId,
+  isDraggable = false,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   timelineId: string;
   eventId: string;
+  isDraggable?: boolean;
 }) => {
   const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
 
@@ -206,6 +210,7 @@ export const getSummaryRows = ({
         const initialDescription = {
           contextId: timelineId,
           eventId,
+          isDraggable,
           value: null,
           fieldType: 'string',
           linkValue: undefined,
@@ -304,15 +309,14 @@ const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
+  isDraggable?: boolean;
   timelineId: string;
   title?: string;
-}> = ({ browserFields, data, eventId, timelineId, title }) => {
-  const summaryRows = useMemo(() => getSummaryRows({ browserFields, data, eventId, timelineId }), [
-    browserFields,
-    data,
-    eventId,
-    timelineId,
-  ]);
+}> = ({ browserFields, data, eventId, isDraggable, timelineId, title }) => {
+  const summaryRows = useMemo(
+    () => getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId }),
+    [browserFields, data, eventId, isDraggable, timelineId]
+  );
 
   const ruleId = useMemo(() => {
     const item = data.find((d) => d.field === 'signal.rule.id');

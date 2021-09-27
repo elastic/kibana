@@ -258,8 +258,8 @@ const removeInvalidAccessors: SavedObjectMigrationFn<
   if (newDoc.attributes.visualizationType === 'lnsXY') {
     const datasourceLayers = newDoc.attributes.state.datasourceStates.indexpattern.layers || {};
     const xyState = newDoc.attributes.state.visualization;
-    (newDoc.attributes as LensDocShapePre710<XYStatePost77>).state.visualization.layers = xyState.layers.map(
-      (layer: XYLayerPre77) => {
+    (newDoc.attributes as LensDocShapePre710<XYStatePost77>).state.visualization.layers =
+      xyState.layers.map((layer: XYLayerPre77) => {
         const layerId = layer.layerId;
         const datasource = datasourceLayers[layerId];
         return {
@@ -268,8 +268,7 @@ const removeInvalidAccessors: SavedObjectMigrationFn<
           splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
           accessors: layer.accessors.filter((accessor) => !!datasource?.columns[accessor]),
         };
-      }
-    );
+      });
   }
   return newDoc;
 };
@@ -379,7 +378,7 @@ const transformTableState: SavedObjectMigrationFn<
 > = (doc) => {
   // nothing to do for non-datatable visualizations
   if (doc.attributes.visualizationType !== 'lnsDatatable')
-    return (doc as unknown) as SavedObjectUnsanitizedDoc<LensDocShape<DatatableStatePost711>>;
+    return doc as unknown as SavedObjectUnsanitizedDoc<LensDocShape<DatatableStatePost711>>;
   const oldState = doc.attributes.state.visualization;
   const layer = oldState.layers[0] || {
     layerId: '',
@@ -403,16 +402,14 @@ const transformTableState: SavedObjectMigrationFn<
   return newDoc;
 };
 
-const renameOperationsForFormula: SavedObjectMigrationFn<
-  LensDocShapePre712,
-  LensDocShapePost712
-> = (doc) => {
-  const newDoc = cloneDeep(doc);
-  return {
-    ...newDoc,
-    attributes: commonRenameOperationsForFormula(newDoc.attributes),
+const renameOperationsForFormula: SavedObjectMigrationFn<LensDocShapePre712, LensDocShapePost712> =
+  (doc) => {
+    const newDoc = cloneDeep(doc);
+    return {
+      ...newDoc,
+      attributes: commonRenameOperationsForFormula(newDoc.attributes),
+    };
   };
-};
 
 const removeTimezoneDateHistogramParam: SavedObjectMigrationFn<LensDocShape713, LensDocShape714> = (
   doc

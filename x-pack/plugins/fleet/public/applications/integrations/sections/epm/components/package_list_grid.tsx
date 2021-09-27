@@ -7,7 +7,6 @@
 
 import type { ReactNode } from 'react';
 import React, { Fragment, useCallback, useState } from 'react';
-import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -29,12 +28,14 @@ import { useLocalSearch, searchIdField } from '../../../hooks';
 
 import { PackageCard } from './package_card';
 
-interface ListProps {
+export interface ListProps {
   isLoading?: boolean;
   controls?: ReactNode;
   title: string;
   list: PackageList;
-  setSelectedCategory?: (category: string) => void;
+  initialSearch?: string;
+  setSelectedCategory: (category: string) => void;
+  onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
 }
 
@@ -43,33 +44,28 @@ export function PackageListGrid({
   controls,
   title,
   list,
-  setSelectedCategory = () => {},
+  initialSearch,
+  onSearchChange,
+  setSelectedCategory,
   showMissingIntegrationMessage = false,
 }: ListProps) {
-  const initialQuery = EuiSearchBar.Query.MATCH_ALL;
-
-  const [query, setQuery] = useState<Query | null>(initialQuery);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
 
   const onQueryChange = ({
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    query,
     queryText: userInput,
     error,
   }: {
-    query: Query | null;
     queryText: string;
     error: { message: string } | null;
   }) => {
     if (!error) {
-      setQuery(query);
+      onSearchChange(userInput);
       setSearchTerm(userInput);
     }
   };
 
   const resetQuery = () => {
-    setQuery(initialQuery);
     setSearchTerm('');
   };
 
@@ -99,7 +95,7 @@ export function PackageListGrid({
       <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiSearchBar
-          query={query || undefined}
+          query={searchTerm || undefined}
           box={{
             placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
               defaultMessage: 'Search for integrations',

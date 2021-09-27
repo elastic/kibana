@@ -11,14 +11,14 @@ import { initializeCreateWorkpadRoute } from './create';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 
-let mockRouteContext = ({
+let mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
   canvas: workpadRouteContextMock.create(),
-} as unknown) as MockWorkpadRouteContext;
+} as unknown as MockWorkpadRouteContext;
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
 
@@ -26,14 +26,14 @@ describe('POST workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
-    mockRouteContext = ({
+    mockRouteContext = {
       core: {
         savedObjects: {
           client: savedObjectsClientMock.create(),
         },
       },
       canvas: workpadRouteContextMock.create(),
-    } as unknown) as MockWorkpadRouteContext;
+    } as unknown as MockWorkpadRouteContext;
 
     const routerDeps = getMockedRouterDeps();
     initializeCreateWorkpadRoute(routerDeps);

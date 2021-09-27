@@ -228,6 +228,7 @@ export interface ElasticsearchLegacySource {
     };
     queue?: {
       type?: string;
+      events?: number;
     };
     jvm?: {
       uptime_in_millis?: number;
@@ -249,6 +250,8 @@ export interface ElasticsearchLegacySource {
     };
     events?: {
       out?: number;
+      in?: number;
+      filtered?: number;
     };
     reloads?: {
       failures?: number;

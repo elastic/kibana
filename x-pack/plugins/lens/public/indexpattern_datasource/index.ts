@@ -60,10 +60,8 @@ export class IndexPatternDatasource {
         fieldFormatsSetup.register([suffixFormatter]);
       }
 
-      const [
-        coreStart,
-        { indexPatternFieldEditor, uiActions, data, fieldFormats },
-      ] = await core.getStartServices();
+      const [coreStart, { indexPatternFieldEditor, uiActions, data, fieldFormats }] =
+        await core.getStartServices();
 
       return getIndexPatternDatasource({
         core: coreStart,

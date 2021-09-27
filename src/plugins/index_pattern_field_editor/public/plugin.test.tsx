@@ -112,7 +112,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
     };
     const { openDeleteModal } = await plugin.start(coreStartMocked, pluginStartMocked);
 
-    const indexPatternMock = ({ removeRuntimeField: removeFieldSpy } as unknown) as IndexPattern;
+    const indexPatternMock = { removeRuntimeField: removeFieldSpy } as unknown as IndexPattern;
 
     openDeleteModal({
       onDelete: onDeleteSpy,

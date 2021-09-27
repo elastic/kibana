@@ -14,7 +14,7 @@ import { GeoContainmentAlertParams } from '../types';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import {
   esQuery,
   esKuery,

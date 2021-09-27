@@ -9,28 +9,30 @@ import { SearchAfterAndBulkCreateParams, WrappedSignalHit, WrapSequences } from 
 import { buildSignalGroupFromSequence } from './build_bulk_body';
 import { ConfigType } from '../../../config';
 
-export const wrapSequencesFactory = ({
-  ruleSO,
-  signalsIndex,
-  mergeStrategy,
-  ignoreFields,
-}: {
-  ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
-  signalsIndex: string;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ignoreFields: ConfigType['alertIgnoreFields'];
-}): WrapSequences => (sequences, buildReasonMessage) =>
-  sequences.reduce(
-    (acc: WrappedSignalHit[], sequence) => [
-      ...acc,
-      ...buildSignalGroupFromSequence(
-        sequence,
-        ruleSO,
-        signalsIndex,
-        mergeStrategy,
-        ignoreFields,
-        buildReasonMessage
-      ),
-    ],
-    []
-  );
+export const wrapSequencesFactory =
+  ({
+    ruleSO,
+    signalsIndex,
+    mergeStrategy,
+    ignoreFields,
+  }: {
+    ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+    signalsIndex: string;
+    mergeStrategy: ConfigType['alertMergeStrategy'];
+    ignoreFields: ConfigType['alertIgnoreFields'];
+  }): WrapSequences =>
+  (sequences, buildReasonMessage) =>
+    sequences.reduce(
+      (acc: WrappedSignalHit[], sequence) => [
+        ...acc,
+        ...buildSignalGroupFromSequence(
+          sequence,
+          ruleSO,
+          signalsIndex,
+          mergeStrategy,
+          ignoreFields,
+          buildReasonMessage
+        ),
+      ],
+      []
+    );

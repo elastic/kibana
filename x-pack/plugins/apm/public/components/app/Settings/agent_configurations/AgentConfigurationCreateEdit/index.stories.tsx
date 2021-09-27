@@ -22,7 +22,7 @@ storiesOf(
   module
 )
   .addDecorator((storyFn) => {
-    const coreMock = ({} as unknown) as CoreStart;
+    const coreMock = {} as unknown as CoreStart;
 
     // mock
     createCallApmApi(coreMock);
@@ -37,7 +37,7 @@ storiesOf(
 
     return (
       <ApmPluginContext.Provider
-        value={(contextMock as unknown) as ApmPluginContextValue}
+        value={contextMock as unknown as ApmPluginContextValue}
       >
         {storyFn()}
       </ApmPluginContext.Provider>

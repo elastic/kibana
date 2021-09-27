@@ -7,6 +7,7 @@
 
 import type {
   Adapters,
+  InspectorOptions,
   Start as InspectorStartContract,
 } from '../../../../src/plugins/inspector/public';
 
@@ -16,7 +17,7 @@ export const getLensInspectorService = (inspector: InspectorStartContract) => {
   const adapters: Adapters = createDefaultInspectorAdapters();
   return {
     adapters,
-    inspect: () => inspector.open(adapters),
+    inspect: (options?: InspectorOptions) => inspector.open(adapters, options),
   };
 };
 

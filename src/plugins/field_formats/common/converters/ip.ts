@@ -19,9 +19,9 @@ export class IpFormat extends FieldFormat {
   });
   static fieldType = KBN_FIELD_TYPES.IP;
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: number) => {
     if (val === undefined || val === null) return '-';
-    if (!isFinite(val)) return val;
+    if (!isFinite(val)) return String(val);
 
     // shazzam!
     // eslint-disable-next-line no-bitwise

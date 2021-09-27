@@ -52,10 +52,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Rejects empty jobParams', async () => {
-      const {
-        status: resStatus,
-        text: resText,
-      } = (await generateAPI.getCsvFromParamsInPayload()) as supertest.Response;
+      const { status: resStatus, text: resText } =
+        (await generateAPI.getCsvFromParamsInPayload()) as supertest.Response;
 
       expect(resStatus).to.eql(400);
       expect(resText).to.match(/jobParams RISON string is required/);

@@ -179,9 +179,9 @@ const outputFormats = [
 
 function parseInputAsDuration(val: number, inputFormat: string) {
   const ratio = ratioToSeconds[inputFormat] || 1;
-  const kind = (inputFormat in ratioToSeconds
-    ? 'seconds'
-    : inputFormat) as unitOfTime.DurationConstructor;
+  const kind = (
+    inputFormat in ratioToSeconds ? 'seconds' : inputFormat
+  ) as unitOfTime.DurationConstructor;
   return moment.duration(val * ratio, kind);
 }
 
@@ -193,9 +193,9 @@ function formatInputHumanPrecise(
   includeSpace: string
 ) {
   const ratio = ratioToSeconds[inputFormat] || 1;
-  const kind = (inputFormat in ratioToSeconds
-    ? 'seconds'
-    : inputFormat) as unitOfTime.DurationConstructor;
+  const kind = (
+    inputFormat in ratioToSeconds ? 'seconds' : inputFormat
+  ) as unitOfTime.DurationConstructor;
   const valueInDuration = moment.duration(val * ratio, kind);
 
   return formatDuration(
@@ -235,7 +235,7 @@ export class DurationFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: number) => {
     const inputFormat = this.param('inputFormat');
     const outputFormat = this.param('outputFormat') as keyof Duration;
     const outputPrecision = this.param('outputPrecision');
