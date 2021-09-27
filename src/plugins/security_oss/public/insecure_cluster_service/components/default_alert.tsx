@@ -25,63 +25,62 @@ export const defaultAlertTitle = i18n.translate('security.checkup.insecureCluste
   defaultMessage: 'Your data is not secure',
 });
 
-export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountPoint = (
-  onDismiss
-) => (e) => {
-  const AlertText = () => {
-    const [persist, setPersist] = useState(false);
+export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountPoint =
+  (onDismiss) => (e) => {
+    const AlertText = () => {
+      const [persist, setPersist] = useState(false);
 
-    return (
-      <I18nProvider>
-        <div data-test-subj="insecureClusterDefaultAlertText">
-          <EuiText size="s">
-            <FormattedMessage
-              id="security.checkup.insecureClusterMessage"
-              defaultMessage="Don't lose one bit. Secure your data for free with Elastic."
+      return (
+        <I18nProvider>
+          <div data-test-subj="insecureClusterDefaultAlertText">
+            <EuiText size="s">
+              <FormattedMessage
+                id="security.checkup.insecureClusterMessage"
+                defaultMessage="Don't lose one bit. Secure your data for free with Elastic."
+              />
+            </EuiText>
+            <EuiSpacer />
+            <EuiCheckbox
+              id="persistDismissedAlertPreference"
+              checked={persist}
+              onChange={(changeEvent) => setPersist(changeEvent.target.checked)}
+              label={i18n.translate('security.checkup.dontShowAgain', {
+                defaultMessage: `Don't show again`,
+              })}
             />
-          </EuiText>
-          <EuiSpacer />
-          <EuiCheckbox
-            id="persistDismissedAlertPreference"
-            checked={persist}
-            onChange={(changeEvent) => setPersist(changeEvent.target.checked)}
-            label={i18n.translate('security.checkup.dontShowAgain', {
-              defaultMessage: `Don't show again`,
-            })}
-          />
-          <EuiSpacer />
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                color="primary"
-                fill
-                href="https://www.elastic.co/what-is/elastic-stack-security?blade=kibanasecuritymessage"
-                target="_blank"
-              >
-                {i18n.translate('security.checkup.learnMoreButtonText', {
-                  defaultMessage: `Learn more`,
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                onClick={() => onDismiss(persist)}
-                data-test-subj="defaultDismissAlertButton"
-              >
-                {i18n.translate('security.checkup.dismissButtonText', {
-                  defaultMessage: `Dismiss`,
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </I18nProvider>
-    );
+            <EuiSpacer />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  color="primary"
+                  fill
+                  href="https://www.elastic.co/what-is/elastic-stack-security?blade=kibanasecuritymessage"
+                  target="_blank"
+                >
+                  {i18n.translate('security.checkup.learnMoreButtonText', {
+                    defaultMessage: `Learn more`,
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  onClick={() => onDismiss(persist)}
+                  data-test-subj="defaultDismissAlertButton"
+                >
+                  {i18n.translate('security.checkup.dismissButtonText', {
+                    defaultMessage: `Dismiss`,
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </I18nProvider>
+      );
+    };
+
+    render(<AlertText />, e);
+
+    return () => unmountComponentAtNode(e);
   };
-
-  render(<AlertText />, e);
-
-  return () => unmountComponentAtNode(e);
-};

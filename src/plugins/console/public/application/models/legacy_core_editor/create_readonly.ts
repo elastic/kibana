@@ -65,7 +65,7 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
 
   (function setupSession(session) {
     session.setMode('ace/mode/text');
-    ((session as unknown) as { setFoldStyle: (v: string) => void }).setFoldStyle('markbeginend');
+    (session as unknown as { setFoldStyle: (v: string) => void }).setFoldStyle('markbeginend');
     session.setTabSize(2);
     session.setUseWrapMode(true);
   })(output.getSession());

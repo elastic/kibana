@@ -8,25 +8,170 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-This section summarizes the changes in each release.
+Review important information about the {kib} 8.0.0 releases.
 
+* <<release-notes-8.0.0-alpha2>>
 * <<release-notes-8.0.0-alpha1>>
 
 --
 
+[[release-notes-8.0.0-alpha2]]
+== {kib} 8.0.0-alpha2
+
+Review the {kib} 8.0.0-alpha2 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+
+[float]
+[[breaking-changes-8.0.0-alpha2]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. Review the following breaking changes, then mitigate the impact to your application.
+
+//tag::notable-breaking-changes[]
+
+[discrete]
+[[breaking-110830]]
+.Changes the `GET /api/status` default behavior
+[%collapsible]
+====
+*Details* +
+`GET /api/status` reports a new and more verbose payload. For more information, refer to {kibana-pull}110830[#110830].
+
+*Impact* +
+To retrieve the {kib} status in the previous format, use `GET /api/status?v7format=true`.
+====
+      
+[discrete]
+[[breaking-110738]]
+.Removes support for legacy exports
+[%collapsible]
+====
+*Details* +
+In {kib} 8.0.0 and later, the legacy format from {kib} 6.x is unsupported. For more information, refer to {kibana-pull}110738[#110738]
+
+*Impact* +
+Using the user interface to import saved objects is restricted to `.ndjson` format imports.
+====
+      
+[discrete]
+[[breaking-109896]]
+.Removes `map.regionmap.*`
+[%collapsible]
+====
+*Details* +
+The deprecated `map.regionmap.*` setting in kibana.yml has been removed. For more information, refer to {kibana-pull}109896[#109896].
+
+*Impact* +
+If you have maps that use `map.regionmap` layers:
+
+. Remove the `map.regionmap` layer.
+
+. To recreate the choropleth layer, use <<import-geospatial-data,GeoJSON upload>> to index your static vector data into {es}. 
+
+. Create a choropleth layer from the indexed vector data. 
+====
+      
+[discrete]
+[[breaking-109798]]
+.Removes `kibana.defaultAppId`
+[%collapsible]
+====
+*Details* +
+The deprecated `kibana.defaultAppId` setting in kibana.yml, which is also available as `kibana_legacy.defaultAppId`, has been removed. For more information, refer to {kibana-pull}109798[#109798].
+
+*Impact* +
+When you upgrade, remove `kibana.defaultAppId` from your kibana.yml file. To configure the default route for users when they enter a space, use the <<defaultroute,`defaultRoute`>> in *Advanced Settings*.
+====
+      
+[discrete]
+[[breaking-109350]]
+.Removes `courier:batchSearches`
+[%collapsible]
+====
+*Details* +
+The deprecated `courier:batchSearches` setting in *Advanced Settings* has been removed. For more information, refer to {kibana-pull}109350[#109350].
+
+*Impact* +
+When you upgrade, the `courier:batchSearches` setting will no longer be available.
+====
+      
+[discrete]
+[[breaking-108111]]
+.Removes `xpack.task_manager.index`
+[%collapsible]
+====
+*Details* +
+The deprecated `xpack.task_manager.index` setting in kibana.yml has been removed. For more information, refer to {kibana-pull}108111[#108111].
+
+*Impact* +
+When you upgrade, remove `xpack.task_manager.index` from your kibana.yml file.
+====
+      
+[discrete]
+[[breaking-108103]]
+.Removes dashboard-only mode
+[%collapsible]
+====
+*Details* +
+The legacy dashboard-only mode has been removed. For more information, refer to {kibana-pull}108103[#108103].
+
+*Impact* +
+To grant users access to only dashboards, create a new role, then assign only the *Dashboard* feature privilege. For more information, refer to <<kibana-feature-privileges,{kib} privileges>>.
+====
+     
+[discrete]
+[[breaking-105979]]
+.Removes `xpack.maps.showMapVisualizationTypes`
+[%collapsible]
+====
+*Details* +
+The deprecated `xpack.maps.showMapVisualizationTypes` setting in kibana.yml has been removed. For more information, refer to {kibana-pull}105979[#105979]
+
+*Impact* +
+When you upgrade, remove `xpack.maps.showMapVisualizationTypes` from your kibana.yml file.
+====
+
+For the {kib} 8.0.0-alpha1 breaking changes, refer to <<breaking-changes-8.0.0,Breaking changes>>.
+
+//end::notable-breaking-changes[]
+      
+[float]
+[[features-8.0.0-alpha2]]
+=== Features
+The 8.0.0-alpha2 release adds the following new and notable feature.
+
+Security::
+* Adds the interactive setup mode {kibana-pull}106881[#106881]
+      
+[float]
+[[enhancement-v8.0.0-alpha2]]
+=== Enhancements
+The 8.0.0-alpha2 release includes the following enhancements.
+
+Elastic Security::
+For the Elastic Security 8.0.0-alpha2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Security::
+* Interactive setup mode {kibana-pull}106881[#106881]
+
+[float]
+[[fixes-v8.0.0-alpha2]]
+=== Bug fix
+The 8.0.0-alpha2 release includes the following bug fix.
+
+Operations::
+* Moves systemd service to /usr/lib/systemd/system {kibana-pull}83571[#83571]
 
 [[release-notes-8.0.0-alpha1]]
 == {kib} 8.0.0-alpha1
 
-The following changes are released for the first time in {kib} 8.0.0-alpha1. Review the changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+Review the {kib} 8.0.0-alpha1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
 [[breaking-changes-8.0.0]]
 === Breaking changes
 
-Breaking changes can prevent your application from optimal operation and performance. Review the breaking changes, then mitigrate the impact to your appilication. 
+Breaking changes can prevent your application from optimal operation and performance. Review the breaking changes, then mitigate the impact to your application. 
 
-// tag::notable-breaking-changes[]
+//tag::notable-breaking-changes[]
 
 [float]
 [[enterprise-search-change]]
@@ -231,6 +376,18 @@ The `logging.useUTC` setting has been removed. For more information, refer to {k
 The default timezone is UTC. To change the timezone, set `logging.timezone: false` in kibana.yml. Change the timezone when the system, such as a docker container, is configured for a nonlocal timezone.  
 ====  
 
+[discrete]
+[[breaking-32049]]
+.Removed environment variables `CONFIG_PATH` and `DATA_PATH`
+[%collapsible]
+====
+*Details* +
+The environment variables `CONFIG_PATH` and `DATA_PATH` have been removed.  For more information, refer to {kibana-pull}32049[#32049]
+
+*Impact* +
+Use the environment variable `KBN_PATH_CONF` instead of `CONFIG_PATH`.  Use the setting `path.data` instead of `DATA_PATH`.
+====
+
 // end::notable-breaking-changes[]
 
 [float]
@@ -271,8 +428,3 @@ The 8.0.0-alpha1 release includes the following bug fix.
 
 Operations::
 * Moves systemd service to /usr/lib/systemd/system {kibana-pull}83571[#83571]
-
-//[[release-notes-8.0.0]]
-//== {kib} 8.0.0
-
-//coming::[8.0.0]

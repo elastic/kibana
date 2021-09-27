@@ -188,7 +188,7 @@ describe('SourceSettings', () => {
       const wrapper = shallow(<SourceSettings />);
 
       expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/api/workplace_search/org/sources/123/download_diagnostics'
+        '/internal/workplace_search/org/sources/123/download_diagnostics'
       );
     });
 
@@ -200,7 +200,7 @@ describe('SourceSettings', () => {
       const wrapper = shallow(<SourceSettings />);
 
       expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/api/workplace_search/account/sources/123/download_diagnostics'
+        '/internal/workplace_search/account/sources/123/download_diagnostics'
       );
     });
 

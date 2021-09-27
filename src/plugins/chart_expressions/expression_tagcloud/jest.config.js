@@ -10,4 +10,10 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../',
   roots: ['<rootDir>/src/plugins/chart_expressions/expression_tagcloud'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/plugins/chart_expressions/expression_tagcloud',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/plugins/chart_expressions/expression_tagcloud/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

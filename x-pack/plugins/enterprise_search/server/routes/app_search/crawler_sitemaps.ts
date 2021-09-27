@@ -15,7 +15,7 @@ export function registerCrawlerSitemapRoutes({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -36,7 +36,7 @@ export function registerCrawlerSitemapRoutes({
 
   router.put(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -58,7 +58,7 @@ export function registerCrawlerSitemapRoutes({
 
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

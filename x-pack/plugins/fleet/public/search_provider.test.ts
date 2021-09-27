@@ -10,7 +10,7 @@ import { NEVER } from 'rxjs';
 
 import { coreMock } from 'src/core/public/mocks';
 
-import { createPackageSearchProvider } from './search_provider';
+import { createPackageSearchProvider, toSearchResult } from './search_provider';
 import type { GetPackagesResponse } from './types';
 
 jest.mock('./hooks/use_request/epm', () => {
@@ -284,6 +284,44 @@ describe('Package search provider', () => {
 
         expect(sendGetPackages).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('toSearchResult', () => {
+    let startMock: ReturnType<typeof coreMock.createStart>;
+
+    beforeEach(() => {
+      startMock = coreMock.createStart();
+    });
+
+    it('uses svg icon if available', () => {
+      const pkg = {
+        ...testResponse[0],
+        icons: [{ type: 'image/svg+xml', src: '/img_nginx.svg', path: '' }],
+      };
+      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath);
+      expect(icon).toMatchInlineSnapshot(`"/api/fleet/epm/packages/test/test/img_nginx.svg"`);
+    });
+
+    it('prepends base path to svg URL', () => {
+      startMock = coreMock.createStart({ basePath: '/foo' });
+      const pkg = {
+        ...testResponse[0],
+        icons: [{ type: 'image/svg+xml', src: '/img_nginx.svg', path: '' }],
+      };
+      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath);
+      expect(icon).toMatchInlineSnapshot(`"/foo/api/fleet/epm/packages/test/test/img_nginx.svg"`);
+    });
+
+    // ICON_TYPES is empty in EUI: https://github.com/elastic/eui/issues/5138
+    it.skip('uses eui icon type as fallback', () => {
+      const pkg = {
+        ...testResponse[0],
+        name: 'elasticsearch',
+        icons: [{ type: 'image/jpg', src: '/img_nginx.svg', path: '' }],
+      };
+      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath);
+      expect(icon).toMatchInlineSnapshot(`"logoElasticsearch"`);
     });
   });
 });

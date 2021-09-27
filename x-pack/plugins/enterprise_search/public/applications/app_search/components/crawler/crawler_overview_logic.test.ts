@@ -43,6 +43,8 @@ const MOCK_SERVER_CRAWLER_DATA: CrawlerDataFromServer = {
       available_deduplication_fields: ['title', 'description'],
     },
   ],
+  events: [],
+  most_recent_crawl_request: null,
 };
 
 const MOCK_CLIENT_CRAWLER_DATA = crawlerDataServerToClient(MOCK_SERVER_CRAWLER_DATA);
@@ -67,7 +69,7 @@ describe('CrawlerOverviewLogic', () => {
         await nextTick();
 
         expect(http.delete).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains/1234',
+          '/internal/app_search/engines/some-engine/crawler/domains/1234',
           {
             query: { respond_with: 'crawler_details' },
           }

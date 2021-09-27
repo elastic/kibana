@@ -43,6 +43,9 @@ export class KbnClientStatus {
     const { data } = await this.requester.request<ApiResponseStatus>({
       method: 'GET',
       path: 'api/status',
+      query: {
+        v8format: true,
+      },
       // Status endpoint returns 503 if any services are in an unavailable state
       ignoreErrors: [503],
     });

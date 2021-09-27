@@ -35,7 +35,6 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           >
             <span
               className="euiToolTipAnchor"
-              onKeyUp={[Function]}
               onMouseOut={[Function]}
               onMouseOver={[Function]}
             >
@@ -53,7 +52,6 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
         >
           <span
             className="euiToolTipAnchor"
-            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >

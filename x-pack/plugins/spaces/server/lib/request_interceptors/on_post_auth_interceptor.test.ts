@@ -61,12 +61,13 @@ describe.skip('onPostAuthInterceptor', () => {
     const { http, elasticsearch } = await root.setup();
 
     // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
-    elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
+    elasticsearch.esNodesCompatibility$ =
+      elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
     const loggingMock = loggingSystemMock.create().asLoggerFactory().get('xpack', 'spaces');
 
     const featuresPlugin = featuresPluginMock.createSetup();
-    featuresPlugin.getKibanaFeatures.mockReturnValue(([
+    featuresPlugin.getKibanaFeatures.mockReturnValue([
       {
         id: 'feature-1',
         name: 'feature 1',
@@ -87,7 +88,7 @@ describe.skip('onPostAuthInterceptor', () => {
         name: 'feature 4',
         app: ['kibana'],
       },
-    ] as unknown) as KibanaFeature[]);
+    ] as unknown as KibanaFeature[]);
 
     const mockRepository = jest.fn().mockImplementation(() => {
       return {
@@ -142,11 +143,11 @@ describe.skip('onPostAuthInterceptor', () => {
     // interceptor to parse out the space id and rewrite the request's URL. Rather than duplicating that logic,
     // we are including the already tested interceptor here in the test chain.
     initSpacesOnRequestInterceptor({
-      http: (http as unknown) as CoreSetup['http'],
+      http: http as unknown as CoreSetup['http'],
     });
 
     initSpacesOnPostAuthRequestInterceptor({
-      http: (http as unknown) as CoreSetup['http'],
+      http: http as unknown as CoreSetup['http'],
       log: loggingMock,
       features: featuresPlugin,
       getSpacesService: () => spacesServiceStart,

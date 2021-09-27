@@ -55,9 +55,11 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
 
   const decodedComponentTemplateName = attemptToURIDecode(componentTemplateName)!;
 
-  const { data: componentTemplateDetails, isLoading, error } = api.useLoadComponentTemplate(
-    decodedComponentTemplateName
-  );
+  const {
+    data: componentTemplateDetails,
+    isLoading,
+    error,
+  } = api.useLoadComponentTemplate(decodedComponentTemplateName);
 
   const [activeTab, setActiveTab] = useState<TabType>('summary');
 

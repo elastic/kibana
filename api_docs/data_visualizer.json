@@ -234,7 +234,7 @@
         "children": [
           {
             "parentPluginId": "dataVisualizer",
-            "id": "def-public.props",
+            "id": "def-public.FileDataVisualizerSpec.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -247,7 +247,7 @@
           },
           {
             "parentPluginId": "dataVisualizer",
-            "id": "def-public.context",
+            "id": "def-public.FileDataVisualizerSpec.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -285,7 +285,7 @@
         "children": [
           {
             "parentPluginId": "dataVisualizer",
-            "id": "def-public.props",
+            "id": "def-public.IndexDataVisualizerSpec.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -298,7 +298,7 @@
           },
           {
             "parentPluginId": "dataVisualizer",
-            "id": "def-public.context",
+            "id": "def-public.IndexDataVisualizerSpec.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -542,7 +542,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"unknown\" | \"histogram\" | \"text\""
+              "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
             ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
@@ -972,7 +972,7 @@
         "label": "JobFieldType",
         "description": [],
         "signature": [
-          "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"unknown\" | \"histogram\" | \"text\""
+          "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
         ],
         "path": "x-pack/plugins/data_visualizer/common/types/job_field_type.ts",
         "deprecated": false,

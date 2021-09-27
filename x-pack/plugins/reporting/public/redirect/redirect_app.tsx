@@ -44,12 +44,12 @@ export const RedirectApp: FunctionComponent<Props> = ({ share }) => {
 
   useEffect(() => {
     try {
-      const locatorParams = ((window as unknown) as Record<string, LocatorParams>)[
+      const locatorParams = (window as unknown as Record<string, LocatorParams>)[
         REPORTING_REDIRECT_LOCATOR_STORE_KEY
       ];
 
       if (!locatorParams) {
-        throw new Error('Could not find locator for report');
+        throw new Error('Could not find locator params for report');
       }
 
       share.navigate(locatorParams);

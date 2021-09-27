@@ -7,6 +7,8 @@
 import React, { createContext } from 'react';
 import { GlobalState } from '../url_state';
 import { MonitoringStartPluginDependencies } from '../types';
+import { TimeRange, RefreshInterval } from '../../../../../src/plugins/data/public';
+import { Legacy } from '../legacy_shims';
 
 interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
@@ -14,10 +16,13 @@ interface GlobalStateProviderProps {
 }
 
 export interface State {
+  [key: string]: unknown;
   cluster_uuid?: string;
   ccs?: any;
   inSetupMode?: boolean;
   save?: () => void;
+  time?: TimeRange;
+  refreshInterval?: RefreshInterval;
 }
 
 export const GlobalStateContext = createContext({} as State);
@@ -29,10 +34,9 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
 }) => {
   // TODO: remove fakeAngularRootScope and fakeAngularLocation when angular is removed
   const fakeAngularRootScope: Partial<ng.IRootScopeService> = {
-    $on: (
-      name: string,
-      listener: (event: ng.IAngularEvent, ...args: any[]) => any
-    ): (() => void) => () => {},
+    $on:
+      (name: string, listener: (event: ng.IAngularEvent, ...args: any[]) => any): (() => void) =>
+      () => {},
     $applyAsync: () => {},
   };
 
@@ -45,13 +49,13 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     },
   };
 
-  const localState: { [key: string]: unknown } = {};
+  const localState: State = {};
   const state = new GlobalState(
     query,
     toasts,
     fakeAngularRootScope,
     fakeAngularLocation,
-    localState
+    localState as { [key: string]: unknown }
   );
 
   const initialState: any = state.getState();
@@ -62,11 +66,19 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     localState[key] = initialState[key];
   }
 
+  localState.refreshInterval = { value: 10000, pause: false };
+
   localState.save = () => {
     const newState = { ...localState };
     delete newState.save;
     state.setState(newState);
   };
+
+  const { value, pause } = Legacy.shims.timefilter.getRefreshInterval();
+  if (!value && pause) {
+    Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
+    localState.save?.();
+  }
 
   return <GlobalStateContext.Provider value={localState}>{children}</GlobalStateContext.Provider>;
 };

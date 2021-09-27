@@ -9,7 +9,7 @@ export interface Account {
   id: string;
   groups: string[];
   isAdmin: boolean;
-  canCreatePersonalSources: boolean;
+  canCreatePrivateSources: boolean;
   viewedOnboardingPage: boolean;
 }
 

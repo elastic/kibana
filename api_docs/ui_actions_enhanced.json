@@ -483,7 +483,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.props",
+                "id": "def-public.ActionFactory.ReactCollectConfig.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -496,7 +496,7 @@
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.ActionFactory.ReactCollectConfig.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -525,7 +525,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.ActionFactory.createConfig.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -554,7 +554,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.config",
+                "id": "def-public.ActionFactory.isConfigValid.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -567,7 +567,7 @@
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.ActionFactory.isConfigValid.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -823,7 +823,9 @@
                 "section": "def-common.SerializedEvent",
                 "text": "SerializedEvent"
               },
-              ", telemetryData: Record<string, any>) => Record<string, any>"
+              ", telemetryData: Record<string, ",
+              "PhraseFilterValue",
+              ">) => Record<string, any>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
@@ -856,7 +858,9 @@
                 "label": "telemetryData",
                 "description": [],
                 "signature": [
-                  "Record<string, any>"
+                  "Record<string, ",
+                  "PhraseFilterValue",
+                  ">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
@@ -2600,7 +2604,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.DrilldownDefinition.createConfig.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -2653,7 +2657,7 @@
             "tags": [],
             "label": "isConfigValid",
             "description": [
-              "\nA validator function for the config object. Should always return a boolean\ngiven any input."
+              "\nA validator function for the config object. Should always return a boolean."
             ],
             "signature": [
               "(config: Config, context: FactoryContext) => boolean"
@@ -2664,7 +2668,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.config",
+                "id": "def-public.DrilldownDefinition.isConfigValid.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -2677,7 +2681,7 @@
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.DrilldownDefinition.isConfigValid.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -2951,7 +2955,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nAny string that uniquely identifies this item in a list of `DrilldownTemplate[]`."
+              "\nA string that uniquely identifies this item in a list of `DrilldownTemplate[]`."
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
             "deprecated": false
@@ -3409,7 +3413,7 @@
         },
         ">>,Pick<",
         "UiActionsServiceEnhancements",
-        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
+        ", \"telemetry\" | \"inject\" | \"extract\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,
@@ -3432,7 +3436,7 @@
           "children": [
             {
               "parentPluginId": "uiActionsEnhanced",
-              "id": "def-public.props",
+              "id": "def-public.StartContract.DrilldownManager.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "props",
@@ -3445,7 +3449,7 @@
             },
             {
               "parentPluginId": "uiActionsEnhanced",
-              "id": "def-public.context",
+              "id": "def-public.StartContract.DrilldownManager.$2",
               "type": "Any",
               "tags": [],
               "label": "context",

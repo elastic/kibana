@@ -273,7 +273,7 @@
         "signature": [
           "Pick<",
           "TGridModel",
-          ", \"columns\" | \"filters\" | \"title\" | \"id\" | \"sort\" | \"version\" | \"isLoading\" | \"dateRange\" | \"defaultColumns\" | \"savedObjectId\" | \"dataProviders\" | \"deletedEventIds\" | \"excludedRowRendererIds\" | \"expandedDetail\" | \"graphEventId\" | \"kqlQuery\" | \"indexNames\" | \"isSelectAllChecked\" | \"itemsPerPage\" | \"itemsPerPageOptions\" | \"loadingEventIds\" | \"showCheckboxes\" | \"selectedEventIds\"> & { activeTab: ",
+          ", \"columns\" | \"filters\" | \"title\" | \"id\" | \"sort\" | \"version\" | \"isLoading\" | \"filterManager\" | \"dateRange\" | \"defaultColumns\" | \"savedObjectId\" | \"unit\" | \"dataProviders\" | \"deletedEventIds\" | \"documentType\" | \"excludedRowRendererIds\" | \"expandedDetail\" | \"footerText\" | \"graphEventId\" | \"kqlQuery\" | \"queryFields\" | \"indexNames\" | \"isSelectAllChecked\" | \"itemsPerPage\" | \"itemsPerPageOptions\" | \"loadingEventIds\" | \"loadingText\" | \"selectAll\" | \"showCheckboxes\" | \"selectedEventIds\"> & { activeTab: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -412,7 +412,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; enableExperimental: string[]; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }>"
+                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }>"
                 ],
                 "path": "x-pack/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
@@ -845,7 +845,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; readonly enableExperimental: string[]; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly packagerTaskInterval: string; readonly prebuiltRulesFromFileSystem: boolean; readonly prebuiltRulesFromSavedObjects: boolean; }"
+          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; readonly alertIgnoreFields: string[]; readonly enableExperimental: string[]; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly packagerTaskInterval: string; readonly prebuiltRulesFromFileSystem: boolean; readonly prebuiltRulesFromSavedObjects: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,
@@ -1032,16 +1032,6 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.ariaRowindex",
-            "type": "number",
-            "tags": [],
-            "label": "ariaRowindex",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
             "id": "def-common.ActionProps.action",
             "type": "CompoundType",
             "tags": [],
@@ -1095,14 +1085,21 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.width",
+            "id": "def-common.ActionProps.ariaRowindex",
             "type": "number",
             "tags": [],
-            "label": "width",
+            "label": "ariaRowindex",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.checked",
+            "type": "boolean",
+            "tags": [],
+            "label": "checked",
+            "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
           },
@@ -1128,42 +1125,49 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.checked",
-            "type": "boolean",
+            "id": "def-common.ActionProps.data",
+            "type": "Array",
             "tags": [],
-            "label": "checked",
+            "label": "data",
             "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.TimelineNonEcsData",
+                "text": "TimelineNonEcsData"
+              },
+              "[]"
+            ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.onRowSelected",
-            "type": "Function",
+            "id": "def-common.ActionProps.disabled",
+            "type": "CompoundType",
             "tags": [],
-            "label": "onRowSelected",
+            "label": "disabled",
             "description": [],
             "signature": [
-              "({ eventIds, isSelected, }: { eventIds: string[]; isSelected: boolean; }) => void"
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "securitySolution",
-                "id": "def-common.__0",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ eventIds: string[]; isSelected: boolean; }"
-                ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.ecsData",
+            "type": "Object",
+            "tags": [],
+            "label": "ecsData",
+            "description": [],
+            "signature": [
+              "Ecs"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "securitySolution",
@@ -1172,6 +1176,55 @@
             "tags": [],
             "label": "eventId",
             "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.eventIdToNoteIds",
+            "type": "Object",
+            "tags": [],
+            "label": "eventIdToNoteIds",
+            "description": [],
+            "signature": [
+              "Readonly<Record<string, string[]>> | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.index",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.isEventPinned",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEventPinned",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.isEventViewer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEventViewer",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
           },
@@ -1205,115 +1258,13 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.showCheckboxes",
-            "type": "boolean",
-            "tags": [],
-            "label": "showCheckboxes",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.data",
-            "type": "Array",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.TimelineNonEcsData",
-                "text": "TimelineNonEcsData"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.ecsData",
-            "type": "Object",
-            "tags": [],
-            "label": "ecsData",
-            "description": [],
-            "signature": [
-              "Ecs"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.index",
-            "type": "number",
-            "tags": [],
-            "label": "index",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.eventIdToNoteIds",
-            "type": "Object",
-            "tags": [],
-            "label": "eventIdToNoteIds",
-            "description": [],
-            "signature": [
-              "Readonly<Record<string, string[]>> | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.isEventPinned",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isEventPinned",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.isEventViewer",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isEventViewer",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.rowIndex",
-            "type": "number",
-            "tags": [],
-            "label": "rowIndex",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.setEventsLoading",
+            "id": "def-common.ActionProps.onRowSelected",
             "type": "Function",
             "tags": [],
-            "label": "setEventsLoading",
+            "label": "onRowSelected",
             "description": [],
             "signature": [
-              "(params: { eventIds: string[]; isLoading: boolean; }) => void"
+              "({ eventIds, isSelected, }: { eventIds: string[]; isSelected: boolean; }) => void"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
@@ -1321,47 +1272,33 @@
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.params",
+                "id": "def-common.ActionProps.onRowSelected.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "params",
+                "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ eventIds: string[]; isLoading: boolean; }"
+                  "{ eventIds: string[]; isSelected: boolean; }"
                 ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
                 "deprecated": false
               }
             ]
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.setEventsDeleted",
+            "id": "def-common.ActionProps.onRuleChange",
             "type": "Function",
             "tags": [],
-            "label": "setEventsDeleted",
+            "label": "onRuleChange",
             "description": [],
             "signature": [
-              "(params: { eventIds: string[]; isDeleted: boolean; }) => void"
+              "(() => void) | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "securitySolution",
-                "id": "def-common.params",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "{ eventIds: string[]; isDeleted: boolean; }"
-                ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-                "deprecated": false
-              }
-            ]
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",
@@ -1380,18 +1317,81 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.ActionProps.onRuleChange",
+            "id": "def-common.ActionProps.rowIndex",
+            "type": "number",
+            "tags": [],
+            "label": "rowIndex",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.setEventsDeleted",
             "type": "Function",
             "tags": [],
-            "label": "onRuleChange",
+            "label": "setEventsDeleted",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(params: { eventIds: string[]; isDeleted: boolean; }) => void"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-common.ActionProps.setEventsDeleted.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isDeleted: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.setEventsLoading",
+            "type": "Function",
+            "tags": [],
+            "label": "setEventsLoading",
+            "description": [],
+            "signature": [
+              "(params: { eventIds: string[]; isLoading: boolean; }) => void"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-common.ActionProps.setEventsLoading.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isLoading: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.showCheckboxes",
+            "type": "boolean",
+            "tags": [],
+            "label": "showCheckboxes",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "securitySolution",
@@ -1450,6 +1450,19 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.width",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2874,7 +2887,7 @@
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues",
+                "id": "def-common.ColumnRenderer.renderColumn.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    columnName,\n    eventId,\n    field,\n    timelineId,\n    truncate,\n    values,\n    linkValues,\n  }",
@@ -2884,7 +2897,7 @@
                 "children": [
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.columnName",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnName",
                     "type": "string",
                     "tags": [],
                     "label": "columnName",
@@ -2894,7 +2907,7 @@
                   },
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.eventId",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.eventId",
                     "type": "string",
                     "tags": [],
                     "label": "eventId",
@@ -2904,7 +2917,7 @@
                   },
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.field",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.field",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "field",
@@ -2912,7 +2925,7 @@
                     "signature": [
                       "Pick<",
                       "EuiDataGridColumn",
-                      ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+                      ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
                       {
                         "pluginId": "timelines",
                         "scope": "common",
@@ -2937,7 +2950,7 @@
                   },
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.timelineId",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.timelineId",
                     "type": "string",
                     "tags": [],
                     "label": "timelineId",
@@ -2947,7 +2960,7 @@
                   },
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.truncate",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.truncate",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "truncate",
@@ -2960,7 +2973,7 @@
                   },
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.values",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.values",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "values",
@@ -2973,7 +2986,7 @@
                   },
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.linkValues",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.linkValues",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "linkValues",
@@ -5259,7 +5272,7 @@
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.HeaderActionProps.onSelectAll.$1.isSelected",
+                "id": "def-common.HeaderActionProps.onSelectAll.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ isSelected }",
@@ -5269,7 +5282,7 @@
                 "children": [
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.HeaderActionProps.onSelectAll.$1.isSelected.isSelected",
+                    "id": "def-common.HeaderActionProps.onSelectAll.$1.isSelected",
                     "type": "boolean",
                     "tags": [],
                     "label": "isSelected",
@@ -14694,7 +14707,7 @@
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId",
+                "id": "def-common.RowRenderer.renderRow.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    browserFields,\n    data,\n    isDraggable,\n    timelineId,\n  }",
@@ -14704,7 +14717,7 @@
                 "children": [
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.browserFields",
+                    "id": "def-common.RowRenderer.renderRow.$1.browserFields",
                     "type": "Object",
                     "tags": [],
                     "label": "browserFields",
@@ -14725,7 +14738,7 @@
                   },
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.data",
+                    "id": "def-common.RowRenderer.renderRow.$1.data",
                     "type": "Object",
                     "tags": [],
                     "label": "data",
@@ -14738,7 +14751,7 @@
                   },
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.isDraggable",
+                    "id": "def-common.RowRenderer.renderRow.$1.isDraggable",
                     "type": "boolean",
                     "tags": [],
                     "label": "isDraggable",
@@ -14748,7 +14761,7 @@
                   },
                   {
                     "parentPluginId": "securitySolution",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.timelineId",
+                    "id": "def-common.RowRenderer.renderRow.$1.timelineId",
                     "type": "string",
                     "tags": [],
                     "label": "timelineId",
@@ -15688,6 +15701,19 @@
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.TimelineEventsAllStrategyResponse.consumers",
+            "type": "Object",
+            "tags": [],
+            "label": "consumers",
+            "description": [],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.TimelineEventsAllStrategyResponse.edges",
@@ -16754,6 +16780,26 @@
                 "text": "ColumnHeaderOptions"
               },
               "[]"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.TimelinePersistInput.defaultColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultColumns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.ColumnHeaderOptions",
+                "text": "ColumnHeaderOptions"
+              },
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
             "deprecated": false
@@ -19107,7 +19153,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -20335,7 +20381,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.nextPage",
+            "id": "def-common.OnChangePage.$1",
             "type": "number",
             "tags": [],
             "label": "nextPage",
@@ -20362,7 +20408,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.columnId",
+            "id": "def-common.OnColumnRemoved.$1",
             "type": "string",
             "tags": [],
             "label": "columnId",
@@ -20389,7 +20435,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.__0",
+            "id": "def-common.OnColumnResized.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -20429,7 +20475,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.sorted",
+            "id": "def-common.OnColumnSorted.$1",
             "type": "Object",
             "tags": [],
             "label": "sorted",
@@ -20475,7 +20521,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.sorted",
+            "id": "def-common.OnColumnsSorted.$1",
             "type": "Array",
             "tags": [],
             "label": "sorted",
@@ -20515,7 +20561,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.eventId",
+            "id": "def-common.OnPinEvent.$1",
             "type": "string",
             "tags": [],
             "label": "eventId",
@@ -20544,7 +20590,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.__0",
+            "id": "def-common.OnRowSelected.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -20576,7 +20622,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.__0",
+            "id": "def-common.OnSelectAll.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -20608,7 +20654,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.eventId",
+            "id": "def-common.OnUnPinEvent.$1",
             "type": "string",
             "tags": [],
             "label": "eventId",
@@ -20645,7 +20691,7 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.columns",
+            "id": "def-common.OnUpdateColumns.$1",
             "type": "Array",
             "tags": [],
             "label": "columns",
@@ -22033,7 +22079,9 @@
         "label": "TimelineExpandedDetail",
         "description": [],
         "signature": [
-          "{ query?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "{ query?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -22041,7 +22089,9 @@
             "section": "def-common.FlowTarget",
             "text": "FlowTarget"
           },
-          "; } | undefined; } | undefined; graph?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "; } | undefined; } | undefined; graph?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -22049,7 +22099,9 @@
             "section": "def-common.FlowTarget",
             "text": "FlowTarget"
           },
-          "; } | undefined; } | undefined; notes?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "; } | undefined; } | undefined; notes?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -22057,7 +22109,9 @@
             "section": "def-common.FlowTarget",
             "text": "FlowTarget"
           },
-          "; } | undefined; } | undefined; pinned?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "; } | undefined; } | undefined; pinned?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -22065,7 +22119,9 @@
             "section": "def-common.FlowTarget",
             "text": "FlowTarget"
           },
-          "; } | undefined; } | undefined; eql?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "; } | undefined; } | undefined; eql?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -22087,7 +22143,9 @@
         "label": "TimelineExpandedDetailType",
         "description": [],
         "signature": [
-          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -22109,7 +22167,9 @@
         "label": "TimelineExpandedEventType",
         "description": [],
         "signature": [
-          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never>"
+          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Record<any, never>"
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
         "deprecated": false,
@@ -22586,7 +22646,9 @@
         "label": "ToggleDetailPanel",
         "description": [],
         "signature": [
-          "({ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } & { tabType?: ",
+          "({ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } & { tabType?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",

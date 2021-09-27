@@ -18,7 +18,7 @@ jest.mock('moment', () => {
   return moment;
 });
 
-import { IndexPattern, IndexPatternField } from '../../../index_patterns';
+import { IndexPattern, IndexPatternField } from '../../..';
 import { AggParamsDateHistogram } from '../buckets';
 import { inferTimeZone } from './infer_time_zone';
 
@@ -34,7 +34,7 @@ describe('inferTimeZone', () => {
     expect(
       inferTimeZone(
         { field: 'mydatefield' },
-        ({
+        {
           typeMeta: {
             aggs: {
               date_histogram: {
@@ -44,7 +44,7 @@ describe('inferTimeZone', () => {
               },
             },
           },
-        } as unknown) as IndexPattern,
+        } as unknown as IndexPattern,
         () => false,
         jest.fn()
       )
@@ -59,7 +59,7 @@ describe('inferTimeZone', () => {
             name: 'mydatefield',
           } as IndexPatternField,
         },
-        ({
+        {
           typeMeta: {
             aggs: {
               date_histogram: {
@@ -69,7 +69,7 @@ describe('inferTimeZone', () => {
               },
             },
           },
-        } as unknown) as IndexPattern,
+        } as unknown as IndexPattern,
         () => false,
         jest.fn()
       )

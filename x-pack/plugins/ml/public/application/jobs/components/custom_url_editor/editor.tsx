@@ -29,7 +29,7 @@ import { isValidLabel } from '../../../util/custom_url_utils';
 
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 function getLinkToOptions() {
   return [

@@ -71,17 +71,13 @@ describe('getImportWarnings', () => {
         references: [],
       },
     ];
-    const warnings = getImportWarnings(
-      (savedObjectRules as unknown) as Array<SavedObject<RawAlert>>
-    );
+    const warnings = getImportWarnings(savedObjectRules as unknown as Array<SavedObject<RawAlert>>);
     expect(warnings[0].message).toBe('2 rules must be enabled after the import.');
   });
 
   it('return no warning messages if no rules were imported', () => {
     const savedObjectRules = [] as Array<SavedObject<RawAlert>>;
-    const warnings = getImportWarnings(
-      (savedObjectRules as unknown) as Array<SavedObject<RawAlert>>
-    );
+    const warnings = getImportWarnings(savedObjectRules as unknown as Array<SavedObject<RawAlert>>);
     expect(warnings.length).toBe(0);
   });
 });

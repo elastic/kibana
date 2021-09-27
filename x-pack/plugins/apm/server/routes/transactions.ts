@@ -179,22 +179,21 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       logger,
     };
 
-    const [
-      { currentPeriod, previousPeriod },
-      anomalyTimeseries,
-    ] = await Promise.all([
-      getLatencyPeriods({
-        ...options,
-        latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-        comparisonStart,
-        comparisonEnd,
-      }),
-      getAnomalySeries(options).catch((error) => {
-        logger.warn(`Unable to retrieve anomalies for latency charts.`);
-        logger.error(error);
-        return undefined;
-      }),
-    ]);
+    const [{ currentPeriod, previousPeriod }, anomalyTimeseries] =
+      await Promise.all([
+        getLatencyPeriods({
+          ...options,
+          latencyAggregationType:
+            latencyAggregationType as LatencyAggregationType,
+          comparisonStart,
+          comparisonEnd,
+        }),
+        getAnomalySeries(options).catch((error) => {
+          logger.warn(`Unable to retrieve anomalies for latency charts.`);
+          logger.error(error);
+          return undefined;
+        }),
+      ]);
 
     return {
       currentPeriod,
@@ -277,12 +276,8 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
     const { params } = resources;
 
     const { serviceName } = params.path;
-    const {
-      environment,
-      kuery,
-      transactionName,
-      transactionType,
-    } = params.query;
+    const { environment, kuery, transactionName, transactionType } =
+      params.query;
 
     return getTransactionBreakdown({
       environment,

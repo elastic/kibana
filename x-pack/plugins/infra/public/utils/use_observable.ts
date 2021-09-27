@@ -95,17 +95,19 @@ export const useOperator = <InputValue, OutputValue>(
   );
 };
 
-export const tapUnsubscribe = (onUnsubscribe: () => void) => <T>(source$: Observable<T>) => {
-  return new Observable<T>((subscriber) => {
-    const subscription = source$.subscribe({
-      next: (value) => subscriber.next(value),
-      error: (error) => subscriber.error(error),
-      complete: () => subscriber.complete(),
-    });
+export const tapUnsubscribe =
+  (onUnsubscribe: () => void) =>
+  <T>(source$: Observable<T>) => {
+    return new Observable<T>((subscriber) => {
+      const subscription = source$.subscribe({
+        next: (value) => subscriber.next(value),
+        error: (error) => subscriber.error(error),
+        complete: () => subscriber.complete(),
+      });
 
-    return () => {
-      onUnsubscribe();
-      subscription.unsubscribe();
-    };
-  });
-};
+      return () => {
+        onUnsubscribe();
+        subscription.unsubscribe();
+      };
+    });
+  };

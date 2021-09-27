@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../src/core/public';
-import { LensPluginStartDependencies } from './plugin';
-import { AttributeService } from '../../../../src/plugins/embeddable/public';
-import {
+import type { CoreStart } from '../../../../src/core/public';
+import type { LensPluginStartDependencies } from './plugin';
+import type { AttributeService } from '../../../../src/plugins/embeddable/public';
+import type {
   ResolvedLensSavedObjectAttributes,
   LensByValueInput,
   LensByReferenceInput,
 } from './embeddable/embeddable';
 import { SavedObjectIndexStore } from './persistence';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
-import { DOC_TYPE } from '../common';
+import { DOC_TYPE } from '../common/constants';
 
 export type LensAttributeService = AttributeService<
   ResolvedLensSavedObjectAttributes,

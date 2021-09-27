@@ -15,6 +15,7 @@ import type { CoreSetup, CoreStart, HttpSetup, Plugin } from 'src/core/public';
 
 import { App } from './app';
 import { HttpProvider } from './use_http';
+import { VerificationProvider } from './use_verification';
 
 export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
   public setup(core: CoreSetup) {
@@ -24,9 +25,16 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
       appRoute: '/',
       chromeless: true,
       mount: (params) => {
+        const url = new URL(window.location.href);
+        const defaultCode = url.searchParams.get('code') || undefined;
+        const onSuccess = () => {
+          url.searchParams.delete('code');
+          window.location.replace(url.href);
+        };
+
         ReactDOM.render(
-          <Providers http={core.http}>
-            <App />
+          <Providers defaultCode={defaultCode} http={core.http}>
+            <App onSuccess={onSuccess} />
           </Providers>,
           params.element
         );
@@ -40,10 +48,13 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
 
 export interface ProvidersProps {
   http: HttpSetup;
+  defaultCode?: string;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({ http, children }) => (
+export const Providers: FunctionComponent<ProvidersProps> = ({ defaultCode, http, children }) => (
   <I18nProvider>
-    <HttpProvider http={http}>{children}</HttpProvider>
+    <HttpProvider http={http}>
+      <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>
+    </HttpProvider>
   </I18nProvider>
 );

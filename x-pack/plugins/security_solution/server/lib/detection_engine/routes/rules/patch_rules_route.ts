@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -30,7 +29,7 @@ import { PartialFilter } from '../../types';
 export const patchRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: IRuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
   router.patch(
     {
@@ -124,7 +123,12 @@ export const patchRulesRoute = (
           throwHttpError(await mlAuthz.validateRuleType(type));
         }
 
-        const existingRule = await readRules({ rulesClient, ruleId, id });
+        const existingRule = await readRules({
+          isRuleRegistryEnabled,
+          rulesClient,
+          ruleId,
+          id,
+        });
         if (existingRule?.params.type) {
           // reject an unauthorized modification of an ML rule
           throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
@@ -189,7 +193,11 @@ export const patchRulesRoute = (
             spaceId: context.securitySolution.getSpaceId(),
           });
 
-          const [validated, errors] = transformValidate(rule, ruleStatuses[0]);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleStatuses[0],
+            isRuleRegistryEnabled
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

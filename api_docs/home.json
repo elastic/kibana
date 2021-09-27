@@ -434,7 +434,7 @@
         "children": [
           {
             "parentPluginId": "home",
-            "id": "def-public.props",
+            "id": "def-public.TutorialDirectoryHeaderLinkComponent.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -447,7 +447,7 @@
           },
           {
             "parentPluginId": "home",
-            "id": "def-public.context",
+            "id": "def-public.TutorialDirectoryHeaderLinkComponent.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -477,7 +477,7 @@
         "children": [
           {
             "parentPluginId": "home",
-            "id": "def-public.props",
+            "id": "def-public.TutorialDirectoryNoticeComponent.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -490,7 +490,7 @@
           },
           {
             "parentPluginId": "home",
-            "id": "def-public.context",
+            "id": "def-public.TutorialDirectoryNoticeComponent.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -520,7 +520,7 @@
         "children": [
           {
             "parentPluginId": "home",
-            "id": "def-public.props",
+            "id": "def-public.TutorialModuleNoticeComponent.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -533,7 +533,7 @@
           },
           {
             "parentPluginId": "home",
-            "id": "def-public.context",
+            "id": "def-public.TutorialModuleNoticeComponent.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -1029,7 +1029,7 @@
         "children": [
           {
             "parentPluginId": "home",
-            "id": "def-server.context",
+            "id": "def-server.TutorialProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "context",

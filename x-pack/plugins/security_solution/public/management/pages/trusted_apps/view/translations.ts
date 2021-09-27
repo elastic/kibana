@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  TrustedApp,
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
   ConditionEntryField,
@@ -61,38 +60,9 @@ export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
   }),
 };
 
-export const PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'entries' | 'version'>]: string }
-> = {
-  name: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.name', {
-    defaultMessage: 'Name',
-  }),
-  os: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.os', {
-    defaultMessage: 'OS',
-  }),
-  created_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdAt', {
-    defaultMessage: 'Date created',
-  }),
-  created_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdBy', {
-    defaultMessage: 'Created by',
-  }),
-  updated_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedAt', {
-    defaultMessage: 'Date modified',
-  }),
-  updated_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedBy', {
-    defaultMessage: 'Modified by',
-  }),
-  description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
-    defaultMessage: 'Description',
-  }),
-  effectScope: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.effectScope', {
-    defaultMessage: 'Effect scope',
-  }),
-};
-
-export const ENTRY_PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<MacosLinuxConditionEntry | WindowsConditionEntry, 'type'>]: string }
-> = {
+export const ENTRY_PROPERTY_TITLES: Readonly<{
+  [K in keyof Omit<MacosLinuxConditionEntry | WindowsConditionEntry, 'type'>]: string;
+}> = {
   field: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.entry.field', {
     defaultMessage: 'Field',
   }),
@@ -103,41 +73,6 @@ export const ENTRY_PROPERTY_TITLES: Readonly<
     defaultMessage: 'Value',
   }),
 };
-
-export const ACTIONS_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.trustedapps.list.columns.actions',
-  {
-    defaultMessage: 'Actions',
-  }
-);
-
-export const LIST_ACTIONS = {
-  delete: {
-    name: i18n.translate('xpack.securitySolution.trustedapps.list.actions.delete', {
-      defaultMessage: 'Remove',
-    }),
-    description: i18n.translate(
-      'xpack.securitySolution.trustedapps.list.actions.delete.description',
-      {
-        defaultMessage: 'Remove this entry',
-      }
-    ),
-  },
-};
-
-export const CARD_DELETE_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.trustedapps.card.removeButtonLabel',
-  {
-    defaultMessage: 'Remove',
-  }
-);
-
-export const CARD_EDIT_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.trustedapps.card.editButtonLabel',
-  {
-    defaultMessage: 'Edit',
-  }
-);
 
 export const GRID_VIEW_TOGGLE_LABEL = i18n.translate(
   'xpack.securitySolution.trustedapps.view.toggle.grid',

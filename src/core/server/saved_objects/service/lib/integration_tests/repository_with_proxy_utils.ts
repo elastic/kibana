@@ -27,6 +27,7 @@ export const setProxyInterrupt = (
     | 'find'
     | 'openPit'
     | 'deleteByNamespace'
+    | 'internalBulkResolve'
     | null
 ) => (proxyInterrupt = testArg);
 
@@ -118,7 +119,11 @@ export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string, 
         parse: false,
       },
       handler: (req, h) => {
-        if (proxyInterrupt === 'bulkGetMyType' || proxyInterrupt === 'checkConficts') {
+        if (
+          proxyInterrupt === 'bulkGetMyType' ||
+          proxyInterrupt === 'checkConficts' ||
+          proxyInterrupt === 'internalBulkResolve'
+        ) {
           return proxyResponseHandler(h, hostname, port);
         } else {
           return relayHandler(h, hostname, port);

@@ -33,7 +33,10 @@ import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas
 
 let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
-describe('utils', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('utils - %s', (_, isRuleRegistryEnabled) => {
   describe('transformBulkError', () => {
     test('returns transformed object if it is a boom object', () => {
       const boom = new Boom.Boom('some boom message', { statusCode: 400 });
@@ -390,12 +393,12 @@ describe('utils', () => {
       rulesClient = rulesClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
       const res = await getFailingRules(['my-fake-id'], rulesClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = getAlertMock(getQueryRuleParams());
+      const foundRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,

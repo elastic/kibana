@@ -19,11 +19,11 @@ describe('createInitialState', () => {
     typeRegistry = new SavedObjectTypeRegistry();
   });
 
-  const migrationsConfig = ({
+  const migrationsConfig = {
     retryAttempts: 15,
     batchSize: 1000,
     maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
-  } as unknown) as SavedObjectsMigrationConfigType;
+  } as unknown as SavedObjectsMigrationConfigType;
   it('creates the initial state for the model based on the passed in parameters', () => {
     expect(
       createInitialState({

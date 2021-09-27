@@ -65,11 +65,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(getBody.messages.length).to.eql(1);
 
-      expect(omit(getBody.messages[0], 'timestamp')).to.eql({
+      expect(omit(getBody.messages[0], ['timestamp', 'node_name'])).to.eql({
         job_id: 'test_get_job_audit_messages_1',
         message: 'Job created',
         level: 'info',
-        node_name: 'node-01',
         job_type: 'anomaly_detector',
         cleared: true,
       });

@@ -7,7 +7,12 @@
  */
 
 import d3 from 'd3';
-import { setHTMLElementClientSizes, setSVGElementGetBBox } from '@kbn/test/jest';
+import $ from 'jquery';
+import {
+  setHTMLElementClientSizes,
+  setSVGElementGetBBox,
+  setSVGElementGetComputedTextLength,
+} from '@kbn/test/jest';
 import { Chart } from './_chart';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
@@ -27,16 +32,8 @@ describe('Vislib _chart Test Suite', function () {
       min: 1408734082458,
     },
     xAxisOrderedValues: [
-      1408734060000,
-      1408734090000,
-      1408734120000,
-      1408734150000,
-      1408734180000,
-      1408734210000,
-      1408734240000,
-      1408734270000,
-      1408734300000,
-      1408734330000,
+      1408734060000, 1408734090000, 1408734120000, 1408734150000, 1408734180000, 1408734210000,
+      1408734240000, 1408734270000, 1408734300000, 1408734330000,
     ],
     series: [
       {
@@ -96,22 +93,31 @@ describe('Vislib _chart Test Suite', function () {
 
   let mockedHTMLElementClientSizes;
   let mockedSVGElementGetBBox;
+  let mockedSVGElementGetComputedTextLength;
+  let mockWidth;
 
   beforeAll(() => {
     mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
     mockedSVGElementGetBBox = setSVGElementGetBBox(100);
+    mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+    mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
   });
 
   beforeEach(() => {
     el = d3.select('body').append('div').attr('class', 'column-chart');
 
     config = {
-      type: 'histogram',
-      addTooltip: true,
+      type: 'heatmap',
       addLegend: true,
-      zeroFill: true,
+      addTooltip: true,
+      colorsNumber: 4,
+      colorSchema: 'Greens',
+      setColorRange: false,
+      percentageMode: true,
+      percentageFormatPattern: '0.0%',
+      invertColors: false,
+      colorsRange: [],
     };
-
     vis = getVis(config, el[0][0]);
     vis.render(data, getMockUiState());
 
@@ -126,6 +132,8 @@ describe('Vislib _chart Test Suite', function () {
   afterAll(() => {
     mockedHTMLElementClientSizes.mockRestore();
     mockedSVGElementGetBBox.mockRestore();
+    mockedSVGElementGetComputedTextLength.mockRestore();
+    mockWidth.mockRestore();
   });
 
   test('should be a constructor for visualization modules', function () {

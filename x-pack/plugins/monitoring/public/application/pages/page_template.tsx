@@ -6,40 +6,77 @@
  */
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
+import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
+import { PageLoading } from '../../components';
+import { getSetupModeState, isSetupModeFeatureEnabled } from '../setup_mode/setup_mode';
+import { SetupModeFeature } from '../../../common/enums';
 
 export interface TabMenuItem {
   id: string;
   label: string;
-  description: string;
-  disabled: boolean;
-  onClick: () => void;
-  testSubj: string;
+  testSubj?: string;
+  route: string;
 }
-interface PageTemplateProps {
+export interface PageTemplateProps {
   title: string;
   pageTitle?: string;
   tabs?: TabMenuItem[];
+  getPageData?: () => Promise<void>;
+  product?: string;
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({ title, pageTitle, tabs, children }) => {
+export const PageTemplate: React.FC<PageTemplateProps> = ({
+  title,
+  pageTitle,
+  tabs,
+  getPageData,
+  product,
+  children,
+}) => {
   useTitle('', title);
+
+  const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
+  const [loaded, setLoaded] = useState(false);
+  const history = useHistory();
+
+  useEffect(() => {
+    getPageData?.()
+      .catch((err) => {
+        // TODO: handle errors
+      })
+      .finally(() => {
+        setLoaded(true);
+      });
+  }, [getPageData, currentTimerange]);
+
+  const onRefresh = () => {
+    getPageData?.().catch((err) => {
+      // TODO: handle errors
+    });
+  };
+
+  const createHref = (route: string) => history.createHref({ pathname: route });
+
+  const isTabSelected = (route: string) => history.location.pathname === route;
 
   return (
     <div className="app-container">
-      <MonitoringToolbar pageTitle={pageTitle} />
+      <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
       {tabs && (
         <EuiTabs>
           {tabs.map((item, idx) => {
             return (
               <EuiTab
                 key={idx}
-                disabled={item.disabled}
-                onClick={item.onClick}
+                disabled={isDisabledTab(product)}
                 title={item.label}
                 data-test-subj={item.testSubj}
+                href={createHref(item.route)}
+                isSelected={isTabSelected(item.route)}
               >
                 {item.label}
               </EuiTab>
@@ -47,7 +84,35 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({ title, pageTitle, ta
           })}
         </EuiTabs>
       )}
-      <div>{children}</div>
+      <div>{!getPageData ? children : loaded ? children : <PageLoading />}</div>
     </div>
   );
 };
+
+function isDisabledTab(product: string | undefined) {
+  const setupMode = getSetupModeState();
+  if (!isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
+    return false;
+  }
+
+  if (!setupMode.data) {
+    return false;
+  }
+
+  if (!product) {
+    return false;
+  }
+
+  const data = setupMode.data[product] || {};
+  if (data.totalUniqueInstanceCount === 0) {
+    return true;
+  }
+  if (
+    data.totalUniqueInternallyCollectedCount === 0 &&
+    data.totalUniqueFullyMigratedCount === 0 &&
+    data.totalUniquePartiallyMigratedCount === 0
+  ) {
+    return true;
+  }
+  return false;
+}

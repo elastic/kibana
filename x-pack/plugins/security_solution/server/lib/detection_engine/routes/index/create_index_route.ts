@@ -23,11 +23,9 @@ import type {
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import {
-  createSignalsFieldAliases,
   getSignalsTemplate,
   SIGNALS_TEMPLATE_VERSION,
-  SIGNALS_FIELD_ALIASES_VERSION,
-  ALIAS_VERSION_FIELD,
+  createBackwardsCompatibilityMapping,
 } from './get_signals_template';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
@@ -35,7 +33,6 @@ import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
 import { RuleDataPluginService } from '../../../../../../rule_registry/server';
-import signalExtraFields from './signal_extra_fields.json';
 import { ConfigType } from '../../../../config';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 
@@ -126,7 +123,7 @@ export const createDetectionIndex = async (
   }
 
   if (indexExists) {
-    await addFieldAliasesToIndices({ esClient, index, spaceId });
+    await addFieldAliasesToIndices({ esClient, index });
     // The internal user is used here because Elasticsearch requires the PUT alias requestor to have 'manage' permissions
     // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
     // and not .alerts-security.alerts (the alias). From the security solution perspective, all .siem-signals-<space id>-*
@@ -148,33 +145,17 @@ export const createDetectionIndex = async (
 const addFieldAliasesToIndices = async ({
   esClient,
   index,
-  spaceId,
 }: {
   esClient: ElasticsearchClient;
   index: string;
-  spaceId: string;
 }) => {
   const { body: indexMappings } = await esClient.indices.get({ index });
-  // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
-  // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
-  // mapping) or else this call will fail and not update ANY signals indices
-  const fieldAliases = createSignalsFieldAliases();
   for (const [indexName, mapping] of Object.entries(indexMappings)) {
     const currentVersion: number | undefined = get(mapping.mappings?._meta, 'version');
-    const newMapping = {
-      properties: {
-        ...signalExtraFields,
-        ...fieldAliases,
-        // ...getRbacRequiredFields(spaceId),
-      },
-      _meta: {
-        version: currentVersion,
-        [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
-      },
-    };
+    const body = createBackwardsCompatibilityMapping(currentVersion ?? 0);
     await esClient.indices.putMapping({
       index: indexName,
-      body: newMapping,
+      body,
       allow_no_indices: true,
     } as estypes.IndicesPutMappingRequest);
   }

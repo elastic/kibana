@@ -12,10 +12,10 @@ import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 // ensures it can be lazily loaded by the jest.mock function below.
 import nestedFieldIndexResponse from '../__mocks__/nested_field_index_response.json';
 
-const indexPattern = ({
+const indexPattern = {
   id: 'nested-field-index',
   title: 'nested-field-index',
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 describe('removeNestedFieldChildren', () => {
   describe('cloudwatch newJobCapsAnalytics()', () => {

@@ -92,7 +92,9 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
   );
 };
 
-const nameToFeature = (source: string) => (name: string): InfraMetadataFeature => ({
-  name,
-  source,
-});
+const nameToFeature =
+  (source: string) =>
+  (name: string): InfraMetadataFeature => ({
+    name,
+    source,
+  });

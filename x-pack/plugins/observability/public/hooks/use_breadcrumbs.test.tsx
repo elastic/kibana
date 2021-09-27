@@ -14,11 +14,11 @@ import { useBreadcrumbs } from './use_breadcrumbs';
 
 const setBreadcrumbs = jest.fn();
 const setTitle = jest.fn();
-const kibanaServices = ({
+const kibanaServices = {
   application: { getUrlForApp: () => {}, navigateToApp: () => {} },
   chrome: { setBreadcrumbs, docTitle: { change: setTitle } },
   uiSettings: { get: () => true },
-} as unknown) as Partial<CoreStart>;
+} as unknown as Partial<CoreStart>;
 const KibanaContext = createKibanaReactContext(kibanaServices);
 
 function Wrapper({ children }: { children?: ReactNode }) {
@@ -42,7 +42,7 @@ describe('useBreadcrumbs', () => {
           <MemoryRouter>
             <KibanaContext.Provider
               services={
-                ({ ...kibanaServices, chrome: { docTitle: {} } } as unknown) as Partial<CoreStart>
+                { ...kibanaServices, chrome: { docTitle: {} } } as unknown as Partial<CoreStart>
               }
             >
               {children}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { exportTimeline } from '../../tasks/timelines';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
@@ -31,10 +32,9 @@ describe('Export timelines', () => {
     exportTimeline(this.templateId);
 
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should(
-        'eql',
-        expectedExportedTimelineTemplate(this.templateResponse)
-      );
+      const parsedExport = JSON.parse(_.trimEnd(response!.body, '\n'));
+
+      cy.wrap(parsedExport).should('eql', expectedExportedTimelineTemplate(this.templateResponse));
     });
   });
 });

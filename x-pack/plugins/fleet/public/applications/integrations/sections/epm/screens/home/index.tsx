@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
-import { Switch, Route, useLocation, useHistory } from 'react-router-dom';
+import React, { memo, useMemo } from 'react';
+import { Switch, Route, useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
 
 import { installationStatuses } from '../../../../../../../common/constants';
-import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
+import {
+  INTEGRATIONS_ROUTING_PATHS,
+  INTEGRATIONS_SEARCH_QUERYPARAM,
+  pagePathGetters,
+} from '../../../../constants';
 import { useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { DefaultLayout } from '../../../../layouts';
@@ -19,6 +23,22 @@ import type { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import { CategoryFacets } from './category_facets';
+
+export interface CategoryParams {
+  category?: string;
+}
+
+function getParams(params: CategoryParams, search: string) {
+  const { category } = params;
+  const selectedCategory = category || '';
+  const queryParams = new URLSearchParams(search);
+  const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
+  return { selectedCategory, searchParam };
+}
+
+function categoryExists(category: string, categories: CategorySummaryItem[]) {
+  return categories.some((c) => c.id === category);
+}
 
 export const EPMHomePage: React.FC = memo(() => {
   return (
@@ -69,7 +89,28 @@ const InstalledPackages: React.FC = memo(() => {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
     experimental: true,
   });
-  const [selectedCategory, setSelectedCategory] = useState('');
+
+  const { selectedCategory, searchParam } = getParams(
+    useParams<CategoryParams>(),
+    useLocation().search
+  );
+  const history = useHistory();
+  function setSelectedCategory(categoryId: string) {
+    const url = pagePathGetters.integrations_installed({
+      category: categoryId,
+      searchTerm: searchParam,
+    })[1];
+    history.push(url);
+  }
+  function setSearchTerm(search: string) {
+    // Use .replace so the browser's back button is tied to single keystroke
+    history.replace(
+      pagePathGetters.integrations_installed({
+        category: selectedCategory,
+        searchTerm: search,
+      })[1]
+    );
+  }
 
   const allInstalledPackages = useMemo(
     () =>
@@ -114,21 +155,28 @@ const InstalledPackages: React.FC = memo(() => {
     [allInstalledPackages.length, updatablePackages.length]
   );
 
-  const controls = useMemo(
-    () => (
-      <CategoryFacets
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
-      />
-    ),
-    [categories, selectedCategory]
+  if (!categoryExists(selectedCategory, categories)) {
+    history.replace(
+      pagePathGetters.integrations_installed({ category: '', searchTerm: searchParam })[1]
+    );
+    return null;
+  }
+
+  const controls = (
+    <CategoryFacets
+      categories={categories}
+      selectedCategory={selectedCategory}
+      onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
+    />
   );
 
   return (
     <PackageListGrid
       isLoading={isLoadingPackages}
       controls={controls}
+      setSelectedCategory={setSelectedCategory}
+      onSearchChange={setSearchTerm}
+      initialSearch={searchParam}
       title={title}
       list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
     />
@@ -137,10 +185,25 @@ const InstalledPackages: React.FC = memo(() => {
 
 const AvailablePackages: React.FC = memo(() => {
   useBreadcrumbs('integrations_all');
+  const { selectedCategory, searchParam } = getParams(
+    useParams<CategoryParams>(),
+    useLocation().search
+  );
   const history = useHistory();
-  const queryParams = new URLSearchParams(useLocation().search);
-  const initialCategory = queryParams.get('category') || '';
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  function setSelectedCategory(categoryId: string) {
+    const url = pagePathGetters.integrations_all({
+      category: categoryId,
+      searchTerm: searchParam,
+    })[1];
+    history.push(url);
+  }
+  function setSearchTerm(search: string) {
+    // Use .replace so the browser's back button is tied to single keystroke
+    history.replace(
+      pagePathGetters.integrations_all({ category: selectedCategory, searchTerm: search })[1]
+    );
+  }
+
   const { data: allCategoryPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages({
     category: '',
   });
@@ -182,16 +245,17 @@ const AvailablePackages: React.FC = memo(() => {
     [allPackages?.length, categoriesRes]
   );
 
+  if (!categoryExists(selectedCategory, categories)) {
+    history.replace(pagePathGetters.integrations_all({ category: '', searchTerm: searchParam })[1]);
+    return null;
+  }
+
   const controls = categories ? (
     <CategoryFacets
       isLoading={isLoadingCategories || isLoadingAllPackages}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => {
-        // clear category query param in the url
-        if (queryParams.get('category')) {
-          history.push({});
-        }
         setSelectedCategory(id);
       }}
     />
@@ -202,8 +266,10 @@ const AvailablePackages: React.FC = memo(() => {
       isLoading={isLoadingCategoryPackages}
       title={title}
       controls={controls}
+      initialSearch={searchParam}
       list={packages}
       setSelectedCategory={setSelectedCategory}
+      onSearchChange={setSearchTerm}
       showMissingIntegrationMessage
     />
   );
