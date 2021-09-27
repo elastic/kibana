@@ -4382,7 +4382,6 @@
     "savedObjectsManagement.importSummary.overwrittenOutcomeLabel": "上書き",
     "savedObjectsManagement.importSummary.warnings.defaultButtonLabel": "Go",
     "savedObjectsManagement.managementSectionLabel": "保存されたオブジェクト",
-    "savedObjectsManagement.objects.savedObjectsDescription": "保存された検索、ビジュアライゼーション、ダッシュボードのインポート、エクスポート、管理を行います。",
     "savedObjectsManagement.objects.savedObjectsTitle": "保存されたオブジェクト",
     "savedObjectsManagement.objectsTable.deleteConfirmModal.sharedObjectsCallout.content": "共有オブジェクトは属しているすべてのスペースから削除されます。",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel": "キャンセル",
