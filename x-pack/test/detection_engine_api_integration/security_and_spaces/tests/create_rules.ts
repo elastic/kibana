@@ -26,14 +26,14 @@ import {
   getSimpleMlRule,
   getSimpleMlRuleOutput,
   waitForRuleSuccessOrStatus,
-  waitForSignalsToBePresent,
-  waitForAlertToComplete,
+  // waitForSignalsToBePresent,
+  // waitForAlertToComplete,
   getRuleForSignalTesting,
-  getRuleForSignalTestingWithTimestampOverride,
+  // getRuleForSignalTestingWithTimestampOverride,
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
+// import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -110,6 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(statusBody[body.id].current_status.status).to.eql('succeeded');
         });
 
+        /*
         it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
           const { body } = await supertest
@@ -131,6 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
             'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.'
           );
         });
+        */
 
         it('should create a single rule with a rule_id and an index pattern that does not match anything and an index pattern that does and the rule should be successful', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']);
@@ -299,6 +301,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
+      /*
       it('should create a single rule which has a timestamp override for an index pattern that does not exist and write a partial failure status', async () => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
@@ -353,6 +356,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
       });
+    */
     });
   });
 };
