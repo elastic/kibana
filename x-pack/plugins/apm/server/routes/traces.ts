@@ -81,16 +81,14 @@ const transactionByIdRoute = createApmServerRoute({
     path: t.type({
       transactionId: t.string,
     }),
-    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { params } = resources;
     const { transactionId } = params.path;
-    const { start, end } = params.query;
     const setup = await setupRequest(resources);
     return {
-      transaction: await getTransaction({ transactionId, setup, start, end }),
+      transaction: await getTransaction({ transactionId, setup }),
     };
   },
 });
