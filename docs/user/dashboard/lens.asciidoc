@@ -442,3 +442,19 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
 ====
+
+[discrete]
+[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
+.*How do I inspect {es} queries in visualizations?*
+[%collapsible]
+====
+You can inspect the requests sent by the visualization to {es} using the Inspector. It can be accessed within the editor or in the dashboard.
+====
+
+[discrete]
+[[how-to-isolate-a-single-series-in-a-chart]]
+.*How do I isolate a single series in a chart?*
+[%collapsible]
+====
+For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically unselected.
+====
