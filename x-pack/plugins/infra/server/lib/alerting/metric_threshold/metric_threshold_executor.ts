@@ -74,11 +74,18 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         },
       });
 
-    const { sourceId, alertOnNoData, alertOnGroupDisappear } = params as {
+    const {
+      sourceId,
+      alertOnNoData,
+      alertOnGroupDisappear: _alertOnGroupDisappear,
+    } = params as {
       sourceId?: string;
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
+
+    // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
+    const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
 
     const source = await libs.sources.getSourceConfiguration(
       savedObjectsClient,
@@ -88,8 +95,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     const previousGroupBy = state.groupBy;
     const prevGroups =
-      alertOnGroupDisappear !== false && // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-      isEqual(previousGroupBy, params.groupBy)
+      alertOnGroupDisappear && isEqual(previousGroupBy, params.groupBy)
         ? // Filter out the * key from the previous groups, only include it if it's one of
           // the current groups. In case of a groupBy alert that starts out with no data and no
           // groups, we don't want to persist the existence of the * alert instance
@@ -108,6 +114,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     // Merge the list of currently fetched groups and previous groups, and uniquify them. This is necessary for reporting
     // no data results on groups that get removed
     const groups = [...new Set([...prevGroups, ...resultGroups])];
+
+    const isNotUngrouped = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
 
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
@@ -155,11 +163,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         // If the user has for some reason disabled alertOnNoData but left alertOnGroupDisappear enabled, use these comditions to
         // distinguish between receiving a No Data state of { '*': No Data } versus, for example, { 'a': No Data, 'b': OK, 'c': OK }
 
-        // First, make sure that there is either more than 1 group, or that the sole detected group isn't '*':
-        const soleGroupIsNotUngroupedKey = groups.length > 1 || groups[0] !== UNGROUPED_FACTORY_KEY;
-        // If that's the case, AND alertOnGroupDisappear is true, then a nextState of NO_DATA would indicate a disappeared group
-        const noDataStateIndicatesDisappearedGroup =
-          alertOnGroupDisappear && soleGroupIsNotUngroupedKey;
+        // If there are more groups present than ['*'], AND alertOnGroupDisappear is true, then a nextState of NO_DATA
+        // would indicate a disappeared group
+        const noDataStateIndicatesDisappearedGroup = alertOnGroupDisappear && isNotUngrouped;
         // With that information, we can determine whether to alert on nextState === NO_DATA, if:
         // 1. alertOnNoData is true, or
         // 2. alertOnNoData is false, alertOnGroupDisappear is true, and a group has disappeared
