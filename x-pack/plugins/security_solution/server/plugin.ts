@@ -104,6 +104,7 @@ import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
+import { registerPrivilegeDeprecations } from './deprecation_privileges';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -350,6 +351,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.taskManager,
       this.telemetryUsageCounter
     );
+
+    registerPrivilegeDeprecations({
+      deprecationsService: core.deprecations,
+      getKibanaRolesByFeatureId:
+        plugins.security?.privilegeDeprecationServices.getKibanaRolesByFeatureId,
+    });
 
     return {};
   }
