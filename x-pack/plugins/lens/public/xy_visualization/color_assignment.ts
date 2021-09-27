@@ -8,6 +8,7 @@
 import { uniq, mapValues } from 'lodash';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import type { Datatable } from 'src/plugins/expressions';
+import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type { FormatFactory } from '../../common';
@@ -21,6 +22,8 @@ interface LayerColorConfig {
   accessors: string[];
   layerId: string;
 }
+
+export const defaultThresholdColor = euiLightVars.euiColorDarkShade;
 
 export type ColorAssignments = Record<
   string,

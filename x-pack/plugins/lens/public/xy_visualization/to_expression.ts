@@ -13,6 +13,7 @@ import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
+import { defaultThresholdColor } from './color_assignment';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -321,9 +322,9 @@ export const buildExpression = (
                               arguments: {
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
-                                color: yConfig.color ? [yConfig.color] : [],
-                                lineStyle: yConfig.lineStyle ? [yConfig.lineStyle] : [],
-                                lineWidth: yConfig.lineWidth ? [yConfig.lineWidth] : [],
+                                color: [yConfig.color || defaultThresholdColor],
+                                lineStyle: [yConfig.lineStyle || 'solid'],
+                                lineWidth: [yConfig.lineWidth || 1],
                                 fill: [yConfig.fill || 'none'],
                                 icon: yConfig.icon ? [yConfig.icon] : [],
                               },

@@ -13,9 +13,13 @@ import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } 
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State } from '../types';
-import { FormatFactory } from '../../../common';
+import { FormatFactory, layerTypes } from '../../../common';
 import { getSeriesColor } from '../state_helpers';
-import { getAccessorColorConfig, getColorAssignments } from '../color_assignment';
+import {
+  defaultThresholdColor,
+  getAccessorColorConfig,
+  getColorAssignments,
+} from '../color_assignment';
 import { getSortedAccessors } from '../to_expression';
 import { updateLayer } from '.';
 import { TooltipWrapper } from '../../shared_components';
@@ -59,6 +63,10 @@ export const ColorPicker = ({
 
     const datasource = frame.datasourceLayers[layer.layerId];
     const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+
+    if (layer.layerType === layerTypes.THRESHOLD) {
+      return defaultThresholdColor;
+    }
 
     const colorAssignments = getColorAssignments(
       state.layers,

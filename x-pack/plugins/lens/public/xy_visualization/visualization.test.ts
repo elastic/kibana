@@ -347,10 +347,6 @@ describe('xy_visualization', () => {
           {
             axisMode: 'bottom',
             forAccessor: 'newCol',
-            color: '#69707d',
-            icon: undefined,
-            lineStyle: 'solid',
-            lineWidth: 1,
           },
         ],
       });
