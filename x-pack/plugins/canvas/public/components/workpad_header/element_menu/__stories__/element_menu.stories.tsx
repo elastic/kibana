@@ -129,12 +129,6 @@ You can use standard Markdown in here, but you can also access your piped-in dat
   },
 };
 
-const mockRenderEmbedPanel = () => <div id="embeddablePanel" />;
-
 storiesOf('components/WorkpadHeader/ElementMenu', module).add('default', () => (
-  <ElementMenu
-    elements={testElements}
-    addElement={action('addElement')}
-    renderEmbedPanel={mockRenderEmbedPanel}
-  />
+  <ElementMenu elements={testElements} addElement={action('addElement')} />
 ));
