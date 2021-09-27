@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { SERVICE_ENVIRONMENT } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup } from '../helpers/setup_request';
 
-export async function getEnvironmentSuggestions({
+export async function getSuggestions({
+  field,
   searchAggregatedTransactions,
   setup,
   size,
   string,
 }: {
+  field: string;
   searchAggregatedTransactions: boolean;
   setup: Setup;
   size: number;
@@ -23,26 +24,23 @@ export async function getEnvironmentSuggestions({
 }) {
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.termsEnum(
-    'get_environment_suggestions',
-    {
-      apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-          ProcessorEvent.error,
-          ProcessorEvent.metric,
-        ],
-      },
-      body: {
-        case_insensitive: true,
-        field: SERVICE_ENVIRONMENT,
-        size,
-        string,
-      },
-    }
-  );
+  const response = await apmEventClient.termsEnum('get_suggestions', {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
+    body: {
+      case_insensitive: true,
+      field,
+      size,
+      string,
+    },
+  });
 
-  return { environments: response.terms };
+  return { terms: response.terms };
 }

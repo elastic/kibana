@@ -8,6 +8,7 @@
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 interface ServiceNamesSelectProps {
@@ -46,9 +47,9 @@ export function ServiceNamesSelect({
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/suggestions/service_names',
+        endpoint: 'GET /internal/apm/suggestions',
         params: {
-          query: { string: searchValue },
+          query: { field: SERVICE_NAME, string: searchValue },
         },
       });
     },
@@ -56,7 +57,7 @@ export function ServiceNamesSelect({
     { preservePreviousData: false }
   );
 
-  const serviceNames = data?.serviceNames ?? [];
+  const serviceNames = data?.terms ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
     ...(allowAll &&

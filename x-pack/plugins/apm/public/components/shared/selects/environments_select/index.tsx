@@ -8,6 +8,7 @@
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
@@ -37,9 +38,9 @@ export function EnvironmentsSelect({
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/suggestions/environments',
+        endpoint: 'GET /internal/apm/suggestions',
         params: {
-          query: { string: searchValue },
+          query: { field: SERVICE_ENVIRONMENT, string: searchValue },
         },
       });
     },
@@ -47,7 +48,7 @@ export function EnvironmentsSelect({
     { preservePreviousData: false }
   );
 
-  const environments = data?.environments ?? [];
+  const environments = data?.terms ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
     ...(searchValue === '' || searchValue.toLowerCase() === allOption.label

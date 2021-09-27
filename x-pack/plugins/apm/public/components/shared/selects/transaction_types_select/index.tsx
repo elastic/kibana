@@ -8,6 +8,7 @@
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 interface TransactionTypesSelectProps {
@@ -41,9 +42,9 @@ export function TransactionTypesSelect({
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/suggestions/transaction_types',
+        endpoint: 'GET /internal/apm/suggestions',
         params: {
-          query: { string: searchValue },
+          query: { field: TRANSACTION_TYPE, string: searchValue },
         },
       });
     },
@@ -51,7 +52,7 @@ export function TransactionTypesSelect({
     { preservePreviousData: false }
   );
 
-  const transactionTypes = data?.transactionTypes ?? [];
+  const transactionTypes = data?.terms ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
     ...(searchValue === '' || searchValue.toLowerCase() === allOption.label
