@@ -36,14 +36,6 @@ import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
-export const parseString = (params: string) => {
-  try {
-    return JSON.parse(params);
-  } catch {
-    return null;
-  }
-};
-
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
     if (isArray(value)) {

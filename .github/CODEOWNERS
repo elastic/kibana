@@ -30,7 +30,7 @@
 /src/plugins/vis_types/table/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/tagcloud/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/timelion/ @elastic/kibana-vis-editors
-/src/plugins/vis_type_timeseries/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/timeseries/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/vega/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/vislib/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/xy/ @elastic/kibana-vis-editors
@@ -381,9 +381,9 @@
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
-/x-pack/plugins/cases @elastic/security-threat-hunting
+/x-pack/plugins/cases @elastic/security-threat-hunting-cases
 /x-pack/plugins/timelines @elastic/security-threat-hunting
-/x-pack/test/case_api_integration @elastic/security-threat-hunting
+/x-pack/test/case_api_integration @elastic/security-threat-hunting-cases
 /x-pack/plugins/lists @elastic/security-detections-response
 
 ## Security Solution sub teams - security-onboarding-and-lifecycle-mgt

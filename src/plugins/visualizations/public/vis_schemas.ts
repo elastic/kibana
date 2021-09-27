@@ -88,6 +88,7 @@ export const getVisSchemas = <TVisParams>(
       params,
       label,
       id: agg.id,
+      aggType: agg.type.name,
     };
   };
 
