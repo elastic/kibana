@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const isInlineScriptingDisabledMock = jest.fn();
-jest.doMock('./is_scripting_disabled', () => ({
-  isInlineScriptingDisabled: isInlineScriptingDisabledMock,
-}));
+import { CustomIntegrationsPlugin } from './plugin';
+
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new CustomIntegrationsPlugin();
+}
+export { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';

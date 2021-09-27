@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { getElasticsearchDeprecationsProvider } from './deprecation_provider';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('custom integrations', () => {
+    loadTestFile(require.resolve('./integrations'));
+  });
+}
