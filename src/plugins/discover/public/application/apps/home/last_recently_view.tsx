@@ -13,10 +13,11 @@ interface LastRecentlyAccessedViewProps {
   id: string;
   title: string;
   indexPattern: string;
+  onClick: () => void;
 }
 
 export function LastRecentlyAccessedView(props: LastRecentlyAccessedViewProps) {
-  const { title, id, indexPattern } = props;
+  const { title, onClick } = props;
 
   return (
     <EuiCard
@@ -24,7 +25,7 @@ export function LastRecentlyAccessedView(props: LastRecentlyAccessedViewProps) {
       icon={<EuiIcon size="m" type={'discoverApp'} className="discoverLogo__icon" />}
       titleSize="s"
       title={title}
-      onClick={() => {}}
+      onClick={onClick}
     />
   );
 }

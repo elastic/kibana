@@ -9,7 +9,7 @@ import React, { useEffect, useState, memo } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import type { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/public';
-import { IndexPatternAttributes, SavedObject } from 'src/plugins/data/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, IndexPatternAttributes, SavedObject } from "src/plugins/data/common";
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { getState } from './services/discover_state';
@@ -19,6 +19,7 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/bre
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getUrlTracker } from '../../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
+import moment from "moment";
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -73,6 +74,19 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
       return indexPatternData;
     }
 
+    async function updateSavedSearch(toUpdate: SavedSearch) {
+      const client = core.savedObjects.client;
+      toUpdate.accessed_at = moment().toISOString();
+      client
+        .update('search', savedSearchId, { accessed_at: moment().toISOString() }, {})
+        .then((resp) => {
+          console.dir('Success');
+        })
+        .catch(async (err) => {
+          console.dir(err);
+        });
+    }
+
     async function loadSavedSearch() {
       try {
         // force a refresh if a given saved search without id was saved
@@ -84,6 +98,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         }
         setSavedSearch(loadedSavedSearch);
         if (savedSearchId) {
+          await updateSavedSearch(loadedSavedSearch);
           chrome.recentlyAccessed.add(
             ((loadedSavedSearch as unknown) as SavedObjectDeprecated).getFullPath(),
             loadedSavedSearch.title,

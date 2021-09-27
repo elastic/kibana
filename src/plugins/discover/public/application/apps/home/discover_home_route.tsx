@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState } from 'react';
+import { cloneDeep } from 'lodash';
 import { History } from 'history';
 import {
   EuiButton,
@@ -15,8 +16,8 @@ import {
   EuiCard,
   EuiIcon,
 } from '@elastic/eui';
-import { FlexGridColumns } from '@elastic/eui/src/components/flex/flex_grid';
 import { DataView } from 'src/plugins/data/common';
+import moment from 'moment';
 import { DiscoverServices } from '../../../build_services';
 import { SectionTitle } from './section_title';
 import { SavedSearch } from '../../../saved_searches';
@@ -57,7 +58,6 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
         const savedSearch = await services.getSavedSearchById(id);
         loadedSavedSearches.push(savedSearch);
       }
-      console.dir(loadedSavedSearches.length);
       setSavedSearches(loadedSavedSearches);
     }
     loadSavedSearches();
@@ -84,22 +84,24 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
 
   useEffect(() => {
     async function getRecentlyAccessed() {
-      const lastRecentlyAccessedItems = core.chrome.recentlyAccessed.get();
-      const recentlyAccessedSavedSearches = [] as SavedSearch[];
-      for (let i = 0; i < lastRecentlyAccessedItems.length; i++) {
-        const item = lastRecentlyAccessedItems[i];
-        try {
-          const savedSearch = await services.getSavedSearchById(item.id);
-          recentlyAccessedSavedSearches.push(savedSearch);
-        } catch (e) {
-          // nothing to do
+      const sortFn = (a: SavedSearch, b: SavedSearch) => {
+        const dateA = moment(a.accessed_at, moment.ISO_8601);
+        const dateB = moment(b.accessed_at, moment.ISO_8601);
+        if (moment(dateB).isAfter(dateA)) {
+          return 1;
         }
-      }
-      setRecentlyAccessed(recentlyAccessedSavedSearches);
+        if (moment(dateA).isAfter(dateB)) {
+          return -1;
+        }
+        return 0;
+      };
+      const lastRecentlyAccessedItems = cloneDeep(savedSearches);
+      lastRecentlyAccessedItems.sort(sortFn);
+      setRecentlyAccessed(lastRecentlyAccessedItems);
     }
 
     getRecentlyAccessed();
-  }, [core, services]);
+  }, [core, services, savedSearches]);
 
   useEffect(() => {
     async function loadIndexPatterns() {
@@ -122,24 +124,23 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
   }, [services, reloadIndexPatterns]);
 
   const lastRecentlyAccessedSection = () => {
-    const recentlyAccessedDisplay: JSX.Element[] = [];
+    const recentlyAccessedItems: JSX.Element[] = [];
     recentlyAccessed.forEach((savedSearch) => {
       const { title, searchSource, id } = savedSearch;
       const indexPattern = searchSource.getField('index');
-      recentlyAccessedDisplay.push(
+      recentlyAccessedItems.push(
         <EuiFlexItem>
           <LastRecentlyAccessedView
             id={id}
             title={title}
             indexPattern={indexPattern?.title || ''}
+            onClick={() => goToDiscover(id)}
           />
         </EuiFlexItem>
       );
     });
     return (
-      <EuiFlexGrid columns={recentlyAccessedDisplay.length as FlexGridColumns}>
-        {recentlyAccessedDisplay}
-      </EuiFlexGrid>
+      <SectionNavigation items={recentlyAccessedItems} itemsPerPage={DISPLAY_NUMBER_OF_ITEMS} />
     );
   };
 
@@ -181,10 +182,10 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     );
   };
 
-  const goToDiscover = () => {
+  const goToDiscover = (id?: string) => {
     const { application } = services.core;
     if (!application) return;
-    const path = `#/`;
+    const path = id ? `#/view/${id}` : '#/';
     application.navigateToApp('discover', { path });
   };
 

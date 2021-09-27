@@ -121,8 +121,8 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) =
 };
 
 const migrateSavedSearchObject: SavedObjectMigrationFn<any, any> = (doc) => {
-  const createdAt = get(doc, 'createdAt');
-  const accessedAt = get(doc, 'accessedAt');
+  const createdAt = get(doc, 'created_at');
+  const accessedAt = get(doc, 'accessed_at');
   if (createdAt && accessedAt) {
     return doc;
   }

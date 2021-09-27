@@ -21,8 +21,8 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
       grid: 'object',
       sort: 'keyword',
       version: 'integer',
-      createdAt: 'date',
-      accessedAt: 'date',
+      created_at: 'date',
+      accessed_at: 'date',
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
@@ -44,8 +44,8 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
           grid: 'object',
           sort: 'keyword',
           version: 'integer',
-          createdAt: 'date',
-          accessedAt: 'date',
+          created_at: 'date',
+          accessed_at: 'date',
         },
         searchSource: true,
         defaults: {
@@ -55,8 +55,8 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
           hits: 0,
           sort: [],
           version: 1,
-          createdAt: moment(Date.now()),
-          accessedAt: moment(Date.now()),
+          created_at: moment(Date.now()).toISOString(),
+          accessed_at: moment(Date.now()).toISOString(),
         },
       });
       this.showInRecentlyAccessed = true;
