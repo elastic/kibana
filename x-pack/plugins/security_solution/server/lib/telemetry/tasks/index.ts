@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('packetbeat app', function () {
-    loadTestFile(require.resolve('./_packetbeat'));
-  });
-}
+export { TelemetryDiagTask as DiagnosticTask } from './diagnostic';
+export { TelemetryEndpointTask as EndpointTask } from './endpoint';
+export { TelemetryExceptionListsTask as ExceptionListsTask } from './security_lists';

@@ -54,10 +54,8 @@ export function updateSearchSource(
 
     // this is not the default index pattern, it determines that it's not of type rollup
     if (indexPatternsUtils.isDefault(indexPattern)) {
-      searchSource.setField(
-        'filter',
-        data.query.timefilter.timefilter.createRelativeFilter(indexPattern)
-      );
+      // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
+      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
     }
 
     if (useNewFieldsApi) {

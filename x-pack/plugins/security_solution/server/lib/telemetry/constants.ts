@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+export const TELEMETRY_MAX_BUFFER_SIZE = 100;
+
 export const TELEMETRY_CHANNEL_LISTS = 'security-lists';
 
 export const TELEMETRY_CHANNEL_ENDPOINT_META = 'endpoint-metadata';
+
+export const LIST_TRUSTED_APPLICATION = 'trusted_application';
 
 export const LIST_ENDPOINT_EXCEPTION = 'endpoint_exception';
 

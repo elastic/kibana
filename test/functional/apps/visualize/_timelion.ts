@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'visEditor',
     'visualize',
   ]);
+  const security = getService('security');
   const monacoEditor = getService('monacoEditor');
   const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
@@ -23,6 +24,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Timelion visualization', () => {
     before(async () => {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'long_window_logstash',
+        'test_logstash_reader',
+      ]);
       await kibanaServer.uiSettings.update({
         'timelion:legacyChartsLibrary': false,
       });
