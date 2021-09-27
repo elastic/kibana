@@ -67,6 +67,7 @@ export const sampleDataSchema = schema.object({
   description: schema.string(),
   previewImagePath: schema.string(),
   darkPreviewImagePath: schema.maybe(schema.string()),
+  icon: schema.maybe(schema.string()),
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: schema.string(),

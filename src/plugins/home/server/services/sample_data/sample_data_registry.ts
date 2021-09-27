@@ -21,6 +21,8 @@ import { createListRoute, createInstallRoute } from './routes';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
+import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
+import { registerSampleDataSetWithIntegration } from './lib/register_with_integrations';
 
 const flightsSampleDataset = flightsSpecProvider();
 const logsSampleDataset = logsSpecProvider();
@@ -34,7 +36,11 @@ export class SampleDataRegistry {
     ecommerceSampleDataset,
   ];
 
-  public setup(core: CoreSetup, usageCollections: UsageCollectionSetup | undefined) {
+  public setup(
+    core: CoreSetup,
+    usageCollections: UsageCollectionSetup | undefined,
+    customIntegrations?: CustomIntegrationsPluginSetup
+  ) {
     if (usageCollections) {
       makeSampleDataUsageCollector(usageCollections, this.initContext);
     }
@@ -52,6 +58,12 @@ export class SampleDataRegistry {
     );
     createUninstallRoute(router, this.sampleDatasets, usageTracker);
 
+    if (customIntegrations) {
+      this.sampleDatasets.forEach((dataSet) => {
+        registerSampleDataSetWithIntegration(customIntegrations, core, dataSet);
+      });
+    }
+
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
         let value: SampleDatasetSchema;
@@ -59,6 +71,10 @@ export class SampleDataRegistry {
           value = sampleDataSchema.validate(specProvider());
         } catch (error) {
           throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
+        }
+
+        if (customIntegrations) {
+          registerSampleDataSetWithIntegration(customIntegrations, core, value);
         }
 
         const defaultIndexSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
