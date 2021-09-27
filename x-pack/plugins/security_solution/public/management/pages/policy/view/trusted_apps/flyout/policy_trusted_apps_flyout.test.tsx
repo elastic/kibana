@@ -16,7 +16,7 @@ import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_u
 
 import { TrustedAppsHttpService } from '../../../../trusted_apps/service';
 import { PolicyDetailsState } from '../../../types';
-import { getFakeCreateResponse, getListResponse } from '../../../test_utils';
+import { getMockCreateResponse, getMockListResponse } from '../../../test_utils';
 import { createLoadedResourceState } from '../../../../../state';
 
 jest.mock('../../../../trusted_apps/service');
@@ -32,9 +32,9 @@ describe('Policy trusted apps flyout', () => {
   beforeEach(() => {
     TrustedAppsHttpServiceMock.mockImplementation(() => {
       return {
-        getTrustedAppsList: () => getListResponse(),
+        getTrustedAppsList: () => getMockListResponse(),
         updateTrustedApp: () => ({
-          data: getFakeCreateResponse(),
+          data: getMockCreateResponse(),
         }),
       };
     });
@@ -111,7 +111,7 @@ describe('Policy trusted apps flyout', () => {
     await waitForAction('policyArtifactsAvailableListPageDataChanged');
 
     expect(component.getByTestId('confirmPolicyTrustedAppsFlyout')).not.toBeNull();
-    expect(component.getByTestId(`${getListResponse().data[0].name}_checkbox`)).not.toBeNull();
+    expect(component.getByTestId(`${getMockListResponse().data[0].name}_checkbox`)).not.toBeNull();
   });
 
   it('should confirm flyout action', async () => {
@@ -128,7 +128,7 @@ describe('Policy trusted apps flyout', () => {
     });
     await waitForAction('policyArtifactsAvailableListPageDataChanged');
 
-    const tACardCheckbox = component.getByTestId(`${getListResponse().data[0].name}_checkbox`);
+    const tACardCheckbox = component.getByTestId(`${getMockListResponse().data[0].name}_checkbox`);
 
     await act(async () => {
       fireEvent.click(tACardCheckbox);
@@ -173,7 +173,7 @@ describe('Policy trusted apps flyout', () => {
   it('should display warning message when too much results', async () => {
     TrustedAppsHttpServiceMock.mockImplementation(() => {
       return {
-        getTrustedAppsList: () => ({ ...getListResponse(), total: 101 }),
+        getTrustedAppsList: () => ({ ...getMockListResponse(), total: 101 }),
       };
     });
 

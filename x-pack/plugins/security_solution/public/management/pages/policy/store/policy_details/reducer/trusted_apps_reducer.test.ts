@@ -15,7 +15,7 @@ import {
   createLoadingResourceState,
   createFailedResourceState,
 } from '../../../../../state';
-import { getListResponse, getAPIError, getFakeCreateResponse } from '../../../test_utils';
+import { getMockListResponse, getAPIError, getMockCreateResponse } from '../../../test_utils';
 
 describe('policy trusted apps reducer', () => {
   let initialState: ImmutableObject<PolicyDetailsState>;
@@ -64,7 +64,7 @@ describe('policy trusted apps reducer', () => {
       it('sets available list loaded', () => {
         const result = policyTrustedAppsReducer(initialState, {
           type: 'policyArtifactsAvailableListPageDataChanged',
-          payload: createLoadedResourceState(getListResponse()),
+          payload: createLoadedResourceState(getMockListResponse()),
         });
 
         expect(result).toStrictEqual({
@@ -72,7 +72,7 @@ describe('policy trusted apps reducer', () => {
           artifacts: {
             ...initialState.artifacts,
             availableList: {
-              data: getListResponse(),
+              data: getMockListResponse(),
               type: 'LoadedResourceState',
             },
           },
@@ -138,7 +138,7 @@ describe('policy trusted apps reducer', () => {
     it('sets update trusted app loaded', () => {
       const result = policyTrustedAppsReducer(initialState, {
         type: 'policyArtifactsUpdateTrustedAppsChanged',
-        payload: createLoadedResourceState([getFakeCreateResponse()]),
+        payload: createLoadedResourceState([getMockCreateResponse()]),
       });
 
       expect(result).toStrictEqual({
@@ -146,7 +146,7 @@ describe('policy trusted apps reducer', () => {
         artifacts: {
           ...initialState.artifacts,
           trustedAppsToUpdate: {
-            data: [getFakeCreateResponse()],
+            data: [getMockCreateResponse()],
             type: 'LoadedResourceState',
           },
         },
@@ -208,7 +208,7 @@ describe('policy trusted apps reducer', () => {
         },
       });
     });
-    it('sets exists trusted app loaded nefative', () => {
+    it('sets exists trusted app loaded negative', () => {
       const result = policyTrustedAppsReducer(initialState, {
         type: 'policyArtifactsAvailableListExistDataChanged',
         payload: createLoadedResourceState(false),

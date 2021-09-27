@@ -12,14 +12,14 @@ import {
 
 import { createSampleTrustedApps, createSampleTrustedApp } from '../../trusted_apps/test_utils';
 
-export const getListResponse: () => GetTrustedListAppsResponse = () => ({
+export const getMockListResponse: () => GetTrustedListAppsResponse = () => ({
   data: createSampleTrustedApps({}),
   per_page: 100,
   page: 1,
   total: 100,
 });
 
-export const getFakeCreateResponse: () => PostTrustedAppCreateResponse = () =>
+export const getMockCreateResponse: () => PostTrustedAppCreateResponse = () =>
   createSampleTrustedApp(1) as unknown as unknown as PostTrustedAppCreateResponse;
 
 export const getAPIError = () => ({
