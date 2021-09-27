@@ -19,8 +19,8 @@ export {
   ElasticsearchError,
 } from './errors';
 export {
-  executionStatusFromState,
-  executionStatusFromError,
+  setExecutionStatusFromState,
+  setExecutionStatusFromError,
   alertExecutionStatusToRaw,
   alertExecutionStatusFromRaw,
 } from './alert_execution_status';

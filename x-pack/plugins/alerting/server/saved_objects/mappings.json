@@ -110,7 +110,20 @@
                 "type": "keyword"
               }
             }
-          }
+          },
+          "delay": { "type": "long" },
+          "duration": { "type": "long" },
+          "instances": { 
+            "properties": {
+              "active": { "type": "long" },
+              "new": { "type": "long" },
+              "recovered": { "type": "long" }
+            }
+          },
+          "searchDuration": { "type": "long" },
+          "indexDuration": { "type": "long" },
+          "noData": { "type": "boolean" },
+          "messages": { "type": "text" }
         }
       }
     }

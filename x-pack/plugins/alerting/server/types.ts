@@ -177,12 +177,23 @@ export interface AlertMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;
 }
 
-// note that the `error` property is "null-able", as we're doing a partial
+// properties are "null-able", so they can be as we're doing a partial
 // update on the alert when we update this data, but need to ensure we
-// delete any previous error if the current status has no error
+// delete any previous value if the next execution doesn't supply them
 export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
   lastExecutionDate: string;
+  delay?: number; // aka "task drift"; milliseconds
+  duration?: number; // milliseconds
+  searchDuration?: null | number; // milliseconds
+  indexDuration?: null | number; // milliseconds
+  noData?: null | boolean;
+  messages?: string[];
+  instances?: null | {
+    active: number;
+    new: number;
+    recovered: number;
+  };
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
     message: string;

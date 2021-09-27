@@ -16,8 +16,8 @@ import { createExecutionHandler, ExecutionHandler } from './create_execution_han
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import {
   validateAlertTypeParams,
-  executionStatusFromState,
-  executionStatusFromError,
+  setExecutionStatusFromState,
+  setExecutionStatusFromError,
   alertExecutionStatusToRaw,
   ErrorWithReason,
   ElasticsearchError,
@@ -221,7 +221,8 @@ export class TaskRunner<
     params: Params,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string,
-    event: Event
+    event: Event,
+    executionStatus: Partial<AlertExecutionStatus>
   ): Promise<AlertTaskState> {
     const {
       alertTypeId,
@@ -353,7 +354,7 @@ export class TaskRunner<
       recoveredAlerts: recoveredAlertInstances,
     });
 
-    generateNewAndRecoveredInstanceEvents({
+    executionStatus.instances = generateNewAndRecoveredInstanceEvents({
       eventLogger,
       originalAlertInstances,
       currentAlertInstances: instancesWithScheduledActions,
@@ -436,7 +437,8 @@ export class TaskRunner<
     services: Services,
     apiKey: RawAlert['apiKey'],
     alert: SanitizedAlert<Params>,
-    event: Event
+    event: Event,
+    executionStatus: Partial<AlertExecutionStatus>
   ) {
     const {
       params: { alertId, spaceId },
@@ -460,11 +462,15 @@ export class TaskRunner<
       validatedParams,
       executionHandler,
       spaceId,
-      event
+      event,
+      executionStatus
     );
   }
 
-  async loadAlertAttributesAndRun(event: Event): Promise<Resultable<AlertTaskRunResult, Error>> {
+  async loadAlertAttributesAndRun(
+    event: Event,
+    executionStatus: Partial<AlertExecutionStatus>
+  ): Promise<Resultable<AlertTaskRunResult, Error>> {
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
@@ -492,7 +498,7 @@ export class TaskRunner<
     }
     return {
       state: await promiseResult<AlertTaskState, Error>(
-        this.validateAndExecuteAlert(services, apiKey, alert, event)
+        this.validateAndExecuteAlert(services, apiKey, alert, event, executionStatus)
       ),
       schedule: asOk(
         // fetch the alert again to ensure we return the correct schedule as it may have
@@ -561,14 +567,20 @@ export class TaskRunner<
     });
     eventLogger.logEvent(startEvent);
 
+    const executionStatus: Partial<AlertExecutionStatus> = {
+      lastExecutionDate: runDate,
+      messages: [],
+    };
+
     const { state, schedule } = await errorAsAlertTaskRunResult(
-      this.loadAlertAttributesAndRun(event)
+      this.loadAlertAttributesAndRun(event, executionStatus)
     );
 
-    const executionStatus: AlertExecutionStatus = map(
+    map(
       state,
-      (alertTaskState: AlertTaskState) => executionStatusFromState(alertTaskState),
-      (err: ElasticsearchError) => executionStatusFromError(err)
+      (alertTaskState: AlertTaskState) =>
+        setExecutionStatusFromState(executionStatus, alertTaskState),
+      (err: ElasticsearchError) => setExecutionStatusFromError(executionStatus, err)
     );
 
     // set the executionStatus date to same as event, if it's set
@@ -584,6 +596,11 @@ export class TaskRunner<
     event.kibana = event.kibana || {};
     event.kibana.alerting = event.kibana.alerting || {};
     event.kibana.alerting.status = executionStatus.status;
+
+    executionStatus.delay = scheduleDelay;
+    if (event.event?.duration !== undefined) {
+      executionStatus.duration = Math.round(event.event?.duration / Millis2Nanos);
+    }
 
     // if executionStatus indicates an error, fill in fields in
     // event from it
@@ -734,10 +751,18 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   rule: SanitizedAlert<AlertTypeParams>;
 }
 
+interface GenerateNewAndRecoveredInstanceEventsResult {
+  active: number;
+  new: number;
+  recovered: number;
+}
+
 function generateNewAndRecoveredInstanceEvents<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
->(params: GenerateNewAndRecoveredInstanceEventsParams<InstanceState, InstanceContext>) {
+>(
+  params: GenerateNewAndRecoveredInstanceEventsParams<InstanceState, InstanceContext>
+): GenerateNewAndRecoveredInstanceEventsResult {
   const {
     eventLogger,
     alertId,
@@ -752,6 +777,11 @@ function generateNewAndRecoveredInstanceEvents<
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
   const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
+  const result = {
+    active: currentAlertInstanceIds.length,
+    new: newIds.length,
+    recovered: recoveredAlertInstanceIds.length,
+  };
 
   for (const id of recoveredAlertInstanceIds) {
     const { group: actionGroup, subgroup: actionSubgroup } =
@@ -801,6 +831,8 @@ function generateNewAndRecoveredInstanceEvents<
       actionSubgroup
     );
   }
+
+  return result;
 
   function logInstanceEvent(
     instanceId: string,

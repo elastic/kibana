@@ -35,6 +35,17 @@ export enum AlertExecutionStatusErrorReasons {
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   lastExecutionDate: Date;
+  delay?: number; // aka "task drift"; milliseconds
+  duration?: number; // milliseconds
+  searchDuration?: null | number; // milliseconds
+  indexDuration?: null | number; // milliseconds
+  instances?: {
+    active: number;
+    new: number;
+    recovered: number;
+  };
+  noData?: boolean;
+  messages?: string[];
   error?: {
     reason: AlertExecutionStatusErrorReasons;
     message: string;
