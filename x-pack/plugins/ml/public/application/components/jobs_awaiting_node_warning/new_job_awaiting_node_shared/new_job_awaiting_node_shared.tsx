@@ -112,11 +112,11 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
               <>
                 <FormattedMessage
                   id="xpack.ml.jobsAwaitingNodeWarningShared.isCloud"
-                  defaultMessage="Elastic Cloud will autoscale to add more ML capacity. This may take 5-20 minutes. "
+                  defaultMessage="Elastic Cloud deployments can autoscale to add more ML capacity. This may take 5-20 minutes. "
                 />
                 {cloudInfo.deploymentId === null ? null : (
                   <FormattedMessage
-                    id="xpack.ml.jobsAwaitingNodeWarningShared.isCloud"
+                    id="xpack.ml.jobsAwaitingNodeWarningShared.isCloud.link"
                     defaultMessage="You can monitor progress in the {link}."
                     values={{
                       link: (
@@ -136,7 +136,21 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
             ) : (
               <FormattedMessage
                 id="xpack.ml.jobsAwaitingNodeWarningShared.notCloud"
-                defaultMessage="You are not running in Elastic Cloud. Your administrator is responsible for adding an ML node."
+                defaultMessage="Only Elastic Cloud deployments can autoscale; you must add machine learning nodes. {link}"
+                values={{
+                  link: (
+                    <EuiLink
+                      href={
+                        'https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-node.html#ml-node'
+                      }
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.jobsAwaitingNodeWarningShared.linkToCloud.linkText"
+                        defaultMessage="Learn more."
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             ))}
         </div>
