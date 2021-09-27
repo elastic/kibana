@@ -21,7 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  // FLAKY https://github.com/elastic/kibana/issues/100296
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
@@ -878,6 +879,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.packagePolicy.id
         );
         expect(await testSubjects.isSelected('policyWindowsEvent_dns')).to.be(wasSelected);
+      });
+
+      it('should show trusted apps card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('fleetTrustedAppsCard');
+        await (await testSubjects.find('linkToTrustedApps')).click();
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
     });
   });
