@@ -279,7 +279,7 @@ image::management/connectors/images/exchange-secrets.png[MS Exchange secrets con
 After adding a new client secret copy the value and put it to the proper field in Microsoft Exchange email connector.
 
 [float]
-[[exchange-client-secret]]
+[[exchange-client-tenant-id]]
 ===== Configure Microsoft Exchange Client ID and Tenant ID
 To find application Client ID you should use Azure portal application Overview page:
 [role="screenshot"]
