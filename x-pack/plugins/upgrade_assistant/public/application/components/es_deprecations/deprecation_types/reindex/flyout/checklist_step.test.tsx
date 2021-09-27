@@ -50,11 +50,11 @@ describe('ChecklistFlyout', () => {
     expect((wrapper.find('EuiButton').props() as any).isLoading).toBe(true);
   });
 
-  it('disables button if hasRequiredPrivileges is false', () => {
+  it('hides button if hasRequiredPrivileges is false', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.hasRequiredPrivileges = false;
     const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
-    expect(wrapper.find('EuiButton').props().disabled).toBe(true);
+    expect(wrapper.exists('EuiButton')).toBe(false);
   });
 
   it('calls startReindex when button is clicked', () => {

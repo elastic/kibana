@@ -11,6 +11,7 @@ import { licensingMock } from '../../../../licensing/server/mocks';
 import { securityMock } from '../../../../security/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
+import { handleEsError } from '../../shared_imports';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -60,6 +61,7 @@ describe('reindex API', () => {
       credentialStore,
       router: mockRouter,
       licensing: licensingMock.createSetup(),
+      lib: { handleEsError },
       getSecurityPlugin: () => securityMock.createStart(),
     };
     registerReindexIndicesRoutes(routeDependencies, () => worker);
