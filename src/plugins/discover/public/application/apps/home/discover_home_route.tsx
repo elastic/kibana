@@ -57,6 +57,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
         const savedSearch = await services.getSavedSearchById(id);
         loadedSavedSearches.push(savedSearch);
       }
+      console.dir(loadedSavedSearches.length);
       setSavedSearches(loadedSavedSearches);
     }
     loadSavedSearches();
@@ -77,11 +78,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
       );
     });
     return (
-      <SectionNavigation
-        items={savedSearchesToDisplay}
-        itemsPerPage={DISPLAY_NUMBER_OF_ITEMS}
-        page={0}
-      />
+      <SectionNavigation items={savedSearchesToDisplay} itemsPerPage={DISPLAY_NUMBER_OF_ITEMS} />
     );
   };
 
@@ -178,11 +175,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
           {addNewIndexPattern}
         </EuiFlexItem>
         <EuiFlexItem grow={9}>
-          <SectionNavigation
-            items={displayElements}
-            page={0}
-            itemsPerPage={DISPLAY_NUMBER_OF_ITEMS}
-          />
+          <SectionNavigation items={displayElements} itemsPerPage={DISPLAY_NUMBER_OF_ITEMS} />
         </EuiFlexItem>
       </EuiFlexGrid>
     );

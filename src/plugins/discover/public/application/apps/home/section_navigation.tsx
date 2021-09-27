@@ -14,23 +14,25 @@ import { NavigationButton } from './navigation_button';
 
 interface Props {
   items: JSX.Element[];
-  page: number;
   itemsPerPage: number;
 }
 
 export function SectionNavigation(props: Props) {
-  const { items, page, itemsPerPage } = props;
+  const { items, itemsPerPage } = props;
   const total = items.length;
 
-  const [activePage, setActivePage] = useState(page);
+  const [activePage, setActivePage] = useState(0);
 
   const start = activePage * itemsPerPage;
-  const end = start + itemsPerPage < total ? start + itemsPerPage : total;
+  let end = (activePage + 1) * itemsPerPage - 1;
+  if (end > total) {
+    end = total;
+  }
 
   const displayItems: JSX.Element[] = [];
 
   const onMoreClick = () => {
-    setActivePage((activePage + 1) % itemsPerPage);
+    setActivePage(activePage + 1);
   };
 
   const onLessClick = () => {
@@ -57,13 +59,13 @@ export function SectionNavigation(props: Props) {
     );
   }
 
-  for (let i = start; i < end; i++) {
+  for (let i = start; i <= end; i++) {
     const item = items[i];
-    const grow = end - start < itemsPerPage ? false : 3;
+    const grow = end - start + 1 < itemsPerPage ? false : 3;
     displayItems.push(<EuiFlexItem grow={grow}>{item}</EuiFlexItem>);
   }
 
-  if (end < total) {
+  if (end + 1 < total) {
     displayItems.push(
       <EuiFlexItem grow={false}>
         <NavigationButton type={'more'} onClick={onMoreClick} />

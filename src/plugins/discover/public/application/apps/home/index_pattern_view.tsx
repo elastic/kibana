@@ -34,12 +34,36 @@ export function IndexPatternView(props: IndexPatternViewProps) {
   const { description } = indexPattern;
   const descriptionText = description && description.length > 0 ? description : '[No Description]';
 
+  const goToIndexPattern = () => {
+    const { application } = services.core;
+    if (!application) return;
+    const path = `/kibana/indexPatterns/patterns/${indexPattern.id}`;
+    application.navigateToApp('management', { path });
+  };
+
+  const title = (
+    <EuiFlexGrid>
+      <EuiFlexItem grow={true} style={{ flexGrow: 1 }}>
+        <EuiText size={'m'}>
+          <h3>{indexPattern.title}</h3>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIcon
+          type={'pencil'}
+          onClick={() => goToIndexPattern()}
+          className="editIndexPattern__icon"
+        />
+      </EuiFlexItem>
+    </EuiFlexGrid>
+  );
+
   return (
     <EuiCard
       layout="horizontal"
       icon={<EuiIcon size="m" type={'discoverApp'} className="discoverLogo__icon" />}
       titleSize="s"
-      title={indexPattern.title}
+      title={title}
       description={descriptionText}
     >
       <React.Fragment>
