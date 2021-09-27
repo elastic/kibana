@@ -300,6 +300,37 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
     )
   );
 
+  // Get the ml upgrade mode
+  router.get(
+    {
+      path: `${API_BASE_PATH}/ml_upgrade_mode`,
+      validate: false,
+    },
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { client: esClient },
+          },
+        },
+        request,
+        response
+      ) => {
+        try {
+          const { body: mlInfo } = await esClient.asCurrentUser.ml.info();
+
+          return response.ok({
+            body: {
+              mlUpgradeModeEnabled: mlInfo.upgrade_mode,
+            },
+          });
+        } catch (e) {
+          return handleEsError({ error: e, response });
+        }
+      }
+    )
+  );
+
   // Delete ML model snapshot
   router.delete(
     {

@@ -160,6 +160,15 @@ export class ApiService {
       method: 'post',
     });
   }
+
+  public useLoadMlUpgradeMode() {
+    return this.useRequest<{
+      mlUpgradeModeEnabled: boolean;
+    }>({
+      path: `${API_BASE_PATH}/ml_upgrade_mode`,
+      method: 'get',
+    });
+  }
 }
 
 export const apiService = new ApiService();
