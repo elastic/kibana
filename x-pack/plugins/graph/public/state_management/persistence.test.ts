@@ -23,6 +23,18 @@ import { settingsSelector } from './advanced_settings';
 import { openSaveModal } from '../services/save_modal';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
 
 jest.mock('../services/persistence', () => ({
   lookupIndexPatternId: jest.fn(() => ({ id: '123', attributes: { title: 'test-pattern' } })),
