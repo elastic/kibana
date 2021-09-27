@@ -9,6 +9,7 @@ import { RemarkParser } from '@elastic/eui/src/components/markdown_editor/markdo
 import { TimelineLinkParser } from './parser';
 import { TimelineSerializer } from './serializer';
 import { Eat } from './types';
+import * as i18n from './translations';
 
 describe('timeline parser', () => {
   describe('TimelineLinkParser', () => {
@@ -40,18 +41,84 @@ describe('timeline parser', () => {
 
       expect(id).toBe('123');
     });
+
+    it('throws an error when the title is missing the closing bracket', () => {
+      expect(() => {
+        new TimelineLinkParser(
+          mockRemark,
+          '[a titlehttps://a.com/security/timelines?timeline=(id:%27123%27,isOpen:!t)',
+          mockEat
+        ).parse();
+      }).toThrow(i18n.FAILED_PARSE_NAME);
+    });
+
+    it('throws an error when the url is not contained in parentheses', () => {
+      expect(() => {
+        new TimelineLinkParser(
+          mockRemark,
+          '[a title](https://a.com/security/timelines?timeline=(id:%27123%27,isOpen:!t)',
+          mockEat
+        ).parse();
+      }).toThrow(i18n.FAILED_PARSE_URL);
+    });
+
+    it('throws an error when the url is not valid', () => {
+      expect(() => {
+        new TimelineLinkParser(
+          mockRemark,
+          '[a title](timelines?timeline=(id:%27123%27,isOpen:!t))',
+          mockEat
+        ).parse();
+      }).toThrow(
+        i18n.FAILED_PARSE_URL_WITH_ERROR('Invalid URL: timelines?timeline=(id:%27123%27,isOpen:!t)')
+      );
+    });
+
+    it('throws an error when the query parameters does not contain timeline', () => {
+      expect(() => {
+        new TimelineLinkParser(
+          mockRemark,
+          '[a title](https://a.com/security/timelines?timelines=(id:%27123%27,isOpen:!t))',
+          mockEat
+        ).parse();
+      }).toThrow(i18n.FAILED_PARSE_URL_WITH_ERROR(i18n.FAILED_PARSE_QUERY_PARAMS));
+    });
+
+    it('throws an error when it fails to decode the query parameters', () => {
+      expect(() => {
+        new TimelineLinkParser(
+          mockRemark,
+          '[a title](https://a.com/security/timelines?timeline=(id:%27123,isOpen:!t))',
+          mockEat
+        ).parse();
+      }).toThrow(
+        i18n.FAILED_PARSE_URL_WITH_ERROR('rison decoder error: invalid string escape: "!t"')
+      );
+    });
+
+    it('throws an error when it fails to find the id field in the query parameters', () => {
+      expect(() => {
+        new TimelineLinkParser(
+          mockRemark,
+          '[a title](https://a.com/security/timelines?timeline=(notidfield:%27123%27,isOpen:!t))',
+          mockEat
+        ).parse();
+      }).toThrow(i18n.FAILED_PARSE_URL_WITH_ERROR(i18n.NO_ID_FIELD));
+    });
   });
 });
 
 function createMockRemark(): RemarkParser {
   return {
-    file: jest.fn(),
+    file: { info: jest.fn() },
   } as unknown as RemarkParser;
 }
 
 function createMockEat(): Eat {
   const mockEat = function () {};
-  mockEat.now = jest.fn();
+  mockEat.now = jest.fn(() => ({
+    line: 0,
+  }));
 
   return mockEat;
 }

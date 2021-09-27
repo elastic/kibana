@@ -94,12 +94,12 @@ export class TimelineLinkParser {
     if (!title) {
       const currentParseLocation = this.eat.now();
 
-      this.remarkParser.file.info(i18n.NO_TIMELINE_NAME_FOUND, {
+      this.remarkParser.file.info(i18n.FAILED_PARSE_NAME, {
         line: currentParseLocation.line,
         column: startingIndex,
       });
 
-      throw new Error('Failed to parse title');
+      throw new Error(i18n.FAILED_PARSE_NAME);
     }
 
     return { title, index };
@@ -115,12 +115,12 @@ export class TimelineLinkParser {
     if (!url) {
       const currentParseLocation = this.eat.now();
 
-      this.remarkParser.file.info(i18n.NO_TIMELINE_URL_FOUND, {
+      this.remarkParser.file.info(i18n.FAILED_PARSE_URL, {
         line: currentParseLocation.line,
         column: startingIndex,
       });
 
-      throw new Error('Failed to parse url');
+      throw new Error(i18n.FAILED_PARSE_URL);
     }
 
     const id = parseId(url);
@@ -173,17 +173,17 @@ function parseId(url: string): string {
     const timelineQueryParam = parsedUrl.searchParams.get('timeline');
 
     if (!timelineQueryParam) {
-      throw new Error('Failed to parse timeline query params');
+      throw new Error(i18n.FAILED_PARSE_QUERY_PARAMS);
     }
 
     const decodedQuery = decode(timelineQueryParam) as { id?: string };
 
     if (!decodedQuery?.id) {
-      throw new Error('Timeline query does not contain mandatory id field');
+      throw new Error(i18n.NO_ID_FIELD);
     }
 
     return decodedQuery.id;
   } catch (error) {
-    throw new Error(`Failed to parse timeline url: ${error}`);
+    throw new Error(i18n.FAILED_PARSE_URL_WITH_ERROR(error.message));
   }
 }

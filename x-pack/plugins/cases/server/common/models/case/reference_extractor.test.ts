@@ -8,23 +8,41 @@
 import { SavedObject, SavedObjectReference } from 'kibana/server';
 import { lensEmbeddableFactory } from '../../../../../lens/server/embeddable/lens_embeddable_factory';
 import { CommentRequestUserType } from '../../../../common/api';
-import { extractLensReferencesFromCommentString, getOrUpdateLensReferences } from './utils';
+import { ReferencesExtractor } from './reference_extractor';
 
-describe('case utils', () => {
-  describe('extractLensReferencesFromCommentString', () => {
-    it('extracts the references successfully', () => {
+describe('case reference extractor', () => {
+  describe('ReferencesExtractor.extractReferences', () => {
+    let extractor: ReferencesExtractor;
+
+    beforeEach(() => {
+      extractor = new ReferencesExtractor(lensEmbeddableFactory);
+    });
+
+    it('returns an empty array when the comment string is an empty string', () => {
+      expect(extractor.extractReferences('')).toEqual([]);
+    });
+
+    it('returns an empty array when the comment string is an empty string and the previous comment had references', () => {
+      const commentSO = {
+        references: [{ id: '123', name: 'timeline', type: 'siem-ui-timeline' }],
+        attributes: {
+          comment:
+            '[timeline](http://localhost:5601/app/security/timelines?timeline=(id%3A%27123%27%2CisOpen%3A!t))',
+        },
+      } as SavedObject<CommentRequestUserType>;
+      expect(extractor.extractReferences('', commentSO)).toEqual([]);
+    });
+
+    it('extracts references from a timeline and multiple lens visualizations in a new comment', () => {
       const commentString = [
         '**Test**   ',
         'Amazingg!!!',
-        '[asdasdasdasd](http://localhost:5601/moq/app/security/timelines?timeline=(id%3A%27e4362a60-f478-11eb-a4b0-ebefce184d8d%27%2CisOpen%3A!t))',
+        '[timeline](http://localhost:5601/app/security/timelines?timeline=(id%3A%27123%27%2CisOpen%3A!t))',
         '!{lens{"timeRange":{"from":"now-7d","to":"now","mode":"relative"},"attributes":{"title":"aaaa","type":"lens","visualizationType":"lnsXY","state":{"datasourceStates":{"indexpattern":{"layers":{"layer1":{"columnOrder":["col1","col2"],"columns":{"col2":{"dataType":"number","isBucketed":false,"label":"Count of records","operationType":"count","scale":"ratio","sourceField":"Records"},"col1":{"dataType":"date","isBucketed":true,"label":"@timestamp","operationType":"date_histogram","params":{"interval":"auto"},"scale":"interval","sourceField":"timestamp"}}}}}},"visualization":{"axisTitlesVisibilitySettings":{"x":true,"yLeft":true,"yRight":true},"fittingFunction":"None","gridlinesVisibilitySettings":{"x":true,"yLeft":true,"yRight":true},"layers":[{"accessors":["col2"],"layerId":"layer1","seriesType":"bar_stacked","xAccessor":"col1","yConfig":[{"forAccessor":"col2"}]}],"legend":{"isVisible":true,"position":"right"},"preferredSeriesType":"bar_stacked","tickLabelsVisibilitySettings":{"x":true,"yLeft":true,"yRight":true},"valueLabels":"hide","yRightExtent":{"mode":"full"}},"query":{"language":"kuery","query":""},"filters":[]},"references":[{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b246","name":"indexpattern-datasource-current-indexpattern"},{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b248","name":"indexpattern-datasource-layer-layer1"}]},"editMode":false}}',
         '!{lens{"timeRange":{"from":"now-7d","to":"now","mode":"relative"},"attributes":{"title":"aaaa","type":"lens","visualizationType":"lnsXY","state":{"datasourceStates":{"indexpattern":{"layers":{"layer1":{"columnOrder":["col1","col2"],"columns":{"col2":{"dataType":"number","isBucketed":false,"label":"Count of records","operationType":"count","scale":"ratio","sourceField":"Records"},"col1":{"dataType":"date","isBucketed":true,"label":"@timestamp","operationType":"date_histogram","params":{"interval":"auto"},"scale":"interval","sourceField":"timestamp"}}}}}},"visualization":{"axisTitlesVisibilitySettings":{"x":true,"yLeft":true,"yRight":true},"fittingFunction":"None","gridlinesVisibilitySettings":{"x":true,"yLeft":true,"yRight":true},"layers":[{"accessors":["col2"],"layerId":"layer1","seriesType":"bar_stacked","xAccessor":"col1","yConfig":[{"forAccessor":"col2"}]}],"legend":{"isVisible":true,"position":"right"},"preferredSeriesType":"bar_stacked","tickLabelsVisibilitySettings":{"x":true,"yLeft":true,"yRight":true},"valueLabels":"hide","yRightExtent":{"mode":"full"}},"query":{"language":"kuery","query":""},"filters":[]},"references":[{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b246","name":"indexpattern-datasource-current-indexpattern"},{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-layer-layer1"}]},"editMode":false}}',
       ].join('\n\n');
 
-      const extractedReferences = extractLensReferencesFromCommentString(
-        lensEmbeddableFactory,
-        commentString
-      );
+      const extractedReferences = extractor.extractReferences(commentString);
 
       const expectedReferences = [
         {
@@ -42,18 +60,13 @@ describe('case utils', () => {
           id: '90943e30-9a47-11e8-b64d-95841ca0b247',
           name: 'indexpattern-datasource-layer-layer1',
         },
+        { id: '123', name: 'timeline', type: 'siem-ui-timeline' },
       ];
 
-      expect(expectedReferences.length).toEqual(extractedReferences.length);
-      expect(expectedReferences).toEqual(expect.arrayContaining(extractedReferences));
+      expect(extractedReferences.length).toEqual(expectedReferences.length);
+      expect(extractedReferences).toEqual(expect.arrayContaining(expectedReferences));
     });
 
-    it('returns an empty array when the comment string is undefined', () => {
-      expect(extractLensReferencesFromCommentString(lensEmbeddableFactory)).toEqual([]);
-    });
-  });
-
-  describe('getOrUpdateLensReferences', () => {
     it('update references', () => {
       const currentCommentStringReferences = [
         [
@@ -82,7 +95,7 @@ describe('case utils', () => {
         ],
       ];
 
-      const currentCommentString = createCommentStringWithTwoLensViz(
+      const currentCommentString = createCommentStringWithTwoLensVizAndOneTimeline(
         currentCommentStringReferences[0],
         currentCommentStringReferences[1]
       );
@@ -90,9 +103,9 @@ describe('case utils', () => {
       const nonLensCurrentCommentReferences = [
         { type: 'case', id: '7b4be181-9646-41b8-b12d-faabf1bd9512', name: 'Test case' },
         {
-          type: 'timeline',
-          id: '0f847d31-9683-4ebd-92b9-454e3e39aec1',
-          name: 'Test case timeline',
+          type: 'siem-ui-timeline',
+          id: 'e4362a60-f478-11eb-a4b0-ebefce184d8d',
+          name: 'asdasdasdasd',
         },
       ];
 
@@ -114,9 +127,11 @@ describe('case utils', () => {
         },
       ];
 
-      const newCommentString = createCommentStringWithOneLensViz(newCommentStringReferences);
+      const newCommentString = createCommentStringWithOneLensVizAndOneTimeline(
+        newCommentStringReferences
+      );
 
-      const updatedReferences = getOrUpdateLensReferences(lensEmbeddableFactory, newCommentString, {
+      const updatedReferences = extractor.extractReferences(newCommentString, {
         references: currentCommentReferences,
         attributes: {
           comment: currentCommentString,
@@ -146,16 +161,25 @@ describe('case utils', () => {
         },
       ];
 
-      const newCommentString = createCommentStringWithOneLensViz(newCommentStringReferences);
+      const newCommentString = createCommentStringWithOneLensVizAndOneTimeline(
+        newCommentStringReferences
+      );
 
-      const updatedReferences = getOrUpdateLensReferences(lensEmbeddableFactory, newCommentString);
+      const updatedReferences = extractor.extractReferences(newCommentString);
 
-      expect(updatedReferences).toEqual(newCommentStringReferences);
+      expect(updatedReferences).toEqual([
+        ...newCommentStringReferences,
+        {
+          type: 'siem-ui-timeline',
+          id: 'e4362a60-f478-11eb-a4b0-ebefce184d8d',
+          name: 'asdasdasdasd',
+        },
+      ]);
     });
   });
 });
 
-const createCommentStringWithTwoLensViz = (
+const createCommentStringWithTwoLensVizAndOneTimeline = (
   referencesForViz1: SavedObjectReference[],
   referencesForViz2: SavedObjectReference[]
 ) => {
@@ -171,7 +195,7 @@ const createCommentStringWithTwoLensViz = (
   ].join('\n\n');
 };
 
-const createCommentStringWithOneLensViz = (references: SavedObjectReference[]) => {
+const createCommentStringWithOneLensVizAndOneTimeline = (references: SavedObjectReference[]) => {
   return [
     '**Test**   ',
     'Awmazingg!!!',

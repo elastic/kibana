@@ -30,14 +30,13 @@ export class ReferencesExtractor {
   }
 
   extractReferences(newComment: string, currentComment?: SavedObject<CommentRequestUserType>) {
-    const nonLensTimelineReferences = this.getNonExtractorReferences(currentComment);
+    const references = this.getNonExtractorReferences(currentComment);
 
-    const referencesToReturn = [...nonLensTimelineReferences];
     for (const extractor of this.extractors) {
-      referencesToReturn.push(...extractor(newComment));
+      references.push(...extractor(newComment));
     }
 
-    return referencesToReturn;
+    return references;
   }
 
   private getNonExtractorReferences(commentSavedObject?: SavedObject<CommentRequestUserType>) {
@@ -60,7 +59,7 @@ const createLensReferencesExtractor = (
     extractLensReferencesFromCommentString(lensEmbeddableFactory, comment);
 };
 
-export const extractLensReferencesFromCommentString = (
+const extractLensReferencesFromCommentString = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   comment?: string
 ): SavedObjectReference[] => {
@@ -86,7 +85,7 @@ const dedupReferences = (references: SavedObjectReference[]): SavedObjectReferen
 const referenceComparator = (refA: SavedObjectReference, refB: SavedObjectReference) =>
   refA.type === refB.type && refA.id === refB.id && refA.name === refB.name;
 
-export const extractTimelineReferenceFromString: Extractor = (
+const extractTimelineReferenceFromString: Extractor = (
   comment?: string
 ): SavedObjectReference[] => {
   if (!comment) {

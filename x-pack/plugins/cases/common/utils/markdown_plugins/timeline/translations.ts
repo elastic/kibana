@@ -15,16 +15,36 @@ export const NO_CHARACTER = (character: string) =>
     },
   });
 
-export const NO_TIMELINE_NAME_FOUND = i18n.translate(
-  'xpack.cases.markdownEditor.plugins.timeline.noTimelineNameFoundErrorMsg',
+export const FAILED_PARSE_NAME = i18n.translate(
+  'xpack.cases.markdownEditor.plugins.timeline.failedTimelineNameMsg',
   {
-    defaultMessage: 'No timeline name found',
+    defaultMessage: 'Failed to parse timeline title',
   }
 );
 
-export const NO_TIMELINE_URL_FOUND = i18n.translate(
-  'xpack.cases.markdownEditor.plugins.timeline.noTimelineUrlFoundErrorMsg',
+export const FAILED_PARSE_URL = i18n.translate(
+  'xpack.cases.markdownEditor.plugins.timeline.failedTimelineUrlMsg',
   {
-    defaultMessage: 'No timeline URL found',
+    defaultMessage: 'Failed to parse timeline URL',
   }
 );
+
+export const FAILED_PARSE_QUERY_PARAMS = i18n.translate(
+  'xpack.cases.markdownEditor.plugins.timeline.failedQueryParamsMsg',
+  {
+    defaultMessage: 'Failed to parse timeline query params',
+  }
+);
+
+export const NO_ID_FIELD = i18n.translate(
+  'xpack.cases.markdownEditor.plugins.timeline.noIdInQueryParamsMsg',
+  {
+    defaultMessage: 'Timeline query does not contain mandatory id field',
+  }
+);
+
+export const FAILED_PARSE_URL_WITH_ERROR = (error: string) =>
+  i18n.translate('xpack.cases.markdownEditor.plugins.timeline.noIdInQueryParamsMsg', {
+    defaultMessage: 'Failed to parse timeline url: { error }',
+    values: { error },
+  });
