@@ -167,7 +167,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.SOURCE_IP_LABEL}>
+      <EuiFormRow fullWidth label={i18n.SOURCE_IP_LABEL} helpText={i18n.SOURCE_IP_HELP_TEXT}>
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}
@@ -177,7 +177,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.DEST_IP_LABEL}>
+      <EuiFormRow fullWidth label={i18n.DEST_IP_LABEL} helpText={i18n.DEST_IP_HELP_TEXT}>
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}
@@ -187,7 +187,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_URL_LABEL}>
+      <EuiFormRow fullWidth label={i18n.MALWARE_URL_LABEL} helpText={i18n.MALWARE_URL_HELP_TEXT}>
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}
@@ -197,7 +197,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_HASH_LABEL}>
+      <EuiFormRow fullWidth label={i18n.MALWARE_HASH_LABEL} helpText={i18n.MALWARE_HASH_HELP_TEXT}>
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}

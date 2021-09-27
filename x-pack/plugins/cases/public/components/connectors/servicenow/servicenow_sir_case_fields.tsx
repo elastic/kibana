@@ -169,10 +169,14 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   }, [category, destIp, malwareHash, malwareUrl, onChange, priority, sourceIp, subcategory]);
 
   return isEdit ? (
-    <div data-test-subj={'connector-fields-sn-sir'}>
-      <EuiFlexGroup>
-        <EuiFlexItem>{showMappingWarning && <DeprecatedCallout />}</EuiFlexItem>
-      </EuiFlexGroup>
+    <div data-test-subj="connector-fields-sn-sir">
+      {showMappingWarning && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <DeprecatedCallout />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow fullWidth label={i18n.ALERT_FIELDS_LABEL}>

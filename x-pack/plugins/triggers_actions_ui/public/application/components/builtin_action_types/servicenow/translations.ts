@@ -106,10 +106,24 @@ export const SOURCE_IP_LABEL = i18n.translate(
   }
 );
 
+export const SOURCE_IP_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.sourceIPHelpText',
+  {
+    defaultMessage: 'List of source IPs (comma, or pipe delimited)',
+  }
+);
+
 export const DEST_IP_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.destinationIPTitle',
   {
     defaultMessage: 'Destination IP',
+  }
+);
+
+export const DEST_IP_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.destIPHelpText',
+  {
+    defaultMessage: 'List of destination IPs (comma, or pipe delimited)',
   }
 );
 
@@ -148,10 +162,24 @@ export const MALWARE_URL_LABEL = i18n.translate(
   }
 );
 
+export const MALWARE_URL_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareURLHelpText',
+  {
+    defaultMessage: 'List of malware URLs (comma, or pipe delimited)',
+  }
+);
+
 export const MALWARE_HASH_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashTitle',
   {
     defaultMessage: 'Malware Hash',
+  }
+);
+
+export const MALWARE_HASH_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashHelpText',
+  {
+    defaultMessage: 'List of malware hashed (comma, or pipe delimited)',
   }
 );
 

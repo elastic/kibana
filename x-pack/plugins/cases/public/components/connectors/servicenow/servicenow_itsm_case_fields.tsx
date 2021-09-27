@@ -153,22 +153,30 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
   }, [category, impact, onChange, severity, subcategory, urgency]);
 
   return isEdit ? (
-    <div data-test-subj={'connector-fields-sn-itsm'}>
+    <div data-test-subj="connector-fields-sn-itsm">
+      {showMappingWarning && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <DeprecatedCallout />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiFlexGroup>
-        <EuiFlexItem>{showMappingWarning && <DeprecatedCallout />}</EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth label={i18n.URGENCY}>
+            <EuiSelect
+              fullWidth
+              data-test-subj="urgencySelect"
+              options={urgencyOptions}
+              value={urgency ?? undefined}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
+              hasNoInitialSelection
+              onChange={(e) => onChangeCb('urgency', e.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFormRow fullWidth label={i18n.URGENCY}>
-        <EuiSelect
-          fullWidth
-          data-test-subj="urgencySelect"
-          options={urgencyOptions}
-          value={urgency ?? undefined}
-          isLoading={isLoadingChoices}
-          disabled={isLoadingChoices}
-          hasNoInitialSelection
-          onChange={(e) => onChangeCb('urgency', e.target.value)}
-        />
-      </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
