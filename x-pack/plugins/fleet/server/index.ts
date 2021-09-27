@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
-import { PreconfiguredPackagesSchema, PreconfiguredAgentPoliciesSchema } from './types';
+import {
+  PreconfiguredPackagesSchema,
+  PreconfiguredAgentPoliciesSchema,
+  PreconfiguredOutputsSchema,
+} from './types';
 
 import { FleetPlugin } from './plugin';
 
@@ -38,7 +42,8 @@ export const config: PluginConfigDescriptor = {
     epm: true,
     agents: true,
   },
-  deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
+  deprecations: ({ deprecate, renameFromRoot, unused, unusedFromRoot }) => [
+    deprecate('enabled', '8.0.0'),
     // Fleet plugin was named ingestManager before
     renameFromRoot('xpack.ingestManager.enabled', 'xpack.fleet.enabled'),
     renameFromRoot('xpack.ingestManager.registryUrl', 'xpack.fleet.registryUrl'),
@@ -113,6 +118,7 @@ export const config: PluginConfigDescriptor = {
     }),
     packages: PreconfiguredPackagesSchema,
     agentPolicies: PreconfiguredAgentPoliciesSchema,
+    outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
   }),
 };

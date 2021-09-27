@@ -14,6 +14,7 @@ import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { renameKeys } from './../lib/rename_keys';
 import { FindOptions } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
 
 // config definition
 const querySchema = schema.object({
@@ -55,6 +56,10 @@ export const aggregateAlertRoute = (
       const rulesClient = context.alerting.getRulesClient();
 
       trackLegacyRouteUsage('aggregate', usageCounter);
+      trackLegacyTerminology(
+        [req.query.search, req.query.search_fields].filter(Boolean) as string[],
+        usageCounter
+      );
 
       const query = req.query;
       const renameMap = {

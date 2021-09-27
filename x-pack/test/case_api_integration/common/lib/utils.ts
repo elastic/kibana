@@ -47,6 +47,7 @@ import {
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
+  CaseResolveResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -1064,6 +1065,32 @@ export const getCase = async ({
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+export const resolveCase = async ({
+  supertest,
+  caseId,
+  includeComments = false,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  includeComments?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResolveResponse> => {
+  const { body: theResolvedCase } = await supertest
+    .get(
+      `${getSpaceUrlPrefix(
+        auth?.space
+      )}${CASES_URL}/${caseId}/resolve?includeComments=${includeComments}`
+    )
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return theResolvedCase;
 };
 
 export const findCases = async ({

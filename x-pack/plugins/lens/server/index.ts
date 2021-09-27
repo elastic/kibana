@@ -19,6 +19,7 @@ import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

@@ -135,7 +135,9 @@ export const CodeEditor: React.FC<Props> = ({
   const MonacoEditor: typeof ReactMonacoEditor = useMemo(() => {
     const isMockedComponent =
       typeof ReactMonacoEditor === 'function' && ReactMonacoEditor.name === 'JestMockEditor';
-    return isMockedComponent ? (ReactMonacoEditor as any)() : ReactMonacoEditor;
+    return isMockedComponent
+      ? (ReactMonacoEditor as unknown as () => typeof ReactMonacoEditor)()
+      : ReactMonacoEditor;
   }, []);
 
   const isReadOnly = options?.readOnly ?? false;
