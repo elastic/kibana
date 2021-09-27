@@ -65,6 +65,7 @@ import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
+import { removeOldAssets } from './epm/packages/cleanup';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -574,6 +575,11 @@ class PackagePolicyService {
           id,
           name: packagePolicy.name,
           success: true,
+        });
+        await removeOldAssets({
+          soClient,
+          pkgName: packageInfo.name,
+          currentVersion: packageInfo.version,
         });
       } catch (error) {
         result.push({
