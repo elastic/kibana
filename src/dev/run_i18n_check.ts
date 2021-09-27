@@ -125,20 +125,20 @@ run(
       const messages: Map<string, { message: string }> = new Map();
       await list.run({ messages, reporter });
 
-      reportTime(runStartTime, 'i18n', {
+      reportTime(runStartTime, 'total', {
         success: true,
       });
     } catch (error: Error | ErrorReporter) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
         error.errors.forEach((e: string | Error) => log.error(e));
-        reportTime(runStartTime, 'i18n', {
+        reportTime(runStartTime, 'error', {
           success: false,
         });
       } else {
         log.error('Unhandled exception!');
         log.error(error);
-        reportTime(runStartTime, 'i18n', {
+        reportTime(runStartTime, 'error', {
           success: false,
           error: error.message,
         });

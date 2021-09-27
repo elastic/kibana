@@ -240,7 +240,7 @@ exports.Cluster = class Cluster {
    * @return {undefined}
    */
   _exec(installPath, opts = {}) {
-    const { skipNativeRealmSetup = false, ...options } = opts;
+    const { skipNativeRealmSetup = false, reportTime, startTime, ...options } = opts;
 
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
@@ -325,6 +325,13 @@ exports.Cluster = class Cluster {
     this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
       lines.forEach((line) => {
+        if (line.message.includes('license mode is')) {
+          if (reportTime && startTime) {
+            reportTime(startTime, 'total', {
+              success: true,
+            });
+          }
+        }
         this._log.info(line.formattedMessage);
       });
     });
@@ -341,7 +348,16 @@ exports.Cluster = class Cluster {
 
       // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
       if (code > 0 && !(code === 143 || code === 130)) {
+        reportTime(startTime, 'abort', {
+          success: true,
+          error: code,
+        });
         throw createCliError(`ES exited with code ${code}`);
+      } else {
+        reportTime(startTime, 'error', {
+          success: false,
+          error: code,
+        });
       }
     });
   }

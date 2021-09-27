@@ -27,7 +27,7 @@ const log = new ToolingLog({
   writeTo: process.stdout,
 });
 
-let runStartTime = Date.now();
+const runStartTime = Date.now();
 const reportTime = getTimeReporter(log, 'check_published_api_changes');
 
 /*
@@ -257,8 +257,6 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
   await runBuildTypes();
   log.info('Types for api extractor has been built');
 
-  runStartTime = Date.now();
-
   const filteredFolders = folders.filter((folder) =>
     opts.filter.length ? folder.match(opts.filter) : true
   );
@@ -268,19 +266,19 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
   }
 
   if (results.includes(false)) {
-    reportTime(runStartTime, 'extract', {
+    reportTime(runStartTime, 'error', {
       success: false,
       ...opts,
     });
     process.exitCode = 1;
   } else {
-    reportTime(runStartTime, 'extract', {
+    reportTime(runStartTime, 'total', {
       success: true,
       ...opts,
     });
   }
 })().catch((e) => {
-  reportTime(runStartTime, 'extract', {
+  reportTime(runStartTime, 'error', {
     success: true,
     error: e.message,
   });

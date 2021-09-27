@@ -58,14 +58,14 @@ run(
 
     if (errors.length) {
       const combinedError = combineErrors(errors);
-      reportTime(runStartTime, 'hook', {
+      reportTime(runStartTime, 'error', {
         success: false,
         error: combinedError.message,
       });
       throw combinedError;
     }
 
-    reportTime(runStartTime, 'hook', {
+    reportTime(runStartTime, 'total', {
       success: true,
       fix: flags.fix,
     });
