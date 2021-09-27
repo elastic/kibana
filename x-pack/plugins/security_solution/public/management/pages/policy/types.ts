@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CoreStart } from 'kibana/public';
 import { ILicense } from '../../../../../licensing/common/types';
 import {
   AppLocation,
@@ -12,6 +13,7 @@ import {
   ProtectionFields,
   PolicyData,
   UIPolicyConfig,
+  MaybeImmutable,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
@@ -23,6 +25,17 @@ import {
 } from '../../../../../fleet/common';
 import { AsyncResourceState } from '../../state';
 import { TrustedAppsListData } from '../trusted_apps/state';
+import { ImmutableMiddlewareAPI } from '../../../common/store';
+import { AppAction } from '../../../common/store/actions';
+
+/**
+ * Function that runs Policy Details middleware
+ */
+export type MiddlewareRunner = (
+  coreStart: CoreStart,
+  store: ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>,
+  action: MaybeImmutable<AppAction>
+) => Promise<void>;
 
 /**
  * Policy list store state

@@ -20,6 +20,7 @@ yarn storybook --site expression_repeat_image
 yarn storybook --site expression_reveal_image
 yarn storybook --site expression_shape
 yarn storybook --site expression_tagcloud
+yarn storybook --site fleet
 yarn storybook --site infra
 yarn storybook --site security_solution
 yarn storybook --site ui_actions_enhanced
