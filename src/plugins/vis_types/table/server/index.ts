@@ -14,9 +14,6 @@ import { registerVisTypeTableUsageCollector } from './usage_collector';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('table_vis.enabled', 'vis_type_table.enabled'),
-  ],
 };
 
 export const plugin = () => ({
