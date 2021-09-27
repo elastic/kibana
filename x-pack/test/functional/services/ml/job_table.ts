@@ -634,9 +634,11 @@ export function MachineLearningJobTableProvider(
       }
 
       // Save custom URL
-      await testSubjects.click('mlJobAddCustomUrl');
-      const expectedIndex = existingCustomUrls.length;
-      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobAddCustomUrl');
+        const expectedIndex = existingCustomUrls.length;
+        await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+      });
 
       // Save the job
       await this.saveEditJobFlyoutChanges();
@@ -654,9 +656,11 @@ export function MachineLearningJobTableProvider(
       await customUrls.setCustomUrlOtherTypeUrl(customUrl.url);
 
       // Save custom URL
-      await testSubjects.click('mlJobAddCustomUrl');
-      const expectedIndex = existingCustomUrls.length;
-      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobAddCustomUrl');
+        const expectedIndex = existingCustomUrls.length;
+        await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+      });
 
       // Save the job
       await this.saveEditJobFlyoutChanges();
