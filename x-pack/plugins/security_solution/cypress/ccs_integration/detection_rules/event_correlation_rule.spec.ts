@@ -72,7 +72,6 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules', function () {
-  const expectedNumberOfRules = 1;
   const expectedNumberOfAlerts = '100 alerts';
 
   beforeEach('Reset signals index', function () {
@@ -80,30 +79,16 @@ describe('Detection rules', function () {
     createSignalsIndex();
   });
 
-  before('Prepare the index and the EQL rule', function () {
+  it('EQL rule on remote indices generates alerts', function () {
     esArchiverCCSLoad('run-parts');
     this.rule = getCCSEqlRule();
-  });
+    createEventCorrelationRule(this.rule);
 
-  after('Clean up the EQL rule and the index', function () {
-    esArchiverCCSUnload('run-parts');
-  });
-
-  it('EQL rule on remote indices generates alerts', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
-
-    createEventCorrelationRule(this.rule);
-
-    changeRowsPerPageTo100();
-
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
-
     filterByCustomRules();
     goToRuleDetails();
     waitForTheRuleToBeExecuted();
