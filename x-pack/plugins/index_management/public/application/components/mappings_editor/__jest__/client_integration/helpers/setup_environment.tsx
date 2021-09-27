@@ -15,11 +15,11 @@ import {
   docLinksServiceMock,
   uiSettingsServiceMock,
 } from '../../../../../../../../../../src/core/public/mocks';
+import { MAJOR_VERSION } from '../../../../../../../common';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
 
-const version = '8.0.0';
-export const kibanaVersion = new SemVer(version);
+export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
