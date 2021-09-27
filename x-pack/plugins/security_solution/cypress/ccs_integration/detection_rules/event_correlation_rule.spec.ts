@@ -56,7 +56,6 @@ import {
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
-import { createTimeline } from '../../tasks/api_calls/timelines';
 import { createEventCorrelationRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -79,15 +78,7 @@ describe('Detection rules', function () {
   before('Prepare the index and the EQL rule', function () {
     cleanKibana();
     esArchiverCCSLoad('run-parts');
-    createTimeline(getCCSEqlRule().timeline).then((response) => {
-      cy.wrap({
-        ...getCCSEqlRule(),
-        timeline: {
-          ...getCCSEqlRule().timeline,
-          id: response.body.data.persistTimeline.timeline.savedObjectId,
-        },
-      }).as('rule');
-    });
+    this.rule = getCCSEqlRule();
   });
 
   after('Clean up the EQL rule and the index', function () {
