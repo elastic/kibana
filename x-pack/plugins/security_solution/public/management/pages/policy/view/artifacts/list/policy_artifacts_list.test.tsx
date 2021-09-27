@@ -12,7 +12,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { fireEvent } from '@testing-library/dom';
-import { getListResponse } from '../../../test_utils';
+import { getMockListResponse } from '../../../test_utils';
 
 describe('Policy artifacts list', () => {
   let mockedContext: AppContextTestRender;
@@ -51,7 +51,7 @@ describe('Policy artifacts list', () => {
   });
 
   it('should artifacts list with data', async () => {
-    const artifactsResponse = getListResponse();
+    const artifactsResponse = getMockListResponse();
     const component = render({
       artifacts: artifactsResponse,
       defaultSelectedArtifactIds: [],
@@ -62,14 +62,14 @@ describe('Policy artifacts list', () => {
   });
 
   it('should select an artifact from list', async () => {
-    const artifactsResponse = getListResponse();
+    const artifactsResponse = getMockListResponse();
     const component = render({
       artifacts: artifactsResponse,
       defaultSelectedArtifactIds: [artifactsResponse.data[0].id],
       isListLoading: false,
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
     });
-    const tACardCheckbox = component.getByTestId(`${getListResponse().data[1].name}_checkbox`);
+    const tACardCheckbox = component.getByTestId(`${getMockListResponse().data[1].name}_checkbox`);
 
     await act(async () => {
       fireEvent.click(tACardCheckbox);

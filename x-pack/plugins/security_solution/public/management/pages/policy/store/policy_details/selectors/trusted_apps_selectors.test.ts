@@ -28,7 +28,7 @@ import {
   createFailedResourceState,
 } from '../../../../../state';
 import { MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH } from '../../../../../common/constants';
-import { getListResponse, getAPIError, getFakeCreateResponse } from '../../../test_utils';
+import { getMockListResponse, getAPIError, getMockCreateResponse } from '../../../test_utils';
 
 describe('policy trusted apps selectors', () => {
   let initialState: ImmutableObject<PolicyDetailsState>;
@@ -95,10 +95,10 @@ describe('policy trusted apps selectors', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableList: createLoadedResourceState(getListResponse()),
+          availableList: createLoadedResourceState(getMockListResponse()),
         },
       });
-      expect(availableList).toEqual(getListResponse());
+      expect(availableList).toEqual(getMockListResponse());
     });
   });
 
@@ -128,7 +128,7 @@ describe('policy trusted apps selectors', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableList: createLoadedResourceState(getListResponse()),
+          availableList: createLoadedResourceState(getMockListResponse()),
         },
       });
       expect(isLoading).toBeFalsy();
@@ -161,7 +161,7 @@ describe('policy trusted apps selectors', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          trustedAppsToUpdate: createLoadedResourceState([getFakeCreateResponse()]),
+          trustedAppsToUpdate: createLoadedResourceState([getMockCreateResponse()]),
         },
       });
       expect(isLoading).toBeFalsy();
@@ -194,7 +194,7 @@ describe('policy trusted apps selectors', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          trustedAppsToUpdate: createLoadedResourceState([getFakeCreateResponse()]),
+          trustedAppsToUpdate: createLoadedResourceState([getMockCreateResponse()]),
         },
       });
       expect(hasFailed).toBeFalsy();
@@ -237,7 +237,7 @@ describe('policy trusted apps selectors', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          trustedAppsToUpdate: createLoadedResourceState([getFakeCreateResponse()]),
+          trustedAppsToUpdate: createLoadedResourceState([getMockCreateResponse()]),
         },
       });
       expect(isLoaded).toBeTruthy();
@@ -280,10 +280,10 @@ describe('policy trusted apps selectors', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          trustedAppsToUpdate: createLoadedResourceState([getFakeCreateResponse()]),
+          trustedAppsToUpdate: createLoadedResourceState([getMockCreateResponse()]),
         },
       });
-      expect(isLoading).toEqual([getFakeCreateResponse()]);
+      expect(isLoading).toEqual([getMockCreateResponse()]);
     });
     it('when update artifacts has failed', () => {
       const isLoading = getUpdateArtifacts({
