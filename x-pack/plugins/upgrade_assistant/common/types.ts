@@ -33,7 +33,7 @@ export enum ReindexStatus {
   cancelled,
   // Used by the UI to differentiate if there was a failure retrieving
   // the status from the server API
-  error,
+  fetchFailed,
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';

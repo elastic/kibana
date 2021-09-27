@@ -101,7 +101,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
         ...reindexState,
         loadingState: LoadingState.Error,
         errorMessage: error.message.toString(),
-        status: ReindexStatus.error,
+        status: ReindexStatus.fetchFailed,
       });
       return;
     }

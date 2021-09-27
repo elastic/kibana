@@ -76,7 +76,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 }> = ({ closeFlyout, reindexState, startReindex, cancelReindex, renderGlobalCallouts }) => {
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
-  const hasError = status === ReindexStatus.error;
+  const hasFetchFailed = status === ReindexStatus.fetchFailed;
   const isCompleted = status === ReindexStatus.completed;
   const hasReindexingFailure = status === ReindexStatus.failed;
 
@@ -134,7 +134,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </Fragment>
         )}
-        {hasError && (
+        {hasFetchFailed && (
           <>
             <EuiSpacer />
             <EuiCallOut
@@ -192,7 +192,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {!hasError && !isCompleted && hasRequiredPrivileges && (
+          {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill

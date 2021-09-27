@@ -45,8 +45,8 @@ const i18nTexts = {
       defaultMessage: 'Reindex failed',
     }
   ),
-  reindexGetStatusFailedText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexGetStatusFailedText',
+  reindexFetchFailedText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.reindex.reindexFetchFailedText',
     {
       defaultMessage: 'Reindex status not available',
     }
@@ -125,14 +125,14 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case ReindexStatus.error:
+    case ReindexStatus.fetchFailed:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type="alert" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexGetStatusFailedText}</EuiText>
+            <EuiText size="s">{i18nTexts.reindexFetchFailedText}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
