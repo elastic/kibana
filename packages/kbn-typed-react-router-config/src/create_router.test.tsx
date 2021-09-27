@@ -34,6 +34,28 @@ describe('createRouter', () => {
           },
           children: [
             {
+              path: '/services/{serviceName}/errors',
+              element: <></>,
+              params: t.type({
+                path: t.type({
+                  serviceName: t.string,
+                }),
+              }),
+              children: [
+                {
+                  path: '/services/{serviceName}/errors/{groupId}',
+                  element: <></>,
+                  params: t.type({
+                    path: t.type({ groupId: t.string }),
+                  }),
+                },
+                {
+                  path: '/services/{serviceName}/errors',
+                  element: <></>,
+                },
+              ],
+            },
+            {
               path: '/services',
               element: <></>,
               params: t.type({
@@ -43,7 +65,7 @@ describe('createRouter', () => {
               }),
             },
             {
-              path: '/services',
+              path: '/services/{serviceName}',
               element: <></>,
               children: [
                 {
@@ -250,6 +272,28 @@ describe('createRouter', () => {
           rangeFrom: 'now-30m',
           rangeTo: 'now',
         },
+      });
+    });
+
+    it('matches deep routes', () => {
+      history.push('/services/opbeans-java/errors/foo?rangeFrom=now-15m&rangeTo=now');
+
+      const matchedRoutes = router.matchRoutes(
+        '/services/{serviceName}/errors/{groupId}',
+        history.location
+      );
+
+      expect(matchedRoutes.length).toEqual(4);
+
+      expect(matchedRoutes[matchedRoutes.length - 1].match).toEqual({
+        isExact: true,
+        params: {
+          path: {
+            groupId: 'foo',
+          },
+        },
+        path: '/services/:serviceName/errors/:groupId',
+        url: '/services/opbeans-java/errors/foo',
       });
     });
   });
