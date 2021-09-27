@@ -78,9 +78,12 @@ discover-app {
 }
 
 .dscHistogram {
-  display: flex;
   height: $euiSize * 8;
   padding: $euiSizeS $euiSizeS $euiSizeS $euiSizeS;
+}
+
+.dscHistogramTimeRange {
+  padding: 0 $euiSizeS 0 $euiSizeS;
 }
 
 .dscTable {

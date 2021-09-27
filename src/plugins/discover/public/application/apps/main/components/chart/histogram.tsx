@@ -93,8 +93,8 @@ export function DiscoverHistogram({
 
   const { timefilter } = services.data.query.timefilter;
 
-  const { from, to } = timefilter.getTime();
-  const dateFormat = uiSettings.get('dateFormat');
+  const { from, to } = timefilter.getAbsoluteTime();
+  const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
 
   const toMoment = useCallback(
     (datetime: moment.Moment | undefined) => {
@@ -179,52 +179,56 @@ export function DiscoverHistogram({
   const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
 
   return (
-    <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
-      <Chart size="100%">
-        <Settings
-          xDomain={xDomain}
-          onBrushEnd={onBrushEnd}
-          onElementClick={onElementClick(xInterval)}
-          tooltip={tooltipProps}
-          theme={chartTheme}
-          baseTheme={chartBaseTheme}
-          allowBrushingLastHistogramBucket={true}
-        />
-        <Axis
-          id="discover-histogram-left-axis"
-          position={Position.Left}
-          ticks={5}
-          integersOnly
-          tickFormat={(value) => xAxisFormatter.convert(value)}
-        />
-        <Axis
-          id="discover-histogram-bottom-axis"
-          position={Position.Bottom}
-          title={timeRangeText}
-          tickFormat={formatXValue}
-          ticks={10}
-        />
-        <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
-        <Endzones
-          isDarkMode={isDarkMode}
-          domainStart={domainStart}
-          domainEnd={domainEnd}
-          interval={xDomain.minInterval}
-          domainMin={xDomain.min}
-          domainMax={xDomain.max}
-        />
-        <HistogramBarSeries
-          id="discover-histogram"
-          minBarHeight={2}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={data}
-          timeZone={timeZone}
-          name={chartData.yAxisLabel}
-        />
-      </Chart>
-    </div>
+    <React.Fragment>
+      <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
+        <Chart size="100%">
+          <Settings
+            xDomain={xDomain}
+            onBrushEnd={onBrushEnd}
+            onElementClick={onElementClick(xInterval)}
+            tooltip={tooltipProps}
+            theme={chartTheme}
+            baseTheme={chartBaseTheme}
+            allowBrushingLastHistogramBucket={true}
+          />
+          <Axis
+            id="discover-histogram-left-axis"
+            position={Position.Left}
+            ticks={5}
+            integersOnly
+            tickFormat={(value) => xAxisFormatter.convert(value)}
+          />
+          <Axis
+            id="discover-histogram-bottom-axis"
+            position={Position.Bottom}
+            tickFormat={formatXValue}
+            ticks={10}
+          />
+          <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
+          <Endzones
+            isDarkMode={isDarkMode}
+            domainStart={domainStart}
+            domainEnd={domainEnd}
+            interval={xDomain.minInterval}
+            domainMin={xDomain.min}
+            domainMax={xDomain.max}
+          />
+          <HistogramBarSeries
+            id="discover-histogram"
+            minBarHeight={2}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            data={data}
+            timeZone={timeZone}
+            name={chartData.yAxisLabel}
+          />
+        </Chart>
+      </div>
+      <EuiText size="xs" className="dscHistogramTimeRange" textAlign="center">
+        {timeRangeText}
+      </EuiText>
+    </React.Fragment>
   );
 }
