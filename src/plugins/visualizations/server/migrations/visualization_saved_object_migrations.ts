@@ -1145,7 +1145,5 @@ export const visualizationSavedObjectTypeMigrations = {
     replaceIndexPatternReference,
     addDropLastBucketIntoTSVBModel
   ),
-  '7.15.0': (doc: SavedObjectUnsanitizedDoc) => doc,
-  '7.16.0': (doc: SavedObjectUnsanitizedDoc) => doc,
   '8.0.0': flow(removeMarkdownLessFromTSVB),
 };
