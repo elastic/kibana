@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { HEADER } from '../screens/osquery';
-
-import { INTEGRATIONS, openNavigationFlyout, navigateTo } from '../tasks/navigation';
+import { INTEGRATIONS, navigateTo } from '../tasks/navigation';
 import { addIntegration } from '../tasks/integrations';
 import { INTEGRATION_LINK } from '../screens/integrations';
 
