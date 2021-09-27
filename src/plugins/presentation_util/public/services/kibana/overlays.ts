@@ -16,10 +16,11 @@ export type OverlaysServiceFactory = KibanaPluginServiceFactory<
 >;
 export const overlaysServiceFactory: OverlaysServiceFactory = ({ coreStart }) => {
   const {
-    overlays: { openFlyout },
+    overlays: { openFlyout, openConfirm },
   } = coreStart;
 
   return {
     openFlyout,
+    openConfirm,
   };
 };

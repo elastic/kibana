@@ -11,7 +11,6 @@ import '../control_group.scss';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import { cloneDeep } from 'lodash';
 import {
   arrayMove,
   SortableContext,
