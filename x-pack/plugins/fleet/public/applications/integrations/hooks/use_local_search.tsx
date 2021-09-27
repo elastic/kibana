@@ -11,7 +11,7 @@ import { useEffect, useRef } from 'react';
 import type { PackageList } from '../../../types';
 
 export const searchIdField = 'id';
-export const fieldsToSearch = ['name', 'title'];
+export const fieldsToSearch = ['name', 'title', 'description'];
 
 export function useLocalSearch(packageList: PackageList) {
   const localSearchRef = useRef<LocalSearch | null>(null);
