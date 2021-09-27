@@ -148,7 +148,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     async assertFeatureImportancePopoverContent() {
-      // we have two different types of content depending on the nuzmber of features returned
+      // we have two different types of content depending on the number of features returned
       // by the analysis: decision path view with chart and JSON tabs or a plain JSON only view
       if (await testSubjects.exists('mlDFADecisionPathJSONViewer', { timeout: 1000 })) {
         const jsonContent = await testSubjects.getVisibleText('mlDFADecisionPathJSONViewer');
