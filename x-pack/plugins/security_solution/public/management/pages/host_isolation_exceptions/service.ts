@@ -53,7 +53,7 @@ export async function getHostIsolationExceptionItems({
   filter?: string;
 }): Promise<FoundExceptionListItemSchema> {
   await ensureHostIsolationExceptionsListExists(http);
-  const entries = (await http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+  const entries: FoundExceptionListItemSchema = await http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
     query: {
       list_id: [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID],
       namespace_type: ['agnostic'],
@@ -63,6 +63,6 @@ export async function getHostIsolationExceptionItems({
       sort_order: sortOrder,
       filter,
     },
-  })) as FoundExceptionListItemSchema;
+  });
   return entries;
 }
