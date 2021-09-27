@@ -255,7 +255,7 @@ image::management/connectors/images/exchange-register-app.png[Register client ap
 The next step is defigning API permissions for the registered application to be able to send emails. https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http#permissions[Documentation] for Microsoft Graph API.
 You can configure it on the Azure portal application page, Manage - API permissions:
 [role="screenshot"]
-image::management/connectors/images/exchange-api-permissions.png.png[MS Exchange API permissions]
+image::management/connectors/images/exchange-api-permissions.png[MS Exchange API permissions]
 
 The minimum requirenment is to add "Mail.Send" permission for Microsoft Graph and it will appear in the list with the status "Not granted for <Your Azure Active Directory>":
 [role="screenshot"]
@@ -268,6 +268,24 @@ image::management/connectors/images/exchange-grant-confirm.png[MS Exchange grant
 After confirming the grant, "Mail.Send" permission will be displayed as granted:
 [role="screenshot"]
 image::management/connectors/images/exchange-granted.png[MS Exchange grant confirmation]
+
+[float]
+[[exchange-client-secret]]
+===== Configure Microsoft Exchange Client secret
+To configure Client secret you should use Azure portal application Manage - Certificates & secrets:
+[role="screenshot"]
+image::management/connectors/images/exchange-secrets.png[MS Exchange secrets configuration]
+
+After adding a new client secret copy the value and put it to the proper field in Microsoft Exchange email connector.
+
+[float]
+[[exchange-client-secret]]
+===== Configure Microsoft Exchange Client ID and Tenant ID
+To find application Client ID you should use Azure portal application Overview page:
+[role="screenshot"]
+image::management/connectors/images/exchange-client-tenant.png[MS Exchange Client ID and Tenant ID configuration]
+
+Copy and paste this values to the proper fields in Microsoft Exchange email connector.
 
 The last step will use the following email connector configuration to send email from Microsoft Exchange:
 [source,text]
