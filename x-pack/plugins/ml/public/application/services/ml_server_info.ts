@@ -33,7 +33,7 @@ export async function loadMlServerInfo() {
     limits = resp.limits;
     cloudInfo.cloudId = resp.cloudId || null;
     cloudInfo.isCloud = resp.cloudId !== undefined;
-    cloudInfo.deploymentId = getCloudDeploymentId();
+    cloudInfo.deploymentId = !resp.cloudId ? null : extractDeploymentId(resp.cloudId);
     return { defaults, limits, cloudId: cloudInfo };
   } catch (error) {
     return { defaults, limits, cloudId: cloudInfo };
