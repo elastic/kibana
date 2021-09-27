@@ -76,9 +76,9 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 }> = ({ closeFlyout, reindexState, startReindex, cancelReindex, renderGlobalCallouts }) => {
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
-  const hasFetchFailed = status === ReindexStatus.fetchFailed;
   const isCompleted = status === ReindexStatus.completed;
-  const hasReindexingFailure = status === ReindexStatus.failed;
+  const hasFetchFailed = status === ReindexStatus.fetchFailed;
+  const hasReindexingFailed = status === ReindexStatus.failed;
 
   const onStartReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
@@ -140,10 +140,10 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             <EuiCallOut
               color="danger"
               iconType="alert"
-              data-test-subj="getStatusErrorCallout"
+              data-test-subj="fetchFailedCallout"
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.errorCalloutTitle"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.fetchFailedCalloutTitle"
                   defaultMessage="Reindex status not available"
                 />
               }
@@ -152,16 +152,16 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             </EuiCallOut>
           </>
         )}
-        {hasReindexingFailure && (
+        {hasReindexingFailed && (
           <>
             <EuiSpacer />
             <EuiCallOut
               color="danger"
               iconType="alert"
-              data-test-subj="reindexErrorCallout"
+              data-test-subj="reindexingFailedCallout"
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.failureCalloutTitle"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingFailedCalloutTitle"
                   defaultMessage="Reindexing error"
                 />
               }
@@ -201,6 +201,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 onClick={onStartReindex}
                 isLoading={loading}
                 disabled={loading || !hasRequiredPrivileges}
+                data-test-subj="startReindexingButton"
               >
                 {buttonLabel(status)}
               </EuiButton>
