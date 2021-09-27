@@ -204,12 +204,11 @@ export const PRIORITY_LABEL = i18n.translate(
   }
 );
 
-export const APP_INFO_API_ERROR = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.unableToGetAppInfoMessage',
-  {
-    defaultMessage: 'Unable to get application information.',
-  }
-);
+export const API_INFO_ERROR = (status: number) =>
+  i18n.translate('xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiInfoError', {
+    values: { status },
+    defaultMessage: 'Received status: {status} when attempting to get application information',
+  });
 
 export const INSTALL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.install',
@@ -262,5 +261,12 @@ export const SN_INSTANCE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.snInstanceLabel',
   {
     defaultMessage: 'ServiceNow instance',
+  }
+);
+
+export const UNKNOWN = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.snInstanceLabel',
+  {
+    defaultMessage: 'UNKNOWN',
   }
 );

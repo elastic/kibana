@@ -9,7 +9,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ToastsApi } from 'kibana/public';
 import { getAppInfo } from './api';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
-import * as i18n from './translations';
 
 export interface UseGetChoicesProps {
   actionTypeId: string;
@@ -57,14 +56,10 @@ export const useGetAppInfo = ({
         if (!didCancel.current) {
           setIsLoading(false);
         }
-        toastNotifications.addDanger({
-          title: i18n.APP_INFO_API_ERROR,
-          text: error.message,
-        });
         throw error;
       }
     },
-    [actionTypeId, toastNotifications]
+    [actionTypeId]
   );
 
   useEffect(() => {

@@ -17,7 +17,18 @@ const content = i18n.translate(
   }
 );
 
-const ApplicationRequiredCalloutComponent: React.FC = () => {
+const ERROR_MESSAGE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout.errorMessage',
+  {
+    defaultMessage: 'Error message',
+  }
+);
+
+interface Props {
+  message: string | null;
+}
+
+const ApplicationRequiredCalloutComponent: React.FC<Props> = ({ message }) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -34,6 +45,11 @@ const ApplicationRequiredCalloutComponent: React.FC = () => {
         )}
       >
         <p>{content}</p>
+        {message && (
+          <p>
+            {ERROR_MESSAGE}: {message}
+          </p>
+        )}
         <SNStoreButton color="danger" />
       </EuiCallOut>
       <EuiSpacer size="m" />

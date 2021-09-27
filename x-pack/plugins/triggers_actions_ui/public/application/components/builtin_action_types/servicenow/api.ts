@@ -9,6 +9,7 @@ import { HttpSetup } from 'kibana/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
 import { BASE_ACTION_API_PATH } from '../../../constants';
+import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError } from './types';
 
 export async function getChoices({
@@ -63,7 +64,7 @@ export async function getAppInfo({
   });
 
   if (!response.ok) {
-    throw new Error(`Received status: ${response.status} when attempting to get app info`);
+    throw new Error(API_INFO_ERROR(response.status));
   }
 
   const data = await response.json();
