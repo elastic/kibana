@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { cloneDeep } from 'lodash';
+import 'jest-canvas-mock';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';

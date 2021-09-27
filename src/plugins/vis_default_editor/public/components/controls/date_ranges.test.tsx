@@ -55,6 +55,9 @@ describe('DateRangesParamEditor component', () => {
   });
 
   it('should validate range values with date math', function () {
+    const mockedConsoleWarn = jest.spyOn(console, 'warn'); // mocked console.warn to avoid console messages when running tests
+    mockedConsoleWarn.mockImplementation(() => {});
+
     const component = mountWithIntl(<DateRangesWrapped {...defaultProps} />);
 
     // should allow empty values
@@ -86,5 +89,7 @@ describe('DateRangesParamEditor component', () => {
 
     component.setProps({ value: [{ from: '5/5/2005+3d' }] });
     expect(setValidity).toHaveBeenNthCalledWith(10, false);
+
+    mockedConsoleWarn.mockRestore();
   });
 });

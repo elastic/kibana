@@ -604,6 +604,9 @@ describe('Lens App', () => {
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
+        const mockedConsoleDir = jest.spyOn(console, 'dir'); // mocked console.dir to avoid messages in the console when running tests
+        mockedConsoleDir.mockImplementation(() => {});
+
         const services = makeDefaultServices(sessionIdSubject);
         services.attributeService.wrapAttributes = jest
           .fn()
@@ -620,6 +623,9 @@ describe('Lens App', () => {
         });
         expect(props.redirectTo).not.toHaveBeenCalled();
         expect(getButton(instance).disableButton).toEqual(false);
+        // eslint-disable-next-line no-console
+        expect(console.dir).toHaveBeenCalledTimes(1);
+        mockedConsoleDir.mockRestore();
       });
 
       it('saves new doc and redirects to originating app', async () => {
