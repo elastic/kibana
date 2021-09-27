@@ -7,7 +7,7 @@
  */
 
 import uuid from 'uuid';
-import { Filter } from '@kbn/es-query';
+import { Filter, migrateFilter } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '../../../../core/types';
 
@@ -60,5 +60,11 @@ export const migrateToLatest = (filters: Filter[], version: string) => {
 };
 
 export const getAllMigrations = () => {
-  return {};
+  return {
+    '8.0.0': (filters: Filter[]) => {
+      return filters.map((filter) => {
+        return migrateFilter(filter) as Filter;
+      });
+    },
+  };
 };
