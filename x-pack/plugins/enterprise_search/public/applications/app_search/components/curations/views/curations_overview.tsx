@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { CurationsTable, EmptyState } from '../components';
 import { SuggestionsTable } from '../components/suggestions_table';
