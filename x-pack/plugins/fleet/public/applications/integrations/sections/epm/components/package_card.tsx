@@ -15,7 +15,7 @@ import { PackageIcon } from '../../../components';
 
 import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
 
-type PackageCardProps = PackageListItem;
+export type PackageCardProps = PackageListItem;
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
 // `a` tags use `euiLinkColor` which results in blueish Badge text

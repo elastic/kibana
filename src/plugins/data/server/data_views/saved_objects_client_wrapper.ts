@@ -10,6 +10,7 @@ import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
+  DataViewSavedObjectConflictError,
 } from '../../common/data_views';
 
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
@@ -23,7 +24,11 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
   }
 
   async get<T = unknown>(type: string, id: string) {
-    return await this.savedObjectClient.get<T>(type, id);
+    const response = await this.savedObjectClient.resolve<T>(type, id);
+    if (response.outcome === 'conflict') {
+      throw new DataViewSavedObjectConflictError(id);
+    }
+    return response.saved_object;
   }
   async update(
     type: string,
