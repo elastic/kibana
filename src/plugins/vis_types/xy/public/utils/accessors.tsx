@@ -11,11 +11,6 @@ import { BUCKET_TYPES } from '../../../../data/public';
 import { FakeParams } from '../../../../visualizations/public';
 import type { Aspect } from '../types';
 
-interface Dimension {
-  id?: Aspect['aggId'];
-  accessor?: Aspect['accessor'];
-}
-
 export const COMPLEX_X_ACCESSOR = '__customXAccessor__';
 export const COMPLEX_SPLIT_ACCESSOR = '__complexSplitAccessor__';
 const SHARD_DELAY = 'shard_delay';
@@ -87,6 +82,9 @@ export const getSplitSeriesAccessorFnMap = (
 export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
   columnId.toString().split('.')[0] === seriesColumnId;
 
-export const isValidSeriesForDimension = (seriesColumnId: string, { id, accessor }: Dimension) =>
-  (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
+export const isValidSeriesForDimension = (
+  seriesColumnId: string,
+  { aggId, accessor }: Partial<Aspect>
+) =>
+  (aggId === seriesColumnId || isPercentileIdEqualToSeriesId(aggId ?? '', seriesColumnId)) &&
   accessor !== null;
