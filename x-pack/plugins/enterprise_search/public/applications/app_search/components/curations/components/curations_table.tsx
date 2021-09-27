@@ -19,6 +19,7 @@ import { convertMetaToPagination, handlePageChange } from '../../../../shared/ta
 
 import { ENGINE_CURATION_PATH } from '../../../routes';
 import { FormattedDateTime } from '../../../utils/formatted_date_time';
+import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
 import { CurationsLogic } from '../curations_logic';
@@ -101,17 +102,29 @@ export const CurationsTable: React.FC = () => {
   ];
 
   return (
-    <EuiBasicTable
-      columns={columns}
-      items={curations}
-      responsive
-      hasActions
-      loading={dataLoading}
-      pagination={{
-        ...convertMetaToPagination(meta),
-        hidePerPageOptions: true,
-      }}
-      onChange={handlePageChange(onPaginate)}
-    />
+    <DataPanel
+      hasBorder
+      iconType="package"
+      title={
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.table.title', {
+            defaultMessage: 'Active curations',
+          })}
+        </h2>
+      }
+    >
+      <EuiBasicTable
+        columns={columns}
+        items={curations}
+        responsive
+        hasActions
+        loading={dataLoading}
+        pagination={{
+          ...convertMetaToPagination(meta),
+          hidePerPageOptions: true,
+        }}
+        onChange={handlePageChange(onPaginate)}
+      />
+    </DataPanel>
   );
 };

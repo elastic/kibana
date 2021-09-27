@@ -8,6 +8,11 @@
 import { Meta } from '../../../../../common/types';
 import { Result } from '../result/types';
 
+export interface CurationSuggestion {
+  query: string;
+  updated_at: string;
+  promoted: string[];
+}
 export interface Curation {
   id: string;
   last_updated: string;
