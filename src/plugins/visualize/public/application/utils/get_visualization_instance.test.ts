@@ -30,11 +30,17 @@ jest.mock('../../../../discover/public', () => ({
   })),
 }));
 
+let savedVisMock = {} as VisSavedObject;
+const mockGetSavedVis = jest.fn((services, opts) => savedVisMock);
+
+jest.mock('../../../../visualizations/public', () => ({
+  getSavedVisualization: jest.fn((services, opts) => mockGetSavedVis(services, opts)),
+}));
+
 describe('getVisualizationInstance', () => {
   const serializedVisMock = {
     type: 'area',
   };
-  let savedVisMock: VisSavedObject;
   let visMock: Vis<VisParams>;
   let mockServices: jest.Mocked<VisualizeServices>;
   let subj: BehaviorSubject<any>;
@@ -46,11 +52,8 @@ describe('getVisualizationInstance', () => {
       type: {},
       data: {},
     } as Vis<VisParams>;
-    savedVisMock = {} as VisSavedObject;
     // @ts-expect-error
     mockServices.data.search.showError.mockImplementation(() => {});
-    // @ts-expect-error
-    mockServices.savedVisualizations.get.mockImplementation(() => savedVisMock);
     // @ts-expect-error
     mockServices.visualizations.convertToSerializedVis.mockImplementation(() => serializedVisMock);
     // @ts-expect-error
@@ -59,6 +62,9 @@ describe('getVisualizationInstance', () => {
     mockServices.createVisEmbeddableFromObject.mockImplementation(() => ({
       getOutput$: jest.fn(() => subj.asObservable()),
     }));
+
+    savedVisMock = {} as VisSavedObject;
+    mockGetSavedVis.mockClear();
   });
 
   test('should create new instances of savedVis, vis and embeddableHandler', async () => {
@@ -71,7 +77,7 @@ describe('getVisualizationInstance', () => {
       opts
     );
 
-    expect(mockServices.savedVisualizations.get).toHaveBeenCalledWith(opts);
+    expect(mockGetSavedVis.mock.calls[0][1]).toBe(opts);
     expect(savedVisMock.searchSourceFields).toEqual({
       index: opts.indexPattern,
     });
@@ -98,7 +104,7 @@ describe('getVisualizationInstance', () => {
     visMock.type.setup = jest.fn(() => newVisObj);
     const { vis } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 
-    expect(mockServices.savedVisualizations.get).toHaveBeenCalledWith('saved_vis_id');
+    expect(mockGetSavedVis.mock.calls[0][1]).toBe('saved_vis_id');
     expect(savedVisMock.searchSourceFields).toBeUndefined();
     expect(visMock.type.setup).toHaveBeenCalledWith(visMock);
     expect(vis).toBe(newVisObj);
@@ -128,7 +134,6 @@ describe('getVisualizationInstanceInput', () => {
   const serializedVisMock = {
     type: 'pie',
   };
-  let savedVisMock: VisSavedObject;
   let visMock: Vis<VisParams>;
   let mockServices: jest.Mocked<VisualizeServices>;
   let subj: BehaviorSubject<any>;
@@ -141,8 +146,6 @@ describe('getVisualizationInstanceInput', () => {
       data: {},
     } as Vis<VisParams>;
     savedVisMock = {} as VisSavedObject;
-    // @ts-expect-error
-    mockServices.savedVisualizations.get.mockImplementation(() => savedVisMock);
     // @ts-expect-error
     mockServices.visualizations.createVis.mockImplementation(() => visMock);
     // @ts-expect-error
@@ -183,7 +186,7 @@ describe('getVisualizationInstanceInput', () => {
     const { savedVis, savedSearch, vis, embeddableHandler } =
       await getVisualizationInstanceFromInput(mockServices, input);
 
-    expect(mockServices.savedVisualizations.get).toHaveBeenCalled();
+    expect(mockGetSavedVis).toHaveBeenCalled();
     expect(mockServices.visualizations.createVis).toHaveBeenCalledWith(
       serializedVisMock.type,
       input.savedVis

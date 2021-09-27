@@ -22,7 +22,6 @@ import { createEmbeddableStateTransferMock } from '../../../../../embeddable/pub
 const mockDefaultEditorControllerDestroy = jest.fn();
 const mockEmbeddableHandlerDestroy = jest.fn();
 const mockEmbeddableHandlerRender = jest.fn();
-const mockSavedVisDestroy = jest.fn();
 const savedVisId = '9ca7aa90-b892-11e8-a6d9-e546fe2bba5f';
 const mockSavedVisInstance = {
   embeddableHandler: {
@@ -32,7 +31,6 @@ const mockSavedVisInstance = {
   savedVis: {
     id: savedVisId,
     title: 'Test Vis',
-    destroy: mockSavedVisDestroy,
   },
   vis: {
     type: {},
@@ -103,7 +101,6 @@ describe('useSavedVisInstance', () => {
     mockDefaultEditorControllerDestroy.mockClear();
     mockEmbeddableHandlerDestroy.mockClear();
     mockEmbeddableHandlerRender.mockClear();
-    mockSavedVisDestroy.mockClear();
     toastNotifications.addWarning.mockClear();
     mockGetVisualizationInstance.mockClear();
   });
@@ -153,7 +150,6 @@ describe('useSavedVisInstance', () => {
 
       expect(mockDefaultEditorControllerDestroy.mock.calls.length).toBe(1);
       expect(mockEmbeddableHandlerDestroy).not.toHaveBeenCalled();
-      expect(mockSavedVisDestroy.mock.calls.length).toBe(1);
     });
   });
 
@@ -236,7 +232,6 @@ describe('useSavedVisInstance', () => {
       unmount();
       expect(mockDefaultEditorControllerDestroy).not.toHaveBeenCalled();
       expect(mockEmbeddableHandlerDestroy.mock.calls.length).toBe(1);
-      expect(mockSavedVisDestroy.mock.calls.length).toBe(1);
     });
   });
 });
