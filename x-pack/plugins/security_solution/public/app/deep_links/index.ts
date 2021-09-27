@@ -22,7 +22,9 @@ import {
   ALERTS,
   RULES,
   EXCEPTIONS,
+  EXPLORE,
   HOSTS,
+  INVESTIGATE,
   NETWORK,
   TIMELINES,
   CASE,
@@ -116,7 +118,7 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
   },
   {
     id: SecurityPageName.explore,
-    title: 'Explore', // TODO: lang
+    title: EXPLORE,
     navLinkStatus: AppNavLinkStatus.hidden,
     keywords: [
       i18n.translate('xpack.securitySolution.search.explore', {
@@ -186,21 +188,21 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
         order: 9003,
         deepLinks: [
           {
-            id: SecurityPageName.dns,
+            id: SecurityPageName.networkDns,
             title: i18n.translate('xpack.securitySolution.search.network.dns', {
               defaultMessage: 'DNS',
             }),
             path: `${NETWORK_PATH}/dns`,
           },
           {
-            id: SecurityPageName.http,
+            id: SecurityPageName.networkHttp,
             title: i18n.translate('xpack.securitySolution.search.network.http', {
               defaultMessage: 'HTTP',
             }),
             path: `${NETWORK_PATH}/http`,
           },
           {
-            id: SecurityPageName.tls,
+            id: SecurityPageName.networkTls,
             title: i18n.translate('xpack.securitySolution.search.network.tls', {
               defaultMessage: 'TLS',
             }),
@@ -238,7 +240,7 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
   },
   {
     id: SecurityPageName.investigate,
-    title: 'Investigate', // TODO: lang
+    title: INVESTIGATE,
     navLinkStatus: AppNavLinkStatus.hidden,
     keywords: [
       i18n.translate('xpack.securitySolution.search.investigate', {
