@@ -35,7 +35,7 @@ export class ViewSavedSearchAction implements Action<ViewSearchContext> {
 
   getDisplayName(context: ActionExecutionContext<ViewSearchContext>): string {
     return i18n.translate('discover.savedSearchEmbeddable.action.viewSavedSearch.displayName', {
-      defaultMessage: 'View saved search',
+      defaultMessage: 'Open in Discover',
     });
   }
 
