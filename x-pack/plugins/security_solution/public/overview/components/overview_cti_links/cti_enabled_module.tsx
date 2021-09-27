@@ -21,20 +21,24 @@ export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props
     case -1:
       return null;
     case 0:
-      return <CtiNoEvents to={to} from={from} data-test-subj="cti-with-no-events" />;
+      return (
+        <div data-test-subj="cti-with-no-events">
+          <CtiNoEvents to={to} from={from} />
+        </div>
+      );
     default:
       return (
-        <CtiWithEvents
-          data-test-subj="cti-with-events"
-          eventCountsByDataset={eventCountsByDataset}
-          totalCount={totalCount}
-          to={to}
-          from={from}
-        />
+        <div data-test-subj="cti-with-events">
+          <CtiWithEvents
+            eventCountsByDataset={eventCountsByDataset}
+            totalCount={totalCount}
+            to={to}
+            from={from}
+          />
+        </div>
       );
   }
 };
 
-CtiEnabledModuleComponent.displayName = 'CtiEnabledModule';
-
 export const CtiEnabledModule = React.memo(CtiEnabledModuleComponent);
+CtiEnabledModule.displayName = 'CtiEnabledModule';
