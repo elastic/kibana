@@ -15,7 +15,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+    'common',
+  ]);
 
   describe('metric chart', function () {
     before(async function () {
@@ -149,9 +155,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Field =  machine.ram');
       await PageObjects.visEditor.selectField('machine.ram', 'metrics');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await PageObjects.common.sleep(300);
       await PageObjects.visEditor.clickGo();
-      const metricValue = await PageObjects.visChart.getMetric();
-      expect(percentileMachineRam).to.eql(metricValue);
+      await retry.try(async function tryingForTime() {
+        const metricValue = await PageObjects.visChart.getMetric();
+        expect(percentileMachineRam).to.eql(metricValue);
+      });
     });
 
     it('should show Percentile Ranks', async function () {
