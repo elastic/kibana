@@ -101,8 +101,8 @@ export class CiStatsReporter {
       totalMem: Os.totalmem(),
       committerHash: email
         ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
-        : '',
-      isElasticCommitter: email ? email.endsWith('@elastic.co') : false,
+        : undefined,
+      isElasticCommitter: email ? email.endsWith('@elastic.co') : undefined,
       kibanaUuid,
     };
 

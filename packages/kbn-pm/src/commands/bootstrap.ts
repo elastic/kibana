@@ -38,6 +38,7 @@ export const BootstrapCommand: ICommand = {
     const kibanaProjectPath = projects.get('kibana')?.path || '';
     const runOffline = options?.offline === true;
     const reporter = CiStatsReporter.fromEnv(log);
+    const timings = [];
 
     // Force install is set in case a flag is passed or
     // if the `.yarn-integrity` file is not found which
@@ -62,14 +63,23 @@ export const BootstrapCommand: ICommand = {
     // That way non bazel projects could depend on bazel projects but not the other way around
     // That is only intended during the migration process while non Bazel projects are not removed at all.
     //
+
     if (forceInstall) {
+      const forceInstallStartTime = Date.now();
       await runBazel(['run', '@nodejs//:yarn'], runOffline);
+      timings.push({
+        id: 'yarn install',
+        ms: Date.now() - forceInstallStartTime,
+      });
     }
 
     // build packages
     const packageStartTime = Date.now();
     await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
-    const packagesTotalTime = Date.now() - packageStartTime;
+    timings.push({
+      id: 'build packages',
+      ms: Date.now() - packageStartTime,
+    });
 
     // Install monorepo npm dependencies outside of the Bazel managed ones
     for (const batch of batchedNonBazelProjects) {
@@ -120,42 +130,22 @@ export const BootstrapCommand: ICommand = {
       { prefix: '[vscode]', debug: false }
     );
 
-    // Build typescript references
-    const typescriptStartTime = Date.now();
     await spawnStreaming(
       process.execPath,
-      ['scripts/build_ts_refs', '--ignore-type-failures', '--info'],
+      ['scripts/build_ts_refs', '--ignore-type-failures'],
       {
         cwd: kbn.getAbsolute(),
         env: process.env,
       },
       { prefix: '[ts refs]', debug: false }
     );
-    const typescriptTotalTime = Date.now() - typescriptStartTime;
 
     // send timings
     await reporter.timings({
       upstreamBranch: kbn.kibanaProject.json.branch,
       // prevent loading @kbn/utils by passing null
       kibanaUuid: kbn.getUuid() || null,
-      timings: [
-        {
-          group: 'bootstrap',
-          id: 'build packages',
-          ms: packagesTotalTime,
-          meta: {
-            success: true,
-          },
-        },
-        {
-          group: 'bootstrap',
-          id: 'typescript references',
-          ms: typescriptTotalTime,
-          meta: {
-            success: true,
-          },
-        },
-      ],
+      timings: timings.map((t) => ({ group: 'bootstrap', ...t })),
     });
   },
 };

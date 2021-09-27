@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { CiStatsReporter } from '../ci_stats_reporter';
 import { pickLevelFromFlags, ToolingLog, LogLevel } from '../tooling_log';
 import { createFlagError } from './fail';
 import { Flags, getFlags, FlagOptions } from './flags';
 import { ProcRunner, withProcRunner } from '../proc_runner';
-import { getHelp } from './help';
+import { getHelp, getScriptPath } from './help';
 import { CleanupTask, Cleanup } from './cleanup';
 
 export interface RunContext {
   log: ToolingLog;
   flags: Flags;
   procRunner: ProcRunner;
+  statsMeta: Map<string, string | boolean | number>;
   addCleanupTask: (task: CleanupTask) => void;
 }
 export type RunFn = (context: RunContext) => Promise<void> | void;
@@ -31,6 +33,7 @@ export interface RunOptions {
 }
 
 export async function run(fn: RunFn, options: RunOptions = {}) {
+  const startTime = Date.now();
   const flags = getFlags(process.argv.slice(2), options.flags, options.log?.defaultLevel);
   const helpText = getHelp({
     description: options.description,
@@ -46,12 +49,15 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
     writeTo: process.stdout,
   });
 
+  const reporter = CiStatsReporter.fromEnv(log);
+
   if (flags.help) {
     log.write(helpText);
     process.exit();
   }
 
   const cleanup = Cleanup.setup(log, helpText);
+  const statsMeta = new Map();
 
   if (!options.flags?.allowUnexpected && flags.unexpected.length) {
     const error = createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
@@ -65,6 +71,7 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
         log,
         flags,
         procRunner,
+        statsMeta,
         addCleanupTask: cleanup.add.bind(cleanup),
       });
     });
@@ -75,4 +82,18 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
   } finally {
     cleanup.execute();
   }
+
+  await reporter.timings({
+    timings: [
+      {
+        group: getScriptPath(),
+        id: 'total time',
+        ms: Date.now() - startTime,
+        meta: {
+          success: true,
+          ...Object.fromEntries(statsMeta),
+        },
+      },
+    ],
+  });
 }

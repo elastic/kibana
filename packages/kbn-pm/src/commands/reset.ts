@@ -27,8 +27,8 @@ export const ResetCommand: ICommand = {
   name: 'reset',
 
   reportTiming: {
-    group: 'bootstrap',
-    id: 'reset',
+    group: 'kbn reset',
+    id: 'overall time',
   },
 
   async run(projects) {

@@ -15,7 +15,7 @@ import dedent from 'dedent';
 import { Command } from './run_with_commands';
 import { getLogLevelFlagsHelp } from '../tooling_log/log_levels';
 
-const DEFAULT_GLOBAL_USAGE = `node ${Path.relative(process.cwd(), process.argv[1])}`;
+const DEFAULT_GLOBAL_USAGE = `node ${getScriptPath()}`;
 export const GLOBAL_FLAGS = dedent`
   --help             Show this message
 `;
@@ -56,6 +56,10 @@ export function getHelp({
 
   Options:
     ${indent(optionHelp, 4)}\n\n`;
+}
+
+export function getScriptPath(): string {
+  return Path.relative(process.cwd(), process.argv[1]);
 }
 
 export function getCommandLevelHelp({
