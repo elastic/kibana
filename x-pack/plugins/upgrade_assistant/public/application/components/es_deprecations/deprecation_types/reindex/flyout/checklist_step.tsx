@@ -134,43 +134,31 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </Fragment>
         )}
-        {hasFetchFailed && (
+        {(hasFetchFailed || hasReindexingFailed) && (
           <>
             <EuiSpacer />
             <EuiCallOut
               color="danger"
               iconType="alert"
-              data-test-subj="fetchFailedCallout"
+              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
               title={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.fetchFailedCalloutTitle"
-                  defaultMessage="Reindex status not available"
-                />
+                hasFetchFailed ? (
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.fetchFailedCalloutTitle"
+                    defaultMessage="Reindex status not available"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingFailedCalloutTitle"
+                    defaultMessage="Reindexing error"
+                  />
+                )
               }
             >
               {reindexState.errorMessage}
             </EuiCallOut>
           </>
         )}
-        {hasReindexingFailed && (
-          <>
-            <EuiSpacer />
-            <EuiCallOut
-              color="danger"
-              iconType="alert"
-              data-test-subj="reindexingFailedCallout"
-              title={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingFailedCalloutTitle"
-                  defaultMessage="Reindexing error"
-                />
-              }
-            >
-              {reindexState.errorMessage}
-            </EuiCallOut>
-          </>
-        )}
-
         <EuiSpacer />
         <EuiTitle size="xs">
           <h3>
