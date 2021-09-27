@@ -10,10 +10,12 @@ import supertest from 'supertest';
 import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const getMockJobParams = (obj: any): JobParamsDownloadCSV => ({
-  title: `Mock CSV Title`,
-  ...obj,
-});
+const getMockJobParams = (obj: object) => {
+  return {
+    title: `Mock CSV Title`,
+    ...obj,
+  } as JobParamsDownloadCSV;
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -30,6 +32,9 @@ export default function ({ getService }: FtrProviderContext) {
         .send(job);
     },
   };
+
+  const fromTime = '2019-06-20T00:00:00.000Z';
+  const toTime = '2019-06-25T00:00:00.000Z';
 
   describe('CSV Generation from SearchSource', () => {
     before(async () => {
@@ -127,8 +132,8 @@ export default function ({ getService }: FtrProviderContext) {
                     meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
                     range: {
                       order_date: {
-                        gte: '2019-03-23T03:06:17.785Z',
-                        lte: '2019-10-04T02:33:16.708Z',
+                        gte: fromTime,
+                        lte: toTime,
                         format: 'strict_date_optional_time',
                       },
                     },
@@ -151,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
         status: resStatus,
         text: resText,
         type: resType,
-      } = (await generateAPI.getCSVFromSearchSource(
+      } = await generateAPI.getCSVFromSearchSource(
         getMockJobParams({
           searchSource: {
             query: { query: '', language: 'kuery' },
@@ -168,8 +173,8 @@ export default function ({ getService }: FtrProviderContext) {
                     meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
                     range: {
                       order_date: {
-                        gte: '2019-03-23T03:06:17.785Z',
-                        lte: '2019-10-04T02:33:16.708Z',
+                        gte: fromTime,
+                        lte: toTime,
                         format: 'strict_date_optional_time',
                       },
                     },
@@ -181,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
           browserTimezone: 'UTC',
           title: 'testfooyu78yt90-',
         })
-      )) as supertest.Response;
+      );
       expect(resStatus).to.eql(200);
       expect(resType).to.eql('text/csv');
       expectSnapshot(resText).toMatch();
@@ -382,9 +387,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('validation', () => {
-      after(async () => {
-        await reportingAPI.deleteAllReports();
-      });
       it('Return a 404', async () => {
         const { body } = (await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
@@ -401,6 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql(expectedBody);
       });
 
+      // NOTE: this test requires having the test server run with `xpack.reporting.csv.maxSizeBytes=6000`
       it(`Searches large amount of data, stops at Max Size Reached`, async () => {
         await reportingAPI.initEcommerce();
 
@@ -415,16 +418,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
               sort: [{ order_date: 'desc' }],
-              fields: [
-                'order_date',
-                'category',
-                'currency',
-                'customer_id',
-                'order_id',
-                'day_of_week_i',
-                'products.created_on',
-                'sku',
-              ],
+              fields: ['*'],
               filter: [],
               parent: {
                 query: { language: 'kuery', query: '' },
@@ -435,8 +429,8 @@ export default function ({ getService }: FtrProviderContext) {
                       meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
                       range: {
                         order_date: {
-                          gte: '2019-03-23T03:06:17.785Z',
-                          lte: '2019-10-04T02:33:16.708Z',
+                          gte: '2019-03-23T00:00:00.000Z',
+                          lte: '2019-10-04T00:00:00.000Z',
                           format: 'strict_date_optional_time',
                         },
                       },
