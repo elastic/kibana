@@ -72,7 +72,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules', function () {
-  const expectedNumberOfAlerts = '100 alerts';
+  const expectedNumberOfAlerts = '1 alert';
 
   beforeEach('Reset signals index', function () {
     cleanKibana();
@@ -80,7 +80,7 @@ describe('Detection rules', function () {
   });
 
   it('EQL rule on remote indices generates alerts', function () {
-    esArchiverCCSLoad('run-parts');
+    esArchiverCCSLoad('linux_process');
     this.rule = getCCSEqlRule();
     createEventCorrelationRule(this.rule);
 
