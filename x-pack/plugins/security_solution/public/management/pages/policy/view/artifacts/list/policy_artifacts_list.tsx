@@ -15,7 +15,7 @@ import {
 import { Loader } from '../../../../../../common/components/loader';
 import { ArtifactEntryCardMinified } from '../../../../../components/artifact_entry_card';
 
-interface PolicyArtifactsListProps {
+export interface PolicyArtifactsListProps {
   artifacts: Immutable<GetTrustedListAppsResponse | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
   defaultSelectedArtifactIds: string[];
   selectedArtifactsUpdated: (ids: string[]) => void;
@@ -46,16 +46,23 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     const availableList = useMemo(() => {
       if (!artifacts || !artifacts.data.length) return null;
       const items = Array.from(artifacts.data) as TrustedApp[];
-      return items.map((artifact) => (
-        <ArtifactEntryCardMinified
-          key={artifact.id}
-          item={artifact}
-          isSelected={selectedArtifactIdsByKey[artifact.id] || false}
-          onToggleSelectedArtifact={(selected) =>
-            setSelectedArtifactIdsByKey({ ...selectedArtifactIdsByKey, [artifact.id]: selected })
-          }
-        />
-      ));
+      return (
+        <div data-test-subj="artifactsList">
+          {items.map((artifact) => (
+            <ArtifactEntryCardMinified
+              key={artifact.id}
+              item={artifact}
+              isSelected={selectedArtifactIdsByKey[artifact.id] || false}
+              onToggleSelectedArtifact={(selected) =>
+                setSelectedArtifactIdsByKey({
+                  ...selectedArtifactIdsByKey,
+                  [artifact.id]: selected,
+                })
+              }
+            />
+          ))}
+        </div>
+      );
     }, [artifacts, selectedArtifactIdsByKey]);
 
     return isListLoading ? <Loader size="xl" /> : <div>{availableList}</div>;
