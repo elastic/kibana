@@ -114,6 +114,12 @@ export interface Case extends BasicCase {
   type: CaseType;
 }
 
+export interface ResolvedCase {
+  case: Case;
+  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+  aliasTargetId?: string;
+}
+
 export interface QueryParams {
   page: number;
   perPage: number;
