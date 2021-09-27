@@ -8,14 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiText } from '@elastic/eui';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, AlertStatus } from '@kbn/rule-data-utils';
 import { useTheme } from '../../../hooks/use_theme';
 
-interface Props {
-  alertStatus: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
+interface AlertStatusIndicatorProps {
+  alertStatus: AlertStatus;
 }
 
-export function AlertStatusIndicator({ alertStatus }: Props) {
+export function AlertStatusIndicator({ alertStatus }: AlertStatusIndicatorProps) {
   const theme = useTheme();
 
   if (alertStatus === ALERT_STATUS_ACTIVE) {
