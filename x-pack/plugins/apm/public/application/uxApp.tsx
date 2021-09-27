@@ -34,6 +34,7 @@ import { redirectTo } from '../components/routing/redirect_to';
 import { useBreadcrumbs } from '../../../observability/public';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { InspectorContextProvider } from '../context/inspector/inspector_context';
 
 export const uxRoutes: APMRouteDefinition[] = [
   {
@@ -125,10 +126,12 @@ export function UXAppRoot({
         >
           <i18nCore.Context>
             <RouterProvider history={history} router={uxRouter}>
-              <UrlParamsProvider>
-                <UxApp />
-                <UXActionMenu appMountParameters={appMountParameters} />
-              </UrlParamsProvider>
+              <InspectorContextProvider>
+                <UrlParamsProvider>
+                  <UxApp />
+                  <UXActionMenu appMountParameters={appMountParameters} />
+                </UrlParamsProvider>
+              </InspectorContextProvider>
             </RouterProvider>
           </i18nCore.Context>
         </KibanaContextProvider>
