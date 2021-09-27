@@ -22,6 +22,7 @@ import * as i18n from './translations';
 import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
 import { ActionTypeConnector, ConnectorTypes } from '../../../common';
+import { DeprecatedCallout } from './deprecated_callout';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
@@ -53,10 +54,12 @@ const ConnectorsComponent: React.FC<Props> = ({
   selectedConnector,
   updateConnectorDisabled,
 }) => {
-  const connectorsName = useMemo(
-    () => connectors.find((c) => c.id === selectedConnector.id)?.name ?? 'none',
+  const connector = useMemo(
+    () => connectors.find((c) => c.id === selectedConnector.id),
     [connectors, selectedConnector.id]
   );
+
+  const connectorsName = connector?.name ?? 'none';
 
   const actionTypeName = useMemo(
     () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? 'Unknown',
@@ -107,6 +110,11 @@ const ConnectorsComponent: React.FC<Props> = ({
                 appendAddConnectorButton={true}
               />
             </EuiFlexItem>
+            {connector?.config.isLegacy && (
+              <EuiFlexItem grow={false}>
+                <DeprecatedCallout />
+              </EuiFlexItem>
+            )}
             {selectedConnector.type !== ConnectorTypes.none ? (
               <EuiFlexItem grow={false}>
                 <Mapping
