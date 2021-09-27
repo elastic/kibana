@@ -202,7 +202,7 @@ export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as con
 
 /**
  * Id for the notifications alerting type
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const LEGACY_NOTIFICATIONS_ID = `siem.notifications`;
 

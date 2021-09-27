@@ -17,7 +17,7 @@ import { legacyUpdateRuleActionsSavedObject } from './legacy_update_rule_actions
 import { LegacyRuleActions } from './legacy_types';
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 interface LegacyUpdateOrCreateRuleActionsSavedObject {
   ruleAlertId: string;
@@ -27,7 +27,7 @@ interface LegacyUpdateOrCreateRuleActionsSavedObject {
 }
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyUpdateOrCreateRuleActionsSavedObject = async ({
   savedObjectsClient,

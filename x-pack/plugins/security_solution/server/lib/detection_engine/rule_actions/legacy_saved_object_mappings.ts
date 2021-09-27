@@ -10,18 +10,12 @@ import { SavedObjectsType } from '../../../../../../../src/core/server';
 import { legacyRuleActionsSavedObjectMigration } from './legacy_migrations';
 
 /**
- * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
- * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
- * needed then it will be safe to remove this saved object and all its migrations.
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyRuleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
 
 /**
- * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
- * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
- * needed then it will be safe to remove this saved object and all its migrations.
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {

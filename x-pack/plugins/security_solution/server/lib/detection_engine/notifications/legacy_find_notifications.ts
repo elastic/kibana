@@ -11,7 +11,7 @@ import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 import { LegacyFindNotificationParams } from './legacy_types';
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyGetFilter = (filter: string | null | undefined) => {
   if (filter == null) {
@@ -22,7 +22,7 @@ export const legacyGetFilter = (filter: string | null | undefined) => {
 };
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyFindNotifications = async ({
   rulesClient,

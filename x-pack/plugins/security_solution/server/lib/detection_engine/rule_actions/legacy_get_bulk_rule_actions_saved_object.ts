@@ -17,7 +17,7 @@ import { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_o
 import { buildChunkedOrFilter } from '../signals/utils';
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 interface LegacyGetBulkRuleActionsSavedObject {
   alertIds: string[];
@@ -25,7 +25,7 @@ interface LegacyGetBulkRuleActionsSavedObject {
 }
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyGetBulkRuleActionsSavedObject = async ({
   alertIds,

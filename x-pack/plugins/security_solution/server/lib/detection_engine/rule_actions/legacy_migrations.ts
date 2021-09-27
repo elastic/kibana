@@ -15,10 +15,7 @@ import {
 import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 
 /**
- * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
- * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
- * needed then it will be safe to remove this saved object and all its migrations
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 function isEmptyObject(obj: {}) {
   for (const attr in obj) {
@@ -30,10 +27,7 @@ function isEmptyObject(obj: {}) {
 }
 
 /**
- * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
- * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
- * needed then it will be safe to remove this saved object and all its migrations
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyRuleActionsSavedObjectMigration = {
   '7.11.2': (

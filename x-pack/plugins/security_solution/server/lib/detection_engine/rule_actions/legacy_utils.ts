@@ -11,7 +11,7 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyGetThrottleOptions = (
   throttle: string | undefined | null = 'no_actions'
@@ -24,7 +24,7 @@ export const legacyGetThrottleOptions = (
 });
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyGetRuleActionsFromSavedObject = (
   savedObject: SavedObjectsUpdateResponse<LegacyIRuleActionsAttributesSavedObjectAttributes>

@@ -18,7 +18,7 @@ import { AlertAction } from '../../../../../alerting/common';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 interface LegacyUpdateRuleActionsSavedObject {
   ruleAlertId: string;
@@ -29,7 +29,7 @@ interface LegacyUpdateRuleActionsSavedObject {
 }
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyUpdateRuleActionsSavedObject = async ({
   ruleAlertId,

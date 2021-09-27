@@ -25,7 +25,7 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 jest.mock('./build_signals_query');
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 describe('legacyRules_notification_alert_type', () => {
   let payload: LegacyNotificationExecutorOptions;

@@ -19,19 +19,19 @@ import { Alert, AlertAction } from '../../../../../alerting/common';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyRuleNotificationAlertTypeParams extends AlertTypeParams {
   ruleAlertId: string;
 }
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export type LegacyRuleNotificationAlertType = Alert<LegacyRuleNotificationAlertTypeParams>;
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyFindNotificationParams {
   rulesClient: RulesClient;
@@ -44,14 +44,14 @@ export interface LegacyFindNotificationParams {
 }
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyClients {
   rulesClient: RulesClient;
 }
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyNotificationAlertParams {
   actions: AlertAction[];
@@ -62,12 +62,12 @@ export interface LegacyNotificationAlertParams {
 }
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export type CreateNotificationParams = LegacyNotificationAlertParams & LegacyClients;
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyReadNotificationParams {
   rulesClient: RulesClient;
@@ -76,7 +76,7 @@ export interface LegacyReadNotificationParams {
 }
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyIsAlertType = (
   partialAlert: PartialAlert<AlertTypeParams>
@@ -85,7 +85,7 @@ export const legacyIsAlertType = (
 };
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export type LegacyNotificationExecutorOptions = AlertExecutorOptions<
   LegacyRuleNotificationAlertTypeParams,
@@ -97,7 +97,7 @@ export type LegacyNotificationExecutorOptions = AlertExecutorOptions<
 /**
  * This returns true because by default a NotificationAlertTypeDefinition is an AlertType
  * since we are only increasing the strictness of params.
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyIsNotificationAlertExecutor = (
   obj: LegacyNotificationAlertTypeDefinition
@@ -112,7 +112,7 @@ export const legacyIsNotificationAlertExecutor = (
 };
 
 /**
- * @deprecated Once legacy notifications/"side car actions" goes away this should be removed
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export type LegacyNotificationAlertTypeDefinition = Omit<
   AlertType<
