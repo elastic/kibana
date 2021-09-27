@@ -879,6 +879,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         expect(await testSubjects.isSelected('policyWindowsEvent_dns')).to.be(wasSelected);
       });
+
+      it('should show trusted apps card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('fleetTrustedAppsCard');
+        await (await testSubjects.find('linkToTrustedApps')).click();
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
     });
   });
 }

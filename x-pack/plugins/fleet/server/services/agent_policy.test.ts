@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { AgentPolicy, NewAgentPolicy, Output } from '../types';
+import type { AgentPolicy, NewAgentPolicy } from '../types';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -46,24 +46,6 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
 
   return mock;
 }
-
-jest.mock('./output', () => {
-  return {
-    outputService: {
-      getDefaultOutputId: () => 'test-id',
-      get: (): Output => {
-        return {
-          id: 'test-id',
-          is_default: true,
-          name: 'default',
-          // @ts-ignore
-          type: 'elasticsearch',
-          hosts: ['http://127.0.0.1:9201'],
-        };
-      },
-    },
-  };
-});
 
 jest.mock('./agent_policy_update');
 jest.mock('./agents');
@@ -186,106 +168,17 @@ describe('agent policy', () => {
     });
   });
 
-  describe('getFullAgentPolicy', () => {
-    it('should return a policy without monitoring if monitoring is not enabled', async () => {
+  describe('bumpAllAgentPoliciesForOutput', () => {
+    it('should call agentPolicyUpdateEventHandler with updated event once', async () => {
       const soClient = getSavedObjectMock({
-        revision: 1,
-      });
-      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
-
-      expect(agentPolicy).toMatchObject({
-        id: 'agent-policy',
-        outputs: {
-          default: {
-            type: 'elasticsearch',
-            hosts: ['http://127.0.0.1:9201'],
-            ca_sha256: undefined,
-            api_key: undefined,
-          },
-        },
-        inputs: [],
-        revision: 1,
-        fleet: {
-          hosts: ['http://fleetserver:8220'],
-        },
-        agent: {
-          monitoring: {
-            enabled: false,
-            logs: false,
-            metrics: false,
-          },
-        },
-      });
-    });
-
-    it('should return a policy with monitoring if monitoring is enabled for logs', async () => {
-      const soClient = getSavedObjectMock({
-        namespace: 'default',
-        revision: 1,
-        monitoring_enabled: ['logs'],
-      });
-      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
-
-      expect(agentPolicy).toMatchObject({
-        id: 'agent-policy',
-        outputs: {
-          default: {
-            type: 'elasticsearch',
-            hosts: ['http://127.0.0.1:9201'],
-            ca_sha256: undefined,
-            api_key: undefined,
-          },
-        },
-        inputs: [],
-        revision: 1,
-        fleet: {
-          hosts: ['http://fleetserver:8220'],
-        },
-        agent: {
-          monitoring: {
-            namespace: 'default',
-            use_output: 'default',
-            enabled: true,
-            logs: true,
-            metrics: false,
-          },
-        },
-      });
-    });
-
-    it('should return a policy with monitoring if monitoring is enabled for metrics', async () => {
-      const soClient = getSavedObjectMock({
-        namespace: 'default',
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      expect(agentPolicy).toMatchObject({
-        id: 'agent-policy',
-        outputs: {
-          default: {
-            type: 'elasticsearch',
-            hosts: ['http://127.0.0.1:9201'],
-            ca_sha256: undefined,
-            api_key: undefined,
-          },
-        },
-        inputs: [],
-        revision: 1,
-        fleet: {
-          hosts: ['http://fleetserver:8220'],
-        },
-        agent: {
-          monitoring: {
-            namespace: 'default',
-            use_output: 'default',
-            enabled: true,
-            logs: false,
-            metrics: true,
-          },
-        },
-      });
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, 'output-id-123');
+
+      expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });
   });
 
