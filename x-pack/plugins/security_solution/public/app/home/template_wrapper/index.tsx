@@ -84,8 +84,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const { indicesExist } = useSourcererScope();
     const securityIndicesExist = indicesExist || metadataIndexExists;
 
-    /* StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop, which may account for any style discrepancies, such as the bottom border not extending the full width of the page, between EuiPageTemplate and the security solution pages.
-     */
+    // StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop, which may account for any style discrepancies, such as the bottom border not extending the full width of the page, between EuiPageTemplate and the security solution pages.
 
     return securityIndicesExist ? (
       <StyledKibanaPageTemplate
