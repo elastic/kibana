@@ -496,7 +496,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
       });
 
-      it('will return only the empty array for results if we have a list that includes all keyword', async () => {
+      it('will return only the empty array for results if we have a list that includes all keywords', async () => {
         await importFile(
           supertest,
           'keyword',
@@ -520,7 +520,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[]]);
+        expect(hits).to.eql([]);
       });
     });
 
