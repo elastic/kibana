@@ -15,12 +15,10 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
-import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { getAllowedTypes } from './../lib';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   mountParams: ManagementAppMountParams;
 }
 
@@ -32,11 +30,7 @@ const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle',
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
-export const mountManagementSection = async ({
-  core,
-  mountParams,
-  serviceRegistry,
-}: MountParams) => {
+export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
   const [coreStart, { data, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
     await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
@@ -81,7 +75,6 @@ export const mountManagementSection = async ({
                   taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
                   spacesApi={spacesApi}
                   dataStart={data}
-                  serviceRegistry={serviceRegistry}
                   actionRegistry={pluginStart.actions}
                   columnRegistry={pluginStart.columns}
                   allowedTypes={allowedObjectTypes}
