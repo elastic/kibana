@@ -10,7 +10,6 @@ import React, { useCallback } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
-import type { PersistedState } from '../../../../visualizations/public';
 import { ColorPicker } from '../../../../charts/public';
 
 function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
@@ -34,11 +33,10 @@ export const getColorPicker =
     setColor: (newColor: string | null, seriesKey: string | number) => void,
     getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
     paletteName: string,
-    uiState: PersistedState
+    overwriteColors: Record<string, string> = {}
   ): LegendColorPicker =>
   ({ anchor, color, onClose, onChange, seriesIdentifiers: [seriesIdentifier] }) => {
     const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
-    const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
     const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
     let keyDownEventOn = false;
 

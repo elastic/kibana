@@ -11,7 +11,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { VisualizationContainer } from '../../../visualizations/public';
-import type { PersistedState } from '../../../visualizations/public';
 import type { ExpressionRenderDefinition } from '../../../expressions/public';
 
 import type { XyVisType } from '../common';
@@ -55,7 +54,6 @@ export const xyVisRenderer: ExpressionRenderDefinition<VisTypeXyRenderConfig, Xy
             visData={visData}
             renderComplete={handlers.done}
             fireEvent={handlers.event}
-            uiState={handlers.uiState as PersistedState}
             syncColors={syncColors}
             updateVariables={handlers.updateVariables}
             variables={handlers.variables}

@@ -34,15 +34,19 @@ describe('getColorPicker', function () {
     emit: jest.fn(),
     setSilent: jest.fn(),
   } as unknown as PersistedState;
+  const colors = uiState.get('vis.colors', {});
 
   let wrapperProps: LegendColorPickerProps;
-  const Component: ComponentType<LegendColorPickerProps> = getColorPicker(
-    'left',
-    jest.fn(),
-    jest.fn().mockImplementation((seriesIdentifier) => seriesIdentifier.seriesKeys[0]),
-    'default',
-    uiState
-  );
+  const getComponent = (overwriteColors: Record<string, string> = colors) =>
+    getColorPicker(
+      'left',
+      jest.fn(),
+      jest.fn().mockImplementation((seriesIdentifier) => seriesIdentifier.seriesKeys[0]),
+      'default',
+      overwriteColors
+    );
+  const Component = getComponent();
+
   let wrapper: ReactWrapper<LegendColorPickerProps>;
 
   beforeAll(() => {
@@ -75,7 +79,8 @@ describe('getColorPicker', function () {
 
   it('renders the color picker with the colorIsOverwritten prop set to true if color is overwritten for the specific series', () => {
     uiState.set('vis.colors', { 'Logstash Airways': '#6092c0' });
-    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    const UpdatedComponent = getComponent(uiState.get('vis.colors'));
+    wrapper = mountWithIntl(<UpdatedComponent {...wrapperProps} />);
     expect(wrapper.find(ColorPicker).prop('colorIsOverwritten')).toBe(true);
   });
 
@@ -90,7 +95,7 @@ describe('getColorPicker', function () {
       jest.fn(),
       jest.fn(),
       'kibana_palette',
-      uiState
+      colors
     );
     wrapper = mountWithIntl(<LegacyPaletteComponent {...wrapperProps} />);
     expect(wrapper.find(ColorPicker).prop('useLegacyColors')).toBe(true);

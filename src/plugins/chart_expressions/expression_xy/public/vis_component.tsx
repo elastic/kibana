@@ -32,7 +32,6 @@ import {
   useActiveCursor,
 } from '../../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/public';
-import type { PersistedState } from '../../../visualizations/public';
 import {
   getTimeZone,
   renderAllSeries,
@@ -59,7 +58,6 @@ import { VisTypeXyConfig, XyVariables } from '../common/types';
 export interface VisComponentProps {
   visParams: VisTypeXyConfig;
   visData: Datatable;
-  uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   syncColors: boolean;
@@ -333,9 +331,15 @@ const VisComponent = (props: VisComponentProps) => {
         setColor,
         getSeriesName,
         visParams.palette.name,
-        props.uiState
+        variables?.uiState.vis?.colors
       ),
-    [getSeriesName, legendPosition, props.uiState, setColor, visParams.palette.name]
+    [
+      getSeriesName,
+      legendPosition,
+      setColor,
+      variables?.uiState.vis?.colors,
+      visParams.palette.name,
+    ]
   );
 
   const splitChartDimension = visParams.dimensions.splitColumn
