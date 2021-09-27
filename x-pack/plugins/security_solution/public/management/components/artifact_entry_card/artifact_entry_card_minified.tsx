@@ -114,6 +114,7 @@ export const ArtifactEntryCardMinified = memo(
 
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
             <EuiButtonEmpty
+              data-test-subj={getTestId('collapse')}
               color="primary"
               size="s"
               flush="left"
