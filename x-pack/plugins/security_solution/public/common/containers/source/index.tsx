@@ -245,6 +245,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
+        console.log('before');
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
             {
@@ -258,14 +259,23 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           )
           .subscribe({
             next: (response) => {
+              console.log('res1', response);
               // TODO: Steph/sourcerer needs better tests
               if (isCompleteResponse(response)) {
+                console.log('res2', response);
                 // TODO: Steph/sourcerer why
                 const newSelectedPatterns = selectedPatterns.filter((pattern) =>
                   patternList.includes(pattern)
                 );
                 const patternString = newSelectedPatterns.sort().join();
                 const signalIndexName = signalIndexNameSelector ?? newSignalsIndex;
+                console.log('response', {
+                  response,
+                  selectedDataViewId,
+                  selectedPatterns,
+                  patternList,
+                  newSelectedPatterns,
+                });
                 dispatch(
                   sourcererActions.setSource({
                     id: sourcererScopeName,
@@ -292,12 +302,16 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                 );
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
+                console.log('isErrorResponse', response);
                 setLoading(false);
                 addWarning(i18n.ERROR_BEAT_FIELDS);
                 searchSubscription$.current.unsubscribe();
+              } else {
+                console.log('uh oh');
               }
             },
             error: (msg) => {
+              console.log('errrr', msg);
               setLoading(false);
               addError(msg, {
                 title: i18n.FAIL_BEAT_FIELDS,
@@ -306,9 +320,27 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
             },
           });
       };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
+      console.log('current!!', {
+        searchSubscription$: searchSubscription$.current,
+        abortCtrl: abortCtrl.current,
+      });
+      if (!searchSubscription$.current.closed) {
+        try {
+          searchSubscription$.current.unsubscribe();
+        } catch (e) {
+          console.log('trycatcherr searchSubscription$', e);
+        }
+      }
+      try {
+        abortCtrl.current.abort();
+      } catch (e) {
+        console.log('trycatcherr abortCtrl', e);
+      }
+      try {
+        asyncSearch();
+      } catch (e) {
+        console.log('trycatcherr', e);
+      }
     },
     [
       addError,
@@ -329,6 +361,12 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       (dataViewId != null && dataViewId !== refDataViewId.current && selectedPatterns.length > 0) ||
       (selectedPatterns.length > 0 && refSelectedPatterns.current.length === 0)
     ) {
+      console.log(`call indexFieldsSearch ${sourcererScopeName}:`, {
+        dataViewId,
+        refSelectedPatterns: refSelectedPatterns.current,
+        refDataViewId: refDataViewId.current,
+        selectedPatterns,
+      });
       indexFieldsSearch(dataViewId);
     }
     refSelectedPatterns.current = selectedPatterns;
