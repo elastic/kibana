@@ -262,7 +262,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       },
       seriesParams: args.seriesParams.map((seriesParam) => {
         const matchedSeries = args.yDimension.filter(({ id, accessor }) =>
-          isValidSeriesForDimension(seriesParam.data.id)({ id, accessor })
+          isValidSeriesForDimension(seriesParam.data.id, { id, accessor })
         );
         return {
           ...seriesParam,

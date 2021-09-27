@@ -12,6 +12,11 @@ import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { ExpressionValueVisDimension, FakeParams } from '../../../../visualizations/public';
 import { Aspect } from '../types';
 
+interface Dimension {
+  id?: string | number;
+  accessor?: string | number | DatatableColumn | null;
+}
+
 export const COMPLEX_X_ACCESSOR = '__customXAccessor__';
 export const COMPLEX_SPLIT_ACCESSOR = '__complexSplitAccessor__';
 const SHARD_DELAY = 'shard_delay';
@@ -55,7 +60,7 @@ export const applyFormatterIfComplexField = (aspect: Aspect, value: unknown) =>
  * @param isComplex - forces to be functional/complex accessor
  */
 export const getComplexAccessor =
-  (fieldName: string) =>
+  (fieldName: string, shouldApplyFormatter: boolean = false) =>
   (aspect: Aspect, index?: number): AccessorFn | undefined => {
     // SHARD_DELAY is used only for dev purpose and need to handle separately.
     if (aspect.accessor === null || aspect.accessor === undefined || aspect.title === SHARD_DELAY) {
@@ -73,7 +78,7 @@ export const getComplexAccessor =
       // What about simple values, formatting them at this step is breaking the logic of intervals (xDomain).
       // If the value will be formatted on this step, it will be rendered without any respect to the passed bounds
       // and the chart will render not all the range, but only the part of range, which contains data.
-      return applyFormatterIfComplexField(aspect, v);
+      return (shouldApplyFormatter ? applyFormatter : applyFormatterIfComplexField)(aspect, v);
     };
     fn.fieldName = getFieldName(fieldName, index);
 
@@ -95,21 +100,13 @@ export const getSplitSeriesAccessorFnMap = (
   return m;
 };
 
-// For percentile aggregation id is comming in the form `%d.%d`, where first `%d` is `id` and the second - `percents`
+// For percentile aggregation id is coming in the form `%d.%d`, where first `%d` is `id` and the second - `percents`
 export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
   columnId.toString().split('.')[0] === seriesColumnId;
 
-export const isValidSeriesForDimension =
-  (seriesColumnId: string) =>
-  ({
-    id,
-    accessor,
-  }: {
-    id?: string | number;
-    accessor?: string | number | DatatableColumn | null;
-  }) =>
-    (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
-    accessor !== null;
+export const isValidSeriesForDimension = (seriesColumnId: string, { id, accessor }: Dimension) =>
+  (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
+  accessor !== null;
 
 export const getValueByAccessor = (
   data: Datatable['rows'][0],
