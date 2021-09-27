@@ -22,14 +22,14 @@ import {
   FilterManager,
   TimefilterContract,
   IndexPatternsContract,
-  DataPublicPluginStart, ISearchStart
-} from "src/plugins/data/public";
+  DataPublicPluginStart,
+  ISearchStart,
+} from 'src/plugins/data/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { pick } from 'lodash';
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
@@ -37,12 +37,8 @@ import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
-import {
-  SearchSourceDependencies,
-  searchSourceRequiredUiSettings,
-  SearchSourceService,
-} from '../../data/common';
 import { SavedObjectsStart } from '../../saved_objects/public';
+import { IndexPatternEditorStart } from '../../index_pattern_editor/target/types/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -71,6 +67,7 @@ export interface DiscoverServices {
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  indexPatternEditor: IndexPatternEditorStart;
   http: HttpStart;
   searchSourceService: ISearchStart;
   savedObjects: SavedObjectsStart;
@@ -115,6 +112,7 @@ export function buildServices(
     uiSettings: core.uiSettings,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    indexPatternEditor: plugins.indexPatternEditor,
     http: core.http,
     savedObjects: plugins.savedObjects,
     searchSourceService: data.search,

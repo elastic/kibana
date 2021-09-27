@@ -24,6 +24,8 @@ export interface SavedSearch {
   lastSavedTitle?: string;
   copyOnSave?: boolean;
   hideChart?: boolean;
+  createdAt?: Date;
+  lastAccessedAt?: Date;
 }
 export interface SavedSearchLoader {
   get: (id: string) => Promise<SavedSearch>;

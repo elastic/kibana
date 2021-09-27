@@ -87,7 +87,7 @@ export class DataView implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
   private runtimeFieldMap: Record<string, RuntimeField>;
-  private createdAt: string;
+  private createdAt?: string;
 
   /**
    * prevents errors when index pattern exists before indices
@@ -127,13 +127,20 @@ export class DataView implements IIndexPattern {
     this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
-    this.createdAt = spec.createdAt || moment.utc().toISOString();
+    this.createdAt = spec.createdAt;
   }
 
   /**
    * Get last saved saved object fields
    */
   getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
+
+  getCreatedAt = () => {
+    if (!this.createdAt) {
+      return 'Unknown time';
+    }
+    return moment(this.createdAt).format('MMM DD, YYYY HH:mm:ss');
+  };
 
   /**
    * Reset last saved saved object fields. used after saving

@@ -24,6 +24,7 @@ import { DiscoverView } from './discover_view';
 import { LastRecentlyAccessedView } from './last_recently_view';
 import { IndexPatternView } from './index_pattern_view';
 import { SectionNavigation } from './section_navigation';
+import { HomeIndexPatternManagement } from './home_index_pattern_management';
 
 export interface DiscoverMainProps {
   /**
@@ -44,6 +45,8 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [recentlyAccessed, setRecentlyAccessed] = useState<SavedSearch[]>([]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
+  const [indexPatternEditorOpen, setIndexPatternEditorOpen] = useState<boolean>(false);
+  const [reloadIndexPatterns, setReloadIndexPatterns] = useState<boolean>(true);
 
   useEffect(() => {
     async function loadSavedSearches() {
@@ -83,17 +86,22 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
   };
 
   useEffect(() => {
-    const lastRecentlyAccessedItems = core.chrome.recentlyAccessed.get();
-    const recentlyAccessedSavedSearches = [] as SavedSearch[];
-    lastRecentlyAccessedItems.forEach(async (item) => {
-      try {
-        const savedSearch = await services.getSavedSearchById(item.id);
-        recentlyAccessedSavedSearches.push(savedSearch);
-      } catch (e) {
-        // nothing to do
+    async function getRecentlyAccessed() {
+      const lastRecentlyAccessedItems = core.chrome.recentlyAccessed.get();
+      const recentlyAccessedSavedSearches = [] as SavedSearch[];
+      for (let i = 0; i < lastRecentlyAccessedItems.length; i++) {
+        const item = lastRecentlyAccessedItems[i];
+        try {
+          const savedSearch = await services.getSavedSearchById(item.id);
+          recentlyAccessedSavedSearches.push(savedSearch);
+        } catch (e) {
+          // nothing to do
+        }
       }
-    });
-    setRecentlyAccessed(recentlyAccessedSavedSearches);
+      setRecentlyAccessed(recentlyAccessedSavedSearches);
+    }
+
+    getRecentlyAccessed();
   }, [core, services]);
 
   useEffect(() => {
@@ -109,9 +117,12 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
         loadedIndexPatterns.push(indexPattern);
       }
       setIndexPatterns(loadedIndexPatterns);
+      setReloadIndexPatterns(false);
     }
-    loadIndexPatterns();
-  }, [services]);
+    if (reloadIndexPatterns) {
+      loadIndexPatterns();
+    }
+  }, [services, reloadIndexPatterns]);
 
   const lastRecentlyAccessedSection = () => {
     const recentlyAccessedDisplay: JSX.Element[] = [];
@@ -135,13 +146,26 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     );
   };
 
+  const toggleIndexPatternEditor = () => {
+    setIndexPatternEditorOpen(!indexPatternEditorOpen);
+  };
+
   const addNewIndexPattern = (
     <EuiCard
       icon={<EuiIcon size="xxl" type="plusInCircle" />}
       title={'Add New'}
       description=""
-      onClick={() => {}}
-    />
+      onClick={toggleIndexPatternEditor}
+    >
+      <HomeIndexPatternManagement
+        services={services}
+        editorOpen={indexPatternEditorOpen}
+        onSave={() => {
+          setIndexPatternEditorOpen(false);
+          setReloadIndexPatterns(true);
+        }}
+      />
+    </EuiCard>
   );
 
   const indexPatternsSection = () => {

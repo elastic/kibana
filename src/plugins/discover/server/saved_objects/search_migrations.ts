@@ -120,9 +120,23 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) =
   };
 };
 
+const migrateSavedSearchObject: SavedObjectMigrationFn<any, any> = (doc) => {
+  const createdAt = get(doc, 'createdAt');
+  const accessedAt = get(doc, 'accessedAt');
+  if (createdAt && accessedAt) {
+    return doc;
+  }
+  return {
+    ...doc,
+    created_at: null,
+    accessed_at: null,
+  };
+};
+
 export const searchMigrations = {
   '6.7.2': flow(migrateMatchAllQuery),
   '7.0.0': flow(setNewReferences),
   '7.4.0': flow(migrateSearchSortToNestedArray),
   '7.9.3': flow(migrateMatchAllQuery),
+  '7.16.0': flow(migrateSavedSearchObject),
 };

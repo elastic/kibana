@@ -47,6 +47,8 @@ export interface SavedObject {
   showInRecentlyAccessed: boolean;
   title: string;
   unresolvedIndexPatternReference?: SavedObjectReference;
+  createdAt?: Date;
+  lastAccessedAt?: Date;
 }
 
 export interface SavedObjectSaveOpts {

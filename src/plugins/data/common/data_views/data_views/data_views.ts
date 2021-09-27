@@ -412,7 +412,7 @@ export class DataViewsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
-      createdAt: moment().from(createdAt),
+      createdAt,
     };
   };
 
@@ -571,6 +571,7 @@ export class DataViewsService {
     }
 
     const body = indexPattern.getAsSavedObjectBody();
+    body.createdAt = moment(Date.now()).toISOString();
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
       DATA_VIEW_SAVED_OBJECT_TYPE,
       body,

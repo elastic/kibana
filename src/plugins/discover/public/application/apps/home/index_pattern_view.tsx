@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import './discover_view.scss';
 import { DataView } from 'src/plugins/data/common';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPatternData } from '../../helpers/use_index_pattern_data';
+import { DiscoverServices } from '../../../build_services';
 
 interface IndexPatternViewProps {
   indexPattern: DataView | undefined;
@@ -40,16 +41,25 @@ export function IndexPatternView(props: IndexPatternViewProps) {
       titleSize="s"
       title={indexPattern.title}
       description={descriptionText}
-      onClick={() => {}}
     >
-      <EuiFlexGrid>
-        <EuiFlexItem>
-          <EuiIcon size="s" type={'documents'} style={{ marginTop: '5px' }} />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ marginLeft: '-4px' }}>
-          <EuiText size="s">{`${nrOfDocuments} documents`}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGrid>
+      <React.Fragment>
+        <EuiFlexGrid>
+          <EuiFlexItem>
+            <EuiIcon size="s" type={'documents'} style={{ marginTop: '5px' }} />
+          </EuiFlexItem>
+          <EuiFlexItem style={{ marginLeft: '-4px' }}>
+            <EuiText size="s">{`${nrOfDocuments} documents`}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGrid>
+        <EuiFlexGrid>
+          <EuiFlexItem>
+            <EuiIcon size="s" type={'clock'} style={{ marginTop: '5px' }} />
+          </EuiFlexItem>
+          <EuiFlexItem style={{ marginLeft: '-4px' }}>
+            <EuiText size="s">{`created at: ` + indexPattern.getCreatedAt()}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGrid>
+      </React.Fragment>
     </EuiCard>
   );
 }

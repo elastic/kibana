@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import { SavedObject, SavedObjectsStart } from '../../../saved_objects/public';
 
 export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
@@ -20,6 +21,8 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
       grid: 'object',
       sort: 'keyword',
       version: 'integer',
+      createdAt: 'date',
+      accessedAt: 'date',
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
@@ -41,6 +44,8 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
           grid: 'object',
           sort: 'keyword',
           version: 'integer',
+          createdAt: 'date',
+          accessedAt: 'date',
         },
         searchSource: true,
         defaults: {
@@ -50,6 +55,8 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
           hits: 0,
           sort: [],
           version: 1,
+          createdAt: moment(Date.now()),
+          accessedAt: moment(Date.now()),
         },
       });
       this.showInRecentlyAccessed = true;
