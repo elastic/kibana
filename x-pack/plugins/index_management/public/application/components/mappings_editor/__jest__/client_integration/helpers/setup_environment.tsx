@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { SemVer } from 'semver';
+
 /* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
 import '../../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
 import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
@@ -15,6 +17,9 @@ import {
 } from '../../../../../../../../../../src/core/public/mocks';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
+
+const version = '8.0.0';
+export const kibanaVersion = new SemVer(version);
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -72,6 +77,9 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
+  kibanaVersion: {
+    get: () => kibanaVersion,
+  },
 });
 
 const defaultProps = {
