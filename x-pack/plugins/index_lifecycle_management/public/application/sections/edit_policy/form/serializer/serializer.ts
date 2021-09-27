@@ -43,100 +43,104 @@ export const createSerializer =
        */
       if (draft.phases.hot) {
         draft.phases.hot.min_age = draft.phases.hot.min_age ?? '0ms';
-      }
 
-      if (draft.phases.hot?.actions) {
-        const hotPhaseActions = draft.phases.hot.actions;
-
-        /**
-         * HOT PHASE ROLLOVER
-         */
-        if (isUsingRollover) {
-          if (_meta.hot?.isUsingDefaultRollover) {
-            hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
-          } else {
-            // Rollover may not exist if editing an existing policy with initially no rollover configured
-            if (!hotPhaseActions.rollover) {
-              hotPhaseActions.rollover = {};
-            }
-
-            // We are using user-defined, custom rollover settings.
-            if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
-              hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot?.customRollover.maxAgeUnit}`;
-            } else {
-              delete hotPhaseActions.rollover.max_age;
-            }
-
-            if (typeof updatedPolicy.phases.hot!.actions.rollover?.max_docs !== 'number') {
-              delete hotPhaseActions.rollover.max_docs;
-            }
-
-            if (updatedPolicy.phases.hot!.actions.rollover?.max_primary_shard_size) {
-              hotPhaseActions.rollover.max_primary_shard_size = `${hotPhaseActions.rollover.max_primary_shard_size}${_meta.hot?.customRollover.maxPrimaryShardSizeUnit}`;
-            } else {
-              delete hotPhaseActions.rollover.max_primary_shard_size;
-            }
-
-            if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
-              hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot?.customRollover.maxStorageSizeUnit}`;
-            } else {
-              delete hotPhaseActions.rollover.max_size;
-            }
-          }
+        if (draft.phases.hot?.actions) {
+          const hotPhaseActions = draft.phases.hot.actions;
 
           /**
-           * HOT PHASE FORCEMERGE
+           * HOT PHASE ROLLOVER
            */
-          if (!updatedPolicy.phases.hot!.actions?.forcemerge) {
+          if (isUsingRollover) {
+            if (_meta.hot?.isUsingDefaultRollover) {
+              hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
+            } else {
+              // Rollover may not exist if editing an existing policy with initially no rollover configured
+              if (!hotPhaseActions.rollover) {
+                hotPhaseActions.rollover = {};
+              }
+
+              // We are using user-defined, custom rollover settings.
+              if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
+                hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot?.customRollover.maxAgeUnit}`;
+              } else {
+                delete hotPhaseActions.rollover.max_age;
+              }
+
+              if (typeof updatedPolicy.phases.hot!.actions.rollover?.max_docs !== 'number') {
+                delete hotPhaseActions.rollover.max_docs;
+              }
+
+              if (updatedPolicy.phases.hot!.actions.rollover?.max_primary_shard_size) {
+                hotPhaseActions.rollover.max_primary_shard_size = `${hotPhaseActions.rollover.max_primary_shard_size}${_meta.hot?.customRollover.maxPrimaryShardSizeUnit}`;
+              } else {
+                delete hotPhaseActions.rollover.max_primary_shard_size;
+              }
+
+              if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
+                hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot?.customRollover.maxStorageSizeUnit}`;
+              } else {
+                delete hotPhaseActions.rollover.max_size;
+              }
+            }
+
+            /**
+             * HOT PHASE FORCEMERGE
+             */
+            if (!updatedPolicy.phases.hot!.actions?.forcemerge) {
+              delete hotPhaseActions.forcemerge;
+            } else if (_meta.hot?.bestCompression) {
+              hotPhaseActions.forcemerge!.index_codec = 'best_compression';
+            } else {
+              delete hotPhaseActions.forcemerge!.index_codec;
+            }
+
+            if (_meta.hot?.bestCompression && hotPhaseActions.forcemerge) {
+              hotPhaseActions.forcemerge.index_codec = 'best_compression';
+            }
+
+            /**
+             * HOT PHASE READ-ONLY
+             */
+            if (_meta.hot?.readonlyEnabled) {
+              hotPhaseActions.readonly = hotPhaseActions.readonly ?? {};
+            } else {
+              delete hotPhaseActions.readonly;
+            }
+            /**
+             * HOT PHASE SHRINK
+             */
+            if (!updatedPolicy.phases.hot?.actions?.shrink) {
+              delete hotPhaseActions.shrink;
+            } else if (_meta.hot.shrink.isUsingShardSize) {
+              delete hotPhaseActions.shrink!.number_of_shards;
+              hotPhaseActions.shrink!.max_primary_shard_size = `${hotPhaseActions.shrink?.max_primary_shard_size}${_meta.hot?.shrink.maxPrimaryShardSizeUnits}`;
+            } else {
+              delete hotPhaseActions.shrink!.max_primary_shard_size;
+            }
+          } else {
+            delete hotPhaseActions.rollover;
             delete hotPhaseActions.forcemerge;
-          } else if (_meta.hot?.bestCompression) {
-            hotPhaseActions.forcemerge!.index_codec = 'best_compression';
-          } else {
-            delete hotPhaseActions.forcemerge!.index_codec;
+            delete hotPhaseActions.readonly;
+            delete hotPhaseActions.shrink;
           }
-
-          if (_meta.hot?.bestCompression && hotPhaseActions.forcemerge) {
-            hotPhaseActions.forcemerge.index_codec = 'best_compression';
+          /**
+           * HOT PHASE SET PRIORITY
+           */
+          if (!updatedPolicy.phases.hot!.actions?.set_priority) {
+            delete hotPhaseActions.set_priority;
           }
 
           /**
-           * HOT PHASE READ-ONLY
+           * HOT PHASE SEARCHABLE SNAPSHOT
            */
-          if (_meta.hot?.readonlyEnabled) {
-            hotPhaseActions.readonly = hotPhaseActions.readonly ?? {};
+          if (updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
+            hotPhaseActions.searchable_snapshot = {
+              ...hotPhaseActions.searchable_snapshot,
+              snapshot_repository: _meta.searchableSnapshot.repository,
+            };
           } else {
-            delete hotPhaseActions.readonly;
+            delete hotPhaseActions.searchable_snapshot;
           }
-        } else {
-          delete hotPhaseActions.rollover;
-          delete hotPhaseActions.forcemerge;
-          delete hotPhaseActions.readonly;
-        }
-
-        /**
-         * HOT PHASE SET PRIORITY
-         */
-        if (!updatedPolicy.phases.hot!.actions?.set_priority) {
-          delete hotPhaseActions.set_priority;
-        }
-
-        /**
-         * HOT PHASE SHRINK
-         */
-        if (!updatedPolicy.phases.hot?.actions?.shrink) {
-          delete hotPhaseActions.shrink;
-        }
-
-        /**
-         * HOT PHASE SEARCHABLE SNAPSHOT
-         */
-        if (updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
-          hotPhaseActions.searchable_snapshot = {
-            ...hotPhaseActions.searchable_snapshot,
-            snapshot_repository: _meta.searchableSnapshot.repository,
-          };
-        } else {
-          delete hotPhaseActions.searchable_snapshot;
         }
       }
 
@@ -197,6 +201,11 @@ export const createSerializer =
          */
         if (!updatedPolicy.phases.warm?.actions?.shrink) {
           delete warmPhase.actions.shrink;
+        } else if (_meta.warm.shrink.isUsingShardSize) {
+          delete warmPhase.actions.shrink!.number_of_shards;
+          warmPhase.actions.shrink!.max_primary_shard_size = `${warmPhase.actions.shrink?.max_primary_shard_size}${_meta.warm?.shrink.maxPrimaryShardSizeUnits}`;
+        } else {
+          delete warmPhase.actions.shrink!.max_primary_shard_size;
         }
       } else {
         delete draft.phases.warm;
