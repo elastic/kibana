@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CiStatsReporter, ToolingLog } from "..";
+import { CiStatsReporter, ToolingLog } from '..';
 
-
-export const getTimeReporter = (log: ToolingLog, group: string,) => {
+export const getTimeReporter = (log: ToolingLog, group: string) => {
   const reporter = CiStatsReporter.fromEnv(log);
   return async (startTime: number, id: string, meta: Record<string, any>) => {
     await reporter.timings({

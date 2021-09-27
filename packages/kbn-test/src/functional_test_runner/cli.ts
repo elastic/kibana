@@ -28,11 +28,11 @@ const parseInstallDir = (flags: Flags) => {
 
 export function runFtrCli() {
   const runStartTime = Date.now();
-  const log = new ToolingLog({
+  const toolingLog = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
   });
-  const reportTime = getTimeReporter(log, 'functional_test_runner');
+  const reportTime = getTimeReporter(toolingLog, 'functional_test_runner');
   run(
     async ({ flags, log }) => {
       const functionalTestRunner = new FunctionalTestRunner(
