@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { RumOverview } from '../RumDashboard';
@@ -18,6 +18,7 @@ import { UserPercentile } from './UserPercentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 import { useHasRumData } from './hooks/useHasRumData';
+import { EmptyStateLoading } from './empty_state_loading';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'Dashboard',
@@ -29,59 +30,67 @@ export function RumHome() {
 
   const { isSmall, isXXL } = useBreakpoints();
 
-  const { data: rumHasData } = useHasRumData();
+  const { data: rumHasData, status } = useHasRumData();
 
   const envStyle = isSmall ? {} : { maxWidth: 500 };
 
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !rumHasData?.hasData
-    ? {
-        solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
-          defaultMessage: 'Observability',
-        }),
-        actions: {
-          beats: {
-            title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
-              defaultMessage: 'Add RUM data',
-            }),
-            description: i18n.translate(
-              'xpack.apm.ux.overview.beatsCard.description',
-              {
-                defaultMessage:
-                  'Use the RUM (JS) agent to collect user experience data.',
-              }
-            ),
-            href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
+    !rumHasData?.hasData
+      ? {
+          solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
+            defaultMessage: 'Observability',
+          }),
+          actions: {
+            beats: {
+              title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
+                defaultMessage: 'Add RUM data',
+              }),
+              description: i18n.translate(
+                'xpack.apm.ux.overview.beatsCard.description',
+                {
+                  defaultMessage:
+                    'Use the RUM (JS) agent to collect user experience data.',
+                }
+              ),
+              href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
+            },
           },
-        },
-        docsLink: core.docLinks.links.observability.guide,
-      }
-    : undefined;
+          docsLink: core.docLinks.links.observability.guide,
+        }
+      : undefined;
+
+  const isLoading = status === 'loading';
 
   return (
-    <CsmSharedContextProvider>
-      <PageTemplateComponent
-        noDataConfig={noDataConfig}
-        pageHeader={
-          isXXL
-            ? {
-                pageTitle: i18n.translate('xpack.apm.ux.overview', {
-                  defaultMessage: 'Dashboard',
-                }),
-                rightSideItems: [
-                  <DatePicker />,
-                  <div style={envStyle}>
-                    <UxEnvironmentFilter />
-                  </div>,
-                  <UserPercentile />,
-                  <WebApplicationSelect />,
-                ],
-              }
-            : { children: <PageHeader /> }
-        }
-      >
-        <RumOverview />
-      </PageTemplateComponent>
-    </CsmSharedContextProvider>
+    <Fragment>
+      <CsmSharedContextProvider>
+        <PageTemplateComponent
+          noDataConfig={isLoading ? undefined : noDataConfig}
+          pageHeader={
+            isXXL
+              ? {
+                  pageTitle: i18n.translate('xpack.apm.ux.overview', {
+                    defaultMessage: 'Dashboard',
+                  }),
+                  rightSideItems: [
+                    <DatePicker />,
+                    <div style={envStyle}>
+                      <UxEnvironmentFilter />
+                    </div>,
+                    <UserPercentile />,
+                    <WebApplicationSelect />,
+                  ],
+                }
+              : { children: <PageHeader /> }
+          }
+        >
+          {isLoading && <EmptyStateLoading />}
+          <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+            <RumOverview />
+          </div>
+        </PageTemplateComponent>
+      </CsmSharedContextProvider>
+    </Fragment>
   );
 }
 

@@ -134,10 +134,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const yAxisColumn = table.columns[yAxisColumnIndex];
   const valueColumn = table.columns.find((v) => v.id === args.valueAccessor);
 
-  const minMaxByColumnId = useMemo(() => findMinMaxByColumnId([args.valueAccessor!], table), [
-    args.valueAccessor,
-    table,
-  ]);
+  const minMaxByColumnId = useMemo(
+    () => findMinMaxByColumnId([args.valueAccessor!], table),
+    [args.valueAccessor, table]
+  );
 
   if (!xAxisColumn || !valueColumn) {
     // Chart is not ready

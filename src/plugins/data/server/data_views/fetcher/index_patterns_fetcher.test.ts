@@ -25,9 +25,9 @@ describe('Index Pattern Fetcher - server', () => {
   };
   const patternList = ['a', 'b', 'c'];
   beforeEach(() => {
-    esClient = ({
+    esClient = {
       count: jest.fn().mockResolvedValueOnce(emptyResponse).mockResolvedValue(response),
-    } as unknown) as ElasticsearchClient;
+    } as unknown as ElasticsearchClient;
     indexPatterns = new IndexPatternsFetcher(esClient);
   });
 
@@ -37,9 +37,9 @@ describe('Index Pattern Fetcher - server', () => {
   });
 
   it('Returns all patterns when all match indices', async () => {
-    esClient = ({
+    esClient = {
       count: jest.fn().mockResolvedValue(response),
-    } as unknown) as ElasticsearchClient;
+    } as unknown as ElasticsearchClient;
     indexPatterns = new IndexPatternsFetcher(esClient);
     const result = await indexPatterns.validatePatternListActive(patternList);
     expect(result).toEqual(patternList);
@@ -57,14 +57,14 @@ describe('Index Pattern Fetcher - server', () => {
       }
     }
 
-    esClient = ({
+    esClient = {
       count: jest
         .fn()
         .mockResolvedValueOnce(response)
         .mockRejectedValue(
           new ServerError('index_not_found_exception', 404, indexNotFoundException)
         ),
-    } as unknown) as ElasticsearchClient;
+    } as unknown as ElasticsearchClient;
     indexPatterns = new IndexPatternsFetcher(esClient);
     const result = await indexPatterns.validatePatternListActive(patternList);
     expect(result).toEqual([patternList[0]]);

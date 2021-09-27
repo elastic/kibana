@@ -45,7 +45,8 @@ export class IndexPatternManagementPlugin
       IndexPatternManagementStart,
       IndexPatternManagementSetupDependencies,
       IndexPatternManagementStartDependencies
-    > {
+    >
+{
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(

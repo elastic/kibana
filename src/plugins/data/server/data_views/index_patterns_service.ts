@@ -48,39 +48,41 @@ export interface IndexPatternsServiceStartDeps {
   logger: Logger;
 }
 
-export const indexPatternsServiceFactory = ({
-  logger,
-  uiSettings,
-  fieldFormats,
-}: {
-  logger: Logger;
-  uiSettings: UiSettingsServiceStart;
-  fieldFormats: FieldFormatsStart;
-}) => async (
-  savedObjectsClient: SavedObjectsClientContract,
-  elasticsearchClient: ElasticsearchClient
-) => {
-  const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-  const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+export const indexPatternsServiceFactory =
+  ({
+    logger,
+    uiSettings,
+    fieldFormats,
+  }: {
+    logger: Logger;
+    uiSettings: UiSettingsServiceStart;
+    fieldFormats: FieldFormatsStart;
+  }) =>
+  async (
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient
+  ) => {
+    const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+    const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
-  return new IndexPatternsCommonService({
-    uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
-    savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-    apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
-    fieldFormats: formats,
-    onError: (error) => {
-      logger.error(error);
-    },
-    onNotification: ({ title, text }) => {
-      logger.warn(`${title}${text ? ` : ${text}` : ''}`);
-    },
-    onUnsupportedTimePattern: ({ index, title }) => {
-      logger.warn(
-        `Currently querying all indices matching ${index}. ${title} should be migrated to a wildcard-based index pattern.`
-      );
-    },
-  });
-};
+    return new IndexPatternsCommonService({
+      uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+      savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
+      apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
+      fieldFormats: formats,
+      onError: (error) => {
+        logger.error(error);
+      },
+      onNotification: ({ title, text }) => {
+        logger.warn(`${title}${text ? ` : ${text}` : ''}`);
+      },
+      onUnsupportedTimePattern: ({ index, title }) => {
+        logger.warn(
+          `Currently querying all indices matching ${index}. ${title} should be migrated to a wildcard-based index pattern.`
+        );
+      },
+    });
+  };
 
 export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
   public setup(

@@ -71,11 +71,13 @@ export const fetchTransactionDurationRanges = async (
     );
   }
 
-  return (resp.body.aggregations
-    .logspace_ranges as estypes.AggregationsMultiBucketAggregate<{
-    from: number;
-    doc_count: number;
-  }>).buckets
+  return (
+    resp.body.aggregations
+      .logspace_ranges as estypes.AggregationsMultiBucketAggregate<{
+      from: number;
+      doc_count: number;
+    }>
+  ).buckets
     .map((d) => ({
       key: d.from,
       doc_count: d.doc_count,

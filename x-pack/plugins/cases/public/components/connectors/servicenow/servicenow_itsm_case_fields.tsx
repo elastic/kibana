@@ -30,8 +30,13 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ServiceNowITSMFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const init = useRef(true);
-  const { severity = null, urgency = null, impact = null, category = null, subcategory = null } =
-    fields ?? {};
+  const {
+    severity = null,
+    urgency = null,
+    impact = null,
+    category = null,
+    subcategory = null,
+  } = fields ?? {};
   const { http, notifications } = useKibana().services;
   const [choices, setChoices] = useState<Fields>(defaultFields);
 

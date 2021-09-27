@@ -10,9 +10,8 @@ import type { IndexPatternsContract, ISearchStart } from 'src/plugins/data/publi
 import type { ChartsPluginStart } from 'src/plugins/charts/public';
 import { createGetterSetter } from '../../../../kibana_utils/public';
 
-export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
-  'IndexPatterns'
-);
+export const [getIndexPatterns, setIndexPatterns] =
+  createGetterSetter<IndexPatternsContract>('IndexPatterns');
 
 export const [getDataSearch, setDataSearch] = createGetterSetter<ISearchStart>('Search');
 

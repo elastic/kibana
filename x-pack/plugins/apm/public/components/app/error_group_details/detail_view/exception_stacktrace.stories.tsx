@@ -585,8 +585,7 @@ JavaWithLongLines.args = {
           module: 'org.apache.tomcat.util.threads',
         },
       ],
-      type:
-        'org.springframework.http.converter.HttpMessageNotWritableException',
+      type: 'org.springframework.http.converter.HttpMessageNotWritableException',
       message:
         'Could not write JSON: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue(); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue() (through reference chain: co.elastic.apm.opbeans.repositories.Stats["numbers"]->com.sun.proxy.$Proxy128["revenue"])',
     },

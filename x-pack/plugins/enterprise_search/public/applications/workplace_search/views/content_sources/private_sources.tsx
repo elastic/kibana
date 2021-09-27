@@ -46,9 +46,8 @@ export const PrivateSources: React.FC = () => {
     return resetSourcesState;
   }, []);
 
-  const { dataLoading, contentSources, serviceTypes, privateContentSources } = useValues(
-    SourcesLogic
-  );
+  const { dataLoading, contentSources, serviceTypes, privateContentSources } =
+    useValues(SourcesLogic);
 
   const {
     account: { canCreatePrivateSources, groups },

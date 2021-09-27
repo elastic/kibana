@@ -8,10 +8,12 @@
 import React, { FunctionComponent, useEffect } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
-
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
+
 import { useAppContext } from '../../../../app_context';
+import { uiMetricService, UIM_RESET_LOGS_COUNTER_CLICK } from '../../../../lib/ui_metric';
 
 const i18nTexts = {
   calloutTitle: (warningsCount: number, previousCheck: string) => (
@@ -30,8 +32,7 @@ const i18nTexts = {
     />
   ),
   calloutBody: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.calloutBody', {
-    defaultMessage:
-      'Reset the counter after making changes and continue monitoring to verify that you are no longer using deprecated APIs.',
+    defaultMessage: `After making changes, reset the counter and continue monitoring to verify you're no longer using deprecated features.`,
   }),
   loadingError: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.loadingError', {
     defaultMessage: 'An error occurred while retrieving the count of deprecation logs',
@@ -61,9 +62,8 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const {
     services: { api },
   } = useAppContext();
-  const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
-    checkpoint
-  );
+  const { data, error, isLoading, resendRequest, isInitialRequest } =
+    api.getDeprecationLogsCount(checkpoint);
 
   const logsCount = data?.count || 0;
   const hasLogs = logsCount > 0;
@@ -73,6 +73,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
 
   const onResetClick = () => {
     const now = moment().toISOString();
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_RESET_LOGS_COUNTER_CLICK);
     setCheckpoint(now);
   };
 

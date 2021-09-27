@@ -29,32 +29,36 @@ interface ErrorWithData {
  * }
  * ```
  */
-export const handleErrors = <
-  P,
-  Q,
-  B,
-  Context extends RequestHandlerContext,
-  Method extends RouteMethod
->(
-  handler: RequestHandler<P, Q, B, Context, Method>
-): RequestHandler<P, Q, B, Context, Method> => async (context, request, response) => {
-  try {
-    return await handler(context, request, response);
-  } catch (error) {
-    if (error instanceof Error) {
-      const body: ErrorResponseBody = {
-        message: error.message,
-      };
+export const handleErrors =
+  <P, Q, B, Context extends RequestHandlerContext, Method extends RouteMethod>(
+    handler: RequestHandler<P, Q, B, Context, Method>
+  ): RequestHandler<P, Q, B, Context, Method> =>
+  async (context, request, response) => {
+    try {
+      return await handler(context, request, response);
+    } catch (error) {
+      if (error instanceof Error) {
+        const body: ErrorResponseBody = {
+          message: error.message,
+        };
 
-      if (typeof (error as ErrorWithData).data === 'object') {
-        body.attributes = (error as ErrorWithData).data;
-      }
+        if (typeof (error as ErrorWithData).data === 'object') {
+          body.attributes = (error as ErrorWithData).data;
+        }
 
-      const is404 =
-        (error as ErrorIndexPatternNotFound).is404 || (error as any)?.output?.statusCode === 404;
+        const is404 =
+          (error as ErrorIndexPatternNotFound).is404 || (error as any)?.output?.statusCode === 404;
 
-      if (is404) {
-        return response.notFound({
+        if (is404) {
+          return response.notFound({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body,
+          });
+        }
+
+        return response.badRequest({
           headers: {
             'content-type': 'application/json',
           },
@@ -62,14 +66,6 @@ export const handleErrors = <
         });
       }
 
-      return response.badRequest({
-        headers: {
-          'content-type': 'application/json',
-        },
-        body,
-      });
+      throw error;
     }
-
-    throw error;
-  }
-};
+  };

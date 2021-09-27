@@ -39,8 +39,10 @@ describe('ML snapshots APIs', () => {
 
   describe('POST /api/upgrade_assistant/ml_snapshots', () => {
     it('returns 200 status and in_progress status', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .upgradeJobSnapshot as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+          .upgradeJobSnapshot as jest.Mock
+      ).mockResolvedValue({
         body: {
           node: NODE_ID,
           completed: false,
@@ -71,8 +73,10 @@ describe('ML snapshots APIs', () => {
     });
 
     it('returns 200 status and complete status', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .upgradeJobSnapshot as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+          .upgradeJobSnapshot as jest.Mock
+      ).mockResolvedValue({
         body: {
           node: NODE_ID,
           completed: true,
@@ -103,8 +107,10 @@ describe('ML snapshots APIs', () => {
     });
 
     it('returns an error if it throws', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .upgradeJobSnapshot as jest.Mock).mockRejectedValue(new Error('scary error!'));
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+          .upgradeJobSnapshot as jest.Mock
+      ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'post',
@@ -125,8 +131,10 @@ describe('ML snapshots APIs', () => {
 
   describe('DELETE /api/upgrade_assistant/ml_snapshots/:jobId/:snapshotId', () => {
     it('returns 200 status', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .deleteModelSnapshot as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+          .deleteModelSnapshot as jest.Mock
+      ).mockResolvedValue({
         body: { acknowledged: true },
       });
 
@@ -148,8 +156,10 @@ describe('ML snapshots APIs', () => {
     });
 
     it('returns an error if it throws', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .deleteModelSnapshot as jest.Mock).mockRejectedValue(new Error('scary error!'));
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+          .deleteModelSnapshot as jest.Mock
+      ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'delete',
@@ -165,10 +175,34 @@ describe('ML snapshots APIs', () => {
     });
   });
 
+  describe('GET /api/upgrade_assistant/ml_upgrade_mode', () => {
+    it('Retrieves ml upgrade mode', async () => {
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.info as jest.Mock
+      ).mockResolvedValue({
+        body: {
+          upgrade_mode: true,
+        },
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/ml_upgrade_mode',
+      })(routeHandlerContextMock, createRequestMock({}), kibanaResponseFactory);
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        mlUpgradeModeEnabled: true,
+      });
+    });
+  });
+
   describe('GET /api/upgrade_assistant/ml_snapshots/:jobId/:snapshotId', () => {
     it('returns "idle" status if saved object does not exist', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .getModelSnapshots as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+          .getModelSnapshots as jest.Mock
+      ).mockResolvedValue({
         body: {
           count: 1,
           model_snapshots: [
@@ -212,8 +246,10 @@ describe('ML snapshots APIs', () => {
     });
 
     it('returns "in_progress" status if snapshot upgrade is in progress', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .getModelSnapshots as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+          .getModelSnapshots as jest.Mock
+      ).mockResolvedValue({
         body: {
           count: 1,
           model_snapshots: [
@@ -246,8 +282,9 @@ describe('ML snapshots APIs', () => {
         ],
       });
 
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.tasks
-        .list as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.tasks.list as jest.Mock
+      ).mockResolvedValue({
         body: {
           nodes: {
             [NODE_ID]: {
@@ -285,8 +322,10 @@ describe('ML snapshots APIs', () => {
     });
 
     it('returns "complete" status if snapshot upgrade has completed', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .getModelSnapshots as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+          .getModelSnapshots as jest.Mock
+      ).mockResolvedValue({
         body: {
           count: 1,
           model_snapshots: [
@@ -319,8 +358,9 @@ describe('ML snapshots APIs', () => {
         ],
       });
 
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.tasks
-        .list as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.tasks.list as jest.Mock
+      ).mockResolvedValue({
         body: {
           nodes: {
             [NODE_ID]: {
@@ -330,8 +370,10 @@ describe('ML snapshots APIs', () => {
         },
       });
 
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.migration
-        .deprecations as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.migration
+          .deprecations as jest.Mock
+      ).mockResolvedValue({
         body: {
           cluster_settings: [],
           ml_settings: [],

@@ -31,9 +31,8 @@ import { CredentialsList } from './credentials_list';
 import { CredentialsLogic } from './credentials_logic';
 
 export const Credentials: React.FC = () => {
-  const { fetchCredentials, fetchDetails, resetCredentials, showCredentialsForm } = useActions(
-    CredentialsLogic
-  );
+  const { fetchCredentials, fetchDetails, resetCredentials, showCredentialsForm } =
+    useActions(CredentialsLogic);
 
   const { meta, dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
 

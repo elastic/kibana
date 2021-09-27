@@ -49,12 +49,12 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       const spacesClient = spacesClientMock.create();
       spacesService.createSpacesClient.mockReturnValue(spacesClient);
       const typeRegistry = savedObjectsTypeRegistryMock.create();
-      typeRegistry.getAllTypes.mockReturnValue(([
+      typeRegistry.getAllTypes.mockReturnValue([
         // for test purposes we only need the names of the object types
         { name: 'foo' },
         { name: 'bar' },
         { name: 'space' },
-      ] as unknown) as SavedObjectsType[]);
+      ] as unknown as SavedObjectsType[]);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -187,14 +187,14 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         typeRegistry.isShareable.mockImplementation((type) => type === 'bar');
         // 'baz' is neither agnostic nor shareable, so it is isolated (namespaceType: 'single' or namespaceType: 'multiple-isolated')
         baseClient.bulkGet.mockResolvedValue({
-          saved_objects: ([
+          saved_objects: [
             { type: 'foo', id: '1', key: 'val' },
             { type: 'bar', id: '2', key: 'val' },
             { type: 'baz', id: '3', key: 'val' }, // this should be replaced with a 400 error
             { type: 'foo', id: '4', key: 'val' },
             { type: 'bar', id: '5', key: 'val' },
             { type: 'baz', id: '6', key: 'val' }, // this should not be replaced with a 400 error because the user did not search for it in '*' all spaces
-          ] as unknown) as SavedObject[],
+          ] as unknown as SavedObject[],
         });
 
         const objects = [

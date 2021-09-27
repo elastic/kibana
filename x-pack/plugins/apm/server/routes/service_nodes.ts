@@ -38,6 +38,5 @@ const serviceNodesRoute = createApmServerRoute({
   },
 });
 
-export const serviceNodeRouteRepository = createApmServerRouteRepository().add(
-  serviceNodesRoute
-);
+export const serviceNodeRouteRepository =
+  createApmServerRouteRepository().add(serviceNodesRoute);

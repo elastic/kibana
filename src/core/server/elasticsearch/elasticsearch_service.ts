@@ -38,7 +38,8 @@ export interface SetupDeps {
 
 /** @internal */
 export class ElasticsearchService
-  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart> {
+  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart>
+{
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private stop$ = new Subject();

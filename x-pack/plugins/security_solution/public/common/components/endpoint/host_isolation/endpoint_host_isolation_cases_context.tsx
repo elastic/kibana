@@ -12,9 +12,8 @@ import { CaseViewRefreshPropInterface } from '../../../../../../cases/common';
  * React Context that can hold the `Ref` that is created an passed to `CaseViewProps['refreshRef`]`, enabling
  * child components to trigger a refresh of a case.
  */
-export const CaseDetailsRefreshContext = React.createContext<MutableRefObject<CaseViewRefreshPropInterface> | null>(
-  null
-);
+export const CaseDetailsRefreshContext =
+  React.createContext<MutableRefObject<CaseViewRefreshPropInterface> | null>(null);
 
 /**
  * Returns the closes CaseDetails Refresh interface if any. Used in conjuction with `CaseDetailsRefreshContext` component

@@ -118,9 +118,11 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         testBed = await setupOverviewPage();
       });
 
-      const { component, exists } = testBed;
+      const { component, find } = testBed;
       component.update();
-      expect(exists('esRequestErrorIconTip')).toBe(true);
+      expect(find('loadingIssuesError').text()).toBe(
+        'Could not retrieve Elasticsearch deprecation issues.'
+      );
     });
 
     test('handles unauthorized error', async () => {
@@ -136,9 +138,11 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         testBed = await setupOverviewPage();
       });
 
-      const { component, exists } = testBed;
+      const { component, find } = testBed;
       component.update();
-      expect(exists('unauthorizedErrorIconTip')).toBe(true);
+      expect(find('loadingIssuesError').text()).toBe(
+        'You are not authorized to view Elasticsearch deprecation issues.'
+      );
     });
 
     test('handles partially upgraded error', async () => {
@@ -157,9 +161,11 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         testBed = await setupOverviewPage({ isReadOnlyMode: false });
       });
 
-      const { component, exists } = testBed;
+      const { component, find } = testBed;
       component.update();
-      expect(exists('partiallyUpgradedErrorIconTip')).toBe(true);
+      expect(find('loadingIssuesError').text()).toBe(
+        'Upgrade Kibana to the same version as your Elasticsearch cluster. One or more nodes in the cluster is running a different version than Kibana.'
+      );
     });
 
     test('handles upgrade error', async () => {
@@ -178,9 +184,9 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         testBed = await setupOverviewPage({ isReadOnlyMode: false });
       });
 
-      const { component, exists } = testBed;
+      const { component, find } = testBed;
       component.update();
-      expect(exists('upgradedErrorIconTip')).toBe(true);
+      expect(find('loadingIssuesError').text()).toBe('All Elasticsearch nodes have been upgraded.');
     });
   });
 });
