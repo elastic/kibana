@@ -4423,7 +4423,6 @@
     "savedObjectsManagement.importSummary.overwrittenOutcomeLabel": "已覆盖",
     "savedObjectsManagement.importSummary.warnings.defaultButtonLabel": "执行",
     "savedObjectsManagement.managementSectionLabel": "已保存对象",
-    "savedObjectsManagement.objects.savedObjectsDescription": "导入、导出和管理您的已保存搜索、可视化和仪表板。",
     "savedObjectsManagement.objects.savedObjectsTitle": "已保存对象",
     "savedObjectsManagement.objectsTable.deleteConfirmModal.sharedObjectsCallout.content": "共享对象已从其所在的各个工作区中移除。",
     "savedObjectsManagement.objectsTable.deleteConfirmModal.sharedObjectsCallout.title": "{sharedObjectsCount, plural, one {# 个已保存对象已共享} other {您的已保存对象有 # 个已共享}}",
