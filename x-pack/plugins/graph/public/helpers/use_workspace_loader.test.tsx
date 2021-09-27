@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { mount } from 'enzyme';
 import { useWorkspaceLoader, UseWorkspaceLoaderProps } from './use_workspace_loader';
 import { coreMock } from 'src/core/public/mocks';
 import { spacesPluginMock } from '../../../spaces/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Workspace } from '../types';
 import { SavedObjectsClientCommon } from 'src/plugins/data/common';
-import { act } from 'react-dom/test-utils';
+import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
@@ -41,20 +39,6 @@ const mockSavedObjectsClient = {
   find: jest.fn().mockResolvedValue({ title: 'test' }),
 } as unknown as SavedObjectsClientCommon;
 
-async function setup(props: UseWorkspaceLoaderProps) {
-  const returnVal = {};
-  function TestComponent() {
-    Object.assign(returnVal, useWorkspaceLoader(props));
-    return null;
-  }
-  await act(async () => {
-    const promise = Promise.resolve();
-    mount(<TestComponent />);
-    await act(() => promise);
-  });
-  return returnVal;
-}
-
 describe('use_workspace_loader', () => {
   const defaultProps = {
     workspaceRef: { current: {} as Workspace },
@@ -62,13 +46,16 @@ describe('use_workspace_loader', () => {
     savedObjectsClient: mockSavedObjectsClient,
     coreStart: coreMock.createStart(),
     spaces: spacesPluginMock.createStartContract(),
-  };
+  } as unknown as UseWorkspaceLoaderProps;
 
   it('should not redirect if outcome is exactMatch', async () => {
     await act(async () => {
-      await setup(defaultProps as unknown as UseWorkspaceLoaderProps);
+      renderHook(
+        () => useWorkspaceLoader(defaultProps),
+        defaultProps as RenderHookOptions<UseWorkspaceLoaderProps>
+      );
     });
-    expect(defaultProps.spaces.ui.redirectLegacyUrl).not.toHaveBeenCalled();
+    expect(defaultProps.spaces?.ui.redirectLegacyUrl).not.toHaveBeenCalled();
     expect(defaultProps.store.dispatch).toHaveBeenCalled();
   });
   it('should redirect if outcome is aliasMatch', async () => {
@@ -83,11 +70,15 @@ describe('use_workspace_loader', () => {
           alias_target_id: 'aliasTargetId',
         }),
       },
-    };
+    } as unknown as UseWorkspaceLoaderProps;
+
     await act(async () => {
-      await setup(props as unknown as UseWorkspaceLoaderProps);
+      renderHook(
+        () => useWorkspaceLoader(props),
+        props as RenderHookOptions<UseWorkspaceLoaderProps>
+      );
     });
-    expect(props.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
+    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith(
       '#/workspace/aliasTargetId?query={}',
       'Graph'
     );
