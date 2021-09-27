@@ -40,87 +40,89 @@ const create_7_14_0_configSchema = (connector?: ESCaseConnectorWithId) => ({
   },
 });
 
-describe('7.15.0 connector ID migration', () => {
-  it('does not create a reference when the connector ID is none', () => {
-    const configureSavedObject = create_7_14_0_configSchema(getNoneCaseConnector());
+describe('configuration migrations', () => {
+  describe('7.15.0 connector ID migration', () => {
+    it('does not create a reference when the connector ID is none', () => {
+      const configureSavedObject = create_7_14_0_configSchema(getNoneCaseConnector());
 
-    const migratedConnector = configureConnectorIdMigration(
-      configureSavedObject
-    ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
+      const migratedConnector = configureConnectorIdMigration(
+        configureSavedObject
+      ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
 
-    expect(migratedConnector.references.length).toBe(0);
-    expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
-  });
-
-  it('does not create a reference when the connector is undefined and defaults it to the none connector', () => {
-    const configureSavedObject = create_7_14_0_configSchema();
-
-    const migratedConnector = configureConnectorIdMigration(
-      configureSavedObject
-    ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
-
-    expect(migratedConnector.references.length).toBe(0);
-    expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
-      Object {
-        "fields": null,
-        "name": "none",
-        "type": ".none",
-      }
-    `);
-  });
-
-  it('creates a reference using the connector id', () => {
-    const configureSavedObject = create_7_14_0_configSchema({
-      id: '123',
-      fields: null,
-      name: 'connector',
-      type: ConnectorTypes.jira,
+      expect(migratedConnector.references.length).toBe(0);
+      expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
     });
 
-    const migratedConnector = configureConnectorIdMigration(
-      configureSavedObject
-    ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
+    it('does not create a reference when the connector is undefined and defaults it to the none connector', () => {
+      const configureSavedObject = create_7_14_0_configSchema();
 
-    expect(migratedConnector.references).toEqual([
-      { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: CONNECTOR_ID_REFERENCE_NAME },
-    ]);
-    expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
-  });
+      const migratedConnector = configureConnectorIdMigration(
+        configureSavedObject
+      ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
 
-  it('returns the other attributes and default connector when the connector is undefined', () => {
-    const configureSavedObject = create_7_14_0_configSchema();
+      expect(migratedConnector.references.length).toBe(0);
+      expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
+        Object {
+          "fields": null,
+          "name": "none",
+          "type": ".none",
+        }
+      `);
+    });
 
-    const migratedConnector = configureConnectorIdMigration(
-      configureSavedObject
-    ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
+    it('creates a reference using the connector id', () => {
+      const configureSavedObject = create_7_14_0_configSchema({
+        id: '123',
+        fields: null,
+        name: 'connector',
+        type: ConnectorTypes.jira,
+      });
 
-    expect(migratedConnector).toMatchInlineSnapshot(`
-      Object {
-        "attributes": Object {
-          "closure_type": "close-by-pushing",
-          "connector": Object {
-            "fields": null,
-            "name": "none",
-            "type": ".none",
+      const migratedConnector = configureConnectorIdMigration(
+        configureSavedObject
+      ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
+
+      expect(migratedConnector.references).toEqual([
+        { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: CONNECTOR_ID_REFERENCE_NAME },
+      ]);
+      expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
+    });
+
+    it('returns the other attributes and default connector when the connector is undefined', () => {
+      const configureSavedObject = create_7_14_0_configSchema();
+
+      const migratedConnector = configureConnectorIdMigration(
+        configureSavedObject
+      ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
+
+      expect(migratedConnector).toMatchInlineSnapshot(`
+        Object {
+          "attributes": Object {
+            "closure_type": "close-by-pushing",
+            "connector": Object {
+              "fields": null,
+              "name": "none",
+              "type": ".none",
+            },
+            "created_at": "2020-04-09T09:43:51.778Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "owner": "securitySolution",
+            "updated_at": "2020-04-09T09:43:51.778Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
           },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": "testemail@elastic.co",
-            "full_name": "elastic",
-            "username": "elastic",
-          },
-          "owner": "securitySolution",
-          "updated_at": "2020-04-09T09:43:51.778Z",
-          "updated_by": Object {
-            "email": "testemail@elastic.co",
-            "full_name": "elastic",
-            "username": "elastic",
-          },
-        },
-        "id": "1",
-        "references": Array [],
-        "type": "cases-configure",
-      }
-    `);
+          "id": "1",
+          "references": Array [],
+          "type": "cases-configure",
+        }
+      `);
+    });
   });
 });

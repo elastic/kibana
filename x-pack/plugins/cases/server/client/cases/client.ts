@@ -18,6 +18,7 @@ import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
 import {
   ICasePostRequest,
+  ICaseResolveResponse,
   ICaseResponse,
   ICasesFindRequest,
   ICasesFindResponse,
@@ -31,6 +32,7 @@ import { find } from './find';
 import {
   CasesByAlertIDParams,
   get,
+  resolve,
   getCasesByAlertID,
   GetParams,
   getReporters,
@@ -57,6 +59,11 @@ export interface CasesSubClient {
    * Retrieves a single case with the specified ID.
    */
   get(params: GetParams): Promise<ICaseResponse>;
+  /**
+   * @experimental
+   * Retrieves a single case resolving the specified ID.
+   */
+  resolve(params: GetParams): Promise<ICaseResolveResponse>;
   /**
    * Pushes a specific case to an external system.
    */
@@ -99,6 +106,7 @@ export const createCasesSubClient = (
     create: (data: CasePostRequest) => create(data, clientArgs),
     find: (params: CasesFindRequest) => find(params, clientArgs),
     get: (params: GetParams) => get(params, clientArgs),
+    resolve: (params: GetParams) => resolve(params, clientArgs),
     push: (params: PushParams) => push(params, clientArgs, casesClient, casesClientInternal),
     update: (cases: CasesPatchRequest) => update(cases, clientArgs, casesClientInternal),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),

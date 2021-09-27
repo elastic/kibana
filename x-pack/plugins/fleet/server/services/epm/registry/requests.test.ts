@@ -15,7 +15,7 @@ const { Response, FetchError } = jest.requireActual('node-fetch');
 const fetchMock = require('node-fetch') as jest.Mock;
 
 jest.setTimeout(120 * 1000);
-describe('setupIngestManager', () => {
+describe('Registry request', () => {
   beforeEach(async () => {});
 
   afterEach(async () => {
