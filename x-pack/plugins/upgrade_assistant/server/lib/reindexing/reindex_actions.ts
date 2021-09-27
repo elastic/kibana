@@ -92,8 +92,6 @@ export interface ReindexActions {
     withTypeName?: boolean
   ): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
 
-  // ----- Functions below are for enforcing locks around groups of indices like ML or Watcher
-
   /**
    * Atomically increments the number of reindex operations running for an index group.
    */
