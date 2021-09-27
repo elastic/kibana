@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiCard, EuiIcon } from '@elastic/eui';
+import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import './discover_view.scss';
 
@@ -14,11 +14,18 @@ interface LastRecentlyAccessedViewProps {
   title: string;
   indexPattern: string;
   onClick: () => void;
+  lastAccessedAt?: string;
 }
 
 export function LastRecentlyAccessedView(props: LastRecentlyAccessedViewProps) {
-  const { title, onClick } = props;
+  const { title, onClick, lastAccessedAt } = props;
 
+  const getLastAccessedAt = () => {
+    if (!lastAccessedAt) {
+      return 'unknown';
+    }
+    return lastAccessedAt;
+  }
   return (
     <EuiCard
       layout="horizontal"
@@ -26,6 +33,14 @@ export function LastRecentlyAccessedView(props: LastRecentlyAccessedViewProps) {
       titleSize="s"
       title={title}
       onClick={onClick}
-    />
+      style={{ backgroundColor: '#d6ede4' }}
+    >
+      <EuiFlexGrid>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={'timeslider'} size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem>{`accessed at: ${getLastAccessedAt()}`}</EuiFlexItem>
+      </EuiFlexGrid>
+    </EuiCard>
   );
 }

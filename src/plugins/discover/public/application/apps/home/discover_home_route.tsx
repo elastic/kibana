@@ -135,6 +135,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
             title={title}
             indexPattern={indexPattern?.title || ''}
             onClick={() => goToDiscover(id)}
+            lastAccessedAt={savedSearch.accessed_at}
           />
         </EuiFlexItem>
       );
