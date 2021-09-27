@@ -1,6 +1,6 @@
 # Cypress Tests
 
-The `osquery/cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
+The `fleet/cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
 
 ## Running the tests
 
