@@ -123,6 +123,11 @@ export class DiscoverPageObject extends FtrService {
     return await searchLink.isDisplayed();
   }
 
+  public async getSavedSearchTitle() {
+    const breadcrumb = await this.find.byCssSelector('[data-test-subj="breadcrumb last"]');
+    return await breadcrumb.getVisibleText();
+  }
+
   public async loadSavedSearch(searchName: string) {
     await this.openLoadSavedSearchPanel();
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
