@@ -7,11 +7,7 @@
 
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
-import {
-  MAX_TIME_COMPLETE_INSTALL,
-  ASSETS_SAVED_OBJECT_TYPE,
-  AUTO_UPDATE_PACKAGES,
-} from '../../../../common';
+import { MAX_TIME_COMPLETE_INSTALL, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
