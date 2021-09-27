@@ -446,6 +446,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const instanceIdA = 'a';
     const instanceIdB = 'b';
+    const instanceIdC = 'c';
     const execute = (metric: string, alertOnGroupDisappear: boolean = true, state?: any) =>
       executor({
         ...mockOptions,
@@ -483,15 +484,17 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
       expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
     });
-    test('does not send No Data alerts when groups disappear if alertOnGroupDisappear is disabled', async () => {
-      resultState.push(await execute('test.metric.1', false, resultState.pop()));
+    test('does not send individual No Data alerts when groups disappear if alertOnGroupDisappear is disabled', async () => {
+      resultState.push(await execute('test.metric.2', false, resultState.pop()));
       expect(mostRecentAction(instanceID)).toBe(undefined);
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
       expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
-      await execute('test.metric.3', false, resultState.pop());
-      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(mostRecentAction(instanceIdA)).toBe(undefined);
-      expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      expect(mostRecentAction(instanceIdC).id).toBe(FIRED_ACTIONS.id);
+      await execute('test.metric.1', false, resultState.pop());
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdC)).toBe(undefined);
     });
 
     describe('if alertOnNoData is disabled but alertOnGroupDisappear is NOT disabled', () => {
