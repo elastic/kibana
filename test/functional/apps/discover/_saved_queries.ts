@@ -58,9 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('saved query management component functionality', function () {
-      before(async function () {
-        await setUpQueriesWithFilters();
-      });
+      before(async () => await setUpQueriesWithFilters());
 
       it('should show the saved query management component when there are no saved queries', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
@@ -173,10 +171,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.switchQueryLanguage('lucene');
         expect(await queryBar.getQueryString()).to.eql('');
       });
+    });
+
+    describe('saved query selection', () => {
+      before(async () => await setUpQueriesWithFilters());
 
       it(`should unselect saved query when navigating to a 'new'`, async function () {
-        await setUpQueriesWithFilters();
-
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'test-unselect-saved-query',
           'mock',
