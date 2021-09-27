@@ -8,6 +8,7 @@
 import { kibanaResponseFactory } from 'src/core/server';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
+import { handleEsError } from '../shared_imports';
 
 jest.mock('../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
@@ -28,6 +29,7 @@ describe('deprecation logging API', () => {
     mockRouter = createMockRouter();
     routeDependencies = {
       router: mockRouter,
+      lib: { handleEsError },
     };
     registerDeprecationLoggingRoutes(routeDependencies);
   });
