@@ -17,7 +17,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
-import { ActionResult } from '../types';
+import { ActionResult, PreConfiguredAction } from '../types';
 import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
@@ -28,9 +28,10 @@ export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string
+  kibanaIndex: string,
+  preconfiguredActions: PreConfiguredAction[]
 ) {
-  registerActionsTelemetryTask(logger, taskManager, core, kibanaIndex);
+  registerActionsTelemetryTask(logger, taskManager, core, kibanaIndex, preconfiguredActions);
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -41,13 +42,14 @@ function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string
+  kibanaIndex: string,
+  preconfiguredActions: PreConfiguredAction[]
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
+      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, preconfiguredActions),
     },
   });
 }
@@ -65,7 +67,12 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
+export function telemetryTaskRunner(
+  logger: Logger,
+  core: CoreSetup,
+  kibanaIndex: string,
+  preconfiguredActions: PreConfiguredAction[]
+) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const getEsClient = () =>
@@ -90,7 +97,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCount(esClient, kibanaIndex),
+          getTotalCount(esClient, kibanaIndex, preconfiguredActions),
           getInUseTotalCount(esClient, actionsBulkGet, kibanaIndex),
         ])
           .then(([totalAggegations, totalInUse]) => {
