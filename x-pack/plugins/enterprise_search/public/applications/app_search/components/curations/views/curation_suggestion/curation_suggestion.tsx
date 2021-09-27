@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useDecodedParams } from '../../../../utils/encode_path_params';
 import { AppSearchPageTemplate } from '../../../layout';
 import { getCurationsBreadcrumbs } from '../../utils';
 
+import { CurationActionBar } from './curation_action_bar';
+import { CurationResultPanel } from './curation_result_panel';
+
 export const CurationSuggestion: React.FC = () => {
   const { query } = useDecodedParams();
+  const [showOrganicResults, setShowOrganicResults] = useState(false);
 
-  const queryTitle = query === '""' ? query : `"${query}"`;
+  const queryTitle = query === '""' ? query : `${query}`;
 
   return (
     <AppSearchPageTemplate
@@ -29,6 +34,47 @@ export const CurationSuggestion: React.FC = () => {
       pageHeader={{
         pageTitle: queryTitle,
       }}
-    />
+    >
+      <CurationActionBar
+        onAcceptClick={() => alert('Accepted')}
+        onRejectClick={() => alert('Rejected')}
+      />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h2>Current</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <CurationResultPanel variant="current" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h2>Suggested</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <CurationResultPanel variant="suggested" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiButton
+        color="text"
+        size="s"
+        fullWidth
+        iconType={showOrganicResults ? 'fold' : 'unfold'}
+        iconSide="right"
+        onClick={() => setShowOrganicResults(!showOrganicResults)}
+      >
+        {showOrganicResults ? 'Collapse' : 'Expand'} organic search results
+      </EuiButton>
+      <EuiSpacer />
+      {showOrganicResults && (
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiPanel hasBorder>A search result</EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </AppSearchPageTemplate>
   );
 };

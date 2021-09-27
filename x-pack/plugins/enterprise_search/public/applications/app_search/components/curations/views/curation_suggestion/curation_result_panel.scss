@@ -1,0 +1,14 @@
+.curationResultPanel {
+  padding: $euiSizeS;
+  border-radius: $euiSizeM;
+}
+
+.curationResultPanel--current {
+  border: 2px solid $euiColorPrimary;
+  background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+}
+
+.curationResultPanel--suggested {
+  border: 2px solid $euiColorSecondary;
+  background-color: tintOrShade($euiColorSuccess, 90%, 70%);
+}
