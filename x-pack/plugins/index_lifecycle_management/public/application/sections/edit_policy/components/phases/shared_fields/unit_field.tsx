@@ -7,8 +7,7 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import { EuiFilterSelectItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
-
-import { UseField } from '../../../../form';
+import { UseField } from '../../../form';
 
 interface Props {
   path: string;
