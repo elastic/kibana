@@ -67,6 +67,18 @@ describe('DataPanel', () => {
       );
     });
 
+    it('renders with icon using the "icon" prop rather than "iconType"', () => {
+      const wrapper = shallow(
+        <DataPanel
+          title={<h1>Flight 815</h1>}
+          icon={<span data-test-subj="MockIcon" />}
+          subtitle="Oceanic Airlines Flight 815 was a scheduled flight from Sydney, Australia to Los Angeles, California"
+        />
+      );
+
+      expect(wrapper.find('[data-test-subj="MockIcon"]')).toHaveLength(1);
+    });
+
     it('renders with a button', () => {
       const wrapper = shallow(
         <DataPanel

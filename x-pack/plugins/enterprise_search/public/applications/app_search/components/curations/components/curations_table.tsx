@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
@@ -19,6 +19,7 @@ import { convertMetaToPagination, handlePageChange } from '../../../../shared/ta
 
 import { ENGINE_CURATION_PATH } from '../../../routes';
 import { FormattedDateTime } from '../../../utils/formatted_date_time';
+import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
 import { CurationsLogic } from '../curations_logic';
@@ -101,17 +102,29 @@ export const CurationsTable: React.FC = () => {
   ];
 
   return (
-    <EuiBasicTable
-      columns={columns}
-      items={curations}
-      responsive
-      hasActions
-      loading={dataLoading}
-      pagination={{
-        ...convertMetaToPagination(meta),
-        hidePerPageOptions: true,
-      }}
-      onChange={handlePageChange(onPaginate)}
-    />
+    <DataPanel
+      hasBorder
+      iconType="package"
+      title={
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.table.title', {
+            defaultMessage: 'Active curations',
+          })}
+        </h2>
+      }
+    >
+      <EuiBasicTable
+        columns={columns}
+        items={curations}
+        responsive
+        hasActions
+        loading={dataLoading}
+        pagination={{
+          ...convertMetaToPagination(meta),
+          hidePerPageOptions: true,
+        }}
+        onChange={handlePageChange(onPaginate)}
+      />
+    </DataPanel>
   );
 };

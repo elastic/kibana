@@ -30,6 +30,7 @@ interface Props {
   titleSize?: EuiTitleProps['size'];
   subtitle?: React.ReactNode;
   iconType?: EuiIconProps['type'];
+  icon?: React.ReactElement;
   action?: React.ReactNode;
   responsive?: boolean;
   filled?: boolean;
@@ -42,6 +43,7 @@ export const DataPanel: React.FC<Props> = ({
   title,
   titleSize = 'xs',
   subtitle,
+  icon,
   iconType,
   action,
   responsive = false,
@@ -68,7 +70,8 @@ export const DataPanel: React.FC<Props> = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={responsive}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {iconType && (
+            {icon && icon}
+            {iconType && !icon && (
               <EuiFlexItem grow={false}>
                 <EuiIcon type={iconType} />
               </EuiFlexItem>
