@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 import {
   Extractor,
   IConfigFile,
@@ -21,7 +21,6 @@ import execa from 'execa';
 import fs from 'fs';
 import path from 'path';
 import getopts from 'getopts';
-import { getTimeReporter } from './report_time';
 
 const log = new ToolingLog({
   level: 'info',

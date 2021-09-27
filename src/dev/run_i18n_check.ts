@@ -9,7 +9,7 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
-import { createFailError, run, ToolingLog } from '@kbn/dev-utils';
+import { createFailError, run, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 import { ErrorReporter, I18nConfig } from './i18n';
 import {
   extractDefaultMessages,
@@ -18,8 +18,6 @@ import {
   checkConfigs,
   mergeConfigs,
 } from './i18n/tasks';
-
-import { getTimeReporter } from './report_time';
 
 const toolingLog = new ToolingLog({
   level: 'info',

@@ -9,7 +9,7 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner, ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { withProcRunner, ToolingLog, REPO_ROOT, getTimeReporter } from '@kbn/dev-utils';
 import dedent from 'dedent';
 
 import {
@@ -23,7 +23,6 @@ import {
 } from './lib';
 
 import { readConfigFile } from '../functional_test_runner/lib';
-import { getTimeReporter } from '../kbn';
 
 const makeSuccessMessage = (options: StartServerOptions) => {
   const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
@@ -174,7 +173,7 @@ export async function startServers({ reportTime, runStartTime, ...options }: Sta
     });
 
     if (runStartTime && reportTime) {
-      reportTime(runStartTime, 'functional_tests_server', {
+      reportTime(runStartTime, 'total', {
         success: true,
         ...options,
       });

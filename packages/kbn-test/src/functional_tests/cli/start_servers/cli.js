@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 import { startServers } from '../../tasks';
 import { runCli } from '../../lib';
 import { processOptions, displayHelp } from './args';
-import { getTimeReporter } from '../../../kbn';
 
 /**
  * Start servers
@@ -23,7 +22,7 @@ export async function startServersCli(defaultConfigPath) {
     level: 'info',
     writeTo: process.stdout,
   });
-  const reportTime = getTimeReporter(log);
+  const reportTime = getTimeReporter(log, 'functional_tests_server');
 
   await runCli(displayHelp, async (userOptions) => {
     const options = processOptions(userOptions, defaultConfigPath);

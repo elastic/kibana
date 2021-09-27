@@ -21,8 +21,7 @@ import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
 import { run } from 'jest';
 import { buildArgv } from 'jest-cli/build/cli';
-import { ToolingLog } from '@kbn/dev-utils';
-import { getTimeReporter } from '../kbn';
+import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 
 // yarn test:jest src/core/server/saved_objects
 // yarn test:jest src/core/public/core_system.test.ts
@@ -37,7 +36,7 @@ export function runJest(configName = 'jest.config.js') {
   });
 
   const runStartTime = Date.now();
-  const reportTime = getTimeReporter(log);
+  const reportTime = getTimeReporter(log, 'jest');
 
   let testFiles: string[] = [];
   let cwd: string | undefined;
@@ -82,7 +81,7 @@ export function runJest(configName = 'jest.config.js') {
 
   run().then(() => {
     // Success means that tests finished, doesn't mean they passed.
-    reportTime(runStartTime, 'jest', {
+    reportTime(runStartTime, 'total', {
       success: true,
       cwd,
       testFiles,

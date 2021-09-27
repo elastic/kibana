@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { run, combineErrors, createFlagError, ToolingLog } from '@kbn/dev-utils';
+import { run, combineErrors, createFlagError, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
-import { getTimeReporter } from './report_time';
 
 const runStartTime = Date.now();
 const log = new ToolingLog({
