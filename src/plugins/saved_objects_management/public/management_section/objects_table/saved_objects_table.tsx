@@ -37,7 +37,6 @@ import {
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
-  ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../../services';
@@ -58,7 +57,6 @@ interface ExportAllOption {
 
 export interface SavedObjectsTableProps {
   allowedTypes: string[];
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
@@ -540,7 +538,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.hideImportFlyout}
         done={this.finishImport}
         http={this.props.http}
-        serviceRegistry={this.props.serviceRegistry}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={newIndexPatternUrl}
         allowedTypes={this.props.allowedTypes}

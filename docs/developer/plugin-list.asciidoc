@@ -44,6 +44,10 @@ as uiSettings within the code.
 |Console provides the user with tools for storing and executing requests against Elasticsearch.
 
 
+|{kib-repo}blob/{branch}/src/plugins/custom_integrations/README.md[customIntegrations]
+|Register add-data cards
+
+
 |<<kibana-dashboard-plugin>>
 |- Registers the dashboard application.
 - Adds a dashboard embeddable that can be used in other applications.
@@ -297,7 +301,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Contains the timelion visualization and the timelion backend.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_timeseries[visTypeTimeseries]
+|{kib-repo}blob/{branch}/src/plugins/vis_types/timeseries[visTypeTimeseries]
 |WARNING: Missing README.
 
 

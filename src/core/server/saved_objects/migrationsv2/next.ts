@@ -12,7 +12,7 @@ import type {
   ReindexSourceToTempOpenPit,
   ReindexSourceToTempRead,
   ReindexSourceToTempClosePit,
-  ReindexSourceToTempIndex,
+  ReindexSourceToTempTransform,
   MarkVersionIndexReady,
   InitState,
   LegacyCreateReindexTargetState,
@@ -105,7 +105,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       }),
     REINDEX_SOURCE_TO_TEMP_CLOSE_PIT: (state: ReindexSourceToTempClosePit) =>
       Actions.closePit({ client, pitId: state.sourceIndexPitId }),
-    REINDEX_SOURCE_TO_TEMP_INDEX: (state: ReindexSourceToTempIndex) =>
+    REINDEX_SOURCE_TO_TEMP_TRANSFORM: (state: ReindexSourceToTempTransform) =>
       Actions.transformDocs({ transformRawDocs, outdatedDocuments: state.outdatedDocuments }),
     REINDEX_SOURCE_TO_TEMP_INDEX_BULK: (state: ReindexSourceToTempIndexBulk) =>
       Actions.bulkOverwriteTransformedDocuments({
