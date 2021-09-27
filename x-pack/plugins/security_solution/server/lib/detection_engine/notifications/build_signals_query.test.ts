@@ -31,7 +31,7 @@ describe('buildSignalsSearchQuery', () => {
                 bool: {
                   should: {
                     match: {
-                      'signal.rule.rule_id': ruleId,
+                      'kibana.alert.rule.rule_id': ruleId,
                     },
                   },
                   minimum_should_match: 1,

@@ -20,6 +20,15 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
 } from '@kbn/rule-data-utils';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_TIME,
+  flattenWithPrefix,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_EVENT_CATEGORY,
+  ALERT_GROUP_ID,
+} from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
@@ -29,6 +38,7 @@ import {
   SavedQueryCreateSchema,
   ThresholdCreateSchema,
 } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -45,16 +55,6 @@ import {
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_GROUP_ID,
-  ALERT_ORIGINAL_EVENT,
-  ALERT_ORIGINAL_EVENT_CATEGORY,
-  ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
-import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
-import { flattenWithPrefix } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/factories/utils/flatten_with_prefix';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -954,7 +954,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsResponse = await getSignalsByIds(supertest, [id]);
         const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+        const signalsOrderedByEventId = orderBy(signals, 'kibana.alert.ancestors.id', 'asc');
         return signalsOrderedByEventId;
       };
 
@@ -1117,7 +1117,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsResponse = await getSignalsByIds(supertest, [id], 1);
         const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+        const signalsOrderedByEventId = orderBy(signals, 'kibana.alert.ancestors.id', 'asc');
         const fullSignal = signalsOrderedByEventId[0];
         if (!fullSignal) {
           return expect(fullSignal).to.be.ok();

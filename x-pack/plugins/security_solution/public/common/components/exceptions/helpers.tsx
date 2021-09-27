@@ -131,7 +131,7 @@ export const formatExceptionItemForUpdate = (
 };
 
 /**
- * Maps "event." fields to "signal.original_event.". This is because when a rule is created
+ * Maps "event." fields to "kibana.alert.original_event.". This is because when a rule is created
  * the "event" field is copied over to "original_event". When the user creates an exception,
  * they expect it to match against the original_event's fields, not the signal event's.
  * @param exceptionItems new or existing ExceptionItem[]
@@ -145,7 +145,7 @@ export const prepareExceptionItemsForBulkClose = (
         return {
           ...itemEntry,
           field: itemEntry.field.startsWith('event.')
-            ? itemEntry.field.replace(/^event./, 'signal.original_event.')
+            ? itemEntry.field.replace(/^event./, 'kibana.alert.original_event.')
             : itemEntry.field,
         };
       });
@@ -633,10 +633,10 @@ export const getPrepopulatedBehaviorException = ({
   const { process } = alertEcsData;
   const entries = filterEmptyExceptionEntries([
     {
-      field: 'rule.id',
+      field: 'kibana.alert.rule.uuid',
       operator: 'included' as const,
       type: 'match' as const,
-      value: alertEcsData.rule?.id ?? '',
+      value: alertEcsData['kibana.alert.rule.uuid'] ?? '',
     },
     {
       field: 'process.executable.caseless',

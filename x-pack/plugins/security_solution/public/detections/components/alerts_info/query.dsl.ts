@@ -8,7 +8,10 @@
 export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
   const queryFilter = [
     {
-      bool: { should: [{ match: { 'signal.status': 'open' } }], minimum_should_match: 1 },
+      bool: {
+        should: [{ match: { 'kibana.alert.workflow_status': 'open' } }],
+        minimum_should_match: 1,
+      },
     },
   ];
 
@@ -24,7 +27,7 @@ export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
                 ...queryFilter,
                 {
                   bool: {
-                    should: [{ match: { 'signal.rule.id': ruleId } }],
+                    should: [{ match: { 'kibana.alert.rule.uuid': ruleId } }],
                     minimum_should_match: 1,
                   },
                 },

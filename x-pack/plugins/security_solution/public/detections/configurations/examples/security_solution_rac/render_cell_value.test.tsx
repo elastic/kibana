@@ -55,7 +55,7 @@ describe('RenderCellValue', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} columnId="signal.rule.severity" />
+          <RenderCellValue {...props} columnId="kibana.alert.rule.severity" />
         </DragDropContextWrapper>
       </TestProviders>
     );
@@ -67,7 +67,7 @@ describe('RenderCellValue', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} columnId="signal.reason" />
+          <RenderCellValue {...props} columnId="kibana.alert.reason" />
         </DragDropContextWrapper>
       </TestProviders>
     );

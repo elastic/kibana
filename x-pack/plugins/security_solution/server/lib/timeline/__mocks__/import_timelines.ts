@@ -271,7 +271,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: 'kibana.alert.rule.description',
           searchable: null,
         },
         {
@@ -387,7 +387,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: 'kibana.alert.rule.description',
           searchable: null,
         },
         {
@@ -550,7 +550,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: 'kibana.alert.rule.description',
           searchable: null,
         },
         {
@@ -738,7 +738,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: 'kibana.alert.rule.description',
           searchable: null,
         },
         {
@@ -906,7 +906,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: 'kibana.alert.rule.description',
           searchable: null,
         },
         {
@@ -1089,7 +1089,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: 'kibana.alert.rule.description',
           searchable: null,
         },
         {
@@ -1202,10 +1202,7 @@ export const mockSavedObject = {
   type: 'siem-ui-timeline',
   id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
   attributes: {
-    savedQueryId: null,
-
     status: 'immutable',
-
     excludedRowRendererIds: [],
     ...mockGetTemplateTimelineValue,
   },

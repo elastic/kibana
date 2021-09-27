@@ -39,8 +39,8 @@ describe('updateAlertsStatus', () => {
             source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
               ctx._source['${ALERT_WORKFLOW_STATUS}'] = 'closed'
             }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
-              ctx._source.signal.status = 'closed'
+            if (ctx._source.signal != null && ctx._source.kibana.alert.workflow_status != null) {
+              ctx._source.kibana.alert.workflow_status = 'closed'
             }`,
             lang: 'painless',
           },
@@ -75,8 +75,8 @@ describe('updateAlertsStatus', () => {
             source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
               ctx._source['${ALERT_WORKFLOW_STATUS}'] = 'closed'
             }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
-              ctx._source.signal.status = 'closed'
+            if (ctx._source.signal != null && ctx._source.kibana.alert.workflow_status != null) {
+              ctx._source.kibana.alert.workflow_status = 'closed'
             }`,
             lang: 'painless',
           },
@@ -116,8 +116,8 @@ describe('updateAlertsStatus', () => {
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
                       ctx._source['kibana.alert.workflow_status'] = 'acknowledged'
                     }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'acknowledged'
+                    if (ctx._source.signal != null && ctx._source.kibana.alert.workflow_status != null) {
+                      ctx._source.kibana.alert.workflow_status = 'acknowledged'
                     }",
               },
             },
@@ -159,8 +159,8 @@ describe('updateAlertsStatus', () => {
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
                       ctx._source['kibana.alert.workflow_status'] = 'closed'
                     }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
+                    if (ctx._source.signal != null && ctx._source.kibana.alert.workflow_status != null) {
+                      ctx._source.kibana.alert.workflow_status = 'closed'
                     }",
               },
             },
@@ -188,8 +188,8 @@ describe('updateAlertsStatus', () => {
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
                       ctx._source['kibana.alert.workflow_status'] = 'open'
                     }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'open'
+                    if (ctx._source.signal != null && ctx._source.kibana.alert.workflow_status != null) {
+                      ctx._source.kibana.alert.workflow_status = 'open'
                     }",
               },
             },
@@ -231,8 +231,8 @@ describe('updateAlertsStatus', () => {
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
                       ctx._source['kibana.alert.workflow_status'] = 'closed'
                     }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
+                    if (ctx._source.signal != null && ctx._source.kibana.alert.workflow_status != null) {
+                      ctx._source.kibana.alert.workflow_status = 'closed'
                     }",
               },
             },
@@ -260,8 +260,8 @@ describe('updateAlertsStatus', () => {
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
                       ctx._source['kibana.alert.workflow_status'] = 'open'
                     }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'open'
+                    if (ctx._source.signal != null && ctx._source.kibana.alert.workflow_status != null) {
+                      ctx._source.kibana.alert.workflow_status = 'open'
                     }",
               },
             },

@@ -169,14 +169,14 @@ describe('StatefulTopN', () => {
           negate: false,
           disabled: false,
           type: 'phrase',
-          key: 'signal.rule.id',
+          key: 'kibana.alert.rule.uuid',
           params: {
             query: 'd62249f0-1632-11ec-b035-19607969bc20',
           },
         },
         query: {
           match_phrase: {
-            'signal.rule.id': 'd62249f0-1632-11ec-b035-19607969bc20',
+            'kibana.alert.rule.uuid': 'd62249f0-1632-11ec-b035-19607969bc20',
           },
         },
       },
@@ -199,14 +199,14 @@ describe('StatefulTopN', () => {
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: 'signal.rule.id',
+            key: 'kibana.alert.rule.uuid',
             params: {
               query: 'd62249f0-1632-11ec-b035-19607969bc20',
             },
           },
           query: {
             match_phrase: {
-              'signal.rule.id': 'd62249f0-1632-11ec-b035-19607969bc20',
+              'kibana.alert.rule.uuid': 'd62249f0-1632-11ec-b035-19607969bc20',
             },
           },
         },

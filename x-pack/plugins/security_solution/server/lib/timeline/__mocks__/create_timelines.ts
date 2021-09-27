@@ -17,7 +17,7 @@ export const mockTemplate = {
     {
       columnHeaderType: 'not-filtered',
       indexes: null,
-      id: 'signal.rule.description',
+      id: 'kibana.alert.rule.description',
       name: null,
       searchable: null,
     },

@@ -5,7 +5,20 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
+import {
+  ALERT_REASON,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAMESPACE,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_RULE_ID,
+  ALERT_WORKFLOW_STATUS,
+} from '@kbn/rule-data-utils';
+import {
+  ALERT_ANCESTORS,
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
+} from '@kbn/securitysolution-rules';
 import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
@@ -75,7 +88,7 @@ export const getEventIdToDataMapping = (
   }, {});
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
-  !isEmpty(event.signal?.rule?.building_block_type);
+  !isEmpty(event[ALERT_BUILDING_BLOCK_TYPE]);
 
 export const isEvenEqlSequence = (event: Ecs): boolean => {
   if (!isEmpty(event.eql?.sequenceNumber)) {
@@ -90,7 +103,7 @@ export const isEvenEqlSequence = (event: Ecs): boolean => {
 };
 /** Return eventType raw or signal or eql */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event.signal?.rule?.id)) {
+  if (!isEmpty(event[ALERT_RULE_RULE_ID])) {
     return 'signal';
   } else if (!isEmpty(event.eql?.parentId)) {
     return 'eql';
@@ -139,75 +152,71 @@ export const allowSorting = ({
   const isAggregatable = browserField?.aggregatable ?? false;
 
   const isAllowlistedNonBrowserField = [
-    'signal.ancestors.depth',
-    'signal.ancestors.id',
-    'signal.ancestors.rule',
-    'signal.ancestors.type',
-    'signal.original_event.action',
-    'signal.original_event.category',
-    'signal.original_event.code',
-    'signal.original_event.created',
-    'signal.original_event.dataset',
-    'signal.original_event.duration',
-    'signal.original_event.end',
-    'signal.original_event.hash',
-    'signal.original_event.id',
-    'signal.original_event.kind',
-    'signal.original_event.module',
-    'signal.original_event.original',
-    'signal.original_event.outcome',
-    'signal.original_event.provider',
-    'signal.original_event.risk_score',
-    'signal.original_event.risk_score_norm',
-    'signal.original_event.sequence',
-    'signal.original_event.severity',
-    'signal.original_event.start',
-    'signal.original_event.timezone',
-    'signal.original_event.type',
-    'signal.original_time',
-    'signal.parent.depth',
-    'signal.parent.id',
-    'signal.parent.index',
-    'signal.parent.rule',
-    'signal.parent.type',
-    'signal.reason',
-    'signal.rule.created_by',
-    'signal.rule.description',
-    'signal.rule.enabled',
-    'signal.rule.false_positives',
-    'signal.rule.filters',
-    'signal.rule.from',
-    'signal.rule.id',
-    'signal.rule.immutable',
-    'signal.rule.index',
-    'signal.rule.interval',
-    'signal.rule.language',
-    'signal.rule.max_signals',
-    'signal.rule.name',
-    'signal.rule.note',
-    'signal.rule.output_index',
-    'signal.rule.query',
-    'signal.rule.references',
-    'signal.rule.risk_score',
-    'signal.rule.rule_id',
-    'signal.rule.saved_id',
-    'signal.rule.severity',
-    'signal.rule.size',
-    'signal.rule.tags',
-    'signal.rule.threat',
-    'signal.rule.threat.tactic.id',
-    'signal.rule.threat.tactic.name',
-    'signal.rule.threat.tactic.reference',
-    'signal.rule.threat.technique.id',
-    'signal.rule.threat.technique.name',
-    'signal.rule.threat.technique.reference',
-    'signal.rule.timeline_id',
-    'signal.rule.timeline_title',
-    'signal.rule.to',
-    'signal.rule.type',
-    'signal.rule.updated_by',
-    'signal.rule.version',
+    ALERT_ORIGINAL_TIME,
+    ALERT_REASON,
+    `${ALERT_ANCESTORS}.depth`,
+    `${ALERT_ANCESTORS}.id`,
+    `${ALERT_ANCESTORS}.rule`,
+    `${ALERT_ANCESTORS}.type`,
+    `${ALERT_ORIGINAL_EVENT}.action`,
+    `${ALERT_ORIGINAL_EVENT}.category`,
+    `${ALERT_ORIGINAL_EVENT}.code`,
+    `${ALERT_ORIGINAL_EVENT}.created`,
+    `${ALERT_ORIGINAL_EVENT}.dataset`,
+    `${ALERT_ORIGINAL_EVENT}.duration`,
+    `${ALERT_ORIGINAL_EVENT}.end`,
+    `${ALERT_ORIGINAL_EVENT}.hash`,
+    `${ALERT_ORIGINAL_EVENT}.id`,
+    `${ALERT_ORIGINAL_EVENT}.kind`,
+    `${ALERT_ORIGINAL_EVENT}.module`,
+    `${ALERT_ORIGINAL_EVENT}.original`,
+    `${ALERT_ORIGINAL_EVENT}.outcome`,
+    `${ALERT_ORIGINAL_EVENT}.provider`,
+    `${ALERT_ORIGINAL_EVENT}.risk_score`,
+    `${ALERT_ORIGINAL_EVENT}.risk_score_norm`,
+    `${ALERT_ORIGINAL_EVENT}.sequence`,
+    `${ALERT_ORIGINAL_EVENT}.severity`,
+    `${ALERT_ORIGINAL_EVENT}.start`,
+    `${ALERT_ORIGINAL_EVENT}.timezone`,
+    `${ALERT_ORIGINAL_EVENT}.type`,
+    `${ALERT_RULE_NAMESPACE}.created_by`,
+    `${ALERT_RULE_NAMESPACE}.description`,
+    `${ALERT_RULE_NAMESPACE}.enabled`,
+    `${ALERT_RULE_NAMESPACE}.false_positives`,
+    `${ALERT_RULE_NAMESPACE}.filters`,
+    `${ALERT_RULE_NAMESPACE}.from`,
+    `${ALERT_RULE_NAMESPACE}.immutable`,
+    `${ALERT_RULE_NAMESPACE}.index`,
+    `${ALERT_RULE_NAMESPACE}.interval`,
+    `${ALERT_RULE_NAMESPACE}.language`,
+    `${ALERT_RULE_NAMESPACE}.max_signals`,
+    `${ALERT_RULE_NAMESPACE}.name`,
+    `${ALERT_RULE_NAMESPACE}.note`,
+    `${ALERT_RULE_NAMESPACE}.output_index`,
+    `${ALERT_RULE_NAMESPACE}.query`,
+    `${ALERT_RULE_NAMESPACE}.references`,
+    `${ALERT_RULE_NAMESPACE}.risk_score`,
+    `${ALERT_RULE_NAMESPACE}.rule_id`,
+    `${ALERT_RULE_NAMESPACE}.saved_id`,
+    `${ALERT_RULE_NAMESPACE}.severity`,
+    `${ALERT_RULE_NAMESPACE}.size`,
+    `${ALERT_RULE_NAMESPACE}.tags`,
+    `${ALERT_RULE_NAMESPACE}.threat`,
+    `${ALERT_RULE_NAMESPACE}.threat.tactic.id`,
+    `${ALERT_RULE_NAMESPACE}.threat.tactic.name`,
+    `${ALERT_RULE_NAMESPACE}.threat.tactic.reference`,
+    `${ALERT_RULE_NAMESPACE}.threat.technique.id`,
+    `${ALERT_RULE_NAMESPACE}.threat.technique.name`,
+    `${ALERT_RULE_NAMESPACE}.threat.technique.reference`,
+    `${ALERT_RULE_NAMESPACE}.timeline_id`,
+    `${ALERT_RULE_NAMESPACE}.timeline_title`,
+    `${ALERT_RULE_NAMESPACE}.to`,
+    `${ALERT_RULE_NAMESPACE}.type`,
+    `${ALERT_RULE_NAMESPACE}.updated_by`,
+    `${ALERT_RULE_NAMESPACE}.uuid`,
+    `${ALERT_RULE_NAMESPACE}.version`,
     'signal.status',
+    ALERT_WORKFLOW_STATUS,
   ].includes(fieldName);
 
   return isAllowlistedNonBrowserField || isAggregatable;

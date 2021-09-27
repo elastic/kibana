@@ -7,6 +7,14 @@
 
 import { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import {
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_GROUP_ID,
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
+  ALERT_ORIGINAL_TIME,
+} from '@kbn/securitysolution-rules';
+import { ALERT_RULE_NAMESPACE, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { JsonObject, JsonArray } from '@kbn/utility-types';
 
 export async function getSavedObjectFromES<T>(
@@ -76,21 +84,21 @@ export const getFieldsToRequest = (): string[] => [
   'destination.ip',
   'user.name',
   '@timestamp',
-  'signal.status',
-  'signal.group.id',
-  'signal.original_time',
-  'signal.rule.building_block_type',
-  'signal.rule.filters',
-  'signal.rule.from',
-  'signal.rule.language',
-  'signal.rule.query',
-  'signal.rule.name',
-  'signal.rule.to',
-  'signal.rule.id',
-  'signal.rule.index',
-  'signal.rule.type',
-  'signal.original_event.kind',
-  'signal.original_event.module',
+  ALERT_WORKFLOW_STATUS,
+  ALERT_GROUP_ID,
+  ALERT_ORIGINAL_TIME,
+  ALERT_BUILDING_BLOCK_TYPE,
+  `${ALERT_RULE_NAMESPACE}.filters`,
+  `${ALERT_RULE_NAMESPACE}.from`,
+  `${ALERT_RULE_NAMESPACE}.language`,
+  `${ALERT_RULE_NAMESPACE}.query`,
+  `${ALERT_RULE_NAMESPACE}.name`,
+  `${ALERT_RULE_NAMESPACE}.to`,
+  `${ALERT_RULE_NAMESPACE}.id`,
+  `${ALERT_RULE_NAMESPACE}.index`,
+  `${ALERT_RULE_NAMESPACE}.type`,
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
   'file.path',
   'file.Ext.code_signature.subject_name',
   'file.Ext.code_signature.trusted',

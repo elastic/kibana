@@ -12,7 +12,7 @@ import { ShowTopNButton } from './show_top_n';
 
 describe('show topN button', () => {
   const defaultProps = {
-    field: 'signal.rule.name',
+    field: 'kibana.alert.rule.name',
     onClick: jest.fn(),
     ownFocus: false,
     showTopN: false,

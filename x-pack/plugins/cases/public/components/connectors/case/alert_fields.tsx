@@ -30,7 +30,7 @@ const Container = styled.div`
 
 const defaultAlertComment = {
   type: CommentType.generatedAlert,
-  alerts: `[{{#context.alerts}}{"_id": "{{_id}}", "_index": "{{_index}}", "ruleId": "{{signal.rule.id}}", "ruleName": "{{signal.rule.name}}"}__SEPARATOR__{{/context.alerts}}]`,
+  alerts: `[{{#context.alerts}}{"_id": "{{_id}}", "_index": "{{_index}}", "ruleId": "{{kibana.alert.rule.uuid}}", "ruleName": "{{kibana.alert.rule.name}}"}__SEPARATOR__{{/context.alerts}}]`,
 };
 
 const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionParams>> = ({

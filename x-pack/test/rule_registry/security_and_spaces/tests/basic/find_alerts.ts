@@ -6,7 +6,10 @@
  */
 import expect from '@kbn/expect';
 
-import { ALERT_WORKFLOW_STATUS } from '../../../../../plugins/rule_registry/common/technical_rule_data_field_names';
+import {
+  ALERT_RULE_NAME,
+  ALERT_WORKFLOW_STATUS,
+} from '../../../../../plugins/rule_registry/common/technical_rule_data_field_names';
 import {
   superUser,
   globalRead,
@@ -108,7 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
           aggs: {
             alertsByGroupingCount: {
               terms: {
-                field: 'signal.rule.name',
+                field: ALERT_RULE_NAME,
                 order: {
                   _count: 'desc',
                 },
@@ -117,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
               aggs: {
                 test: {
                   terms: {
-                    field: 'signal.rule.name',
+                    field: ALERT_RULE_NAME,
                     size: 10,
                     script: {
                       source: 'SCRIPT',
@@ -142,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
           aggs: {
             alertsByGroupingCount: {
               terms: {
-                field: 'signal.rule.name',
+                field: ALERT_RULE_NAME,
                 order: {
                   _count: 'desc',
                 },
@@ -151,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
               aggs: {
                 test: {
                   terms: {
-                    field: 'signal.rule.name',
+                    field: ALERT_RULE_NAME,
                     size: 10,
                   },
                 },

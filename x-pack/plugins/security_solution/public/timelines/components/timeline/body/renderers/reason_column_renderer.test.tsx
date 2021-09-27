@@ -81,7 +81,7 @@ describe('reasonColumnRenderer', () => {
   });
 
   describe('isIntance', () => {
-    it('returns true when columnName is `signal.reason`', () => {
+    it('returns true when columnName is `kibana.alert.reason`', () => {
       expect(reasonColumnRenderer.isInstance(REASON_FIELD_NAME, [])).toBeTruthy();
     });
   });

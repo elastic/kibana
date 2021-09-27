@@ -8,6 +8,12 @@
 import { get, isEqual } from 'lodash';
 import expect from '@kbn/expect';
 import { ALERT_REASON, ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
+} from '@kbn/securitysolution-rules';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DETECTION_ENGINE_RULES_STATUS_URL } from '../../../../plugins/security_solution/common/constants';
@@ -26,12 +32,6 @@ import {
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
 import { ENRICHMENT_TYPES } from '../../../../plugins/security_solution/common/cti/constants';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_ORIGINAL_EVENT,
-  ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
 import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);

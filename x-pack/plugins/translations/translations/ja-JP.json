@@ -20610,7 +20610,7 @@
     "xpack.securitySolution.alerts.riskScoreMapping.defaultRiskScoreTitle": "デフォルトリスクスコア",
     "xpack.securitySolution.alerts.riskScoreMapping.mappingDescriptionLabel": "ソースイベント値を使用して、デフォルトリスクスコアを上書きします。",
     "xpack.securitySolution.alerts.riskScoreMapping.mappingDetailsLabel": "値が境界外の場合、またはフィールドがない場合は、デフォルトリスクスコアが使用されます。",
-    "xpack.securitySolution.alerts.riskScoreMapping.riskScoreFieldTitle": "signal.rule.risk_score",
+    "xpack.securitySolution.alerts.riskScoreMapping.riskScoreFieldTitle": "kibana.alert.rule.risk_score",
     "xpack.securitySolution.alerts.riskScoreMapping.riskScoreMappingTitle": "リスクスコア無効化",
     "xpack.securitySolution.alerts.riskScoreMapping.riskScoreTitle": "リスクスコア",
     "xpack.securitySolution.alerts.riskScoreMapping.sourceFieldTitle": "ソースフィールド",

@@ -20917,7 +20917,7 @@
     "xpack.securitySolution.alerts.riskScoreMapping.defaultRiskScoreTitle": "默认风险分数",
     "xpack.securitySolution.alerts.riskScoreMapping.mappingDescriptionLabel": "使用源事件值覆盖默认风险分数。",
     "xpack.securitySolution.alerts.riskScoreMapping.mappingDetailsLabel": "如果值超出范围，或字段不存在，将使用默认风险分数。",
-    "xpack.securitySolution.alerts.riskScoreMapping.riskScoreFieldTitle": "signal.rule.risk_score",
+    "xpack.securitySolution.alerts.riskScoreMapping.riskScoreFieldTitle": "kibana.alert.rule.risk_score",
     "xpack.securitySolution.alerts.riskScoreMapping.riskScoreMappingTitle": "风险分数覆盖",
     "xpack.securitySolution.alerts.riskScoreMapping.riskScoreTitle": "风险分数",
     "xpack.securitySolution.alerts.riskScoreMapping.sourceFieldTitle": "源字段",

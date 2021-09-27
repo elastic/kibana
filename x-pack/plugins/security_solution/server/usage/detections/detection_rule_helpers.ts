@@ -203,7 +203,7 @@ export const getDetectionRuleMetrics = async (
       body: {
         aggs: {
           detectionAlerts: {
-            terms: { field: 'signal.rule.id.keyword' },
+            terms: { field: 'kibana.alert.rule.uuid.keyword' },
           },
         },
         query: {

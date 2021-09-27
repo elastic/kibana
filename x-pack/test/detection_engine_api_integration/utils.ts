@@ -10,7 +10,7 @@ import type { ApiResponse } from '@elastic/elasticsearch';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { ALERT_RULE_RULE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_RULE_ID, ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import type SuperTest from 'supertest';
 import type {
@@ -241,7 +241,7 @@ export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): Updat
 });
 
 export const getSignalStatus = () => ({
-  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+  aggs: { statuses: { terms: { field: ALERT_WORKFLOW_STATUS, size: 10 } } },
 });
 
 export const getQueryAllSignals = () => ({

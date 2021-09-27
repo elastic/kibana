@@ -61,23 +61,23 @@ interface EventSummaryField {
 }
 
 const defaultDisplayFields: EventSummaryField[] = [
-  { id: 'signal.status', label: SIGNAL_STATUS },
+  { id: 'kibana.alert.workflow_status', label: SIGNAL_STATUS },
   { id: '@timestamp', label: TIMESTAMP },
   {
     id: SIGNAL_RULE_NAME_FIELD_NAME,
-    linkField: 'signal.rule.id',
+    linkField: 'kibana.alert.rule.uuid',
     label: ALERTS_HEADERS_RULE,
   },
-  { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
-  { id: 'signal.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
+  { id: 'kibana.alert.rule.severity', label: ALERTS_HEADERS_SEVERITY },
+  { id: 'kibana.alert.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
-  { id: 'signal.threshold_result.count', label: ALERTS_HEADERS_THRESHOLD_COUNT },
-  { id: 'signal.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
-  { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
+  { id: 'kibana.alert.threshold_result.count', label: ALERTS_HEADERS_THRESHOLD_COUNT },
+  { id: 'kibana.alert.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
+  { id: 'kibana.alert.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
 
 const processCategoryFields: EventSummaryField[] = [
@@ -253,7 +253,7 @@ export const getSummaryRows = ({
           return acc;
         }
 
-        if (item.id === 'signal.threshold_result.terms') {
+        if (item.id === 'kibana.alert.threshold_result.terms') {
           try {
             const terms = getOr(null, 'originalValue', field);
             const parsedValue = terms.map((term: string) => JSON.parse(term));
@@ -274,7 +274,7 @@ export const getSummaryRows = ({
           }
         }
 
-        if (item.id === 'signal.threshold_result.cardinality') {
+        if (item.id === 'kibana.alert.threshold_result.cardinality') {
           try {
             const parsedValue = JSON.parse(value);
             return [
@@ -319,7 +319,7 @@ const AlertSummaryViewComponent: React.FC<{
   );
 
   const ruleId = useMemo(() => {
-    const item = data.find((d) => d.field === 'signal.rule.id');
+    const item = data.find((d) => d.field === 'kibana.alert.rule.uuid');
     return Array.isArray(item?.originalValue)
       ? item?.originalValue[0]
       : item?.originalValue ?? null;

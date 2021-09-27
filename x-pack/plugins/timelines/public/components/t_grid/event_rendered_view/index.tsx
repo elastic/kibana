@@ -164,8 +164,8 @@ const EventRenderedViewComponent = ({
         hideForMobile: false,
         // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
-          const ruleName = get(item, `ecs.signal.rule.name`); /* `ecs.${ALERT_RULE_NAME}`*/
-          const ruleId = get(item, `ecs.signal.rule.id`); /* `ecs.${ALERT_RULE_ID}`*/
+          const ruleName = get(item, `ecs.kibana.alert.rule.name`); /* `ecs.${ALERT_RULE_NAME}`*/
+          const ruleId = get(item, `ecs.kibana.alert.rule.uuid`); /* `ecs.${ALERT_RULE_UUID}`*/
           return <RuleName name={ruleName} id={ruleId} />;
         },
       },
@@ -179,7 +179,7 @@ const EventRenderedViewComponent = ({
         // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
           const ecsData = get(item, 'ecs');
-          const reason = get(item, `ecs.signal.reason`); /* `ecs.${ALERT_REASON}`*/
+          const reason = get(item, `ecs.kibana.alert.reason`); /* `ecs.${ALERT_REASON}`*/
           const rowRenderersValid = rowRenderers.filter((rowRenderer) =>
             rowRenderer.isInstance(ecsData)
           );

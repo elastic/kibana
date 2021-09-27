@@ -6,9 +6,9 @@
  */
 
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_ANCESTORS } from '@kbn/securitysolution-rules';
 import { createHash } from 'crypto';
 import { Ancestor } from '../../../signals/types';
-import { ALERT_ANCESTORS } from '../../field_maps/field_names';
 import { RACAlert } from '../../types';
 
 /**

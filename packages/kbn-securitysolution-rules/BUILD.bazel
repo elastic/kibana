@@ -29,15 +29,19 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "@npm//lodash",
   "@npm//tslib",
   "@npm//uuid",
+  "//packages/kbn-rule-data-utils"
 ]
 
 TYPES_DEPS = [
+  "@npm//lodash",
   "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/uuid"
+  "@npm//@types/uuid",
+  "//packages/kbn-rule-data-utils"
 ]
 
 jsts_transpiler(

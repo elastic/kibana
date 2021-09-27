@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_ORIGINAL_TIME } from '@kbn/securitysolution-rules';
 import { orderBy } from 'lodash';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
 } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { ALERT_ORIGINAL_TIME } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   /**
    * Tests around timestamps within signals such as the copying of timestamps correctly into
-   * the "signal.original_time" field, ensuring that timestamp overrides operate, and ensuring that
+   * the "kibana.alert.original_time" field, ensuring that timestamp overrides operate, and ensuring that
    * partial errors happen correctly
    */
   describe('timestamp tests', () => {
@@ -172,7 +172,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id], 3);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          const signalsOrderedByEventId = orderBy(signals, 'kibana.alert.ancestors.id', 'asc');
 
           expect(signalsOrderedByEventId.length).equal(3);
         });
@@ -186,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          const signalsOrderedByEventId = orderBy(signals, 'kibana.alert.ancestors.id', 'asc');
 
           expect(signalsOrderedByEventId.length).equal(2);
         });
@@ -202,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id, id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          const signalsOrderedByEventId = orderBy(signals, 'kibana.alert.ancestors.id', 'asc');
 
           expect(signalsOrderedByEventId.length).equal(2);
         });
@@ -240,7 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          const signalsOrderedByEventId = orderBy(signals, 'kibana.alert.ancestors.id', 'asc');
 
           expect(signalsOrderedByEventId.length).equal(2);
         });

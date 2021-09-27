@@ -41,7 +41,7 @@ const useFetchRule = () => useAsync(fetchWithOptionslSignal);
 const buildLastAlertQuery = (ruleId: string) => ({
   query: {
     bool: {
-      filter: [{ match: { 'signal.rule.id': ruleId } }],
+      filter: [{ match: { 'kibana.alert.rule.uuid': ruleId } }],
     },
   },
   size: 1,
@@ -77,7 +77,9 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   }, [addError, error]);
 
   const rule = useMemo<Rule | undefined>(() => {
-    const result = isExistingRule ? ruleData : alertsData?.hits.hits[0]?._source.signal.rule;
+    const result = isExistingRule
+      ? ruleData
+      : alertsData?.hits.hits[0]?._source['kibana.alert.rule'];
     if (result) {
       return transformInput(result);
     }

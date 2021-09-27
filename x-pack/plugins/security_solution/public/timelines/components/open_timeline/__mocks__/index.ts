@@ -194,7 +194,7 @@ export const mockTemplate = {
           description: null,
           example: null,
           indexes: null,
-          id: 'signal.rule.description',
+          id: 'kibana.alert.rule.description',
           name: null,
           searchable: null,
           type: null,

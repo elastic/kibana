@@ -949,7 +949,7 @@ export const mockAlertsQuery: object = {
   aggs: {
     alertsByGrouping: {
       terms: {
-        field: 'signal.rule.risk_score',
+        field: 'kibana.alert.rule.risk_score',
         missing: 'All others',
         order: { _count: 'desc' },
         size: 10,

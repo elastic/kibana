@@ -54,9 +54,9 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
         );
       case ALERT_DURATION:
         return <span data-test-subj="alert-duration">{moment().fromNow(true)}</span>;
-      case 'signal.rule.severity':
+      case 'kibana.alert.rule.severity':
         return <Severity data-test-subj="rule-severity" severity={value} />;
-      case 'signal.reason':
+      case 'kibana.alert.reason':
         return (
           <EuiLink data-test-subj="reason">
             <TruncatableText>{reason}</TruncatableText>

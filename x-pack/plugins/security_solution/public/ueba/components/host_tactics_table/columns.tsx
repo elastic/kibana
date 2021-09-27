@@ -39,7 +39,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
               name: tactic,
               kqlQuery: '',
               queryMatch: {
-                field: 'signal.rule.threat.tactic.name',
+                field: 'kibana.alert.rule.threat.tactic.name',
                 value: tactic,
                 operator: IS_OPERATOR,
               },
@@ -78,7 +78,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
               name: technique,
               kqlQuery: '',
               queryMatch: {
-                field: 'signal.rule.threat.technique.name',
+                field: 'kibana.alert.rule.threat.technique.name',
                 value: technique,
                 operator: IS_OPERATOR,
               },
@@ -117,7 +117,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
               name: `${riskScore}`,
               kqlQuery: '',
               queryMatch: {
-                field: 'signal.rule.risk_score',
+                field: 'kibana.alert.rule.risk_score',
                 value: riskScore,
                 operator: IS_OPERATOR,
               },

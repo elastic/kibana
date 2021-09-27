@@ -17,8 +17,6 @@ import { GeoEcs } from './geo';
 import { HostEcs } from './host';
 import { NetworkEcs } from './network';
 import { RegistryEcs } from './registry';
-import { RuleEcs } from './rule';
-import { SignalEcs } from './signal';
 import { SourceEcs } from './source';
 import { SuricataEcs } from './suricata';
 import { TlsEcs } from './tls';
@@ -47,8 +45,6 @@ export interface Ecs {
   host?: HostEcs;
   network?: NetworkEcs;
   registry?: RegistryEcs;
-  rule?: RuleEcs;
-  signal?: SignalEcs;
   source?: SourceEcs;
   suricata?: SuricataEcs;
   tls?: TlsEcs;

@@ -39,22 +39,22 @@ export const buildHostTacticsQuery = ({
       aggs: {
         risk_score: {
           sum: {
-            field: 'signal.rule.risk_score',
+            field: 'kibana.alert.rule.risk_score',
           },
         },
         tactic: {
           terms: {
-            field: 'signal.rule.threat.tactic.name',
+            field: 'kibana.alert.rule.threat.tactic.name',
           },
           aggs: {
             technique: {
               terms: {
-                field: 'signal.rule.threat.technique.name',
+                field: 'kibana.alert.rule.threat.technique.name',
               },
               aggs: {
                 risk_score: {
                   sum: {
-                    field: 'signal.rule.risk_score',
+                    field: 'kibana.alert.rule.risk_score',
                   },
                 },
               },
@@ -63,12 +63,12 @@ export const buildHostTacticsQuery = ({
         },
         tactic_count: {
           cardinality: {
-            field: 'signal.rule.threat.tactic.name',
+            field: 'kibana.alert.rule.threat.tactic.name',
           },
         },
         technique_count: {
           cardinality: {
-            field: 'signal.rule.threat.technique.name',
+            field: 'kibana.alert.rule.threat.technique.name',
           },
         },
       },

@@ -353,7 +353,7 @@ describe('helpers', () => {
       expect(
         allowSorting({
           browserField: undefined, // no BrowserField metadata for this field
-          fieldName: 'signal.rule.name', //  an allow-listed field name
+          fieldName: 'kibana.alert.rule.name', //  an allow-listed field name
         })
       ).toBe(true);
     });

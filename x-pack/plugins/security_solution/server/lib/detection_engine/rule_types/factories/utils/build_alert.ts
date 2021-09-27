@@ -16,6 +16,13 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  flattenWithPrefix,
+  ALERT_ORIGINAL_TIME,
+  ALERT_ORIGINAL_EVENT,
+} from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
@@ -28,13 +35,6 @@ import {
   isWrappedSignalHit,
 } from '../../../signals/utils';
 import { RACAlert } from '../../types';
-import { flattenWithPrefix } from './flatten_with_prefix';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_ORIGINAL_EVENT,
-  ALERT_ORIGINAL_TIME,
-} from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import { SearchTypes } from '../../../../telemetry/types';
 

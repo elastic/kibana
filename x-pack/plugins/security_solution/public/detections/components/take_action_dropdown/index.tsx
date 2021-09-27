@@ -71,9 +71,9 @@ export const TakeActionDropdownComponent = React.memo(
     const actionsData = useMemo(
       () =>
         [
-          { category: 'signal', field: 'signal.rule.id', name: 'ruleId' },
-          { category: 'signal', field: 'signal.rule.name', name: 'ruleName' },
-          { category: 'signal', field: 'signal.status', name: 'alertStatus' },
+          { category: 'signal', field: 'kibana.alert.rule.uuid', name: 'ruleId' },
+          { category: 'signal', field: 'kibana.alert.rule.name', name: 'ruleName' },
+          { category: 'signal', field: 'kibana.alert.status', name: 'alertStatus' },
           { category: 'event', field: 'event.kind', name: 'eventKind' },
           { category: '_id', field: '_id', name: 'eventId' },
         ].reduce<ActionsData>(
