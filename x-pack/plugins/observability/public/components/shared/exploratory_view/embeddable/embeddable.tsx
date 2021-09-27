@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
-import { AllSeries, ObservabilityPublicPluginsStart } from '../../../..';
-import { LensAttributes } from '../configurations/lens_attributes';
+import { isEmpty } from 'lodash';
+import { AllSeries } from '../../../..';
+import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { getDefaultConfigs } from '../configurations/default_configs';
-
-import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 import { OperationTypeComponent } from '../series_builder/columns/operation_type_select';
+import { UrlFilter } from '../types';
+import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
+import { DataView } from '../../../../../../../../src/plugins/data/common';
+import { LensPublicStart } from '../../../../../../lens/public';
 
 export interface ExploratoryEmbeddableProps {
   attributes: AllSeries;
-  appendTitle: JSX.Element;
+  appendTitle?: JSX.Element;
   title: string | JSX.Element;
   showCalculationMethod?: boolean;
+}
+
+export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
+  lens: LensPublicStart;
+  indexPattern: DataView;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -29,66 +35,47 @@ export default function Embeddable({
   attributes,
   title,
   appendTitle,
-  showCalculationMethod = true,
-}: ExploratoryEmbeddableProps) {
-  const {
-    services: { lens, data },
-  } = useKibana<ObservabilityPublicPluginsStart>();
-
-  const [loading, setLoading] = useState(false);
-  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
-
+  indexPattern,
+  lens,
+  showCalculationMethod = false,
+}: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
 
   const series = Object.entries(attributes)[0][1];
-  const seriesId = Object.entries(attributes)[0][0];
+  const allSeriesIds = Object.keys(attributes);
 
   const [operationType, setOperationType] = useState(series?.operationType);
 
-  const { seriesType, dataType, reportType, reportDefinitions, filters } = series;
+  const layerConfigs: LayerConfig[] = [];
 
-  const loadIndexPattern = useCallback(
-    async ({ dataType: dt }) => {
-      setLoading(true);
-      try {
-        const obsvIndexP = new ObservabilityIndexPatterns(data);
-        const indPattern = await obsvIndexP.getIndexPattern(dt, 'heartbeat-*');
-        setIndexPattern(indPattern!);
+  allSeriesIds.forEach((seriesIdT) => {
+    const seriesT = attributes[seriesIdT];
+    if (indexPattern && seriesT.reportType && !isEmpty(seriesT.reportDefinitions)) {
+      const seriesConfig = getDefaultConfigs({
+        reportType: seriesT.reportType,
+        dataType: seriesT.dataType,
+        indexPattern,
+      });
 
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-      }
-    },
-    [data]
-  );
+      const filters: UrlFilter[] = (seriesT.filters ?? []).concat(
+        getFiltersFromDefs(seriesT.reportDefinitions)
+      );
 
-  useEffect(() => {
-    loadIndexPattern({ dataType });
-  }, [dataType, loadIndexPattern]);
-
-  if (!indexPattern || loading) {
-    return <EuiLoadingSpinner />;
-  }
-
-  const dataViewConfig = getDefaultConfigs({
-    seriesId,
-    reportType,
-    indexPattern,
+      layerConfigs.push({
+        filters,
+        indexPattern,
+        seriesConfig,
+        time: seriesT.time,
+        breakdown: seriesT.breakdown,
+        seriesType: seriesT.seriesType,
+        operationType: seriesT.operationType,
+        reportDefinitions: seriesT.reportDefinitions ?? {},
+        selectedMetricField: seriesT.selectedMetricField,
+      });
+    }
   });
 
-  const lensAttributes = new LensAttributes(
-    indexPattern,
-    dataViewConfig,
-    seriesType,
-    filters,
-    operationType,
-    reportDefinitions
-  );
-
-  if (series.breakdown) {
-    lensAttributes.addBreakdown(series.breakdown);
-  }
+  const lensAttributes = new LensAttributes(layerConfigs);
 
   if (!LensComponent) {
     return <EuiText>No lens component</EuiText>;
