@@ -11,7 +11,8 @@ import type { PackagePolicy, FullAgentPolicyInput, FullAgentPolicyInputStream } 
 import { DEFAULT_OUTPUT } from '../constants';
 
 export const storedPackagePoliciesToAgentInputs = (
-  packagePolicies: PackagePolicy[]
+  packagePolicies: PackagePolicy[],
+  outputId: string = DEFAULT_OUTPUT.name
 ): FullAgentPolicyInput[] => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -32,7 +33,7 @@ export const storedPackagePoliciesToAgentInputs = (
         data_stream: {
           namespace: packagePolicy.namespace || 'default',
         },
-        use_output: DEFAULT_OUTPUT.name,
+        use_output: outputId,
         ...(input.compiled_input || {}),
         ...(input.streams.length
           ? {

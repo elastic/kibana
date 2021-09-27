@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiPageHeaderProps, EuiTab } from '@elastic/eui';
 
 /*
  * Given an AppSearchPageTemplate or WorkplaceSearchPageTemplate, these
@@ -35,8 +35,25 @@ export const getPageHeaderActions = (wrapper: ShallowWrapper) => {
 
   return shallow(
     <div>
-      {actions.map((action: React.ReactNode, i) => (
+      {actions.map((action, i) => (
         <Fragment key={i}>{action}</Fragment>
+      ))}
+    </div>
+  );
+};
+
+export const getPageHeaderTabs = (wrapper: ShallowWrapper) => {
+  // The tabs prop of EuiPageHeader takes an `Array<EuiTabProps>`
+  // instead of an array of EuiTab jsx components
+  // These are then rendered inside of EuiPageHeader as EuiTabs
+  // See https://elastic.github.io/eui/#/layout/page-header#tabs-in-the-page-header
+
+  const tabs = getPageHeader(wrapper).tabs || [];
+
+  return shallow(
+    <div>
+      {tabs.map((tabProps, i) => (
+        <EuiTab {...tabProps} key={i} />
       ))}
     </div>
   );
