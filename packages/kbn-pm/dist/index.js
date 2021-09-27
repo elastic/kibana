@@ -9114,7 +9114,6 @@ class CiStatsReporter {
         stdout
       } = await (0, _execa.default)('git', ['branch', '--show-current']);
       branch = stdout;
-      console.log('------------------------------------', branch);
     } catch (e) {
       this.log.debug(e.message);
     }
