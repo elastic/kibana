@@ -25,7 +25,15 @@ export default function chainRunner(tlConfig) {
   let sheet;
 
   function throwWithCell(cell, exception) {
-    throw new Error(' in cell #' + (cell + 1) + ': ' + exception.message);
+    throw new Error(
+      i18n.translate('timelion.serverSideErrors.errorInCell', {
+        defaultMessage: ' in cell #{number}: {message}',
+        values: {
+          number: cell + 1,
+          message: exception.message,
+        },
+      })
+    );
   }
 
   // Invokes a modifier function, resolving arguments into series as needed
