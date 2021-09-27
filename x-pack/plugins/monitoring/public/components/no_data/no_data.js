@@ -32,9 +32,9 @@ import { CloudDeployment } from './blurbs';
 import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 function NoDataMessage(props) {
-  const { isLoading, reason, checkMessage } = props;
+  const { isLoading, reason, checkMessage, isCollectionEnabledUpdated } = props;
 
-  if (isLoading) {
+  if ((isCollectionEnabledUpdated && !reason) || isLoading) {
     return <CheckingSettings checkMessage={checkMessage} />;
   }
 

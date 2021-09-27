@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, ChangeEvent, ClickEvent, useEffect, useRef } from 'react';
+import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -51,7 +51,7 @@ export function SeriesName({ series, seriesId }: Props) {
     }
   };
 
-  const onOutsideClick = (event: ClickEvent) => {
+  const onOutsideClick = (event: Event) => {
     if (event.target !== buttonRef.current) {
       setIsEditingEnabled(false);
     }

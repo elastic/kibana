@@ -64,7 +64,7 @@ steps:
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
     agents:
-      queue: jest
+      queue: n2-4
     timeout_in_minutes: 120
     key: jest-integration
     retry:
