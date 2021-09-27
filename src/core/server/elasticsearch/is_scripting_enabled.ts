@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../../elasticsearch';
+import { ElasticsearchClient } from './client';
 
 const scriptAllowedTypesKey = 'script.allowed_types';
 
-export const isInlineScriptingDisabled = async ({
+export const isInlineScriptingEnabled = async ({
   client,
 }: {
   client: ElasticsearchClient;
@@ -28,7 +28,5 @@ export const isInlineScriptingDisabled = async ({
     [];
 
   // when unspecified, the setting as a default `[]` value that means that both scriptings are allowed.
-  const scriptAllowed = scriptAllowedTypes.length === 0 || scriptAllowedTypes.includes('inline');
-
-  return !scriptAllowed;
+  return scriptAllowedTypes.length === 0 || scriptAllowedTypes.includes('inline');
 };
