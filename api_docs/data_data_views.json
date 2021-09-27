@@ -1022,7 +1022,9 @@
             "label": "getComputedFields",
             "description": [],
             "signature": [
-              "() => { storedFields: string[]; scriptFields: Record<string, { script: { source: string; lang: string; }; }>; docvalueFields: { field: string; format: string; }[]; runtimeFields: Record<string, ",
+              "() => { storedFields: string[]; scriptFields: Record<string, ",
+              "ScriptField",
+              ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: Record<string, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -9782,6 +9784,14 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
           },
           {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
+          },
+          {
             "plugin": "stackAlerts",
             "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/single_field_select.tsx"
           },
@@ -10482,6 +10492,38 @@
             "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/index.tsx"
           },
           {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/with_kuery_autocompletion.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/with_kuery_autocompletion.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/index.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/index.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
@@ -10734,6 +10776,14 @@
             "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/index_pattern_context.ts"
           },
           {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/target/types/public/components/kuery_bar/with_kuery_autocompletion.d.ts"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/target/types/public/components/kuery_bar/with_kuery_autocompletion.d.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/target/types/public/common/containers/source/index.d.ts"
           },
@@ -10792,6 +10842,14 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/index.d.ts"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/target/types/public/alerts/components/param_details_form/use_derived_index_pattern.d.ts"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/target/types/public/alerts/components/param_details_form/use_derived_index_pattern.d.ts"
           },
           {
             "plugin": "securitySolution",
@@ -12254,7 +12312,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(key: string) => Promise<any>"
+              "<T = any>(key: string) => Promise<T>"
             ],
             "path": "src/plugins/data/common/data_views/types.ts",
             "deprecated": false,
@@ -12284,7 +12342,7 @@
             "label": "getAll",
             "description": [],
             "signature": [
-              "() => Promise<Record<string, any>>"
+              "() => Promise<Record<string, unknown>>"
             ],
             "path": "src/plugins/data/common/data_views/types.ts",
             "deprecated": false,

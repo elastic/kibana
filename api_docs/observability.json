@@ -3906,7 +3906,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { cases: Readonly<{} & { enabled: boolean; }>; alertingExperience: Readonly<{} & { enabled: boolean; }>; }>; }"
+          "any"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,

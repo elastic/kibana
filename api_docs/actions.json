@@ -1779,7 +1779,19 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.AdditionalEmailServices",
+        "type": "Enum",
+        "tags": [],
+        "label": "AdditionalEmailServices",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "actions",

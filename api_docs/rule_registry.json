@@ -2238,7 +2238,7 @@
         "label": "RuleRegistryPluginConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly write: Readonly<{} & { enabled: boolean; }>; readonly unsafe: Readonly<{} & { legacyMultiTenancy: Readonly<{} & { enabled: boolean; }>; indexUpgrade: Readonly<{} & { enabled: boolean; }>; }>; }"
+          "any"
         ],
         "path": "x-pack/plugins/rule_registry/server/config.ts",
         "deprecated": false,

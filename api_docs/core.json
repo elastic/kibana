@@ -8274,6 +8274,136 @@
         "children": [
           {
             "parentPluginId": "core",
+            "id": "def-server.ConfigDeprecationFactory.deprecate",
+            "type": "Function",
+            "tags": [],
+            "label": "deprecate",
+            "description": [
+              "\nDeprecate a configuration property from inside a plugin's configuration path.\nWill log a deprecation warning if the deprecatedKey was found.\n"
+            ],
+            "signature": [
+              "(deprecatedKey: string, removeBy: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
+              "ConfigDeprecation"
+            ],
+            "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ConfigDeprecationFactory.deprecate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "deprecatedKey",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ConfigDeprecationFactory.deprecate.$2",
+                "type": "string",
+                "tags": [],
+                "label": "removeBy",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ConfigDeprecationFactory.deprecate.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "details",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
+                ],
+                "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ConfigDeprecationFactory.deprecateFromRoot",
+            "type": "Function",
+            "tags": [],
+            "label": "deprecateFromRoot",
+            "description": [
+              "\nDeprecate a configuration property from the root configuration.\nWill log a deprecation warning if the deprecatedKey was found.\n\nThis should be only used when deprecating properties from different configuration's path.\nTo deprecate properties from inside a plugin's configuration, use 'deprecate' instead.\n"
+            ],
+            "signature": [
+              "(deprecatedKey: string, removeBy: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
+              "ConfigDeprecation"
+            ],
+            "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ConfigDeprecationFactory.deprecateFromRoot.$1",
+                "type": "string",
+                "tags": [],
+                "label": "deprecatedKey",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ConfigDeprecationFactory.deprecateFromRoot.$2",
+                "type": "string",
+                "tags": [],
+                "label": "removeBy",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ConfigDeprecationFactory.deprecateFromRoot.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "details",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
+                ],
+                "path": "node_modules/@kbn/config/target_types/deprecation/types.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.ConfigDeprecationFactory.rename",
             "type": "Function",
             "tags": [],
