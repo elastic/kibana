@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, ChangeEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, ClickEvent, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -38,6 +38,8 @@ export function SeriesName({ series, seriesId }: Props) {
 
   const [value, setValue] = useState(series.name);
   const [isEditingEnabled, setIsEditingEnabled] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -49,16 +51,37 @@ export function SeriesName({ series, seriesId }: Props) {
     }
   };
 
+  const onOutsideClick = (event: ClickEvent) => {
+    if (event.target !== buttonRef.current) {
+      setIsEditingEnabled(false);
+    }
+  };
+
   useEffect(() => {
     setValue(series.name);
   }, [series.name]);
+
+  useEffect(() => {
+    if (isEditingEnabled && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditingEnabled, inputRef]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       {isEditingEnabled ? (
         <EuiFlexItem grow={false}>
-          <EuiOutsideClickDetector onOutsideClick={() => setIsEditingEnabled(false)}>
-            <EuiFieldText value={value} onChange={onChange} fullWidth onBlur={onSave} />
+          <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
+            <EuiFieldText
+              value={value}
+              onChange={onChange}
+              fullWidth
+              onBlur={onSave}
+              inputRef={inputRef}
+              aria-label={i18n.translate('xpack.observability.expView.seriesEditor.seriesName', {
+                defaultMessage: 'Series name',
+              })}
+            />
           </EuiOutsideClickDetector>
         </EuiFlexItem>
       ) : (
@@ -68,12 +91,13 @@ export function SeriesName({ series, seriesId }: Props) {
       )}
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          onClick={() => setIsEditingEnabled(true)}
+          onClick={() => setIsEditingEnabled(!isEditingEnabled)}
           iconType="pencil"
           aria-label={i18n.translate('xpack.observability.expView.seriesEditor.editName', {
             defaultMessage: 'Edit name',
           })}
           color="text"
+          buttonRef={buttonRef}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
