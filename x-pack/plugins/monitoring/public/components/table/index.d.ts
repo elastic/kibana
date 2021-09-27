@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('filebeat app', function () {
-    loadTestFile(require.resolve('./filebeat'));
-  });
-}
+export const euiTableStorageGetter: (string) => any;
+export const euiTableStorageSetter: (string) => any;
