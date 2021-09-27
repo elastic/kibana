@@ -117,7 +117,7 @@ export const createCaseSavedObjectType = (
         type: 'keyword',
       },
       title: {
-        type: 'keyword',
+        type: 'text',
       },
       status: {
         type: 'keyword',
