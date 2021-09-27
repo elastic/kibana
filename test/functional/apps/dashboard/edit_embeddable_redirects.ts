@@ -49,8 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(newPanelCount).to.eql(originalPanelCount);
       const titles = await PageObjects.dashboard.getPanelTitles();
-      const visibleTitles = titles.map((title) => title.split('\n')[1]);
-      expect(visibleTitles.indexOf(newTitle)).to.not.be(-1);
+      expect(titles.indexOf(newTitle)).to.not.be(-1);
     });
 
     it('redirects via save as button after edit, adding a new panel', async () => {
@@ -67,8 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(newPanelCount).to.eql(originalPanelCount + 1);
       const titles = await PageObjects.dashboard.getPanelTitles();
-      const visibleTitles = titles.map((title) => title.split('\n')[1]);
-      expect(visibleTitles.indexOf(newTitle)).to.not.be(-1);
+      expect(titles.indexOf(newTitle)).to.not.be(-1);
     });
 
     it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {

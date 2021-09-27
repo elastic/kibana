@@ -35,13 +35,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('clones a panel', async () => {
-      const initialPanelTitles = await PageObjects.dashboard.getVisiblePanelTitles();
+      const initialPanelTitles = await PageObjects.dashboard.getPanelTitles();
       await dashboardPanelActions.clonePanelByTitle(PIE_CHART_VIS_NAME);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      const postPanelTitles = await PageObjects.dashboard.getVisiblePanelTitles();
+      const postPanelTitles = await PageObjects.dashboard.getPanelTitles();
       expect(postPanelTitles.length).to.equal(initialPanelTitles.length + 1);
-      expect(postPanelTitles[1]).to.equal(PIE_CHART_VIS_NAME + ' (copy)');
+    });
+
+    it('appends a clone title tag', async () => {
+      const panelTitles = await PageObjects.dashboard.getPanelTitles();
+      expect(panelTitles[1]).to.equal(PIE_CHART_VIS_NAME + ' (copy)');
     });
 
     it('retains original panel dimensions', async () => {
@@ -50,12 +54,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('gives a correct title to the clone of a clone', async () => {
-      const initialPanelTitles = await PageObjects.dashboard.getVisiblePanelTitles();
+      const initialPanelTitles = await PageObjects.dashboard.getPanelTitles();
       const clonedPanelName = initialPanelTitles[initialPanelTitles.length - 1];
       await dashboardPanelActions.clonePanelByTitle(clonedPanelName);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      const postPanelTitles = await PageObjects.dashboard.getVisiblePanelTitles();
+      const postPanelTitles = await PageObjects.dashboard.getPanelTitles();
       expect(postPanelTitles.length).to.equal(initialPanelTitles.length + 1);
       expect(postPanelTitles[postPanelTitles.length - 1]).to.equal(
         PIE_CHART_VIS_NAME + ' (copy 1)'

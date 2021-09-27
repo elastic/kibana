@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.waitFor('first cell contains expected timestamp', async () => {
           const cell = await dataGrid.getCellElement(1, 3);
-          const text = (await cell.getVisibleText()).split('\n')[0];
+          const text = await cell.getVisibleText();
           return text === expectedTimeStamp;
         });
       });

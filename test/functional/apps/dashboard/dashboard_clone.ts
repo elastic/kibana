@@ -40,8 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
       await retry.try(async () => {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
-        const visiblePanelTitles = panelTitles.map((title) => title.split('\n')[1]);
-        expect(visiblePanelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
+        expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
       });
     });
 
