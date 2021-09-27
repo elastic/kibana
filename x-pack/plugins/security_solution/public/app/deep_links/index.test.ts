@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getDeepLinks, PREMIUM_DEEP_LINKS_IDS } from '.';
+import { getDeepLinks, PREMIUM_DEEP_LINK_IDS } from '.';
 import { AppDeepLink, Capabilities } from '../../../../../../src/core/public';
 import { SecurityPageName } from '../types';
 import { mockGlobalState } from '../../common/mock';
@@ -49,7 +49,7 @@ describe('deepLinks', () => {
     };
     testAllBasicInPlatinum(basicLinks, platinumLinks);
 
-    PREMIUM_DEEP_LINKS_IDS.forEach((premiumDeepLinkId) => {
+    PREMIUM_DEEP_LINK_IDS.forEach((premiumDeepLinkId) => {
       expect(findDeepLink(premiumDeepLinkId, platinumLinks)).toBeTruthy();
       expect(findDeepLink(premiumDeepLinkId, basicLinks)).toBeFalsy();
     });

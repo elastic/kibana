@@ -47,11 +47,11 @@ import {
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
-export const PREMIUM_DEEP_LINKS_IDS: string[] = [
+export const PREMIUM_DEEP_LINK_IDS: Set<string> = new Set([
   SecurityPageName.hostsAnomalies,
   SecurityPageName.networkAnomalies,
   SecurityPageName.caseConfigure,
-];
+]);
 
 export const securitySolutionsDeepLinks: AppDeepLink[] = [
   {
@@ -354,7 +354,7 @@ export function getDeepLinks(
   const filterDeepLinks = (deepLinks: AppDeepLink[]): AppDeepLink[] => {
     return deepLinks
       .filter((deepLink) => {
-        if (!isPremium && PREMIUM_DEEP_LINKS_IDS.includes(deepLink.id)) {
+        if (!isPremium && PREMIUM_DEEP_LINK_IDS.has(deepLink.id)) {
           return false;
         }
         if (deepLink.id === SecurityPageName.case) {
