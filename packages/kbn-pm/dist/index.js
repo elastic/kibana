@@ -9098,6 +9098,7 @@ class CiStatsReporter {
     const upstreamBranch = (_options$upstreamBran = options.upstreamBranch) !== null && _options$upstreamBran !== void 0 ? _options$upstreamBran : this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
+    let branch;
 
     try {
       const {
@@ -9108,6 +9109,17 @@ class CiStatsReporter {
       this.log.debug(e.message);
     }
 
+    try {
+      const {
+        stdout
+      } = await (0, _execa.default)('git', ['branch', '--show-current']);
+      branch = stdout;
+      console.log('------------------------------------', branch);
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    const memUsage = process.memoryUsage();
     const defaultMetadata = {
       osPlatform: _os.default.platform(),
       osRelease: _os.default.release(),
@@ -9117,6 +9129,12 @@ class CiStatsReporter {
       cpuSpeed: (_Os$cpus$2 = _os.default.cpus()[0]) === null || _Os$cpus$2 === void 0 ? void 0 : _Os$cpus$2.speed,
       freeMem: _os.default.freemem(),
       totalMem: _os.default.totalmem(),
+      memoryUsageRss: memUsage.rss,
+      memoryUsageHeapTotal: memUsage.heapTotal,
+      memoryUsageHeapUsed: memUsage.heapUsed,
+      memoryUsageExternal: memUsage.external,
+      memoryUsageArrayBuffers: memUsage.arrayBuffers,
+      branchHash: branch ? _crypto.default.createHash('sha256').update(branch).digest('hex').substring(0, 20) : undefined,
       committerHash: email ? _crypto.default.createHash('sha256').update(email).digest('hex').substring(0, 20) : undefined,
       isElasticCommitter: email ? email.endsWith('@elastic.co') : undefined,
       kibanaUuid

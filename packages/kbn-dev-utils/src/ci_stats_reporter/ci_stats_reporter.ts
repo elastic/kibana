@@ -82,6 +82,7 @@ export class CiStatsReporter {
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
+    let branch;
 
     try {
       const { stdout } = await execa('git', ['config', 'user.email']);
@@ -90,6 +91,14 @@ export class CiStatsReporter {
       this.log.debug(e.message);
     }
 
+    try {
+      const { stdout } = await execa('git', ['branch', '--show-current']);
+      branch = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    const memUsage = process.memoryUsage();
     const defaultMetadata = {
       osPlatform: Os.platform(),
       osRelease: Os.release(),
@@ -99,6 +108,14 @@ export class CiStatsReporter {
       cpuSpeed: Os.cpus()[0]?.speed,
       freeMem: Os.freemem(),
       totalMem: Os.totalmem(),
+      memoryUsageRss: memUsage.rss,
+      memoryUsageHeapTotal: memUsage.heapTotal,
+      memoryUsageHeapUsed: memUsage.heapUsed,
+      memoryUsageExternal: memUsage.external,
+      memoryUsageArrayBuffers: memUsage.arrayBuffers,
+      branchHash: branch
+        ? crypto.createHash('sha256').update(branch).digest('hex').substring(0, 20)
+        : undefined,
       committerHash: email
         ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
         : undefined,
