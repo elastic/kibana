@@ -26,7 +26,7 @@ export const useKibana = <Extra extends object = {}>(): KibanaReactContextValue<
 > =>
   useContext(context as unknown as React.Context<KibanaReactContextValue<KibanaServices & Extra>>);
 
-export const withKibana = <Props extends { kibana: KibanaReactContextValue<any> }>(
+export const withKibana = <Props extends { kibana: KibanaReactContextValue<{}> }>(
   type: React.ComponentType<Props>
 ): React.FC<Omit<Props, 'kibana'>> => {
   const EnhancedType: React.FC<Omit<Props, 'kibana'>> = (props: Omit<Props, 'kibana'>) => {
@@ -35,10 +35,6 @@ export const withKibana = <Props extends { kibana: KibanaReactContextValue<any> 
   };
   return EnhancedType;
 };
-
-export const UseKibana: React.FC<{
-  children: (kibana: KibanaReactContextValue<any>) => React.ReactNode;
-}> = ({ children }) => <>{children(useKibana())}</>;
 
 export const createKibanaReactContext = <Services extends KibanaServices>(
   services: Services
@@ -58,7 +54,7 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
       () => createKibanaReactContext({ ...services, ...oldValue.services, ...newServices }),
       [services, oldValue, newServices]
     );
-    return createElement(context.Provider as React.ComponentType<any>, {
+    return createElement(context.Provider, {
       value: newValue,
       children,
     });

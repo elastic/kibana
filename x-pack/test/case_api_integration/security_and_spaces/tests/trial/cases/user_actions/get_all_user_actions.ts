@@ -108,8 +108,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body[1].action_field).to.eql(['pushed']);
       expect(body[1].action).to.eql('push-to-service');
       expect(body[1].old_value).to.eql(null);
+      expect(body[1].old_val_connector_id).to.eql(null);
+      expect(body[1].new_val_connector_id).to.eql(configure.connector.id);
       const newValue = JSON.parse(body[1].new_value);
-      expect(newValue.connector_id).to.eql(configure.connector.id);
+      expect(newValue).to.not.have.property('connector_id');
       expect(newValue.pushed_by).to.eql(defaultUser);
     });
   });
