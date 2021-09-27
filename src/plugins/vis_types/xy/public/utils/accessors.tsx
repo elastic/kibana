@@ -7,7 +7,8 @@
  */
 
 import { AccessorFn, Accessor } from '@elastic/charts';
-import { BUCKET_TYPES } from '../../../../data/public';
+import { DatatableColumn } from '../../../../expressions';
+import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FakeParams } from '../../../../visualizations/public';
 import { Aspect } from '../types';
 
@@ -28,8 +29,25 @@ const getFieldName = (fieldName: string, index?: number) => {
   return `${fieldName}${indexStr}`;
 };
 
-export const isRangeAggType = (type: string | null) =>
-  type === BUCKET_TYPES.DATE_RANGE || type === BUCKET_TYPES.RANGE || type === BUCKET_TYPES.IP_RANGE;
+export const isSimpleField = (format: Aspect['format']) => {
+  const simpleFormats: string[] = [
+    KBN_FIELD_TYPES.STRING,
+    KBN_FIELD_TYPES.NUMBER,
+    KBN_FIELD_TYPES.DATE,
+    KBN_FIELD_TYPES.BOOLEAN,
+  ];
+  return simpleFormats.includes(format?.id ?? '');
+};
+
+export const applyFormatter = (aspect: Aspect, value: unknown, shouldApply: boolean = true) =>
+  shouldApply ? aspect.formatter?.(value) ?? value : value;
+
+export const applyFormatterIfSimpleField = (aspect: Aspect, value: unknown) =>
+  applyFormatter(aspect, value, isSimpleField(aspect.format));
+
+// complex field is a field, which has some specific structure, as `range`, for example, not pure value
+export const applyFormatterIfComplexField = (aspect: Aspect, value: unknown) =>
+  applyFormatter(aspect, value, !isSimpleField(aspect.format));
 
 /**
  * Returns accessor function for complex accessor types
@@ -37,27 +55,26 @@ export const isRangeAggType = (type: string | null) =>
  * @param isComplex - forces to be functional/complex accessor
  */
 export const getComplexAccessor =
-  (fieldName: string, isComplex: boolean = false) =>
-  (aspect: Aspect, index?: number): Accessor | AccessorFn | undefined => {
-    if (!aspect.accessor || aspect.aggType === SHARD_DELAY) {
+  (fieldName: string) =>
+  (aspect: Aspect, index?: number): AccessorFn | undefined => {
+    // SHARD_DELAY is used only for dev purpose and need to handle separately.
+    if (aspect.accessor === null || aspect.accessor === undefined || aspect.title === SHARD_DELAY) {
       return;
     }
-
-    if (!((isComplex || isRangeAggType(aspect.aggType)) && aspect.formatter)) {
-      return aspect.accessor;
-    }
-
-    const formatter = aspect.formatter;
     const accessor = aspect.accessor;
+
     const fn: AccessorFn = (d) => {
       const v = d[accessor];
       if (v === undefined) {
         return;
       }
-      const f = formatter(v);
-      return f;
+      // Because of the specific logic of chart, it cannot compare complex values to display,
+      // thats why it is necessary to apply formatters before its comparison while rendering.
+      // What about simple values, formatting them at this step is breaking the logic of intervals (xDomain).
+      // If the value will be formatted on this step, it will be rendered without any respect to the passed bounds
+      // and the chart will render not all the range, but only the part of range, which contains data.
+      return applyFormatterIfComplexField(aspect, v);
     };
-
     fn.fieldName = getFieldName(fieldName, index);
 
     return fn;
@@ -77,3 +94,19 @@ export const getSplitSeriesAccessorFnMap = (
 
   return m;
 };
+
+// For percentile aggregation id is comming in the form `%d.%d`, where first `%d` is `id` and the second - `percents`
+export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
+  columnId.toString().split('.')[0] === seriesColumnId;
+
+export const isValidSeriesForDimension =
+  (seriesColumnId: string) =>
+  ({
+    id,
+    accessor,
+  }: {
+    id?: string | number;
+    accessor?: string | number | DatatableColumn | null;
+  }) =>
+    (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
+    accessor !== null;

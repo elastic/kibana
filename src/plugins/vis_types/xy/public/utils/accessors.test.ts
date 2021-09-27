@@ -7,95 +7,101 @@
  */
 
 import { COMPLEX_SPLIT_ACCESSOR, getComplexAccessor } from './accessors';
-import { BUCKET_TYPES } from '../../../../data/common';
 import { AccessorFn, Datum } from '@elastic/charts';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 describe('XY chart datum accessors', () => {
+  const formatter = (val: Datum) => JSON.stringify(val);
   const aspectBase = {
     accessor: 'col-0-2',
-    formatter: (value: Datum) => value,
-    aggId: '',
+    formatter,
+    id: '',
     title: '',
     params: {},
   };
 
-  it('should return complex accessor for IP range aggregation', () => {
+  const shouldNotApplyFormatterForNotComplexField = (type: string) => {
     const aspect = {
-      aggType: BUCKET_TYPES.IP_RANGE,
       ...aspectBase,
+      format: { id: type },
+    };
+    const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
+    const val = 'data';
+    const datum = { 'col-0-2': val };
+    expect(accessor?.(datum)).toBe(val);
+  };
+
+  it('should format IP range aggregation', () => {
+    const aspect = {
+      ...aspectBase,
+      format: { id: 'range' },
     };
     const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
     const datum = {
       'col-0-2': { type: 'range', from: '0.0.0.0', to: '127.255.255.255' },
     };
 
-    expect(typeof accessor).toBe('function');
-    expect((accessor as AccessorFn)(datum)).toStrictEqual({
-      type: 'range',
-      from: '0.0.0.0',
-      to: '127.255.255.255',
-    });
+    expect((accessor as AccessorFn)(datum)).toStrictEqual(
+      formatter({
+        type: 'range',
+        from: '0.0.0.0',
+        to: '127.255.255.255',
+      })
+    );
   });
 
-  it('should return complex accessor for date range aggregation', () => {
+  it('should format date range aggregation', () => {
     const aspect = {
-      aggType: BUCKET_TYPES.DATE_RANGE,
       ...aspectBase,
+      format: { id: 'date_range' },
     };
     const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
     const datum = {
       'col-0-2': { from: '1613941200000', to: '1614685113537' },
     };
 
-    expect(typeof accessor).toBe('function');
-    expect((accessor as AccessorFn)(datum)).toStrictEqual({
-      from: '1613941200000',
-      to: '1614685113537',
-    });
+    expect((accessor as AccessorFn)(datum)).toStrictEqual(
+      formatter({
+        from: '1613941200000',
+        to: '1614685113537',
+      })
+    );
   });
 
-  it('should return complex accessor when isComplex option set to true', () => {
+  it(`should not apply formatter for not complex field: ${KBN_FIELD_TYPES.STRING}`, () =>
+    shouldNotApplyFormatterForNotComplexField(KBN_FIELD_TYPES.STRING));
+
+  it(`should not apply formatter for not complex field: ${KBN_FIELD_TYPES.NUMBER}`, () =>
+    shouldNotApplyFormatterForNotComplexField(KBN_FIELD_TYPES.NUMBER));
+
+  it(`should not apply formatter for not complex field: ${KBN_FIELD_TYPES.DATE}`, () =>
+    shouldNotApplyFormatterForNotComplexField(KBN_FIELD_TYPES.DATE));
+
+  it(`should not apply formatter for not complex field: ${KBN_FIELD_TYPES.BOOLEAN}`, () =>
+    shouldNotApplyFormatterForNotComplexField(KBN_FIELD_TYPES.BOOLEAN));
+
+  it('should return simple string when aspect has no formatter', () => {
     const aspect = {
-      aggType: BUCKET_TYPES.TERMS,
-      ...aspectBase,
-    };
-    const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(aspect);
-
-    expect(typeof accessor).toBe('function');
-    expect((accessor as AccessorFn)({ 'col-0-2': 'some value' })).toBe('some value');
-  });
-
-  it('should return simple string accessor for not range (date histogram) aggregation', () => {
-    const aspect = {
-      aggType: BUCKET_TYPES.DATE_HISTOGRAM,
-      ...aspectBase,
-    };
-    const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
-
-    expect(typeof accessor).toBe('string');
-    expect(accessor).toBe('col-0-2');
-  });
-
-  it('should return simple string accessor when aspect has no formatter', () => {
-    const aspect = {
-      aggType: BUCKET_TYPES.RANGE,
       ...aspectBase,
       formatter: undefined,
     };
     const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
 
-    expect(typeof accessor).toBe('string');
-    expect(accessor).toBe('col-0-2');
+    const val = 'data';
+    const datum = { 'col-0-2': val };
+
+    expect(accessor?.(datum)).toBe(val);
   });
 
   it('should return undefined when aspect has no accessor', () => {
     const aspect = {
-      aggType: BUCKET_TYPES.RANGE,
       ...aspectBase,
       accessor: null,
     };
+    const datum = { 'col-0-2': 'data' };
+
     const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
 
-    expect(accessor).toBeUndefined();
+    expect(accessor?.(datum)).toBeUndefined();
   });
 });

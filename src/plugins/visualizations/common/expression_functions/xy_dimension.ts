@@ -42,6 +42,7 @@ interface Arguments {
   params: string;
   aggType: string;
   label: string;
+  id?: number | string;
 }
 
 export type ExpressionValueXYDimension = ExpressionValueBoxed<
@@ -52,7 +53,8 @@ export type ExpressionValueXYDimension = ExpressionValueBoxed<
     params: DateHistogramParams | HistogramParams | FakeParams | {};
     accessor: number | DatatableColumn;
     format: SerializedFieldFormat;
-  }
+    id?: number | string;
+  } & { params: { integersOnly?: boolean } }
 >;
 
 export const xyDimension = (): ExpressionFunctionDefinition<
@@ -93,6 +95,12 @@ export const xyDimension = (): ExpressionFunctionDefinition<
         defaultMessage: 'Params',
       }),
     },
+    id: {
+      types: ['string', 'number'],
+      help: i18n.translate('visualizations.function.xyDimension.id.help', {
+        defaultMessage: 'ID',
+      }),
+    },
   },
   fn: (context, args) => {
     return {
@@ -102,6 +110,7 @@ export const xyDimension = (): ExpressionFunctionDefinition<
       params: JSON.parse(args.params!),
       accessor: args.visDimension.accessor as number,
       format: args.visDimension.format,
+      id: args.id,
     };
   },
 });

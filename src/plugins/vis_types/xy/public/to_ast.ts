@@ -28,6 +28,7 @@ import {
   ValueAxis,
   Scale,
   TimeMarker,
+  AxisMode,
 } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
 import { XyVisType } from '../common';
@@ -123,9 +124,9 @@ const prepareVisDimension = (data: Dimension) => {
 const prepareXYDimension = (data: Dimension) => {
   const xyDimension = buildExpressionFunction('xydimension', {
     params: JSON.stringify(data.params),
-    aggType: data.aggType,
     label: data.label,
     visDimension: prepareVisDimension(data),
+    id: data.id,
   });
 
   return buildExpression([xyDimension]);
@@ -145,8 +146,12 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const responseAggs = vis.data.aggs?.getResponseAggs().filter(({ enabled }) => enabled) ?? [];
 
-  if (dimensions.x) {
-    const xAgg = responseAggs[dimensions.x.accessor] as any;
+  const xAgg = dimensions.x ? (responseAggs[dimensions.x?.accessor] as any) : null;
+  const enableHistogramMode = [BUCKET_TYPES.HISTOGRAM, BUCKET_TYPES.DATE_HISTOGRAM].includes(
+    xAgg?.type?.name
+  );
+
+  if (dimensions.x && xAgg) {
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
       (dimensions.x.params as DateHistogramParams).date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
@@ -184,9 +189,18 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
       const usedValueAxis = (vis.params.valueAxes || []).find(
         (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
       );
-      if (usedValueAxis?.scale.mode === 'percentage') {
+      if (usedValueAxis?.scale.mode === AxisMode.Percentage) {
         yDimension.format = { id: 'percent' };
       }
+    }
+    // if aggType is 'Count', need to display only integers at y-axis
+    // prevent from displaying floats on small charts with small step
+    if (yDimension.aggType === 'count') {
+      if (!yDimension.params) {
+        yDimension.params = {};
+      }
+
+      yDimension.params.integersOnly = true;
     }
   });
 
@@ -221,6 +235,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     seriesDimension: dimensions.series?.map(prepareXYDimension),
     splitRowDimension: dimensions.splitRow?.map(prepareXYDimension),
     splitColumnDimension: dimensions.splitColumn?.map(prepareXYDimension),
+    enableHistogramMode,
   });
 
   const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);

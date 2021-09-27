@@ -14,13 +14,10 @@ import { DatatableColumn } from '../../../../expressions/public';
 
 import { Aspect, Dimension, Aspects, Dimensions } from '../types';
 import { getFormatService } from '../services';
-import { getAggId } from './get_agg_id';
 
 export function getEmptyAspect(): Aspect {
   return {
     accessor: null,
-    aggId: null,
-    aggType: null,
     title: i18n.translate('visTypeXy.aggResponse.allDocsTitle', {
       defaultMessage: 'All docs',
     }),
@@ -76,14 +73,13 @@ function getAspectsFromDimension(
 
 const getAspect = (
   { id: accessor, name: title }: DatatableColumn,
-  { accessor: column, format, params, aggType }: Dimension
+  { accessor: column, format, params, id }: Dimension
 ): Aspect => ({
   accessor,
   column,
   title,
   format,
-  aggType,
-  aggId: getAggId(accessor),
   formatter: (value: any) => getFormatService().deserialize(format).convert(value),
   params,
+  id,
 });

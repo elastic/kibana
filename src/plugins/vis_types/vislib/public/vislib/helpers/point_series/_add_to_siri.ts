@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { getAggId } from '../../../../../xy/public';
 import type { Dimension } from '../../../../../xy/public';
-
+import { getAggId } from './get_agg_id';
 import { Point } from './_get_point';
 
 export interface Serie {

@@ -31,8 +31,7 @@ export const getVisConfig = (): VisConfig => {
             pattern: 'HH:mm',
           },
         },
-        aggType: 'date_histogram',
-        aggId: '2',
+        id: '2',
         params: {
           date: true,
           intervalESUnit: 'm',
@@ -49,8 +48,7 @@ export const getVisConfig = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'avg',
-          aggId: '3',
+          id: '3',
           params: {},
         },
       ],
@@ -154,8 +152,7 @@ export const getVisConfigMutipleYaxis = (): VisConfig => {
             pattern: 'HH:mm',
           },
         },
-        aggType: 'date_histogram',
-        aggId: '2',
+        id: '2',
         params: {
           date: true,
           intervalESUnit: 'm',
@@ -172,8 +169,7 @@ export const getVisConfigMutipleYaxis = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'avg',
-          aggId: '3',
+          id: '3',
           params: {},
         },
         {
@@ -183,8 +179,7 @@ export const getVisConfigMutipleYaxis = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'avg',
-          aggId: '33',
+          id: '33',
           params: {},
         },
       ],
@@ -288,8 +283,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
             pattern: 'HH:mm',
           },
         },
-        aggType: 'date_histogram',
-        aggId: '2',
+        id: '2',
         params: {
           date: true,
           intervalESUnit: 'm',
@@ -306,8 +300,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'percentiles',
-          aggId: '3.1',
+          id: '3.1',
           params: {},
         },
         {
@@ -317,8 +310,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'percentiles',
-          aggId: '3.5',
+          id: '3.5',
           params: {},
         },
         {
@@ -328,8 +320,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'percentiles',
-          aggId: '3.25',
+          id: '3.25',
           params: {},
         },
         {
@@ -339,8 +330,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'percentiles',
-          aggId: '3.50',
+          id: '3.50',
           params: {},
         },
         {
@@ -350,8 +340,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'percentiles',
-          aggId: '3.75',
+          id: '3.75',
           params: {},
         },
         {
@@ -361,8 +350,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'percentiles',
-          aggId: '3.95',
+          id: '3.95',
           params: {},
         },
         {
@@ -372,8 +360,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
           format: {
             id: 'number',
           },
-          aggType: 'percentiles',
-          aggId: '3.99',
+          id: '3.99',
           params: {},
         },
       ],

@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { FieldFormatsStart } from '../../../field_formats/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../../visualizations/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../charts/public';
@@ -47,6 +48,7 @@ export interface VisTypeXyPluginStartDependencies {
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, VisTypeXyPluginStart>;
@@ -86,8 +88,8 @@ export class VisTypeXyPlugin
     return {};
   }
 
-  public start(core: CoreStart, { data, charts }: VisTypeXyPluginStartDependencies) {
-    setFormatService(data.fieldFormats);
+  public start(core: CoreStart, { data, charts, fieldFormats }: VisTypeXyPluginStartDependencies) {
+    setFormatService(fieldFormats);
     setDataActions(data.actions);
     setDocLinks(core.docLinks);
     setActiveCursor(charts.activeCursor);
