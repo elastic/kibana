@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import useAsync from 'react-use/lib/useAsync';
+
 import { epmRouteService } from '../../services';
 import type {
   GetCategoriesRequest,
@@ -20,7 +22,14 @@ import type {
 } from '../../types';
 import type { GetStatsResponse } from '../../../common';
 
+import { getCustomIntegrations } from '../../services/custom_integrations';
+
 import { useRequest, sendRequest } from './use_request';
+
+export function useGetAddableCustomIntegrations() {
+  const customIntegrations = getCustomIntegrations();
+  return useAsync(customIntegrations.getAppendCustomIntegrations, []);
+}
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({
