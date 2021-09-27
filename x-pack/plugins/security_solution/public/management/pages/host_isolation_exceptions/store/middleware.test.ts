@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-/* import type {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types'; */
 import { applyMiddleware, createStore, Store } from 'redux';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-// import { Immutable } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import {
   createSpyMiddleware,
   MiddlewareActionSpyHelper,
 } from '../../../../common/store/test_utils';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
-import { getHostIsolationExceptionsList } from '../service';
+import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 import { initialHostIsolationExceptionsPageState } from './builders';
 import { createHostIsolationExceptionsPageMiddleware } from './middleware';
@@ -28,7 +23,7 @@ import { hostIsolationExceptionsPageReducer } from './reducer';
 import { getListFetchError } from './selector';
 
 jest.mock('../service');
-const getHostIsolationExceptionsListMock = getHostIsolationExceptionsList as jest.Mock;
+const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 
 const fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
 
@@ -81,8 +76,8 @@ describe('Host isolation exceptions middleware', () => {
     };
 
     beforeEach(() => {
-      getHostIsolationExceptionsListMock.mockClear();
-      getHostIsolationExceptionsListMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+      getHostIsolationExceptionItemsMock.mockClear();
+      getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
     });
 
     it.each([
@@ -98,7 +93,7 @@ describe('Host isolation exceptions middleware', () => {
           },
         });
 
-        expect(getHostIsolationExceptionsListMock).toHaveBeenCalledWith(
+        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledWith(
           expect.objectContaining({
             page: (pageIndex ?? 0) + 1,
             perPage: perPage ?? 10,
@@ -115,7 +110,7 @@ describe('Host isolation exceptions middleware', () => {
           return isLoadedResourceState(payload);
         },
       });
-      expect(getHostIsolationExceptionsListMock).toHaveBeenCalledWith(
+      expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledWith(
         expect.objectContaining({
           page: 1,
           perPage: 10,
@@ -126,7 +121,7 @@ describe('Host isolation exceptions middleware', () => {
     });
 
     it('should dispatch a Failure if an API error was encountered', async () => {
-      getHostIsolationExceptionsListMock.mockRejectedValue({
+      getHostIsolationExceptionItemsMock.mockRejectedValue({
         body: { message: 'error message', statusCode: 500, error: 'Internal Server Error' },
       });
 

@@ -9,25 +9,24 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
-import { HostIsolationExceptions } from './host_isolation_exceptions';
+import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
-import { getHostIsolationExceptionsList } from '../service';
+import { getHostIsolationExceptionItems } from '../service';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 
 jest.mock('../service');
-const getHostIsolationExceptionsListMock = getHostIsolationExceptionsList as jest.Mock;
+const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 
 describe('When on the host isolation exceptions page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
-  // let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
   beforeEach(() => {
-    getHostIsolationExceptionsListMock.mockReset();
+    getHostIsolationExceptionItemsMock.mockReset();
     const mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
-    render = () => (renderResult = mockedContext.render(<HostIsolationExceptions />));
+    render = () => (renderResult = mockedContext.render(<HostIsolationExceptionsList />));
     waitForAction = mockedContext.middlewareSpy.waitForAction;
 
     act(() => {
@@ -45,7 +44,7 @@ describe('When on the host isolation exceptions page', () => {
       });
     describe('And no data exists', () => {
       beforeEach(async () => {
-        getHostIsolationExceptionsListMock.mockReturnValue({
+        getHostIsolationExceptionItemsMock.mockReturnValue({
           data: [],
           page: 1,
           per_page: 10,
@@ -61,12 +60,12 @@ describe('When on the host isolation exceptions page', () => {
     });
     describe('And data exists', () => {
       beforeEach(async () => {
-        getHostIsolationExceptionsListMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       });
       it('should show loading indicator while retrieving data', async () => {
         let releaseApiResponse: (value?: unknown) => void;
 
-        getHostIsolationExceptionsListMock.mockReturnValue(
+        getHostIsolationExceptionItemsMock.mockReturnValue(
           new Promise((resolve) => (releaseApiResponse = resolve))
         );
         render();
@@ -86,7 +85,7 @@ describe('When on the host isolation exceptions page', () => {
         expect(renderResult.getByTestId('hostIsolationExceptionsCard')).toBeTruthy();
       });
       it('should show API error if one is encountered', async () => {
-        getHostIsolationExceptionsListMock.mockImplementation(() => {
+        getHostIsolationExceptionItemsMock.mockImplementation(() => {
           throw new Error('Server is too far away');
         });
         const errorDispatched = act(async () => {

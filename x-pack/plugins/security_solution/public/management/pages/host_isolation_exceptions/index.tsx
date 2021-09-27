@@ -9,7 +9,7 @@ import { Switch, Route } from 'react-router-dom';
 import React, { memo } from 'react';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
-import { HostIsolationExceptions } from './view/host_isolation_exceptions';
+import { HostIsolationExceptionsList } from './view/host_isolation_exceptions_list';
 
 /**
  * Provides the routing container for the hosts related views
@@ -20,7 +20,7 @@ export const HostIsolationExceptionsContainer = memo(() => {
       <Route
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         exact
-        component={HostIsolationExceptions}
+        component={HostIsolationExceptionsList}
       />
       <Route path="*" component={NotFoundPage} />
     </Switch>

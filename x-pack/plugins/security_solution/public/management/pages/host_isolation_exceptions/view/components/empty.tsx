@@ -39,4 +39,4 @@ export const HostIsolationExceptionsEmptyState = memo<{}>(() => {
   );
 });
 
-HostIsolationExceptionsEmptyState.displayName = 'EventFiltersListEmptyState';
+HostIsolationExceptionsEmptyState.displayName = 'HostIsolationExceptionsEmptyState';

@@ -37,7 +37,7 @@ async function ensureHostIsolationExceptionsListExists(http: HttpStart) {
   return createHostIsolationExceptionList(http);
 }
 
-export async function getHostIsolationExceptionsList({
+export async function getHostIsolationExceptionItems({
   http,
   perPage,
   page,

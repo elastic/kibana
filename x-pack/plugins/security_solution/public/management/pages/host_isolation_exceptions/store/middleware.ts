@@ -17,7 +17,7 @@ import {
   createFailedResourceState,
   createLoadedResourceState,
 } from '../../../state/async_resource_builders';
-import { getHostIsolationExceptionsList } from '../service';
+import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 import { getCurrentListPageDataState, getCurrentLocation } from './selector';
 
@@ -68,7 +68,7 @@ async function loadHostIsolationExceptionsList(
       },
     });
 
-    const entries = await getHostIsolationExceptionsList(query);
+    const entries = await getHostIsolationExceptionItems(query);
 
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',

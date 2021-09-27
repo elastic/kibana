@@ -34,7 +34,7 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   typeof ExceptionItem
 >;
 
-export const HostIsolationExceptions = () => {
+export const HostIsolationExceptionsList = () => {
   const listItems = useHostIsolationExceptionsSelector(getListItems);
   const pagination = useHostIsolationExceptionsSelector(getListPagination);
   const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
@@ -86,8 +86,7 @@ export const HostIsolationExceptions = () => {
           }
         )}
       />
-      <EuiSpacer size="m" />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
         items={listItems}
         ItemComponent={ArtifactEntryCard}
@@ -104,4 +103,4 @@ export const HostIsolationExceptions = () => {
   );
 };
 
-HostIsolationExceptions.displayName = 'HostIsolationExceptions';
+HostIsolationExceptionsList.displayName = 'HostIsolationExceptionsList';
