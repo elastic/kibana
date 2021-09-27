@@ -54,7 +54,7 @@
             "unit" : "minute"
           }
         },
-        "transaction.duration.us" : {
+        "transaction_duration" : {
           "avg" : {
             "field" : "transaction.duration.histogram"
           }
@@ -80,7 +80,7 @@
             }
           }
         },
-        "percent_failure" : {
+        "transaction_failure_percentage" : {
           "bucket_script" : {
             "buckets_path" : {
               "failure_count" : "error_count>_count",

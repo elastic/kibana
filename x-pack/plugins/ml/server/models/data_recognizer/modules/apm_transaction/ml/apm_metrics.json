@@ -11,7 +11,7 @@
       {
         "detector_description" : "high duration by transaction type for an APM service",
         "function" : "high_mean",
-        "field_name" : "transaction.duration.us",
+        "field_name" : "transaction_duration",
         "by_field_name" : "transaction.type",
         "partition_field_name" : "service.name"
       },
@@ -25,7 +25,7 @@
       {
         "detector_description" : "percent failed for an APM service",
         "function" : "high_mean",
-        "field_name" : "percent_failure",
+        "field_name" : "transaction_failure_percentage",
         "by_field_name" : "transaction.type",
         "partition_field_name" : "service.name"
       }
