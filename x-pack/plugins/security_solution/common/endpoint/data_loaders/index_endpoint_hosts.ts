@@ -181,6 +181,14 @@ export async function indexEndpointHostDocs({
       await indexFleetActionsForHost(client, hostMetadata);
     }
 
+    hostMetadata = {
+      ...hostMetadata,
+      // since the united transform uses latest metadata transform as a source
+      // there is an extra delay and fleet-agents gets populated much sooner.
+      // we manually add a delay to the time sync field so that the united transform
+      // will pick up the latest metadata doc.
+      '@timestamp': hostMetadata['@timestamp'] + 60000,
+    };
     await client
       .index({
         index: metadataIndex,

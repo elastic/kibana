@@ -20,6 +20,9 @@ export const metadataTransformPrefix = 'endpoint.metadata_current-default';
 /** The metadata Transform Name prefix with NO namespace and NO (package) version) */
 export const metadataTransformPattern = 'endpoint.metadata_current-*';
 
+export const METADATA_UNITED_TRANSFORM = 'endpoint.metadata_united-default';
+export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default';
+
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 export const LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG = 'endpoint:limited-concurrency';
