@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsType } from '../../../../../../../src/core/server';
-import { timelinesMigrations } from './migrations';
+import { timelinesMigrations } from './migrations/timelines';
 
 export const timelineSavedObjectType = 'siem-ui-timeline';
 
