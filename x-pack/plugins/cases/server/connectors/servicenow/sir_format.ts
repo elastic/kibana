@@ -68,5 +68,7 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
     category,
     subcategory,
     priority,
+    correlation_id: theCase.id,
+    correlation_display: 'Elastic Case',
   };
 };

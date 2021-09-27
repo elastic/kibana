@@ -8,7 +8,12 @@
 import { ServiceNowITSMFieldsType } from '../../../common';
 import { ICasesConnector } from '../types';
 
-export interface ServiceNowSIRFieldsType {
+interface CorrelationValues {
+  correlation_id: string | null;
+  correlation_display: string | null;
+}
+
+export interface ServiceNowSIRFieldsType extends CorrelationValues {
   dest_ip: string | null;
   source_ip: string | null;
   category: string | null;
@@ -26,7 +31,9 @@ export type AlertFieldMappingAndValues = Record<
 
 // ServiceNow ITSM
 export type ServiceNowITSMCasesConnector = ICasesConnector<ServiceNowITSMFieldsType>;
-export type ServiceNowITSMFormat = ICasesConnector<ServiceNowITSMFieldsType>['format'];
+export type ServiceNowITSMFormat = ICasesConnector<
+  ServiceNowITSMFieldsType & CorrelationValues
+>['format'];
 export type ServiceNowITSMGetMapping = ICasesConnector<ServiceNowITSMFieldsType>['getMapping'];
 
 // ServiceNow SIR
