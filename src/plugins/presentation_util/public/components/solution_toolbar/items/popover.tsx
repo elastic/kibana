@@ -18,13 +18,17 @@ type AllowedPopoverProps = Omit<
   'button' | 'isOpen' | 'closePopover' | 'anchorPosition'
 >;
 
-export type Props = AllowedButtonProps & AllowedPopoverProps;
+export type Props = AllowedButtonProps &
+  AllowedPopoverProps & {
+    children: (arg: { closePopover: () => void }) => React.ReactNode;
+  };
 
 export const SolutionToolbarPopover = ({
   label,
   iconType,
   primary,
   iconSide,
+  children,
   ...popover
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +41,13 @@ export const SolutionToolbarPopover = ({
   );
 
   return (
-    <EuiPopover anchorPosition="downLeft" {...{ isOpen, button, closePopover }} {...popover} />
+    <EuiPopover
+      anchorPosition="downLeft"
+      panelPaddingSize="none"
+      {...{ isOpen, button, closePopover }}
+      {...popover}
+    >
+      {children({ closePopover })}
+    </EuiPopover>
   );
 };
