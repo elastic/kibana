@@ -14,12 +14,12 @@ interface CorrelationValues {
 }
 
 export interface ServiceNowSIRFieldsType extends CorrelationValues {
-  dest_ip: string | null;
-  source_ip: string | null;
+  dest_ip: string[] | null;
+  source_ip: string[] | null;
   category: string | null;
   subcategory: string | null;
-  malware_hash: string | null;
-  malware_url: string | null;
+  malware_hash: string[] | null;
+  malware_url: string[] | null;
   priority: string | null;
 }
 
