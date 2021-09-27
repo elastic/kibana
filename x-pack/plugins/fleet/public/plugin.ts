@@ -17,6 +17,8 @@ import { i18n } from '@kbn/i18n';
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
+import type { CustomIntegrationsSetup } from '../../../../src/plugins/custom_integrations/public';
+
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -47,6 +49,8 @@ import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extensi
 
 export { FleetConfigType } from '../common/types';
 
+import { setCustomIntegrations } from './services/custom_integrations';
+
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -66,6 +70,7 @@ export interface FleetSetupDeps {
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  customIntegrations: CustomIntegrationsSetup;
 }
 
 export interface FleetStartDeps {
@@ -93,6 +98,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
+
+    setCustomIntegrations(deps.customIntegrations);
 
     // Set up http client
     setHttpClient(core.http);

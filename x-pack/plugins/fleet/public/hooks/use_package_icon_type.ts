@@ -46,7 +46,7 @@ export const usePackageIconType = ({
       setIconType(CACHED_ICONS.get(cacheKey) || '');
       return;
     }
-    const svgIcons = (paramIcons || iconList)?.filter(
+    const svgIcons = (paramIcons && paramIcons.length ? paramIcons : iconList)?.filter(
       (iconDef) => iconDef.type === 'image/svg+xml'
     );
     const localIconSrc =
