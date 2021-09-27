@@ -14,23 +14,23 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import url from 'url';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import {
   CSV_REPORT_TYPE,
   PDF_REPORT_TYPE,
   PDF_REPORT_TYPE_V2,
   PNG_REPORT_TYPE,
   PNG_REPORT_TYPE_V2,
-} from '../../common/constants';
-import { BaseParams } from '../../common/types';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+} from '../../../common/constants';
+import { BaseParams } from '../../../common/types';
+import { ReportingAPIClient } from '../../lib/reporting_api_client';
+import { WarningUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 
 /**
  * Based on {@link URL_MAX_LENGTH} exported from core/public.
@@ -59,7 +59,6 @@ interface State {
   absoluteUrl: string;
   layoutId: string;
   objectType: string;
-  showCopyButtonWithUnsavedChanges: boolean;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
@@ -76,7 +75,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
       objectType,
-      showCopyButtonWithUnsavedChanges: false,
     };
   }
 
@@ -116,92 +114,42 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return this.props.objectId === undefined || this.props.objectId === '';
   };
 
-  private setShowCopyButton() {
-    this.setState({
-      showCopyButtonWithUnsavedChanges: true,
-    });
-  }
-
-  private shouldShowCopyButton({
-    isUnsaved,
-    exceedsMaxLength,
-  }: {
-    isUnsaved: boolean;
-    exceedsMaxLength: boolean;
-  }): boolean {
-    if (exceedsMaxLength) {
-      return false;
-    }
-    return !isUnsaved || (isUnsaved && this.state.showCopyButtonWithUnsavedChanges);
-  }
-
-  private renderWarningText({
+  private renderCopyURLButton({
     isUnsaved,
     exceedsMaxLength,
   }: {
     isUnsaved: boolean;
     exceedsMaxLength: boolean;
   }) {
+    const showCopyPostURLButton = !exceedsMaxLength;
+
+    const button = showCopyPostURLButton ? (
+      <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+        {(copy) => (
+          <EuiButton color={isUnsaved ? 'warning' : 'primary'} fullWidth onClick={copy} size="s">
+            <FormattedMessage
+              id="xpack.reporting.panelContent.copyUrlButtonLabel"
+              defaultMessage="Copy POST URL"
+            />
+          </EuiButton>
+        )}
+      </EuiCopy>
+    ) : undefined;
+
     if (isUnsaved) {
       if (exceedsMaxLength) {
-        return (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="danger">
-              <p>
-                <FormattedMessage
-                  id="xpack.reporting.panelContent.unsavedStateAndExceedsMaxLength"
-                  defaultMessage="This URL is too long and cannot be copied. Try saving your work."
-                />
-              </p>
-            </EuiText>
-          </>
-        );
+        return <ErrorUrlTooLongPanel isUnsaved />;
       }
 
-      return (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="warning">
-            <p>
-              <FormattedMessage
-                id="xpack.reporting.panelContent.unsavedStateWarningText"
-                defaultMessage="It is recommended to save your work before copying this URL."
-              />{' '}
-              <EuiLink
-                onClick={() => this.setShowCopyButton()}
-                color={this.state.showCopyButtonWithUnsavedChanges ? 'subdued' : 'warning'}
-              >
-                <FormattedMessage
-                  id="xpack.reporting.panelContent.checkbox.showCopyURLAnywayButtonLabel"
-                  defaultMessage="Proceed anyway."
-                />
-              </EuiLink>
-            </p>
-          </EuiText>
-        </>
-      );
+      return <WarningUnsavedWorkPanel>{button}</WarningUnsavedWorkPanel>;
     } else if (exceedsMaxLength) {
-      return (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="danger">
-            <p>
-              <FormattedMessage
-                id="xpack.reporting.panelContent.unsavedStateAndExceedsMaxLength"
-                defaultMessage="This URL is too long and cannot be copied."
-              />
-            </p>
-          </EuiText>
-        </>
-      );
+      return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
-    return undefined;
+    return button;
   }
 
   public render() {
     const isUnsaved: boolean = this.isNotSaved() || this.props.isDirty || this.state.isStale;
-    const exceedsMaxLength = this.state.absoluteUrl.length >= CHROMIUM_MAX_URL_LENGTH;
 
     if (this.props.requiresSavedState && isUnsaved) {
       return (
@@ -220,7 +168,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       );
     }
 
-    const showCopyPostURLButton = this.shouldShowCopyButton({ isUnsaved, exceedsMaxLength });
+    const exceedsMaxLength = this.state.absoluteUrl.length >= CHROMIUM_MAX_URL_LENGTH;
 
     return (
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
@@ -264,28 +212,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
               />
             </p>
           </EuiText>
-
-          {this.renderWarningText({ isUnsaved, exceedsMaxLength })}
-
-          <EuiSpacer size="s" />
-
-          {showCopyPostURLButton && (
-            <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
-              {(copy) => (
-                <EuiButton
-                  color={isUnsaved ? 'warning' : 'primary'}
-                  fullWidth
-                  onClick={copy}
-                  size="s"
-                >
-                  <FormattedMessage
-                    id="xpack.reporting.panelContent.copyUrlButtonLabel"
-                    defaultMessage="Copy POST URL"
-                  />
-                </EuiButton>
-              )}
-            </EuiCopy>
-          )}
+          <EuiSpacer size="l" />
+          {this.renderCopyURLButton({ isUnsaved, exceedsMaxLength })}
         </EuiAccordion>
       </EuiForm>
     );

@@ -12,8 +12,8 @@ import {
   notificationServiceMock,
   uiSettingsServiceMock,
 } from 'src/core/public/mocks';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ReportingPanelContent, ReportingPanelProps as Props } from './reporting_panel_content';
+import { ReportingAPIClient } from '../../lib/reporting_api_client';
+import { ReportingPanelContent, ReportingPanelProps as Props } from '.';
 
 describe('ReportingPanelContent', () => {
   const props: Partial<Props> = {
