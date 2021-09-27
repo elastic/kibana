@@ -65,16 +65,6 @@ export class ApiService {
     });
   }
 
-  public async sendPageTelemetryData(telemetryData: { [tabName: string]: boolean }) {
-    const result = await this.sendRequest({
-      path: `${API_BASE_PATH}/stats/ui_open`,
-      method: 'put',
-      body: JSON.stringify(telemetryData),
-    });
-
-    return result;
-  }
-
   public useLoadDeprecationLogging() {
     return this.useRequest<{
       isDeprecationLogIndexingEnabled: boolean;
@@ -150,16 +140,6 @@ export class ApiService {
     });
   }
 
-  public async sendReindexTelemetryData(telemetryData: { [key: string]: boolean }) {
-    const result = await this.sendRequest({
-      path: `${API_BASE_PATH}/stats/ui_reindex`,
-      method: 'put',
-      body: JSON.stringify(telemetryData),
-    });
-
-    return result;
-  }
-
   public async getReindexStatus(indexName: string) {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}`,
@@ -178,6 +158,15 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}/cancel`,
       method: 'post',
+    });
+  }
+
+  public useLoadMlUpgradeMode() {
+    return this.useRequest<{
+      mlUpgradeModeEnabled: boolean;
+    }>({
+      path: `${API_BASE_PATH}/ml_upgrade_mode`,
+      method: 'get',
     });
   }
 }
