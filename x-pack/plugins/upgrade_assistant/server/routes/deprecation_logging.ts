@@ -16,7 +16,10 @@ import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 import { DEPRECATION_LOGS_INDEX } from '../../common/constants';
 
-export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) {
+export function registerDeprecationLoggingRoutes({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/deprecation_logging`,
@@ -32,8 +35,12 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         request,
         response
       ) => {
-        const result = await getDeprecationLoggingStatus(client);
-        return response.ok({ body: result });
+        try {
+          const result = await getDeprecationLoggingStatus(client);
+          return response.ok({ body: result });
+        } catch (error) {
+          return handleEsError({ error, response });
+        }
       }
     )
   );
@@ -57,10 +64,14 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         request,
         response
       ) => {
-        const { isEnabled } = request.body as { isEnabled: boolean };
-        return response.ok({
-          body: await setDeprecationLogging(client, isEnabled),
-        });
+        try {
+          const { isEnabled } = request.body as { isEnabled: boolean };
+          return response.ok({
+            body: await setDeprecationLogging(client, isEnabled),
+          });
+        } catch (error) {
+          return handleEsError({ error, response });
+        }
       }
     )
   );
@@ -84,28 +95,32 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         request,
         response
       ) => {
-        const { body: indexExists } = await client.asCurrentUser.indices.exists({
-          index: DEPRECATION_LOGS_INDEX,
-        });
+        try {
+          const { body: indexExists } = await client.asCurrentUser.indices.exists({
+            index: DEPRECATION_LOGS_INDEX,
+          });
 
-        if (!indexExists) {
-          return response.ok({ body: { count: 0 } });
-        }
+          if (!indexExists) {
+            return response.ok({ body: { count: 0 } });
+          }
 
-        const { body } = await client.asCurrentUser.count({
-          index: DEPRECATION_LOGS_INDEX,
-          body: {
-            query: {
-              range: {
-                '@timestamp': {
-                  gte: request.query.from,
+          const { body } = await client.asCurrentUser.count({
+            index: DEPRECATION_LOGS_INDEX,
+            body: {
+              query: {
+                range: {
+                  '@timestamp': {
+                    gte: request.query.from,
+                  },
                 },
               },
             },
-          },
-        });
+          });
 
-        return response.ok({ body: { count: body.count } });
+          return response.ok({ body: { count: body.count } });
+        } catch (error) {
+          return handleEsError({ error, response });
+        }
       }
     )
   );
