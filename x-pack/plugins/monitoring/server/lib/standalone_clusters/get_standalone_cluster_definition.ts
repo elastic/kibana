@@ -6,8 +6,9 @@
  */
 
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { Cluster } from '../../types';
 
-export const getStandaloneClusterDefinition = () => {
+export const getStandaloneClusterDefinition: () => Cluster = () => {
   return {
     cluster_uuid: STANDALONE_CLUSTER_CLUSTER_UUID,
     license: {},
@@ -28,5 +29,5 @@ export const getStandaloneClusterDefinition = () => {
         },
       },
     },
-  };
+  } as Cluster;
 };
