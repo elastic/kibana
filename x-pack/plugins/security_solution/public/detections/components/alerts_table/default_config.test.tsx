@@ -73,7 +73,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: 'kibana.alert.workflow_status',
           negate: false,
           params: {
             query: 'acknowledged',
@@ -85,12 +85,12 @@ describe('alerts default_config', () => {
             should: [
               {
                 term: {
-                  'signal.status': 'acknowledged',
+                  'kibana.alert.workflow_status': 'acknowledged',
                 },
               },
               {
                 term: {
-                  'signal.status': 'in-progress',
+                  'kibana.alert.workflow_status': 'in-progress',
                 },
               },
             ],
@@ -107,7 +107,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: 'kibana.alert.workflow_status',
           negate: false,
           params: {
             query: 'open',
@@ -116,7 +116,7 @@ describe('alerts default_config', () => {
         },
         query: {
           term: {
-            'signal.status': 'open',
+            'kibana.alert.workflow_status': 'open',
           },
         },
       };
@@ -139,17 +139,17 @@ describe('alerts default_config', () => {
             should: [
               {
                 term: {
-                  'signal.status': 'open',
+                  'kibana.alert.workflow_status': 'open',
                 },
               },
               {
                 term: {
-                  'signal.status': 'acknowledged',
+                  'kibana.alert.workflow_status': 'acknowledged',
                 },
               },
               {
                 term: {
-                  'signal.status': 'in-progress',
+                  'kibana.alert.workflow_status': 'in-progress',
                 },
               },
             ],

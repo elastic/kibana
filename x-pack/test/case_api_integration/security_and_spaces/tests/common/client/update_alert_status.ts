@@ -86,12 +86,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // There should be no change in their status since syncing is disabled
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
-        CaseStatuses.open
-      );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
-        CaseStatuses.open
-      );
+      expect(
+        signals.get(defaultSignalsIndex)?.get(signalID)?._source?.['kibana.alert.workflow_status']
+      ).to.be(CaseStatuses.open);
+      expect(
+        signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.['kibana.alert.workflow_status']
+      ).to.be(CaseStatuses.open);
 
       // does NOT updates alert status when the status is updated and syncAlerts=false
       // this performs the cases update through the test plugin that leverages the cases client instead
@@ -124,12 +124,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // There should still be no change in their status since syncing is disabled
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
-        CaseStatuses.open
-      );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
-        CaseStatuses.open
-      );
+      expect(
+        signals.get(defaultSignalsIndex)?.get(signalID)?._source?.['kibana.alert.workflow_status']
+      ).to.be(CaseStatuses.open);
+      expect(
+        signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.['kibana.alert.workflow_status']
+      ).to.be(CaseStatuses.open);
 
       // it updates alert status when syncAlerts is turned on
       // turn on the sync settings
@@ -156,12 +156,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // alerts should be updated now that the
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
-        CaseStatuses.closed
-      );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
-        'acknowledged'
-      );
+      expect(
+        signals.get(defaultSignalsIndex)?.get(signalID)?._source?.['kibana.alert.workflow_status']
+      ).to.be(CaseStatuses.closed);
+      expect(
+        signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.['kibana.alert.workflow_status']
+      ).to.be('acknowledged');
     });
   });
 };

@@ -241,7 +241,7 @@ export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): Updat
 });
 
 export const getSignalStatus = () => ({
-  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+  aggs: { statuses: { terms: { field: 'kibana.alert.workflow_status', size: 10 } } },
 });
 
 export const getQueryAllSignals = () => ({

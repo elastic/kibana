@@ -244,7 +244,7 @@ export const getCombinedFilterQuery = ({
  * @deprecated
  */
 const replaceStatusField = (query: string): string =>
-  query.replaceAll('signal.status', ALERT_WORKFLOW_STATUS);
+  query.replaceAll('kibana.alert.workflow_status', ALERT_WORKFLOW_STATUS);
 
 /**
  * The CSS class name of a "stateful event", which appears in both

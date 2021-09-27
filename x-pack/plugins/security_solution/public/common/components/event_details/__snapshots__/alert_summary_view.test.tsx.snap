@@ -157,7 +157,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.status. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.workflow_status. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -170,8 +170,8 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.status"
-                    field="signal.status"
+                    data-test-subj="more-actions-kibana.alert.workflow_status"
+                    field="kibana.alert.workflow_status"
                     items="[object Object],[object Object]"
                     value="open"
                   >
@@ -962,7 +962,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.status. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.workflow_status. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -975,8 +975,8 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.status"
-                    field="signal.status"
+                    data-test-subj="more-actions-kibana.alert.workflow_status"
+                    field="kibana.alert.workflow_status"
                     items="[object Object],[object Object]"
                     value="open"
                   >

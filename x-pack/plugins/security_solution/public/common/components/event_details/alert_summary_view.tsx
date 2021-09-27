@@ -61,7 +61,7 @@ interface EventSummaryField {
 }
 
 const defaultDisplayFields: EventSummaryField[] = [
-  { id: 'signal.status', label: SIGNAL_STATUS },
+  { id: 'kibana.alert.workflow_status', label: SIGNAL_STATUS },
   { id: '@timestamp', label: TIMESTAMP },
   {
     id: SIGNAL_RULE_NAME_FIELD_NAME,

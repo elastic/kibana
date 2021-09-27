@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
                               'signal.rule.id': 'c76f1a10-ffb6-11eb-8914-9b237bf6808c',
                             },
                           },
-                          { term: { 'signal.status': 'open' } },
+                          { term: { 'kibana.alert.workflow_status': 'open' } },
                         ],
                         should: [],
                         must_not: [{ exists: { field: 'signal.rule.building_block_type' } }],

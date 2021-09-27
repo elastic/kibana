@@ -196,7 +196,7 @@ describe('AlertsHistogramPanel', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: 'kibana.alert.workflow_status',
           negate: false,
           params: {
             query: 'open',
@@ -205,7 +205,7 @@ describe('AlertsHistogramPanel', () => {
         },
         query: {
           term: {
-            'signal.status': 'open',
+            'kibana.alert.workflow_status': 'open',
           },
         },
       };
@@ -229,7 +229,7 @@ describe('AlertsHistogramPanel', () => {
           [
             {
               bool: {
-                filter: [{ term: { 'signal.status': 'open' } }],
+                filter: [{ term: { 'kibana.alert.workflow_status': 'open' } }],
                 must: [],
                 must_not: [],
                 should: [],

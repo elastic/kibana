@@ -207,7 +207,7 @@ export const allowSorting = ({
     'signal.rule.type',
     'signal.rule.updated_by',
     'signal.rule.version',
-    'signal.status',
+    'kibana.alert.workflow_status',
   ].includes(fieldName);
 
   return isAllowlistedNonBrowserField || isAggregatable;

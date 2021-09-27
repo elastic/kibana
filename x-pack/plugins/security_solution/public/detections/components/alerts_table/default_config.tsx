@@ -34,12 +34,12 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
             should: [
               {
                 term: {
-                  'signal.status': status,
+                  'kibana.alert.workflow_status': status,
                 },
               },
               {
                 term: {
-                  'signal.status': 'in-progress',
+                  'kibana.alert.workflow_status': 'in-progress',
                 },
               },
             ],
@@ -47,7 +47,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         }
       : {
           term: {
-            'signal.status': status,
+            'kibana.alert.workflow_status': status,
           },
         };
 
@@ -58,7 +58,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         negate: false,
         disabled: false,
         type: 'phrase',
-        key: 'signal.status',
+        key: 'kibana.alert.workflow_status',
         params: {
           query: status,
         },
@@ -76,7 +76,7 @@ export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
     bool: {
       should: statuses.map((status) => ({
         term: {
-          'signal.status': status,
+          'kibana.alert.workflow_status': status,
         },
       })),
     },
@@ -162,7 +162,7 @@ export const alertsDefaultModel: SubsetTimelineModel = {
 
 export const requiredFieldsForActions = [
   '@timestamp',
-  'signal.status',
+  'kibana.alert.workflow_status',
   'signal.group.id',
   'signal.original_time',
   'signal.rule.building_block_type',

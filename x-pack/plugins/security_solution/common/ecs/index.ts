@@ -70,4 +70,5 @@ export interface Ecs {
   Memory_protection?: MemoryProtection;
   Target?: Target;
   dll?: DllEcs;
+  'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
 }

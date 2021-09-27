@@ -362,7 +362,12 @@ export const mockAlertDetailsData = [
       },
     ],
   },
-  { category: 'signal', field: 'signal.status', values: ['open'], originalValue: 'open' },
+  {
+    category: 'signal',
+    field: 'kibana.alert.workflow_status',
+    values: ['open'],
+    originalValue: 'open',
+  },
   {
     category: 'signal',
     field: 'signal.rule.id',
