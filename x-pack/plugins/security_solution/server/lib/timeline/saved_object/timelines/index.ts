@@ -30,11 +30,15 @@ import {
   TimelineStatus,
   TimelineResult,
   TimelineWithoutExternalRefs,
+  ResolvedTimelineSavedObject,
 } from '../../../../../common/types/timeline';
 import { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
-import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
+import {
+  convertSavedObjectToSavedTimeline,
+  convertResolvedSavedObjectToSavedTimeline,
+} from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings/';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
@@ -50,49 +54,6 @@ export interface ResponseTemplateTimeline {
   message?: Maybe<string>;
 
   templateTimeline: TimelineResult;
-}
-
-export interface Timeline {
-  getTimeline: (
-    request: FrameworkRequest,
-    timelineId: string,
-    timelineType?: TimelineTypeLiteralWithNull
-  ) => Promise<TimelineSavedObject>;
-
-  getAllTimeline: (
-    request: FrameworkRequest,
-    onlyUserFavorite: boolean | null,
-    pageInfo: PageInfoTimeline,
-    search: string | null,
-    sort: SortTimeline | null,
-    status: TimelineStatusLiteralWithNull,
-    timelineType: TimelineTypeLiteralWithNull
-  ) => Promise<AllTimelinesResponse>;
-
-  persistFavorite: (
-    request: FrameworkRequest,
-    timelineId: string | null,
-    templateTimelineId: string | null,
-    templateTimelineVersion: number | null,
-    timelineType: TimelineType
-  ) => Promise<ResponseFavoriteTimeline>;
-
-  persistTimeline: (
-    request: FrameworkRequest,
-    timelineId: string | null,
-    version: string | null,
-    timeline: SavedTimeline,
-    isImmutable?: boolean
-  ) => Promise<ResponseTimeline>;
-
-  deleteTimeline: (request: FrameworkRequest, timelineIds: string[]) => Promise<void>;
-  convertStringToBase64: (text: string) => string;
-  timelineWithReduxProperties: (
-    notes: NoteSavedObject[],
-    pinnedEvents: PinnedEventSavedObject[],
-    timeline: TimelineSavedObject,
-    userName: string
-  ) => TimelineSavedObject;
 }
 
 export const getTimeline = async (
@@ -127,6 +88,44 @@ export const getTimelineOrNull = async (
   let timeline = null;
   try {
     timeline = await getTimeline(frameworkRequest, savedObjectId);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+  return timeline;
+};
+
+export const resolveTimeline = async (
+  request: FrameworkRequest,
+  timelineId: string,
+  timelineType: TimelineTypeLiteralWithNull = TimelineType.default
+): Promise<ResolvedTimelineSavedObject> => {
+  let timelineIdToUse = timelineId;
+  try {
+    if (timelineType === TimelineType.template) {
+      // TODO: When would this happen? The templateTimelineId wouldn't be defined in this scenario I thought?
+      const options = {
+        type: timelineSavedObjectType,
+        perPage: 1,
+        page: 1,
+        filter: `siem-ui-timeline.attributes.templateTimelineId: ${timelineId}`,
+      };
+      const result = await getAllSavedTimeline(request, options);
+      if (result.totalCount === 1) {
+        timelineIdToUse = result.timeline[0].savedObjectId;
+      }
+    }
+  } catch {
+    // TO DO, we need to bring the logger here
+  }
+  return resolveSavedTimeline(request, timelineIdToUse);
+};
+
+export const resolveTimelineOrNull = async (
+  frameworkRequest: FrameworkRequest,
+  savedObjectId: string
+): Promise<ResolvedTimelineSavedObject | null> => {
+  let timeline = null;
+  try {
+    timeline = await resolveTimeline(frameworkRequest, savedObjectId);
     // eslint-disable-next-line no-empty
   } catch (e) {}
   return timeline;
@@ -584,6 +583,35 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
   );
 };
 
+const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+  const { saved_object: savedObject, ...resolveAttributes } =
+    await savedObjectsClient.resolve<TimelineWithoutExternalRefs>(
+      timelineSavedObjectType,
+      timelineId
+    );
+
+  const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
+
+  return convertResolvedSavedObjectToSavedTimeline(populatedTimeline, resolveAttributes);
+};
+
+const resolveSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
+  const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+
+  const resolvedTimelineSaveObject = await resolveBasicSavedTimeline(request, timelineId);
+
+  const timelineWithNotesAndPinnedEvents = await Promise.all([
+    note.getNotesByTimelineId(request, resolvedTimelineSaveObject.savedObjectId),
+    pinnedEvent.getAllPinnedEventsByTimelineId(request, resolvedTimelineSaveObject.savedObjectId),
+    Promise.resolve(resolvedTimelineSaveObject),
+  ]);
+
+  const [notes, pinnedEvents, timeline] = timelineWithNotesAndPinnedEvents;
+
+  return resolvedTimelineWithReduxProperties(notes, pinnedEvents, timeline, userName);
+};
+
 const getBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
   const savedObject = await savedObjectsClient.get<TimelineWithoutExternalRefs>(
@@ -646,19 +674,30 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
 
 export const convertStringToBase64 = (text: string): string => Buffer.from(text).toString('base64');
 
-// we have to use any here because the SavedObjectAttributes interface is like below
-// export interface SavedObjectAttributes {
-//   [key: string]: SavedObjectAttributes | string | number | boolean | null;
-// }
-// then this interface does not allow types without index signature
-// this is limiting us with our type for now so the easy way was to use any
-
 export const timelineWithReduxProperties = (
   notes: NoteSavedObject[],
   pinnedEvents: PinnedEventSavedObject[],
   timeline: TimelineSavedObject,
   userName: string
 ): TimelineSavedObject => ({
+  ...timeline,
+  favorite:
+    timeline.favorite != null && userName != null
+      ? timeline.favorite.filter((fav) => fav.userName === userName)
+      : [],
+  eventIdToNoteIds: notes.filter((n) => n.eventId != null),
+  noteIds: notes.filter((n) => n.eventId == null && n.noteId != null).map((n) => n.noteId),
+  notes,
+  pinnedEventIds: pinnedEvents.map((e) => e.eventId),
+  pinnedEventsSaveObject: pinnedEvents,
+});
+
+export const resolvedTimelineWithReduxProperties = (
+  notes: NoteSavedObject[],
+  pinnedEvents: PinnedEventSavedObject[],
+  timeline: ResolvedTimelineSavedObject,
+  userName: string
+): ResolvedTimelineSavedObject => ({
   ...timeline,
   favorite:
     timeline.favorite != null && userName != null

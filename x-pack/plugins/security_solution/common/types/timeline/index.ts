@@ -337,20 +337,36 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
 
-/**
- * Timeline Saved object type with metadata
- */
-
-export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
+export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
+  SavedTimelineRuntimeType,
   runtimeTypes.type({
-    id: runtimeTypes.string,
-    attributes: SavedTimelineRuntimeType,
+    savedObjectId: runtimeTypes.string,
     version: runtimeTypes.string,
+    outcome: runtimeTypes.union([
+      runtimeTypes.literal('exactMatch'),
+      runtimeTypes.literal('aliasMatch'),
+      runtimeTypes.literal('conflict'),
+    ]),
   }),
   runtimeTypes.partial({
-    savedObjectId: runtimeTypes.string,
+    eventIdToNoteIds: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
+    noteIds: runtimeTypes.array(runtimeTypes.string),
+    notes: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
+    pinnedEventIds: runtimeTypes.array(runtimeTypes.string),
+    pinnedEventsSaveObject: runtimeTypes.array(PinnedEventToReturnSavedObjectRuntimeType),
+    alias_target_id: runtimeTypes.string,
   }),
 ]);
+
+export type ResolvedTimelineSavedObject = runtimeTypes.TypeOf<
+  typeof ResolvedTimelineSavedObjectToReturnObjectRuntimeType
+>;
+
+export const ResolvedSingleTimelineResponseType = runtimeTypes.type({
+  data: runtimeTypes.type({
+    getOneTimeline: ResolvedTimelineSavedObjectToReturnObjectRuntimeType,
+  }),
+});
 
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,
