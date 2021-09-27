@@ -19,7 +19,7 @@ function createDataMock(
   timefilterFetch$: Subject<unknown>,
   autoRefreshFetch$: Subject<unknown>
 ) {
-  return ({
+  return {
     query: {
       queryString: {
         getUpdates$: () => {
@@ -42,7 +42,7 @@ function createDataMock(
         },
       },
     },
-  } as unknown) as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 }
 
 describe('getFetchObservable', () => {
@@ -52,7 +52,7 @@ describe('getFetchObservable', () => {
     const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
     const refetch$: DataRefetch$ = new Subject();
     const fetch$ = getFetch$({
-      setAutoRefreshDoneCb: jest.fn(),
+      setAutoRefreshDone: jest.fn(),
       main$,
       refetch$,
       data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
@@ -65,7 +65,7 @@ describe('getFetchObservable', () => {
     });
     refetch$.next();
   });
-  test('getAutoRefreshFetch$ should trigger fetch$.next when index pattern has a timefield', async () => {
+  test('getAutoRefreshFetch$ should trigger fetch$.next', async () => {
     jest.useFakeTimers();
     const searchSessionManagerMock = createSearchSessionMock();
     const autoRefreshFetch$ = new Subject();
@@ -73,9 +73,9 @@ describe('getFetchObservable', () => {
     const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
     const refetch$: DataRefetch$ = new Subject();
     const dataMock = createDataMock(new Subject(), new Subject(), new Subject(), autoRefreshFetch$);
-    const setAutoRefreshDoneCb = jest.fn();
+    const setAutoRefreshDone = jest.fn();
     const fetch$ = getFetch$({
-      setAutoRefreshDoneCb,
+      setAutoRefreshDone,
       main$,
       refetch$,
       data: dataMock,
@@ -90,33 +90,6 @@ describe('getFetchObservable', () => {
     autoRefreshFetch$.next(jest.fn());
     jest.runAllTimers();
     expect(fetchfnMock).toHaveBeenCalledTimes(1);
-    expect(setAutoRefreshDoneCb).toHaveBeenCalled();
-  });
-
-  test('getAutoRefreshFetch$ should not trigger fetch$.next when index pattern has no timefield', async () => {
-    jest.useFakeTimers();
-    const searchSessionManagerMock = createSearchSessionMock();
-    const autoRefreshFetch$ = new Subject();
-
-    const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
-    const refetch$: DataRefetch$ = new Subject();
-    const dataMock = createDataMock(new Subject(), new Subject(), new Subject(), autoRefreshFetch$);
-    const fetch$ = getFetch$({
-      setAutoRefreshDoneCb: jest.fn(),
-      main$,
-      refetch$,
-      data: dataMock,
-      searchSessionManager: searchSessionManagerMock.searchSessionManager,
-      searchSource: savedSearchMock.searchSource,
-    });
-
-    const fetchfnMock = jest.fn();
-
-    fetch$.subscribe(() => {
-      fetchfnMock();
-    });
-    autoRefreshFetch$.next();
-    jest.runAllTimers();
-    expect(fetchfnMock).toHaveBeenCalledTimes(0);
+    expect(setAutoRefreshDone).toHaveBeenCalled();
   });
 });

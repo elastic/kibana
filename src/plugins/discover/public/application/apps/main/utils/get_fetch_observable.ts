@@ -21,14 +21,13 @@ import { DiscoverSearchSessionManager } from '../services/discover_search_sessio
  * This function returns an observable that's used to trigger data fetching
  */
 export function getFetch$({
-  setAutoRefreshDoneCb,
+  setAutoRefreshDone,
   data,
   main$,
   refetch$,
   searchSessionManager,
-  searchSource,
 }: {
-  setAutoRefreshDoneCb: (val: AutoRefreshDoneFn | undefined) => void;
+  setAutoRefreshDone: (val: AutoRefreshDoneFn | undefined) => void;
   data: DataPublicPluginStart;
   main$: DataMain$;
   refetch$: DataRefetch$;
@@ -43,7 +42,7 @@ export function getFetch$({
     timefilter.getFetch$(),
     timefilter.getAutoRefreshFetch$().pipe(
       tap((done) => {
-        setAutoRefreshDoneCb(done);
+        setAutoRefreshDone(done);
       }),
       filter(() => {
         const currentFetchStatus = main$.getValue().fetchStatus;
@@ -52,11 +51,7 @@ export function getFetch$({
            * filter to prevent auto-refresh triggered fetch when
            * loading is still ongoing
            */
-          currentFetchStatus !== FetchStatus.LOADING &&
-          currentFetchStatus !== FetchStatus.PARTIAL &&
-          // prevent auto refresh if it's a index pattern without time field, because there is
-          // no UI to stop it
-          Boolean(searchSource.getField('index')?.isTimeBased())
+          currentFetchStatus !== FetchStatus.LOADING && currentFetchStatus !== FetchStatus.PARTIAL
         );
       })
     ),
