@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Moment } from 'moment';
+
 import { RoleMapping } from '../shared/types';
 
 export * from '../../../common/types/workplace_search';
@@ -127,7 +129,44 @@ interface SourceActivity {
   status: string;
 }
 
-interface IndexingConfig {
+export interface SyncEstimate {
+  duration?: string;
+  nextStart: string;
+  lastRun?: string;
+}
+
+interface SyncIndexItem<T> {
+  full: T;
+  incremental: T;
+  delete: T;
+  permissions?: T;
+}
+
+interface IndexingSchedule extends SyncIndexItem<string> {
+  estimates: SyncIndexItem<SyncEstimate>;
+}
+
+export type SyncJobType = 'full' | 'incremental' | 'delete' | 'permissions';
+
+export const DAYS_OF_WEEK_VALUES = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+] as const;
+export type DayOfWeek = typeof DAYS_OF_WEEK_VALUES[number];
+
+export interface BlockedWindow {
+  jobType: SyncJobType;
+  day: DayOfWeek;
+  start: Moment;
+  end: Moment;
+}
+
+export interface IndexingConfig {
   enabled: boolean;
   features: {
     contentExtraction: {
@@ -137,6 +176,7 @@ interface IndexingConfig {
       enabled: boolean;
     };
   };
+  schedule: IndexingSchedule;
 }
 
 export interface ContentSourceFullData extends ContentSourceDetails {
