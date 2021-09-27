@@ -43,9 +43,8 @@ let server = null;
 let store = null;
 const indices = [];
 
-let isOpen = true;
-const getBaseFakeIndex = () => {
-  const base = {
+const getBaseFakeIndex = (isOpen) => {
+  return {
     health: isOpen ? 'green' : 'yellow',
     status: isOpen ? 'open' : 'closed',
     primary: 1,
@@ -55,17 +54,15 @@ const getBaseFakeIndex = () => {
     size: '156kb',
     primary_size: '156kb',
   };
-  isOpen = !isOpen;
-  return base;
 };
 
 for (let i = 0; i < 105; i++) {
   indices.push({
-    ...getBaseFakeIndex(),
+    ...getBaseFakeIndex(true),
     name: `testy${i}`,
   });
   indices.push({
-    ...getBaseFakeIndex(),
+    ...getBaseFakeIndex(false),
     name: `.admin${i}`,
     // Add 2 hidden indices in the list in position 3 & 7
     // note: for each loop iteration we add 2 indices
@@ -269,12 +266,22 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
 
-    snapshot(namesText(rendered));
+    // We have manually defined above that the `.admin1` and `.admin3` indices are hidden.
+    // We **don't** expect them to be in this list as by default we don't show hidden indices
+    let indicesInTable = namesText(rendered);
+    expect(indicesInTable).not.toContain('.admin1');
+    expect(indicesInTable).not.toContain('.admin3');
+    snapshot(indicesInTable);
 
+    // Enable "Show hidden indices"
     const switchControl = findTestSubject(rendered, 'indexTableIncludeHiddenIndicesToggle');
     switchControl.simulate('click');
 
-    snapshot(namesText(rendered));
+    // We do expect now the `.admin1` and `.admin3` indices to be in the list
+    indicesInTable = namesText(rendered);
+    expect(indicesInTable).toContain('.admin1');
+    expect(indicesInTable).toContain('.admin3');
+    snapshot(indicesInTable);
   });
 
   test('should filter based on content of search input', async () => {
