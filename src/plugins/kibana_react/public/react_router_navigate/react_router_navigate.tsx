@@ -7,6 +7,7 @@
  */
 
 import { ScopedHistory } from 'kibana/public';
+import { MouseEvent } from 'react';
 import { History, parsePath } from 'history';
 
 interface LocationObject {
@@ -15,10 +16,10 @@ interface LocationObject {
   hash?: string;
 }
 
-const isModifiedEvent = (event: any) =>
+const isModifiedEvent = (event: MouseEvent) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
-const isLeftClickEvent = (event: any) => event.button === 0;
+const isLeftClickEvent = (event: MouseEvent) => event.button === 0;
 
 export const toLocationObject = (to: string | LocationObject) =>
   typeof to === 'string' ? parsePath(to) : to;
@@ -34,7 +35,7 @@ export const reactRouterNavigate = (
 
 export const reactRouterOnClickHandler =
   (history: ScopedHistory | History, to: string | LocationObject, onClickCallback?: Function) =>
-  (event: any) => {
+  (event: MouseEvent) => {
     if (onClickCallback) {
       onClickCallback(event);
     }
@@ -43,7 +44,9 @@ export const reactRouterOnClickHandler =
       return;
     }
 
-    if (event.target.getAttribute('target')) {
+    if (
+      (event.target as unknown as { getAttribute: (a: string) => unknown })?.getAttribute('target')
+    ) {
       return;
     }
 

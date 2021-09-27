@@ -32,7 +32,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
-      resolve(__dirname, './apps/lens'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
@@ -58,6 +57,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
       resolve(__dirname, './apps/reporting'),
+      resolve(__dirname, './apps/lens'), // smokescreen tests cause flakiness in other tests
 
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
