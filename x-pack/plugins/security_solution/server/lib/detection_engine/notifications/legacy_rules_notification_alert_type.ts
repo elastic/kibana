@@ -45,7 +45,7 @@ export const legacyRulesNotificationAlertType = ({
   async executor({ startedAt, previousStartedAt, alertId, services, params }) {
     // TODO: Change this to be a link to documentation on how to migrate: https://github.com/elastic/kibana/issues/113055
     logger.warn(
-      'Security Solution notification (Legacy) system detected still running. Please see documentation on how to the new notification system.'
+      'Security Solution notification (Legacy) system detected still running. Please see documentation on how to migrate to the new notification system.'
     );
     const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',

@@ -23,7 +23,7 @@ class LegacyTestError extends Error {
   public output: { statusCode: number };
 }
 
-describe('legacyRead_notifications', () => {
+describe('legacyReadNotifications', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
   beforeEach(() => {

@@ -36,6 +36,9 @@ import {
   getQueryRuleParams,
   getThreatRuleParams,
 } from '../../schemas/rule_schemas.mock';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -272,6 +275,69 @@ describe.each([
         {}
       );
       const expected = getOutputRuleAlertForRest();
+      expect(output).toEqual({
+        page: 1,
+        perPage: 0,
+        total: 0,
+        data: [expected],
+      });
+    });
+
+    test('outputs 200 if the data is of type siem alert and has undefined for the legacyRuleActions', () => {
+      const output = transformFindAlerts(
+        {
+          page: 1,
+          perPage: 0,
+          total: 0,
+          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+        },
+        {},
+        {
+          '123': undefined,
+        }
+      );
+      const expected = getOutputRuleAlertForRest();
+      expect(output).toEqual({
+        page: 1,
+        perPage: 0,
+        total: 0,
+        data: [expected],
+      });
+    });
+
+    test('outputs 200 if the data is of type siem alert and has a legacy rule action', () => {
+      const actions: RuleAlertAction[] = [
+        {
+          id: '456',
+          params: {},
+          group: '',
+          action_type_id: 'action_123',
+        },
+      ];
+
+      const legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined> = {
+        [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()).id]: {
+          id: '123',
+          actions,
+          alertThrottle: '1h',
+          ruleThrottle: '1h',
+        },
+      };
+      const output = transformFindAlerts(
+        {
+          page: 1,
+          perPage: 0,
+          total: 0,
+          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+        },
+        {},
+        legacyRuleActions
+      );
+      const expected = {
+        ...getOutputRuleAlertForRest(),
+        throttle: '1h',
+        actions,
+      };
       expect(output).toEqual({
         page: 1,
         perPage: 0,
