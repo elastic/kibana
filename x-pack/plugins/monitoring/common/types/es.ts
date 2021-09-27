@@ -156,7 +156,7 @@ export interface ElasticsearchLegacySource {
           heap_max_in_bytes?: number;
         };
       };
-      fs: {
+      fs?: {
         available_in_bytes?: number;
         total_in_bytes?: number;
       };
@@ -497,7 +497,7 @@ export interface ElasticsearchMetricbeatSource {
         };
         nodes?: {
           versions?: string[];
-          count?: number;
+          count?: number | {};
           jvm?: {
             max_uptime?: {
               ms?: number;
