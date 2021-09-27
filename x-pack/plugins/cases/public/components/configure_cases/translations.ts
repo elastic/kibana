@@ -173,6 +173,6 @@ export const DEPRECATED_TOOLTIP_TITLE = i18n.translate(
 export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
   'xpack.cases.configureCases.deprecatedTooltipTitle',
   {
-    defaultMessage: 'Please upgrade your connector',
+    defaultMessage: 'Please update your connector',
   }
 );

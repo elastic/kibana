@@ -216,7 +216,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                 )}
                 content={i18n.translate(
                   'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
-                  { defaultMessage: 'Please upgrade your connector' }
+                  { defaultMessage: 'Please update your connector' }
                 )}
               />
             )}
