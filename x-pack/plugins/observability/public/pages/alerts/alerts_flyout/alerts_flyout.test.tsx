@@ -8,14 +8,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import * as DateFormatHook from '../../../hooks/use_date_format';
-
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
-import { mockHook } from '../../../utils/test_helper';
 import type { TopAlert } from '../';
 import { AlertsFlyout } from './';
 
 describe('AlertsFlyout', () => {
-  mockHook([DateFormatHook, 'useDateFormat'], () => '');
+  jest.spyOn(DateFormatHook, 'useDateFormat').mockImplementation(() => '');
 
   const observabilityRuleTypeRegistryMock = createObservabilityRuleTypeRegistryMock();
 

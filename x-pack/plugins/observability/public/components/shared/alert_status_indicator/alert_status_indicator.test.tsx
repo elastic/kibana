@@ -10,7 +10,6 @@ import { shallow } from 'enzyme';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import * as ThemeHook from '../../../hooks/use_theme';
 import { AlertStatusIndicator } from './alert_status_indicator';
-import { mockHook } from '../../../utils/test_helper';
 
 describe('AlertStatusIndicator', () => {
   it('should render correctly when active', async () => {
@@ -29,7 +28,7 @@ describe('AlertStatusIndicator', () => {
       eui: lightTheme,
       darkMode: false,
     };
-    mockHook([ThemeHook, 'useTheme'], () => mockThemeContext);
+    jest.spyOn(ThemeHook, 'useTheme').mockImplementation(() => mockThemeContext);
 
     expect(shallow(<AlertStatusIndicator alertStatus={'recovered'} />)).toMatchInlineSnapshot(`
       <EuiHealth

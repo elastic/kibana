@@ -12,14 +12,13 @@ import type { CellValueElementProps } from '../../../../timelines/common';
 import * as PluginHook from '../../hooks/use_plugin_context';
 import { getRenderCellValue } from './render_cell_value';
 import { AlertStatusIndicator } from '../../components/shared/alert_status_indicator';
-import { mockHook } from '../../utils/test_helper';
 
 interface AlertsTableRow {
   alertStatus: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
 }
 
 describe('getRenderCellValue', () => {
-  mockHook([PluginHook, 'usePluginContext'], () => ({} as any));
+  jest.spyOn(PluginHook, 'usePluginContext').mockImplementation(() => ({} as any));
 
   const renderCellValue = getRenderCellValue({
     setFlyoutAlert: jest.fn(),
