@@ -904,7 +904,7 @@
             "children": [
               {
                 "parentPluginId": "visTypeXy",
-                "id": "def-public.showElasticChartsOptions",
+                "id": "def-public.xyVisTypes.area.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "showElasticChartsOptions",
@@ -931,7 +931,7 @@
             "children": [
               {
                 "parentPluginId": "visTypeXy",
-                "id": "def-public.showElasticChartsOptions",
+                "id": "def-public.xyVisTypes.line.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "showElasticChartsOptions",
@@ -958,7 +958,7 @@
             "children": [
               {
                 "parentPluginId": "visTypeXy",
-                "id": "def-public.showElasticChartsOptions",
+                "id": "def-public.xyVisTypes.histogram.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "showElasticChartsOptions",
@@ -985,7 +985,7 @@
             "children": [
               {
                 "parentPluginId": "visTypeXy",
-                "id": "def-public.showElasticChartsOptions",
+                "id": "def-public.xyVisTypes.horizontalBar.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "showElasticChartsOptions",

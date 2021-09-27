@@ -19,8 +19,6 @@ import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
 import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
-export { pie } from '../../common/expressions';
-
 export const getPieRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -44,6 +42,7 @@ export const getPieRenderer = (dependencies: {
           {...config}
           formatFactory={dependencies.formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          interactive={handlers.isInteractive()}
           paletteService={dependencies.paletteService}
           onClickValue={onClickValue}
           renderMode={handlers.getRenderMode()}

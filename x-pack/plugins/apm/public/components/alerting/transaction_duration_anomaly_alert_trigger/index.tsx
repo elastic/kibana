@@ -17,7 +17,8 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata } from '../helper';
+import { AlertMetadata, isNewApmRuleFromStackManagement } from '../helper';
+import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 import {
@@ -48,9 +49,11 @@ interface Props {
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
-  const transactionTypes = useServiceTransactionTypesFetcher(
-    metadata?.serviceName
-  );
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName: metadata?.serviceName,
+    start: metadata?.start,
+    end: metadata?.end,
+  });
 
   const params = defaults(
     {
@@ -70,6 +73,10 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     start: metadata?.start,
     end: metadata?.end,
   });
+
+  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
+    return <NewAlertEmptyPrompt />;
+  }
 
   const fields = [
     <ServiceField value={params.serviceName} />,

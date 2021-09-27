@@ -46,6 +46,5 @@ const environmentsRoute = createApmServerRoute({
   },
 });
 
-export const environmentsRouteRepository = createApmServerRouteRepository().add(
-  environmentsRoute
-);
+export const environmentsRouteRepository =
+  createApmServerRouteRepository().add(environmentsRoute);

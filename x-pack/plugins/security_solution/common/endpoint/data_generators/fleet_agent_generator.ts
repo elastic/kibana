@@ -82,6 +82,10 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
           action_seq_no: -1,
           active: true,
           enrolled_at: now,
+          agent: {
+            id: this.randomUUID(),
+            version: this.randomVersion(),
+          },
           local_metadata: {
             elastic: {
               agent: {

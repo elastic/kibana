@@ -281,7 +281,6 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
-  permissions = 'permissions',
 }
 
 export interface RegistryDataStream {
@@ -297,15 +296,15 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
-  [RegistryDataStreamKeys.permissions]?: RegistryDataStreamPermissions;
 }
 
 export interface RegistryElasticsearch {
+  privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
 }
 
-export interface RegistryDataStreamPermissions {
+export interface RegistryDataStreamPrivileges {
   cluster?: string[];
   indices?: string[];
 }
@@ -361,6 +360,18 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   id: string;
 };
+
+export interface IntegrationCardItem {
+  uiInternalPathUrl: string;
+  release?: 'beta' | 'experimental' | 'ga';
+  description: string;
+  name: string;
+  title: string;
+  version: string;
+  icons: PackageSpecIcon[];
+  integration: string;
+  id: string;
+}
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

@@ -20,7 +20,7 @@ export class RelativeDateFormat extends FieldFormat {
   });
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: string | number) => {
     if (val === null || val === undefined) {
       return '-';
     }
@@ -29,7 +29,7 @@ export class RelativeDateFormat extends FieldFormat {
     if (date.isValid()) {
       return date.fromNow();
     } else {
-      return val;
+      return String(val);
     }
   };
 }

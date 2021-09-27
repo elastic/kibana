@@ -21,14 +21,14 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
 
-import moment from 'moment-timezone';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   PieVisualizationState,
 } from '../../../lens/public';
-import { FilterStateStore } from '../../../../../src/plugins/data/common';
+import { FilterStateStore, IndexPattern } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
@@ -391,38 +391,63 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   toggleErrors,
   expanded,
 }) => {
+  const data = useKibana().services.data;
+  const [logsIndexPattern, setLogsIndexPattern] = useState<IndexPattern | undefined>(undefined);
+
   const { data: lastResultsData, isFetched } = useScheduledQueryGroupQueryLastResults({
     actionId,
     agentIds,
     interval,
+    logsIndexPattern,
   });
 
   const { data: errorsData, isFetched: errorsFetched } = useScheduledQueryGroupQueryErrors({
     actionId,
     agentIds,
     interval,
+    logsIndexPattern,
   });
 
-  const handleErrorsToggle = useCallback(() => toggleErrors({ queryId, interval }), [
-    queryId,
-    interval,
-    toggleErrors,
-  ]);
+  const handleErrorsToggle = useCallback(
+    () => toggleErrors({ queryId, interval }),
+    [queryId, interval, toggleErrors]
+  );
+
+  useEffect(() => {
+    const fetchLogsIndexPattern = async () => {
+      const indexPattern = await data.indexPatterns.find('logs-*');
+
+      setLogsIndexPattern(indexPattern[0]);
+    };
+    fetchLogsIndexPattern();
+  }, [data.indexPatterns]);
 
   if (!isFetched || !errorsFetched) {
     return <EuiLoadingSpinner />;
   }
 
-  if (!lastResultsData) {
+  if (!lastResultsData && !errorsData?.total) {
     return <>{'-'}</>;
   }
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={4}>
-        {lastResultsData.first_event_ingested_time?.value ? (
-          <EuiToolTip content={lastResultsData.first_event_ingested_time?.value}>
-            <>{moment(lastResultsData.first_event_ingested_time?.value).fromNow()}</>
+        {lastResultsData?.['@timestamp'] ? (
+          <EuiToolTip
+            content={
+              <>
+                <FormattedDate
+                  value={lastResultsData['@timestamp']}
+                  year="numeric"
+                  month="short"
+                  day="2-digit"
+                />{' '}
+                <FormattedTime value={lastResultsData['@timestamp']} timeZoneName="short" />
+              </>
+            }
+          >
+            <FormattedRelative value={lastResultsData['@timestamp']} />
           </EuiToolTip>
         ) : (
           '-'
@@ -432,10 +457,17 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued">
-              {lastResultsData?.doc_count ?? 0}
+              {lastResultsData?.docCount ?? 0}
             </EuiNotificationBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{'Documents'}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.osquery.queriesStatusTable.documentLabelText"
+              defaultMessage="{count, plural, one {Document} other {Documents}}"
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{ count: lastResultsData?.docCount as number }}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
@@ -443,10 +475,17 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued">
-              {lastResultsData?.unique_agents?.value ?? 0}
+              {lastResultsData?.uniqueAgentsCount ?? 0}
             </EuiNotificationBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{'Agents'}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.osquery.queriesStatusTable.agentsLabelText"
+              defaultMessage="{count, plural, one {Agent} other {Agents}}"
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{ count: agentIds?.length }}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
@@ -458,7 +497,15 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
             </EuiNotificationBadge>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>{'Errors'}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {' '}
+            <FormattedMessage
+              id="xpack.osquery.queriesStatusTable.errorsLabelText"
+              defaultMessage="{count, plural, one {Error} other {Errors}}"
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{ count: errorsData?.total as number }}
+            />
+          </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -481,171 +528,171 @@ interface ScheduledQueryGroupQueriesStatusTableProps {
   scheduledQueryGroupName: string;
 }
 
-const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGroupQueriesStatusTableProps> = ({
-  agentIds,
-  data,
-  scheduledQueryGroupName,
-}) => {
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
-  >({});
+const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGroupQueriesStatusTableProps> =
+  ({ agentIds, data, scheduledQueryGroupName }) => {
+    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+      Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
+    >({});
 
-  const renderQueryColumn = useCallback(
-    (query: string) => (
-      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {query}
-      </EuiCodeBlock>
-    ),
-    []
-  );
+    const renderQueryColumn = useCallback(
+      (query: string) => (
+        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+          {query}
+        </EuiCodeBlock>
+      ),
+      []
+    );
 
-  const toggleErrors = useCallback(
-    ({ queryId, interval }: { queryId: string; interval: number }) => {
-      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-      if (itemIdToExpandedRowMapValues[queryId]) {
-        delete itemIdToExpandedRowMapValues[queryId];
-      } else {
-        itemIdToExpandedRowMapValues[queryId] = (
-          <ScheduledQueryExpandedContent
-            actionId={getPackActionId(queryId, scheduledQueryGroupName)}
-            agentIds={agentIds}
-            interval={interval}
-          />
-        );
-      }
-      setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
-    },
-    [agentIds, itemIdToExpandedRowMap, scheduledQueryGroupName]
-  );
+    const toggleErrors = useCallback(
+      ({ queryId, interval }: { queryId: string; interval: number }) => {
+        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+        if (itemIdToExpandedRowMapValues[queryId]) {
+          delete itemIdToExpandedRowMapValues[queryId];
+        } else {
+          itemIdToExpandedRowMapValues[queryId] = (
+            <ScheduledQueryExpandedContent
+              actionId={getPackActionId(queryId, scheduledQueryGroupName)}
+              agentIds={agentIds}
+              interval={interval}
+            />
+          );
+        }
+        setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+      },
+      [agentIds, itemIdToExpandedRowMap, scheduledQueryGroupName]
+    );
 
-  const renderLastResultsColumn = useCallback(
-    (item) => (
-      <ScheduledQueryLastResults
-        // @ts-expect-error update types
-        agentIds={agentIds}
-        queryId={item.vars.id.value}
-        actionId={getPackActionId(item.vars.id.value, scheduledQueryGroupName)}
-        interval={item.vars?.interval.value}
-        toggleErrors={toggleErrors}
-        expanded={!!itemIdToExpandedRowMap[item.vars.id.value]}
+    const renderLastResultsColumn = useCallback(
+      (item) => (
+        <ScheduledQueryLastResults
+          // @ts-expect-error update types
+          agentIds={agentIds}
+          queryId={item.vars.id.value}
+          actionId={getPackActionId(item.vars.id.value, scheduledQueryGroupName)}
+          interval={item.vars?.interval.value}
+          toggleErrors={toggleErrors}
+          expanded={!!itemIdToExpandedRowMap[item.vars.id.value]}
+        />
+      ),
+      [agentIds, itemIdToExpandedRowMap, scheduledQueryGroupName, toggleErrors]
+    );
+
+    const renderDiscoverResultsAction = useCallback(
+      (item) => (
+        <ViewResultsInDiscoverAction
+          actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
+          agentIds={agentIds}
+          buttonType={ViewResultsActionButtonType.icon}
+          startDate={`now-${item.vars?.interval.value * 2}s`}
+          endDate="now"
+          mode="relative"
+        />
+      ),
+      [agentIds, scheduledQueryGroupName]
+    );
+
+    const renderLensResultsAction = useCallback(
+      (item) => (
+        <ViewResultsInLensAction
+          actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
+          agentIds={agentIds}
+          buttonType={ViewResultsActionButtonType.icon}
+          startDate={`now-${item.vars?.interval.value * 2}s`}
+          endDate="now"
+          mode="relative"
+        />
+      ),
+      [agentIds, scheduledQueryGroupName]
+    );
+
+    const getItemId = useCallback(
+      (item: OsqueryManagerPackagePolicyInputStream) => get('vars.id.value', item),
+      []
+    );
+
+    const columns = useMemo(
+      () => [
+        {
+          field: 'vars.id.value',
+          name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.idColumnTitle', {
+            defaultMessage: 'ID',
+          }),
+          width: '15%',
+        },
+        {
+          field: 'vars.interval.value',
+          name: i18n.translate(
+            'xpack.osquery.scheduledQueryGroup.queriesTable.intervalColumnTitle',
+            {
+              defaultMessage: 'Interval (s)',
+            }
+          ),
+          width: '80px',
+        },
+        {
+          field: 'vars.query.value',
+          name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.queryColumnTitle', {
+            defaultMessage: 'Query',
+          }),
+          render: renderQueryColumn,
+          width: '20%',
+        },
+        {
+          name: i18n.translate(
+            'xpack.osquery.scheduledQueryGroup.queriesTable.lastResultsColumnTitle',
+            {
+              defaultMessage: 'Last results',
+            }
+          ),
+          render: renderLastResultsColumn,
+        },
+        {
+          name: i18n.translate(
+            'xpack.osquery.scheduledQueryGroup.queriesTable.viewResultsColumnTitle',
+            {
+              defaultMessage: 'View results',
+            }
+          ),
+          width: '90px',
+          actions: [
+            {
+              render: renderDiscoverResultsAction,
+            },
+            {
+              render: renderLensResultsAction,
+            },
+          ],
+        },
+      ],
+      [
+        renderQueryColumn,
+        renderLastResultsColumn,
+        renderDiscoverResultsAction,
+        renderLensResultsAction,
+      ]
+    );
+
+    const sorting = useMemo(
+      () => ({
+        sort: {
+          field: 'vars.id.value' as keyof OsqueryManagerPackagePolicyInputStream,
+          direction: 'asc' as const,
+        },
+      }),
+      []
+    );
+
+    return (
+      <EuiBasicTable<OsqueryManagerPackagePolicyInputStream>
+        items={data}
+        itemId={getItemId}
+        columns={columns}
+        sorting={sorting}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        isExpandable
       />
-    ),
-    [agentIds, itemIdToExpandedRowMap, scheduledQueryGroupName, toggleErrors]
-  );
-
-  const renderDiscoverResultsAction = useCallback(
-    (item) => (
-      <ViewResultsInDiscoverAction
-        actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
-        agentIds={agentIds}
-        buttonType={ViewResultsActionButtonType.icon}
-        startDate={`now-${item.vars?.interval.value * 2}s`}
-        endDate="now"
-        mode="relative"
-      />
-    ),
-    [agentIds, scheduledQueryGroupName]
-  );
-
-  const renderLensResultsAction = useCallback(
-    (item) => (
-      <ViewResultsInLensAction
-        actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
-        agentIds={agentIds}
-        buttonType={ViewResultsActionButtonType.icon}
-        startDate={`now-${item.vars?.interval.value * 2}s`}
-        endDate="now"
-        mode="relative"
-      />
-    ),
-    [agentIds, scheduledQueryGroupName]
-  );
-
-  const getItemId = useCallback(
-    (item: OsqueryManagerPackagePolicyInputStream) => get('vars.id.value', item),
-    []
-  );
-
-  const columns = useMemo(
-    () => [
-      {
-        field: 'vars.id.value',
-        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.idColumnTitle', {
-          defaultMessage: 'ID',
-        }),
-        width: '15%',
-      },
-      {
-        field: 'vars.interval.value',
-        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.intervalColumnTitle', {
-          defaultMessage: 'Interval (s)',
-        }),
-        width: '80px',
-      },
-      {
-        field: 'vars.query.value',
-        name: i18n.translate('xpack.osquery.scheduledQueryGroup.queriesTable.queryColumnTitle', {
-          defaultMessage: 'Query',
-        }),
-        render: renderQueryColumn,
-        width: '20%',
-      },
-      {
-        name: i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queriesTable.lastResultsColumnTitle',
-          {
-            defaultMessage: 'Last results',
-          }
-        ),
-        render: renderLastResultsColumn,
-      },
-      {
-        name: i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queriesTable.viewResultsColumnTitle',
-          {
-            defaultMessage: 'View results',
-          }
-        ),
-        width: '90px',
-        actions: [
-          {
-            render: renderDiscoverResultsAction,
-          },
-          {
-            render: renderLensResultsAction,
-          },
-        ],
-      },
-    ],
-    [
-      renderQueryColumn,
-      renderLastResultsColumn,
-      renderDiscoverResultsAction,
-      renderLensResultsAction,
-    ]
-  );
-
-  const sorting = useMemo(
-    () => ({
-      sort: {
-        field: 'vars.id.value' as keyof OsqueryManagerPackagePolicyInputStream,
-        direction: 'asc' as const,
-      },
-    }),
-    []
-  );
-
-  return (
-    <EuiBasicTable<OsqueryManagerPackagePolicyInputStream>
-      items={data}
-      itemId={getItemId}
-      columns={columns}
-      sorting={sorting}
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable
-    />
-  );
-};
+    );
+  };
 
 export const ScheduledQueryGroupQueriesStatusTable = React.memo(
   ScheduledQueryGroupQueriesStatusTableComponent

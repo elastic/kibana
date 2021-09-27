@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from '../../../../kibana_services';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 
 /**

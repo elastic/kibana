@@ -24,7 +24,7 @@ interface Payload {
   statusCode: number;
   content: string | Stream | ErrorFromPayload;
   contentType: string | null;
-  headers: Record<string, any>;
+  headers: Record<string, string | number>;
 }
 
 type TaskRunResult = Required<ReportApiJSON>['output'];

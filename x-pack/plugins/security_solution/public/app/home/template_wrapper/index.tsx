@@ -42,7 +42,6 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
     transform: ${(
       { $isShowingTimelineOverlay } // Since the bottom bar wraps the whole overlay now, need to override any transforms when it is open
     ) => ($isShowingTimelineOverlay ? 'none' : 'translateY(calc(100% - 50px))')};
-    z-index: ${({ theme }) => theme.eui.euiZLevel8};
 
     .${IS_DRAGGING_CLASS_NAME} & {
       // When a drag is in process the bottom flyout should slide up to allow a drop
@@ -66,8 +65,8 @@ interface SecuritySolutionPageWrapperProps {
   onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> = React.memo(
-  ({ children, onAppLeave }) => {
+export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> =
+  React.memo(({ children, onAppLeave }) => {
     const solutionNav = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
@@ -100,5 +99,4 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         </EuiPanel>
       </StyledKibanaPageTemplate>
     );
-  }
-);
+  });

@@ -27495,16 +27495,23 @@ function isIdentifierChar(code) {
 function isIdentifierName(name) {
   let isFirst = true;
 
-  for (let _i = 0, _Array$from = Array.from(name); _i < _Array$from.length; _i++) {
-    const char = _Array$from[_i];
-    const cp = char.codePointAt(0);
+  for (let i = 0; i < name.length; i++) {
+    let cp = name.charCodeAt(i);
+
+    if ((cp & 0xfc00) === 0xd800 && i + 1 < name.length) {
+      const trail = name.charCodeAt(++i);
+
+      if ((trail & 0xfc00) === 0xdc00) {
+        cp = 0x10000 + ((cp & 0x3ff) << 10) + (trail & 0x3ff);
+      }
+    }
 
     if (isFirst) {
+      isFirst = false;
+
       if (!isIdentifierStart(cp)) {
         return false;
       }
-
-      isFirst = false;
     } else if (!isIdentifierChar(cp)) {
       return false;
     }
@@ -59643,7 +59650,7 @@ class CiStatsReporter {
           throw error;
         }
 
-        if (error !== null && error !== void 0 && error.response && error.response.status < 502) {
+        if (error !== null && error !== void 0 && error.response && error.response.status < 500) {
           // error response from service was received so warn the user and move on
           this.log.warning(`error reporting ${bodyDesc} [status=${error.response.status}] [resp=${(0, _util.inspect)(error.response.data)}]`);
           return;

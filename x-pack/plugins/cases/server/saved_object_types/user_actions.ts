@@ -49,4 +49,8 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
     },
   },
   migrations: userActionsMigrations,
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
 };

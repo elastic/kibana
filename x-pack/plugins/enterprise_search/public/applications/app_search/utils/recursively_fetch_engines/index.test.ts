@@ -46,18 +46,21 @@ describe('recursivelyFetchEngines', () => {
       .mockReturnValueOnce(Promise.resolve(MOCK_PAGE_3));
 
     recursivelyFetchEngines({
-      endpoint: '/api/app_search/engines/some-engine/source_engines',
+      endpoint: '/internal/app_search/engines/some-engine/source_engines',
       onComplete: MOCK_CALLBACK,
     });
     await nextTick();
 
     expect(http.get).toHaveBeenCalledTimes(3); // Called once for each page
-    expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/source_engines', {
-      query: {
-        'page[current]': 1,
-        'page[size]': 25,
-      },
-    });
+    expect(http.get).toHaveBeenCalledWith(
+      '/internal/app_search/engines/some-engine/source_engines',
+      {
+        query: {
+          'page[current]': 1,
+          'page[size]': 25,
+        },
+      }
+    );
 
     expect(MOCK_CALLBACK).toHaveBeenCalledWith([
       { name: 'source-engine-1' },
@@ -68,12 +71,12 @@ describe('recursivelyFetchEngines', () => {
 
   it('passes optional query params', () => {
     recursivelyFetchEngines({
-      endpoint: '/api/app_search/engines/some-engine/engines',
+      endpoint: '/internal/app_search/engines/some-engine/engines',
       onComplete: MOCK_CALLBACK,
       query: { type: 'indexed' },
     });
 
-    expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/engines', {
+    expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/engines', {
       query: {
         'page[current]': 1,
         'page[size]': 25,

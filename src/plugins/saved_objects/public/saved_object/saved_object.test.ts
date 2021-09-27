@@ -20,7 +20,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { createStubIndexPattern } from '../../../../plugins/data/common/stubs';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
-import { IndexPattern } from '../../../data/common/index_patterns/index_patterns';
+import { DataView } from '../../../data/common';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 describe('Saved Object', () => {
@@ -93,7 +93,7 @@ describe('Saved Object', () => {
 
   const initSavedObjectClass = () => {
     SavedObjectClass = createSavedObjectClass(
-      ({
+      {
         savedObjectsClient: savedObjectsClientStub,
         indexPatterns: dataStartMock.indexPatterns,
         search: {
@@ -104,7 +104,7 @@ describe('Saved Object', () => {
             createEmpty: createSearchSourceMock,
           },
         },
-      } as unknown) as SavedObjectKibanaServices,
+      } as unknown as SavedObjectKibanaServices,
       decoratorRegistry
     );
   };
@@ -653,13 +653,13 @@ describe('Saved Object', () => {
 
     it('passes references to search source parsing function', async () => {
       SavedObjectClass = createSavedObjectClass(
-        ({
+        {
           savedObjectsClient: savedObjectsClientStub,
           indexPatterns: dataStartMock.indexPatterns,
           search: {
             ...dataStartMock.search,
           },
-        } as unknown) as SavedObjectKibanaServices,
+        } as unknown as SavedObjectKibanaServices,
         decoratorRegistry
       );
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });
@@ -725,7 +725,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: true,
-          indexPattern: { id: indexPatternId } as IndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(
@@ -752,7 +752,7 @@ describe('Saved Object', () => {
         return savedObject.init!().then(() => {
           expect(afterESRespCallback).toHaveBeenCalled();
           const index = savedObject.searchSource!.getField('index');
-          expect(index instanceof IndexPattern).toBe(true);
+          expect(index instanceof DataView).toBe(true);
           expect(index!.id).toEqual(indexPatternId);
         });
       });
@@ -765,7 +765,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: false,
-          indexPattern: { id: indexPatternId } as IndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(getMockedDocResponse(indexPatternId));

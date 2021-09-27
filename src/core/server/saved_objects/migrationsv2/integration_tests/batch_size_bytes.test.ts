@@ -67,7 +67,9 @@ describe('migration v2', () => {
     await root.setup();
     await expect(root.start()).resolves.toBeTruthy();
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // After plugins start, some saved objects are deleted/recreated, so we
+    // wait a bit for the count to settle.
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     const esClient: ElasticsearchClient = esServer.es.getClient();
     const migratedIndexResponse = await esClient.count({

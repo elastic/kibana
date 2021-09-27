@@ -83,7 +83,7 @@
             "signature": [
               "Map<string, ",
               "TriggerInternal",
-              "<any>>"
+              "<object>>"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false

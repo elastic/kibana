@@ -21,7 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import { IndexPattern } from '../../../kibana_services';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -36,7 +36,6 @@ import {
 import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '../../../../common';
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 import { SortPairArr } from '../../apps/main/components/doc_table/lib/get_sort';
@@ -219,10 +218,10 @@ export const DiscoverGrid = ({
    */
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
-  const pageCount = useMemo(() => Math.ceil(rowCount / pagination.pageSize), [
-    rowCount,
-    pagination,
-  ]);
+  const pageCount = useMemo(
+    () => Math.ceil(rowCount / pagination.pageSize),
+    [rowCount, pagination]
+  );
   const isOnLastPage = pagination.pageIndex === pageCount - 1;
 
   const paginationObj = useMemo(() => {
@@ -385,41 +384,39 @@ export const DiscoverGrid = ({
         data-document-number={displayedRows.length}
         className={className}
       >
-        <KibanaContextProvider services={{ uiSettings: services.uiSettings }}>
-          <EuiDataGridMemoized
-            aria-describedby={randomId}
-            aria-labelledby={ariaLabelledBy}
-            columns={euiGridColumns}
-            columnVisibility={columnsVisibility}
-            data-test-subj="docTable"
-            gridStyle={gridStyle as EuiDataGridStyle}
-            leadingControlColumns={lead}
-            onColumnResize={(col: { columnId: string; width: number }) => {
-              if (onResize) {
-                onResize(col);
-              }
-            }}
-            pagination={paginationObj}
-            renderCellValue={renderCellValue}
-            rowCount={rowCount}
-            schemaDetectors={schemaDetectors}
-            sorting={sorting as EuiDataGridSorting}
-            toolbarVisibility={
-              defaultColumns
-                ? {
-                    ...toolbarVisibility,
-                    showColumnSelector: false,
-                    showSortSelector: isSortEnabled,
-                    additionalControls,
-                  }
-                : {
-                    ...toolbarVisibility,
-                    showSortSelector: isSortEnabled,
-                    additionalControls,
-                  }
+        <EuiDataGridMemoized
+          aria-describedby={randomId}
+          aria-labelledby={ariaLabelledBy}
+          columns={euiGridColumns}
+          columnVisibility={columnsVisibility}
+          data-test-subj="docTable"
+          gridStyle={gridStyle as EuiDataGridStyle}
+          leadingControlColumns={lead}
+          onColumnResize={(col: { columnId: string; width: number }) => {
+            if (onResize) {
+              onResize(col);
             }
-          />
-        </KibanaContextProvider>
+          }}
+          pagination={paginationObj}
+          renderCellValue={renderCellValue}
+          rowCount={rowCount}
+          schemaDetectors={schemaDetectors}
+          sorting={sorting as EuiDataGridSorting}
+          toolbarVisibility={
+            defaultColumns
+              ? {
+                  ...toolbarVisibility,
+                  showColumnSelector: false,
+                  showSortSelector: isSortEnabled,
+                  additionalControls,
+                }
+              : {
+                  ...toolbarVisibility,
+                  showSortSelector: isSortEnabled,
+                  additionalControls,
+                }
+          }
+        />
 
         {showDisclaimer && (
           <p className="dscDiscoverGrid__footer">

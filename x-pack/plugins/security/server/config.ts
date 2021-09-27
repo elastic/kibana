@@ -228,6 +228,11 @@ export const ConfigSchema = schema.object({
   sameSiteCookies: schema.maybe(
     schema.oneOf([schema.literal('Strict'), schema.literal('Lax'), schema.literal('None')])
   ),
+  public: schema.object({
+    protocol: schema.maybe(schema.oneOf([schema.literal('http'), schema.literal('https')])),
+    hostname: schema.maybe(schema.string({ hostname: true })),
+    port: schema.maybe(schema.number({ min: 0, max: 65535 })),
+  }),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
@@ -256,7 +261,7 @@ export const ConfigSchema = schema.object({
     saml: providerOptionsSchema(
       'saml',
       schema.object({
-        realm: schema.string(),
+        realm: schema.maybe(schema.string()),
         maxRedirectURLSize: schema.maybe(schema.byteSize()),
       })
     ),
@@ -324,20 +329,22 @@ export function createConfig(
   }
 
   const isUsingLegacyProvidersFormat = Array.isArray(config.authc.providers);
-  const providers = (isUsingLegacyProvidersFormat
-    ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
-        (legacyProviders, providerType, order) => {
-          legacyProviders[providerType] = {
-            [providerType]:
-              providerType === 'saml' || providerType === 'oidc'
-                ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
-                : { enabled: true, showInSelector: true, order },
-          };
-          return legacyProviders;
-        },
-        {} as Record<string, unknown>
-      )
-    : config.authc.providers) as ProvidersConfigType;
+  const providers = (
+    isUsingLegacyProvidersFormat
+      ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
+          (legacyProviders, providerType, order) => {
+            legacyProviders[providerType] = {
+              [providerType]:
+                providerType === 'saml' || providerType === 'oidc'
+                  ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
+                  : { enabled: true, showInSelector: true, order },
+            };
+            return legacyProviders;
+          },
+          {} as Record<string, unknown>
+        )
+      : config.authc.providers
+  ) as ProvidersConfigType;
 
   // Remove disabled providers and sort the rest.
   const sortedProviders: Array<{

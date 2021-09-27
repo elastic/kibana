@@ -39,18 +39,15 @@ export async function getServicesItems({
       maxNumServices: MAX_NUMBER_OF_SERVICES,
     };
 
-    const [
-      transactionStats,
-      servicesFromMetricDocuments,
-      healthStatuses,
-    ] = await Promise.all([
-      getServiceTransactionStats(params),
-      getServicesFromMetricDocuments(params),
-      getHealthStatuses(params).catch((err) => {
-        logger.error(err);
-        return [];
-      }),
-    ]);
+    const [transactionStats, servicesFromMetricDocuments, healthStatuses] =
+      await Promise.all([
+        getServiceTransactionStats(params),
+        getServicesFromMetricDocuments(params),
+        getHealthStatuses(params).catch((err) => {
+          logger.error(err);
+          return [];
+        }),
+      ]);
 
     return mergeServiceStats({
       transactionStats,

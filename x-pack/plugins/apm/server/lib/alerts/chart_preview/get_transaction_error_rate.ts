@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { rangeQuery } from '../../../../../observability/server';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { getBucketSize } from '../../helpers/get_bucket_size';
+import { AlertParams } from '../../../routes/alerts/chart_preview';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+  getSearchAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
@@ -28,41 +30,56 @@ export async function getTransactionErrorRateChartPreview({
   setup: Setup & SetupTimeRange;
   alertParams: AlertParams;
 }) {
-  const { apmEventClient, start, end } = setup;
-  const { serviceName, environment, transactionType } = alertParams;
+  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    ...setup,
+    kuery: '',
+  });
 
-  const query = {
-    bool: {
-      filter: [
-        { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-        ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-        ...(transactionType
-          ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-          : []),
-        ...rangeQuery(start, end),
-        ...environmentQuery(environment),
-      ],
-    },
-  };
+  const { apmEventClient, start, end } = setup;
+  const { serviceName, environment, transactionType, interval } = alertParams;
 
   const outcomes = getOutcomeAggregation();
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
-
-  const aggs = {
-    outcomes,
-    timeseries: {
-      date_histogram: {
-        field: '@timestamp',
-        fixed_interval: intervalString,
-      },
-      aggs: { outcomes },
-    },
-  };
-
   const params = {
-    apm: { events: [ProcessorEvent.transaction] },
-    body: { size: 0, query, aggs },
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
+            ...(transactionType
+              ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+              : []),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          ],
+        },
+      },
+      aggs: {
+        outcomes,
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: interval,
+            extended_bounds: {
+              min: start,
+              max: end,
+            },
+          },
+          aggs: { outcomes },
+        },
+      },
+    },
   };
 
   const resp = await apmEventClient.search(

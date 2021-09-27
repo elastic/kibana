@@ -45,7 +45,7 @@ import { getPreloadedState } from '../state_management/lens_slice';
 export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
-  attributeService: () => Promise<LensAttributeService>
+  attributeService: LensAttributeService
 ): Promise<LensAppServices> {
   const {
     data,
@@ -55,6 +55,7 @@ export async function getLensServices(
     savedObjectsTagging,
     usageCollection,
     fieldFormats,
+    spaces,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -70,7 +71,7 @@ export async function getLensServices(
     stateTransfer,
     usageCollection,
     savedObjectsTagging,
-    attributeService: await attributeService(),
+    attributeService,
     http: coreStart.http,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
@@ -87,6 +88,7 @@ export async function getLensServices(
     },
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
+    spaces,
   };
 }
 
@@ -95,8 +97,8 @@ export async function mountApp(
   params: AppMountParameters,
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
-    attributeService: () => Promise<LensAttributeService>;
-    getPresentationUtilContext: () => Promise<FC>;
+    attributeService: LensAttributeService;
+    getPresentationUtilContext: () => FC;
   }
 ) {
   const { createEditorFrame, attributeService, getPresentationUtilContext } = mountProps;
@@ -203,7 +205,9 @@ export async function mountApp(
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
 
-      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, emptyState }));
+      lensStore.dispatch(
+        loadInitial({ redirectCallback, initialInput, emptyState, history: props.history })
+      );
 
       return (
         <Provider store={lensStore}>
@@ -248,7 +252,7 @@ export async function mountApp(
 
   params.element.classList.add('lnsAppWrapper');
 
-  const PresentationUtilContext = await getPresentationUtilContext();
+  const PresentationUtilContext = getPresentationUtilContext();
 
   render(
     <I18nProvider>

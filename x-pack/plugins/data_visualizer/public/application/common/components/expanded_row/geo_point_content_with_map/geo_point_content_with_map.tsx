@@ -7,16 +7,15 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
 import { ExamplesList } from '../../examples_list';
 import { FieldVisConfig } from '../../stats_table/types';
-import { LayerDescriptor } from '../../../../../../../maps/common/descriptor_types';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 import { JOB_FIELD_TYPES } from '../../../../../../common';
-import { ES_GEO_FIELD_TYPE } from '../../../../../../../maps/common';
+import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '../../../../../../../maps/common';
 import { EmbeddedMapComponent } from '../../embedded_map';
 
 export const GeoPointContentWithMap: FC<{

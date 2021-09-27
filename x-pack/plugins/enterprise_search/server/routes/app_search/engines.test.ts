@@ -10,7 +10,7 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerEnginesRoutes } from './engines';
 
 describe('engine routes', () => {
-  describe('GET /api/app_search/engines', () => {
+  describe('GET /internal/app_search/engines', () => {
     const mockRequest = {
       query: {
         type: 'indexed',
@@ -25,7 +25,7 @@ describe('engine routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines',
+        path: '/internal/app_search/engines',
       });
 
       registerEnginesRoutes({
@@ -98,14 +98,14 @@ describe('engine routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines', () => {
+  describe('POST /internal/app_search/engines', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines',
+        path: '/internal/app_search/engines',
       });
 
       registerEnginesRoutes({
@@ -176,14 +176,14 @@ describe('engine routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{name}', () => {
+  describe('GET /internal/app_search/engines/{name}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}',
+        path: '/internal/app_search/engines/{name}',
       });
 
       registerEnginesRoutes({
@@ -199,14 +199,14 @@ describe('engine routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{name}', () => {
+  describe('DELETE /internal/app_search/engines/{name}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{name}',
+        path: '/internal/app_search/engines/{name}',
       });
 
       registerEnginesRoutes({
@@ -237,14 +237,14 @@ describe('engine routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{name}/overview', () => {
+  describe('GET /internal/app_search/engines/{name}/overview', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/overview',
+        path: '/internal/app_search/engines/{name}/overview',
       });
 
       registerEnginesRoutes({

@@ -304,6 +304,7 @@ export const GetPingsParamsType = t.intersection([
     dateRange: DateRangeType,
   }),
   t.partial({
+    excludedLocations: t.string,
     index: t.number,
     size: t.number,
     locations: t.string,

@@ -34,6 +34,15 @@ export enum MatrixHistogramType {
   dns = 'dns',
 }
 
+export const MatrixHistogramTypeToAggName = {
+  [MatrixHistogramType.alerts]: 'aggregations.alertsGroup.buckets',
+  [MatrixHistogramType.anomalies]: 'aggregations.anomalyActionGroup.buckets',
+  [MatrixHistogramType.authentications]: 'aggregations.eventActionGroup.buckets',
+  [MatrixHistogramType.authenticationsEntities]: 'aggregations.events.buckets',
+  [MatrixHistogramType.dns]: 'aggregations.dns_name_query_count.buckets',
+  [MatrixHistogramType.events]: 'aggregations.eventActionGroup.buckets',
+};
+
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;

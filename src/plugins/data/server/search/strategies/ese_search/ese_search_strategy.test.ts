@@ -48,7 +48,7 @@ describe('ES search strategy', () => {
   const mockLogger: any = {
     debug: () => {},
   };
-  const mockDeps = ({
+  const mockDeps = {
     uiSettingsClient: {
       get: jest.fn(),
     },
@@ -63,7 +63,7 @@ describe('ES search strategy', () => {
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
-  } as unknown) as SearchStrategyDependencies;
+  } as unknown as SearchStrategyDependencies;
   const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
       shardTimeout: {

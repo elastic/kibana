@@ -46,15 +46,14 @@ interface OwnProps {
   commit: CommitFn;
 }
 
-const withGlobalState = (
-  commit: CommitFn,
-  updateGlobalState: (layoutState: LayoutState) => void
-) => (type: string, payload: any) => {
-  const newLayoutState = commit(type, payload);
-  if (newLayoutState.currentScene.gestureEnd) {
-    updateGlobalState(newLayoutState);
-  }
-};
+const withGlobalState =
+  (commit: CommitFn, updateGlobalState: (layoutState: LayoutState) => void) =>
+  (type: string, payload: any) => {
+    const newLayoutState = commit(type, payload);
+    if (newLayoutState.currentScene.gestureEnd) {
+      updateGlobalState(newLayoutState);
+    }
+  };
 
 /*
  * TODO: this is all copied from interactive_workpad_page and workpad_shortcuts

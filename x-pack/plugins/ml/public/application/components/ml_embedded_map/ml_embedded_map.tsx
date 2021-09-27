@@ -8,15 +8,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { htmlIdGenerator } from '@elastic/eui';
-import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
-import { INITIAL_LOCATION } from '../../../../../maps/common/constants';
+import {
+  INITIAL_LOCATION,
+  LayerDescriptor,
+  MAP_SAVED_OBJECT_TYPE,
+} from '../../../../../maps/common';
 import type {
   MapEmbeddable,
   MapEmbeddableInput,
   MapEmbeddableOutput,
   RenderTooltipContentParams,
 } from '../../../../../maps/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/public';
 
 import {
   EmbeddableFactory,

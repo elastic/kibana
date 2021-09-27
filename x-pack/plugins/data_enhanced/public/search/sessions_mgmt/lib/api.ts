@@ -79,46 +79,48 @@ async function getUrlFromState(
 }
 
 // Helper: factory for a function to map server objects to UI objects
-const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) => async (
-  savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
-): Promise<UISession> => {
-  const {
-    name,
-    appId,
-    created,
-    expires,
-    urlGeneratorId,
-    initialState,
-    restoreState,
-    idMapping,
-    version,
-  } = savedObject.attributes;
+const mapToUISession =
+  (urls: UrlGeneratorsStart, config: SessionsConfigSchema) =>
+  async (
+    savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
+  ): Promise<UISession> => {
+    const {
+      name,
+      appId,
+      created,
+      expires,
+      urlGeneratorId,
+      initialState,
+      restoreState,
+      idMapping,
+      version,
+    } = savedObject.attributes;
 
-  const status = getUIStatus(savedObject.attributes);
-  const actions = getActions(status);
+    const status = getUIStatus(savedObject.attributes);
+    const actions = getActions(status);
 
-  // TODO: initialState should be saved without the searchSessionID
-  if (initialState) delete initialState.searchSessionId;
-  // derive the URL and add it in
-  const reloadUrl = await getUrlFromState(urls, urlGeneratorId, initialState);
-  const restoreUrl = await getUrlFromState(urls, urlGeneratorId, restoreState);
+    // TODO: initialState should be saved without the searchSessionID
+    if (initialState) delete initialState.searchSessionId;
+    // derive the URL and add it in
+    const reloadUrl = await getUrlFromState(urls, urlGeneratorId, initialState);
+    const restoreUrl = await getUrlFromState(urls, urlGeneratorId, restoreState);
 
-  return {
-    id: savedObject.id,
-    name,
-    appId,
-    created,
-    expires,
-    status,
-    actions,
-    restoreUrl,
-    reloadUrl,
-    initialState,
-    restoreState,
-    numSearches: Object.keys(idMapping).length,
-    version,
+    return {
+      id: savedObject.id,
+      name,
+      appId,
+      created,
+      expires,
+      status,
+      actions,
+      restoreUrl,
+      reloadUrl,
+      initialState,
+      restoreState,
+      numSearches: Object.keys(idMapping).length,
+      version,
+    };
   };
-};
 
 interface SearchSessionManagementDeps {
   urls: UrlGeneratorsStart;

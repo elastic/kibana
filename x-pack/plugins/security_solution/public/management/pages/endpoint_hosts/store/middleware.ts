@@ -473,15 +473,13 @@ async function endpointDetailsListMiddleware({
     });
 
     try {
-      const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackagePolicies(
-        http,
-        {
+      const policyDataResponse: GetPolicyListResponse =
+        await sendGetEndpointSpecificPackagePolicies(http, {
           query: {
             perPage: 50, // Since this is an oboarding flow, we'll cap at 50 policies.
             page: 1,
           },
-        }
-      );
+        });
 
       dispatch({
         type: 'serverReturnedPoliciesForOnboarding',
@@ -640,12 +638,12 @@ async function endpointDetailsActivityLogChangedMiddleware({
   });
 
   try {
-    const { page, pageSize } = getActivityLogDataPaging(getState());
+    const { page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
     const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
       agent_id: selectedAgent(getState()),
     });
     const activityLog = await coreStart.http.get<ActivityLog>(route, {
-      query: { page, page_size: pageSize },
+      query: { page, page_size: pageSize, start_date: startDate, end_date: endDate },
     });
     dispatch({
       type: 'endpointDetailsActivityLogChanged',
@@ -709,9 +707,9 @@ async function endpointDetailsActivityLogPagingMiddleware({
 
     const lastLoadedLogData = getLastLoadedActivityLogData(getState());
     if (lastLoadedLogData !== undefined) {
-      const updatedLogDataItems = ([
-        ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
-      ] as ActivityLog['data']).sort((a, b) =>
+      const updatedLogDataItems = (
+        [...new Set([...lastLoadedLogData.data, ...activityLog.data])] as ActivityLog['data']
+      ).sort((a, b) =>
         new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
       );
 

@@ -35,6 +35,9 @@ import {
   AlertNotifyWhenType,
   AlertTypeParams,
   ResolvedSanitizedRule,
+  AlertWithLegacyId,
+  SanitizedAlertWithLegacyId,
+  PartialAlertWithLegacyId,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -294,11 +297,11 @@ export class RulesClient {
     await this.validateActions(ruleType, data.actions);
 
     // Extract saved object references for this rule
-    const { references, params: updatedParams, actions } = await this.extractReferences(
-      ruleType,
-      data.actions,
-      validatedAlertTypeParams
-    );
+    const {
+      references,
+      params: updatedParams,
+      actions,
+    } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
 
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
@@ -383,9 +386,11 @@ export class RulesClient {
 
   public async get<Params extends AlertTypeParams = never>({
     id,
+    includeLegacyId = false,
   }: {
     id: string;
-  }): Promise<SanitizedAlert<Params>> {
+    includeLegacyId?: boolean;
+  }): Promise<SanitizedAlert<Params> | SanitizedAlertWithLegacyId<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     try {
       await this.authorization.ensureAuthorized({
@@ -414,7 +419,8 @@ export class RulesClient {
       result.id,
       result.attributes.alertTypeId,
       result.attributes,
-      result.references
+      result.references,
+      includeLegacyId
     );
   }
 
@@ -423,10 +429,8 @@ export class RulesClient {
   }: {
     id: string;
   }): Promise<ResolvedSanitizedRule<Params>> {
-    const {
-      saved_object: result,
-      ...resolveResponse
-    } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
+    const { saved_object: result, ...resolveResponse } =
+      await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
     try {
       await this.authorization.ensureAuthorized({
         ruleTypeId: result.attributes.alertTypeId,
@@ -486,7 +490,8 @@ export class RulesClient {
     dateStart,
   }: GetAlertInstanceSummaryParams): Promise<AlertInstanceSummary> {
     this.logger.debug(`getAlertInstanceSummary(): getting alert ${id}`);
-    const alert = await this.get({ id });
+    const alert = (await this.get({ id, includeLegacyId: true })) as SanitizedAlertWithLegacyId;
+
     await this.authorization.ensureAuthorized({
       ruleTypeId: alert.alertTypeId,
       consumer: alert.consumer,
@@ -505,13 +510,18 @@ export class RulesClient {
     this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
     let events: IEvent[];
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
-        page: 1,
-        per_page: 10000,
-        start: parsedDateStart.toISOString(),
-        end: dateNow.toISOString(),
-        sort_order: 'desc',
-      });
+      const queryResults = await eventLogClient.findEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          page: 1,
+          per_page: 10000,
+          start: parsedDateStart.toISOString(),
+          end: dateNow.toISOString(),
+          sort_order: 'desc',
+        },
+        alert.legacyId !== null ? [alert.legacyId] : undefined
+      );
       events = queryResults.data;
     } catch (err) {
       this.logger.debug(
@@ -621,13 +631,11 @@ export class RulesClient {
     // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
     const alertExecutionStatus = await Promise.all(
       AlertExecutionStatusValues.map(async (status: string) => {
-        const {
-          filter: authorizationFilter,
-          logSuccessfulAuthorization,
-        } = await this.authorization.getFindAuthorizationFilter(
-          AlertingAuthorizationEntity.Rule,
-          alertingAuthorizationFilterOpts
-        );
+        const { filter: authorizationFilter, logSuccessfulAuthorization } =
+          await this.authorization.getFindAuthorizationFilter(
+            AlertingAuthorizationEntity.Rule,
+            alertingAuthorizationFilterOpts
+          );
         const filter = options.filter
           ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
           : `alert.attributes.executionStatus.status:(${status})`;
@@ -660,16 +668,23 @@ export class RulesClient {
   }
 
   public async delete({ id }: { id: string }) {
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.delete('${id}')`,
+      async () => await this.deleteWithOCC({ id })
+    );
+  }
+
+  private async deleteWithOCC({ id }: { id: string }) {
     let taskIdToRemove: string | undefined | null;
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      const decryptedAlert =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
       attributes = decryptedAlert.attributes;
@@ -744,11 +759,10 @@ export class RulesClient {
     let alertSavedObject: SavedObject<RawAlert>;
 
     try {
-      alertSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      alertSavedObject =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
@@ -834,11 +848,11 @@ export class RulesClient {
     await this.validateActions(ruleType, data.actions);
 
     // Extract saved object references for this rule
-    const { references, params: updatedParams, actions } = await this.extractReferences(
-      ruleType,
-      data.actions,
-      validatedAlertTypeParams
-    );
+    const {
+      references,
+      params: updatedParams,
+      actions,
+    } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
 
     const username = await this.getUserName();
 
@@ -923,11 +937,10 @@ export class RulesClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      const decryptedAlert =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -1028,11 +1041,10 @@ export class RulesClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      const decryptedAlert =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -1146,11 +1158,10 @@ export class RulesClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      const decryptedAlert =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -1533,13 +1544,26 @@ export class RulesClient {
     id: string,
     ruleTypeId: string,
     rawAlert: RawAlert,
-    references: SavedObjectReference[] | undefined
-  ): Alert {
+    references: SavedObjectReference[] | undefined,
+    includeLegacyId: boolean = false
+  ): Alert | AlertWithLegacyId {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw<Params>(id, ruleType, rawAlert, references) as Alert;
+    const res = this.getPartialAlertFromRaw<Params>(
+      id,
+      ruleType,
+      rawAlert,
+      references,
+      includeLegacyId
+    );
+    // include to result because it is for internal rules client usage
+    if (includeLegacyId) {
+      return res as AlertWithLegacyId;
+    }
+    // exclude from result because it is an internal variable
+    return omit(res, ['legacyId']) as Alert;
   }
 
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
@@ -1550,17 +1574,18 @@ export class RulesClient {
       updatedAt,
       meta,
       notifyWhen,
+      legacyId,
       scheduledTaskId,
       params,
-      legacyId, // exclude from result because it is an internal variable
       executionStatus,
       schedule,
       actions,
       ...partialRawAlert
     }: Partial<RawAlert>,
-    references: SavedObjectReference[] | undefined
-  ): PartialAlert<Params> {
-    return {
+    references: SavedObjectReference[] | undefined,
+    includeLegacyId: boolean = false
+  ): PartialAlert<Params> | PartialAlertWithLegacyId<Params> {
+    const rule = {
       id,
       notifyWhen,
       ...partialRawAlert,
@@ -1576,6 +1601,9 @@ export class RulesClient {
         ? { executionStatus: alertExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
     };
+    return includeLegacyId
+      ? ({ ...rule, legacyId } as PartialAlertWithLegacyId<Params>)
+      : (rule as PartialAlert<Params>);
   }
 
   private async validateActions(
