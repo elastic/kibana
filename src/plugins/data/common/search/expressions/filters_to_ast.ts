@@ -12,10 +12,10 @@ import { ExpressionFunctionKibanaFilter } from './kibana_filter';
 
 export const filtersToAst = (filters: Filter[] | Filter) => {
   return (Array.isArray(filters) ? filters : [filters]).map((filter) => {
-    const { meta, query } = filter;
+    const { meta, $state, query, ...restOfFilters } = filter;
     return buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaFilter>('kibanaFilter', {
-        query: JSON.stringify(query),
+        query: JSON.stringify(query || restOfFilters),
         negate: meta.negate,
         disabled: meta.disabled,
       }),

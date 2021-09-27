@@ -35,7 +35,7 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
  * @return {Object} the query version of that filter
  */
 const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
-  return filter.query || {};
+  return filter.query || filter;
 };
 
 /**
