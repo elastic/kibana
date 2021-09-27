@@ -160,6 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(204);
 
+      let previousStatus: string | undefined;
       await retry.try(async () => {
         const runningSearchResult = await es.search({
           index: '.kibana_task_manager',
@@ -178,13 +179,14 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
         const total = (runningSearchResult.body.hits.total as estypes.SearchTotalHits).value;
-        log.warning(`Total: ${total}`);
+        log.warning(`Total: ${total}, Previous status: ${previousStatus}`);
         expect(total).to.eql(1);
         const hitsMetadata = runningSearchResult.body.hits as estypes.SearchHitsMetadata<{
           task?: { status: string };
         }>;
         const hits = hitsMetadata.hits;
         const firstHitStatus = hits[0]._source?.task?.status;
+        previousStatus = firstHitStatus;
         log.warning(`firstHitStatus: ${firstHitStatus}`);
         expect(firstHitStatus).to.eql('running');
       });
