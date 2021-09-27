@@ -4,7 +4,9 @@
 <titleabbrev>Check reindex status</titleabbrev>
 ++++
 
-experimental[] Check the status of the reindex task.
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+Check the status of the reindex task.
 
 [[check-reindex-status-request]]
 ==== Request

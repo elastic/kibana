@@ -10,6 +10,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DocLinksStart } from 'kibana/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -54,11 +55,23 @@ const i18nTexts = {
 
 const getBatchReindexLink = (docLinks: DocLinksStart) => {
   return (
-    <EuiLink href={docLinks.links.upgradeAssistant.batchReindex} target="_blank" external={true}>
-      {i18n.translate('xpack.upgradeAssistant.esDeprecations.batchReindexingDocsLink', {
-        defaultMessage: 'To start multiple reindexing tasks in a single request, use the Kibana batch reindexing API.',
-      })}
-    </EuiLink>
+    <FormattedMessage
+      id="xpack.upgradeAssistant.esDeprecations.batchReindexingDocsDescription"
+      defaultMessage="To start multiple reindexing tasks in a single request, use the Kibana {docsLink}."
+      values={{
+        docsLink: (
+          <EuiLink
+            href={docLinks.links.upgradeAssistant.batchReindex}
+            target="_blank"
+            external={true}
+          >
+            {i18n.translate('xpack.upgradeAssistant.esDeprecations.batchReindexingDocsLink', {
+              defaultMessage: 'batch reindexing API',
+            })}
+          </EuiLink>
+        ),
+      }}
+    />
   );
 };
 
