@@ -7,10 +7,16 @@
 
 import type { SecurityPluginStart } from '../../../security/server';
 import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../../src/plugins/data/server';
 
 export interface StartDeps {
   security?: SecurityPluginStart;
+  data: DataPluginStart;
 }
 export interface SetupDeps {
   usageCollection: UsageCollectionSetup;
+  data: DataPluginSetup;
 }

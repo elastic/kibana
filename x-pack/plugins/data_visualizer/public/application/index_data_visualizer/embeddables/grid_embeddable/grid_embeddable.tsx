@@ -39,7 +39,7 @@ import { getDefaultDataVisualizerListState } from '../../components/index_data_v
 import { DataVisualizerTableState } from '../../../../../common';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
-import { useDataVisualizerGridData } from './use_data_visualizer_grid_data';
+import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {

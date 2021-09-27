@@ -46,8 +46,8 @@ export async function getVisualizerOverallStats({
     runtimeMappings,
   });
 
-  const fileUploadModules = await lazyLoadModules();
-  return await fileUploadModules.getHttp().fetch<OverallStats>({
+  const dataVisualizerModules = await lazyLoadModules();
+  return await dataVisualizerModules.getHttp().fetch<OverallStats>({
     path: `${basePath()}/get_overall_stats/${indexPatternTitle}`,
     method: 'POST',
     body,
@@ -89,8 +89,8 @@ export async function getVisualizerFieldStats({
     runtimeMappings,
   });
 
-  const fileUploadModules = await lazyLoadModules();
-  return await fileUploadModules.getHttp().fetch<[DocumentCounts, FieldVisStats]>({
+  const dataVisualizerModules = await lazyLoadModules();
+  return await dataVisualizerModules.getHttp().fetch<[DocumentCounts, FieldVisStats]>({
     path: `${basePath()}/get_field_stats/${indexPatternTitle}`,
     method: 'POST',
     body,

@@ -9,27 +9,28 @@ import { Required } from 'utility-types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import { i18n } from '@kbn/i18n';
-import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
-import { useDataVisualizerKibana } from '../../../kibana_context';
-import { getEsQueryFromSavedSearch } from '../../utils/saved_search_utils';
-import { MetricFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
-import { DataLoader } from '../../data_loader/data_loader';
-import { useTimefilter } from '../../hooks/use_time_filter';
-import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
-import { TimeBuckets } from '../../services/time_buckets';
+import { i18n } from '../../../../../../../../../../../../private/var/tmp/_bazel_quynhnguyen/bd5cc7ce3740c1abb2c63a2609d8bb9f/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
+import { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
+import { useDataVisualizerKibana } from '../../kibana_context';
+import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
+import { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
+import { DataLoader } from '../data_loader/data_loader';
+import { useTimefilter } from './use_time_filter';
+import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
+import { TimeBuckets } from '../services/time_buckets';
 import {
   DataViewField,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
-} from '../../../../../../../../src/plugins/data/common';
-import { extractErrorProperties } from '../../utils/error_utils';
-import { FieldVisConfig } from '../../../common/components/stats_table/types';
-import { FieldRequestConfig, JOB_FIELD_TYPES } from '../../../../../common';
-import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
-import { getActions } from '../../../common/components/field_data_row/action_menu';
-import { DataVisualizerGridEmbeddableInput } from './grid_embeddable';
-import { getDefaultPageState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
+} from '../../../../../../../src/plugins/data/common';
+import { extractErrorProperties } from '../utils/error_utils';
+import { FieldVisConfig } from '../../common/components/stats_table/types';
+import { FieldRequestConfig, JOB_FIELD_TYPES } from '../../../../common';
+import { kbnTypeToJobType } from '../../common/util/field_types_utils';
+import { getActions } from '../../common/components/field_data_row/action_menu';
+import { DataVisualizerGridEmbeddableInput } from '../embeddables/grid_embeddable/grid_embeddable';
+import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
+import { useFieldStatsSearchStrategy } from './use_search_strategy';
 
 const defaults = getDefaultPageState();
 
@@ -38,11 +39,12 @@ export const useDataVisualizerGridData = (
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>
 ) => {
   const { services } = useDataVisualizerKibana();
-  const { notifications, uiSettings } = services;
+  const { notifications, uiSettings, data } = services;
   const { toasts } = notifications;
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
+  const [searchSessionId, setSearchSessionId] = useState<string | undefined>();
 
   const {
     currentSavedSearch,
@@ -92,6 +94,34 @@ export const useDataVisualizerGridData = (
     currentFilters,
   ]);
 
+  useEffect(() => {
+    const currentSearchSessionId = data.search?.session?.getSessionId();
+    if (currentSearchSessionId !== undefined) {
+      setSearchSessionId(currentSearchSessionId);
+    }
+    console.log('currentSearchSessionId', currentSearchSessionId);
+  }, [data]);
+
+  const _timeBuckets = useMemo(() => {
+    return new TimeBuckets({
+      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+      dateFormat: uiSettings.get('dateFormat'),
+      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+    });
+  }, [uiSettings]);
+
+  /** Search strategy**/
+  const strategyResponse = useFieldStatsSearchStrategy({
+    query: searchQuery,
+    sessionId: searchSessionId,
+    timeBuckets: _timeBuckets,
+    indexPattern: currentIndexPattern,
+    savedSearch: currentSavedSearch,
+    timeFilter: timefilter,
+  });
+
+  console.log('strategyResponse', strategyResponse);
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
