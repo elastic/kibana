@@ -45,8 +45,8 @@ const i18nTexts = {
       defaultMessage: 'Reindex failed',
     }
   ),
-  reindexErrorText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexErrorText',
+  reindexGetStatusFailedText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.reindex.reindexGetStatusFailedText',
     {
       defaultMessage: 'Reindex status not available',
     }
@@ -132,7 +132,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
             <EuiIcon type="alert" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexErrorText}</EuiText>
+            <EuiText size="s">{i18nTexts.reindexGetStatusFailedText}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
