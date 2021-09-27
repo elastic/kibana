@@ -17,7 +17,6 @@ import type { SpacesApi, SpacesContextProps } from '../../../../../x-pack/plugin
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import {
-  ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../services';
@@ -31,7 +30,6 @@ const SavedObjectsTablePage = ({
   taggingApi,
   spacesApi,
   allowedTypes,
-  serviceRegistry,
   actionRegistry,
   columnRegistry,
   setBreadcrumbs,
@@ -41,7 +39,6 @@ const SavedObjectsTablePage = ({
   taggingApi?: SavedObjectsTaggingApi;
   spacesApi?: SpacesApi;
   allowedTypes: string[];
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -75,13 +72,11 @@ const SavedObjectsTablePage = ({
       spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]
   );
-
   return (
     <ContextWrapper>
       <SavedObjectsTable
         initialQuery={initialQuery}
         allowedTypes={allowedTypes}
-        serviceRegistry={serviceRegistry}
         actionRegistry={actionRegistry}
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
@@ -94,12 +89,10 @@ const SavedObjectsTablePage = ({
         applications={coreStart.application}
         perPageConfig={itemsPerPage}
         goInspectObject={(savedObject) => {
-          const { editUrl } = savedObject.meta;
-          if (editUrl) {
-            return coreStart.application.navigateToUrl(
-              coreStart.http.basePath.prepend(`/app${editUrl}`)
-            );
-          }
+          const savedObjectEditUrl = savedObject.meta.editUrl
+            ? `/app${savedObject.meta.editUrl}`
+            : `/app/management/kibana/objects/${savedObject.type}/${savedObject.id}`;
+          coreStart.application.navigateToUrl(coreStart.http.basePath.prepend(savedObjectEditUrl));
         }}
         canGoInApp={(savedObject) => {
           const { inAppUrl } = savedObject.meta;

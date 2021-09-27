@@ -154,7 +154,7 @@ export function disableUnknownTypeMappingFields(
 ): IndexMapping {
   const targetTypes = Object.keys(activeMappings.properties);
 
-  const disabledTypesProperties = Object.keys(sourceMappings.properties)
+  const disabledTypesProperties = Object.keys(sourceMappings.properties ?? {})
     .filter((sourceType) => {
       const isObjectType = 'properties' in sourceMappings.properties[sourceType];
       // Only Object/Nested datatypes can be excluded from the field count by

@@ -355,6 +355,33 @@ describe('formula', () => {
         references: [],
       });
     });
+
+    it('should move into Formula previous static_value operation', () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            label: 'Static value: 0',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'static_value',
+            references: [],
+            params: {
+              value: '0',
+            },
+          },
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: '0',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: { isFormulaBroken: false, formula: '0' },
+        references: [],
+      });
+    });
   });
 
   describe('regenerateLayerFromAst()', () => {

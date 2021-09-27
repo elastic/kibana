@@ -241,38 +241,6 @@ describe('when on integration detail', () => {
         'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
       );
     });
-
-    it('should NOT show link for agent count if it is zero', async () => {
-      await mockedApi.waitForApi();
-      const firstRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[0];
-      expect(firstRowAgentCount.textContent).toEqual('0');
-      expect(firstRowAgentCount.tagName).not.toEqual('A');
-    });
-
-    it('should show add agent button if agent count is zero', async () => {
-      await mockedApi.waitForApi();
-      const firstRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[0];
-      expect(firstRowAgentCount.textContent).toEqual('0');
-
-      const addAgentButton = renderResult.getAllByTestId('addAgentButton')[0];
-      expect(addAgentButton).not.toBeNull();
-    });
-
-    it('should show link for agent count if greater than zero', async () => {
-      await mockedApi.waitForApi();
-      const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
-      expect(secondRowAgentCount.textContent).toEqual('100');
-      expect(secondRowAgentCount.tagName).toEqual('A');
-    });
-
-    it('should NOT show add agent button if agent count is greater than zero', async () => {
-      await mockedApi.waitForApi();
-      const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
-      expect(secondRowAgentCount.textContent).toEqual('100');
-
-      const addAgentButton = renderResult.getAllByTestId('addAgentButton')[1];
-      expect(addAgentButton).toBeUndefined();
-    });
   });
 });
 
