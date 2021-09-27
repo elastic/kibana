@@ -178,9 +178,9 @@ export function LayerPanel(
         setNextFocusedButtonId(columnId);
       }
 
-      const filterOperations =
-        groups.find(({ groupId: gId }) => gId === targetItem.groupId)?.filterOperations ||
-        (() => false);
+      const group = groups.find(({ groupId: gId }) => gId === groupId);
+
+      const filterOperations = group?.filterOperations || (() => false);
 
       const dropResult = layerDatasourceOnDrop({
         ...layerDatasourceDropProps,
@@ -198,7 +198,12 @@ export function LayerPanel(
 
         // make it inherit only for moving and duplicate
         if (!previousColumn) {
-          if (dropType === 'duplicate_compatible' && typeof droppedItem.columnId === 'string') {
+          // when duplicating check if the previous column is required
+          if (
+            dropType === 'duplicate_compatible' &&
+            typeof droppedItem.columnId === 'string' &&
+            group?.requiresPreviousColumnOnDuplicate
+          ) {
             previousColumn = droppedItem.columnId;
           } else {
             previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;

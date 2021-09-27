@@ -367,6 +367,7 @@ export const getXyVisualization = ({
             defaultMessage:
               'This threshold is assigned to an axis that no longer exists. You may move this threshold to another available axis or remove it.',
           }),
+          requiresPreviousColumnOnDuplicate: true,
         })),
       };
     }
