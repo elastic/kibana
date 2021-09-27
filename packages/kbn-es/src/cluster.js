@@ -240,7 +240,7 @@ exports.Cluster = class Cluster {
    * @return {undefined}
    */
   _exec(installPath, opts = {}) {
-    const { skipNativeRealmSetup = false, reportTime, startTime, ...options } = opts;
+    const { skipNativeRealmSetup = false, reportTime = () => {}, startTime, ...options } = opts;
 
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
@@ -326,11 +326,9 @@ exports.Cluster = class Cluster {
       const lines = parseEsLog(data.toString());
       lines.forEach((line) => {
         if (line.message.includes('license mode is')) {
-          if (reportTime && startTime) {
-            reportTime(startTime, 'total', {
-              success: true,
-            });
-          }
+          reportTime(startTime, 'total', {
+            success: true,
+          });
         }
         this._log.info(line.formattedMessage);
       });
