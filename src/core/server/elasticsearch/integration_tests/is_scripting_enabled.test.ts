@@ -11,9 +11,9 @@ import {
   TestElasticsearchUtils,
   TestKibanaUtils,
 } from '../../../test_helpers/kbn_server';
-import { isInlineScriptingDisabled } from '../deprecations/is_scripting_disabled';
+import { isInlineScriptingEnabled } from '../is_scripting_enabled';
 
-describe('isInlineScriptingDisabled', () => {
+describe('isInlineScriptingEnabled', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
 
@@ -33,6 +33,13 @@ describe('isInlineScriptingDisabled', () => {
         es: {
           esArgs,
         },
+        kbn: {
+          elasticsearch: {
+            // required for the server to start without throwing
+            // as inline scripting is disabled in some tests
+            skipStartupConnectionCheck: true,
+          },
+        },
       },
     });
 
@@ -40,43 +47,43 @@ describe('isInlineScriptingDisabled', () => {
     kibanaServer = await startKibana();
   };
 
-  it('returns false when `script.allowed_types` is unset', async () => {
+  it('returns true when `script.allowed_types` is unset', async () => {
     await startServers({ esArgs: [] });
 
-    const disabled = await isInlineScriptingDisabled({
+    const enabled = await isInlineScriptingEnabled({
       client: kibanaServer.coreStart.elasticsearch.client.asInternalUser,
     });
 
-    expect(disabled).toEqual(false);
+    expect(enabled).toEqual(true);
   });
 
-  it('returns false when `script.allowed_types` is `inline`', async () => {
+  it('returns true when `script.allowed_types` is `inline`', async () => {
     await startServers({ esArgs: ['script.allowed_types=inline'] });
 
-    const disabled = await isInlineScriptingDisabled({
+    const enabled = await isInlineScriptingEnabled({
       client: kibanaServer.coreStart.elasticsearch.client.asInternalUser,
     });
 
-    expect(disabled).toEqual(false);
+    expect(enabled).toEqual(true);
   });
 
-  it('returns true when `script.allowed_types` is `stored`', async () => {
+  it('returns false when `script.allowed_types` is `stored`', async () => {
     await startServers({ esArgs: ['script.allowed_types=stored'] });
 
-    const disabled = await isInlineScriptingDisabled({
+    const enabled = await isInlineScriptingEnabled({
       client: kibanaServer.coreStart.elasticsearch.client.asInternalUser,
     });
 
-    expect(disabled).toEqual(true);
+    expect(enabled).toEqual(false);
   });
 
-  it('returns true when `script.allowed_types` is `none', async () => {
+  it('returns false when `script.allowed_types` is `none', async () => {
     await startServers({ esArgs: ['script.allowed_types=none'] });
 
-    const disabled = await isInlineScriptingDisabled({
+    const enabled = await isInlineScriptingEnabled({
       client: kibanaServer.coreStart.elasticsearch.client.asInternalUser,
     });
 
-    expect(disabled).toEqual(true);
+    expect(enabled).toEqual(false);
   });
 });
