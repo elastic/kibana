@@ -89,31 +89,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ).toMatchInline(`"2021-08-03T06:50:00.000Z"`);
         });
 
-        it('has the correct first value', () => {
-          expectSnapshot(first(throughputResponse.currentPeriod)?.y).toMatchInline(`4`);
-        });
-
         it('has the correct end date', () => {
           expectSnapshot(
             new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
           ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
         });
 
-        it('has the correct last value', () => {
-          expectSnapshot(last(throughputResponse.currentPeriod)?.y).toMatchInline(`0`);
-        });
-
-        it('has the correct number of buckets', () => {
-          expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`31`);
-        });
-
         it('has the correct throughput avg', () => {
           const avg = mean(throughputResponse.currentPeriod.map((d) => d.y));
           expectSnapshot(avg).toMatchInline(`7.2258064516129`);
-        });
-
-        it('has the correct throughput', () => {
-          expectSnapshot(throughputResponse.currentPeriod).toMatch();
         });
       });
 
@@ -132,6 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   end: metadata.end,
                   transactionType: 'request',
                   environment: 'ENVIRONMENT_ALL',
+                  _inspect: true,
                 },
               },
             });
@@ -155,31 +140,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ).toMatchInline(`"2021-08-03T06:50:00.000Z"`);
           });
 
-          it('has the correct first value', () => {
-            expectSnapshot(first(throughputResponse.currentPeriod)?.y).toMatchInline(`2`);
-          });
-
           it('has the correct end date', () => {
             expectSnapshot(
               new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
             ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
           });
 
-          it('has the correct last value', () => {
-            expectSnapshot(last(throughputResponse.currentPeriod)?.y).toMatchInline(`0`);
-          });
-
-          it('has the correct number of buckets', () => {
-            expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`61`);
-          });
-
           it('has the correct throughput avg', () => {
             const avg = mean(throughputResponse.currentPeriod.map((d) => d.y));
             expectSnapshot(avg).toMatchInline(`7.44262295081967`);
-          });
-
-          it('has the correct throughput', () => {
-            expectSnapshot(throughputResponse.currentPeriod).toMatch();
           });
         });
       });
@@ -247,13 +216,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
       });
 
-      it('has the correct number of buckets', () => {
-        expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`91`);
-        expectSnapshot(throughputResponse.previousPeriod.length).toMatchInline(`91`);
+      it('returns same number of buckets for both periods', () => {
+        expect(throughputResponse.currentPeriod.length).to.be(
+          throughputResponse.previousPeriod.length
+        );
       });
 
-      it('has the correct throughput in tpm', () => {
-        expectSnapshot(throughputResponse).toMatch();
+      it('calculates the correct throughput avg for both periods', () => {
+        const currentPeriodAvg = mean(throughputResponse.currentPeriod.map((d) => d.y));
+        expectSnapshot(currentPeriodAvg).toMatchInline(`6.46153846153846`);
+        const previousPeriodAvg = mean(throughputResponse.previousPeriod.map((d) => d.y));
+        expectSnapshot(previousPeriodAvg).toMatchInline(`8.50549450549451`);
       });
     }
   );
