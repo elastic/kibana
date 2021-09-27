@@ -84,21 +84,6 @@ export class DataLoader {
     fields: FieldRequestConfig[],
     interval?: number
   ): Promise<any[]> {
-    console.log('loadFieldStats');
-    console.log(
-      JSON.stringify({
-        indexPatternTitle: this._indexPatternTitle,
-        query,
-        timeFieldName: this._indexPattern.timeFieldName,
-        earliest,
-        latest,
-        samplerShardSize,
-        interval,
-        fields,
-        maxExamples: this._maxExamples,
-        runtimeMappings: this._runtimeMappings,
-      })
-    );
     const stats = await getVisualizerFieldStats({
       indexPatternTitle: this._indexPatternTitle,
       query,

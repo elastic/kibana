@@ -9,26 +9,15 @@ import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { FIELD_STATS_SEARCH_STRATEGY } from '../../../../common/search_strategy/constants';
-import {
+import type {
   FieldStatRawResponse,
   FieldStatsRequest,
   FieldStatsResponse,
+  FieldStatsSearchStrategyParams,
+  FieldStatsSearchStrategyProgress,
+  FieldStatsSearchStrategyReturnBase,
 } from '../../../../common/search_strategy/types';
 import { useDataVisualizerKibana } from '../../kibana_context';
-
-interface SearchStrategyReturnBase<TRawResponse extends FieldStatRawResponse> {
-  progress: SearchStrategyProgress;
-  response: TRawResponse;
-  startFetch: () => void;
-  cancelFetch: () => void;
-}
-
-interface SearchStrategyProgress {
-  error?: Error;
-  isRunning: boolean;
-  loaded: number;
-  total: number;
-}
 
 const getInitialRawResponse = <TRawResponse extends FieldStatRawResponse>(): TRawResponse =>
   ({
@@ -36,7 +25,7 @@ const getInitialRawResponse = <TRawResponse extends FieldStatRawResponse>(): TRa
     took: 0,
   } as TRawResponse);
 
-const getInitialProgress = (): SearchStrategyProgress => ({
+const getInitialProgress = (): FieldStatsSearchStrategyProgress => ({
   isRunning: false,
   loaded: 0,
   total: 100,
@@ -49,16 +38,10 @@ const getReducer =
     ...update,
   });
 
-interface SearchStrategyParams {
-  sessionId?: string;
-  // @todo update type
-  query?: any;
-}
 export function useFieldStatsSearchStrategy<
   TRawResponse extends FieldStatRawResponse,
-  TParams extends SearchStrategyParams
->(searchStrategyParams?: TParams): SearchStrategyReturnBase<TRawResponse> {
-  console.log('searchStrategyParams', searchStrategyParams);
+  TParams extends FieldStatsSearchStrategyParams
+>(searchStrategyParams: TParams | undefined): FieldStatsSearchStrategyReturnBase<TRawResponse> {
   const {
     services: { data },
   } = useDataVisualizerKibana();
@@ -69,13 +52,14 @@ export function useFieldStatsSearchStrategy<
   );
 
   const [fetchState, setFetchState] = useReducer(
-    getReducer<SearchStrategyProgress>(),
+    getReducer<FieldStatsSearchStrategyProgress>(),
     getInitialProgress()
   );
 
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
-  const searchStrategyParamsRef = useRef(searchStrategyParams);
+
+  console.log('rawResponse', rawResponse);
 
   const startFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
@@ -87,7 +71,7 @@ export function useFieldStatsSearchStrategy<
     });
 
     const request = {
-      params: {},
+      params: searchStrategyParams,
     };
 
     // Submit the search request using the `data.search` service.
@@ -97,7 +81,8 @@ export function useFieldStatsSearchStrategy<
         abortSignal: abortCtrl.current.signal,
       })
       .subscribe({
-        next: (response: FieldStatsResponse) => {
+        next: (response) => {
+          // Setting results to latest even if the response is still partial
           setRawResponse(response.rawResponse);
           setFetchState({
             isRunning: response.isRunning || false,
@@ -106,6 +91,7 @@ export function useFieldStatsSearchStrategy<
           });
 
           if (isCompleteResponse(response)) {
+            // If the whole request is completed
             searchSubscription$.current?.unsubscribe();
             setFetchState({
               isRunning: false,
@@ -116,6 +102,8 @@ export function useFieldStatsSearchStrategy<
               error: response as unknown as Error,
               isRunning: false,
             });
+          } else {
+            // If is partial response
           }
         },
         error: (error: Error) => {
@@ -125,7 +113,7 @@ export function useFieldStatsSearchStrategy<
           });
         },
       });
-  }, [data.search]);
+  }, [data.search, searchStrategyParams]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

@@ -8,31 +8,8 @@
 import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { StartDeps, SetupDeps } from './types';
 import { dataVisualizerRoutes } from './routes';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../src/plugins/data/common';
 import { FIELD_STATS_SEARCH_STRATEGY } from '../common/search_strategy/constants';
-import type { FieldStatsRequest, FieldStatsResponse } from '../common/search_strategy/types';
-import type { ISearchStrategy } from '../../../../src/plugins/data/server';
-
-// @todo: rename
-export const myEnhancedSearchStrategyProvider = (
-  data: StartDeps['data']
-): ISearchStrategy<FieldStatsRequest, FieldStatsResponse> => {
-  // Get the default search strategy
-  const ese = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
-  return {
-    search: (request, options, deps) => {
-      // search will be called multiple times,
-      // be sure your response formatting is capable of handling partial results, as well as the final result.
-      return ese.search(request, options, deps);
-    },
-    cancel: async (id, options, deps) => {
-      // call the cancel method of the async strategy you are using or implement your own cancellation function.
-      if (ese.cancel) {
-        await ese.cancel(id, options, deps);
-      }
-    },
-  };
-};
+import { myEnhancedSearchStrategyProvider } from './search_strategy/field_stats_search_strategy';
 
 export class DataVisualizerPlugin implements Plugin {
   constructor() {}

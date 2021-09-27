@@ -9,7 +9,7 @@ import { JOB_FIELD_TYPES } from '../../../../../common';
 import type {
   FileBasedFieldVisConfig,
   FileBasedUnknownFieldVisConfig,
-} from '../stats_table/types/field_vis_config';
+} from '../../../../../common/types/field_vis_config';
 
 export function filterFields(
   fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>,

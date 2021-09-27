@@ -33,7 +33,7 @@ import {
   FieldVisConfig,
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
-} from './types/field_vis_config';
+} from '../../../../../common/types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 import { calculateTableColumnsDimensions } from './utils';

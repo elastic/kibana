@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import type { AggregationsAggregate } from '@elastic/elasticsearch/api/types';
 
 export interface LatencyCorrelationSearchServiceProgress {
   started: number;
-  loadedHistogramStepsize: number;
-  loadedOverallHistogram: number;
-  loadedFieldCandidates: number;
-  loadedFieldValuePairs: number;
-  loadedHistograms: number;
+  loadedOverallStats: number;
+  loadedFieldStats: number;
 }
 
-export const fieldStatsSearchServiceStateProvider = (dataPlugin: DataPluginStart) => {
+type FieldStat = Record<string, AggregationsAggregate> | undefined;
+export const fieldStatsSearchServiceStateProvider = () => {
   let ccsWarning = false;
   function setCcsWarning(d: boolean) {
     ccsWarning = d;
@@ -40,22 +38,18 @@ export const fieldStatsSearchServiceStateProvider = (dataPlugin: DataPluginStart
     isRunning = d;
   }
 
+  const fieldsStats: FieldStat[] = [];
+  function addFieldStats(d: FieldStat) {
+    fieldsStats.push(d);
+  }
+
   let progress: LatencyCorrelationSearchServiceProgress = {
     started: Date.now(),
-    loadedHistogramStepsize: 0,
-    loadedOverallHistogram: 0,
-    loadedFieldCandidates: 0,
-    loadedFieldValuePairs: 0,
-    loadedHistograms: 0,
+    loadedOverallStats: 0,
+    loadedFieldStats: 0,
   };
   function getOverallProgress() {
-    return (
-      progress.loadedHistogramStepsize * 0.025 +
-      progress.loadedOverallHistogram * 0.025 +
-      progress.loadedFieldCandidates * 0.025 +
-      progress.loadedFieldValuePairs * 0.025 +
-      progress.loadedHistograms * 0.9
-    );
+    return progress.loadedOverallStats * 0.1 + progress.loadedFieldStats * 0.9;
   }
   function setProgress(d: Partial<Omit<LatencyCorrelationSearchServiceProgress, 'started'>>) {
     progress = {
@@ -71,6 +65,7 @@ export const fieldStatsSearchServiceStateProvider = (dataPlugin: DataPluginStart
       isCancelled,
       isRunning,
       progress,
+      fieldsStats,
     };
   }
 
@@ -83,6 +78,7 @@ export const fieldStatsSearchServiceStateProvider = (dataPlugin: DataPluginStart
     setIsCancelled,
     setIsRunning,
     setProgress,
+    addFieldStats,
   };
 };
 

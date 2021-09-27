@@ -64,13 +64,13 @@ import { ActionsPanel } from '../actions_panel';
 import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
 import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../../../common/components/help_menu';
-import { TimeBuckets } from '../../services/time_buckets';
 import { createMergedEsQuery, getEsQueryFromSavedSearch } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
 import { IndexPatternField, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import './_index.scss';
+import { TimeBuckets } from '../../../../../common/services/time_buckets';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;

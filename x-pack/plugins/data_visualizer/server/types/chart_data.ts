@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '../../common/utils/object_utils';
+
 export interface FieldData {
   fieldName: string;
   existsInDocs: boolean;
@@ -19,6 +21,11 @@ export interface Field {
   fieldName: string;
   type: string;
   cardinality: number;
+  identifier: number;
+}
+
+export function isValidField(arg: unknown): arg is Field {
+  return isPopulatedObject(arg, ['fieldName', 'type']) && typeof arg.fieldName === 'string';
 }
 
 export interface HistogramField {

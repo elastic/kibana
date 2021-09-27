@@ -12,4 +12,4 @@ export {
   MetricFieldVisStats,
   isFileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
-} from './field_vis_config';
+} from '../../../../../../common/types/field_vis_config';

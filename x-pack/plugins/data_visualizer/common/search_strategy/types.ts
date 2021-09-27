@@ -5,19 +5,68 @@
  * 2.0.
  */
 
-import {
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
 } from '../../../../../src/plugins/data/common';
+import type { TimeBucketsInterval } from '../services/time_buckets';
+import { RuntimeField } from '../../../../../src/plugins/data/common';
+import { FieldRequestConfig } from '../types';
+import { ISearchStrategy } from '../../../../../src/plugins/data/server';
+import { isPopulatedObject } from '../utils/object_utils';
+
+export interface FieldStatsCommonRequestParams {
+  index: string;
+  query: any;
+  samplerShardSize: number;
+  timeFieldName?: string;
+  earliestMs?: number | undefined;
+  latestMs?: number | undefined;
+  runtimeFieldMap?: Record<string, RuntimeField>;
+  intervalMs?: number;
+}
+
+export interface FieldStatsSearchStrategyParams {
+  sessionId?: string;
+  earliest?: number;
+  latest?: number;
+  aggInterval: TimeBucketsInterval;
+  intervalMs?: number;
+  searchQuery?: any;
+  samplerShardSize: number;
+  index: string;
+  metricConfigs: FieldRequestConfig[];
+  nonMetricConfigs: FieldRequestConfig[];
+  timeFieldName?: string;
+  runtimeFieldMap: Record<string, RuntimeField>;
+}
+
+export function isFieldStatsSearchStrategyParams(
+  arg: unknown
+): arg is FieldStatsSearchStrategyParams {
+  return isPopulatedObject(arg, ['index', 'samplerShardSize', 'metricConfigs', 'nonMetricConfigs']);
+}
 
 export interface FieldStatRawResponse {
   loading?: boolean;
   ccsWarning: false;
   took: 0;
 }
-export type FieldStatsRequest = IKibanaSearchRequest<{
-  index: string;
-  sessionId?: string;
-}>;
-
+export type FieldStatsRequest = IKibanaSearchRequest<FieldStatsSearchStrategyParams>;
 export type FieldStatsResponse = IKibanaSearchResponse<FieldStatRawResponse>;
+
+export interface FieldStatsSearchStrategyReturnBase<TRawResponse extends FieldStatRawResponse> {
+  progress: FieldStatsSearchStrategyProgress;
+  response: TRawResponse;
+  startFetch: () => void;
+  cancelFetch: () => void;
+}
+
+export interface FieldStatsSearchStrategyProgress {
+  error?: Error;
+  isRunning: boolean;
+  loaded: number;
+  total: number;
+}
+
+export type FieldStatsSearchStrategy = ISearchStrategy<FieldStatsRequest, FieldStatsResponse>;

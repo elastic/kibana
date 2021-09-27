@@ -17,7 +17,7 @@ import { MetricFieldsStats } from '../../common/components/stats_table/component
 import { DataLoader } from '../data_loader/data_loader';
 import { useTimefilter } from './use_time_filter';
 import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
-import { TimeBuckets } from '../services/time_buckets';
+import { TimeBuckets } from '../../../../common/services/time_buckets';
 import {
   DataViewField,
   KBN_FIELD_TYPES,
@@ -63,6 +63,7 @@ export const useDataVisualizerGridData = (
     [input]
   );
 
+  /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     const searchData = getEsQueryFromSavedSearch({
       indexPattern: currentIndexPattern,
@@ -99,7 +100,6 @@ export const useDataVisualizerGridData = (
     if (currentSearchSessionId !== undefined) {
       setSearchSessionId(currentSearchSessionId);
     }
-    console.log('currentSearchSessionId', currentSearchSessionId);
   }, [data]);
 
   const _timeBuckets = useMemo(() => {
@@ -111,17 +111,11 @@ export const useDataVisualizerGridData = (
     });
   }, [uiSettings]);
 
-  /** Search strategy**/
-  const strategyResponse = useFieldStatsSearchStrategy({
-    query: searchQuery,
-    sessionId: searchSessionId,
-    timeBuckets: _timeBuckets,
-    indexPattern: currentIndexPattern,
-    savedSearch: currentSavedSearch,
-    timeFilter: timefilter,
+  const timefilter = useTimefilter({
+    timeRangeSelector: currentIndexPattern?.timeFieldName !== undefined,
+    autoRefreshSelector: true,
   });
 
-  console.log('strategyResponse', strategyResponse);
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
@@ -132,15 +126,79 @@ export const useDataVisualizerGridData = (
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
+  /** Search strategy **/
+  const fieldStatsRequest = useMemo(() => {
+    // Obtain the interval to use for date histogram aggregations
+    // (such as the document count chart). Aim for 75 bars.
+    const buckets = _timeBuckets;
+
+    const tf = timefilter as any;
+
+    if (!buckets || !tf || !currentIndexPattern) return;
+
+    const activeBounds = tf.getActiveBounds();
+    let earliest: number | undefined;
+    let latest: number | undefined;
+    if (activeBounds !== undefined && currentIndexPattern.timeFieldName !== undefined) {
+      earliest = tf.getActiveBounds().min.valueOf();
+      latest = tf.getActiveBounds().max.valueOf();
+    }
+
+    const bounds = tf.getActiveBounds();
+    const BAR_TARGET = 75;
+    buckets.setInterval('auto');
+    buckets.setBounds(bounds);
+    buckets.setBarTarget(BAR_TARGET);
+    const aggInterval = buckets.getInterval();
+
+    const existMetricFields: FieldRequestConfig[] = metricConfigs.map((config) => {
+      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
+      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
+        props.cardinality = config.stats.cardinality;
+      }
+      return props;
+    });
+
+    // Pass the field name, type and cardinality in the request.
+    // Top values will be obtained on a sample if cardinality > 100000.
+    const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs.map((config) => {
+      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
+      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
+        props.cardinality = config.stats.cardinality;
+      }
+      return props;
+    });
+
+    return {
+      earliest,
+      latest,
+      aggInterval,
+      intervalMs: aggInterval?.asMilliseconds(),
+      searchQuery,
+      samplerShardSize,
+      sessionId: searchSessionId,
+      index: currentIndexPattern.title,
+      timeFieldName: currentIndexPattern.timeFieldName,
+      runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
+      metricConfigs: existMetricFields,
+      nonMetricConfigs: existNonMetricFields,
+    };
+  }, [
+    _timeBuckets,
+    timefilter,
+    currentIndexPattern,
+    searchQuery,
+    samplerShardSize,
+    searchSessionId,
+    metricConfigs,
+    nonMetricConfigs,
+  ]);
+
+  const strategyResponse = useFieldStatsSearchStrategy(fieldStatsRequest);
   const dataLoader = useMemo(
     () => new DataLoader(currentIndexPattern, toasts),
     [currentIndexPattern, toasts]
   );
-
-  const timefilter = useTimefilter({
-    timeRangeSelector: currentIndexPattern?.timeFieldName !== undefined,
-    autoRefreshSelector: true,
-  });
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
