@@ -17,7 +17,6 @@ import type { SpacesApi, SpacesContextProps } from '../../../../../x-pack/plugin
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import {
-  ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../services';
@@ -31,7 +30,6 @@ const SavedObjectsTablePage = ({
   taggingApi,
   spacesApi,
   allowedTypes,
-  serviceRegistry,
   actionRegistry,
   columnRegistry,
   setBreadcrumbs,
@@ -41,7 +39,6 @@ const SavedObjectsTablePage = ({
   taggingApi?: SavedObjectsTaggingApi;
   spacesApi?: SpacesApi;
   allowedTypes: string[];
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
