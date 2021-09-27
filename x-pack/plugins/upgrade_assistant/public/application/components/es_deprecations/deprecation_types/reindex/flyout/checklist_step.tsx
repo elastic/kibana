@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 
 import {
   EuiButton,
@@ -19,8 +19,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { ReindexStatus } from '../../../../../../../common/types';
+import {
+  uiMetricService,
+  UIM_REINDEX_START_CLICK,
+  UIM_REINDEX_STOP_CLICK,
+} from '../../../../../lib/ui_metric';
 import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
@@ -73,6 +79,16 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   const hasError = status === ReindexStatus.error;
   const isCompleted = status === ReindexStatus.completed;
   const hasReindexingFailure = status === ReindexStatus.failed;
+
+  const onStartReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
+    startReindex();
+  }, [startReindex]);
+
+  const onStopReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_STOP_CLICK);
+    cancelReindex();
+  }, [cancelReindex]);
 
   return (
     <Fragment>
@@ -162,7 +178,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </h3>
         </EuiTitle>
-        <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
+        <ReindexProgress reindexState={reindexState} cancelReindex={onStopReindex} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -180,7 +196,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 fill
                 color={status === ReindexStatus.paused ? 'warning' : 'primary'}
                 iconType={status === ReindexStatus.paused ? 'play' : undefined}
-                onClick={startReindex}
+                onClick={onStartReindex}
                 isLoading={loading}
                 disabled={loading || !hasRequiredPrivileges}
               >

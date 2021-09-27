@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { usePrimaryNavigation } from './use_primary_navigation';
 import { useKibana } from '../../../lib/kibana';
-import { setBreadcrumbs } from '../breadcrumbs';
+import { useSetBreadcrumbs } from '../breadcrumbs';
 import { makeMapStateToProps } from '../../url_state/helpers';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { navTabs } from '../../../../app/home/home_navigations';
@@ -37,6 +37,9 @@ export const useSecuritySolutionNavigation = () => {
     const { ueba, ...rest } = enabledNavTabs;
     enabledNavTabs = rest;
   }
+
+  const setBreadcrumbs = useSetBreadcrumbs();
+
   useEffect(() => {
     if (pathName || pageName) {
       setBreadcrumbs(
@@ -74,6 +77,7 @@ export const useSecuritySolutionNavigation = () => {
     getUrlForApp,
     navigateToUrl,
     enabledNavTabs,
+    setBreadcrumbs,
   ]);
 
   return usePrimaryNavigation({

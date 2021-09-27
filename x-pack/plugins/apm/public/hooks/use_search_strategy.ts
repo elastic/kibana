@@ -156,8 +156,8 @@ export function useSearchStrategy<
           setRawResponse(response.rawResponse);
           setFetchState({
             isRunning: response.isRunning || false,
-            loaded: response.loaded,
-            total: response.total,
+            ...(response.loaded ? { loaded: response.loaded } : {}),
+            ...(response.total ? { total: response.total } : {}),
           });
 
           if (isCompleteResponse(response)) {

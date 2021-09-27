@@ -80,8 +80,8 @@ export class DataViewsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private onUnsupportedTimePattern: OnUnsupportedTimePattern;
-  private indexPatternCache: ReturnType<typeof createDataViewCache>;
-  ensureDefaultIndexPattern: EnsureDefaultDataView;
+  private dataViewCache: ReturnType<typeof createDataViewCache>;
+  ensureDefaultDataView: EnsureDefaultDataView;
 
   constructor({
     uiSettings,
@@ -100,12 +100,9 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.onUnsupportedTimePattern = onUnsupportedTimePattern;
-    this.ensureDefaultIndexPattern = createEnsureDefaultDataView(
-      uiSettings,
-      onRedirectNoIndexPattern
-    );
+    this.ensureDefaultDataView = createEnsureDefaultDataView(uiSettings, onRedirectNoIndexPattern);
 
-    this.indexPatternCache = createDataViewCache();
+    this.dataViewCache = createDataViewCache();
   }
 
   /**
@@ -194,9 +191,9 @@ export class DataViewsService {
   clearCache = (id?: string) => {
     this.savedObjectsCache = null;
     if (id) {
-      this.indexPatternCache.clear(id);
+      this.dataViewCache.clear(id);
     } else {
-      this.indexPatternCache.clearAll();
+      this.dataViewCache.clearAll();
     }
   };
 
@@ -293,7 +290,7 @@ export class DataViewsService {
       indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+        this.onNotification({ title: err.message, color: 'danger', iconType: 'alert' });
       }
 
       this.onError(err, {
@@ -338,7 +335,7 @@ export class DataViewsService {
       return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+        this.onNotification({ title: err.message, color: 'danger', iconType: 'alert' });
         return {};
       }
 
@@ -479,7 +476,7 @@ export class DataViewsService {
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification({
-          title: (err as any).message,
+          title: err.message,
           color: 'danger',
           iconType: 'alert',
         });
@@ -537,12 +534,11 @@ export class DataViewsService {
 
   get = async (id: string): Promise<DataView> => {
     const indexPatternPromise =
-      this.indexPatternCache.get(id) ||
-      this.indexPatternCache.set(id, this.getSavedObjectAndInit(id));
+      this.dataViewCache.get(id) || this.dataViewCache.set(id, this.getSavedObjectAndInit(id));
 
     // don't cache failed requests
     indexPatternPromise.catch(() => {
-      this.indexPatternCache.clear(id);
+      this.dataViewCache.clear(id);
     });
 
     return indexPatternPromise;
@@ -612,7 +608,7 @@ export class DataViewsService {
     )) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response);
-    this.indexPatternCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
+    this.dataViewCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
     }
@@ -700,7 +696,7 @@ export class DataViewsService {
           indexPattern.version = samePattern.version;
 
           // Clear cache
-          this.indexPatternCache.clear(indexPattern.id!);
+          this.dataViewCache.clear(indexPattern.id!);
 
           // Try the save again
           return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors);
@@ -714,7 +710,7 @@ export class DataViewsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
-    this.indexPatternCache.clear(indexPatternId);
+    this.dataViewCache.clear(indexPatternId);
     return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);
   }
 }
