@@ -145,7 +145,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
                       }
                     >
                       <FormattedMessage
-                        id="xpack.ml.jobsAwaitingNodeWarningShared.linkToCloud.linkText"
+                        id="xpack.ml.jobsAwaitingNodeWarningShared.linkToCloud.learnMore"
                         defaultMessage="Learn more."
                       />
                     </EuiLink>
