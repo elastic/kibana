@@ -22,6 +22,7 @@ import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { BeatsOverviewPage } from './pages/beats/overview';
 import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
+import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
@@ -78,6 +79,13 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* ElasticSearch Views */}
+                  <RouteInit
+                    path="/elasticsearch/nodes"
+                    component={ElasticsearchNodesPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/elasticsearch"
                     component={ElasticsearchOverviewPage}

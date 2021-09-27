@@ -112,5 +112,6 @@ export const createCaseCommentSavedObjectType = ({
   migrations: createCommentsMigrations(migrationDeps),
   management: {
     importableAndExportable: true,
+    visibleInManagement: false,
   },
 });
