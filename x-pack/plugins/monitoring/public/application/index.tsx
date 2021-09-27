@@ -21,10 +21,18 @@ import { RouteInit } from './route_init';
 import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { BeatsOverviewPage } from './pages/beats/overview';
+<<<<<<< HEAD
 import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
+=======
+import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS, CODE_PATH_LOGSTASH } from '../../common/constants';
+>>>>>>> elasticsearch-nodes-view-migration
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
+import { LogStashOverviewPage } from './pages/logstash/overview';
+import { LogStashNodePage } from './pages/logstash/nodes';
+import { LogStashPipelinesPage } from './pages/logstash/pipelines';
+import { LogStashPipelinePage } from './pages/logstash/pipeline';
 
 export const renderApp = (
   core: CoreStart,
@@ -98,6 +106,35 @@ const MonitoringApp: React.FC<{
                     path="/beats"
                     component={BeatsOverviewPage}
                     codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  {/* Logstash Routes */}
+                  <RouteInit
+                    path="/logstash/nodes"
+                    component={LogStashNodePage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/pipelines/:id/:hash?"
+                    component={LogStashPipelinePage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/pipelines"
+                    component={LogStashPipelinesPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash"
+                    component={LogStashOverviewPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
                     fetchAllClusters={false}
                   />
 
