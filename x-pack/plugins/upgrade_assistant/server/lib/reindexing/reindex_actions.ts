@@ -90,7 +90,7 @@ export interface ReindexActions {
   getFlatSettings(
     indexName: string,
     withTypeName?: boolean
-  ): Promise<FlatSettings | FlatSettingsWithTypeName>;
+  ): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
 
   // ----- Functions below are for enforcing locks around groups of indices like ML or Watcher
 
@@ -262,6 +262,10 @@ export const reindexActionsFactory = (
           index: indexName,
           flat_settings: true,
         });
+      }
+
+      if (!flatSettings.body[indexName]) {
+        return null;
       }
 
       return flatSettings.body[indexName];

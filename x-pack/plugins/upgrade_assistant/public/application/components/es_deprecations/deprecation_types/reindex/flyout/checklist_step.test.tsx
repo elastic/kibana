@@ -57,6 +57,30 @@ describe('ChecklistFlyout', () => {
     expect(wrapper.exists('EuiButton')).toBe(false);
   });
 
+  it('hides button if has error', () => {
+    const props = cloneDeep(defaultProps);
+    props.reindexState.status = ReindexStatus.error;
+    props.reindexState.errorMessage = 'Index not found';
+    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    expect(wrapper.exists('EuiButton')).toBe(false);
+  });
+
+  it('shows get status error callout', () => {
+    const props = cloneDeep(defaultProps);
+    props.reindexState.status = ReindexStatus.error;
+    props.reindexState.errorMessage = 'Index not found';
+    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    expect(wrapper.exists('[data-test-subj="getStatusErrorCallout"]')).toBe(true);
+  });
+
+  it('shows reindexing callout', () => {
+    const props = cloneDeep(defaultProps);
+    props.reindexState.status = ReindexStatus.failed;
+    props.reindexState.errorMessage = 'Index not found';
+    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    expect(wrapper.exists('[data-test-subj="reindexErrorCallout"]')).toBe(true);
+  });
+
   it('calls startReindex when button is clicked', () => {
     const props = {
       ...defaultProps,

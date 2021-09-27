@@ -140,6 +140,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             <EuiCallOut
               color="danger"
               iconType="alert"
+              data-test-subj="getStatusErrorCallout"
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.errorCalloutTitle"
@@ -157,6 +158,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             <EuiCallOut
               color="danger"
               iconType="alert"
+              data-test-subj="reindexErrorCallout"
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.failureCalloutTitle"
