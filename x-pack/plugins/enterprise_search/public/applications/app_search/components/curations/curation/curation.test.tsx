@@ -28,7 +28,13 @@ describe('Curation', () => {
     dataLoading: false,
     queries: ['query A', 'query B'],
     isFlyoutOpen: false,
+    curation: {
+      suggestion: {
+        status: 'applied',
+      },
+    },
   };
+
   const actions = {
     loadCuration: jest.fn(),
     resetCuration: jest.fn(),
@@ -76,31 +82,46 @@ describe('Curation', () => {
     expect(actions.loadCuration).toHaveBeenCalledTimes(2);
   });
 
-  describe('restore defaults button', () => {
-    let restoreDefaultsButton: ShallowWrapper;
-    let confirmSpy: jest.SpyInstance;
-
-    beforeAll(() => {
-      const wrapper = shallow(<Curation />);
-      restoreDefaultsButton = getPageHeaderActions(wrapper).childAt(0);
-
-      confirmSpy = jest.spyOn(window, 'confirm');
+  describe('manual curations', () => {
+    beforeEach(() => {
+      setMockValues({
+        ...values,
+        curation: {
+          ...values.curation,
+          suggestion: {
+            ...values.curation.suggestion,
+            status: 'applied',
+          },
+        },
+      });
     });
 
-    afterAll(() => {
-      confirmSpy.mockRestore();
-    });
+    describe('restore defaults button', () => {
+      let restoreDefaultsButton: ShallowWrapper;
+      let confirmSpy: jest.SpyInstance;
 
-    it('resets the curation upon user confirmation', () => {
-      confirmSpy.mockReturnValueOnce(true);
-      restoreDefaultsButton.simulate('click');
-      expect(actions.resetCuration).toHaveBeenCalled();
-    });
+      beforeAll(() => {
+        const wrapper = shallow(<Curation />);
+        restoreDefaultsButton = getPageHeaderActions(wrapper).childAt(0);
 
-    it('does not reset the curation if the user cancels', () => {
-      confirmSpy.mockReturnValueOnce(false);
-      restoreDefaultsButton.simulate('click');
-      expect(actions.resetCuration).not.toHaveBeenCalled();
+        confirmSpy = jest.spyOn(window, 'confirm');
+      });
+
+      afterAll(() => {
+        confirmSpy.mockRestore();
+      });
+
+      it('resets the curation upon user confirmation', () => {
+        confirmSpy.mockReturnValueOnce(true);
+        restoreDefaultsButton.simulate('click');
+        expect(actions.resetCuration).toHaveBeenCalled();
+      });
+
+      it('does not reset the curation if the user cancels', () => {
+        confirmSpy.mockReturnValueOnce(false);
+        restoreDefaultsButton.simulate('click');
+        expect(actions.resetCuration).not.toHaveBeenCalled();
+      });
     });
   });
 });
