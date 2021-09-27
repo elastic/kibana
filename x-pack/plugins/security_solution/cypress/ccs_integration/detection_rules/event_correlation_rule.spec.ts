@@ -11,11 +11,6 @@ import { getCCSEqlRule } from '../../objects/rule';
 import { ALERT_DATA_GRID, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
 import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import {
   filterByCustomRules,
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
