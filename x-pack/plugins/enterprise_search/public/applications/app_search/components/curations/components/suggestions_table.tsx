@@ -103,7 +103,7 @@ export const SuggestionsTable: React.FC = () => {
 
   return (
     <DataPanel
-      icon={<LightbulbIcon />}
+      iconType={LightbulbIcon}
       title={
         <h2>
           {i18n.translate(
