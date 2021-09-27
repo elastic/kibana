@@ -8,7 +8,7 @@
 
 import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 
-import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationFn } from 'kibana/server';
 
 import { DEFAULT_QUERY_LANGUAGE, INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
 import {
