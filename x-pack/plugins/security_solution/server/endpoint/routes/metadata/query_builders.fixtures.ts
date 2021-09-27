@@ -20,6 +20,23 @@ export const expectedCompleteUnitedIndexQuery = {
                 'united.agent.policy_id': ['test-endpoint-policy-id'],
               },
             },
+            {
+              exists: {
+                field: 'united.endpoint.agent.id',
+              },
+            },
+            {
+              exists: {
+                field: 'united.agent.agent.id',
+              },
+            },
+            {
+              term: {
+                'united.agent.active': {
+                  value: true,
+                },
+              },
+            },
           ],
         },
       },

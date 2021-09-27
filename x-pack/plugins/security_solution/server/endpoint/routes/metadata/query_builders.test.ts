@@ -226,7 +226,32 @@ describe('query builder', () => {
     it('correctly builds empty query', async () => {
       const query = await buildUnitedIndexQuery(mockRequest, mockEndpointAppContext, [], []);
       const expected = {
-        match_all: {},
+        bool: {
+          filter: [
+            {
+              terms: {
+                'united.agent.policy_id': [],
+              },
+            },
+            {
+              exists: {
+                field: 'united.endpoint.agent.id',
+              },
+            },
+            {
+              exists: {
+                field: 'united.agent.agent.id',
+              },
+            },
+            {
+              term: {
+                'united.agent.active': {
+                  value: true,
+                },
+              },
+            },
+          ],
+        },
       };
       expect(query.body.query).toEqual(expected);
     });
