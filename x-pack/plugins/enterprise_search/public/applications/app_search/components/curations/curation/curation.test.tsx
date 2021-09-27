@@ -14,9 +14,13 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { EuiBadge } from '@elastic/eui';
+
 import { rerender, getPageTitle, getPageHeaderActions } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
+import { getShallowPageTitle } from '../../../../test_helpers/get_page_header';
+
 import { CurationLogic } from './curation_logic';
 
 import { AddResultFlyout } from './results';
@@ -49,7 +53,8 @@ describe('Curation', () => {
   it('renders', () => {
     const wrapper = shallow(<Curation />);
 
-    expect(getPageTitle(wrapper)).toEqual('Manage curation');
+    expect(getShallowPageTitle(wrapper).text()).toContain('Manage curation');
+
     expect(wrapper.prop('pageChrome')).toEqual([
       'Engines',
       'some-engine',
@@ -96,6 +101,12 @@ describe('Curation', () => {
       });
     });
 
+    it('has no badge in the title', () => {
+      const wrapper = shallow(<Curation />);
+
+      expect(getShallowPageTitle(wrapper).find(EuiBadge)).toHaveLength(0);
+    });
+
     describe('restore defaults button', () => {
       let restoreDefaultsButton: ShallowWrapper;
       let confirmSpy: jest.SpyInstance;
@@ -122,6 +133,27 @@ describe('Curation', () => {
         restoreDefaultsButton.simulate('click');
         expect(actions.resetCuration).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('automated curations', () => {
+    beforeEach(() => {
+      setMockValues({
+        ...values,
+        curation: {
+          ...values.curation,
+          suggestion: {
+            ...values.curation.suggestion,
+            status: 'automated',
+          },
+        },
+      });
+    });
+
+    it('displays a badge in the title', () => {
+      const wrapper = shallow(<Curation />);
+
+      expect(getShallowPageTitle(wrapper).find(EuiBadge)).toHaveLength(1);
     });
   });
 });

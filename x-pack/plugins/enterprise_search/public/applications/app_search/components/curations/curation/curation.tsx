@@ -10,13 +10,14 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton, EuiBadge } from '@elastic/eui';
 
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../../constants';
 import { AppSearchPageTemplate } from '../../layout';
-import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
+import { AUTOMATED_LABEL, MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
 import { getCurationsBreadcrumbs } from '../utils';
 
+import { AutomatedIcon } from './automated_icon';
 import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
@@ -25,18 +26,32 @@ import { AddResultLogic, AddResultFlyout } from './results';
 export const Curation: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
   const { loadCuration, resetCuration } = useActions(CurationLogic({ curationId }));
-  const { dataLoading, queries } = useValues(CurationLogic({ curationId }));
+  const { curation, dataLoading, queries } = useValues(CurationLogic({ curationId }));
   const { isFlyoutOpen } = useValues(AddResultLogic);
 
   useEffect(() => {
     loadCuration();
   }, [curationId]);
 
+  const isAutomated = curation.suggestion?.status === 'automated';
+
   return (
     <AppSearchPageTemplate
       pageChrome={getCurationsBreadcrumbs([queries.join(', ')])}
       pageHeader={{
-        pageTitle: MANAGE_CURATION_TITLE,
+        pageTitle: (
+          <>
+            {MANAGE_CURATION_TITLE}
+            {isAutomated && (
+              <>
+                {' '}
+                <EuiBadge iconType={AutomatedIcon} color="accent">
+                  {AUTOMATED_LABEL}
+                </EuiBadge>
+              </>
+            )}
+          </>
+        ),
         rightSideItems: [
           <EuiButton
             color="danger"

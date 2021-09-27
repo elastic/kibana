@@ -82,3 +82,8 @@ export const SHOW_DOCUMENT_ACTION = {
   iconType: 'eye',
   iconColor: 'primary' as EuiButtonIconColor,
 };
+
+export const AUTOMATED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curation.automatedLabel',
+  { defaultMessage: 'Automated' }
+);

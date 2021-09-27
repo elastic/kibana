@@ -26,6 +26,10 @@ export const getPageTitle = (wrapper: ShallowWrapper) => {
   return getPageHeader(wrapper).pageTitle;
 };
 
+export const getShallowPageTitle = (wrapper: ShallowWrapper) => {
+  return shallow(<div>{getPageHeader(wrapper).pageTitle}</div>);
+};
+
 export const getPageDescription = (wrapper: ShallowWrapper) => {
   return getPageHeader(wrapper).description;
 };
