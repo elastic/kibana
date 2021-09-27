@@ -212,7 +212,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
               />
             </p>
           </EuiText>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="s" />
           {this.renderCopyURLButton({ isUnsaved, exceedsMaxLength })}
         </EuiAccordion>
       </EuiForm>
