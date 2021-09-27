@@ -173,37 +173,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved query selection', () => {
-      before(async () => await setUpQueriesWithFilters());
+    it(`should unselect saved query when navigating to a 'new'`, async function () {
+      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await setUpQueriesWithFilters();
 
-      it(`should unselect saved query when navigating to a 'new'`, async function () {
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'test-unselect-saved-query',
-          'mock',
-          true,
-          true
-        );
+      await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+        'test-unselect-saved-query',
+        'mock',
+        true,
+        true
+      );
 
-        await queryBar.submitQuery();
+      await queryBar.submitQuery();
 
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-        expect(await queryBar.getQueryString()).to.eql('response:200');
+      expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+      expect(await queryBar.getQueryString()).to.eql('response:200');
 
-        await PageObjects.discover.clickNewSearchButton();
+      await PageObjects.discover.clickNewSearchButton();
 
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
-        expect(await queryBar.getQueryString()).to.eql('');
+      expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+      expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
+      await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
 
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
-        expect(await queryBar.getQueryString()).to.eql('');
+      expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+      expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+      await PageObjects.discover.selectIndexPattern('logstash-*');
 
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
-        expect(await queryBar.getQueryString()).to.eql('');
-      });
+      expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+      expect(await queryBar.getQueryString()).to.eql('');
     });
   });
 }
