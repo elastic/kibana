@@ -40,7 +40,7 @@ export async function getTransaction({
           filter: asMutableArray([
             { term: { [TRANSACTION_ID]: transactionId } },
             ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
-            ...('start' in setup ? rangeQuery(start, end) : []),
+            ...(start && end ? rangeQuery(start, end) : []),
           ]),
         },
       },
