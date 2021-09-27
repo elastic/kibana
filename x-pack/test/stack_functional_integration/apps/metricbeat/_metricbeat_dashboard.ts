@@ -8,11 +8,16 @@
 import expect from '@kbn/expect';
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/dev-utils';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
 const ARCHIVE = resolve(INTEGRATION_TEST_ROOT, 'test/es_archives/metricbeat');
 
-export default function ({ getService, getPageObjects, updateBaselines }) {
+export default function ({
+  getService,
+  getPageObjects,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const screenshot = getService('screenshots');
   const browser = getService('browser');
   const log = getService('log');
