@@ -12,34 +12,26 @@ import {
   LinkToApp,
   LinkToAppProps,
 } from '../../../../../../../common/components/endpoint/link_to_app';
-import { useAppUrl } from '../../../../../../../common/lib/kibana';
 
-const LinkLabel = styled.span`
+const LinkLabel = styled.span<{
+  size?: 'm' | 'l';
+}>`
   display: inline-block;
   padding-right: ${(props) => props.theme.eui.paddingSizes.s};
+  font-size: ${({ size, theme }) => (size === 'm' ? theme.eui.euiFontSizeXS : 'innherit')};
 `;
 
 type ComponentProps = LinkToAppProps & {
-  size: 'm' | 'l';
+  size?: 'm' | 'l';
 };
 
-export const LinkWithIcon: FC<ComponentProps> = memo(({ children, ...props }) => {
+export const LinkWithIcon: FC<ComponentProps> = memo(({ children, size = 'l', ...props }) => {
   return (
     <LinkToApp {...props}>
-      <LinkLabel size={props.size}>{children}</LinkLabel>
-      <EuiIcon type={props.size === 'm' ? 'arrowRight' : 'popout'} />
+      <LinkLabel size={size}>{children}</LinkLabel>
+      <EuiIcon type={size === 'm' ? 'arrowRight' : 'popout'} />
     </LinkToApp>
   );
 });
 
 LinkWithIcon.displayName = 'LinkWithIcon';
-
-export const ShowLink = memo(() => {
-  const { getAppUrl } = useAppUrl();
-  return (
-    <LinkWithIcon href={getAppUrl({ appId: 'one', path: '/one' })} size="l">
-      {'hello'}
-    </LinkWithIcon>
-  );
-});
-ShowLink.displayName = 'hello';
