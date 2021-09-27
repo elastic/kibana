@@ -552,6 +552,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         newIndexPatternUrl={newIndexPatternUrl}
         basePath={this.props.http.basePath}
         search={this.props.search}
+        allowedTypes={this.props.allowedTypes}
       />
     );
   }
@@ -569,12 +570,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.onHideRelationships}
         goInspectObject={this.props.goInspectObject}
         canGoInApp={this.props.canGoInApp}
+        allowedTypes={this.props.allowedTypes}
       />
     );
   }
 
   renderDeleteConfirmModal() {
     const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
+    const { allowedTypes } = this.props;
+
     if (!isShowingDeleteConfirmModal) {
       return null;
     }
@@ -589,6 +593,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           this.setState({ isShowingDeleteConfirmModal: false });
         }}
         selectedObjects={selectedSavedObjects}
+        allowedTypes={allowedTypes}
       />
     );
   }
@@ -670,6 +675,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             basePath={http.basePath}
             taggingApi={taggingApi}
             initialQuery={this.props.initialQuery}
+            allowedTypes={allowedTypes}
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}

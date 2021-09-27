@@ -49,6 +49,7 @@ describe('Flyout', () => {
       http,
       search,
       basePath,
+      allowedTypes: [],
     };
   });
 
