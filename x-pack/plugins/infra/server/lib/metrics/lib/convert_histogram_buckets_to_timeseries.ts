@@ -64,9 +64,9 @@ const getValue = (valueObject: ValueObjectType) => {
   return null;
 };
 
-const dropOutOfBoundsBuckets = (from: number, to: number, bucketSizeInMillis: number) => (
-  row: MetricsAPIRow
-) => row.timestamp >= from && row.timestamp + bucketSizeInMillis <= to;
+const dropOutOfBoundsBuckets =
+  (from: number, to: number, bucketSizeInMillis: number) => (row: MetricsAPIRow) =>
+    row.timestamp >= from && row.timestamp + bucketSizeInMillis <= to;
 
 const convertBucketsToRows = (
   options: MetricsAPIRequest,

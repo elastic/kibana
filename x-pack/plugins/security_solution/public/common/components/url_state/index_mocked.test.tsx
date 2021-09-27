@@ -15,6 +15,7 @@ import { CONSTANTS } from './constants';
 import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_dependencies';
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
+import { useLocation } from 'react-router-dom';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -31,13 +32,9 @@ jest.mock('../../lib/kibana', () => ({
   }),
 }));
 
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-  return {
-    ...original,
-    useDispatch: () => jest.fn(),
-  };
-});
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn(),
+}));
 
 describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {
   afterEach(() => {
@@ -54,6 +51,11 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         pageName: SecurityPageName.network,
         detailName: undefined,
       }).noSearch.definedQuery;
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+      });
+
       const wrapper = mount(
         <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
       );
@@ -105,6 +107,11 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         pageName: SecurityPageName.network,
         detailName: undefined,
       }).noSearch.undefinedQuery;
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+      });
+
       const wrapper = mount(
         <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
       );
@@ -136,6 +143,10 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         pageName: SecurityPageName.network,
         detailName: undefined,
       }).noSearch.undefinedQuery;
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+      });
 
       const wrapper = mount(
         <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
@@ -170,6 +181,10 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         detailName: undefined,
       }).noSearch.undefinedQuery;
 
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+      });
+
       const wrapper = mount(
         <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
       );
@@ -203,6 +218,11 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .noSearch.undefinedQuery;
+
+            (useLocation as jest.Mock).mockReturnValue({
+              pathname: mockProps.pathName,
+            });
+
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockHistory.replace.mock.calls[0][0]).toEqual({
@@ -239,6 +259,11 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             pageName: SecurityPageName.network,
             detailName: undefined,
           }).noSearch.definedQuery;
+
+          (useLocation as jest.Mock).mockReturnValue({
+            pathname: mockProps.pathName,
+          });
+
           const wrapper = mount(
             <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
           );
@@ -249,7 +274,12 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             "?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
           );
 
+          (useLocation as jest.Mock).mockReturnValue({
+            pathname: updatedProps.pathName,
+          });
+
           wrapper.setProps({ hookProps: updatedProps });
+
           wrapper.update();
 
           expect(

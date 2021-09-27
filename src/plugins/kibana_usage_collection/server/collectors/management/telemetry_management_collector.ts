@@ -28,7 +28,7 @@ export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClien
         return obj;
       }, {});
     // TODO: It would be Partial<UsageStats>, but the telemetry-tools for the schema extraction still does not support it. We need to fix it before setting the right Partial<UsageStats> type
-    return (modifiedEntries as unknown) as UsageStats;
+    return modifiedEntries as unknown as UsageStats;
   };
 }
 

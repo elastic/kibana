@@ -23,7 +23,7 @@ import {
   SOURCES_PATH,
   SOURCE_ADDED_PATH,
   OAUTH_AUTHORIZE_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   ORG_SETTINGS_PATH,
   USERS_AND_ROLES_PATH,
   SECURITY_PATH,
@@ -94,8 +94,8 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       </Route>
       <Route path={PERSONAL_PATH}>
         <Switch>
-          <Redirect exact from={PERSONAL_PATH} to={PERSONAL_SOURCES_PATH} />
-          <Route path={PERSONAL_SOURCES_PATH}>
+          <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
+          <Route path={PRIVATE_SOURCES_PATH}>
             <SourcesRouter />
           </Route>
           <Route path={PERSONAL_SETTINGS_PATH}>

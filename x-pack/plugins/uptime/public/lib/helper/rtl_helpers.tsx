@@ -62,11 +62,11 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
 }
 
 function getSetting<T = any>(key: string): T {
-  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+  return 'MMM D, YYYY @ HH:mm:ss.SSS' as unknown as T;
 }
 
 function setSetting$<T = any>(key: string): T {
-  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+  return of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown as T;
 }
 
 const createMockStore = () => {

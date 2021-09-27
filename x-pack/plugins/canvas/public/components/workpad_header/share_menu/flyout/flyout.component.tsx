@@ -108,9 +108,10 @@ export const ShareWebsiteFlyout: FC<Props> = ({
 }) => {
   const notifyService = useNotifyService();
 
-  const onCopy = useCallback(() => notifyService.info(strings.getCopyShareConfigMessage()), [
-    notifyService,
-  ]);
+  const onCopy = useCallback(
+    () => notifyService.info(strings.getCopyShareConfigMessage()),
+    [notifyService]
+  );
 
   const downloadRenderedWorkpad = useDownloadRenderedWorkpad();
   const downloadRuntime = useDownloadRuntime();

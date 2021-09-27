@@ -91,9 +91,10 @@ export function FormulaEditor({
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 
-  const visibleOperationsMap = useMemo(() => filterByVisibleOperation(operationDefinitionMap), [
-    operationDefinitionMap,
-  ]);
+  const visibleOperationsMap = useMemo(
+    () => filterByVisibleOperation(operationDefinitionMap),
+    [operationDefinitionMap]
+  );
 
   const baseInterval =
     'interval' in dateHistogramInterval
@@ -303,8 +304,9 @@ export function FormulaEditor({
     [text]
   );
 
-  const errorCount = warnings.filter((marker) => marker.severity === monaco.MarkerSeverity.Error)
-    .length;
+  const errorCount = warnings.filter(
+    (marker) => marker.severity === monaco.MarkerSeverity.Error
+  ).length;
   const warningCount = warnings.filter(
     (marker) => marker.severity === monaco.MarkerSeverity.Warning
   ).length;

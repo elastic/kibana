@@ -64,6 +64,7 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
 export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
+export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 export enum SecurityPageName {
   administration = 'administration',
@@ -197,7 +198,6 @@ export const EQL_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.eqlRule` as const;
 export const INDICATOR_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.indicatorRule` as const;
 export const ML_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.mlRule` as const;
 export const QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.queryRule` as const;
-export const SAVED_QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.savedQueryRule` as const;
 export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as const;
 
 /**

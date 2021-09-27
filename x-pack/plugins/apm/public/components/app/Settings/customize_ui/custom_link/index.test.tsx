@@ -32,13 +32,13 @@ const data = {
 };
 
 function getMockAPMContext({ canSave }: { canSave: boolean }) {
-  return ({
+  return {
     ...mockApmPluginContextValue,
     core: {
       ...mockApmPluginContextValue.core,
       application: { capabilities: { apm: { save: canSave }, ml: {} } },
     },
-  } as unknown) as ApmPluginContextValue;
+  } as unknown as ApmPluginContextValue;
 }
 
 describe('CustomLink', () => {

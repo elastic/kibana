@@ -22,7 +22,7 @@ beforeEach(async () => {
   esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
     body: { xyz: { username: 'normal_user', roles: ['data_analyst'] } },
   });
-  context = ({ esClient } as unknown) as GetDeprecationsContext;
+  context = { esClient } as unknown as GetDeprecationsContext;
 });
 
 test('logs no deprecations when setup has no issues', async () => {

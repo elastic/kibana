@@ -20,7 +20,8 @@ import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eq
 import { indexFieldsProvider } from './search_strategy/index_fields';
 
 export class TimelinesPlugin
-  implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins> {
+  implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

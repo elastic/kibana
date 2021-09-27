@@ -44,10 +44,10 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const formattedTotalCount = useMemo(() => numeral(totalItems).format(defaultNumberFormat), [
-    defaultNumberFormat,
-    totalItems,
-  ]);
+  const formattedTotalCount = useMemo(
+    () => numeral(totalItems).format(defaultNumberFormat),
+    [defaultNumberFormat, totalItems]
+  );
   const formattedSelectedEventsCount = useMemo(
     () => numeral(selectedCount).format(defaultNumberFormat),
     [defaultNumberFormat, selectedCount]

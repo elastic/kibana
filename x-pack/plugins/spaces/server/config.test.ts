@@ -19,7 +19,9 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
       deprecation,
       path: '',
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,

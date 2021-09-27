@@ -23,7 +23,7 @@ import { AppLogic } from '../../../../app_logic';
 import {
   ADD_GITHUB_PATH,
   SOURCES_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   getSourcesPath,
 } from '../../../../routes';
 import { CustomSource } from '../../../../types';
@@ -321,7 +321,7 @@ describe('AddSourceLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith(getSourcesPath(SOURCES_PATH, true));
       });
 
-      it('redirects to private dashboard when account context', async () => {
+      it('redirects to personal dashboard when account context', async () => {
         const accountQueryString =
           '?state=%7B%22action%22:%22create%22,%22context%22:%22account%22,%22service_type%22:%22gmail%22,%22csrf_token%22:%22token%3D%3D%22,%22index_permissions%22:false%7D&code=code';
 
@@ -379,7 +379,7 @@ describe('AddSourceLogic', () => {
           const githubQueryString = getGithubQueryString('account');
           AddSourceLogic.actions.saveSourceParams(githubQueryString, errorParams, false);
 
-          expect(navigateToUrl).toHaveBeenCalledWith(PERSONAL_SOURCES_PATH);
+          expect(navigateToUrl).toHaveBeenCalledWith(PRIVATE_SOURCES_PATH);
           expect(setErrorMessage).toHaveBeenCalledWith(
             PERSONAL_DASHBOARD_SOURCE_ERROR(GITHUB_ERROR)
           );
@@ -569,9 +569,7 @@ describe('AddSourceLogic', () => {
 
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
-          expect(
-            http.put
-          ).toHaveBeenCalledWith(
+          expect(http.put).toHaveBeenCalledWith(
             `/internal/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
             { body: JSON.stringify(params) }
           );

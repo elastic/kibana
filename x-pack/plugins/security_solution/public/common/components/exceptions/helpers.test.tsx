@@ -39,7 +39,7 @@ import {
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
-import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { IndexPatternBase } from '@kbn/es-query';
@@ -342,7 +342,7 @@ describe('Exception helpers', () => {
   describe('#getCodeSignatureValue', () => {
     test('it should return empty string if code_signature nested value are undefined', () => {
       // Using the unsafe casting because with our types this shouldn't be possible but there have been issues with old data having undefined values in these fields
-      const payload = ([{ trusted: undefined, subject_name: undefined }] as unknown) as Flattened<
+      const payload = [{ trusted: undefined, subject_name: undefined }] as unknown as Flattened<
         CodeSignature[]
       >;
       const result = getCodeSignatureValue(payload);

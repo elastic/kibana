@@ -73,10 +73,8 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
           : input.filters?.filter((f) => esFilters.isFilterPinned(f));
     }
 
-    const {
-      restOfFilters: filtersFromEvent,
-      timeRange: timeRangeFromEvent,
-    } = esFilters.extractTimeRange(context.filters, context.timeFieldName);
+    const { restOfFilters: filtersFromEvent, timeRange: timeRangeFromEvent } =
+      esFilters.extractTimeRange(context.filters, context.timeFieldName);
 
     if (filtersFromEvent) {
       params.filters = [...(params.filters ?? []), ...filtersFromEvent];

@@ -49,9 +49,8 @@ export const EnginesOverview: React.FC = () => {
     metaEnginesLoading,
   } = useValues(EnginesLogic);
 
-  const { loadEngines, loadMetaEngines, onEnginesPagination, onMetaEnginesPagination } = useActions(
-    EnginesLogic
-  );
+  const { loadEngines, loadMetaEngines, onEnginesPagination, onMetaEnginesPagination } =
+    useActions(EnginesLogic);
 
   useEffect(() => {
     loadEngines();

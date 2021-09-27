@@ -107,10 +107,8 @@ export async function getServiceAnomalies({
       getMLJobIds(ml.anomalyDetectors, environment),
     ]);
 
-    const typedAnomalyResponse: ESSearchResponse<
-      unknown,
-      typeof params
-    > = anomalyResponse as any;
+    const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> =
+      anomalyResponse as any;
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space

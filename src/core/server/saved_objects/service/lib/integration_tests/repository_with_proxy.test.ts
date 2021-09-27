@@ -245,6 +245,15 @@ describe('404s from proxies', () => {
       expect(docsFound.saved_objects.length).toBeGreaterThan(0);
     });
 
+    it('handles `bulkResolve` requests that are successful when the proxy passes through the product header', async () => {
+      const docsToGet = myOtherTypeDocs;
+      const docsFound = await repository.bulkResolve(
+        docsToGet.map((doc) => ({ id: doc.id, type: 'my_other_type' }))
+      );
+      expect(docsFound.resolved_objects.length).toBeGreaterThan(0);
+      expect(docsFound.resolved_objects[0].outcome).toBe('exactMatch');
+    });
+
     it('handles `resolve` requests that are successful with an exact match', async () => {
       const resolvedExactMatch = await repository.resolve('my_other_type', `${myOtherType.id}`);
       expect(resolvedExactMatch.outcome).toBe('exactMatch');
@@ -399,14 +408,27 @@ describe('404s from proxies', () => {
       expect(genericNotFoundEsUnavailableError(deleteErr, 'my_type', 'myTypeId1'));
     });
 
+    it('returns an EsUnavailable error on `bulkResolve` requests with a 404 proxy response and wrong product header for an exact match', async () => {
+      const docsToGet = myTypeDocs;
+      let testBulkResolveErr: any;
+      setProxyInterrupt('internalBulkResolve');
+      try {
+        await repository.bulkGet(docsToGet.map((doc) => ({ id: doc.id, type: 'my_type' })));
+      } catch (err) {
+        testBulkResolveErr = err;
+      }
+      expect(genericNotFoundEsUnavailableError(testBulkResolveErr));
+    });
+
     it('returns an EsUnavailable error on `resolve` requests with a 404 proxy response and wrong product header for an exact match', async () => {
+      setProxyInterrupt('internalBulkResolve');
       let testResolveErr: any;
       try {
         await repository.resolve('my_type', 'myTypeId1');
       } catch (err) {
         testResolveErr = err;
       }
-      expect(genericNotFoundEsUnavailableError(testResolveErr, 'my_type', 'myTypeId1'));
+      expect(genericNotFoundEsUnavailableError(testResolveErr));
     });
 
     it('returns an EsUnavailable error on `bulkGet` requests with a 404 proxy response and wrong product header', async () => {

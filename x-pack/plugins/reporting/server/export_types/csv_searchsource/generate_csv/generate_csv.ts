@@ -291,7 +291,7 @@ export class CsvGenerator {
     const index = searchSource.getField('index');
 
     if (!index) {
-      throw new Error(`The search must have a revference to an index pattern!`);
+      throw new Error(`The search must have a reference to an index pattern!`);
     }
 
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;

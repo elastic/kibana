@@ -36,16 +36,8 @@ export const createListRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const {
-          name,
-          description,
-          deserializer,
-          id,
-          serializer,
-          type,
-          meta,
-          version,
-        } = request.body;
+        const { name, description, deserializer, id, serializer, type, meta, version } =
+          request.body;
         const lists = getListClient(context);
         const listExists = await lists.getListIndexExists();
         if (!listExists) {

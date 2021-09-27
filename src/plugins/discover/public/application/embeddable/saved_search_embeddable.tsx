@@ -71,7 +71,8 @@ interface SearchEmbeddableConfig {
 
 export class SavedSearchEmbeddable
   extends Embeddable<SearchInput, SearchOutput>
-  implements ISearchEmbeddable {
+  implements ISearchEmbeddable
+{
   private readonly savedSearch: SavedSearch;
   private inspectorAdapters: Adapters;
   private panelTitle: string = '';
@@ -215,7 +216,7 @@ export class SavedSearchEmbeddable
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
       this.savedSearch.sort = getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       );
     }
 
@@ -225,7 +226,7 @@ export class SavedSearchEmbeddable
       isLoading: false,
       sort: getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       ),
       rows: [],
       searchDescription: this.savedSearch.description,

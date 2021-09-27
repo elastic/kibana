@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function ForceRefreshCheckbox({ applyForceRefresh, setApplyForceRefresh }: Props) {
-  const onRespondToForceRefreshChange = (event: EuiSwitchEvent) => {
+  const onChange = (event: EuiSwitchEvent) => {
     setApplyForceRefresh(event.target.checked);
   };
 
@@ -24,7 +24,7 @@ export function ForceRefreshCheckbox({ applyForceRefresh, setApplyForceRefresh }
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.maps.filterEditor.applyForceRefreshTooltip', {
-          defaultMessage: `When enabled, results are narrowed by search bar`,
+          defaultMessage: `When enabled, layer re-fetches data when automatic refresh fires and when "Refresh" is clicked.`,
         })}
       >
         <EuiSwitch
@@ -32,7 +32,7 @@ export function ForceRefreshCheckbox({ applyForceRefresh, setApplyForceRefresh }
             defaultMessage: `Apply global refresh to layer data`,
           })}
           checked={applyForceRefresh}
-          onChange={onRespondToForceRefreshChange}
+          onChange={onChange}
           data-test-subj="mapLayerPanelRespondToForceRefreshCheckbox"
           compressed
         />

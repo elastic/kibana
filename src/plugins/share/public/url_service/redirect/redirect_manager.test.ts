@@ -22,7 +22,7 @@ const setup = () => {
       };
     },
     migrations: {
-      '0.0.2': ((({ num }: { num: number }) => ({ num: num * 2 })) as unknown) as MigrateFunction,
+      '0.0.2': (({ num }: { num: number }) => ({ num: num * 2 })) as unknown as MigrateFunction,
     },
   });
   const manager = new RedirectManager({

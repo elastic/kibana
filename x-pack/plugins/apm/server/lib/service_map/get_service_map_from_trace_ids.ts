@@ -46,10 +46,8 @@ export async function getServiceMapFromTraceIds({
   setup: Setup & SetupTimeRange;
   traceIds: string[];
 }) {
-  const serviceMapFromTraceIdsScriptResponse = await fetchServicePathsFromTraceIds(
-    setup,
-    traceIds
-  );
+  const serviceMapFromTraceIdsScriptResponse =
+    await fetchServicePathsFromTraceIds(setup, traceIds);
 
   const serviceMapScriptedAggValue =
     serviceMapFromTraceIdsScriptResponse.aggregations?.service_map.value;

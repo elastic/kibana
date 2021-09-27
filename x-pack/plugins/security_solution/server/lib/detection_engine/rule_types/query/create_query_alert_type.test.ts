@@ -24,7 +24,7 @@ jest.mock('../utils/get_list_client', () => ({
 
 jest.mock('../../rule_execution_log/rule_execution_log_client');
 
-describe('Custom query alerts', () => {
+describe('Custom Query Alerts', () => {
   it('does not send an alert when no events found', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
     const queryAlertType = createQueryAlertType({
