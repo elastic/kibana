@@ -57,6 +57,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
+    describe('saved query selection', () => {
+      before(async () => await setUpQueriesWithFilters());
+
+      after(
+        async () =>
+          await savedQueryManagementComponent.deleteSavedQuery(
+            'test-unselect-saved-query12112312311x'
+          )
+      );
+
+      it(`should unselect saved query when navigating to a 'new'`, async function () {
+        await savedQueryManagementComponent.saveNewQuery(
+          'test-unselect-saved-query12112312311x',
+          'mock',
+          true,
+          true
+        );
+
+        await queryBar.submitQuery();
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        expect(await queryBar.getQueryString()).to.eql('response:200');
+
+        await PageObjects.discover.clickNewSearchButton();
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        expect(await queryBar.getQueryString()).to.eql('');
+
+        await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        expect(await queryBar.getQueryString()).to.eql('');
+
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        expect(await queryBar.getQueryString()).to.eql('');
+      });
+    });
+
     describe('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
@@ -171,38 +211,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.switchQueryLanguage('lucene');
         expect(await queryBar.getQueryString()).to.eql('');
       });
-    });
-
-    it(`should unselect saved query when navigating to a 'new'`, async function () {
-      await PageObjects.discover.selectIndexPattern('logstash-*');
-      await setUpQueriesWithFilters();
-
-      await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-        'test-unselect-saved-query',
-        'mock',
-        true,
-        true
-      );
-
-      await queryBar.submitQuery();
-
-      expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-      expect(await queryBar.getQueryString()).to.eql('response:200');
-
-      await PageObjects.discover.clickNewSearchButton();
-
-      expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
-      expect(await queryBar.getQueryString()).to.eql('');
-
-      await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
-
-      expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
-      expect(await queryBar.getQueryString()).to.eql('');
-
-      await PageObjects.discover.selectIndexPattern('logstash-*');
-
-      expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
-      expect(await queryBar.getQueryString()).to.eql('');
     });
   });
 }
