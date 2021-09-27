@@ -98,7 +98,8 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                       size={ICON_SIZE}
                       type="alert"
                       color="warning"
-                      content="Deprecated connector. Please create a new one."
+                      title={i18n.DEPRECATED_TOOLTIP_TITLE}
+                      content={i18n.DEPRECATED_TOOLTIP_CONTENT}
                     />
                   </EuiFlexItem>
                 )}
