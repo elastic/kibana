@@ -11,8 +11,11 @@ import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { RULE_CPU_USAGE, RULE_DETAILS, RULE_REQUIRES_APP_CONTEXT } from '../../../common/constants';
 import { validate, MonitoringAlertTypeParams } from '../components/param_details_form/validation';
 import { Expression, Props } from '../components/param_details_form/expression';
+import { MonitoringConfig } from '../../types';
 
-export function createCpuUsageAlertType(): AlertTypeModel<MonitoringAlertTypeParams> {
+export function createCpuUsageAlertType(
+  config: MonitoringConfig
+): AlertTypeModel<MonitoringAlertTypeParams> {
   return {
     id: RULE_CPU_USAGE,
     description: RULE_DETAILS[RULE_CPU_USAGE].description,
@@ -21,7 +24,11 @@ export function createCpuUsageAlertType(): AlertTypeModel<MonitoringAlertTypePar
       return `${docLinks.links.monitoring.alertsKibanaCpuThreshold}`;
     },
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={RULE_DETAILS[RULE_CPU_USAGE].paramDetails} />
+      <Expression
+        {...props}
+        config={config}
+        paramDetails={RULE_DETAILS[RULE_CPU_USAGE].paramDetails}
+      />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
