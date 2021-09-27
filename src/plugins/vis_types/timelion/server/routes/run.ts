@@ -94,15 +94,18 @@ export function runRoute(
         allowedGraphiteUrls: configManager.getGraphiteUrls(),
         esShardTimeout: configManager.getEsShardTimeout(),
       });
-      const chainRunner = chainRunnerFn(tlConfig);
-      const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
-
-      return response.ok({
-        body: {
-          sheet,
-          stats: chainRunner.getStats(),
-        },
-      });
+      try {
+        const chainRunner = chainRunnerFn(tlConfig);
+        const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
+        return response.ok({
+          body: {
+            sheet,
+            stats: chainRunner.getStats(),
+          },
+        });
+      } catch (e) {
+        return response.badRequest({ body: { message: e.message } });
+      }
     })
   );
 }
