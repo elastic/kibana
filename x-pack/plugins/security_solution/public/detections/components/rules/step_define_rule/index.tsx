@@ -11,7 +11,11 @@ import styled from 'styled-components';
 import { isEqual } from 'lodash';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { DEFAULT_INDEX_KEY, DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
+import {
+  DEFAULT_INDEX_KEY,
+  DEFAULT_THREAT_INDEX_KEY,
+  DEFAULT_THREAT_MATCH_QUERY,
+} from '../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -72,7 +76,7 @@ const stepDefineDefaultValue: DefineStepRule = {
     saved_id: undefined,
   },
   threatQueryBar: {
-    query: { query: '*:*', language: 'kuery' },
+    query: { query: DEFAULT_THREAT_MATCH_QUERY, language: 'kuery' },
     filters: [],
     saved_id: undefined,
   },
