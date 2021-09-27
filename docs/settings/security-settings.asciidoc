@@ -15,7 +15,8 @@ You do not need to configure any additional settings to use the
 [cols="2*<"]
 |===
 | `xpack.security.enabled`
-  | By default, {kib} automatically detects whether to enable the
+  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
+  By default, {kib} automatically detects whether to enable the
   {security-features} based on the license and whether {es} {security-features}
   are enabled. +
   +
