@@ -112,7 +112,6 @@ export class LegacyLoggingServer {
         tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
         timestamp: timestamp.getTime(),
       })
-      // @ts-expect-error @hapi/podium emit is actually an async function
       .catch((err) => {
         // eslint-disable-next-line no-console
         console.error('An unexpected error occurred while writing to the log:', err.stack);
