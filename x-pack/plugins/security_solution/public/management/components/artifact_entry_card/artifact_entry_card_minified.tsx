@@ -74,6 +74,7 @@ export const ArtifactEntryCardMinified = memo(
             <EuiFlexItem grow={false}>
               <EuiCheckbox
                 id={artifact.name}
+                data-test-subj={`${artifact.name}_checkbox`}
                 checked={isSelected}
                 onChange={() => onToggleSelectedArtifact(!isSelected)}
               />

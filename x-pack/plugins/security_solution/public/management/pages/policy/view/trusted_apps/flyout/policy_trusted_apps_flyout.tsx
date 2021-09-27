@@ -83,6 +83,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
       payload: { trustedAppIds: selectedArtifactIds },
     });
   }, [dispatch, selectedArtifactIds]);
+
   const handleOnSearch = useCallback(
     (filter) => {
       dispatch({
@@ -172,6 +173,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
 
         {canShowPolicyArtifactsList ? (
           <PolicyArtifactsList
+            data-test-subj="artifactsListTrustedAppsFlyout"
             artifacts={availableArtifactsList}
             defaultSelectedArtifactIds={[]}
             isListLoading={isAvailableArtifactsListLoading || isAvailableArtifactsListExistLoading}
@@ -179,6 +181,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
           />
         ) : entriesExists ? (
           <EuiEmptyPrompt
+            data-test-subj="noItemsFoundTrustedAppsFlyout"
             title={
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noResults"
@@ -188,6 +191,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
           />
         ) : (
           <EuiEmptyPrompt
+            data-test-subj="noAvailableItemsTrustedAppsFlyout"
             title={
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noAvailable"
