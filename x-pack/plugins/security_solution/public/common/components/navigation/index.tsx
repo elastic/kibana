@@ -14,7 +14,7 @@ import { useKibana } from '../../lib/kibana';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { makeMapStateToProps } from '../url_state/helpers';
-import { setBreadcrumbs } from './breadcrumbs';
+import { useSetBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 
@@ -41,6 +41,8 @@ export const TabNavigationComponent: React.FC<
       chrome,
       application: { getUrlForApp, navigateToUrl },
     } = useKibana().services;
+
+    const setBreadcrumbs = useSetBreadcrumbs();
 
     useEffect(() => {
       if (pathName || pageName) {
@@ -79,6 +81,7 @@ export const TabNavigationComponent: React.FC<
       tabName,
       getUrlForApp,
       navigateToUrl,
+      setBreadcrumbs,
     ]);
 
     return (
