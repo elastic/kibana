@@ -20,6 +20,11 @@ export interface Curation {
   promoted: CurationResult[];
   hidden: CurationResult[];
   organic: Result[];
+  suggestion?: CurationSuggestion;
+}
+
+export interface CurationSuggestion {
+  status: 'pending' | 'applied' | 'automated' | 'rejected' | 'disabled';
 }
 
 export interface CurationsAPIResponse {
