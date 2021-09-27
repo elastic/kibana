@@ -68,6 +68,7 @@ interface Props {
   styleProperties: StyleProperties;
   isTimeAware: boolean;
   showIsTimeAware: boolean;
+  customIcons: CustomIcon[];
 }
 
 interface State {
@@ -412,6 +413,7 @@ export class VectorStyleEditor extends Component<Props, State> {
           <VectorStyleIconEditor
             disabled={!hasMarkerOrIcon}
             disabledBy={VECTOR_STYLES.ICON_SIZE}
+            customIcons={this.props.customIcons}
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
             onCustomIconsChange={this._onCustomIconsChange}

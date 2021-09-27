@@ -245,7 +245,7 @@ export type StyleMetaDescriptor = {
 
 export type VectorStyleDescriptor = StyleDescriptor & {
   properties: VectorStylePropertiesDescriptor;
-  customIcons?: CustomIcon[];
+  customIcons: CustomIcon[];
   isTimeAware: boolean;
   __styleMeta?: StyleMetaDescriptor;
 };

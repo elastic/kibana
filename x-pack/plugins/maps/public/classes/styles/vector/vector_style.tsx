@@ -461,12 +461,12 @@ export class VectorStyle implements IVectorStyle {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {
       rawProperties[propertyName] = stylePropertyDescriptor; // override single property, but preserve the rest
-      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware(), this.customIcons());
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
     const onIsTimeAwareChange = (isTimeAware: boolean) => {
-      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, isTimeAware);
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, isTimeAware, this.customIcons());
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
@@ -495,6 +495,7 @@ export class VectorStyle implements IVectorStyle {
         onCustomIconsChange={onCustomIconsChange}
         isTimeAware={this.isTimeAware()}
         showIsTimeAware={propertiesWithFieldMeta.length > 0}
+        customIcons={this.customIcons()}
         hasBorder={this._hasBorder()}
       />
     );
@@ -675,6 +676,10 @@ export class VectorStyle implements IVectorStyle {
 
   isTimeAware() {
     return this._descriptor.isTimeAware;
+  }
+
+  customIcons() {
+    return this._descriptor.customIcons;
   }
 
   getRawProperties(): VectorStylePropertiesDescriptor {

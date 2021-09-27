@@ -44,32 +44,17 @@ export class IconSelect extends Component {
   state = {
     isPopoverOpen: false,
     isModalVisible: false,
-    customIcons: [],
   };
 
   _handleSave = (name, description, image) => {
-    const key = getComputedIconName();
-    this.setState(prevState => ({
-      customIcons: [...prevState.customIcons, {
-        key,
-        icon: image,
-        label: name
-      }]
-    }), () => {
-      this._onCustomIconsChange();
-    });
+    const symbolId = getComputedIconName();
+    const icons = [...this.props.customIcons, {
+      symbolId,
+      icon: image,
+      name,
+    }];
+    this.props.onCustomIconsChange(icons);
     this._hideModal();
-  }
-
-  _onCustomIconsChange = () => {
-    const customIcons = this.state.customIcons.map(({ key, icon, label }) => {
-      return {
-        symbolId: key,
-        name: label,
-        icon,
-      }
-    });
-    this.props.onCustomIconsChange(customIcons);
   }
 
   _closePopover = () => {
@@ -167,16 +152,15 @@ export class IconSelect extends Component {
       };
     });
 
-    const customOptions = this.state.customIcons.map(({ key, label, checked, icon }) => {
+    const customOptions = this.props.customIcons.map(({ symbolId, icon, name }) => {
       return {
-        key,
-        label,
-        checked,
+        key: symbolId,
+        label: name,
         icon,
         prepend: (
           <SymbolIcon
-            key={key}
-            symbolId={key}
+            key={symbolId}
+            symbolId={symbolId}
             svg={icon}
             fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
           />
