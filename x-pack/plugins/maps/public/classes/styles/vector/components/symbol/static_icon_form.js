@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IconSelect } from './icon_select';
 
-export function StaticIconForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
+export function StaticIconForm({ onStaticStyleChange, onCustomIconsChange, staticDynamicSelect, styleProperty }) {
   const onChange = (selectedIconId) => {
     onStaticStyleChange(styleProperty.getStyleName(), { value: selectedIconId });
   };
@@ -20,7 +20,7 @@ export function StaticIconForm({ onStaticStyleChange, staticDynamicSelect, style
         {staticDynamicSelect}
       </EuiFlexItem>
       <EuiFlexItem>
-        <IconSelect onChange={onChange} value={styleProperty.getOptions().value} />
+        <IconSelect onChange={onChange} onCustomIconsChange={onCustomIconsChange} label={styleProperty.getOptions().value} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

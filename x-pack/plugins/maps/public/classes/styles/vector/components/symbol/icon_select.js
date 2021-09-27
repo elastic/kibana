@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import {
+  EuiButton,
   EuiFormControlLayout,
   EuiFieldText,
   EuiPopover,
@@ -16,24 +17,81 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { SymbolIcon } from '../legend/symbol_icon';
-import { SYMBOL_OPTIONS } from '../../symbol_utils';
+import { getComputedIconName, SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
+import { CustomIconModal } from './custom_icon_modal';
+import { Image2Sdf } from '../../../../util/image_to_sdf';
+import { buildSrcUrl } from '../../symbol_utils'
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
 }
 
+const createSdfIcon = async (name, description, image) => {
+  const blobUrl = buildSrcUrl(image);
+  const rawIcon = await new Promise((resolve, reject) => {
+    const img = new Image();
+      img.addEventListener('load', () => resolve(img));
+      img.addEventListener('error', (err) => reject(err));
+      img.src = blobUrl;
+  });
+  const sdfgen = new Image2Sdf();
+  const icon = sdfgen.draw(rawIcon);
+  return icon;
+}
+
 export class IconSelect extends Component {
   state = {
     isPopoverOpen: false,
+    isModalVisible: false,
+    customIcons: [],
   };
+
+  _handleSave = (name, description, image) => {
+    const key = getComputedIconName();
+    this.setState(prevState => ({
+      customIcons: [...prevState.customIcons, {
+        key,
+        icon: image,
+        label: name
+      }]
+    }), () => {
+      this._onCustomIconsChange();
+    });
+    this._hideModal();
+  }
+
+  _onCustomIconsChange = () => {
+    const customIcons = this.state.customIcons.map(({ key, icon, label }) => {
+      return {
+        symbolId: key,
+        name: label,
+        icon,
+      }
+    });
+    this.props.onCustomIconsChange(customIcons);
+  }
 
   _closePopover = () => {
     this.setState({ isPopoverOpen: false });
   };
 
+  _hideModal = () => {
+    this.setState({ isModalVisible: false });
+  };
+
   _openPopover = () => {
     this.setState({ isPopoverOpen: true });
+  };
+
+  _showModal = () => {
+    this.setState({ isModalVisible: true });
+  };
+
+  _toggleModal = () => {
+    this.setState((prevState) => ({
+      isModalVisible: !prevState.isModalVisible,
+    }));
   };
 
   _togglePopover = () => {
@@ -59,7 +117,7 @@ export class IconSelect extends Component {
     });
 
     if (selectedOption) {
-      this.props.onChange(selectedOption.value);
+      this.props.onChange(selectedOption.key);
     }
     this._closePopover();
   };
@@ -77,15 +135,15 @@ export class IconSelect extends Component {
         <EuiFieldText
           onClick={this._togglePopover}
           onKeyDown={this._handleKeyboardActivity}
-          value={this.props.value}
+          value={this.props.label}
           compressed
           readOnly
           fullWidth
           prepend={
             <SymbolIcon
-              key={this.props.value}
+              key={this.props.key}
               className="mapIconSelectSymbol__inputButton"
-              symbolId={this.props.value}
+              symbolId={this.props.key}
               fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
             />
           }
@@ -95,19 +153,43 @@ export class IconSelect extends Component {
   }
 
   _renderIconSelectable() {
-    const options = SYMBOL_OPTIONS.map(({ value, label }) => {
+    const makiOptions = SYMBOL_OPTIONS.map(({ key, label }) => {
       return {
-        value,
+        key,
         label,
         prepend: (
           <SymbolIcon
-            key={value}
-            symbolId={value}
+            key={key}
+            symbolId={key}
             fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
           />
         ),
       };
     });
+
+    const customOptions = this.state.customIcons.map(({ key, label, checked, icon }) => {
+      return {
+        key,
+        label,
+        checked,
+        icon,
+        prepend: (
+          <SymbolIcon
+            key={key}
+            symbolId={key}
+            svg={icon}
+            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+          />
+        ),
+      };
+    });
+
+    if (customOptions.length) customOptions.splice(0, 0, {
+      label: 'Custom Icons',
+      isGroupLabel: true,
+    });
+
+    const options = [...makiOptions, ...customOptions];
 
     return (
       <EuiSelectable searchable options={options} onChange={this._onIconSelect}>
@@ -123,17 +205,27 @@ export class IconSelect extends Component {
 
   render() {
     return (
-      <EuiPopover
-        ownFocus
-        button={this._renderPopoverButton()}
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this._closePopover}
-        anchorPosition="downLeft"
-        panelPaddingSize="s"
-        display="block"
-      >
-        <EuiFocusTrap clickOutsideDisables={true}>{this._renderIconSelectable()}</EuiFocusTrap>
-      </EuiPopover>
+      <Fragment>
+        <EuiPopover
+          ownFocus
+          button={this._renderPopoverButton()}
+          isOpen={this.state.isPopoverOpen}
+          closePopover={this._closePopover}
+          anchorPosition="downLeft"
+          panelPaddingSize="s"
+          display="block"
+        >
+          <EuiFocusTrap clickOutsideDisables={true}>
+            {this._renderIconSelectable()}
+            <EuiButton fullWidth onClick={this._toggleModal}>
+              Add custom icon
+            </EuiButton>
+          </EuiFocusTrap>
+        </EuiPopover>
+        {this.state.isModalVisible ? (
+          <CustomIconModal title="Custom Icon" onSave={this._handleSave} onCancel={this._hideModal} />
+        ) : null}
+      </Fragment>
     );
   }
 }

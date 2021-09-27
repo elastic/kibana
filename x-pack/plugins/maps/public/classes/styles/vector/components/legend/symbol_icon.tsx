@@ -10,7 +10,8 @@ import React, { Component } from 'react';
 import { getMakiSymbolSvg, styleSvg, buildSrcUrl } from '../../symbol_utils';
 
 interface Props {
-  symbolId: string;
+  symbolId?: string;
+  svg?: string;
   fill?: string;
   stroke?: string;
 }
@@ -38,7 +39,7 @@ export class SymbolIcon extends Component<Props, State> {
   async _loadSymbol() {
     let imgDataUrl;
     try {
-      const svg = getMakiSymbolSvg(this.props.symbolId);
+      const svg = this.props.svg ?? getMakiSymbolSvg(this.props.symbolId);
       const styledSvg = await styleSvg(svg, this.props.fill, this.props.stroke);
       imgDataUrl = buildSrcUrl(styledSvg);
     } catch (error) {

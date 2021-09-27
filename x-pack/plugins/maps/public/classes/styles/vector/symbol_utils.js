@@ -8,6 +8,7 @@
 import React from 'react';
 import maki from '@elastic/maki';
 import xml2js from 'xml2js';
+import uuid from 'uuid/v4'
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
@@ -36,7 +37,7 @@ maki.svgArray.forEach((svgString) => {
 
 export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map((symbolId) => {
   return {
-    value: symbolId,
+    key: symbolId,
     label: symbolId,
   };
 });
@@ -57,6 +58,10 @@ export function getMakiSymbolAnchor(symbolId) {
     default:
       return 'center';
   }
+}
+
+export function getComputedIconName() {
+  return `__kbn__customIcon__${uuid()}`;
 }
 
 // Style descriptor stores symbolId, for example 'aircraft'

@@ -46,6 +46,7 @@ import {
   ColorDynamicOptions,
   ColorStaticOptions,
   ColorStylePropertyDescriptor,
+  CustomIcon,
   DynamicStyleProperties,
   DynamicStylePropertyOptions,
   IconDynamicOptions,
@@ -165,12 +166,14 @@ export class VectorStyle implements IVectorStyle {
 
   static createDescriptor(
     properties: Partial<VectorStylePropertiesDescriptor> = {},
-    isTimeAware = true
+    isTimeAware = true,
+    customIcons: CustomIcon[] = [],
   ) {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
       properties: { ...getDefaultStaticProperties(), ...properties },
       isTimeAware,
+      customIcons,
     };
   }
 
@@ -189,7 +192,7 @@ export class VectorStyle implements IVectorStyle {
     this._descriptor = descriptor
       ? {
           ...descriptor,
-          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
+          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware, descriptor.customIcons),
         }
       : VectorStyle.createDescriptor();
 
@@ -467,6 +470,11 @@ export class VectorStyle implements IVectorStyle {
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
+    const onCustomIconsChange = (customIcons: CustomIcon[]) => {
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware(), customIcons);
+      onStyleDescriptorChange(vectorStyleDescriptor);
+    }
+
     const propertiesWithFieldMeta = this.getDynamicPropertiesArray().filter((dynamicStyleProp) => {
       return dynamicStyleProp.isFieldMetaEnabled();
     });
@@ -484,6 +492,7 @@ export class VectorStyle implements IVectorStyle {
         isPointsOnly={this._getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         onIsTimeAwareChange={onIsTimeAwareChange}
+        onCustomIconsChange={onCustomIconsChange}
         isTimeAware={this.isTimeAware()}
         showIsTimeAware={propertiesWithFieldMeta.length > 0}
         hasBorder={this._hasBorder()}
