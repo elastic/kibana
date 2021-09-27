@@ -13,8 +13,8 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface CardHeaderProps extends Pick<CommonProps, 'data-test-subj'> {
   name: string;
-  createdDate?: string;
-  updatedDate?: string;
+  createdDate: string;
+  updatedDate: string;
   /** If defined, then an overflow menu will be shown with the actions provided */
   actions?: ActionsContextMenuProps['items'];
 }
@@ -35,22 +35,18 @@ export const CardHeader = memo<CardHeaderProps>(
             <EuiFlexItem grow={false}>
               <EuiFlexGroup responsive={false} gutterSize="xl">
                 <EuiFlexItem grow={false}>
-                  {updatedDate ? (
-                    <DateFieldValue
-                      date={updatedDate}
-                      type="update"
-                      data-test-subj={getTestId('updated')}
-                    />
-                  ) : null}
+                  <DateFieldValue
+                    date={updatedDate}
+                    type="update"
+                    data-test-subj={getTestId('updated')}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {createdDate ? (
-                    <DateFieldValue
-                      date={createdDate}
-                      type="create"
-                      data-test-subj={getTestId('created')}
-                    />
-                  ) : null}
+                  <DateFieldValue
+                    date={createdDate}
+                    type="create"
+                    data-test-subj={getTestId('created')}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

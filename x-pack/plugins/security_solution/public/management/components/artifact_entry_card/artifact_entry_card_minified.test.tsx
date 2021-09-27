@@ -18,7 +18,7 @@ import { getTrustedAppProvider, getExceptionProvider } from './test_utils';
 describe.each([
   ['trusted apps', getTrustedAppProvider],
   ['exceptions/event filters', getExceptionProvider],
-])('when using the ArtifactEntryCard component with %s', (_, generateItem) => {
+])('when using the ArtifactEntryCardMinified component with %s', (_, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
