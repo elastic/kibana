@@ -41,5 +41,15 @@
         "type": "object"
       }
     }
+  },
+  "action_oauth": {
+    "properties": {
+      "tokenType": {
+        "type": "keyword"
+      },
+      "accessToken": {
+        "type": "binary"
+      }
+    }
   }
 }

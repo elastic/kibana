@@ -9,14 +9,19 @@
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
-import { Logger } from '../../../../../../src/core/server';
+import {
+  Logger,
+  ISavedObjectsRepository,
+  SavedObjectsErrorHelpers,
+} from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { CustomHostSettings } from '../../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
-import { ProxySettings } from '../../types';
+import { ProxySettings, RawOAuthAction } from '../../types';
 import { AdditionalEmailServices } from '../../../common';
+import { ACTION_OAUTH_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -59,13 +64,17 @@ export interface Content {
   message: string;
 }
 
-export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
+export async function sendEmail(
+  logger: Logger,
+  options: SendEmailOptions,
+  getSavedObjectsClient: () => Promise<ISavedObjectsRepository>
+): Promise<unknown> {
   const { transport, content } = options;
   const { message } = content;
   const messageHTML = htmlFromMarkdown(logger, message);
 
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
-    return await sendEmailWithExchange(logger, options, messageHTML);
+    return await sendEmailWithExchange(logger, options, messageHTML, getSavedObjectsClient);
   } else {
     return await sendEmailWithNodemailer(logger, options, messageHTML);
   }
@@ -75,37 +84,110 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
 async function sendEmailWithExchange(
   logger: Logger,
   options: SendEmailOptions,
-  messageHTML: string
+  messageHTML: string,
+  getSavedObjectsClient: () => Promise<ISavedObjectsRepository>
 ): Promise<unknown> {
   const { transport, configurationUtilities } = options;
-  const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
-  // request access token for microsoft exchange online server with Graph API scope
 
-  const tokenResult = await requestOAuthClientCredentialsToken(
-    oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
-    logger,
-    {
-      scope: GRAPH_API_OAUTH_SCOPE,
-      clientId,
-      clientSecret,
-    },
-    configurationUtilities
-  );
+  // request access token for microsoft exchange online server with Graph API scope
+  const savedObjects = await getSavedObjectsClient();
+  const clientId = transport.clientId as string;
+
+  const headers = await getGraphApiHeaders(savedObjects, clientId, options, logger);
+  // break it
+  headers.Authorization = headers.Authorization.slice(0, headers.Authorization.length - 2) + '2';
+
+  const result: { isAccessTokenInvalidError: boolean; response?: unknown } =
+    await sendEmailGraphApi(
+      {
+        options,
+        headers,
+        messageHTML,
+        graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
+      },
+      logger,
+      configurationUtilities
+    );
+
+  if (result.isAccessTokenInvalidError) {
+    return await sendEmailGraphApi(
+      {
+        options,
+        headers: await getGraphApiHeaders(savedObjects, clientId, options, logger),
+        messageHTML,
+        graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
+      },
+      logger,
+      configurationUtilities
+    );
+  }
+
+  return result;
+}
+
+async function getGraphApiHeaders(
+  savedObjects: ISavedObjectsRepository,
+  clientId: string,
+  options: SendEmailOptions,
+  logger: Logger
+) {
+  const {
+    configurationUtilities,
+    transport: { clientSecret, tenantId, oauthTokenUrl },
+  } = options;
+  let savedObjectTokenResult;
+  try {
+    savedObjectTokenResult = await savedObjects.get<RawOAuthAction>(
+      ACTION_OAUTH_SAVED_OBJECT_TYPE,
+      clientId
+    );
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err as Error)) {
+      throw err;
+    }
+  }
+
+  let tokenType: string;
+  let accessToken: string;
+  if (savedObjectTokenResult) {
+    tokenType = savedObjectTokenResult.attributes.tokenType;
+    accessToken = savedObjectTokenResult.attributes.accessToken;
+  } else {
+    const tokenResult = await requestOAuthClientCredentialsToken(
+      oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
+      logger,
+      {
+        scope: GRAPH_API_OAUTH_SCOPE,
+        clientId,
+        clientSecret,
+      },
+      configurationUtilities
+    );
+    tokenType = tokenResult.tokenType;
+    accessToken = tokenResult.accessToken;
+  }
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
+    Authorization: `${tokenType} ${accessToken}`,
   };
 
-  return await sendEmailGraphApi(
-    {
-      options,
-      headers,
-      messageHTML,
-      graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
-    },
-    logger,
-    configurationUtilities
-  );
+  if (!savedObjectTokenResult) {
+    await savedObjects.create(
+      ACTION_OAUTH_SAVED_OBJECT_TYPE,
+      {
+        tokenType,
+        accessToken,
+      },
+      { id: clientId }
+    );
+  } else {
+    await savedObjects.update(ACTION_OAUTH_SAVED_OBJECT_TYPE, clientId, {
+      tokenType,
+      accessToken,
+    });
+  }
+
+  return headers;
 }
 
 // send an email using nodemailer

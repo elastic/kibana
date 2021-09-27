@@ -67,6 +67,7 @@ import { defineRoutes } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
+  ACTION_OAUTH_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
@@ -235,10 +236,16 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       this.preconfiguredActions
     );
 
+    async function getSavedObjectsClient() {
+      const [startCore] = await core.getStartServices();
+      return startCore.savedObjects.createInternalRepository([ACTION_OAUTH_SAVED_OBJECT_TYPE]);
+    }
+
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
       actionsConfigUtils,
+      getSavedObjectsClient,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
     });
 

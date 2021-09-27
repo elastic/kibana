@@ -7,7 +7,7 @@
 
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { Logger } from '../../../../../src/core/server';
+import { Logger, ISavedObjectsRepository } from '../../../../../src/core/server';
 
 import { getActionType as getEmailActionType } from './email';
 import { getActionType as getIndexActionType } from './es_index';
@@ -54,15 +54,17 @@ export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,
   actionTypeRegistry,
   logger,
+  getSavedObjectsClient,
   publicBaseUrl,
 }: {
   actionsConfigUtils: ActionsConfigurationUtilities;
   actionTypeRegistry: ActionTypeRegistry;
   logger: Logger;
+  getSavedObjectsClient: () => Promise<ISavedObjectsRepository>;
   publicBaseUrl?: string;
 }) {
   actionTypeRegistry.register(
-    getEmailActionType({ logger, configurationUtilities, publicBaseUrl })
+    getEmailActionType({ logger, configurationUtilities, getSavedObjectsClient, publicBaseUrl })
   );
   actionTypeRegistry.register(getIndexActionType({ logger }));
   actionTypeRegistry.register(getPagerDutyActionType({ logger, configurationUtilities }));

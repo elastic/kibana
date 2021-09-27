@@ -172,3 +172,8 @@ export interface ResponseSettings {
 export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
 }
+
+export interface RawOAuthAction extends SavedObjectAttributes {
+  accessToken: string;
+  tokenType: string;
+}

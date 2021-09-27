@@ -13,7 +13,7 @@ import SMTPConnection from 'nodemailer/lib/smtp-connection';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
-import { Logger } from '../../../../../src/core/server';
+import { Logger, ISavedObjectsRepository } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
@@ -165,12 +165,13 @@ interface GetActionTypeParams {
   logger: Logger;
   publicBaseUrl?: string;
   configurationUtilities: ActionsConfigurationUtilities;
+  getSavedObjectsClient: () => Promise<ISavedObjectsRepository>;
 }
 
 // action type definition
 export const ActionTypeId = '.email';
 export function getActionType(params: GetActionTypeParams): EmailActionType {
-  const { logger, publicBaseUrl, configurationUtilities } = params;
+  const { logger, publicBaseUrl, configurationUtilities, getSavedObjectsClient } = params;
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
@@ -185,7 +186,12 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       params: ParamsSchema,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger, publicBaseUrl, configurationUtilities }),
+    executor: curry(executor)({
+      logger,
+      publicBaseUrl,
+      configurationUtilities,
+      getSavedObjectsClient,
+    }),
   };
 }
 
@@ -208,10 +214,12 @@ async function executor(
     logger,
     publicBaseUrl,
     configurationUtilities,
+    getSavedObjectsClient,
   }: {
     logger: GetActionTypeParams['logger'];
     publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
     configurationUtilities: ActionsConfigurationUtilities;
+    getSavedObjectsClient: () => Promise<ISavedObjectsRepository>;
   },
   execOptions: EmailActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
@@ -279,7 +287,7 @@ async function executor(
   let result;
 
   try {
-    result = await sendEmail(logger, sendEmailOptions);
+    result = await sendEmail(logger, sendEmailOptions, getSavedObjectsClient);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',

@@ -22,6 +22,7 @@ import { ActionTypeRegistry } from '../action_type_registry';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+  ACTION_OAUTH_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 import { getOldestIdleActionTask } from '../../../task_manager/server';
 
@@ -94,5 +95,34 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
+  });
+
+  savedObjects.registerType({
+    name: ACTION_OAUTH_SAVED_OBJECT_TYPE,
+    hidden: true,
+    namespaceType: 'multiple',
+    mappings: mappings.action_oauth as SavedObjectsTypeMappingDefinition,
+    management: {
+      defaultSearchField: 'name',
+      importableAndExportable: true,
+      getTitle(savedObject: SavedObject<RawAction>) {
+        return `Connector OAuth: [${savedObject.attributes.name}]`;
+      },
+      onExport<RawAction>(
+        context: SavedObjectsExportTransformContext,
+        objects: Array<SavedObject<RawAction>>
+      ) {
+        return transformConnectorsForExport(objects, actionTypeRegistry);
+      },
+      onImport(connectors) {
+        return {
+          warnings: getImportWarnings(connectors as Array<SavedObject<RawAction>>),
+        };
+      },
+    },
+  });
+  encryptedSavedObjects.registerType({
+    type: ACTION_OAUTH_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['accessToken', 'refreshToken']),
   });
 }
