@@ -9017,28 +9017,6 @@ const BootstrapCommand = {
         group: 'bootstrap'
       }, t))
     });
-    const typescriptTotalTime = Date.now() - typescriptStartTime; // send timings
-
-    await reporter.timings({
-      upstreamBranch: kbn.kibanaProject.json.branch,
-      // prevent loading @kbn/utils by passing null
-      kibanaUuid: kbn.getUuid() || null,
-      timings: [{
-        group: 'bootstrap',
-        id: 'build packages',
-        ms: packagesTotalTime,
-        meta: {
-          success: true
-        }
-      }, {
-        group: 'bootstrap',
-        id: 'typescript references',
-        ms: typescriptTotalTime,
-        meta: {
-          success: true
-        }
-      }]
-    });
   }
 
 };
