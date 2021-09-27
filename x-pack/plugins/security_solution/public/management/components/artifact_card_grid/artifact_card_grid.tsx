@@ -6,6 +6,7 @@
  */
 
 import React, { ComponentType, memo, useCallback, useMemo } from 'react';
+import { Mutable } from 'utility-types';
 import {
   AnyArtifact,
   ArtifactEntryCollapsableCard,
@@ -22,6 +23,13 @@ type ArtifactsPaginatedContentProps = PaginatedContentProps<
 
 type ArtifactsPaginatedComponent = ComponentType<ArtifactsPaginatedContentProps>;
 
+interface CardExpandCollapseState {
+  expanded: MaybeImmutable<AnyArtifact[]>;
+  collapsed: MaybeImmutable<AnyArtifact[]>;
+}
+
+type CallerDefinedCardProps = Omit<ArtifactEntryCollapsableCardProps, 'onExpandCollapse' | 'item'>;
+
 const PaginatedContent: ArtifactsPaginatedComponent = _PaginatedContent;
 
 export type ArtifactCardGridProps = Omit<
@@ -32,41 +40,76 @@ export type ArtifactCardGridProps = Omit<
 
   onPageChange: ArtifactsPaginatedContentProps['onChange'];
 
-  onExpandCollapse: (changes: { expanded: MaybeImmutable<AnyArtifact[]> }) => void;
+  onExpandCollapse: (state: CardExpandCollapseState) => void;
 
   /**
    * Callback to provide additional props for the `ArtifactEntryCollapsableCard`
    *
    * @param item
    */
-  cardComponentProps?: (
-    item: AnyArtifact
-  ) => Omit<ArtifactEntryCollapsableCardProps, 'onExpandCollapse' | 'item'>;
+  cardComponentProps?: (item: MaybeImmutable<AnyArtifact>) => CallerDefinedCardProps;
 };
 
 export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
   ({ items, cardComponentProps, onPageChange, onExpandCollapse, ...paginatedContentProps }) => {
-    const handleCardExpandCollapse = useCallback(() => {}, []);
+    // The list of card props that the caller can define
+    type PartialCardProps = Map<MaybeImmutable<AnyArtifact>, CallerDefinedCardProps>;
+    const callerDefinedCardProps = useMemo<PartialCardProps>(() => {
+      const cardProps: PartialCardProps = new Map();
 
-    const cardPropsById = useMemo<Record<string, ArtifactEntryCollapsableCardProps>>(() => {
-      return items.reduce<Record<string, ArtifactEntryCollapsableCardProps>>((cardsProps, item) => {
-        cardsProps[item.id] = {
-          ...(cardComponentProps ? cardComponentProps(item) : {}),
-          item,
-          onExpandCollapse: () => {
-            handleCardExpandCollapse();
-          },
-        };
+      for (const artifact of items) {
+        cardProps.set(artifact, cardComponentProps ? cardComponentProps(artifact) : {});
+      }
 
-        return cardsProps;
-      }, {});
-    }, [cardComponentProps, handleCardExpandCollapse, items]);
+      return cardProps;
+    }, [cardComponentProps, items]);
+
+    // Handling of what is expanded or collapsed is done by looking at the at what the caller card's
+    // `expanded` prop value was and then invert it for the card that the user clicked expand/collapse
+    const handleCardExpandCollapse = useCallback(
+      (item: AnyArtifact) => {
+        const changes: {
+          expanded: Mutable<CardExpandCollapseState['expanded']>;
+          collapsed: Mutable<CardExpandCollapseState['collapsed']>;
+        } = { expanded: [], collapsed: [] };
+
+        for (const [artifact, currentCardProps] of callerDefinedCardProps) {
+          const currentExpandedState = Boolean(currentCardProps.expanded);
+          const newExpandedState = artifact === item ? !currentExpandedState : currentExpandedState;
+
+          if (newExpandedState) {
+            changes.expanded.push(artifact);
+          } else {
+            changes.collapsed.push(artifact);
+          }
+        }
+
+        onExpandCollapse(changes);
+      },
+      [callerDefinedCardProps, onExpandCollapse]
+    );
+
+    // Full list of card props that includes the actual artifact and the callbacks
+    type FullCardProps = Map<MaybeImmutable<AnyArtifact>, ArtifactEntryCollapsableCardProps>;
+    const fullCardProps = useMemo<FullCardProps>(() => {
+      const newFullCardProps: FullCardProps = new Map();
+
+      for (const [artifact, cardProps] of callerDefinedCardProps) {
+        newFullCardProps.set(artifact, {
+          ...cardProps,
+          item: artifact,
+          onExpandCollapse: () => handleCardExpandCollapse(artifact),
+        });
+      }
+
+      return newFullCardProps;
+    }, [callerDefinedCardProps, handleCardExpandCollapse]);
 
     const handleItemComponentProps = useCallback(
       (item: AnyArtifact): ArtifactEntryCollapsableCardProps => {
-        return cardPropsById[item.id];
+        return fullCardProps.get(item)!;
       },
-      [cardPropsById]
+      [fullCardProps]
     );
 
     return (

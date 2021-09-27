@@ -51,16 +51,28 @@ export const PolicyTrustedAppsList = memo(() => {
     [history, pagination.pageSize, policyId, urlParams]
   );
 
-  const handleExpandCollapse = useCallback<ArtifactCardGridProps['onExpandCollapse']>((change) => {
-    // FIXME:PT implement callback
-  }, []);
+  const handleExpandCollapse = useCallback<ArtifactCardGridProps['onExpandCollapse']>(
+    ({ expanded, collapsed }) => {
+      const newCardExpandedSettings: Record<string, boolean> = {};
+
+      for (const trustedApp of expanded) {
+        newCardExpandedSettings[trustedApp.id] = true;
+      }
+
+      for (const trustedApp of collapsed) {
+        newCardExpandedSettings[trustedApp.id] = false;
+      }
+
+      setCardExpanded(newCardExpandedSettings);
+    },
+    []
+  );
 
   const provideCardProps = useCallback(
     (item: TrustedApp) => {
-      // FIXME:PT implement callback
-
       return {
         expanded: Boolean(isCardExpanded[item.id]),
+        // FIXME:PT implement card menu
         actions: [{ children: 'one' }, { children: 'two' }],
       };
     },

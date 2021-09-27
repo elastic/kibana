@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { CommonProps, EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
+import { COLLAPSE_ACTION, EXPAND_ACTION } from './translations';
 
 export interface CardExpandButtonProps extends Pick<CommonProps, 'data-test-subj'> {
   expanded: boolean;
@@ -20,6 +21,7 @@ export const CardExpandButton = memo<CardExpandButtonProps>(
         iconType={expanded ? 'arrowUp' : 'arrowDown'}
         onClick={onClick}
         data-test-subj={dataTestSubj}
+        aria-label={expanded ? COLLAPSE_ACTION : EXPAND_ACTION}
       />
     );
   }
