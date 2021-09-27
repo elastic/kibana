@@ -128,6 +128,14 @@ export const deleteCustomRule = (ruleId = '1') => {
   });
 };
 
+export const createSignalsIndex = () => {
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/index',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+};
+
 export const removeSignalsIndex = () => {
   cy.request({ url: '/api/detection_engine/index', failOnStatusCode: false }).then((response) => {
     if (response.status === 200) {

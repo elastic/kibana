@@ -56,7 +56,7 @@ import {
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
-import { createEventCorrelationRule } from '../../tasks/api_calls/rules';
+import { createSignalsIndex, createEventCorrelationRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   createAndActivateRule,
@@ -75,8 +75,12 @@ describe('Detection rules', function () {
   const expectedNumberOfRules = 1;
   const expectedNumberOfAlerts = '100 alerts';
 
-  before('Prepare the index and the EQL rule', function () {
+  beforeEach('Reset signals index', function () {
     cleanKibana();
+    createSignalsIndex();
+  });
+
+  before('Prepare the index and the EQL rule', function () {
     esArchiverCCSLoad('run-parts');
     this.rule = getCCSEqlRule();
   });
