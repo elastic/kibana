@@ -98,6 +98,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
     () => (
       <>
         <EuiCallOut
+          data-test-subj="tooMuchResultsWarningMessageTrustedAppsFlyout"
           color="warning"
           size="s"
           heading="h4"

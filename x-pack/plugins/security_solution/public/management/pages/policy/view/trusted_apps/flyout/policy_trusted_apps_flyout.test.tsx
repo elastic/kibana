@@ -169,4 +169,40 @@ describe('Policy trusted apps flyout', () => {
     const currentLocation = getState().artifacts.location;
     expect(currentLocation.show).toBeUndefined();
   });
+
+  it('should display warning message when too much results', async () => {
+    TrustedAppsHttpServiceMock.mockImplementation(() => {
+      return {
+        getTrustedAppsList: () => ({ ...getListResponse(), total: 101 }),
+      };
+    });
+
+    const component = render();
+    mockedContext.store.dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        pathname: '/administration/policy/1234/trustedApps',
+        search: '?show=list',
+        hash: '',
+      },
+    });
+    await waitForAction('policyArtifactsAvailableListPageDataChanged');
+
+    expect(component.getByTestId('tooMuchResultsWarningMessageTrustedAppsFlyout')).not.toBeNull();
+  });
+
+  it('should not display warning message when few results', async () => {
+    const component = render();
+    mockedContext.store.dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        pathname: '/administration/policy/1234/trustedApps',
+        search: '?show=list',
+        hash: '',
+      },
+    });
+    await waitForAction('policyArtifactsAvailableListPageDataChanged');
+
+    expect(component.queryByTestId('tooMuchResultsWarningMessageTrustedAppsFlyout')).toBeNull();
+  });
 });
