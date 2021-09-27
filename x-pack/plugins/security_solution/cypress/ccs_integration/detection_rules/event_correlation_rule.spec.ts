@@ -25,7 +25,7 @@ import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate, waitForTheRuleToBeExecuted } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 describe('Detection rules', function () {
   const expectedNumberOfAlerts = '1 alert';
@@ -40,10 +40,7 @@ describe('Detection rules', function () {
     this.rule = getCCSEqlRule();
     createEventCorrelationRule(this.rule);
 
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     filterByCustomRules();
     goToRuleDetails();
