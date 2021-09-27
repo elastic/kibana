@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from 'kibana/server';
-
-import { MAX_BUCKETS_SETTING } from '../common/constants';
+import { UI_SETTINGS } from '../common/constants';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
-  [MAX_BUCKETS_SETTING]: {
+  [UI_SETTINGS.MAX_BUCKETS_SETTING]: {
     name: i18n.translate('visTypeTimeseries.advancedSettings.maxBucketsTitle', {
       defaultMessage: 'TSVB buckets limit',
     }),
@@ -24,5 +23,17 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
         'Affects the TSVB histogram density. Must be set higher than "histogram:maxBars".',
     }),
     schema: schema.number(),
+  },
+  [UI_SETTINGS.ALLOW_STRING_INDICES]: {
+    name: i18n.translate('visTypeTimeseries.advancedSettings.allowStringIndicesTitle', {
+      defaultMessage: 'Allow string indices in TSVB',
+    }),
+    value: false,
+    requiresPageReload: true,
+    description: i18n.translate('visTypeTimeseries.advancedSettings.allowStringIndicesText', {
+      defaultMessage:
+        'Enables you to use index patterns and Elasticsearch indices in <strong>TSVB</strong> visualizations.',
+    }),
+    schema: schema.boolean(),
   },
 });
