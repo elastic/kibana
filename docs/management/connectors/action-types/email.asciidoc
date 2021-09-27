@@ -227,7 +227,7 @@ NOTE:   You must use your Amazon SES SMTP credentials to send email through
 [[exchange]]
 ==== Sending email from Microsoft Exchange
 
-deprecated::[This Microsoft Exchange configuration is deprecated in 7.16.0, and will be removed later, because of the Microsoft announcement about deprecating https://docs.microsoft.com/en-us/lifecycle/announcements/exchange-online-basic-auth-deprecated[Basic Authentication]. To prepare for the removal of Basic Auth, you must update all existing Microsoft Exchange connectors with the new configuration based on the https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow[OAuth 2.0 Client Credentials Authentication].
+deprecated:[This Microsoft Exchange configuration is deprecated in 7.16.0, and will be removed later, because of the Microsoft announcement about deprecating https://docs.microsoft.com/en-us/lifecycle/announcements/exchange-online-basic-auth-deprecated [Basic Authentication]. To prepare for the removal of Basic Auth, you must update all existing Microsoft Exchange connectors with the new configuration based on the https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow[OAuth 2.0 Client Credentials Authentication].
 
 [source,text]
 --------------------------------------------------
