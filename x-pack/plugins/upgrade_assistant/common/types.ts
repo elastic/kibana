@@ -29,6 +29,8 @@ export enum ReindexStatus {
   failed,
   paused,
   cancelled,
+  // Used by the UI to differentiate if there was a failure retrieving
+  // the status from the server API
   error,
 }
 

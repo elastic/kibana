@@ -119,7 +119,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </Fragment>
         )}
         {hasError && (
-          <Fragment>
+          <>
             <EuiSpacer />
             <EuiCallOut
               color="danger"
@@ -133,10 +133,10 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             >
               {reindexState.errorMessage}
             </EuiCallOut>
-          </Fragment>
+          </>
         )}
         {hasReindexingFailure && (
-          <Fragment>
+          <>
             <EuiSpacer />
             <EuiCallOut
               color="danger"
@@ -150,8 +150,9 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             >
               {reindexState.errorMessage}
             </EuiCallOut>
-          </Fragment>
+          </>
         )}
+
         <EuiSpacer />
         <EuiTitle size="xs">
           <h3>
@@ -173,7 +174,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {!hasError && !hasReindexingFailure && !isCompleted && hasRequiredPrivileges && (
+          {!hasError && !isCompleted && hasRequiredPrivileges && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill

@@ -269,15 +269,10 @@ export const reindexActionsFactory = (
         if (error.meta.body.status === 404) {
           throw reindexingError.indexNotFound(`Index ${indexName} does not exist.`);
         }
-        if (error.meta.body.status === 402) {
-          throw reindexingError.accessForbidden(
-            `You do not have adequate privileges to read ${indexName}`
-          );
-        }
 
         // Otherwise throw with the original error so that the exception
         // can be caught in an upper scope.
-        throw error;
+        throw error.meta.body;
       }
 
       if (!flatSettings.body[indexName]) {
