@@ -11,13 +11,11 @@ import {
   SavedObjectSanitizedDoc,
   SavedObjectAttributes,
 } from '../../../../../../../src/core/server';
-import { IRuleActionsAttributesSavedObjectAttributes } from './types';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 
 /**
- * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
- * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
- * needed then it will be safe to remove this saved object and all its migrations
- * @deprecated Remove this once we no longer need legacy migrations for rule actions (8.0.0)
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 function isEmptyObject(obj: {}) {
   for (const attr in obj) {
@@ -29,15 +27,12 @@ function isEmptyObject(obj: {}) {
 }
 
 /**
- * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
- * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
- * needed then it will be safe to remove this saved object and all its migrations
- * @deprecated Remove this once we no longer need legacy migrations for rule actions (8.0.0)
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const ruleActionsSavedObjectMigration = {
+export const legacyRuleActionsSavedObjectMigration = {
   '7.11.2': (
-    doc: SavedObjectUnsanitizedDoc<IRuleActionsAttributesSavedObjectAttributes>
-  ): SavedObjectSanitizedDoc<IRuleActionsAttributesSavedObjectAttributes> => {
+    doc: SavedObjectUnsanitizedDoc<LegacyIRuleActionsAttributesSavedObjectAttributes>
+  ): SavedObjectSanitizedDoc<LegacyIRuleActionsAttributesSavedObjectAttributes> => {
     const { actions } = doc.attributes;
     const newActions = actions.reduce((acc, action) => {
       if (

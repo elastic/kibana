@@ -35,8 +35,11 @@ import {
   transformFromAlertThrottle,
   transformToAlertThrottle,
   transformToNotifyWhen,
+  transformActions,
 } from '../rules/utils';
 import { ruleTypeMappings } from '../signals/utils';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleActions } from '../rule_actions/legacy_types';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -279,7 +282,8 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 
 export const internalRuleToAPIResponse = (
   rule: SanitizedAlert<RuleParams>,
-  ruleStatus?: IRuleStatusSOAttributes
+  ruleStatus?: IRuleStatusSOAttributes,
+  legacyRuleActions?: LegacyRuleActions | null
 ): FullResponseSchema => {
   const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
   return {
@@ -298,14 +302,8 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: transformFromAlertThrottle(rule),
-    actions:
-      rule?.actions.map((action) => ({
-        group: action.group,
-        id: action.id,
-        action_type_id: action.actionTypeId,
-        params: action.params,
-      })) ?? [],
+    throttle: transformFromAlertThrottle(rule, legacyRuleActions),
+    actions: transformActions(rule.actions, legacyRuleActions),
     // Rule status
     status: mergedStatus?.status ?? undefined,
     status_date: mergedStatus?.statusDate ?? undefined,

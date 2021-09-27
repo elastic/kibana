@@ -12,6 +12,7 @@ import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 
 import { AppClient } from './client';
 import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
+import type { ActionsApiRequestHandlerContext } from '../../actions/server';
 
 export { AppClient };
 
@@ -25,6 +26,7 @@ export type SecuritySolutionRequestHandlerContext = RequestHandlerContext & {
   securitySolution: AppRequestContext;
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
+  actions: ActionsApiRequestHandlerContext;
   lists?: ListsApiRequestHandlerContext;
 };
 
