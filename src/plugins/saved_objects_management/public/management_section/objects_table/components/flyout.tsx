@@ -52,7 +52,6 @@ const CREATE_NEW_COPIES_DEFAULT = false;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export interface FlyoutProps {
-  allowedTypes: string[];
   close: () => void;
   done: () => void;
   newIndexPatternUrl: string;
