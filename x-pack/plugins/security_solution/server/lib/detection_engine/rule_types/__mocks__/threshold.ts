@@ -21,18 +21,18 @@ import {
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
 } from '@kbn/rule-data-utils';
-import {
-  ALERT_ANCESTORS,
-  ALERT_ORIGINAL_TIME,
-  ALERT_ORIGINAL_EVENT,
-  flattenWithPrefix,
-} from '@kbn/securitysolution-rules';
 import { TypeOfFieldMap } from '../../../../../../rule_registry/common/field_map';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ANCHOR_DATE } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
+import { flattenWithPrefix } from '../factories/utils/flatten_with_prefix';
 import { RulesFieldMap } from '../field_maps';
+import {
+  ALERT_ANCESTORS,
+  ALERT_ORIGINAL_TIME,
+  ALERT_ORIGINAL_EVENT,
+} from '../field_maps/field_names';
 import { WrappedRACAlert } from '../types';
 
 export const mockThresholdResults = {

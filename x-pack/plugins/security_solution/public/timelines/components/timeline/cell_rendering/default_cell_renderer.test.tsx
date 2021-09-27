@@ -26,7 +26,7 @@ const mockImplementation = {
 };
 
 describe('DefaultCellRenderer', () => {
-  const columnId = 'kibana.alert.rule.risk_score';
+  const columnId = 'signal.rule.risk_score';
   const eventId = '_id-123';
   const isDetails = true;
   const isExpandable = true;

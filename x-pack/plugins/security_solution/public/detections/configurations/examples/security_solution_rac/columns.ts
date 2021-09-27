@@ -26,20 +26,20 @@ export const columns: Array<
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'kibana.alert.rule.name',
+    id: 'signal.rule.name',
     displayAsText: i18n.ALERTS_HEADERS_RULE_NAME,
-    linkField: 'kibana.alert.rule.uuid',
+    linkField: 'signal.rule.id',
     initialWidth: 212,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'kibana.alert.rule.severity',
+    id: 'signal.rule.severity',
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
     initialWidth: 104,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'kibana.alert.reason',
+    id: 'signal.reason',
     displayAsText: i18n.ALERTS_HEADERS_REASON,
   },
 ];

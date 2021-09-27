@@ -12,12 +12,6 @@ import {
   ALERT_RULE_UPDATED_AT,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_ORIGINAL_TIME,
-  flattenWithPrefix,
-} from '@kbn/securitysolution-rules';
 
 import { MachineLearningCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -35,6 +29,12 @@ import {
   deleteListsIndex,
   importFile,
 } from '../../../lists_api_integration/utils';
+import { flattenWithPrefix } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/factories/utils/flatten_with_prefix';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_TIME,
+} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

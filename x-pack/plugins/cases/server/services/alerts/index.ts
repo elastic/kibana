@@ -196,8 +196,8 @@ async function updateByQuery(
             source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
               ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
             }
-            if (ctx._source.signal != null && ctx._source.kibana.alert.workflow_status != null) {
-              ctx._source.kibana.alert.workflow_status = '${status}'
+            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+              ctx._source.signal.status = '${status}'
             }`,
             lang: 'painless',
           },

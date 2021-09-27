@@ -144,7 +144,7 @@ const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 const linkFields: Record<string, string> = {
-  'kibana.alert.rule.name': 'kibana.alert.rule.uuid',
+  'signal.rule.name': 'signal.rule.id',
   'event.module': 'rule.reference',
 };
 

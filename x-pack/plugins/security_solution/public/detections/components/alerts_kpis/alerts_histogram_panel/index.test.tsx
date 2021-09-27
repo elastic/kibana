@@ -170,7 +170,7 @@ describe('AlertsHistogramPanel', () => {
 
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[0]).toEqual([
-          'kibana.alert.rule.name',
+          'signal.rule.name',
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [
@@ -196,7 +196,7 @@ describe('AlertsHistogramPanel', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'kibana.alert.workflow_status',
+          key: 'signal.status',
           negate: false,
           params: {
             query: 'open',
@@ -205,7 +205,7 @@ describe('AlertsHistogramPanel', () => {
         },
         query: {
           term: {
-            'kibana.alert.workflow_status': 'open',
+            'signal.status': 'open',
           },
         },
       };
@@ -223,13 +223,13 @@ describe('AlertsHistogramPanel', () => {
 
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[1]).toEqual([
-          'kibana.alert.rule.name',
+          'signal.rule.name',
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [
             {
               bool: {
-                filter: [{ term: { 'kibana.alert.workflow_status': 'open' } }],
+                filter: [{ term: { 'signal.status': 'open' } }],
                 must: [],
                 must_not: [],
                 should: [],

@@ -291,7 +291,7 @@ export const showAllOthersBucket: string[] = [
   'event.category',
   'event.dataset',
   'event.module',
-  'kibana.alert.rule.threat.tactic.name',
+  'signal.rule.threat.tactic.name',
   'source.ip',
   'destination.ip',
   'user.name',

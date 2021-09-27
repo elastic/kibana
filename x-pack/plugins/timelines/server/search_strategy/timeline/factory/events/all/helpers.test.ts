@@ -5,19 +5,7 @@
  * 2.0.
  */
 
-import {
-  ALERT_RULE_NAMESPACE,
-  ALERT_WORKFLOW_STATUS,
-  EVENT_KIND,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
-import {
-  ALERT_ANCESTORS,
-  ALERT_ORIGINAL_TIME,
-  flattenWithPrefix,
-} from '@kbn/securitysolution-rules';
 import { eventHit } from '@kbn/securitysolution-t-grid';
-
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { buildObjectForFieldPath, formatTimelineData } from './helpers';
@@ -26,7 +14,7 @@ describe('#formatTimelineData', () => {
   it('happy path', async () => {
     const res = await formatTimelineData(
       [
-        TIMESTAMP,
+        '@timestamp',
         'host.name',
         'destination.ip',
         'source.ip',
@@ -46,7 +34,7 @@ describe('#formatTimelineData', () => {
         _index: 'auditbeat-7.8.0-2020.11.05-000003',
         data: [
           {
-            field: TIMESTAMP,
+            field: '@timestamp',
             value: ['2020-11-17T14:48:08.922Z'],
           },
           {
@@ -63,7 +51,7 @@ describe('#formatTimelineData', () => {
           },
         ],
         ecs: {
-          [TIMESTAMP]: ['2020-11-17T14:48:08.922Z'],
+          '@timestamp': ['2020-11-17T14:48:08.922Z'],
           _id: 'tkCt1nUBaEgqnrVSZ8R_',
           _index: 'auditbeat-7.8.0-2020.11.05-000003',
           agent: {
@@ -143,131 +131,152 @@ describe('#formatTimelineData', () => {
       _id: 'a77040f198355793c35bf22b900902371309be615381f0a2ec92c208b6132562',
       _score: 0,
       _source: {
-        threshold_result: {
-          count: 10000,
-          value: '2a990c11-f61b-4c8e-b210-da2574e9f9db',
-        },
-        depth: 1,
-        rule: flattenWithPrefix(ALERT_RULE_NAMESPACE, {
-          note: null,
-          throttle: null,
-          references: [],
-          severity_mapping: [],
-          description: 'asdasd',
-          created_at: '2021-01-09T11:25:45.046Z',
-          language: 'kuery',
-          threshold: {
-            field: '',
-            value: 200,
+        signal: {
+          threshold_result: {
+            count: 10000,
+            value: '2a990c11-f61b-4c8e-b210-da2574e9f9db',
           },
-          building_block_type: null,
-          output_index: '.siem-signals-patrykkopycinski-default',
-          type: 'threshold',
-          rule_name_override: null,
-          enabled: true,
-          exceptions_list: [],
-          updated_at: '2021-01-09T13:36:39.204Z',
-          timestamp_override: null,
-          from: 'now-360s',
-          uuid: '696c24e0-526d-11eb-836c-e1620268b945',
-          timeline_id: null,
-          max_signals: 100,
-          severity: 'low',
-          risk_score: 21,
-          risk_score_mapping: [],
-          author: [],
-          query: '_id :*',
-          index: [
-            'apm-*-transaction*',
-            'traces-apm*',
-            'auditbeat-*',
-            'endgame-*',
-            'filebeat-*',
-            'logs-*',
-            'packetbeat-*',
-            'winlogbeat-*',
-          ],
-          filters: [
-            {
-              $state: {
-                store: 'appState',
-              },
-              meta: {
-                negate: false,
-                alias: null,
-                disabled: false,
-                type: 'exists',
-                value: 'exists',
-                key: '_index',
-              },
-              exists: {
-                field: '_index',
-              },
-            },
-            {
-              $state: {
-                store: 'appState',
-              },
-              meta: {
-                negate: false,
-                alias: 'id_exists',
-                disabled: false,
-                type: 'exists',
-                value: 'exists',
-                key: '_id',
-              },
-              exists: {
-                field: '_id',
-              },
-            },
-          ],
-          created_by: 'patryk_test_user',
-          version: 1,
-          saved_id: null,
-          tags: [],
-          rule_id: '2a990c11-f61b-4c8e-b210-da2574e9f9db',
-          license: '',
-          immutable: false,
-          timeline_title: null,
-          meta: {
-            from: '1m',
-            kibana_siem_app_url: 'http://localhost:5601/app/security',
-          },
-          name: 'Threshold test',
-          updated_by: 'patryk_test_user',
-          interval: '5m',
-          false_positives: [],
-          to: 'now',
-          threat: [],
-          actions: [],
-        }),
-        [ALERT_ORIGINAL_TIME]: '2021-01-09T13:39:32.595Z',
-        [ALERT_ANCESTORS]: [
-          {
+          parent: {
             depth: 0,
             index:
               'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
             id: '0268af90-d8da-576a-9747-2a191519416a',
             type: 'event',
           },
-        ],
-        [ALERT_WORKFLOW_STATUS]: 'open',
+          depth: 1,
+          _meta: {
+            version: 14,
+          },
+          rule: {
+            note: null,
+            throttle: null,
+            references: [],
+            severity_mapping: [],
+            description: 'asdasd',
+            created_at: '2021-01-09T11:25:45.046Z',
+            language: 'kuery',
+            threshold: {
+              field: '',
+              value: 200,
+            },
+            building_block_type: null,
+            output_index: '.siem-signals-patrykkopycinski-default',
+            type: 'threshold',
+            rule_name_override: null,
+            enabled: true,
+            exceptions_list: [],
+            updated_at: '2021-01-09T13:36:39.204Z',
+            timestamp_override: null,
+            from: 'now-360s',
+            id: '696c24e0-526d-11eb-836c-e1620268b945',
+            timeline_id: null,
+            max_signals: 100,
+            severity: 'low',
+            risk_score: 21,
+            risk_score_mapping: [],
+            author: [],
+            query: '_id :*',
+            index: [
+              'apm-*-transaction*',
+              'traces-apm*',
+              'auditbeat-*',
+              'endgame-*',
+              'filebeat-*',
+              'logs-*',
+              'packetbeat-*',
+              'winlogbeat-*',
+            ],
+            filters: [
+              {
+                $state: {
+                  store: 'appState',
+                },
+                meta: {
+                  negate: false,
+                  alias: null,
+                  disabled: false,
+                  type: 'exists',
+                  value: 'exists',
+                  key: '_index',
+                },
+                exists: {
+                  field: '_index',
+                },
+              },
+              {
+                $state: {
+                  store: 'appState',
+                },
+                meta: {
+                  negate: false,
+                  alias: 'id_exists',
+                  disabled: false,
+                  type: 'exists',
+                  value: 'exists',
+                  key: '_id',
+                },
+                exists: {
+                  field: '_id',
+                },
+              },
+            ],
+            created_by: 'patryk_test_user',
+            version: 1,
+            saved_id: null,
+            tags: [],
+            rule_id: '2a990c11-f61b-4c8e-b210-da2574e9f9db',
+            license: '',
+            immutable: false,
+            timeline_title: null,
+            meta: {
+              from: '1m',
+              kibana_siem_app_url: 'http://localhost:5601/app/security',
+            },
+            name: 'Threshold test',
+            updated_by: 'patryk_test_user',
+            interval: '5m',
+            false_positives: [],
+            to: 'now',
+            threat: [],
+            actions: [],
+          },
+          original_time: '2021-01-09T13:39:32.595Z',
+          ancestors: [
+            {
+              depth: 0,
+              index:
+                'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+              id: '0268af90-d8da-576a-9747-2a191519416a',
+              type: 'event',
+            },
+          ],
+          parents: [
+            {
+              depth: 0,
+              index:
+                'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+              id: '0268af90-d8da-576a-9747-2a191519416a',
+              type: 'event',
+            },
+          ],
+          status: 'open',
+        },
       },
       fields: {
-        [`${ALERT_RULE_NAMESPACE}.output_index`]: ['.siem-signals-patrykkopycinski-default'],
-        [`${ALERT_RULE_NAMESPACE}.from`]: ['now-360s'],
-        [`${ALERT_RULE_NAMESPACE}.language`]: ['kuery'],
-        [TIMESTAMP]: ['2021-01-09T13:41:40.517Z'],
-        [`${ALERT_RULE_NAMESPACE}.query`]: ['_id :*'],
-        [`${ALERT_RULE_NAMESPACE}.type`]: ['threshold'],
-        [`${ALERT_RULE_NAMESPACE}.id`]: ['696c24e0-526d-11eb-836c-e1620268b945'],
-        [`${ALERT_RULE_NAMESPACE}.risk_score`]: [21],
-        [ALERT_WORKFLOW_STATUS]: ['open'],
-        [EVENT_KIND]: ['signal'],
-        [ALERT_ORIGINAL_TIME]: ['2021-01-09T13:39:32.595Z'],
-        [`${ALERT_RULE_NAMESPACE}.severity`]: ['low'],
-        [`${ALERT_RULE_NAMESPACE}.version`]: ['1'],
-        [`${ALERT_RULE_NAMESPACE}.index`]: [
+        'signal.rule.output_index': ['.siem-signals-patrykkopycinski-default'],
+        'signal.rule.from': ['now-360s'],
+        'signal.rule.language': ['kuery'],
+        '@timestamp': ['2021-01-09T13:41:40.517Z'],
+        'signal.rule.query': ['_id :*'],
+        'signal.rule.type': ['threshold'],
+        'signal.rule.id': ['696c24e0-526d-11eb-836c-e1620268b945'],
+        'signal.rule.risk_score': [21],
+        'signal.status': ['open'],
+        'event.kind': ['signal'],
+        'signal.original_time': ['2021-01-09T13:39:32.595Z'],
+        'signal.rule.severity': ['low'],
+        'signal.rule.version': ['1'],
+        'signal.rule.index': [
           'apm-*-transaction*',
           'traces-apm*',
           'auditbeat-*',
@@ -277,8 +286,8 @@ describe('#formatTimelineData', () => {
           'packetbeat-*',
           'winlogbeat-*',
         ],
-        [`${ALERT_RULE_NAMESPACE}.name`]: ['Threshold test'],
-        [`${ALERT_RULE_NAMESPACE}.to`]: ['now'],
+        'signal.rule.name': ['Threshold test'],
+        'signal.rule.to': ['now'],
       },
       _type: '',
       sort: ['1610199700517'],
@@ -286,7 +295,7 @@ describe('#formatTimelineData', () => {
 
     expect(
       await formatTimelineData(
-        [TIMESTAMP, 'host.name', 'destination.ip', 'source.ip'],
+        ['@timestamp', 'host.name', 'destination.ip', 'source.ip'],
         TIMELINE_EVENTS_FIELDS,
         response
       )
@@ -300,12 +309,12 @@ describe('#formatTimelineData', () => {
         _index: '.siem-signals-patrykkopycinski-default-000007',
         data: [
           {
-            field: TIMESTAMP,
+            field: '@timestamp',
             value: ['2021-01-09T13:41:40.517Z'],
           },
         ],
         ecs: {
-          [TIMESTAMP]: ['2021-01-09T13:41:40.517Z'],
+          '@timestamp': ['2021-01-09T13:41:40.517Z'],
           timestamp: '2021-01-09T13:41:40.517Z',
           _id: 'a77040f198355793c35bf22b900902371309be615381f0a2ec92c208b6132562',
           _index: '.siem-signals-patrykkopycinski-default-000007',
@@ -393,16 +402,16 @@ describe('#formatTimelineData', () => {
 
   describe('buildObjectForFieldPath', () => {
     it('builds an object from a single non-nested field', () => {
-      expect(buildObjectForFieldPath(TIMESTAMP, eventHit)).toEqual({
-        [TIMESTAMP]: ['2020-11-17T14:48:08.922Z'],
+      expect(buildObjectForFieldPath('@timestamp', eventHit)).toEqual({
+        '@timestamp': ['2020-11-17T14:48:08.922Z'],
       });
     });
 
     it('builds an object with no fields response', () => {
       const { fields, ...fieldLessHit } = eventHit;
       // @ts-expect-error fieldLessHit is intentionally missing fields
-      expect(buildObjectForFieldPath(TIMESTAMP, fieldLessHit)).toEqual({
-        [TIMESTAMP]: [],
+      expect(buildObjectForFieldPath('@timestamp', fieldLessHit)).toEqual({
+        '@timestamp': [],
       });
     });
 

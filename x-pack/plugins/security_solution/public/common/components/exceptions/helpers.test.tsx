@@ -9,9 +9,6 @@ import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 
-import { IndexPatternBase } from '@kbn/es-query';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-
 import {
   getFormattedComments,
   formatOperatingSystems,
@@ -45,6 +42,7 @@ import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/
 import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import { CodeSignature } from '../../../../common/ecs/file';
+import { IndexPatternBase } from '@kbn/es-query';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
@@ -434,7 +432,7 @@ describe('Exception helpers', () => {
           entries: [
             {
               ...getEntryMatchMock(),
-              field: 'kibana.alert.original_event.kind',
+              field: 'signal.original_event.kind',
             },
             getEntryMatchMock(),
           ],
@@ -444,7 +442,7 @@ describe('Exception helpers', () => {
           entries: [
             {
               ...getEntryMatchMock(),
-              field: 'kibana.alert.original_event.module',
+              field: 'signal.original_event.module',
             },
           ],
         },
@@ -1184,7 +1182,9 @@ describe('Exception helpers', () => {
     test('it should return pre-populated behavior protection items', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
-        [ALERT_RULE_UUID]: '123',
+        rule: {
+          id: '123',
+        },
         process: {
           command_line: 'command_line',
           executable: 'some file path',

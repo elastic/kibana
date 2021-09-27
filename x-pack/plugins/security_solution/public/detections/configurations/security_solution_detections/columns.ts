@@ -31,26 +31,26 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_RULE,
-    id: 'kibana.alert.rule.name',
+    id: 'signal.rule.name',
     initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    linkField: 'kibana.alert.rule.uuid',
+    linkField: 'signal.rule.id',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
-    id: 'kibana.alert.rule.severity',
+    id: 'signal.rule.severity',
     initialWidth: 105,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_RISK_SCORE,
-    id: 'kibana.alert.rule.risk_score',
+    id: 'signal.rule.risk_score',
     initialWidth: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_REASON,
-    id: 'kibana.alert.reason',
+    id: 'signal.reason',
     initialWidth: 450,
   },
   {

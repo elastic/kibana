@@ -664,7 +664,7 @@ describe('helpers', () => {
       expect(
         allowTopN({
           browserField: undefined,
-          fieldName: 'kibana.alert.rule.name',
+          fieldName: 'signal.rule.name',
           hideTopN: false,
         })
       ).toBe(true);

@@ -6,11 +6,6 @@
  */
 
 import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
-import {
-  ALERT_BUILDING_BLOCK_TYPE,
-  ALERT_GROUP_ID,
-  ALERT_GROUP_INDEX,
-} from '@kbn/securitysolution-rules';
 
 import { Logger } from 'kibana/server';
 
@@ -25,11 +20,16 @@ import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import { objectArrayIntersection } from '../../../signals/build_bulk_body';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
+import {
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_GROUP_ID,
+  ALERT_GROUP_INDEX,
+} from '../../field_maps/field_names';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
  * one signal for each event in the sequence, and a "shell" signal that ties them all together. All N+1 signals
- * share the same kibana.alert.group.id to make it easy to query them.
+ * share the same signal.group.id to make it easy to query them.
  * @param sequence The raw ES documents that make up the sequence
  * @param ruleSO SavedObject representing the rule that found the sequence
  */

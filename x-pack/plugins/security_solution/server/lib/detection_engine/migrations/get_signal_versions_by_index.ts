@@ -62,7 +62,6 @@ export const getSignalVersionsByIndex = async ({
           aggs: {
             signal_versions: {
               terms: {
-                // TODO: how to handle?
                 field: 'signal._meta.version',
                 missing: 0,
               },

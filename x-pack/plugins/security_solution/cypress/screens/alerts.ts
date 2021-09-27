@@ -19,14 +19,13 @@ export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 export const ALERT_ID = '[data-test-subj="draggable-content-_id"]';
 
 export const ALERT_RISK_SCORE_HEADER =
-  '[data-test-subj="dataGridHeaderCell-kibana.alert.rule.risk_score"]';
+  '[data-test-subj="dataGridHeaderCell-signal.rule.risk_score"]';
 
-export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-kibana.alert.rule.name"]';
+export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-signal.rule.name"]';
 
-export const ALERT_RULE_RISK_SCORE =
-  '[data-test-subj="formatted-field-kibana.alert.rule.risk_score"]';
+export const ALERT_RULE_RISK_SCORE = '[data-test-subj="formatted-field-signal.rule.risk_score"]';
 
-export const ALERT_RULE_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.rule.severity"]';
+export const ALERT_RULE_SEVERITY = '[data-test-subj="formatted-field-signal.rule.severity"]';
 
 export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
 

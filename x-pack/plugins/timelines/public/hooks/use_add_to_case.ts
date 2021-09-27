@@ -120,13 +120,13 @@ export const useAddToCase = ({
   const isAlert = useMemo(() => {
     if (event !== undefined) {
       const data = [...event.data];
-      return data.some(({ field }) => field === 'kibana.alert.instance.id');
+      return data.some(({ field }) => field === 'kibana.alert.uuid');
     } else {
       return false;
     }
   }, [event]);
   const isSecurityAlert = useMemo(() => {
-    return !isEmpty(event?.ecs[ALERT_RULE_UUID]);
+    return !isEmpty(event?.ecs.signal?.rule?.id);
   }, [event]);
   const isEventSupported = isSecurityAlert || isAlert;
   const userCanCrud = casePermissions?.crud ?? false;
@@ -251,12 +251,12 @@ export function normalizedEventFields(event?: TimelineItem) {
   const ruleUuid =
     ruleUuidValueData ??
     get(`ecs.${ALERT_RULE_UUID}[0]`, event) ??
-    get(`ecs.kibana.alert.rule.uuid[0]`, event) ??
+    get(`ecs.signal.rule.id[0]`, event) ??
     null;
   const ruleName =
     ruleNameValueData ??
     get(`ecs.${ALERT_RULE_NAME}[0]`, event) ??
-    get(`ecs.kibana.alert.rule.name[0]`, event) ??
+    get(`ecs.signal.rule.name[0]`, event) ??
     null;
 
   return {

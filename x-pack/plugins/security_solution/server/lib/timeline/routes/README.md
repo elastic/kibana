@@ -1119,7 +1119,7 @@ kbn-version: 8.0.0
         },
         {
           "columnHeaderType": "not-filtered",
-          "id": "kibana.alert.rule.description"
+          "id": "signal.rule.description"
         },
         {
           "columnHeaderType": "not-filtered",

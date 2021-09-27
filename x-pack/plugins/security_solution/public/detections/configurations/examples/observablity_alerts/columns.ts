@@ -42,12 +42,12 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
-    id: 'kibana.alert.rule.severity',
+    id: 'signal.rule.severity',
     initialWidth: 102,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_REASON,
-    id: 'kibana.alert.reason',
+    id: 'signal.reason',
   },
 ];

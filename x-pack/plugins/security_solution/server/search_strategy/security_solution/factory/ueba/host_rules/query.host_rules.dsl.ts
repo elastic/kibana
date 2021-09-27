@@ -39,12 +39,12 @@ export const buildHostRulesQuery = ({
       aggs: {
         risk_score: {
           sum: {
-            field: 'kibana.alert.rule.risk_score',
+            field: 'signal.rule.risk_score',
           },
         },
         rule_name: {
           terms: {
-            field: 'kibana.alert.rule.name',
+            field: 'signal.rule.name',
             order: {
               risk_score: Direction.desc,
             },
@@ -52,19 +52,19 @@ export const buildHostRulesQuery = ({
           aggs: {
             risk_score: {
               sum: {
-                field: 'kibana.alert.rule.risk_score',
+                field: 'signal.rule.risk_score',
               },
             },
             rule_type: {
               terms: {
-                field: 'kibana.alert.rule.type',
+                field: 'signal.rule.type',
               },
             },
           },
         },
         rule_count: {
           cardinality: {
-            field: 'kibana.alert.rule.name',
+            field: 'signal.rule.name',
           },
         },
       },

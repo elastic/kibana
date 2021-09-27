@@ -25,14 +25,14 @@ describe('alerts default_config', () => {
           negate: false,
           disabled: false,
           type: 'phrase',
-          key: 'kibana.alert.rule.uuid',
+          key: 'signal.rule.id',
           params: {
             query: 'rule-id-1',
           },
         },
         query: {
           match_phrase: {
-            'kibana.alert.rule.uuid': 'rule-id-1',
+            'signal.rule.id': 'rule-id-1',
           },
         },
       };
@@ -48,12 +48,12 @@ describe('alerts default_config', () => {
             alias: null,
             disabled: false,
             negate: false,
-            key: 'kibana.alert.rule.threat_mapping',
+            key: 'signal.rule.threat_mapping',
             type: 'exists',
             value: 'exists',
           },
           exists: {
-            field: 'kibana.alert.rule.threat_mapping',
+            field: 'signal.rule.threat_mapping',
           },
         };
         expect(filters).toHaveLength(1);
@@ -73,7 +73,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'kibana.alert.workflow_status',
+          key: 'signal.status',
           negate: false,
           params: {
             query: 'acknowledged',
@@ -85,12 +85,12 @@ describe('alerts default_config', () => {
             should: [
               {
                 term: {
-                  'kibana.alert.workflow_status': 'acknowledged',
+                  'signal.status': 'acknowledged',
                 },
               },
               {
                 term: {
-                  'kibana.alert.workflow_status': 'in-progress',
+                  'signal.status': 'in-progress',
                 },
               },
             ],
@@ -107,7 +107,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'kibana.alert.workflow_status',
+          key: 'signal.status',
           negate: false,
           params: {
             query: 'open',
@@ -116,7 +116,7 @@ describe('alerts default_config', () => {
         },
         query: {
           term: {
-            'kibana.alert.workflow_status': 'open',
+            'signal.status': 'open',
           },
         },
       };
@@ -139,17 +139,17 @@ describe('alerts default_config', () => {
             should: [
               {
                 term: {
-                  'kibana.alert.workflow_status': 'open',
+                  'signal.status': 'open',
                 },
               },
               {
                 term: {
-                  'kibana.alert.workflow_status': 'acknowledged',
+                  'signal.status': 'acknowledged',
                 },
               },
               {
                 term: {
-                  'kibana.alert.workflow_status': 'in-progress',
+                  'signal.status': 'in-progress',
                 },
               },
             ],

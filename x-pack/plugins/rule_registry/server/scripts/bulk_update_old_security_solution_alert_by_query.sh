@@ -9,7 +9,7 @@
 
 set -e
 
-QUERY=${1:-"kibana.alert.workflow_status: open"}
+QUERY=${1:-"signal.status: open"}
 STATUS=${2}
 
 echo $IDS

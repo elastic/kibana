@@ -8,8 +8,6 @@
 import sinon from 'sinon';
 import moment from 'moment';
 
-import { ALERT_GROUP_ID } from '@kbn/securitysolution-rules';
-
 import { sendAlertToTimelineAction, determineToAndFrom } from './actions';
 import {
   mockEcsDataWithAlert,
@@ -290,7 +288,13 @@ describe('alert actions', () => {
       test('it invokes createTimeline with timelineDefaults', async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
-          'kibana.alert.rule.timeline_id': null,
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert.signal?.rule!,
+              // @ts-expect-error
+              timeline_id: null,
+            },
+          },
         };
 
         await sendAlertToTimelineAction({
@@ -334,12 +338,19 @@ describe('alert actions', () => {
     });
 
     describe('Eql', () => {
-      test(' with kibana.alert.group.id', async () => {
+      test(' with signal.group.id', async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
-          ['kibana.alert.rule.type']: ['eql'],
-          ['kibana.alert.rule.timeline_id']: [''],
-          [ALERT_GROUP_ID]: 'my-group-id',
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert.signal?.rule!,
+              type: ['eql'],
+              timeline_id: [''],
+            },
+            group: {
+              id: ['my-group-id'],
+            },
+          },
         };
 
         await sendAlertToTimelineAction({
@@ -364,18 +375,23 @@ describe('alert actions', () => {
                 id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
                 kqlQuery: '',
                 name: '1',
-                queryMatch: { field: 'kibana.alert.group.id', operator: ':', value: 'my-group-id' },
+                queryMatch: { field: 'signal.group.id', operator: ':', value: 'my-group-id' },
               },
             ],
           },
         });
       });
 
-      test(' with NO kibana.alert.group.id', async () => {
+      test(' with NO  signal.group.id', async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
-          'kibana.alert.rule.type': ['eql'],
-          'kibana.alert.rule.timeline_id': [''],
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert.signal?.rule!,
+              type: ['eql'],
+              timeline_id: [''],
+            },
+          },
         };
 
         await sendAlertToTimelineAction({

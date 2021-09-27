@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { ALERT_RULE_RULE_ID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/securitysolution-rules';
 
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -94,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
         const query = {
           query: {
             bool: {
-              should: [{ match_phrase: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
+              should: [{ match_phrase: { 'kibana.alert.workflow_status': 'open' } }],
             },
           },
         };
@@ -188,13 +186,13 @@ export default ({ getService }: FtrProviderContext) => {
                         filter: [
                           {
                             match_phrase: {
-                              [ALERT_RULE_RULE_ID]: 'c76f1a10-ffb6-11eb-8914-9b237bf6808c',
+                              'signal.rule.id': 'c76f1a10-ffb6-11eb-8914-9b237bf6808c',
                             },
                           },
-                          { term: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+                          { term: { 'signal.status': 'open' } },
                         ],
                         should: [],
-                        must_not: [{ exists: { field: ALERT_BUILDING_BLOCK_TYPE } }],
+                        must_not: [{ exists: { field: 'signal.rule.building_block_type' } }],
                       },
                     },
                     {

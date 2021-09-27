@@ -68,13 +68,10 @@ export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
 export const getFilterAndRuleBounds = (
   data: TimelineNonEcsData[][]
 ): [string[], number, number] => {
-  const stringFilter =
-    data?.[0].filter((d) => d.field === 'kibana.alert.rule.filters')?.[0]?.value ?? [];
+  const stringFilter = data?.[0].filter((d) => d.field === 'signal.rule.filters')?.[0]?.value ?? [];
 
   const eventTimes = data
-    .flatMap(
-      (alert) => alert.filter((d) => d.field === 'kibana.alert.original_time')?.[0]?.value ?? []
-    )
+    .flatMap((alert) => alert.filter((d) => d.field === 'signal.original_time')?.[0]?.value ?? [])
     .map((d) => moment(d));
 
   return [stringFilter, moment.min(eventTimes).valueOf(), moment.max(eventTimes).valueOf()];
@@ -139,9 +136,7 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   const ecsData = ecs as Ecs;
   const elapsedTimeRule = moment.duration(
     moment().diff(
-      dateMath.parse(
-        ecsData['kibana.alert.rule.from'] != null ? ecsData['kibana.alert.rule.from'][0] : 'now-0s'
-      )
+      dateMath.parse(ecsData?.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
     )
   );
   const from = moment(ecsData?.timestamp ?? new Date())
@@ -169,7 +164,7 @@ export const getThresholdAggregationData = (
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
   return thresholdEcsData.reduce<ThresholdAggregationData>(
     (outerAcc, thresholdData) => {
-      const threshold = thresholdData['kibana.alert.rule.threshold'] as string[];
+      const threshold = thresholdData.signal?.rule?.threshold as string[];
 
       let aggField: string[] = [];
       let thresholdResult: {
@@ -182,26 +177,24 @@ export const getThresholdAggregationData = (
       };
 
       try {
-        thresholdResult = JSON.parse(
-          (thresholdData['kibana.alert.threshold_result'] as string[])[0]
-        );
+        thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
         aggField = JSON.parse(threshold[0]).field;
       } catch (err) {
         thresholdResult = {
           terms: [
             {
-              field: (thresholdData['kibana.alert.rule.threshold'] as { field: string }).field,
-              value: (thresholdData['kibana.alert.threshold_result'] as { value: string }).value,
+              field: (thresholdData.rule?.threshold as { field: string }).field,
+              value: (thresholdData.signal?.threshold_result as { value: string }).value,
             },
           ],
-          count: (thresholdData['kibana.alert.threshold_result'] as { count: number }).count,
-          from: (thresholdData['kibana.alert.threshold_result'] as { from: string }).from,
+          count: (thresholdData.signal?.threshold_result as { count: number }).count,
+          from: (thresholdData.signal?.threshold_result as { from: string }).from,
         };
       }
 
-      const originalTime = moment(thresholdData['kibana.alert.original_time']![0]);
+      const originalTime = moment(thresholdData.signal?.original_time![0]);
       const now = moment();
-      const ruleFrom = dateMath.parse(thresholdData['kibana.alert.rule.from']![0]!);
+      const ruleFrom = dateMath.parse(thresholdData.signal?.rule?.from![0]!);
       const ruleInterval = moment.duration(now.diff(ruleFrom));
       const fromOriginalTime = originalTime.clone().subtract(ruleInterval); // This is the default... can overshoot
       const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
@@ -261,15 +254,15 @@ export const getThresholdAggregationData = (
 };
 
 export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
-  ecsData['kibana.alert.rule.type'].length &&
-  ecsData['kibana.alert.rule.type'][0] === 'eql' &&
-  ecsData['kibana.alert.group.id'].length;
+  ecsData.signal?.rule?.type?.length &&
+  ecsData.signal?.rule?.type[0] === 'eql' &&
+  ecsData.signal?.group?.id?.length;
 
 export const isThresholdRule = (ecsData: Ecs) =>
-  ecsData['kibana.alert.rule.type'].length && ecsData['kibana.alert.rule.type'][0] === 'threshold';
+  ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'threshold';
 
 export const buildAlertsKqlFilter = (
-  key: '_id' | 'kibana.alert.group.id',
+  key: '_id' | 'signal.group.id',
   alertIds: string[]
 ): Filter[] => {
   return [
@@ -337,10 +330,10 @@ export const buildEqlDataProviderOrFilter = (
     return {
       dataProviders: [],
       filters: buildAlertsKqlFilter(
-        'kibana.alert.group.id',
+        'signal.group.id',
         ecs.reduce<string[]>((acc, ecsData) => {
-          const signalGroupId = ecsData['kibana.alert.group.id'].length
-            ? ecsData['kibana.alert.group.id'][0]
+          const signalGroupId = ecsData.signal?.group?.id?.length
+            ? ecsData.signal?.group?.id[0]
             : 'unknown-signal-group-id';
           if (!acc.includes(signalGroupId)) {
             return [...acc, signalGroupId];
@@ -350,8 +343,8 @@ export const buildEqlDataProviderOrFilter = (
       ),
     };
   } else if (!Array.isArray(ecs)) {
-    const signalGroupId = ecs['kibana.alert.group.id'].length
-      ? ecs['kibana.alert.group.id'][0]
+    const signalGroupId = ecs.signal?.group?.id?.length
+      ? ecs.signal?.group?.id[0]
       : 'unknown-signal-group-id';
     return {
       dataProviders: [
@@ -363,7 +356,7 @@ export const buildEqlDataProviderOrFilter = (
           excluded: false,
           kqlQuery: '',
           queryMatch: {
-            field: 'kibana.alert.group.id',
+            field: 'signal.group.id',
             value: signalGroupId,
             operator: ':' as const,
           },
@@ -388,12 +381,9 @@ export const sendAlertToTimelineAction = async ({
    */
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
   const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
-  const noteContent =
-    ecsData['kibana.alert.rule.note'] != null ? ecsData['kibana.alert.rule.note'][0] : '';
+  const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
   const timelineId =
-    ecsData['kibana.alert.rule.timeline_id'] != null
-      ? ecsData['kibana.alert.rule.timeline_id'][0]
-      : '';
+    ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
   const { to, from } = determineToAndFrom({ ecs });
 
   // For now we do not want to populate the template timeline if we have alertIds
@@ -487,7 +477,7 @@ export const sendAlertToTimelineAction = async ({
       timeline: {
         ...timelineDefaults,
         description: `_id: ${ecsData._id}`,
-        filters: getFiltersFromRule(ecsData['kibana.alert.rule.filters'] as string[]),
+        filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
         dataProviders,
         id: TimelineId.active,
         indexNames: [],
@@ -499,15 +489,13 @@ export const sendAlertToTimelineAction = async ({
         kqlQuery: {
           filterQuery: {
             kuery: {
-              kind: ecsData['kibana.alert.rule.language'].length
-                ? (ecsData['kibana.alert.rule.language'][0] as KueryFilterQueryKind)
+              kind: ecsData.signal?.rule?.language?.length
+                ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
                 : 'kuery',
-              expression: ecsData['kibana.alert.rule.query'].length
-                ? ecsData['kibana.alert.rule.query'][0]
-                : '',
+              expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
             },
-            serializedQuery: ecsData['kibana.alert.rule.query'].length
-              ? ecsData['kibana.alert.rule.query'][0]
+            serializedQuery: ecsData.signal?.rule?.query?.length
+              ? ecsData.signal?.rule?.query[0]
               : '',
           },
         },

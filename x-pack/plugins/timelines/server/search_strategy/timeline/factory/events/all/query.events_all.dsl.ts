@@ -83,7 +83,7 @@ export const buildTimelineEventsAllQuery = ({
       track_total_hits: true,
       sort: getSortField(sort),
       fields,
-      _source: ['kibana.alert.*'],
+      _source: ['signal.*'],
     },
   };
 

@@ -34,12 +34,12 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
             should: [
               {
                 term: {
-                  'kibana.alert.status': status,
+                  'signal.status': status,
                 },
               },
               {
                 term: {
-                  'kibana.alert.status': 'in-progress',
+                  'signal.status': 'in-progress',
                 },
               },
             ],
@@ -47,7 +47,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         }
       : {
           term: {
-            'kibana.alert.status': status,
+            'signal.status': status,
           },
         };
 
@@ -58,7 +58,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         negate: false,
         disabled: false,
         type: 'phrase',
-        key: 'kibana.alert.status',
+        key: 'signal.status',
         params: {
           query: status,
         },
@@ -76,7 +76,7 @@ export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
     bool: {
       should: statuses.map((status) => ({
         term: {
-          'kibana.alert.status': status,
+          'signal.status': status,
         },
       })),
     },
@@ -103,14 +103,14 @@ export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: 'kibana.alert.rule.uuid',
+            key: 'signal.rule.id',
             params: {
               query: ruleId,
             },
           },
           query: {
             match_phrase: {
-              'kibana.alert.rule.uuid': ruleId,
+              'signal.rule.id': ruleId,
             },
           },
         },
@@ -127,11 +127,11 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.alert.rule.building_block_type',
+            key: 'signal.rule.building_block_type',
             value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'kibana.alert.rule.building_block_type' },
+          exists: { field: 'signal.rule.building_block_type' },
         },
       ];
 
@@ -143,12 +143,12 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             alias: null,
             disabled: false,
             negate: false,
-            key: 'kibana.alert.rule.threat_mapping',
+            key: 'signal.rule.threat_mapping',
             type: 'exists',
             value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'kibana.alert.rule.threat_mapping' },
+          exists: { field: 'signal.rule.threat_mapping' },
         },
       ]
     : [];
@@ -162,21 +162,21 @@ export const alertsDefaultModel: SubsetTimelineModel = {
 
 export const requiredFieldsForActions = [
   '@timestamp',
-  'kibana.alert.status',
-  'kibana.alert.group.id',
-  'kibana.alert.original_time',
-  'kibana.alert.rule.building_block_type',
-  'kibana.alert.rule.filters',
-  'kibana.alert.rule.from',
-  'kibana.alert.rule.language',
-  'kibana.alert.rule.query',
-  'kibana.alert.rule.name',
-  'kibana.alert.rule.to',
-  'kibana.alert.rule.uuid',
-  'kibana.alert.rule.index',
-  'kibana.alert.rule.type',
-  'kibana.alert.original_event.kind',
-  'kibana.alert.original_event.module',
+  'signal.status',
+  'signal.group.id',
+  'signal.original_time',
+  'signal.rule.building_block_type',
+  'signal.rule.filters',
+  'signal.rule.from',
+  'signal.rule.language',
+  'signal.rule.query',
+  'signal.rule.name',
+  'signal.rule.to',
+  'signal.rule.id',
+  'signal.rule.index',
+  'signal.rule.type',
+  'signal.original_event.kind',
+  'signal.original_event.module',
   // Endpoint exception fields
   'file.path',
   'file.Ext.code_signature.subject_name',

@@ -1572,135 +1572,135 @@
                 "ancestors": {
                   "properties": {
                     "depth": {
-                      "path": "kibana.alert.ancestors.depth",
+                      "path": "signal.ancestors.depth",
                       "type": "alias"
                     },
                     "id": {
-                      "path": "kibana.alert.ancestors.id",
+                      "path": "signal.ancestors.id",
                       "type": "alias"
                     },
                     "index": {
-                      "path": "kibana.alert.ancestors.index",
+                      "path": "signal.ancestors.index",
                       "type": "alias"
                     },
                     "type": {
-                      "path": "kibana.alert.ancestors.type",
+                      "path": "signal.ancestors.type",
                       "type": "alias"
                     }
                   }
                 },
                 "depth": {
-                  "path": "kibana.alert.depth",
+                  "path": "signal.depth",
                   "type": "alias"
                 },
                 "original_event": {
                   "properties": {
                     "action": {
-                      "path": "kibana.alert.original_event.action",
+                      "path": "signal.original_event.action",
                       "type": "alias"
                     },
                     "category": {
-                      "path": "kibana.alert.original_event.category",
+                      "path": "signal.original_event.category",
                       "type": "alias"
                     },
                     "code": {
-                      "path": "kibana.alert.original_event.code",
+                      "path": "signal.original_event.code",
                       "type": "alias"
                     },
                     "created": {
-                      "path": "kibana.alert.original_event.created",
+                      "path": "signal.original_event.created",
                       "type": "alias"
                     },
                     "dataset": {
-                      "path": "kibana.alert.original_event.dataset",
+                      "path": "signal.original_event.dataset",
                       "type": "alias"
                     },
                     "duration": {
-                      "path": "kibana.alert.original_event.duration",
+                      "path": "signal.original_event.duration",
                       "type": "alias"
                     },
                     "end": {
-                      "path": "kibana.alert.original_event.end",
+                      "path": "signal.original_event.end",
                       "type": "alias"
                     },
                     "hash": {
-                      "path": "kibana.alert.original_event.hash",
+                      "path": "signal.original_event.hash",
                       "type": "alias"
                     },
                     "id": {
-                      "path": "kibana.alert.original_event.id",
+                      "path": "signal.original_event.id",
                       "type": "alias"
                     },
                     "kind": {
-                      "path": "kibana.alert.original_event.kind",
+                      "path": "signal.original_event.kind",
                       "type": "alias"
                     },
                     "module": {
-                      "path": "kibana.alert.original_event.module",
+                      "path": "signal.original_event.module",
                       "type": "alias"
                     },
                     "outcome": {
-                      "path": "kibana.alert.original_event.outcome",
+                      "path": "signal.original_event.outcome",
                       "type": "alias"
                     },
                     "provider": {
-                      "path": "kibana.alert.original_event.provider",
+                      "path": "signal.original_event.provider",
                       "type": "alias"
                     },
                     "reason": {
-                      "path": "kibana.alert.original_event.reason",
+                      "path": "signal.original_event.reason",
                       "type": "alias"
                     },
                     "risk_score": {
-                      "path": "kibana.alert.original_event.risk_score",
+                      "path": "signal.original_event.risk_score",
                       "type": "alias"
                     },
                     "risk_score_norm": {
-                      "path": "kibana.alert.original_event.risk_score_norm",
+                      "path": "signal.original_event.risk_score_norm",
                       "type": "alias"
                     },
                     "sequence": {
-                      "path": "kibana.alert.original_event.sequence",
+                      "path": "signal.original_event.sequence",
                       "type": "alias"
                     },
                     "severity": {
-                      "path": "kibana.alert.original_event.severity",
+                      "path": "signal.original_event.severity",
                       "type": "alias"
                     },
                     "start": {
-                      "path": "kibana.alert.original_event.start",
+                      "path": "signal.original_event.start",
                       "type": "alias"
                     },
                     "timezone": {
-                      "path": "kibana.alert.original_event.timezone",
+                      "path": "signal.original_event.timezone",
                       "type": "alias"
                     },
                     "type": {
-                      "path": "kibana.alert.original_event.type",
+                      "path": "signal.original_event.type",
                       "type": "alias"
                     }
                   }
                 },
                 "original_time": {
-                  "path": "kibana.alert.original_time",
+                  "path": "signal.original_time",
                   "type": "alias"
                 },
                 "reason": {
-                  "path": "kibana.alert.reason",
+                  "path": "signal.reason",
                   "type": "alias"
                 },
                 "risk_score": {
-                  "path": "kibana.alert.rule.risk_score",
+                  "path": "signal.rule.risk_score",
                   "type": "alias"
                 },
                 "rule": {
                   "properties": {
                     "author": {
-                      "path": "kibana.alert.rule.author",
+                      "path": "signal.rule.author",
                       "type": "alias"
                     },
                     "building_block_type": {
-                      "path": "kibana.alert.rule.building_block_type",
+                      "path": "signal.rule.building_block_type",
                       "type": "alias"
                     },
                     "consumer": {
@@ -1708,63 +1708,63 @@
                       "value": "siem"
                     },
                     "created_at": {
-                      "path": "kibana.alert.rule.created_at",
+                      "path": "signal.rule.created_at",
                       "type": "alias"
                     },
                     "created_by": {
-                      "path": "kibana.alert.rule.created_by",
+                      "path": "signal.rule.created_by",
                       "type": "alias"
                     },
                     "description": {
-                      "path": "kibana.alert.rule.description",
+                      "path": "signal.rule.description",
                       "type": "alias"
                     },
                     "enabled": {
-                      "path": "kibana.alert.rule.enabled",
+                      "path": "signal.rule.enabled",
                       "type": "alias"
                     },
                     "false_positives": {
-                      "path": "kibana.alert.rule.false_positives",
+                      "path": "signal.rule.false_positives",
                       "type": "alias"
                     },
                     "from": {
-                      "path": "kibana.alert.rule.from",
+                      "path": "signal.rule.from",
                       "type": "alias"
                     },
-                    "uuid": {
-                      "path": "kibana.alert.rule.uuid",
+                    "id": {
+                      "path": "signal.rule.id",
                       "type": "alias"
                     },
                     "immutable": {
-                      "path": "kibana.alert.rule.immutable",
+                      "path": "signal.rule.immutable",
                       "type": "alias"
                     },
                     "index": {
-                      "path": "kibana.alert.rule.index",
+                      "path": "signal.rule.index",
                       "type": "alias"
                     },
                     "interval": {
-                      "path": "kibana.alert.rule.interval",
+                      "path": "signal.rule.interval",
                       "type": "alias"
                     },
                     "language": {
-                      "path": "kibana.alert.rule.language",
+                      "path": "signal.rule.language",
                       "type": "alias"
                     },
                     "license": {
-                      "path": "kibana.alert.rule.license",
+                      "path": "signal.rule.license",
                       "type": "alias"
                     },
                     "max_signals": {
-                      "path": "kibana.alert.rule.max_signals",
+                      "path": "signal.rule.max_signals",
                       "type": "alias"
                     },
                     "name": {
-                      "path": "kibana.alert.rule.name",
+                      "path": "signal.rule.name",
                       "type": "alias"
                     },
                     "note": {
-                      "path": "kibana.alert.rule.note",
+                      "path": "signal.rule.note",
                       "type": "alias"
                     },
                     "producer": {
@@ -1772,35 +1772,35 @@
                       "value": "siem"
                     },
                     "query": {
-                      "path": "kibana.alert.rule.query",
+                      "path": "signal.rule.query",
                       "type": "alias"
                     },
                     "references": {
-                      "path": "kibana.alert.rule.references",
+                      "path": "signal.rule.references",
                       "type": "alias"
                     },
                     "risk_score_mapping": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.rule.risk_score_mapping.field",
+                          "path": "signal.rule.risk_score_mapping.field",
                           "type": "alias"
                         },
                         "operator": {
-                          "path": "kibana.alert.rule.risk_score_mapping.operator",
+                          "path": "signal.rule.risk_score_mapping.operator",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.rule.risk_score_mapping.value",
+                          "path": "signal.rule.risk_score_mapping.value",
                           "type": "alias"
                         }
                       }
                     },
                     "rule_id": {
-                      "path": "kibana.alert.rule.rule_id",
+                      "path": "signal.rule.rule_id",
                       "type": "alias"
                     },
                     "rule_name_override": {
-                      "path": "kibana.alert.rule.rule_name_override",
+                      "path": "signal.rule.rule_name_override",
                       "type": "alias"
                     },
                     "rule_type_id": {
@@ -1808,51 +1808,51 @@
                       "value": "siem.signals"
                     },
                     "saved_id": {
-                      "path": "kibana.alert.rule.saved_id",
+                      "path": "signal.rule.saved_id",
                       "type": "alias"
                     },
                     "severity_mapping": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.rule.severity_mapping.field",
+                          "path": "signal.rule.severity_mapping.field",
                           "type": "alias"
                         },
                         "operator": {
-                          "path": "kibana.alert.rule.severity_mapping.operator",
+                          "path": "signal.rule.severity_mapping.operator",
                           "type": "alias"
                         },
                         "severity": {
-                          "path": "kibana.alert.rule.severity_mapping.severity",
+                          "path": "signal.rule.severity_mapping.severity",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.rule.severity_mapping.value",
+                          "path": "signal.rule.severity_mapping.value",
                           "type": "alias"
                         }
                       }
                     },
                     "tags": {
-                      "path": "kibana.alert.rule.tags",
+                      "path": "signal.rule.tags",
                       "type": "alias"
                     },
                     "threat": {
                       "properties": {
                         "framework": {
-                          "path": "kibana.alert.rule.threat.framework",
+                          "path": "signal.rule.threat.framework",
                           "type": "alias"
                         },
                         "tactic": {
                           "properties": {
                             "id": {
-                              "path": "kibana.alert.rule.threat.tactic.id",
+                              "path": "signal.rule.threat.tactic.id",
                               "type": "alias"
                             },
                             "name": {
-                              "path": "kibana.alert.rule.threat.tactic.name",
+                              "path": "signal.rule.threat.tactic.name",
                               "type": "alias"
                             },
                             "reference": {
-                              "path": "kibana.alert.rule.threat.tactic.reference",
+                              "path": "signal.rule.threat.tactic.reference",
                               "type": "alias"
                             }
                           }
@@ -1860,29 +1860,29 @@
                         "technique": {
                           "properties": {
                             "id": {
-                              "path": "kibana.alert.rule.threat.technique.id",
+                              "path": "signal.rule.threat.technique.id",
                               "type": "alias"
                             },
                             "name": {
-                              "path": "kibana.alert.rule.threat.technique.name",
+                              "path": "signal.rule.threat.technique.name",
                               "type": "alias"
                             },
                             "reference": {
-                              "path": "kibana.alert.rule.threat.technique.reference",
+                              "path": "signal.rule.threat.technique.reference",
                               "type": "alias"
                             },
                             "subtechnique": {
                               "properties": {
                                 "id": {
-                                  "path": "kibana.alert.rule.threat.technique.subtechnique.id",
+                                  "path": "signal.rule.threat.technique.subtechnique.id",
                                   "type": "alias"
                                 },
                                 "name": {
-                                  "path": "kibana.alert.rule.threat.technique.subtechnique.name",
+                                  "path": "signal.rule.threat.technique.subtechnique.name",
                                   "type": "alias"
                                 },
                                 "reference": {
-                                  "path": "kibana.alert.rule.threat.technique.subtechnique.reference",
+                                  "path": "signal.rule.threat.technique.subtechnique.reference",
                                   "type": "alias"
                                 }
                               }
@@ -1892,15 +1892,15 @@
                       }
                     },
                     "threat_index": {
-                      "path": "kibana.alert.rule.threat_index",
+                      "path": "signal.rule.threat_index",
                       "type": "alias"
                     },
                     "threat_indicator_path": {
-                      "path": "kibana.alert.rule.threat_indicator_path",
+                      "path": "signal.rule.threat_indicator_path",
                       "type": "alias"
                     },
                     "threat_language": {
-                      "path": "kibana.alert.rule.threat_language",
+                      "path": "signal.rule.threat_language",
                       "type": "alias"
                     },
                     "threat_mapping": {
@@ -1908,15 +1908,15 @@
                         "entries": {
                           "properties": {
                             "field": {
-                              "path": "kibana.alert.rule.threat_mapping.entries.field",
+                              "path": "signal.rule.threat_mapping.entries.field",
                               "type": "alias"
                             },
                             "type": {
-                              "path": "kibana.alert.rule.threat_mapping.entries.type",
+                              "path": "signal.rule.threat_mapping.entries.type",
                               "type": "alias"
                             },
                             "value": {
-                              "path": "kibana.alert.rule.threat_mapping.entries.value",
+                              "path": "signal.rule.threat_mapping.entries.value",
                               "type": "alias"
                             }
                           }
@@ -1924,53 +1924,53 @@
                       }
                     },
                     "threat_query": {
-                      "path": "kibana.alert.rule.threat_query",
+                      "path": "signal.rule.threat_query",
                       "type": "alias"
                     },
                     "threshold": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.rule.threshold.field",
+                          "path": "signal.rule.threshold.field",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.rule.threshold.value",
+                          "path": "signal.rule.threshold.value",
                           "type": "alias"
                         }
                       }
                     },
                     "timeline_id": {
-                      "path": "kibana.alert.rule.timeline_id",
+                      "path": "signal.rule.timeline_id",
                       "type": "alias"
                     },
                     "timeline_title": {
-                      "path": "kibana.alert.rule.timeline_title",
+                      "path": "signal.rule.timeline_title",
                       "type": "alias"
                     },
                     "to": {
-                      "path": "kibana.alert.rule.to",
+                      "path": "signal.rule.to",
                       "type": "alias"
                     },
                     "type": {
-                      "path": "kibana.alert.rule.type",
+                      "path": "signal.rule.type",
                       "type": "alias"
                     },
                     "updated_at": {
-                      "path": "kibana.alert.rule.updated_at",
+                      "path": "signal.rule.updated_at",
                       "type": "alias"
                     },
                     "updated_by": {
-                      "path": "kibana.alert.rule.updated_by",
+                      "path": "signal.rule.updated_by",
                       "type": "alias"
                     },
                     "version": {
-                      "path": "kibana.alert.rule.version",
+                      "path": "signal.rule.version",
                       "type": "alias"
                     }
                   }
                 },
                 "severity": {
-                  "path": "kibana.alert.rule.severity",
+                  "path": "signal.rule.severity",
                   "type": "alias"
                 },
                 "threshold_result": {
@@ -1978,31 +1978,31 @@
                     "cardinality": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.threshold_result.cardinality.field",
+                          "path": "signal.threshold_result.cardinality.field",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.threshold_result.cardinality.value",
+                          "path": "signal.threshold_result.cardinality.value",
                           "type": "alias"
                         }
                       }
                     },
                     "count": {
-                      "path": "kibana.alert.threshold_result.count",
+                      "path": "signal.threshold_result.count",
                       "type": "alias"
                     },
                     "from": {
-                      "path": "kibana.alert.threshold_result.from",
+                      "path": "signal.threshold_result.from",
                       "type": "alias"
                     },
                     "terms": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.threshold_result.terms.field",
+                          "path": "signal.threshold_result.terms.field",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.threshold_result.terms.value",
+                          "path": "signal.threshold_result.terms.value",
                           "type": "alias"
                         }
                       }
@@ -2010,7 +2010,7 @@
                   }
                 },
                 "workflow_status": {
-                  "path": "kibana.alert.status",
+                  "path": "signal.status",
                   "type": "alias"
                 }
               }
@@ -6564,135 +6564,135 @@
                 "ancestors": {
                   "properties": {
                     "depth": {
-                      "path": "kibana.alert.ancestors.depth",
+                      "path": "signal.ancestors.depth",
                       "type": "alias"
                     },
                     "id": {
-                      "path": "kibana.alert.ancestors.id",
+                      "path": "signal.ancestors.id",
                       "type": "alias"
                     },
                     "index": {
-                      "path": "kibana.alert.ancestors.index",
+                      "path": "signal.ancestors.index",
                       "type": "alias"
                     },
                     "type": {
-                      "path": "kibana.alert.ancestors.type",
+                      "path": "signal.ancestors.type",
                       "type": "alias"
                     }
                   }
                 },
                 "depth": {
-                  "path": "kibana.alert.depth",
+                  "path": "signal.depth",
                   "type": "alias"
                 },
                 "original_event": {
                   "properties": {
                     "action": {
-                      "path": "kibana.alert.original_event.action",
+                      "path": "signal.original_event.action",
                       "type": "alias"
                     },
                     "category": {
-                      "path": "kibana.alert.original_event.category",
+                      "path": "signal.original_event.category",
                       "type": "alias"
                     },
                     "code": {
-                      "path": "kibana.alert.original_event.code",
+                      "path": "signal.original_event.code",
                       "type": "alias"
                     },
                     "created": {
-                      "path": "kibana.alert.original_event.created",
+                      "path": "signal.original_event.created",
                       "type": "alias"
                     },
                     "dataset": {
-                      "path": "kibana.alert.original_event.dataset",
+                      "path": "signal.original_event.dataset",
                       "type": "alias"
                     },
                     "duration": {
-                      "path": "kibana.alert.original_event.duration",
+                      "path": "signal.original_event.duration",
                       "type": "alias"
                     },
                     "end": {
-                      "path": "kibana.alert.original_event.end",
+                      "path": "signal.original_event.end",
                       "type": "alias"
                     },
                     "hash": {
-                      "path": "kibana.alert.original_event.hash",
+                      "path": "signal.original_event.hash",
                       "type": "alias"
                     },
                     "id": {
-                      "path": "kibana.alert.original_event.id",
+                      "path": "signal.original_event.id",
                       "type": "alias"
                     },
                     "kind": {
-                      "path": "kibana.alert.original_event.kind",
+                      "path": "signal.original_event.kind",
                       "type": "alias"
                     },
                     "module": {
-                      "path": "kibana.alert.original_event.module",
+                      "path": "signal.original_event.module",
                       "type": "alias"
                     },
                     "outcome": {
-                      "path": "kibana.alert.original_event.outcome",
+                      "path": "signal.original_event.outcome",
                       "type": "alias"
                     },
                     "provider": {
-                      "path": "kibana.alert.original_event.provider",
+                      "path": "signal.original_event.provider",
                       "type": "alias"
                     },
                     "reason": {
-                      "path": "kibana.alert.original_event.reason",
+                      "path": "signal.original_event.reason",
                       "type": "alias"
                     },
                     "risk_score": {
-                      "path": "kibana.alert.original_event.risk_score",
+                      "path": "signal.original_event.risk_score",
                       "type": "alias"
                     },
                     "risk_score_norm": {
-                      "path": "kibana.alert.original_event.risk_score_norm",
+                      "path": "signal.original_event.risk_score_norm",
                       "type": "alias"
                     },
                     "sequence": {
-                      "path": "kibana.alert.original_event.sequence",
+                      "path": "signal.original_event.sequence",
                       "type": "alias"
                     },
                     "severity": {
-                      "path": "kibana.alert.original_event.severity",
+                      "path": "signal.original_event.severity",
                       "type": "alias"
                     },
                     "start": {
-                      "path": "kibana.alert.original_event.start",
+                      "path": "signal.original_event.start",
                       "type": "alias"
                     },
                     "timezone": {
-                      "path": "kibana.alert.original_event.timezone",
+                      "path": "signal.original_event.timezone",
                       "type": "alias"
                     },
                     "type": {
-                      "path": "kibana.alert.original_event.type",
+                      "path": "signal.original_event.type",
                       "type": "alias"
                     }
                   }
                 },
                 "original_time": {
-                  "path": "kibana.alert.original_time",
+                  "path": "signal.original_time",
                   "type": "alias"
                 },
                 "reason": {
-                  "path": "kibana.alert.reason",
+                  "path": "signal.reason",
                   "type": "alias"
                 },
                 "risk_score": {
-                  "path": "kibana.alert.rule.risk_score",
+                  "path": "signal.rule.risk_score",
                   "type": "alias"
                 },
                 "rule": {
                   "properties": {
                     "author": {
-                      "path": "kibana.alert.rule.author",
+                      "path": "signal.rule.author",
                       "type": "alias"
                     },
                     "building_block_type": {
-                      "path": "kibana.alert.rule.building_block_type",
+                      "path": "signal.rule.building_block_type",
                       "type": "alias"
                     },
                     "consumer": {
@@ -6700,63 +6700,63 @@
                       "value": "siem"
                     },
                     "created_at": {
-                      "path": "kibana.alert.rule.created_at",
+                      "path": "signal.rule.created_at",
                       "type": "alias"
                     },
                     "created_by": {
-                      "path": "kibana.alert.rule.created_by",
+                      "path": "signal.rule.created_by",
                       "type": "alias"
                     },
                     "description": {
-                      "path": "kibana.alert.rule.description",
+                      "path": "signal.rule.description",
                       "type": "alias"
                     },
                     "enabled": {
-                      "path": "kibana.alert.rule.enabled",
+                      "path": "signal.rule.enabled",
                       "type": "alias"
                     },
                     "false_positives": {
-                      "path": "kibana.alert.rule.false_positives",
+                      "path": "signal.rule.false_positives",
                       "type": "alias"
                     },
                     "from": {
-                      "path": "kibana.alert.rule.from",
+                      "path": "signal.rule.from",
                       "type": "alias"
                     },
-                    "uuid": {
-                      "path": "kibana.alert.rule.uuid",
+                    "id": {
+                      "path": "signal.rule.id",
                       "type": "alias"
                     },
                     "immutable": {
-                      "path": "kibana.alert.rule.immutable",
+                      "path": "signal.rule.immutable",
                       "type": "alias"
                     },
                     "index": {
-                      "path": "kibana.alert.rule.index",
+                      "path": "signal.rule.index",
                       "type": "alias"
                     },
                     "interval": {
-                      "path": "kibana.alert.rule.interval",
+                      "path": "signal.rule.interval",
                       "type": "alias"
                     },
                     "language": {
-                      "path": "kibana.alert.rule.language",
+                      "path": "signal.rule.language",
                       "type": "alias"
                     },
                     "license": {
-                      "path": "kibana.alert.rule.license",
+                      "path": "signal.rule.license",
                       "type": "alias"
                     },
                     "max_signals": {
-                      "path": "kibana.alert.rule.max_signals",
+                      "path": "signal.rule.max_signals",
                       "type": "alias"
                     },
                     "name": {
-                      "path": "kibana.alert.rule.name",
+                      "path": "signal.rule.name",
                       "type": "alias"
                     },
                     "note": {
-                      "path": "kibana.alert.rule.note",
+                      "path": "signal.rule.note",
                       "type": "alias"
                     },
                     "producer": {
@@ -6764,35 +6764,35 @@
                       "value": "siem"
                     },
                     "query": {
-                      "path": "kibana.alert.rule.query",
+                      "path": "signal.rule.query",
                       "type": "alias"
                     },
                     "references": {
-                      "path": "kibana.alert.rule.references",
+                      "path": "signal.rule.references",
                       "type": "alias"
                     },
                     "risk_score_mapping": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.rule.risk_score_mapping.field",
+                          "path": "signal.rule.risk_score_mapping.field",
                           "type": "alias"
                         },
                         "operator": {
-                          "path": "kibana.alert.rule.risk_score_mapping.operator",
+                          "path": "signal.rule.risk_score_mapping.operator",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.rule.risk_score_mapping.value",
+                          "path": "signal.rule.risk_score_mapping.value",
                           "type": "alias"
                         }
                       }
                     },
                     "rule_id": {
-                      "path": "kibana.alert.rule.rule_id",
+                      "path": "signal.rule.rule_id",
                       "type": "alias"
                     },
                     "rule_name_override": {
-                      "path": "kibana.alert.rule.rule_name_override",
+                      "path": "signal.rule.rule_name_override",
                       "type": "alias"
                     },
                     "rule_type_id": {
@@ -6800,51 +6800,51 @@
                       "value": "siem.signals"
                     },
                     "saved_id": {
-                      "path": "kibana.alert.rule.saved_id",
+                      "path": "signal.rule.saved_id",
                       "type": "alias"
                     },
                     "severity_mapping": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.rule.severity_mapping.field",
+                          "path": "signal.rule.severity_mapping.field",
                           "type": "alias"
                         },
                         "operator": {
-                          "path": "kibana.alert.rule.severity_mapping.operator",
+                          "path": "signal.rule.severity_mapping.operator",
                           "type": "alias"
                         },
                         "severity": {
-                          "path": "kibana.alert.rule.severity_mapping.severity",
+                          "path": "signal.rule.severity_mapping.severity",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.rule.severity_mapping.value",
+                          "path": "signal.rule.severity_mapping.value",
                           "type": "alias"
                         }
                       }
                     },
                     "tags": {
-                      "path": "kibana.alert.rule.tags",
+                      "path": "signal.rule.tags",
                       "type": "alias"
                     },
                     "threat": {
                       "properties": {
                         "framework": {
-                          "path": "kibana.alert.rule.threat.framework",
+                          "path": "signal.rule.threat.framework",
                           "type": "alias"
                         },
                         "tactic": {
                           "properties": {
                             "id": {
-                              "path": "kibana.alert.rule.threat.tactic.id",
+                              "path": "signal.rule.threat.tactic.id",
                               "type": "alias"
                             },
                             "name": {
-                              "path": "kibana.alert.rule.threat.tactic.name",
+                              "path": "signal.rule.threat.tactic.name",
                               "type": "alias"
                             },
                             "reference": {
-                              "path": "kibana.alert.rule.threat.tactic.reference",
+                              "path": "signal.rule.threat.tactic.reference",
                               "type": "alias"
                             }
                           }
@@ -6852,29 +6852,29 @@
                         "technique": {
                           "properties": {
                             "id": {
-                              "path": "kibana.alert.rule.threat.technique.id",
+                              "path": "signal.rule.threat.technique.id",
                               "type": "alias"
                             },
                             "name": {
-                              "path": "kibana.alert.rule.threat.technique.name",
+                              "path": "signal.rule.threat.technique.name",
                               "type": "alias"
                             },
                             "reference": {
-                              "path": "kibana.alert.rule.threat.technique.reference",
+                              "path": "signal.rule.threat.technique.reference",
                               "type": "alias"
                             },
                             "subtechnique": {
                               "properties": {
                                 "id": {
-                                  "path": "kibana.alert.rule.threat.technique.subtechnique.id",
+                                  "path": "signal.rule.threat.technique.subtechnique.id",
                                   "type": "alias"
                                 },
                                 "name": {
-                                  "path": "kibana.alert.rule.threat.technique.subtechnique.name",
+                                  "path": "signal.rule.threat.technique.subtechnique.name",
                                   "type": "alias"
                                 },
                                 "reference": {
-                                  "path": "kibana.alert.rule.threat.technique.subtechnique.reference",
+                                  "path": "signal.rule.threat.technique.subtechnique.reference",
                                   "type": "alias"
                                 }
                               }
@@ -6884,15 +6884,15 @@
                       }
                     },
                     "threat_index": {
-                      "path": "kibana.alert.rule.threat_index",
+                      "path": "signal.rule.threat_index",
                       "type": "alias"
                     },
                     "threat_indicator_path": {
-                      "path": "kibana.alert.rule.threat_indicator_path",
+                      "path": "signal.rule.threat_indicator_path",
                       "type": "alias"
                     },
                     "threat_language": {
-                      "path": "kibana.alert.rule.threat_language",
+                      "path": "signal.rule.threat_language",
                       "type": "alias"
                     },
                     "threat_mapping": {
@@ -6900,15 +6900,15 @@
                         "entries": {
                           "properties": {
                             "field": {
-                              "path": "kibana.alert.rule.threat_mapping.entries.field",
+                              "path": "signal.rule.threat_mapping.entries.field",
                               "type": "alias"
                             },
                             "type": {
-                              "path": "kibana.alert.rule.threat_mapping.entries.type",
+                              "path": "signal.rule.threat_mapping.entries.type",
                               "type": "alias"
                             },
                             "value": {
-                              "path": "kibana.alert.rule.threat_mapping.entries.value",
+                              "path": "signal.rule.threat_mapping.entries.value",
                               "type": "alias"
                             }
                           }
@@ -6916,53 +6916,53 @@
                       }
                     },
                     "threat_query": {
-                      "path": "kibana.alert.rule.threat_query",
+                      "path": "signal.rule.threat_query",
                       "type": "alias"
                     },
                     "threshold": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.rule.threshold.field",
+                          "path": "signal.rule.threshold.field",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.rule.threshold.value",
+                          "path": "signal.rule.threshold.value",
                           "type": "alias"
                         }
                       }
                     },
                     "timeline_id": {
-                      "path": "kibana.alert.rule.timeline_id",
+                      "path": "signal.rule.timeline_id",
                       "type": "alias"
                     },
                     "timeline_title": {
-                      "path": "kibana.alert.rule.timeline_title",
+                      "path": "signal.rule.timeline_title",
                       "type": "alias"
                     },
                     "to": {
-                      "path": "kibana.alert.rule.to",
+                      "path": "signal.rule.to",
                       "type": "alias"
                     },
                     "type": {
-                      "path": "kibana.alert.rule.type",
+                      "path": "signal.rule.type",
                       "type": "alias"
                     },
                     "updated_at": {
-                      "path": "kibana.alert.rule.updated_at",
+                      "path": "signal.rule.updated_at",
                       "type": "alias"
                     },
                     "updated_by": {
-                      "path": "kibana.alert.rule.updated_by",
+                      "path": "signal.rule.updated_by",
                       "type": "alias"
                     },
                     "version": {
-                      "path": "kibana.alert.rule.version",
+                      "path": "signal.rule.version",
                       "type": "alias"
                     }
                   }
                 },
                 "severity": {
-                  "path": "kibana.alert.rule.severity",
+                  "path": "signal.rule.severity",
                   "type": "alias"
                 },
                 "threshold_result": {
@@ -6970,31 +6970,31 @@
                     "cardinality": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.threshold_result.cardinality.field",
+                          "path": "signal.threshold_result.cardinality.field",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.threshold_result.cardinality.value",
+                          "path": "signal.threshold_result.cardinality.value",
                           "type": "alias"
                         }
                       }
                     },
                     "count": {
-                      "path": "kibana.alert.threshold_result.count",
+                      "path": "signal.threshold_result.count",
                       "type": "alias"
                     },
                     "from": {
-                      "path": "kibana.alert.threshold_result.from",
+                      "path": "signal.threshold_result.from",
                       "type": "alias"
                     },
                     "terms": {
                       "properties": {
                         "field": {
-                          "path": "kibana.alert.threshold_result.terms.field",
+                          "path": "signal.threshold_result.terms.field",
                           "type": "alias"
                         },
                         "value": {
-                          "path": "kibana.alert.threshold_result.terms.value",
+                          "path": "signal.threshold_result.terms.value",
                           "type": "alias"
                         }
                       }
@@ -7002,7 +7002,7 @@
                   }
                 },
                 "workflow_status": {
-                  "path": "kibana.alert.status",
+                  "path": "signal.status",
                   "type": "alias"
                 }
               }

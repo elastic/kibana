@@ -38,11 +38,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               id,
               name: ruleName,
               kqlQuery: '',
-              queryMatch: {
-                field: 'kibana.alert.rule.name',
-                value: ruleName,
-                operator: IS_OPERATOR,
-              },
+              queryMatch: { field: 'signal.rule.name', value: ruleName, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -77,11 +73,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               id,
               name: ruleType,
               kqlQuery: '',
-              queryMatch: {
-                field: 'kibana.alert.rule.type',
-                value: ruleType,
-                operator: IS_OPERATOR,
-              },
+              queryMatch: { field: 'signal.rule.type', value: ruleType, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -117,7 +109,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               name: `${riskScore}`,
               kqlQuery: '',
               queryMatch: {
-                field: 'kibana.alert.rule.risk_score',
+                field: 'signal.rule.risk_score',
                 value: riskScore,
                 operator: IS_OPERATOR,
               },

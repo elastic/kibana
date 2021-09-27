@@ -45,7 +45,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     const draggableId = `${timelineId}-${eventId}-${columnId}-${value}`;
 
     switch (columnId) {
-      case 'kibana.alert.rule.severity':
+      case 'signal.rule.severity':
         return (
           <DefaultDraggable
             data-test-subj="custom-severity"
@@ -56,7 +56,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
             <Severity severity={value} />
           </DefaultDraggable>
         );
-      case 'kibana.alert.reason':
+      case 'signal.reason':
         return <TruncatableText data-test-subj="custom-reason">{reason}</TruncatableText>;
       default:
         return (

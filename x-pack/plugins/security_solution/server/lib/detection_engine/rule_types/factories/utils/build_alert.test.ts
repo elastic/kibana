@@ -20,15 +20,9 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  flattenWithPrefix,
-  ALERT_ORIGINAL_TIME,
-  ALERT_ORIGINAL_EVENT,
-} from '@kbn/securitysolution-rules';
 
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
+import { flattenWithPrefix } from './flatten_with_prefix';
 import { buildAlert, buildParent, buildAncestors, additionalAlertFields } from './build_alert';
 import { Ancestor, SignalSourceHit } from '../../../signals/types';
 import {
@@ -36,6 +30,12 @@ import {
   ANCHOR_DATE,
 } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
+} from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import { EVENT_DATASET } from '../../../../../../common/cti/constants';
 import { v4 } from 'uuid';

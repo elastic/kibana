@@ -8,16 +8,16 @@
 import { Logger } from 'kibana/server';
 
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+
+import { sampleDocNoSortId } from '../../../signals/__mocks__/es_results';
+import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
+import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
   ALERT_ANCESTORS,
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_DEPTH,
   ALERT_GROUP_ID,
-} from '@kbn/securitysolution-rules';
-
-import { sampleDocNoSortId } from '../../../signals/__mocks__/es_results';
-import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+} from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import { getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
 

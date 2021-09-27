@@ -20,7 +20,7 @@ describe('useHoverActionItems', () => {
   const defaultProps: UseHoverActionItemsProps = {
     dataProvider: [{} as DataProvider],
     defaultFocusedButtonRef: null,
-    field: 'kibana.alert.rule.name',
+    field: 'signal.rule.name',
     handleHoverActionClicked: jest.fn(),
     hideTopN: false,
     isCaseView: false,
@@ -97,7 +97,7 @@ describe('useHoverActionItems', () => {
         'hover-actions-filter-out'
       );
       expect(result.current.overflowActionItems[2].props['data-test-subj']).toEqual(
-        'more-actions-kibana.alert.rule.name'
+        'more-actions-signal.rule.name'
       );
       expect(result.current.overflowActionItems[2].props.items[0].props['data-test-subj']).toEqual(
         'hover-actions-toggle-column'

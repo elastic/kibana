@@ -199,14 +199,14 @@ describe('field_items', () => {
         ...mockBrowserFields,
         signal: {
           fields: {
-            'kibana.alert.rule.name': {
+            'signal.rule.name': {
               aggregatable: true,
               category: 'signal',
               description: 'rule name',
               example: '',
               format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
-              name: 'kibana.alert.rule.name',
+              name: 'signal.rule.name',
               searchable: true,
               type: 'string',
             },
@@ -235,7 +235,7 @@ describe('field_items', () => {
         </TestProviders>
       );
       wrapper
-        .find(`[data-test-subj="field-kibana.alert.rule.name-checkbox"]`)
+        .find(`[data-test-subj="field-signal.rule.name-checkbox"]`)
         .last()
         .simulate('change', {
           target: { checked: true },
@@ -244,7 +244,7 @@ describe('field_items', () => {
       await waitFor(() => {
         expect(toggleColumn).toBeCalledWith({
           columnHeaderType: 'not-filtered',
-          id: 'kibana.alert.rule.name',
+          id: 'signal.rule.name',
           initialWidth: 180,
         });
       });

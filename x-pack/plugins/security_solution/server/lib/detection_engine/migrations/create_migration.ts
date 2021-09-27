@@ -54,7 +54,6 @@ export const createMigration = async ({
       source: { index, size },
       script: {
         lang: 'painless',
-        // TODO: how to handle?
         source: `
                 if (ctx._source.signal._meta == null) {
                   ctx._source.signal._meta = [:];
@@ -79,7 +78,7 @@ export const createMigration = async ({
 
                 // migrate status
                 if(ctx._source.signal?.status == "in-progress") {
-                  ctx._source.kibana.alert.workflow_status = "acknowledged";
+                  ctx._source.signal.status = "acknowledged";
                 }
               `,
         params: {

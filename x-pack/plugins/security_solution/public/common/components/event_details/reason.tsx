@@ -34,12 +34,12 @@ export const ReasonComponent: React.FC<Props> = ({ eventId, data }) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
   const reason = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'kibana.alert.reason' }, data),
+    () => getFieldValue({ category: 'signal', field: 'signal.reason' }, data),
     [data]
   );
 
   const ruleId = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'kibana.alert.rule.uuid' }, data),
+    () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data),
     [data]
   );
 
