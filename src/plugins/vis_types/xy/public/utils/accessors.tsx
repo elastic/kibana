@@ -82,9 +82,6 @@ export const getSplitSeriesAccessorFnMap = (
 export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
   columnId.toString().split('.')[0] === seriesColumnId;
 
-export const isValidSeriesForDimension = (
-  seriesColumnId: string,
-  { aggId, accessor }: Partial<Aspect>
-) =>
+export const isValidSeriesForDimension = (seriesColumnId: string, { aggId, accessor }: Aspect) =>
   (aggId === seriesColumnId || isPercentileIdEqualToSeriesId(aggId ?? '', seriesColumnId)) &&
   accessor !== null;

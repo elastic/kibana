@@ -82,9 +82,7 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspects = aspects.y.filter(({ aggId, accessor }) =>
-        isValidSeriesForDimension(paramId, { aggId, accessor })
-      );
+      const yAspects = aspects.y.filter((aspect) => isValidSeriesForDimension(paramId, aspect));
       if (!show || !yAspects.length) {
         return null;
       }
