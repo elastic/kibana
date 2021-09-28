@@ -68,7 +68,7 @@ export const CurationsSettingsLogic = kea<
 
       try {
         const response = await http.get(
-          `/internal/app_search/engines/${engineName}/search_relevance_insights/settings`
+          `/internal/app_search/engines/${engineName}/search_relevance_suggestions/settings`
         );
         actions.onCurationsSettingsLoad(response.curation);
       } catch (e) {
@@ -88,7 +88,7 @@ export const CurationsSettingsLogic = kea<
       const { engineName } = EngineLogic.values;
       try {
         const response = await http.put(
-          `/internal/app_search/engines/${engineName}/search_relevance_insights/settings`,
+          `/internal/app_search/engines/${engineName}/search_relevance_suggestions/settings`,
           {
             body: JSON.stringify({ curation: currationsSetting }),
           }

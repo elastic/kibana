@@ -11,13 +11,13 @@ import { skipBodyValidation } from '../../lib/route_config_helpers';
 
 import { RouteDependencies } from '../../plugin';
 
-export function registerSearchRelevanceInsightsRoutes({
+export function registerSearchRelevanceSuggestionsRoutes({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.get(
     {
-      path: '/internal/app_search/engines/{engineName}/search_relevance_insights/settings',
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -25,13 +25,13 @@ export function registerSearchRelevanceInsightsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v1/engines/:engineName/search_relevance_insights/settings',
+      path: '/api/as/v1/engines/:engineName/search_relevance_suggestions/settings',
     })
   );
 
   router.put(
     skipBodyValidation({
-      path: '/internal/app_search/engines/{engineName}/search_relevance_insights/settings',
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -39,7 +39,7 @@ export function registerSearchRelevanceInsightsRoutes({
       },
     }),
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v1/engines/:engineName/search_relevance_insights/settings',
+      path: '/api/as/v1/engines/:engineName/search_relevance_suggestions/settings',
     })
   );
 }
