@@ -88,7 +88,9 @@ export const ControlFrame = ({
         <>
           {customPrepend ?? null}
           {usingTwoLineLayout ? undefined : (
-            <EuiFormLabel htmlFor={embeddableId}>{title}</EuiFormLabel>
+            <EuiFormLabel className="controlFrame--formControlLayout__label" htmlFor={embeddableId}>
+              {title}
+            </EuiFormLabel>
           )}
         </>
       }

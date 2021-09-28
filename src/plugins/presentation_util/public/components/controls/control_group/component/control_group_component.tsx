@@ -123,7 +123,11 @@ export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
           </SortableContext>
           <DragOverlay>
             {draggingId ? (
-              <ControlClone embeddableId={draggingId} container={controlGroupContainer} />
+              <ControlClone
+                width={controlGroupContainer.getInput().panels[draggingId].width}
+                embeddableId={draggingId}
+                container={controlGroupContainer}
+              />
             ) : null}
           </DragOverlay>
         </DndContext>

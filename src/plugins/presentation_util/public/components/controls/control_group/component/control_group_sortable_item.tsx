@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexItem, EuiFormControlLayout, EuiFormLabel, EuiIcon } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFormControlLayout,
+  EuiFormLabel,
+  EuiIcon,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import React, { forwardRef, HTMLAttributes } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -118,26 +124,34 @@ const SortableControlInner = forwardRef<
 export const ControlClone = ({
   embeddableId,
   container,
+  width,
 }: {
   embeddableId: string;
   container: ControlGroupContainer;
+  width: ControlWidth;
 }) => {
   const embeddable = useChildEmbeddable({ embeddableId, container });
-
+  const layout = container.getInput().controlStyle;
   return (
-    <EuiFlexItem className={'controlFrame--cloneWrapper'}>
-      <EuiFormControlLayout
-        className={'controlFrame--formControlLayout'}
-        fullWidth
-        prepend={
-          <>
-            <button className="controlFrame--dragHandle">
-              <EuiIcon type="grabHorizontal" />
-            </button>
-            <EuiFormLabel htmlFor={embeddableId}>{embeddable?.getInput().title}</EuiFormLabel>
-          </>
-        }
-      />
+    <EuiFlexItem
+      className={classNames('controlFrame--cloneWrapper', {
+        'controlFrame--cloneWrapper-small': width === 'small',
+        'controlFrame--cloneWrapper-medium': width === 'medium',
+        'controlFrame--cloneWrapper-large': width === 'large',
+        'controlFrame--cloneWrapper-twoLine': layout === 'twoLine',
+      })}
+    >
+      {layout === 'twoLine' ? (
+        <EuiFormLabel>{embeddable?.getInput().title}</EuiFormLabel>
+      ) : undefined}
+      <EuiFlexGroup gutterSize="none" className={'controlFrame--draggable'}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="grabHorizontal" className="controlFrame--dragHandle" />
+        </EuiFlexItem>
+        {container.getInput().controlStyle === 'oneLine' ? (
+          <EuiFlexItem>{embeddable?.getInput().title}</EuiFlexItem>
+        ) : undefined}
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
 };
