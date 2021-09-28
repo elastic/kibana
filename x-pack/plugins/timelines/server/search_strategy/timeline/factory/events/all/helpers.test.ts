@@ -271,7 +271,7 @@ describe('#formatTimelineData', () => {
         'signal.rule.type': ['threshold'],
         'signal.rule.id': ['696c24e0-526d-11eb-836c-e1620268b945'],
         'signal.rule.risk_score': [21],
-        'kibana.alert.workflow_status': ['open'],
+        'signal.status': ['open'],
         'event.kind': ['signal'],
         'signal.original_time': ['2021-01-09T13:39:32.595Z'],
         'signal.rule.severity': ['low'],
