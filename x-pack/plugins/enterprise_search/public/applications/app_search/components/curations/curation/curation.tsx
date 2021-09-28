@@ -34,7 +34,7 @@ export const Curation: React.FC = () => {
   const { convertToManual, loadCuration, resetCuration } = useActions(
     CurationLogic({ curationId })
   );
-  const { curation, dataLoading, queries } = useValues(CurationLogic({ curationId }));
+  const { activeQuery, curation, dataLoading, queries } = useValues(CurationLogic({ curationId }));
   const { isFlyoutOpen } = useValues(AddResultLogic);
 
   useEffect(() => {
@@ -71,18 +71,15 @@ export const Curation: React.FC = () => {
     <AppSearchPageTemplate
       pageChrome={getCurationsBreadcrumbs([queries.join(', ')])}
       pageHeader={{
-        pageTitle: (
+        pageTitle: isAutomated ? (
           <>
-            {MANAGE_CURATION_TITLE}
-            {isAutomated && (
-              <>
-                {' '}
-                <EuiBadge iconType={AutomatedIcon} color="accent">
-                  {AUTOMATED_LABEL}
-                </EuiBadge>
-              </>
-            )}
+            {activeQuery}{' '}
+            <EuiBadge iconType={AutomatedIcon} color="accent">
+              {AUTOMATED_LABEL}
+            </EuiBadge>
           </>
+        ) : (
+          MANAGE_CURATION_TITLE
         ),
         rightSideItems: pageHeaderActions,
       }}

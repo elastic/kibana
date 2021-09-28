@@ -16,10 +16,12 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiBadge } from '@elastic/eui';
 
-import { rerender, getPageTitle, getPageHeaderActions } from '../../../../test_helpers';
+import { rerender, getPageHeaderActions } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { getShallowPageTitle } from '../../../../test_helpers/get_page_header';
+
+import { AppSearchPageTemplate } from '../../layout';
 
 import { CurationLogic } from './curation_logic';
 
@@ -54,14 +56,7 @@ describe('Curation', () => {
   it('renders', () => {
     const wrapper = shallow(<Curation />);
 
-    expect(getShallowPageTitle(wrapper).text()).toContain('Manage curation');
-
-    expect(wrapper.prop('pageChrome')).toEqual([
-      'Engines',
-      'some-engine',
-      'Curations',
-      'query A, query B',
-    ]);
+    expect(wrapper.is(AppSearchPageTemplate));
   });
 
   it('renders the add result flyout when open', () => {
@@ -102,10 +97,12 @@ describe('Curation', () => {
       });
     });
 
-    it('has no badge in the title', () => {
+    it('displays a static title with no badge', () => {
       const wrapper = shallow(<Curation />);
+      const shallowPageTitle = getShallowPageTitle(wrapper);
 
-      expect(getShallowPageTitle(wrapper).find(EuiBadge)).toHaveLength(0);
+      expect(shallowPageTitle.text()).toContain('Manage curation');
+      expect(shallowPageTitle.find(EuiBadge)).toHaveLength(0);
     });
 
     describe('restore defaults button', () => {
@@ -141,8 +138,10 @@ describe('Curation', () => {
     beforeEach(() => {
       setMockValues({
         ...values,
+        activeQuery: 'query A',
         curation: {
           ...values.curation,
+          queries: ['query A'],
           suggestion: {
             ...values.curation.suggestion,
             status: 'automated',
@@ -151,10 +150,12 @@ describe('Curation', () => {
       });
     });
 
-    it('displays a badge in the title', () => {
+    it('displays the query in the title with a badge', () => {
       const wrapper = shallow(<Curation />);
+      const shallowPageTitle = getShallowPageTitle(wrapper);
 
-      expect(getShallowPageTitle(wrapper).find(EuiBadge)).toHaveLength(1);
+      expect(shallowPageTitle.text()).toContain('query A');
+      expect(shallowPageTitle.find(EuiBadge)).toHaveLength(1);
     });
 
     describe('convert to manaul button', () => {
