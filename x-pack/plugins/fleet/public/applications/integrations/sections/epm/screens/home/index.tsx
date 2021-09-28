@@ -21,8 +21,7 @@ import {
   useGetCategories,
   useGetPackages,
   useBreadcrumbs,
-  useGetAppendCustomIntegrations,
-  useGetReplacementCustomIntegrations,
+  useGetAddableCustomIntegrations,
   useLink,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
@@ -277,21 +276,16 @@ const AvailablePackages: React.FC = memo(() => {
     [allCategoryPackagesRes]
   );
 
-  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
-    useGetAppendCustomIntegrations();
-  const filteredAddableIntegrations = appendCustomIntegrations
-    ? appendCustomIntegrations.filter((integration: CustomIntegration) => {
+  const { loading: isLoadingAddableCustomIntegrations, value: addableCustomIntegrations } =
+    useGetAddableCustomIntegrations();
+  const filteredAddableIntegrations = addableCustomIntegrations
+    ? addableCustomIntegrations.filter((integration: CustomIntegration) => {
         if (!selectedCategory) {
           return true;
         }
         return integration.categories.indexOf(selectedCategory as Category) >= 0;
       })
     : [];
-
-  const { loading: isLoadingReplacementCustomIntegrations, value: replacementCustomIntegrations } =
-    useGetReplacementCustomIntegrations();
-
-  console.log('repl', replacementCustomIntegrations);
 
   const title = useMemo(
     () =>
@@ -312,26 +306,26 @@ const AvailablePackages: React.FC = memo(() => {
   const categories = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] =
       isLoadingCategories ||
-      isLoadingAppendCustomIntegrations ||
-      !appendCustomIntegrations ||
+      isLoadingAddableCustomIntegrations ||
+      !addableCustomIntegrations ||
       !categoriesRes
         ? []
         : mergeAndReplaceCategoryCounts(
             categoriesRes.response as CategoryFacet[],
-            appendCustomIntegrations
+            addableCustomIntegrations
           );
     return [
       {
         id: '',
-        count: (allEprPackages?.length || 0) + (appendCustomIntegrations?.length || 0),
+        count: (allEprPackages?.length || 0) + (addableCustomIntegrations?.length || 0),
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
     ] as CategoryFacet[];
   }, [
     allEprPackages?.length,
-    appendCustomIntegrations,
+    addableCustomIntegrations,
     categoriesRes,
-    isLoadingAppendCustomIntegrations,
+    isLoadingAddableCustomIntegrations,
     isLoadingCategories,
   ]);
 
@@ -342,7 +336,7 @@ const AvailablePackages: React.FC = memo(() => {
 
   const controls = categories ? (
     <CategoryFacets
-      isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
+      isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAddableCustomIntegrations}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategoryFacet) => {
