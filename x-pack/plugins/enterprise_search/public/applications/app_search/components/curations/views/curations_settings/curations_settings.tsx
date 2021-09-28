@@ -60,7 +60,7 @@ export const CurationsSettings: React.FC = () => {
         subtitle={
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.curations.settings.licenseUpgradeCTASubtitle"
-            defaultMessage="Upgrade to a {platinumLicenseName} license to harness the power of machine learning. By analyzing your engine's analytics, App Seearch is able to suggest new or updated curations. Effortlessly help your users find exactly what they're looking for. Start a free trial today."
+            defaultMessage="Upgrade to a {platinumLicenseName} license to harness the power of machine learning. By analyzing your engine's analytics, App Search is able to suggest new or updated curations. Effortlessly help your users find exactly what they're looking for. Start a free trial today."
             values={{
               platinumLicenseName: <strong>Platinum</strong>,
             }}
@@ -135,7 +135,7 @@ export const CurationsSettings: React.FC = () => {
           'xpack.enterpriseSearch.appSearch.curations.settings.automatedCurationsDescription',
           {
             defaultMessage:
-              "Suggesssted curations will monitor your engine's analytics and make automatic suggestions to help you deliver the most relevant results. Each suggested curation can be accepted, rejected, or modified.",
+              "Suggested curations will monitor your engine's analytics and make automatic suggestions to help you deliver the most relevant results. Each suggested curation can be accepted, rejected, or modified.",
           }
         )}
       </EuiText>
