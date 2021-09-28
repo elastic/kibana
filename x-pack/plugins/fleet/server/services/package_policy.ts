@@ -1014,7 +1014,7 @@ function deepMergeVars(original: any, override: any): any {
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
-    result.vars[name] = { ...overrideVal, ...originalVar };
+    result.vars[name] = { ...originalVar, ...overrideVal };
   }
 
   return result;
