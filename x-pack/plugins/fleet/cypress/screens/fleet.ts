@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export const ADD_AGENT_BUTTON = '.euiButton__text';
-// export const ADD_AGENT_BUTTON = '[data-test-subj="addAgentButton"]';
+export const ADD_AGENT_BUTTON = '[data-test-subj="addAgentButton"]';
+
+export const AGENT_POLICIES_TAB = '[data-test-subj="fleet-agent-policies-tab"]';
+export const ENROLLMENT_TOKENS_TAB = '[data-test-subj="fleet-enrollment-tokens-tab"]';

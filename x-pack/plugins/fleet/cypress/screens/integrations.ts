@@ -10,3 +10,5 @@ export const CREATE_PACKAGE_POLICY_SAVE_BTN = '[data-test-subj="createPackagePol
 export const INTEGRATIONS_CARD = '.euiCard__titleAnchor';
 
 export const INTEGRATION_LINK = '[data-test-subj="integrationNameLink"]';
+
+export const CONFIRM_SAVE_AND_DEPLOY_BTN = '[data-test-subj="confirmModalConfirmButton"]';

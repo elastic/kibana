@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ADD_AGENT_BUTTON } from '../screens/fleet';
+import { ADD_AGENT_BUTTON, AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 describe('Fleet startup', () => {
@@ -13,7 +13,21 @@ describe('Fleet startup', () => {
     navigateTo(FLEET);
   });
 
-  it('Displays Add agent button once Fleet Agent page loaded', () => {
+  it('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
     cy.get(ADD_AGENT_BUTTON).contains('Add agent');
+    cy.get('.euiBadge').contains('Healthy');
+  });
+
+  it('should display default agent policies on agent policies tab', () => {
+    cy.get(AGENT_POLICIES_TAB).click();
+    cy.get('.euiLink').contains('Default policy');
+    cy.get('.euiLink').contains('Default Fleet Server policy');
+  });
+
+  it('should display default tokens on enrollment tokens tab', () => {
+    cy.get(ENROLLMENT_TOKENS_TAB).click();
+    cy.get('.euiTableRow').should('have.length', 2);
+    cy.get('.euiTableRowCell').contains('Default policy');
+    cy.get('.euiTableRowCell').contains('Default Fleet Server policy');
   });
 });

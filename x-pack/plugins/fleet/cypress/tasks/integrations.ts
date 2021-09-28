@@ -7,6 +7,7 @@
 
 import {
   ADD_POLICY_BTN,
+  CONFIRM_SAVE_AND_DEPLOY_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   INTEGRATIONS_CARD,
 } from '../screens/integrations';
@@ -15,6 +16,7 @@ export const addIntegration = (integration: string) => {
   cy.get(INTEGRATIONS_CARD).contains(integration).click();
   cy.get(ADD_POLICY_BTN).click();
   cy.get(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
+  cy.get(CONFIRM_SAVE_AND_DEPLOY_BTN).click();
   cy.get(CREATE_PACKAGE_POLICY_SAVE_BTN).should('not.exist');
   cy.reload();
 };
