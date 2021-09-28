@@ -109,6 +109,8 @@ export function getEsQueryFromSavedSearch({
 
   // If no saved search available, use user's query and filters
   if (!savedSearchData && userQuery) {
+    if (filterManager && userFilters) filterManager.setFilters(userFilters);
+
     const combinedQuery = createMergedEsQuery(
       userQuery,
       Array.isArray(userFilters) ? userFilters : [],

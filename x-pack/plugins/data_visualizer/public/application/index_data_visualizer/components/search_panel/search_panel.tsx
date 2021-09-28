@@ -39,10 +39,12 @@ interface Props {
     searchQuery,
     searchString,
     queryLanguage,
+    filters,
   }: {
     searchQuery: Query['query'];
     searchString: Query['query'];
     queryLanguage: SearchQueryLanguage;
+    filters: Filter[];
   }): void;
   showEmptyFields: boolean;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
@@ -84,18 +86,14 @@ export const SearchPanel: FC<Props> = ({
       query: searchString || '',
       language: searchQueryLanguage,
     });
-
-    return () => {
-      // Reset previously added filters when moving away from the page
-      queryManager.filterManager.removeAll();
-    };
   }, [searchQueryLanguage, searchString, queryManager.filterManager]);
 
   const searchHandler = ({ query, filters }: { query?: Query; filters?: Filter[] }) => {
     const mergedQuery = query ?? searchInput;
+    const mergedFilters = filters ?? queryManager.filterManager.getFilters();
     try {
-      if (filters) {
-        queryManager.filterManager.setFilters(filters);
+      if (mergedFilters) {
+        queryManager.filterManager.setFilters(mergedFilters);
       }
 
       const combinedQuery = createMergedEsQuery(
@@ -109,6 +107,7 @@ export const SearchPanel: FC<Props> = ({
         searchQuery: combinedQuery,
         searchString: mergedQuery.query,
         queryLanguage: mergedQuery.language as SearchQueryLanguage,
+        filters: mergedFilters,
       });
     } catch (e) {
       console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console

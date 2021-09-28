@@ -23,6 +23,7 @@ import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_tab
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import {
   KBN_FIELD_TYPES,
   UI_SETTINGS,
@@ -117,6 +118,7 @@ export const getDefaultDataVisualizerListState = (
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+  filters: [],
   showDistributions: true,
   showAllFields: false,
   showEmptyFields: false,
@@ -152,6 +154,15 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       setCurrentSavedSearch(dataVisualizerProps?.currentSavedSearch);
     }
   }, [dataVisualizerProps?.currentSavedSearch]);
+
+  useEffect(() => {
+    return () => {
+      // When navigating away from the index pattern
+      // Reset all previously set filters
+      // to make sure new page doesn't have unrelated filters
+      data.query.filterManager.removeAll();
+    };
+  }, [currentIndexPattern.id, data.query.filterManager]);
 
   const getTimeBuckets = useCallback(() => {
     return new TimeBuckets({
@@ -238,6 +249,9 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
+      if (dataVisualizerListState.filters) {
+        data.query.filterManager.setFilters(dataVisualizerListState.filters);
+      }
       return {
         searchQuery: dataVisualizerListState.searchQuery,
         searchString: dataVisualizerListState.searchString,
@@ -258,6 +272,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       searchQuery: Query['query'];
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
+      filters: Filter[];
     }) => {
       // When the user loads saved search and then clear or modify the query
       // we should remove the saved search and replace it with the index pattern id
@@ -270,6 +285,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
         searchQueryLanguage: searchParams.queryLanguage,
+        filters: searchParams.filters,
       });
     },
     [currentSavedSearch, dataVisualizerListState, setDataVisualizerListState]
@@ -345,6 +361,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         searchQuery: combinedQuery,
         searchString: mergedQuery.query,
         queryLanguage: mergedQuery.language as SearchQueryLanguage,
+        filters: data.query.filterManager.getFilters(),
       });
     },
     [

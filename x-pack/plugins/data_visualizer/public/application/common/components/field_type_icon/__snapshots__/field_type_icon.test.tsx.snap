@@ -9,7 +9,7 @@ exports[`FieldTypeIcon render component when type matches a field type 1`] = `
 >
   <FieldTypeIconContainer
     ariaLabel="keyword type"
-    color="euiColorVis0"
+    color="euiColorVis1"
     iconType="tokenText"
     needsAria={false}
   />
