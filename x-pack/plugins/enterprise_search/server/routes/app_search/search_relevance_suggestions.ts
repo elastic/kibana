@@ -25,7 +25,7 @@ export function registerSearchRelevanceSuggestionsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v1/engines/:engineName/search_relevance_suggestions/settings',
+      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
     })
   );
 
@@ -39,7 +39,7 @@ export function registerSearchRelevanceSuggestionsRoutes({
       },
     }),
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v1/engines/:engineName/search_relevance_suggestions/settings',
+      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
     })
   );
 }

@@ -33,7 +33,7 @@ describe('search relevance insights routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v1/engines/:engineName/search_relevance_suggestions/settings',
+        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
       });
     });
   });
@@ -58,7 +58,7 @@ describe('search relevance insights routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v1/engines/:engineName/search_relevance_suggestions/settings',
+        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
       });
     });
   });
