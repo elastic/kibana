@@ -34,7 +34,7 @@ import type { VisSavedObject, SerializedVis, ISavedVis } from '../types';
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
 
-const SAVED_VIS_TYPE = 'visualization';
+export const SAVED_VIS_TYPE = 'visualization';
 
 const getDefaults = (opts: Record<string, unknown>) => ({
   title: '',
