@@ -105,8 +105,8 @@ export class TelemetryDetectionRulesTask {
     const { body: prebuiltRules } = await this.receiver.fetchDetectionRules();
 
     const cacheArray = prebuiltRules.hits.hits.reduce((cache, searchHit) => {
-      const rule = searchHit._source;
-      const ruleId = searchHit._source?.alert.params.ruleId;
+      const rule = searchHit._source as RuleSearchResult;
+      const ruleId = rule.alert.params.ruleId;
 
       const shouldNotProcess =
         rule === null ||
