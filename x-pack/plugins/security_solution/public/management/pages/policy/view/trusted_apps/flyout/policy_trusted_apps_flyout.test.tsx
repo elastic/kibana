@@ -18,6 +18,7 @@ import { TrustedAppsHttpService } from '../../../../trusted_apps/service';
 import { PolicyDetailsState } from '../../../types';
 import { getMockCreateResponse, getMockListResponse } from '../../../test_utils';
 import { createLoadedResourceState, isLoadedResourceState } from '../../../../../state';
+import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 
 jest.mock('../../../../trusted_apps/service');
 
@@ -57,14 +58,8 @@ describe('Policy trusted apps flyout', () => {
       };
     });
     const component = render();
-    mockedContext.store.dispatch({
-      type: 'userChangedUrl',
-      payload: {
-        pathname: '/administration/policy/1234/trustedApps',
-        search: '?show=list',
-        hash: '',
-      },
-    });
+
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { show: 'list' }));
 
     await waitForAction('policyArtifactsAssignableListPageDataChanged', {
       validate: (action) => isLoadedResourceState(action.payload),
@@ -82,14 +77,8 @@ describe('Policy trusted apps flyout', () => {
       };
     });
     const component = render();
-    mockedContext.store.dispatch({
-      type: 'userChangedUrl',
-      payload: {
-        pathname: '/administration/policy/1234/trustedApps',
-        search: '?show=list',
-        hash: '',
-      },
-    });
+
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { show: 'list' }));
     await waitForAction('policyArtifactsAssignableListPageDataChanged', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
@@ -105,14 +94,8 @@ describe('Policy trusted apps flyout', () => {
 
   it('should renders flyout open correctly', async () => {
     const component = render();
-    mockedContext.store.dispatch({
-      type: 'userChangedUrl',
-      payload: {
-        pathname: '/administration/policy/1234/trustedApps',
-        search: '?show=list',
-        hash: '',
-      },
-    });
+
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { show: 'list' }));
     await waitForAction('policyArtifactsAssignableListPageDataChanged', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
@@ -127,14 +110,8 @@ describe('Policy trusted apps flyout', () => {
     });
     const waitChangeUrl = waitForAction('userChangedUrl');
     const component = render();
-    mockedContext.store.dispatch({
-      type: 'userChangedUrl',
-      payload: {
-        pathname: '/administration/policy/1234/trustedApps',
-        search: '?show=list',
-        hash: '',
-      },
-    });
+
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { show: 'list' }));
     await waitForAction('policyArtifactsAssignableListPageDataChanged', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
@@ -160,14 +137,8 @@ describe('Policy trusted apps flyout', () => {
   it('should cancel flyout action', async () => {
     const waitChangeUrl = waitForAction('userChangedUrl');
     const component = render();
-    mockedContext.store.dispatch({
-      type: 'userChangedUrl',
-      payload: {
-        pathname: '/administration/policy/1234/trustedApps',
-        search: '?show=list',
-        hash: '',
-      },
-    });
+
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { show: 'list' }));
     await waitForAction('policyArtifactsAssignableListPageDataChanged', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
@@ -191,14 +162,8 @@ describe('Policy trusted apps flyout', () => {
     });
 
     const component = render();
-    mockedContext.store.dispatch({
-      type: 'userChangedUrl',
-      payload: {
-        pathname: '/administration/policy/1234/trustedApps',
-        search: '?show=list',
-        hash: '',
-      },
-    });
+
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { show: 'list' }));
     await waitForAction('policyArtifactsAssignableListPageDataChanged', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
@@ -208,14 +173,8 @@ describe('Policy trusted apps flyout', () => {
 
   it('should not display warning message when few results', async () => {
     const component = render();
-    mockedContext.store.dispatch({
-      type: 'userChangedUrl',
-      payload: {
-        pathname: '/administration/policy/1234/trustedApps',
-        search: '?show=list',
-        hash: '',
-      },
-    });
+
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { show: 'list' }));
     await waitForAction('policyArtifactsAssignableListPageDataChanged', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
