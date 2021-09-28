@@ -74,9 +74,12 @@ export const CurationsSettings: React.FC = () => {
         }
         action={
           <EuiButtonTo to="/app/management/stack/license_management" shouldNotCreateHref>
-            {i18n.translate('xpack.enterpriseSearch.start30DayTrialButtonLabel', {
-              defaultMessage: 'Start a 30-day trial',
-            })}
+            {i18n.translate(
+              'xpack.enterpriseSearch.curations.settings.start30DayTrialButtonLabel',
+              {
+                defaultMessage: 'Start a 30-day trial',
+              }
+            )}
           </EuiButtonTo>
         }
       >
@@ -85,7 +88,7 @@ export const CurationsSettings: React.FC = () => {
           iconType="popout"
           href={`${docLinks.enterpriseSearchBase}/license-management.html`}
         >
-          {i18n.translate('xpack.enterpriseSearch.licenseUpgradeLink', {
+          {i18n.translate('xpack.enterpriseSearch.curations.settings.licenseUpgradeLink', {
             defaultMessage: 'Learn more about license upgrades',
           })}
         </EuiButtonEmpty>
