@@ -33,6 +33,7 @@ import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors/extension_service';
 import { ExtensionsService } from '../../public/services';
+import { kibanaVersion } from '../client_integration/helpers';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { notificationServiceMock } from '../../../../../src/core/public/notifications/notifications_service.mock';
@@ -43,10 +44,10 @@ let server = null;
 let store = null;
 const indices = [];
 
-for (let i = 0; i < 105; i++) {
-  const baseFake = {
-    health: i % 2 === 0 ? 'green' : 'yellow',
-    status: i % 2 === 0 ? 'open' : 'closed',
+const getBaseFakeIndex = (isOpen) => {
+  return {
+    health: isOpen ? 'green' : 'yellow',
+    status: isOpen ? 'open' : 'closed',
     primary: 1,
     replica: 1,
     documents: 10000,
@@ -54,13 +55,19 @@ for (let i = 0; i < 105; i++) {
     size: '156kb',
     primary_size: '156kb',
   };
+};
+
+for (let i = 0; i < 105; i++) {
   indices.push({
-    ...baseFake,
+    ...getBaseFakeIndex(true),
     name: `testy${i}`,
   });
   indices.push({
-    ...baseFake,
+    ...getBaseFakeIndex(false),
     name: `.admin${i}`,
+    // Add 2 hidden indices in the list in position 3 & 7
+    // note: for each loop iteration we add 2 indices
+    hidden: i === 1 || i === 3 ? true : false, // ".admin1" and ".admin3" are the only hidden in 8.x
   });
 }
 
@@ -110,6 +117,7 @@ const testAction = (rendered, buttonIndex, rowIndex = 0) => {
   // so we "time" our assertion based on how many Redux actions we observe. This is brittle because it
   // depends upon how our UI is architected, which will affect how many actions are dispatched.
   // Expect this to break when we rearchitect the UI.
+  // Update: Expect this to be removed when we rearchitect the UI :)
   let dispatchedActionsCount = 0;
   store.subscribe(() => {
     if (dispatchedActionsCount === 1) {
@@ -254,15 +262,44 @@ describe('index table', () => {
     expect(button.text()).toEqual('Manage 2 indices');
   });
 
-  test('should show system indices only when the switch is turned on', async () => {
+  test('should show hidden indices only when the switch is turned on', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
 
-    snapshot(rendered.find('.euiPagination li').map((item) => item.text()));
-    const switchControl = rendered.find('.euiSwitch__button');
+    // We have manually set `.admin1` and `.admin3` as hidden indices
+    // We **don't** expect them to be in this list as by default we don't show hidden indices
+    let indicesInTable = namesText(rendered);
+    expect(indicesInTable).not.toContain('.admin1');
+    expect(indicesInTable).not.toContain('.admin3');
+
+    if (kibanaVersion.major >= 8) {
+      // From 8.x indices starting with a period are treated as normal indices
+      expect(indicesInTable).toContain('.admin0');
+      expect(indicesInTable).toContain('.admin2');
+    } else if (kibanaVersion.major < 8) {
+      // In 7.x those are treated as system and are thus hidden
+      expect(indicesInTable).not.toContain('.admin0');
+      expect(indicesInTable).not.toContain('.admin2');
+    }
+
+    snapshot(indicesInTable);
+
+    // Enable "Show hidden indices"
+    const switchControl = findTestSubject(rendered, 'indexTableIncludeHiddenIndicesToggle');
     switchControl.simulate('click');
-    snapshot(rendered.find('.euiPagination li').map((item) => item.text()));
+
+    // We do expect now the `.admin1` and `.admin3` indices to be in the list
+    indicesInTable = namesText(rendered);
+    expect(indicesInTable).toContain('.admin1');
+    expect(indicesInTable).toContain('.admin3');
+
+    if (kibanaVersion.major < 8) {
+      expect(indicesInTable).toContain('.admin0');
+      expect(indicesInTable).toContain('.admin2');
+    }
+
+    snapshot(indicesInTable);
   });
 
   test('should filter based on content of search input', async () => {

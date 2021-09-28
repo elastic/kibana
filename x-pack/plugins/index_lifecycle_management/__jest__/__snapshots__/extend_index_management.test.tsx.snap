@@ -103,6 +103,7 @@ exports[`extend index management ilm summary extension should return extension w
       "documents": "2",
       "documents_deleted": "0",
       "health": "yellow",
+      "hidden": false,
       "ilm": Object {
         "action": "rollover",
         "action_time_millis": 1544187775891,
@@ -650,6 +651,7 @@ exports[`extend index management ilm summary extension should return extension w
       "documents": "2",
       "documents_deleted": "0",
       "health": "yellow",
+      "hidden": false,
       "ilm": Object {
         "action": "complete",
         "action_time_millis": 1544187775867,
