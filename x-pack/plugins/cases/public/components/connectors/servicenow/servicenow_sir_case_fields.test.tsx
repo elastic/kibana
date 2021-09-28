@@ -68,16 +68,16 @@ describe('ServiceNowSIR Fields', () => {
     wrapper.update();
 
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
-      'Destination IP: Yes'
+      'Destination IPs: Yes'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
-      'Source IP: Yes'
+      'Source IPs: Yes'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
-      'Malware URL: Yes'
+      'Malware URLs: Yes'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(3).text()).toEqual(
-      'Malware Hash: Yes'
+      'Malware Hashes: Yes'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(4).text()).toEqual(
       'Priority: 1 - Critical'

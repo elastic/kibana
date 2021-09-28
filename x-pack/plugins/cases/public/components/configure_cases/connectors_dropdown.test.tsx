@@ -77,7 +77,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-servicenow-1",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -88,7 +88,9 @@ describe('ConnectorsDropdown', () => {
                 type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 My Connector
               </span>
@@ -100,7 +102,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-resilient-2",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -111,7 +113,9 @@ describe('ConnectorsDropdown', () => {
                 type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 My Connector 2
               </span>
@@ -123,7 +127,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-jira-1",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -134,7 +138,9 @@ describe('ConnectorsDropdown', () => {
                 type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 Jira
               </span>
@@ -146,7 +152,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-servicenow-sir",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -157,7 +163,9 @@ describe('ConnectorsDropdown', () => {
                 type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 My Connector SIR
               </span>

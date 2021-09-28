@@ -146,7 +146,10 @@ describe('ServiceNowITSMParamsFields renders', () => {
     };
     mount(<ServiceNowITSMParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
-      incident: {},
+      incident: {
+        correlation_display: 'Alerting',
+        correlation_id: '{{rule.id}}:{{alert.id}}',
+      },
       comments: [],
     });
   });
@@ -168,7 +171,10 @@ describe('ServiceNowITSMParamsFields renders', () => {
     wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
-      incident: {},
+      incident: {
+        correlation_display: 'Alerting',
+        correlation_id: '{{rule.id}}:{{alert.id}}',
+      },
       comments: [],
     });
   });
