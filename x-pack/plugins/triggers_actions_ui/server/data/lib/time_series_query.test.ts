@@ -9,6 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from '../../../../../../src/core/server';
 import {
   TimeSeriesQueryParameters,
   TimeSeriesQuery,
@@ -34,22 +35,22 @@ const DefaultQueryParams: TimeSeriesQuery = {
 };
 
 describe('timeSeriesQuery', () => {
-  let params: TimeSeriesQueryParameters;
   const esClient = elasticsearchClientMock.createClusterClient().asScoped().asCurrentUser;
-
-  beforeEach(async () => {
-    params = {
-      logger: loggingSystemMock.create().get(),
-      esClient,
-      query: DefaultQueryParams,
-    };
-  });
+  const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const params = {
+    logger,
+    esClient,
+    query: DefaultQueryParams,
+  };
 
   it('fails as expected when the callCluster call fails', async () => {
     esClient.search = jest.fn().mockRejectedValue(new Error('woopsie'));
-    expect(timeSeriesQuery(params)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error running search"`
-    );
+    await timeSeriesQuery(params);
+    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "indexThreshold timeSeriesQuery: callCluster error: woopsie",
+      ]
+    `);
   });
 
   it('fails as expected when the query params are invalid', async () => {
