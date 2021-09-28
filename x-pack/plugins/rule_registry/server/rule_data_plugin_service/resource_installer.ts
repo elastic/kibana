@@ -348,6 +348,7 @@ export class ResourceInstaller {
             },
           },
           mappings: {
+            dynamic: false,
             _meta: indexMetadata,
           },
           aliases:

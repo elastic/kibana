@@ -35,7 +35,8 @@ export interface SecurityOssPluginStart {
 }
 
 export class SecurityOssPlugin
-  implements Plugin<SecurityOssPluginSetup, SecurityOssPluginStart, {}, {}> {
+  implements Plugin<SecurityOssPluginSetup, SecurityOssPluginStart, {}, {}>
+{
   private readonly config = this.initializerContext.config.get<ConfigType>();
   private readonly insecureClusterService = new InsecureClusterService(this.config, localStorage);
   private readonly appStateService = new AppStateService();

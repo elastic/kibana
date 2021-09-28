@@ -10,7 +10,7 @@ import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { Query, QueryStringInput } from '../../../../../../../../src/plugins/data/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { explorerService } from '../../explorer_dashboard_service';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';

@@ -378,9 +378,9 @@ export class VectorStyleEditor extends Component<Props, State> {
     let iconOrientationEditor;
     let iconEditor;
     if (
-      (this.props.styleProperties[
-        VECTOR_STYLES.SYMBOLIZE_AS
-      ] as SymbolizeAsProperty).isSymbolizedAsIcon()
+      (
+        this.props.styleProperties[VECTOR_STYLES.SYMBOLIZE_AS] as SymbolizeAsProperty
+      ).isSymbolizedAsIcon()
     ) {
       iconOrientationEditor = (
         <Fragment>

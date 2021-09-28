@@ -4,7 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { ApiResponse, estypes } from '@elastic/elasticsearch';
+import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { JsonObject, JsonArray } from '@kbn/utility-types';
+
+export async function getSavedObjectFromES<T>(
+  es: KibanaClient,
+  savedObjectType: string,
+  query?: object
+): Promise<ApiResponse<estypes.SearchResponse<T>, unknown>> {
+  return await es.search<T>({
+    index: '.kibana',
+    body: {
+      query: {
+        bool: {
+          filter: [
+            { ...query },
+            {
+              term: {
+                type: {
+                  value: savedObjectType,
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+}
 
 export const getFilterValue = (hostName: string, from: string, to: string): JsonObject => ({
   bool: {

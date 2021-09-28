@@ -21,13 +21,13 @@ export const taskClaimingMock = {
     taskManagerId = '',
     events = new Subject<TaskClaim>(),
   }: TaskClaimingOptions) {
-    const mocked = ({
+    const mocked = {
       claimAvailableTasks: jest.fn(),
       claimAvailableTasksIfCapacityIsAvailable: jest.fn(),
       maxAttempts,
       taskManagerId,
       events,
-    } as unknown) as jest.Mocked<TaskClaiming>;
+    } as unknown as jest.Mocked<TaskClaiming>;
     return mocked;
   },
 };

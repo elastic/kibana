@@ -289,9 +289,9 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: ({
+        indexPatternService: {
           get: (id: string) => Promise.resolve({ id }),
-        } as unknown) as IndexPatternsContract,
+        } as unknown as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -408,12 +408,12 @@ describe('embeddable', () => {
   });
 
   it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
-    const sampleInput = ({
+    const sampleInput = {
       id: '123',
       enhancements: {
         dynamicActions: {},
       },
-    } as unknown) as LensEmbeddableInput;
+    } as unknown as LensEmbeddableInput;
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -635,7 +635,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: ({ get: jest.fn() } as unknown) as IndexPatternsContract,
+        indexPatternService: { get: jest.fn() } as unknown as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -836,7 +836,7 @@ describe('embeddable', () => {
             errors: undefined,
           }),
       },
-      ({ id: '123', onLoad } as unknown) as LensEmbeddableInput
+      { id: '123', onLoad } as unknown as LensEmbeddableInput
     );
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
@@ -909,7 +909,7 @@ describe('embeddable', () => {
             errors: undefined,
           }),
       },
-      ({ id: '123', onFilter } as unknown) as LensEmbeddableInput
+      { id: '123', onFilter } as unknown as LensEmbeddableInput
     );
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
@@ -957,7 +957,7 @@ describe('embeddable', () => {
             errors: undefined,
           }),
       },
-      ({ id: '123', onBrushEnd } as unknown) as LensEmbeddableInput
+      { id: '123', onBrushEnd } as unknown as LensEmbeddableInput
     );
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
@@ -1005,7 +1005,7 @@ describe('embeddable', () => {
             errors: undefined,
           }),
       },
-      ({ id: '123', onTableRowClick } as unknown) as LensEmbeddableInput
+      { id: '123', onTableRowClick } as unknown as LensEmbeddableInput
     );
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);

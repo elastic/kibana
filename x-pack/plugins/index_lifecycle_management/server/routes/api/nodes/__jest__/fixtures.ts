@@ -127,8 +127,7 @@ export const cloudNodeSettingsWithLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -137,8 +136,7 @@ export const cloudNodeSettingsWithLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },
@@ -354,8 +352,7 @@ export const cloudNodeSettingsWithLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -364,8 +361,7 @@ export const cloudNodeSettingsWithLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },
@@ -580,8 +576,7 @@ export const cloudNodeSettingsWithLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -590,8 +585,7 @@ export const cloudNodeSettingsWithLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },
@@ -806,8 +800,7 @@ export const cloudNodeSettingsWithLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -816,8 +809,7 @@ export const cloudNodeSettingsWithLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },
@@ -1032,8 +1024,7 @@ export const cloudNodeSettingsWithLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -1042,8 +1033,7 @@ export const cloudNodeSettingsWithLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },
@@ -1269,8 +1259,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -1279,8 +1268,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },
@@ -1496,8 +1484,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -1506,8 +1493,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },
@@ -1722,8 +1708,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -1732,8 +1717,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },
@@ -1948,8 +1932,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -1958,8 +1941,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },
@@ -2174,8 +2156,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                       principal: 'http://saml.elastic-cloud.com/attributes/principal',
                     },
                     sp: {
-                      acs:
-                        'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
+                      acs: 'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/api/security/saml/callback',
                       entity_id: 'ec:2628060457:916c269173df465f9826f4471799de42',
                       logout:
                         'https://916c269173df465f9826f4471799de42.europe-west4.gcp.elastic-cloud.com:9243/logout',
@@ -2184,8 +2165,7 @@ export const cloudNodeSettingsWithoutLegacy = {
                     idp: {
                       entity_id: 'urn:idp-cloud-elastic-co',
                       metadata: {
-                        path:
-                          '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
+                        path: '/app/config/cloud-saml-metadata-916c269173df465f9826f4471799de42.xml',
                       },
                     },
                   },

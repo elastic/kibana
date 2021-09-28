@@ -36,3 +36,14 @@ export function getIntervalAndTimeRange({
     end: new Date(end).toISOString(),
   };
 }
+
+export function isNewApmRuleFromStackManagement(
+  alertParams: any,
+  metadata?: AlertMetadata
+) {
+  return (
+    alertParams !== undefined &&
+    Object.keys(alertParams).length === 0 &&
+    metadata === undefined
+  );
+}

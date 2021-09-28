@@ -38,7 +38,7 @@ describe('ElasticsearchService', () => {
     let mockStatusSubject: BehaviorSubject<CoreStatus>;
     let mockLicenseSubject: BehaviorSubject<SecurityLicenseFeatures>;
     beforeEach(() => {
-      mockLicenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
+      mockLicenseSubject = new BehaviorSubject({} as unknown as SecurityLicenseFeatures);
       mockLicense = licenseMock.create();
       mockLicense.isEnabled.mockReturnValue(false);
       mockLicense.features$ = mockLicenseSubject;
@@ -134,7 +134,7 @@ describe('ElasticsearchService', () => {
       expect(mockHandler).toHaveBeenCalledTimes(4);
 
       // New changes still trigger handler once again and reset retry timer.
-      mockLicenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
       expect(mockHandler).toHaveBeenCalledTimes(5);
 
       // Retry timer is reset.
@@ -167,7 +167,7 @@ describe('ElasticsearchService', () => {
       expect(mockHandler).toHaveBeenCalledTimes(1);
 
       // New changes should immediately call handler.
-      mockLicenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
       expect(mockHandler).toHaveBeenCalledTimes(2);
 
       // Retry timeout should have been cancelled.

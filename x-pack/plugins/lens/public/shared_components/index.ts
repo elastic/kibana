@@ -14,3 +14,4 @@ export * from './coloring';
 export { useDebouncedValue } from './debounced_value';
 export * from './helpers';
 export { LegendActionPopover } from './legend_action_popover';
+export * from './static_header';

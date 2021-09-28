@@ -30,7 +30,8 @@ export abstract class Container<
     TContainerOutput extends ContainerOutput = ContainerOutput
   >
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput>
+{
   public readonly isContainer: boolean = true;
   public readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
@@ -150,13 +151,13 @@ export abstract class Container<
       explicitFiltered[key] = explicitInput[key];
     });
 
-    return ({
+    return {
       ...containerInput,
       ...explicitFiltered,
       // Typescript has difficulties with inferring this type but it is accurate with all
       // tests I tried. Could probably be revisted with future releases of TS to see if
       // it can accurately infer the type.
-    } as unknown) as TEmbeddableInput;
+    } as unknown as TEmbeddableInput;
   }
 
   public destroy() {
@@ -229,7 +230,7 @@ export abstract class Container<
 
   /**
    * Return state that comes from the container and is passed down to the child. For instance, time range and
-   * filters are common inherited input state. Note that any state stored in `this.input.panels[embeddableId].explicitInput`
+   * filters are common inherited input state. Note that state stored in `this.input.panels[embeddableId].explicitInput`
    * will override inherited input.
    */
   protected abstract getInheritedInput(id: string): TChildInput;
@@ -308,8 +309,7 @@ export abstract class Container<
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
 
-      // TODO: lets get rid of this distinction with factories, I don't think it will be needed
-      // anymore after this change.
+      // TODO: lets get rid of this distinction with factories, I don't think it will be needed after this change.
       embeddable = isSavedObjectEmbeddableInput(inputForChild)
         ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);

@@ -139,9 +139,11 @@ describe('Jira Fields', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
     await waitFor(() =>
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: 'parentId', value: 'parentId' }])
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: 'parentId', value: 'parentId' }])
     );
     wrapper.update();
     expect(onChange).toHaveBeenCalledWith({
@@ -164,9 +166,11 @@ describe('Jira Fields', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
     await waitFor(() =>
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onSearchChange: (a: string) => void;
-      }).onSearchChange('womanId')
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange('womanId')
     );
     wrapper.update();
     expect(useGetIssuesMock.mock.calls[2][0].query).toEqual('womanId');

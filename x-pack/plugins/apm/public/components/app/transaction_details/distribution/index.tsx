@@ -17,18 +17,24 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { useUiTracker } from '../../../../../../observability/public';
+
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import {
   APM_SEARCH_STRATEGIES,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../../common/search_strategies/constants';
+
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
-import { useUiTracker } from '../../../../../../observability/public';
+import {
+  TransactionDistributionChart,
+  TransactionDistributionChartData,
+} from '../../../shared/charts/transaction_distribution_chart';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
 import { getOverallHistogram } from '../../correlations/utils/get_overall_histogram';
 
@@ -132,6 +138,19 @@ export function TransactionDistribution({
     trackApmEvent({ metric: 'transaction_distribution_chart_clear_selection' });
   };
 
+  const transactionDistributionChartData: TransactionDistributionChartData[] =
+    [];
+
+  if (Array.isArray(overallHistogram)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+        { defaultMessage: 'All transactions' }
+      ),
+      histogram: overallHistogram,
+    });
+  }
+
   return (
     <div data-test-subj="apmTransactionDistributionTabContent">
       <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}>
@@ -193,10 +212,10 @@ export function TransactionDistribution({
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
+        data={transactionDistributionChartData}
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={response.percentileThresholdValue ?? 0}
-        overallHistogram={overallHistogram}
         onChartSelection={onTrackedChartSelection}
         hasData={hasData}
         selection={selection}
