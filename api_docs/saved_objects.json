@@ -671,14 +671,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
           }
         ],
         "children": [
@@ -758,7 +750,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
@@ -1245,7 +1237,7 @@
           },
           ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
-          ", \"savedObjectsClient\" | \"overlays\">) => Promise<true>"
+          ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
         ],
         "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
         "deprecated": false,
@@ -1310,7 +1302,7 @@
             "signature": [
               "Pick<",
               "SavedObjectKibanaServices",
-              ", \"savedObjectsClient\" | \"overlays\">"
+              ", \"overlays\" | \"savedObjectsClient\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -1511,7 +1503,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1711,7 +1703,15 @@
                     "section": "def-public.SavedObjectsBatchResponse",
                     "text": "SavedObjectsBatchResponse"
                   },
-                  "<unknown>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+                  "<unknown>>; bulkResolve: <T = unknown>(objects?: { id: string; type: string; }[]) => Promise<{ resolved_objects: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.ResolvedSimpleSavedObject",
+                    "text": "ResolvedSimpleSavedObject"
+                  },
+                  "<T>[]; }>; resolve: <T = unknown>(type: string, id: string) => Promise<",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -2512,7 +2512,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -2947,7 +2947,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },

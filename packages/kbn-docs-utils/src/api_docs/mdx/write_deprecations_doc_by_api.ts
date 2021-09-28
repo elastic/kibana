@@ -50,7 +50,7 @@ export function writeDeprecationDocByApi(
     .sort((a, b) => {
       const aRemoveBy = deprecationReferencesByApi[a].deprecatedApi.removeBy ?? '';
       const bRemoveBy = deprecationReferencesByApi[b].deprecatedApi.removeBy ?? '';
-      return bRemoveBy.localeCompare(aRemoveBy);
+      return aRemoveBy.localeCompare(bRemoveBy);
     })
     .map((key) => {
       const api = deprecationReferencesByApi[key].deprecatedApi;

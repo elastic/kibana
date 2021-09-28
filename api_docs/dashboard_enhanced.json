@@ -608,13 +608,7 @@
               "; url: ",
               "UrlService",
               "; navigate(options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.RedirectOptions",
-                "text": "RedirectOptions"
-              },
+              "RedirectOptions",
               "<",
               "SerializableRecord",
               ">): void; }"
@@ -713,13 +707,7 @@
               "; url: ",
               "UrlService",
               "; navigate(options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.RedirectOptions",
-                "text": "RedirectOptions"
-              },
+              "RedirectOptions",
               "<",
               "SerializableRecord",
               ">): void; }"

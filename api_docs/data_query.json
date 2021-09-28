@@ -729,7 +729,7 @@
           {
             "pluginId": "data",
             "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
+            "docId": "kibDataDataViewsPluginApi",
             "section": "def-common.IndexPattern",
             "text": "IndexPattern"
           },
@@ -840,7 +840,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -999,7 +999,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">) => ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"bulkUpdate\">) => ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -1027,7 +1027,7 @@
                 "section": "def-public.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
             ],
             "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
             "deprecated": false,
@@ -1117,7 +1117,7 @@
           {
             "pluginId": "data",
             "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
+            "docId": "kibDataDataViewsPluginApi",
             "section": "def-common.IFieldType",
             "text": "IFieldType"
           },
@@ -1164,7 +1164,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IFieldType",
                 "text": "IFieldType"
               }
@@ -1276,7 +1276,7 @@
           {
             "pluginId": "data",
             "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
+            "docId": "kibDataDataViewsPluginApi",
             "section": "def-common.IIndexPattern",
             "text": "IIndexPattern"
           },
@@ -1310,7 +1310,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IIndexPattern",
                 "text": "IIndexPattern"
               },
@@ -1378,7 +1378,7 @@
           {
             "pluginId": "data",
             "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
+            "docId": "kibDataDataViewsPluginApi",
             "section": "def-common.IndexPattern",
             "text": "IndexPattern"
           },
@@ -1487,7 +1487,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -2051,7 +2051,7 @@
           {
             "pluginId": "data",
             "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
+            "docId": "kibDataDataViewsPluginApi",
             "section": "def-common.IndexPattern",
             "text": "IndexPattern"
           },
@@ -2164,7 +2164,29 @@
           {
             "pluginId": "data",
             "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
+            "docId": "kibDataDataViewsPluginApi",
+            "section": "def-common.IIndexPattern",
+            "text": "IIndexPattern"
+          },
+          ", timeRange?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined) => ",
+          "RangeFilter",
+          " | ",
+          "ScriptedRangeFilter",
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined; createRelativeFilter: (indexPattern: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataDataViewsPluginApi",
             "section": "def-common.IIndexPattern",
             "text": "IIndexPattern"
           },
@@ -2425,6 +2447,124 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getRelativeTime",
+        "type": "Function",
+        "tags": [],
+        "label": "getRelativeTime",
+        "description": [],
+        "signature": [
+          "(indexPattern: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataDataViewsPluginApi",
+            "section": "def-common.IIndexPattern",
+            "text": "IIndexPattern"
+          },
+          " | undefined, timeRange: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
+          "RangeFilter",
+          " | ",
+          "ScriptedRangeFilter",
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
+        ],
+        "path": "src/plugins/data/common/query/timefilter/get_time.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getRelativeTime.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataDataViewsPluginApi",
+                "section": "def-common.IIndexPattern",
+                "text": "IIndexPattern"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getRelativeTime.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
+            ],
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getRelativeTime.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.getRelativeTime.$3.forceNow",
+                "type": "Object",
+                "tags": [],
+                "label": "forceNow",
+                "description": [],
+                "signature": [
+                  "Date | undefined"
+                ],
+                "path": "src/plugins/data/common/query/timefilter/get_time.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.getRelativeTime.$3.fieldName",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/query/timefilter/get_time.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.getTime",
         "type": "Function",
         "tags": [],
@@ -2435,7 +2575,7 @@
           {
             "pluginId": "data",
             "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
+            "docId": "kibDataDataViewsPluginApi",
             "section": "def-common.IIndexPattern",
             "text": "IIndexPattern"
           },
@@ -2469,7 +2609,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IIndexPattern",
                 "text": "IIndexPattern"
               },

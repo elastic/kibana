@@ -136,7 +136,7 @@
             "label": "submit",
             "description": [],
             "signature": [
-              "(e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined) => Promise<{ data: ",
+              "(e?: React.MouseEvent<Element, MouseEvent> | React.FormEvent<HTMLFormElement> | undefined) => Promise<{ data: ",
               {
                 "pluginId": "runtimeFields",
                 "scope": "public",
@@ -158,7 +158,7 @@
                 "label": "e",
                 "description": [],
                 "signature": [
-                  "React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined"
+                  "React.MouseEvent<Element, MouseEvent> | React.FormEvent<HTMLFormElement> | undefined"
                 ],
                 "path": "src/plugins/es_ui_shared/static/forms/hook_form_lib/types.ts",
                 "deprecated": false
