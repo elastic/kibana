@@ -36,9 +36,10 @@ export async function getFilesForCommit(gitRef) {
       .split('\n')
       // Ignore blank lines
       .filter((line) => line.trim().length > 0)
-      .map(
-        (path) =>
-          new File(path, () => fcb((cb) => simpleGit.catFile(['-p', gitCatPrefix + path], cb)))
-      )
+      .map((path) => {
+        const file = new File(path);
+        file.setFileReader(() => fcb((cb) => simpleGit.catFile(['-p', gitCatPrefix + path], cb)));
+        return file;
+      })
   );
 }
