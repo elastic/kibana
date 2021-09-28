@@ -156,6 +156,7 @@ export const tutorialSchema = schema.object({
   customStatusCheckName: schema.maybe(schema.string()),
 
   integrationBrowserCategories: schema.maybe(schema.arrayOf(schema.string())),
+  eprPackageOverlap: schema.maybe(schema.string()),
 });
 
 export type TutorialSchema = TypeOf<typeof tutorialSchema>;

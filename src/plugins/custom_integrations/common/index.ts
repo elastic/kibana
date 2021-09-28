@@ -59,4 +59,5 @@ export interface CustomIntegration {
   eprOverlap?: string;
 }
 
-export const ROUTES_ADDABLECUSTOMINTEGRATIONS = `/api/${PLUGIN_ID}/appendCustomIntegrations`;
+export const ROUTES_APPEND_CUSTOM_INTEGRATIONS = `/api/${PLUGIN_ID}/appendCustomIntegrations`;
+export const ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS = `/api/${PLUGIN_ID}/replacementCustomIntegrations`;

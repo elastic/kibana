@@ -15,23 +15,17 @@ import {
 import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
-import { Category, CATEGORY_DISPLAY } from '../../../../custom_integrations/common';
+import { Category } from '../../../../custom_integrations/common';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 
 function registerTutorialWithCustomIntegrations(
   customIntegrations: CustomIntegrationsPluginSetup,
   tutorial: TutorialSchema
 ) {
-  const allowedCategories: Category[] = (tutorial.integrationBrowserCategories ?? []).filter(
-    (category) => {
-      return CATEGORY_DISPLAY.hasOwnProperty(category);
-    }
-  ) as Category[];
-
   customIntegrations.registerCustomIntegration({
     id: tutorial.id,
     title: tutorial.name,
-    categories: allowedCategories,
+    categories: (tutorial.integrationBrowserCategories ?? []) as Category[],
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
     icons: tutorial.euiIconType
@@ -44,6 +38,7 @@ function registerTutorialWithCustomIntegrations(
       : [],
     shipper: 'tutorial',
     isBeta: false,
+    eprOverlap: tutorial.eprPackageOverlap,
   });
 }
 
@@ -55,7 +50,7 @@ function registerBeatsTutorialsWithCustomIntegrations(
   customIntegrations.registerCustomIntegration({
     id: tutorial.name,
     title: tutorial.name,
-    categories: [], // For beats packages, we don't know categories
+    categories: tutorial.integrationBrowserCategories as Category[],
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
     icons: tutorial.euiIconType

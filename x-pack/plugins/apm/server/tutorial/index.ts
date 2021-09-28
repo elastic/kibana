@@ -108,6 +108,8 @@ It allows you to monitor the performance of thousands of applications in real ti
       onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),
       elasticCloud: createElasticCloudInstructions(cloud),
       previewImagePath: '/plugins/apm/assets/apm.png',
+      eprPackageOverlap: 'apm',
+      integrationBrowserCategories: ['web'],
       savedObjects,
       savedObjectsInstallMsg: i18n.translate(
         'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',

@@ -7,10 +7,14 @@
  */
 
 import { Logger } from 'kibana/server';
-import { CustomIntegration } from '../common';
+import { Category, CATEGORY_DISPLAY, CustomIntegration } from '../common';
 
-function isAddable(integration: CustomIntegration) {
-  return integration.categories.length;
+function isAddable(integration: CustomIntegration): boolean {
+  return !!integration.categories.length && !integration.eprOverlap;
+}
+
+function isReplacement(integration: CustomIntegration): boolean {
+  return !!integration.categories.length && !!integration.eprOverlap;
 }
 
 export class CustomIntegrationRegistry {
@@ -39,10 +43,20 @@ export class CustomIntegrationRegistry {
       return;
     }
 
-    this._integrations.push(customIntegration);
+    const allowedCategories: Category[] = (customIntegration.categories ?? []).filter(
+      (category) => {
+        return CATEGORY_DISPLAY.hasOwnProperty(category);
+      }
+    ) as Category[];
+
+    this._integrations.push({ ...customIntegration, categories: allowedCategories });
   }
 
   getAppendCustomIntegrations(): CustomIntegration[] {
     return this._integrations.filter(isAddable);
+  }
+
+  getReplacementCustomIntegrations(): CustomIntegration[] {
+    return this._integrations.filter(isReplacement);
   }
 }
