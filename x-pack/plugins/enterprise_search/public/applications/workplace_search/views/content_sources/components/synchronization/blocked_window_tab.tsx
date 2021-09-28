@@ -41,8 +41,8 @@ export const BlockedWindows: React.FC = () => {
 
   const blockedWindowItems = (
     <>
-      {blockedWindows.map((blockedWindow) => (
-        <BlockedWindowItem blockedWindow={blockedWindow} />
+      {blockedWindows.map((blockedWindow, i) => (
+        <BlockedWindowItem key={i} blockedWindow={blockedWindow} />
       ))}
       <EuiSpacer />
       <EuiButton onClick={addBlockedWindow}>{ADD_LABEL}</EuiButton>

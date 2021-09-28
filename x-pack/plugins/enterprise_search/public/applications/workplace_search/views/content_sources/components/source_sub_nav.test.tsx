@@ -90,7 +90,7 @@ describe('useSourceSubNav', () => {
   it('returns extra nav items for synchronization', () => {
     setMockValues({
       isOrganization: true,
-      contentSource: { id: '2', isIndexedSource: true, name: 'foo' },
+      contentSource: { id: '2', isIndexedSource: true, name: 'foo', isSyncConfigEnabled: true },
     });
 
     expect(useSourceSubNav()).toEqual([
