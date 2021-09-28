@@ -115,7 +115,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     // no data results on groups that get removed
     const groups = [...new Set([...prevGroups, ...resultGroups])];
 
-    const isNotUngrouped = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
+    const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
 
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
@@ -165,7 +165,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
         // If there are more groups present than ['*'], AND alertOnGroupDisappear is true, then a nextState of NO_DATA
         // would indicate a disappeared group
-        const noDataStateIndicatesDisappearedGroup = alertOnGroupDisappear && isNotUngrouped;
+        const noDataStateIndicatesDisappearedGroup = alertOnGroupDisappear && hasGroups;
         // With that information, we can determine whether to alert on nextState === NO_DATA, if:
         // 1. alertOnNoData is true, or
         // 2. alertOnNoData is false, alertOnGroupDisappear is true, and a group has disappeared
