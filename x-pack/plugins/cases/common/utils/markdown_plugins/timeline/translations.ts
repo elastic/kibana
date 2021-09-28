@@ -44,7 +44,7 @@ export const NO_ID_FIELD = i18n.translate(
 );
 
 export const FAILED_PARSE_URL_WITH_ERROR = (error: string) =>
-  i18n.translate('xpack.cases.markdownEditor.plugins.timeline.noIdInQueryParamsMsg', {
+  i18n.translate('xpack.cases.markdownEditor.plugins.timeline.failedToParseUrlWithErrorMsg', {
     defaultMessage: 'Failed to parse timeline url: { error }',
     values: { error },
   });
