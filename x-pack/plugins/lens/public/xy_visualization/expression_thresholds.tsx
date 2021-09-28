@@ -8,10 +8,10 @@
 import React from 'react';
 import { groupBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
-import { RectAnnotation, AnnotationDomainType, LineAnnotation } from '@elastic/charts';
+import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import type { PaletteRegistry, SeriesLayer } from 'src/plugins/charts/public';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
-import type { LayerArgs } from '../../common/expressions';
+import type { LayerArgs, YConfig } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
 import type { ColorAssignments } from './color_assignment';
 
@@ -22,25 +22,57 @@ function hasIcon(icon: string | undefined): icon is string {
 }
 
 // Note: it does take into consideration whether the threshold is in view or not
-export const getThresholdRequiredPaddings = (thresholdLayers: LayerArgs[]) => ({
-  ...(thresholdLayers.some((thresholdLayer) =>
-    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'right' && hasIcon(icon))
-  )
-    ? { right: THRESHOLD_ICON_SIZE }
-    : null),
-  ...(thresholdLayers.some((thresholdLayer) =>
-    thresholdLayer.yConfig?.some(({ axisMode, icon }) => axisMode === 'bottom' && hasIcon(icon))
-  )
-    ? { bottom: THRESHOLD_ICON_SIZE }
-    : null),
-  ...(thresholdLayers.some((thresholdLayer) =>
-    thresholdLayer.yConfig?.some(
-      ({ axisMode, icon }) => hasIcon(icon) && (axisMode === 'left' || axisMode == null)
-    )
-  )
-    ? { left: THRESHOLD_ICON_SIZE }
-    : null),
-});
+export const getThresholdRequiredPaddings = (
+  thresholdLayers: LayerArgs[],
+  axesMap: Record<'left' | 'right', unknown>
+) => {
+  return thresholdLayers.reduce(
+    (memo, layer) => {
+      if (!Object.values(memo).some(Boolean)) {
+        layer.yConfig?.forEach(({ axisMode, icon, iconPosition }) => {
+          if (axisMode && hasIcon(icon)) {
+            const placement = getIconPlacement(iconPosition, axisMode, axesMap);
+            memo[placement] = THRESHOLD_ICON_SIZE;
+          }
+        });
+      }
+      return memo;
+    },
+    { left: undefined, right: undefined, bottom: undefined, top: undefined } as Record<
+      Position,
+      number | undefined
+    >
+  );
+};
+
+// if there's just one axis, put it on the other one
+// otherwise use the same axis
+function getIconPlacement(
+  iconPosition: YConfig['iconPosition'],
+  axisMode: YConfig['axisMode'],
+  axesMap: Record<string, unknown>
+) {
+  if (iconPosition === 'auto') {
+    if (axisMode === 'bottom') {
+      return Position.Top;
+    }
+    if (axisMode === 'left') {
+      return axesMap.right ? Position.Left : Position.Right;
+    }
+    return axesMap.left ? Position.Right : Position.Left;
+  }
+
+  if (iconPosition === 'left') {
+    return Position.Left;
+  }
+  if (iconPosition === 'right') {
+    return Position.Right;
+  }
+  if (iconPosition === 'below') {
+    return Position.Bottom;
+  }
+  return Position.Top;
+}
 
 export const ThresholdAnnotations = ({
   thresholdLayers,
@@ -49,6 +81,7 @@ export const ThresholdAnnotations = ({
   formatters,
   paletteService,
   syncColors,
+  axesMap,
 }: {
   thresholdLayers: LayerArgs[];
   data: LensMultiTable;
@@ -56,6 +89,7 @@ export const ThresholdAnnotations = ({
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   paletteService: PaletteRegistry;
   syncColors: boolean;
+  axesMap: Record<'left' | 'right', boolean>;
 }) => {
   return (
     <>
@@ -114,6 +148,7 @@ export const ThresholdAnnotations = ({
           const props = {
             groupId,
             marker: hasIcon(yConfig.icon) ? <EuiIcon type={yConfig.icon} /> : undefined,
+            markerPosition: getIconPlacement(yConfig.iconPosition, yConfig.axisMode, axesMap),
           };
           const annotations = [];
 

@@ -316,7 +316,11 @@ export function XYChart({
     Boolean(isHistogramViz)
   );
 
-  const thresholdPaddings = getThresholdRequiredPaddings(thresholdLayers);
+  const yAxesMap = {
+    left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
+    right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
+  };
+  const thresholdPaddings = getThresholdRequiredPaddings(thresholdLayers, yAxesMap);
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
@@ -538,6 +542,7 @@ export function XYChart({
               !axisTitlesVisibilitySettings.yLeft && { left: thresholdPaddings.left }),
             ...(!tickLabelsVisibilitySettings?.yRight &&
               !axisTitlesVisibilitySettings.yRight && { right: thresholdPaddings.right }),
+            ...(thresholdPaddings.top && { top: thresholdPaddings.top }),
           },
         }}
         baseTheme={chartBaseTheme}
@@ -875,9 +880,13 @@ export function XYChart({
           syncColors={syncColors}
           paletteService={paletteService}
           formatters={{
-            left: yAxesConfiguration.find(({ groupId }) => groupId === 'left')?.formatter,
-            right: yAxesConfiguration.find(({ groupId }) => groupId === 'right')?.formatter,
+            left: yAxesMap.left?.formatter,
+            right: yAxesMap.right?.formatter,
             bottom: xAxisFormatter,
+          }}
+          axesMap={{
+            left: Boolean(yAxesMap.left),
+            right: Boolean(yAxesMap.right),
           }}
         />
       ) : null}

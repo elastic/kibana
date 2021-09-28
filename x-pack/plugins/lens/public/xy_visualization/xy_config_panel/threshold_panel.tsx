@@ -14,7 +14,7 @@ import type { VisualizationDimensionEditorProps } from '../../types';
 import { State } from '../types';
 import { FormatFactory } from '../../../common';
 import { YConfig } from '../../../common/expressions';
-import { LineStyle, FillStyle } from '../../../common/expressions/xy_chart';
+import { LineStyle, FillStyle, IconPosition } from '../../../common/expressions/xy_chart';
 
 import { ColorPicker } from './color_picker';
 import { updateLayer, idPrefix } from '.';
@@ -109,13 +109,84 @@ const IconSelect = ({
   );
 };
 
+function getIconPositionOptions({
+  isHorizontal,
+  axisMode,
+}: {
+  isHorizontal: boolean;
+  axisMode: YConfig['axisMode'];
+}) {
+  const options = [
+    {
+      id: `${idPrefix}auto`,
+      label: i18n.translate('xpack.lens.xyChart.thresholdMarker.auto', {
+        defaultMessage: 'Auto',
+      }),
+      'data-test-subj': 'lnsXY_markerPosition_auto',
+    },
+  ];
+  if (axisMode === 'bottom') {
+    return [
+      ...options,
+      {
+        id: `${idPrefix}above`,
+        label: !isHorizontal
+          ? i18n.translate('xpack.lens.xyChart.markerPosition.above', {
+              defaultMessage: 'Above',
+            })
+          : i18n.translate('xpack.lens.xyChart.markerPosition.left', {
+              defaultMessage: 'Left',
+            }),
+        'data-test-subj': 'lnsXY_markerPosition_above',
+      },
+      {
+        id: `${idPrefix}below`,
+        label: !isHorizontal
+          ? i18n.translate('xpack.lens.xyChart.markerPosition.below', {
+              defaultMessage: 'Below',
+            })
+          : i18n.translate('xpack.lens.xyChart.markerPosition.right', {
+              defaultMessage: 'Right',
+            }),
+        'data-test-subj': 'lnsXY_markerPosition_below',
+      },
+    ];
+  }
+  return [
+    ...options,
+    {
+      id: `${idPrefix}left`,
+      label: isHorizontal
+        ? i18n.translate('xpack.lens.xyChart.markerPosition.above', {
+            defaultMessage: 'Above',
+          })
+        : i18n.translate('xpack.lens.xyChart.markerPosition.left', {
+            defaultMessage: 'Left',
+          }),
+      'data-test-subj': 'lnsXY_markerPosition_left',
+    },
+    {
+      id: `${idPrefix}right`,
+      label: isHorizontal
+        ? i18n.translate('xpack.lens.xyChart.markerPosition.below', {
+            defaultMessage: 'Below',
+          })
+        : i18n.translate('xpack.lens.xyChart.markerPosition.right', {
+            defaultMessage: 'Right',
+          }),
+      'data-test-subj': 'lnsXY_markerPosition_right',
+    },
+  ];
+}
+
 export const ThresholdPanel = (
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
+    isHorizontal: boolean;
   }
 ) => {
-  const { state, setState, layerId, accessor } = props;
+  const { state, setState, layerId, accessor, isHorizontal } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
 
@@ -259,7 +330,7 @@ export const ThresholdPanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisSide.icon', {
+        label={i18n.translate('xpack.lens.xyChart.thresholdMarker.icon', {
           defaultMessage: 'Icon',
         })}
       >
@@ -270,6 +341,34 @@ export const ThresholdPanel = (
           }}
         />
       </EuiFormRow>
+      {currentYConfig?.icon && currentYConfig.icon !== 'none' && (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
+            defaultMessage: 'Icon position',
+          })}
+        >
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
+              defaultMessage: 'Icon position',
+            })}
+            data-test-subj="lnsXY_markerPosition_threshold"
+            name="markerPosition"
+            buttonSize="compressed"
+            options={getIconPositionOptions({
+              isHorizontal,
+              axisMode: currentYConfig!.axisMode,
+            })}
+            idSelected={`${idPrefix}${currentYConfig?.iconPosition || 'auto'}`}
+            onChange={(id) => {
+              const newMode = id.replace(idPrefix, '') as IconPosition;
+              setYConfig({ forAccessor: accessor, iconPosition: newMode });
+            }}
+          />
+        </EuiFormRow>
+      )}
     </>
   );
 };
