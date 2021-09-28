@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import * as DateFormatHook from '../../../hooks/use_date_format';
+import * as useUiSettingHook from '../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
 import type { TopAlert } from '../';
 import { AlertsFlyout } from './';
 
 describe('AlertsFlyout', () => {
-  jest.spyOn(DateFormatHook, 'useDateFormat').mockImplementation(() => '');
+  jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => '');
 
   const observabilityRuleTypeRegistryMock = createObservabilityRuleTypeRegistryMock();
 
