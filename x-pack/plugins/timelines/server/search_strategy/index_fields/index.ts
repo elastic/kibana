@@ -96,32 +96,24 @@ export const requestIndexFieldSearch = async (
   let existingIndices: string[] = [];
   let indexFields: IndexField[] = [];
   let runtimeMappings = {};
-  console.log('REQUEST', request);
 
   // if dataViewId is provided, get fields and indices from the Kibana Data View
   if ('dataViewId' in request) {
-    console.log('case 1');
     const dataView = await dataViewService.get(request.dataViewId);
     const patternList = dataView.title.split(',');
     indicesExist = await findExistingIndices(patternList, esClient.asCurrentUser);
-    console.log('case 2');
     existingIndices = patternList.filter((index, i) => indicesExist[i]);
     if (!request.onlyCheckIfIndicesExist) {
-      console.log('case 3');
       // type cast because index pattern type is FieldSpec and timeline type is FieldDescriptor, same diff
       const fieldDescriptor = [Object.values(dataView.fields.toSpec()) as FieldDescriptor[]];
       runtimeMappings = dataView.toSpec().runtimeFieldMap ?? {};
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
-      console.log('case 4');
     }
   } else if ('indices' in request) {
-    console.log('case 5');
     const dedupeIndices = dedupeIndexName(request.indices);
     indicesExist = await findExistingIndices(dedupeIndices, esClient.asCurrentUser);
-    console.log('case 6');
     existingIndices = dedupeIndices.filter((index, i) => indicesExist[i]);
     if (!request.onlyCheckIfIndicesExist) {
-      console.log('case 7');
       const fieldDescriptor = await Promise.all(
         dedupeIndices
           .filter((index, i) => indicesExist[i])
@@ -136,9 +128,7 @@ export const requestIndexFieldSearch = async (
             });
           })
       );
-      console.log('case 8');
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, dedupeIndices);
-      console.log('case 9');
     }
   }
 
