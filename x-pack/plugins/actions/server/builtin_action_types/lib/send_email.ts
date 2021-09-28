@@ -99,7 +99,7 @@ async function sendEmailWithExchange(
     return await sendEmailGraphApi(
       {
         options,
-        headers: await getGraphApiHeaders(options, logger),
+        headers: await getGraphApiHeaders(options, logger, true),
         messageHTML,
         graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
       },
@@ -111,12 +111,16 @@ async function sendEmailWithExchange(
   return result;
 }
 
-async function getGraphApiHeaders(options: SendEmailOptions, logger: Logger) {
+async function getGraphApiHeaders(
+  options: SendEmailOptions,
+  logger: Logger,
+  force: boolean = false
+) {
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = options.transport;
   let accessToken = options.transport.accessToken;
   let tokenType = options.transport.tokenType;
 
-  if (!accessToken) {
+  if (!accessToken || force) {
     const tokenResult = await requestOAuthClientCredentialsToken(
       oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
       logger,
