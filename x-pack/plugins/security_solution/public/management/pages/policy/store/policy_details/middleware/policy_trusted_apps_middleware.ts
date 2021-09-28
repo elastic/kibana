@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import { find, isEmpty } from 'lodash/fp';
 import { PolicyDetailsState, MiddlewareRunner } from '../../../types';
 import {
   policyIdFromParams,
   isOnPolicyTrustedAppsPage,
   getCurrentArtifactsLocation,
-  getAvailableArtifactsList,
+  getAssignableArtifactsList,
 } from '../selectors';
 import {
   ImmutableArray,
+  ImmutableObject,
   PostTrustedAppCreateRequest,
+  TrustedApp,
 } from '../../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareAPI } from '../../../../../../common/store';
 import { TrustedAppsHttpService, TrustedAppsService } from '../../../../trusted_apps/service';
@@ -29,7 +32,7 @@ import { parseQueryFilterToKQL } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
 import { PolicyDetailsAction } from '../action';
 
-const checkIfThereAreAvailableTrustedApps = async (
+const checkIfThereAreAssignableTrustedApps = async (
   store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
   trustedAppsService: TrustedAppsService
 ) => {
@@ -37,7 +40,7 @@ const checkIfThereAreAvailableTrustedApps = async (
   const policyId = policyIdFromParams(state);
 
   store.dispatch({
-    type: 'policyArtifactsAvailableListExistDataChanged',
+    type: 'policyArtifactsAssignableListExistDataChanged',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
     // @ts-ignore
     payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
@@ -50,12 +53,12 @@ const checkIfThereAreAvailableTrustedApps = async (
     });
 
     store.dispatch({
-      type: 'policyArtifactsAvailableListExistDataChanged',
+      type: 'policyArtifactsAssignableListExistDataChanged',
       payload: createLoadedResourceState(!isEmpty(trustedApps.data)),
     });
   } catch (err) {
     store.dispatch({
-      type: 'policyArtifactsAvailableListExistDataChanged',
+      type: 'policyArtifactsAssignableListExistDataChanged',
       // Ignore will be fixed with when AsyncResourceState is refactored (#830)
       // @ts-ignore
       payload: createFailedResourceState(err.body ?? err),
@@ -72,7 +75,7 @@ const searchTrustedApps = async (
   const policyId = policyIdFromParams(state);
 
   store.dispatch({
-    type: 'policyArtifactsAvailableListPageDataChanged',
+    type: 'policyArtifactsAssignableListPageDataChanged',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
     // @ts-ignore
     payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
@@ -95,22 +98,27 @@ const searchTrustedApps = async (
     });
 
     store.dispatch({
-      type: 'policyArtifactsAvailableListPageDataChanged',
+      type: 'policyArtifactsAssignableListPageDataChanged',
       payload: createLoadedResourceState(trustedApps),
     });
 
     if (isEmpty(trustedApps.data)) {
-      checkIfThereAreAvailableTrustedApps(store, trustedAppsService);
+      checkIfThereAreAssignableTrustedApps(store, trustedAppsService);
     }
   } catch (err) {
     store.dispatch({
-      type: 'policyArtifactsAvailableListPageDataChanged',
+      type: 'policyArtifactsAssignableListPageDataChanged',
       // Ignore will be fixed with when AsyncResourceState is refactored (#830)
       // @ts-ignore
       payload: createFailedResourceState(err.body ?? err),
     });
   }
 };
+
+interface UpdateTrustedAppWrapperProps {
+  entry: ImmutableObject<TrustedApp>;
+  policies: ImmutableArray<string>;
+}
 
 const updateTrustedApps = async (
   store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
@@ -119,7 +127,7 @@ const updateTrustedApps = async (
 ) => {
   const state = store.getState();
   const policyId = policyIdFromParams(state);
-  const availavleArtifacts = getAvailableArtifactsList(state);
+  const availavleArtifacts = getAssignableArtifactsList(state);
 
   if (!availavleArtifacts || !availavleArtifacts.data.length) {
     return;
@@ -135,23 +143,31 @@ const updateTrustedApps = async (
   try {
     const trustedAppsUpdateActions = [];
 
+    const updateTrustedApp = async ({ entry, policies }: UpdateTrustedAppWrapperProps) =>
+      trustedAppsService.updateTrustedApp({ id: entry.id }, {
+        effectScope: { type: 'policy', policies: [...policies, policyId] },
+        name: entry.name,
+        entries: entry.entries,
+        os: entry.os,
+        description: entry.description,
+        version: entry.version,
+      } as PostTrustedAppCreateRequest);
+
     for (const entryId of trustedAppsIds) {
-      const entry = find({ id: entryId }, availavleArtifacts.data);
+      const entry = find({ id: entryId }, availavleArtifacts.data) as ImmutableObject<TrustedApp>;
       if (entry) {
         const policies = entry.effectScope.type === 'policy' ? entry.effectScope.policies : [];
-        const trustedApp = trustedAppsService.updateTrustedApp({ id: entry.id }, {
-          effectScope: { type: 'policy', policies: [...policies, policyId] },
-          name: entry.name,
-          entries: entry.entries,
-          os: entry.os,
-          description: entry.description,
-          version: entry.version,
-        } as PostTrustedAppCreateRequest);
-        trustedAppsUpdateActions.push(trustedApp);
+        trustedAppsUpdateActions.push({ entry, policies });
       }
     }
 
-    const updatedTrustedApps = await Promise.all(trustedAppsUpdateActions);
+    const updatedTrustedApps = await pMap(trustedAppsUpdateActions, updateTrustedApp, {
+      concurrency: 5,
+      /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to settle
+       * and then reject with an aggregated error containing all the errors from the rejected promises. */
+      stopOnError: false,
+    });
+
     store.dispatch({
       type: 'policyArtifactsUpdateTrustedAppsChanged',
       payload: createLoadedResourceState(updatedTrustedApps),
@@ -187,7 +203,7 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
   ) {
     await updateTrustedApps(store, trustedAppsService, action.payload.trustedAppIds);
   } else if (
-    action.type === 'policyArtifactsAvailableListPageDataFilter' &&
+    action.type === 'policyArtifactsAssignableListPageDataFilter' &&
     isOnPolicyTrustedAppsPage(state) &&
     getCurrentArtifactsLocation(state).show === 'list'
   ) {
