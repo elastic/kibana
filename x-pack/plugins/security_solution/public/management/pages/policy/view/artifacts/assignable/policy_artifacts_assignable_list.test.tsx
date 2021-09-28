@@ -36,7 +36,7 @@ describe('Policy artifacts list', () => {
     const emptyArtifactsResponse = { data: [], per_page: 0, page: 0, total: 0 };
     const component = render({
       artifacts: emptyArtifactsResponse,
-      defaultSelectedArtifactIds: [],
+      selectedArtifactIds: [],
       isListLoading: true,
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
     });
@@ -48,7 +48,7 @@ describe('Policy artifacts list', () => {
     const emptyArtifactsResponse = { data: [], per_page: 0, page: 0, total: 0 };
     const component = render({
       artifacts: emptyArtifactsResponse,
-      defaultSelectedArtifactIds: [],
+      selectedArtifactIds: [],
       isListLoading: false,
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
     });
@@ -59,7 +59,7 @@ describe('Policy artifacts list', () => {
     const artifactsResponse = getMockListResponse();
     const component = render({
       artifacts: artifactsResponse,
-      defaultSelectedArtifactIds: [],
+      selectedArtifactIds: [],
       isListLoading: false,
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
     });
@@ -70,7 +70,7 @@ describe('Policy artifacts list', () => {
     const artifactsResponse = getMockListResponse();
     const component = render({
       artifacts: artifactsResponse,
-      defaultSelectedArtifactIds: [artifactsResponse.data[0].id],
+      selectedArtifactIds: [artifactsResponse.data[0].id],
       isListLoading: false,
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
     });
@@ -80,9 +80,6 @@ describe('Policy artifacts list', () => {
       fireEvent.click(tACardCheckbox);
     });
 
-    expect(selectedArtifactsUpdatedMock).toHaveBeenCalledWith([
-      artifactsResponse.data[0].id,
-      artifactsResponse.data[1].id,
-    ]);
+    expect(selectedArtifactsUpdatedMock).toHaveBeenCalledWith(artifactsResponse.data[1].id, true);
   });
 });

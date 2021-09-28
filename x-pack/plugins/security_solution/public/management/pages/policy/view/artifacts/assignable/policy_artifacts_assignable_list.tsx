@@ -17,31 +17,21 @@ import { ArtifactEntryCardMinified } from '../../../../../components/artifact_en
 
 export interface PolicyArtifactsAssignableListProps {
   artifacts: Immutable<GetTrustedListAppsResponse | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
-  defaultSelectedArtifactIds: string[];
-  selectedArtifactsUpdated: (ids: string[]) => void;
+  selectedArtifactIds: string[];
+  selectedArtifactsUpdated: (id: string, selected: boolean) => void;
   isListLoading: boolean;
 }
 
 export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignableListProps>(
-  ({ artifacts, isListLoading, defaultSelectedArtifactIds, selectedArtifactsUpdated }) => {
-    const [selectedArtifactIdsByKey, setSelectedArtifactIdsByKey] = useState(
-      defaultSelectedArtifactIds.reduce(
-        (acc: { [key: string]: boolean }, current) => ({ ...acc, [current]: true }),
-        {}
-      )
+  ({ artifacts, isListLoading, selectedArtifactIds, selectedArtifactsUpdated }) => {
+    const selectedArtifactIdsByKey = useMemo(
+      () =>
+        selectedArtifactIds.reduce(
+          (acc: { [key: string]: boolean }, current) => ({ ...acc, [current]: true }),
+          {}
+        ),
+      [selectedArtifactIds]
     );
-
-    useEffect(() => {
-      const selectedArray: string[] = [];
-
-      Object.keys(selectedArtifactIdsByKey).forEach((key) => {
-        if (selectedArtifactIdsByKey[key]) {
-          selectedArray.push(key);
-        }
-      });
-      selectedArtifactsUpdated(selectedArray);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedArtifactIdsByKey]);
 
     const assignableList = useMemo(() => {
       if (!artifacts || !artifacts.data.length) return null;
@@ -54,16 +44,13 @@ export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignabl
               item={artifact}
               isSelected={selectedArtifactIdsByKey[artifact.id] || false}
               onToggleSelectedArtifact={(selected) =>
-                setSelectedArtifactIdsByKey({
-                  ...selectedArtifactIdsByKey,
-                  [artifact.id]: selected,
-                })
+                selectedArtifactsUpdated(artifact.id, selected)
               }
             />
           ))}
         </div>
       );
-    }, [artifacts, selectedArtifactIdsByKey]);
+    }, [artifacts, selectedArtifactIdsByKey, selectedArtifactsUpdated]);
 
     return isListLoading ? <Loader size="xl" /> : <div>{assignableList}</div>;
   }

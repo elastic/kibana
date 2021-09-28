@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, without } from 'lodash/fp';
 import {
   EuiButton,
   EuiTitle,
@@ -176,11 +176,17 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
           <PolicyArtifactsAssignableList
             data-test-subj="artifactsListTrustedAppsFlyout"
             artifacts={assignableArtifactsList}
-            defaultSelectedArtifactIds={[]}
+            selectedArtifactIds={selectedArtifactIds}
             isListLoading={
               isAssignableArtifactsListLoading || isAssignableArtifactsListExistLoading
             }
-            selectedArtifactsUpdated={(artifactIds) => setSelectedArtifactIds(artifactIds)}
+            selectedArtifactsUpdated={(artifactId, selected) => {
+              setSelectedArtifactIds((currentSelectedArtifactIds) =>
+                selected
+                  ? [...currentSelectedArtifactIds, artifactId]
+                  : without([artifactId], currentSelectedArtifactIds)
+              );
+            }}
           />
         ) : entriesExists ? (
           <EuiEmptyPrompt
