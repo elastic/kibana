@@ -8,7 +8,7 @@
 import { isEmpty, groupBy, capitalize, partition } from 'lodash';
 import type { SectionDescriptor } from './types';
 
-const EXCLUDED_FIELDS = ['error.stacktrace', 'span.stacktrace'];
+const EXCLUDED_FIELDS = ['error.exception', 'span.stacktrace'];
 
 export const getSectionsFromFields = (fields: Record<string, any>) => {
   const rows = Object.keys(fields)

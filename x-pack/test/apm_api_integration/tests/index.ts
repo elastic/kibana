@@ -29,10 +29,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
 
     // correlations
-    describe('correlations/latency_slow_transactions', function () {
-      loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
-    });
-
     describe('correlations/failed_transactions', function () {
       loadTestFile(require.resolve('./correlations/failed_transactions'));
     });
@@ -41,6 +37,7 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./correlations/latency'));
     });
 
+<<<<<<< HEAD
     describe('correlations/latency_overall', function () {
       loadTestFile(require.resolve('./correlations/latency_overall'));
     });
@@ -57,6 +54,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./metadata/event_metadata'));
     });
 
+=======
+>>>>>>> 165cafdd74901e4fdfb65b9d42ea121893779eb2
     describe('metrics_charts/metrics_charts', function () {
       loadTestFile(require.resolve('./metrics_charts/metrics_charts'));
     });
