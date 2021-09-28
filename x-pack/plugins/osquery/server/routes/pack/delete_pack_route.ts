@@ -5,37 +5,63 @@
  * 2.0.
  */
 
+import { compact, transform, set, unset, has, difference, filter, find, map } from 'lodash';
+import { produce } from 'immer';
 import { schema } from '@kbn/config-schema';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
 
 import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType } from '../../../common/types';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const deletePackRoute = (router: IRouter) => {
+export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.delete(
     {
-      path: '/internal/osquery/packs',
+      path: '/internal/osquery/packs/{id}',
       validate: {
-        body: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
+      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-      // @ts-expect-error update types
-      const { packIds } = request.body;
+      const currentPackSO = await savedObjectsClient.get(packSavedObjectType, request.params.id);
+
+      await savedObjectsClient.delete(packSavedObjectType, request.params.id, {
+        refresh: 'wait_for',
+      });
+
+      const { items: packagePolicies } = await packagePolicyService?.list(savedObjectsClient, {
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+        perPage: 1000,
+        page: 1,
+      });
+      const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
+        has(packagePolicy, `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`)
+      );
 
       await Promise.all(
-        packIds.map(
-          // @ts-expect-error update types
-          async (packId) =>
-            await savedObjectsClient.delete(packSavedObjectType, packId, {
-              refresh: 'wait_for',
+        currentPackagePolicies.map((packagePolicy) =>
+          packagePolicyService?.update(
+            savedObjectsClient,
+            esClient,
+            packagePolicy.id,
+            produce(packagePolicy, (draft) => {
+              delete packagePolicy.id;
+              delete draft.inputs[0].config.osquery.value.packs[currentPackSO.attributes.name];
+              return draft;
             })
+          )
         )
       );
 
       return response.ok({
-        body: packIds,
+        body: {},
       });
     }
   );

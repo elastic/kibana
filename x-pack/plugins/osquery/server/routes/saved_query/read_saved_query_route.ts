@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
-import { savedQuerySavedObjectType } from '../../../common/types';
+import {
+  // packSavedObjectType,
+  savedQuerySavedObjectType,
+} from '../../../common/types';
 
 export const readSavedQueryRoute = (router: IRouter) => {
   router.get(
@@ -27,6 +30,18 @@ export const readSavedQueryRoute = (router: IRouter) => {
         // @ts-expect-error update types
         request.params.id
       );
+
+      // const references = await savedObjectsClient.find({
+      //   type: packSavedObjectType,
+      //   hasReference: {
+      //     type: savedQuerySavedObjectType,
+      //     id: savedQuery.id,
+      //   },
+      // });
+
+      // console.log('savedQuery', savedQuery);
+
+      // console.log('references', references);
 
       return response.ok({
         body: savedQuery,

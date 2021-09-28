@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { compact, find, map } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiComboBoxOptionOption } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { captureRejectionSymbol } from 'stream';
 import { GetAgentPoliciesResponseItem } from '../../../../fleet/common';
 import { ComboBoxField, FieldHook } from '../../shared_imports';
 
@@ -41,20 +39,17 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   field,
   agentPoliciesById,
 }) => {
-  const [selectedOptions, setSelectedOptions] = useState([]);
-  const { value, setValue } = field;
-
-  console.error('value', value);
+  const { value } = field;
 
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => (
       <EuiFlexGroup>
-        <AgentPolicyNameColumn grow={3}>
+        <AgentPolicyNameColumn grow={2}>
           <span className="eui-textTruncate">
             {(option.key && agentPoliciesById[option.key]?.name) ?? option.label}
           </span>
         </AgentPolicyNameColumn>
-        <AgentPolicyDescriptionColumn grow={4}>
+        <AgentPolicyDescriptionColumn grow={5}>
           <EuiTextColor className="eui-textTruncate" color="subdued">
             {(option.key && agentPoliciesById[option.key].description) ?? ''}
           </EuiTextColor>
@@ -100,32 +95,17 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
     );
   }, [agentPoliciesById, value]);
 
-  const onChange = useCallback(
-    (newSelected) => {
-      setValue(() => map(newSelected, 'value'));
-      setSelectedOptions(newSelected);
-    },
-    [setValue]
-  );
-
   const mergedEuiFieldProps = useMemo(
     () => ({
       onCreateOption: null,
       noSuggestions: false,
       isClearable: true,
-      selectedOptions,
+      // selectedOptions,
       renderOption,
-      onChange,
       ...euiFieldProps,
     }),
-    [euiFieldProps, onChange, renderOption, selectedOptions]
+    [euiFieldProps, renderOption]
   );
-
-  useEffect(() => {
-    setSelectedOptions(
-      compact(value.map((agentPolicyId) => find(euiFieldProps.options, ['value', agentPolicyId])))
-    );
-  }, [euiFieldProps?.options, value]);
 
   return (
     <ComboBoxField

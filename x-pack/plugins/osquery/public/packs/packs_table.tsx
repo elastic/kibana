@@ -6,7 +6,7 @@
  */
 
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -22,18 +22,18 @@ const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string })
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
 
-const renderName = (_: unknown, item: PackagePolicy) => (
-  <ScheduledQueryName id={item.id} name={item.name} />
+const renderName = (_: unknown, item) => (
+  <ScheduledQueryName id={item.id} name={item.attributes.name} />
 );
 
 const PacksTableComponent = () => {
   const { data } = usePacks({});
 
-  const renderAgentPolicyIds = useCallback(
-    (agentPolicyIds = []) => (
+  const renderAgentPolicy = useCallback(
+    (policyIds) => (
       <>
-        {agentPolicyIds.map((agentPolicyId: string) => (
-          <AgentsPolicyLink key={agentPolicyId} policyId={agentPolicyId} />
+        {policyIds.map((policyId: string) => (
+          <AgentsPolicyLink key={policyId} policyId={policyId} />
         ))}
       </>
     ),
@@ -41,7 +41,7 @@ const PacksTableComponent = () => {
   );
 
   const renderQueries = useCallback(
-    (queries: PackagePolicy['inputs'][0]['streams']) => <>{queries.length}</>,
+    (queries: PackagePolicy['inputs'][0]['streams']) => <>{queries?.length ?? 0}</>,
     []
   );
 
@@ -50,14 +50,15 @@ const PacksTableComponent = () => {
   const renderUpdatedAt = useCallback((updatedAt, item) => {
     if (!updatedAt) return '-';
 
-    const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
+    const updatedBy =
+      item.updated_by !== item.attributes.created_by ? ` @ ${item.attributes.updated_by}` : '';
     return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
   }, []);
 
   const columns: Array<EuiBasicTableColumn<PackagePolicy>> = useMemo(
     () => [
       {
-        field: 'attributes.id',
+        field: 'attributes.name',
         name: i18n.translate('xpack.osquery.packs.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
@@ -65,15 +66,15 @@ const PacksTableComponent = () => {
         render: renderName,
       },
       {
-        field: 'agent_policy_ids',
+        field: 'policy_ids',
         name: i18n.translate('xpack.osquery.packs.table.policyColumnTitle', {
-          defaultMessage: 'Policy',
+          defaultMessage: 'Policies',
         }),
         truncateText: true,
-        render: renderAgentPolicyIds,
+        render: renderAgentPolicy,
       },
       {
-        field: 'queries',
+        field: 'attributes.queries',
         name: i18n.translate('xpack.osquery.packs.table.numberOfQueriesColumnTitle', {
           defaultMessage: 'Number of queries',
         }),
@@ -81,7 +82,7 @@ const PacksTableComponent = () => {
         width: '150px',
       },
       {
-        field: 'created_by',
+        field: 'attributes.created_by',
         name: i18n.translate('xpack.osquery.packs.table.createdByColumnTitle', {
           defaultMessage: 'Created by',
         }),
@@ -89,14 +90,14 @@ const PacksTableComponent = () => {
         truncateText: true,
       },
       {
-        field: 'updated_at',
+        field: 'attributes.updated_at',
         name: 'Last updated',
         sortable: (item) => (item.updated_at ? Date.parse(item.updated_at) : 0),
         truncateText: true,
         render: renderUpdatedAt,
       },
       {
-        field: 'enabled',
+        field: 'attributes.enabled',
         name: i18n.translate('xpack.osquery.packs.table.activeColumnTitle', {
           defaultMessage: 'Active',
         }),
@@ -106,13 +107,13 @@ const PacksTableComponent = () => {
         render: renderActive,
       },
     ],
-    [renderActive, renderAgentPolicyIds, renderQueries, renderUpdatedAt]
+    [renderActive, renderAgentPolicy, renderQueries, renderUpdatedAt]
   );
 
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'name',
+        field: 'attributes.name',
         direction: 'asc' as const,
       },
     }),

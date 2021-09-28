@@ -13,18 +13,25 @@ import { AddPackPage } from './add';
 import { EditPackPage } from './edit';
 import { PackDetailsPage } from './details';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
+import { useKibana } from '../../common/lib/kibana';
+import { MissingPrivileges } from '../components';
 
 const PacksComponent = () => {
-  useBreadcrumbs('scheduled_query_groups');
+  const permissions = useKibana().services.application.capabilities.osquery;
+  useBreadcrumbs('packs');
   const match = useRouteMatch();
+
+  if (!permissions.readPacks) {
+    return <MissingPrivileges />;
+  }
 
   return (
     <Switch>
       <Route path={`${match.url}/add`}>
-        <AddPackPage />
+        {permissions.writePacks ? <AddPackPage /> : <MissingPrivileges />}
       </Route>
       <Route path={`${match.url}/:packId/edit`}>
-        <EditPackPage />
+        {permissions.writePacks ? <EditPackPage /> : <MissingPrivileges />}
       </Route>
       <Route path={`${match.url}/:packId`}>
         <PackDetailsPage />

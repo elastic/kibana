@@ -9,7 +9,6 @@ import { useMutation, useQueryClient } from 'react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
-import { savedQuerySavedObjectType } from '../../common/types';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { SAVED_QUERIES_ID, SAVED_QUERY_ID } from './constants';
@@ -23,44 +22,16 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
   const queryClient = useQueryClient();
   const {
     application: { navigateToApp },
-    savedObjects,
-    security,
     notifications: { toasts },
+    http,
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useMutation(
-    async (payload) => {
-      const currentUser = await security.authc.getCurrentUser();
-
-      if (!currentUser) {
-        throw new Error('CurrentUser is missing');
-      }
-
-      // @ts-expect-error update types
-      const payloadId = payload.id;
-      const conflictingEntries = await savedObjects.client.find({
-        type: savedQuerySavedObjectType,
-        search: payloadId,
-        searchFields: ['id'],
-      });
-      const conflictingObjects = conflictingEntries.savedObjects;
-      // we some how have more than one object with the same id
-      const updateConflicts =
-        conflictingObjects.length > 1 ||
-        // or the one we conflict with isn't the same one we are updating
-        (conflictingObjects.length && conflictingObjects[0].id !== savedQueryId);
-      if (updateConflicts) {
-        throw new Error(`Saved query with id ${payloadId} already exists.`);
-      }
-
-      return savedObjects.client.update(savedQuerySavedObjectType, savedQueryId, {
-        // @ts-expect-error update types
-        ...payload,
-        updated_by: currentUser.username,
-        updated_at: new Date(Date.now()).toISOString(),
-      });
-    },
+    (payload) =>
+      http.put(`/internal/osquery/saved_query/${savedQueryId}`, {
+        body: JSON.stringify(payload),
+      }),
     {
       onError: (error) => {
         if (error instanceof Error) {

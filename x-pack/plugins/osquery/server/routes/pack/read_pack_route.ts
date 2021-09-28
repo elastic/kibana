@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { filter, find, map, compact } from 'lodash';
+import { filter, has, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
+import { PLUGIN_ID } from '../../../common';
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
 import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType } from '../../../common/types';
@@ -20,10 +22,17 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
+
+      const packagePolicies = await packagePolicyService?.list(savedObjectsClient, {
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+        perPage: 1000,
+        page: 1,
+      });
 
       const { attributes, references, ...rest } = await savedObjectsClient.get<{
         name: string;
@@ -35,22 +44,18 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         request.params.id
       );
 
-      const packagePolicyReferences = filter(references, [
-        'type',
-        PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-      ]);
-
-      const packagePolicies = await packagePolicyService?.getByIDs(
-        savedObjectsClient,
-        map(packagePolicyReferences, 'id')
+      const policyIds = map(
+        filter(packagePolicies?.items, (packagePolicy) =>
+          has(packagePolicy, `inputs[0].config.osquery.value.packs.${attributes.name}`)
+        ),
+        'policy_id'
       );
 
       return response.ok({
         body: {
           ...rest,
           ...attributes,
-          packagePolicies,
-          agent_policy_ids: packagePolicies ? compact(map(packagePolicies, 'policy_id')) : [],
+          policy_ids: policyIds,
           references,
         },
       });

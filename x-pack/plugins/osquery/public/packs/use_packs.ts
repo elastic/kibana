@@ -28,7 +28,7 @@ export const usePacks = ({
     {
       keepPreviousData: true,
       // Refetch the data every 10 seconds
-      refetchInterval: isLive ? 5000 : false,
+      refetchInterval: isLive ? 10000 : false,
     }
   );
 };

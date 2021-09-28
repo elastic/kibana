@@ -43,7 +43,7 @@ const PacksPageComponent = () => {
         isDisabled={!permissions.writePacks}
       >
         <FormattedMessage
-          id="xpack.osquery.packList.addScheduledQueryButtonLabel"
+          id="xpack.osquery.packList.addPackButtonLabel"
           defaultMessage="Add pack"
         />
       </EuiButton>
@@ -51,7 +51,7 @@ const PacksPageComponent = () => {
     [newQueryLinkProps, permissions.writePacks]
   );
 
-  return ( 
+  return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       <PacksTable />
     </WithHeaderLayout>

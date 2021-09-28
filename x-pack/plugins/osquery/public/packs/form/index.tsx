@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapKeys } from 'lodash';
+import { mapKeys, reduce } from 'lodash';
 import { merge } from 'lodash/fp';
 import {
   EuiFlexGroup,
@@ -14,23 +14,16 @@ import {
   EuiButton,
   EuiDescribedFormGroup,
   EuiSpacer,
-  EuiAccordion,
   EuiBottomBar,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useMutation } from 'react-query';
 import { produce } from 'immer';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { PLUGIN_ID } from '../../../common';
 import { OsqueryManagerPackagePolicy } from '../../../common/types';
-import {
-  AgentPolicy,
-  PackagePolicyPackage,
-  packagePolicyRouteService,
-} from '../../../../fleet/common';
+import { AgentPolicy, PackagePolicyPackage } from '../../../../fleet/common';
 import {
   Form,
   useForm,
@@ -40,18 +33,17 @@ import {
   FIELD_TYPES,
   fieldValidators,
 } from '../../shared_imports';
-import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
+import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
 import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
 import { useAgentPolicies } from '../../agent_policies';
-import { useErrorToast } from '../../common/hooks/use_error_toast';
-import { useCreatePack } from '../../packs/use_create_pack';
-import { useUpdatePack } from '../../packs/use_update_pack';
+import { useCreatePack } from '../use_create_pack';
+import { useUpdatePack } from '../use_update_pack';
 
 const GhostFormField = () => <></>;
 
-const FORM_ID = 'packForm';
+const FORM_ID = 'scheduledQueryForm';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -75,7 +67,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     () =>
       agentPolicies?.map((agentPolicy) => ({
         key: agentPolicy.id,
-        label: agentPolicy.name,
+        // label: agentPolicy.name,
+        label: agentPolicy.id,
         value: agentPolicy.id,
       })) ?? [],
     [agentPolicies]
@@ -83,20 +76,19 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const cancelButtonProps = useRouterNavigate(`packs/${editMode ? defaultValue?.id : ''}`);
 
-  const { isLoading: createIsLoading, mutateAsync: createAsync } = useCreatePack({
+  const { mutateAsync: createAsync } = useCreatePack({
     withRedirect: true,
   });
-  const { isLoading: updateIsLoading, mutateAsync: updateAsync } = useUpdatePack({
+  const { mutateAsync: updateAsync } = useUpdatePack({
     withRedirect: true,
   });
 
   const { form } = useForm<
-    Omit<OsqueryManagerPackagePolicy, 'agent_policy_ids' | 'id'> & {
-      agent_policy_ids: string[];
+    Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id'> & {
+      policy_ids: string[];
     },
-    Omit<OsqueryManagerPackagePolicy, 'agent_policy_ids' | 'id' | 'namespace'> & {
-      agent_policy_ids: string[];
-      namespace: string[];
+    Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id'> & {
+      policy_ids: string[];
     }
   >({
     id: FORM_ID,
@@ -122,13 +114,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           defaultMessage: 'Description',
         }),
       },
-      namespace: {
-        type: FIELD_TYPES.COMBO_BOX,
-        label: i18n.translate('xpack.osquery.pack.form.namespaceFieldLabel', {
-          defaultMessage: 'Namespace',
-        }),
-      },
-      agent_policy_ids: {
+      policy_ids: {
         type: FIELD_TYPES.COMBO_BOX,
         label: i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldLabel', {
           defaultMessage: 'Agent policies',
@@ -137,65 +123,80 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     },
     onSubmit: (payload, isValid) => {
       if (!isValid) return Promise.resolve();
-      return editMode ? updateAsync({ id: defaultValue.id, ...payload }) : createAsync(payload);
+
+      return editMode ? updateAsync({ id: defaultValue?.id, ...payload }) : createAsync(payload);
     },
     options: {
       stripEmptyFields: false,
     },
     deserializer: (payload) => ({
       ...payload,
-      agent_policy_ids: payload.agent_policy_ids ?? [],
-      namespace: [payload.namespace],
+      policy_ids: payload.policy_ids ?? [],
     }),
     serializer: (payload) => ({
       ...payload,
-      namespace: payload.namespace[0],
+      // policy_id: payload.policy_id[0],
     }),
     defaultValue: merge(
       {
         name: '',
         description: '',
         enabled: true,
-        agent_policy_ids: [],
-        namespace: 'default',
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         package: packageInfo!,
         queries: [],
+        policy_ids: [],
       },
       defaultValue ?? {}
     ),
   });
 
-  const { submit } = form;
+  const { setFieldValue, submit, isSubmitting } = form;
 
-  const policyIdEuiFieldProps = useMemo(() => ({ options: agentPolicyOptions }), [
-    agentPolicyOptions,
-  ]);
+  const policyIdEuiFieldProps = useMemo(
+    () => ({ options: agentPolicyOptions }),
+    [agentPolicyOptions]
+  );
 
   const [
     {
       package: { version: integrationPackageVersion } = { version: undefined },
-      agent_policy_ids: agentPolicyIds,
+      policy_ids: policyIds,
     },
   ] = useFormData({
     form,
-    watch: ['package', 'agent_policy_ids'],
+    watch: ['package', 'policy_ids'],
   });
 
   const currentPolicy = useMemo(() => {
-    if (!agentPolicyIds?.length) {
+    if (!policyIds?.length) {
       return {
         agentCount: 0,
         agentPolicy: {} as AgentPolicy,
       };
     }
 
-    const currentAgentPolicy = agentPoliciesById[agentPolicyIds[0]];
+    const agentCount = reduce(
+      policyIds,
+      (acc, policyId) => {
+        const agentPolicy = agentPoliciesById[policyId];
+
+        return acc + (agentPolicy?.agents ?? 0);
+      },
+      0
+    );
+
+    const currentAgentPolicy = agentPoliciesById[policyIds[0]];
     return {
-      agentCount: currentAgentPolicy?.agents ?? 0,
+      agentCount,
       agentPolicy: currentAgentPolicy,
     };
-  }, [agentPoliciesById, agentPolicyIds]);
+  }, [agentPoliciesById, policyIds]);
+
+  const handleNameChange = useCallback(
+    (newName: string) => setFieldValue('name', newName),
+    [setFieldValue]
+  );
 
   const handleSaveClick = useCallback(() => {
     if (currentPolicy.agentCount) {
@@ -227,10 +228,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           description={
             <FormattedMessage
               id="xpack.osquery.pack.form.settingsSectionDescriptionText"
-              defaultMessage="Pack include one or more queries that are run
-                at a set interval and are associated with an agent policies.
-                When you define a pack, it is added as a new Osquery Manager
-                policy per Agent policy."
+              defaultMessage="UPDATE ME!!! Packs include one or more queries that are run
+                at a set interval and are associated with an agent policy.
+                When you define a pack, it is added as a new
+                Osquery Manager policy."
             />
           }
         >
@@ -239,22 +240,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <CommonUseField path="description" />
 
           <CommonUseField
-            path="agent_policy_ids"
+            path="policy_ids"
             euiFieldProps={policyIdEuiFieldProps}
             component={PolicyIdComboBoxField}
             agentPoliciesById={agentPoliciesById}
           />
-
-          <EuiSpacer />
-          <EuiAccordion
-            id="accordion1"
-            buttonContent={i18n.translate(
-              'xpack.osquery.pack.form.advancedSectionToggleButtonLabel',
-              { defaultMessage: 'Advanced' }
-            )}
-          >
-            <CommonUseField path="namespace" />
-          </EuiAccordion>
         </EuiDescribedFormGroup>
 
         <EuiHorizontalRule />
@@ -262,7 +252,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         <CommonUseField
           path="queries"
           component={QueriesField}
+          packId={defaultValue?.id ?? null}
           integrationPackageVersion={integrationPackageVersion}
+          handleNameChange={handleNameChange}
         />
 
         <CommonUseField path="enabled" component={GhostFormField} />
@@ -287,17 +279,24 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  isLoading={createIsLoading || updateIsLoading}
+                  isLoading={isSubmitting}
                   color="primary"
                   fill
                   size="m"
                   iconType="save"
                   onClick={handleSaveClick}
                 >
-                  <FormattedMessage
-                    id="xpack.osquery.pack.form.saveQueryButtonLabel"
-                    defaultMessage="Save pack"
-                  />
+                  {editMode ? (
+                    <FormattedMessage
+                      id="xpack.osquery.pack.form.updatePackButtonLabel"
+                      defaultMessage="Update pack"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.osquery.pack.form.savePackButtonLabel"
+                      defaultMessage="Save pack"
+                    />
+                  )}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

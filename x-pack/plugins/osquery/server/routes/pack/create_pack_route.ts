@@ -5,35 +5,40 @@
  * 2.0.
  */
 
+import { compact, transform, set, unset, has, difference, filter, find, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
+import { produce } from 'immer';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
 import { IRouter } from '../../../../../../src/core/server';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+
+import { PLUGIN_ID } from '../../../common';
+
 
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 
-export const createPackRoute = (router: IRouter, osqueryContext) => {
+export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
       path: '/internal/osquery/packs',
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
-      const agentPolicyService = osqueryContext.service.getAgentPolicyService();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-      const {
-        name,
-        description,
-        queries,
-        namespace,
-        enabled,
-        integration_version,
-        agent_policy_ids,
-      } = request.body;
+      const { name, description, queries, enabled, policy_ids } = request.body;
+
+      const { items: packagePolicies } = await packagePolicyService?.list(savedObjectsClient, {
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+        perPage: 1000,
+        page: 1,
+      });
 
       const packSO = await savedObjectsClient.create(
         packSavedObjectType,
@@ -41,7 +46,6 @@ export const createPackRoute = (router: IRouter, osqueryContext) => {
           name,
           description,
           queries,
-          namespace,
           enabled,
         },
         {
@@ -49,59 +53,32 @@ export const createPackRoute = (router: IRouter, osqueryContext) => {
         }
       );
 
-      if (!agent_policy_ids?.length) {
-        return response.ok({ body: packSO });
-      }
-
-      const agentPolicies = await agentPolicyService.getByIds(agent_policy_ids);
-
-      const packagePolicies = await Promise.all(
-        agent_policy_ids.map((agentPolicyId) =>
-          packagePolicyService?.create(savedObjectsClient, esClient, {
-            name: 'osquery_manager_controlled',
-            description,
-            policy_id: agentPolicyId,
-            namespace,
-            inputs: [
-              {
-                type: 'osquery',
-                enabled: true,
-                streams: [
-                  {
-                    data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
-                    enabled: true,
-                    vars: {
-                      id: { type: 'text', value: 'Test' },
-                      interval: { type: 'integer', value: 3600 },
-                      query: { type: 'text', value: 'select * from users;' },
-                    },
+      await Promise.all(
+        policy_ids.map((agentPolicyId) => {
+          const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+          return packagePolicyService?.update(
+            savedObjectsClient,
+            esClient,
+            packagePolicy.id,
+            produce(packagePolicy, (draft) => {
+              delete packagePolicy.id;
+              set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
+                queries: transform(
+                  queries,
+                  (result, query) => {
+                    const { id: queryId, ...rest } = query;
+                    result[queryId] = rest;
                   },
-                ],
-              },
-            ],
-            enabled: true,
-            output_id: '',
-            package: { name: 'osquery_manager', version: '0.5.2', title: 'Osquery manager' },
-          })
-        )
+                  {}
+                ),
+              });
+              return draft;
+            })
+          );
+        })
       );
 
-      const packSOWithReferences = await savedObjectsClient.update(
-        packSavedObjectType,
-        packSO.id,
-        {},
-        {
-          references: packagePolicies.map((packagePolicy) => ({
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            id: packagePolicy.id,
-            name: packagePolicy.policy_id,
-          })),
-        }
-      );
-
-      return response.ok({
-        body: packSOWithReferences,
-      });
+      return response.ok({ body: packSO });
     }
   );
 };

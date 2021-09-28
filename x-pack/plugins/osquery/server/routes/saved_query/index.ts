@@ -12,11 +12,12 @@ import { deleteSavedQueryRoute } from './delete_saved_query_route';
 import { findSavedQueryRoute } from './find_saved_query_route';
 import { readSavedQueryRoute } from './read_saved_query_route';
 import { updateSavedQueryRoute } from './update_saved_query_route';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const initSavedQueryRoutes = (router: IRouter) => {
+export const initSavedQueryRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createSavedQueryRoute(router);
   deleteSavedQueryRoute(router);
   findSavedQueryRoute(router);
   readSavedQueryRoute(router);
-  updateSavedQueryRoute(router);
+  updateSavedQueryRoute(router, context);
 };

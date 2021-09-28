@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { isArray } from 'lodash';
+import { isArray, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
 
 import { useMemo } from 'react';
 import { useForm } from '../../shared_imports';
-import { createFormSchema } from '../../scheduled_query_groups/queries/schema';
-import { ScheduledQueryGroupFormData } from '../../scheduled_query_groups/queries/use_scheduled_query_group_query_form';
+import { createFormSchema } from '../../packs/queries/schema';
+import { PackFormData } from '../../packs/queries/use_pack_query_form';
 import { useSavedQueries } from '../use_saved_queries';
 
 const SAVED_QUERY_FORM_ID = 'savedQueryForm';
@@ -67,11 +67,15 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
             draft.version = draft.version[0];
           }
         }
+        if (isEmpty(draft.ecs_mapping)) {
+          // @ts-expect-error update types
+          delete draft.ecs_mapping;
+        }
         return draft;
       }),
     // @ts-expect-error update types
     deserializer: (payload) => {
-      if (!payload) return {} as ScheduledQueryGroupFormData;
+      if (!payload) return {} as PackFormData;
 
       return {
         id: payload.id,
@@ -80,6 +84,7 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
         interval: payload.interval ? parseInt(payload.interval, 10) : undefined,
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
+        ecs_mapping: payload.ecs_mapping ?? {},
       };
     },
   });

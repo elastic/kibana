@@ -29,7 +29,9 @@ export const createSavedQueryRoute = (router: IRouter) => {
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      const { id, description, platform, query, version, interval } = request.body;
+      // @ts-expect-error update types
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { id, description, platform, query, version, interval, ecs_mapping } = request.body;
 
       const savedQuerySO = await savedObjectsClient.create(savedQuerySavedObjectType, {
         id,
@@ -38,6 +40,7 @@ export const createSavedQueryRoute = (router: IRouter) => {
         platform,
         version,
         interval,
+        ecs_mapping,
       });
 
       return response.ok({

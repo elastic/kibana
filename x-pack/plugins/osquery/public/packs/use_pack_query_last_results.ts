@@ -9,7 +9,7 @@ import { useQuery } from 'react-query';
 import { IndexPattern } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 
-interface UseScheduledQueryGroupQueryLastResultsProps {
+interface UsePackQueryLastResultsProps {
   actionId: string;
   agentIds?: string[];
   interval: number;
@@ -17,13 +17,12 @@ interface UseScheduledQueryGroupQueryLastResultsProps {
   skip?: boolean;
 }
 
-export const useScheduledQueryGroupQueryLastResults = ({
+export const usePackQueryLastResults = ({
   actionId,
-  agentIds,
   interval,
   logsIndexPattern,
   skip = false,
-}: UseScheduledQueryGroupQueryLastResultsProps) => {
+}: UsePackQueryLastResultsProps) => {
   const data = useKibana().services.data;
 
   return useQuery(
@@ -35,12 +34,6 @@ export const useScheduledQueryGroupQueryLastResults = ({
         query: {
           // @ts-expect-error update types
           bool: {
-            should: agentIds?.map((agentId) => ({
-              match_phrase: {
-                'agent.id': agentId,
-              },
-            })),
-            minimum_should_match: 1,
             filter: [
               {
                 match_phrase: {
@@ -66,12 +59,6 @@ export const useScheduledQueryGroupQueryLastResults = ({
           query: {
             // @ts-expect-error update types
             bool: {
-              should: agentIds?.map((agentId) => ({
-                match_phrase: {
-                  'agent.id': agentId,
-                },
-              })),
-              minimum_should_match: 1,
               filter: [
                 {
                   match_phrase: {
@@ -102,7 +89,7 @@ export const useScheduledQueryGroupQueryLastResults = ({
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && agentIds?.length && logsIndexPattern),
+      enabled: !!(!skip && actionId && interval && logsIndexPattern),
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }

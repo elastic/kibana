@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, xor } from 'lodash';
+import { isArray, isEmpty, xor } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
 
@@ -18,11 +18,8 @@ const FORM_ID = 'editQueryFlyoutForm';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
-  defaultValue?: OsqueryManagerPackagePolicyConfigRecord | undefined;
-  handleSubmit: FormConfig<
-    OsqueryManagerPackagePolicyConfigRecord,
-    PackFormData
-  >['onSubmit'];
+  defaultValue?: PackFormData | undefined;
+  handleSubmit: FormConfig<PackFormData, PackFormData>['onSubmit'];
 }
 
 export interface PackFormData {
@@ -31,6 +28,14 @@ export interface PackFormData {
   interval: number;
   platform?: string | undefined;
   version?: string[] | undefined;
+  ecs_mapping?:
+    | Record<
+        string,
+        {
+          field: string;
+        }
+      >
+    | undefined;
 }
 
 export const usePackQueryForm = ({
@@ -39,25 +44,33 @@ export const usePackQueryForm = ({
   handleSubmit,
 }: UsePackQueryFormProps) => {
   const idSet = useMemo<Set<string>>(
-    () =>
-      new Set<string>(xor(uniqueQueryIds, defaultValue?.id.value ? [defaultValue.id.value] : [])),
+    () => new Set<string>(xor(uniqueQueryIds, defaultValue?.id ? [defaultValue.id] : [])),
     [uniqueQueryIds, defaultValue]
   );
-  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(() => createFormSchema(idSet), [
-    idSet,
-  ]);
+  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
+    () => createFormSchema(idSet),
+    [idSet]
+  );
 
   return useForm<OsqueryManagerPackagePolicyConfigRecord, PackFormData>({
     id: FORM_ID + uuid.v4(),
     onSubmit: async (formData, isValid) => {
       if (isValid && handleSubmit) {
+        // @ts-expect-error update types
         return handleSubmit(formData, isValid);
       }
     },
     options: {
       stripEmptyFields: false,
     },
-    defaultValue,
+    defaultValue: defaultValue || {
+      id: '',
+      query: '',
+      interval: '3600',
+      ecs_mapping: {
+        value: {},
+      },
+    },
     // @ts-expect-error update types
     serializer: (payload) =>
       produce(payload, (draft) => {
@@ -76,17 +89,21 @@ export const usePackQueryForm = ({
             draft.version = draft.version[0];
           }
         }
+        if (isEmpty(draft.ecs_mapping)) {
+          delete draft.ecs_mapping;
+        }
         return draft;
       }),
     deserializer: (payload) => {
       if (!payload) return {} as PackFormData;
 
       return {
-        id: payload.id.value,
-        query: payload.query.value,
-        interval: parseInt(payload.interval.value, 10),
-        platform: payload.platform?.value,
-        version: payload.version?.value ? [payload.version?.value] : [],
+        id: payload.id,
+        query: payload.query,
+        interval: parseInt(payload.interval, 10),
+        platform: payload.platform,
+        version: payload.version ? [payload.version] : [],
+        ecs_mapping: payload.ecs_mapping ?? {},
       };
     },
     schema: formSchema,

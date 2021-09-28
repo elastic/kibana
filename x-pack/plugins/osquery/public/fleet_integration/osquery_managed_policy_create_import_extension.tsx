@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter } from 'lodash/fp';
+import { satisfies } from 'semver';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -16,18 +16,16 @@ import {
   agentPolicyRouteService,
   AgentPolicy,
   PLUGIN_ID,
-  NewPackagePolicy,
 } from '../../../fleet/common';
 import {
   pagePathGetters,
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
 } from '../../../fleet/public';
-import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_groups/scheduled_query_group_queries_table';
+// import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_groups/scheduled_query_group_queries_table';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
-import { OsqueryManagerPackagePolicy } from '../../common/types';
 
 /**
  * Exports Osquery-specific package policy instructions
@@ -111,9 +109,11 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       this code removes that, so the user can schedule queries
       in the next step
     */
-    if (!editMode) {
+    if (!editMode && newPolicy?.package && satisfies(newPolicy?.package.version, '<0.6.0')) {
       const updatedPolicy = produce(newPolicy, (draft) => {
-        draft.inputs[0].streams = [];
+        if (draft.inputs[0]) {
+          draft.inputs[0].streams = [];
+        }
         return draft;
       });
       onChange({
@@ -146,19 +146,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   //     });
   //   }
   // }, [editMode, replace]);
-
-  const scheduledQueryGroupTableData = useMemo(() => {
-    const policyWithoutEmptyQueries = produce<
-      NewPackagePolicy,
-      OsqueryManagerPackagePolicy,
-      OsqueryManagerPackagePolicy
-    >(newPolicy, (draft) => {
-      draft.inputs[0].streams = filter(['compiled_stream.id', null], draft.inputs[0].streams);
-      return draft;
-    });
-
-    return policyWithoutEmptyQueries;
-  }, [newPolicy]);
 
   return (
     <>
@@ -193,16 +180,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       />
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
-
-      {editMode && scheduledQueryGroupTableData.inputs[0].streams.length ? (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <ScheduledQueryGroupQueriesTable
-              data={scheduledQueryGroupTableData.inputs[0].streams}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
     </>
   );
 });

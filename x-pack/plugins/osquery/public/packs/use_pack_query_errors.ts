@@ -10,21 +10,19 @@ import { IndexPattern, SortDirection } from '../../../../../src/plugins/data/com
 
 import { useKibana } from '../common/lib/kibana';
 
-interface UseScheduledQueryGroupQueryErrorsProps {
+interface UsePackQueryErrorsProps {
   actionId: string;
-  agentIds?: string[];
   interval: number;
   logsIndexPattern?: IndexPattern;
   skip?: boolean;
 }
 
-export const useScheduledQueryGroupQueryErrors = ({
+export const usePackQueryErrors = ({
   actionId,
-  agentIds,
   interval,
   logsIndexPattern,
   skip = false,
-}: UseScheduledQueryGroupQueryErrorsProps) => {
+}: UsePackQueryErrorsProps) => {
   const data = useKibana().services.data;
 
   return useQuery(
@@ -41,12 +39,6 @@ export const useScheduledQueryGroupQueryErrors = ({
         query: {
           // @ts-expect-error update types
           bool: {
-            should: agentIds?.map((agentId) => ({
-              match_phrase: {
-                'elastic_agent.id': agentId,
-              },
-            })),
-            minimum_should_match: 1,
             filter: [
               {
                 match_phrase: {
@@ -81,7 +73,7 @@ export const useScheduledQueryGroupQueryErrors = ({
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && agentIds?.length && logsIndexPattern),
+      enabled: !!(!skip && actionId && interval && logsIndexPattern),
       select: (response) => response.rawResponse.hits ?? [],
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { startCase } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
@@ -12,20 +13,24 @@ import React, { useMemo } from 'react';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { PackForm } from '../../../packs/form';
+import { useOsqueryIntegrationStatus } from '../../../common/hooks';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const AddPackPageComponent = () => {
   useBreadcrumbs('pack_add');
   const packListProps = useRouterNavigate('packs');
+  const { data: osqueryIntegration } = useOsqueryIntegrationStatus();
 
-  // TODO: move to backend
   const packageInfo = useMemo(() => {
+    if (!osqueryIntegration) return;
+
     return {
-      name: 'osquery_manager',
-      version: '0.5.2',
+      name: osqueryIntegration.name,
+      title: osqueryIntegration.title ?? startCase(osqueryIntegration.name),
+      version: osqueryIntegration.version,
     };
-  }, []);
+  }, [osqueryIntegration]);
 
   const LeftColumn = useMemo(
     () => (

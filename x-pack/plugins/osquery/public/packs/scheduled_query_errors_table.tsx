@@ -13,10 +13,10 @@ import { stringify } from 'querystring';
 
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { AgentIdToName } from '../agents/agent_id_to_name';
-import { useScheduledQueryGroupQueryErrors } from './use_scheduled_query_group_query_errors';
+import { usePackQueryErrors } from './use_pack_query_errors';
 
 const VIEW_IN_LOGS = i18n.translate(
-  'xpack.osquery.scheduledQueryGroup.queriesTable.viewLogsErrorsActionAriaLabel',
+  'xpack.osquery.pack.queriesTable.viewLogsErrorsActionAriaLabel',
   {
     defaultMessage: 'View in Logs',
   }
@@ -85,7 +85,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
   agentIds,
   interval,
 }) => {
-  const { data: lastErrorsData } = useScheduledQueryGroupQueryErrors({
+  const { data: lastErrorsData } = usePackQueryErrors({
     actionId,
     agentIds,
     interval,

@@ -41,6 +41,10 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     interval: {
       type: 'keyword',
     },
+    ecs_mapping: {
+      type: 'object',
+      enabled: false,
+    },
   },
 };
 
@@ -71,9 +75,6 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     updated_by: {
       type: 'text',
     },
-    namespace: {
-      type: 'keyword',
-    },
     enabled: {
       type: 'boolean',
     },
@@ -99,6 +100,10 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
         version: {
           type: 'keyword',
+        },
+        ecs_mapping: {
+          type: 'object',
+          enabled: false,
         },
       },
     },

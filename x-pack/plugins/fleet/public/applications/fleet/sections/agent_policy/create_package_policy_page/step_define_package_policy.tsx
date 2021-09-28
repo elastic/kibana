@@ -93,7 +93,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         // Existing package policies on the agent policy using the package name, retrieve highest number appended to package policy name
         const pkgPoliciesNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
         const pkgPoliciesWithMatchingNames = (agentPolicy.package_policies as PackagePolicy[])
-          .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+          .filter((ds) => Boolean(ds.name?.match(pkgPoliciesNamePattern)))
           .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
           .sort((a, b) => a - b);
 

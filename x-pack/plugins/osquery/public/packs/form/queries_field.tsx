@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { satisfies } from 'semver';
 
 import {
   OsqueryManagerPackagePolicyInputStream,
@@ -23,6 +24,7 @@ import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms/helpers';
 
 interface QueriesFieldProps {
+  handleNameChange: (name: string) => void;
   field: FieldHook<OsqueryManagerPackagePolicyInput[]>;
   integrationPackageVersion?: string | undefined;
   packId: string;
@@ -34,30 +36,29 @@ interface GetNewQueryProps {
   query: string;
   platform?: string | undefined;
   version?: string | undefined;
+  ecs_mapping?: Record<
+    string,
+    {
+      field: string;
+    }
+  >;
 }
 
-const getNewQuery = (payload: GetNewQueryProps) =>
-  produce(
-    {
-      enabled: true,
-      id: payload.id,
-      interval: payload.interval,
-      query: payload.query,
-    },
-    (draft) => {
-      if (payload.platform) {
-        draft.platform = payload.platform;
-      }
-      if (payload.version && draft.vars) {
-        draft.version = payload.version;
-      }
-      return draft;
-    }
-  );
+const getNewQuery = (payload: GetNewQueryProps) => ({
+  id: payload.id,
+  interval: payload.interval,
+  query: payload.query,
+  ecs_mapping: payload.ecs_mapping,
+  enabled: true,
+  platform: payload.platform,
+  version: payload.version,
+});
 
 const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   field,
+  handleNameChange,
   integrationPackageVersion,
+  packId,
 }) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
@@ -72,13 +73,13 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   const { setValue } = field;
 
   const handleDeleteClick = useCallback(
-    (query: any) => {
-      const queryIndex = findIndex(field.value, ['id', query.id]);
+    (query) => {
+      const streamIndex = findIndex(field.value, ['id', query.id]);
 
-      if (queryIndex > -1) {
+      if (streamIndex > -1) {
         setValue(
           produce((draft) => {
-            pullAt(draft[0], [queryIndex]);
+            pullAt(draft, [streamIndex]);
 
             return draft;
           })
@@ -89,10 +90,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   );
 
   const handleEditClick = useCallback(
-    (query: any) => {
-      const queryIndex = findIndex(field.value, ['id', query.id]);
+    (query) => {
+      const streamIndex = findIndex(field.value, ['id', query.id]);
 
-      setShowEditQueryFlyout(queryIndex);
+      setShowEditQueryFlyout(streamIndex);
     },
     [field.value]
   );
@@ -108,15 +109,29 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
               draft[showEditQueryFlyout].query = updatedQuery.query;
 
               if (updatedQuery.platform?.length) {
-                draft[showEditQueryFlyout].platform = updatedQuery.platform;
+                draft[showEditQueryFlyout].platform = {
+                  type: 'text',
+                  value: updatedQuery.platform,
+                };
               } else {
                 delete draft[showEditQueryFlyout].platform;
               }
 
               if (updatedQuery.version?.length) {
-                draft[showEditQueryFlyout].version = updatedQuery.version;
+                draft[showEditQueryFlyout].version = {
+                  type: 'text',
+                  value: updatedQuery.version,
+                };
               } else {
                 delete draft[showEditQueryFlyout].version;
+              }
+
+              if (updatedQuery.ecs_mapping) {
+                draft[showEditQueryFlyout].ecs_mapping = {
+                  value: updatedQuery.ecs_mapping,
+                };
+              } else {
+                delete draft[showEditQueryFlyout].ecs_mapping;
               }
 
               return draft;
@@ -135,20 +150,25 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       new Promise<void>((resolve) => {
         setValue(
           produce((draft) => {
-            draft.push(getNewQuery(newQuery));
+            draft.push(
+              getNewQuery({
+                ...newQuery,
+                packId,
+              })
+            );
             return draft;
           })
         );
         handleHideAddFlyout();
         resolve();
       }),
-    [handleHideAddFlyout, setValue]
+    [handleHideAddFlyout, packId, setValue]
   );
 
   const handleDeleteQueries = useCallback(() => {
     setValue(
       produce((draft) => {
-        pullAllBy(draft, tableSelectedItems, 'vars.id.value');
+        pullAllBy(draft, tableSelectedItems, 'id');
 
         return draft;
       })
@@ -157,17 +177,17 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   }, [setValue, tableSelectedItems]);
 
   const handlePackUpload = useCallback(
-    (newQueries) => {
+    (parsedContent, packName) => {
       setValue(
         produce((draft) => {
-          forEach(newQueries, (newQuery, newQueryId) => {
-            draff.push(
+          forEach(parsedContent.queries, (newQuery, newQueryId) => {
+            draft.push(
               getNewQuery({
                 id: newQueryId,
-                interval: newQuery.interval,
+                interval: newQuery.interval ?? parsedContent.interval,
                 query: newQuery.query,
-                version: newQuery.version,
-                platform: getSupportedPlatforms(newQuery.platform),
+                version: newQuery.version ?? parsedContent.version,
+                platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
               })
             );
           });
@@ -175,13 +195,17 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
           return draft;
         })
       );
+
+      handleNameChange(packName);
     },
-    [setValue]
+    [handleNameChange, setValue]
   );
+
+  const tableData = useMemo(() => (field.value?.length ? field.value : []), [field.value]);
 
   const uniqueQueryIds = useMemo<string[]>(
     () =>
-      field.value?.length
+      field.value && field.value.length
         ? field.value.reduce((acc, query) => {
             if (query?.id) {
               acc.push(query.id);
@@ -221,8 +245,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       <EuiSpacer />
       {field.value?.length ? (
         <PackQueriesTable
-          editMode={true}
-          data={field.value}
+          data={tableData}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
           selectedItems={tableSelectedItems}
@@ -242,7 +265,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <QueryFlyout
           uniqueQueryIds={uniqueQueryIds}
-          defaultValue={field.value[0].streams[showEditQueryFlyout]?.vars}
+          defaultValue={field.value[showEditQueryFlyout]}
           integrationPackageVersion={integrationPackageVersion}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}

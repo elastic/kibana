@@ -36,9 +36,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const queryClient = useQueryClient();
   const {
     application: {
-      capabilities: {
-        osquery: { writePacks },
-      },
+      capabilities: { osquery: permissions },
     },
     http,
     notifications: { toasts },
@@ -48,8 +46,8 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
 
   const hideConfirmationModal = useCallback(() => setConfirmationModal(false), []);
 
-  const { data: agentStatus } = useAgentStatus({ policyId: item.policy_id, skip: !item.policy_id });
-  const { data: agentPolicy } = useAgentPolicy({ policyId: item.policy_id, skip: !item.policy_id });
+  const { data: agentStatus } = useAgentStatus({ policyId: item.policy_id });
+  const { data: agentPolicy } = useAgentPolicy({ policyId: item.policy_id });
 
   const { isLoading, mutate } = useMutation(
     ({ id, ...payload }: UpdatePackagePolicy & { id: string }) =>
@@ -58,7 +56,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       }),
     {
       onSuccess: (response) => {
-        queryClient.invalidateQueries('packs');
+        queryClient.invalidateQueries('packList');
         setErrorToast();
         toasts.addSuccess(
           response.item.enabled
@@ -102,9 +100,6 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       delete draft.created_by;
 
       draft.enabled = !item.enabled;
-      draft.inputs[0].streams.forEach((stream) => {
-        delete stream.compiled_stream;
-      });
 
       return draft;
     });
@@ -125,8 +120,9 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     <>
       {isLoading && <StyledEuiLoadingSpinner />}
       <EuiSwitch
-        checked={item.enabled}
-        disabled={!writePacks || isLoading}
+        // @ts-expect-error update types
+        checked={item.attributes.enabled}
+        disabled={!permissions.writePacks || isLoading}
         showLabel={false}
         label=""
         onChange={handleToggleActiveClick}

@@ -5,22 +5,34 @@
  * 2.0.
  */
 
-import { find, map, uniq } from 'lodash/fp';
+import { filter, has, find, map, uniq } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
 import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { PLUGIN_ID } from '../../../common';
 
-export const findPackRoute = (router: IRouter) => {
+export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
       path: '/internal/osquery/packs',
       validate: {
         query: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
+      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
+
+      const { items: packagePolicies } = await packagePolicyService?.list(savedObjectsClient, {
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+        perPage: 1000,
+        page: 1,
+      });
 
       const soClientResponse = await savedObjectsClient.find<{
         name: string;
@@ -38,63 +50,77 @@ export const findPackRoute = (router: IRouter) => {
         sortOrder: request.query.sortDirection ?? 'desc',
       });
 
-      const packs = soClientResponse.saved_objects.map(({ attributes, references, ...rest }) => ({
-        ...rest,
-        ...attributes,
-        queries:
-          attributes.queries?.map((packQuery) => {
-            const queryReference = find(['name', packQuery.name], references);
+      soClientResponse.saved_objects.map((pack) => {
+        const packName = pack.attributes.name;
 
-            if (queryReference) {
-              return {
-                ...packQuery,
-                id: queryReference?.id,
-              };
-            }
+        const policyIds = map(
+          filter(packagePolicies, (packagePolicy) =>
+            has(packagePolicy, `inputs[0].config.osquery.value.packs.${packName}`)
+          ),
+          'policy_id'
+        );
 
-            return packQuery;
-          }) ?? [],
-      }));
+        pack.policy_ids = policyIds;
+        return pack;
+      });
 
-      const savedQueriesIds = uniq<string>(
-        // @ts-expect-error update types
-        packs.reduce((acc, savedQuery) => [...acc, ...map('id', savedQuery.queries)], [])
-      );
+      // const packs = soClientResponse.saved_objects.map(({ attributes, references, ...rest }) => ({
+      //   ...rest,
+      //   ...attributes,
+      //   queries:
+      //     attributes.queries?.map((packQuery) => {
+      //       const queryReference = find(['name', packQuery.name], references);
 
-      const { saved_objects: savedQueries } = await savedObjectsClient.bulkGet(
-        savedQueriesIds.map((queryId) => ({
-          type: savedQuerySavedObjectType,
-          id: queryId,
-        }))
-      );
+      //       if (queryReference) {
+      //         return {
+      //           ...packQuery,
+      //           id: queryReference?.id,
+      //         };
+      //       }
 
-      const packsWithSavedQueriesQueries = packs.map((pack) => ({
-        ...pack,
-        // @ts-expect-error update types
-        queries: pack.queries.reduce((acc, packQuery) => {
-          // @ts-expect-error update types
-          const savedQuerySO = find(['id', packQuery.id], savedQueries);
+      //       return packQuery;
+      //     }) ?? [],
+      // }));
 
-          // @ts-expect-error update types
-          if (savedQuerySO?.attributes?.query) {
-            return [
-              ...acc,
-              {
-                ...packQuery,
-                // @ts-expect-error update types
-                query: find(['id', packQuery.id], savedQueries).attributes.query,
-              },
-            ];
-          }
+      // const savedQueriesIds = uniq<string>(
+      //   // @ts-expect-error update types
+      //   packs.reduce((acc, savedQuery) => [...acc, ...map('id', savedQuery.queries)], [])
+      // );
 
-          return acc;
-        }, []),
-      }));
+      // const { saved_objects: savedQueries } = await savedObjectsClient.bulkGet(
+      //   savedQueriesIds.map((queryId) => ({
+      //     type: savedQuerySavedObjectType,
+      //     id: queryId,
+      //   }))
+      // );
+
+      // const packsWithSavedQueriesQueries = packs.map((pack) => ({
+      //   ...pack,
+      //   // @ts-expect-error update types
+      //   queries: pack.queries.reduce((acc, packQuery) => {
+      //     // @ts-expect-error update types
+      //     const savedQuerySO = find(['id', packQuery.id], savedQueries);
+
+      //     // @ts-expect-error update types
+      //     if (savedQuerySO?.attributes?.query) {
+      //       return [
+      //         ...acc,
+      //         {
+      //           ...packQuery,
+      //           // @ts-expect-error update types
+      //           query: find(['id', packQuery.id], savedQueries).attributes.query,
+      //         },
+      //       ];
+      //     }
+
+      //     return acc;
+      //   }, []),
+      // }));
 
       return response.ok({
         body: {
           ...soClientResponse,
-          saved_objects: packsWithSavedQueriesQueries,
+          // items: packsWithSavedQueriesQueries,
         },
       });
     }

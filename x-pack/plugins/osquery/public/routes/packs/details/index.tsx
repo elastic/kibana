@@ -24,10 +24,11 @@ import styled from 'styled-components';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { usePack } from '../../../packs/use_pack';
-import { PackQueriesTable } from '../../../packs/pack_queries_table';
+import { PackQueriesStatusTable } from '../../../packs/pack_queries_status_table';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { AgentsPolicyLink } from '../../../agent_policies/agents_policy_link';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
+import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
 
 const Divider = styled.div`
   width: 0;
@@ -42,6 +43,10 @@ const PackDetailsPageComponent = () => {
   const editQueryLinkProps = useRouterNavigate(`packs/${packId}/edit`);
 
   const { data } = usePack({ packId });
+  const { data: agentIds } = useAgentPolicyAgentIds({
+    agentPolicyId: data?.policy_id,
+    skip: !data,
+  });
 
   useBreadcrumbs('pack_details', { packName: data?.name ?? '' });
 
@@ -51,8 +56,8 @@ const PackDetailsPageComponent = () => {
         <EuiFlexItem>
           <EuiButtonEmpty iconType="arrowLeft" {...packsListProps} flush="left" size="xs">
             <FormattedMessage
-              id="xpack.osquery.packDetails.viewAllScheduledQueriesListTitle"
-              defaultMessage="View all scheduled query groups"
+              id="xpack.osquery.packDetails.viewAllPackListTitle"
+              defaultMessage="View all packs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -92,20 +97,20 @@ const PackDetailsPageComponent = () => {
           <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
             <EuiDescriptionListTitle className="eui-textNoWrap">
               <FormattedMessage
-                id="xpack.osquery.pack.kpis.agentPoliciesLabelText"
-                defaultMessage="Agent Policies"
+                id="xpack.osquery.scheduleQueryGroup.kpis.policyLabelText"
+                defaultMessage="Policy"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              {data?.agent_policy_ids ? (
-                <EuiFlexGroup>
-                  {data?.agent_policy_ids.map((agentPolicyId, index) => (
-                    <EuiFlexItem key="agentPolicyId">
-                      <AgentsPolicyLink policyId={agentPolicyId} />
-                      {index < data?.agent_policy_ids.length - 1 ? ',' : null}
-                    </EuiFlexItem>
+              {data?.policy_ids?.length ? (
+                <>
+                  {data?.policy_ids.map((policyId: string) => (
+                    <>
+                      {' '}
+                      <AgentsPolicyLink key={policyId} policyId={policyId} />
+                    </>
                   ))}
-                </EuiFlexGroup>
+                </>
               ) : null}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
@@ -128,12 +133,14 @@ const PackDetailsPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [data?.agent_policy_ids, editQueryLinkProps, permissions.writePacks]
+    [data?.policy_ids, editQueryLinkProps, permissions]
   );
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {data && <PackQueriesTable data={data.queries} />}
+      {data && (
+        <PackQueriesStatusTable agentIds={agentIds} packName={data.name} data={data.queries} />
+      )}
     </WithHeaderLayout>
   );
 };

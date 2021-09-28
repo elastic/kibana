@@ -6,14 +6,18 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../scheduled_query_groups/queries/constants';
-import { PlatformCheckBoxGroupField } from '../../scheduled_query_groups/queries/platform_checkbox_group_field';
-import { Field, getUseField, UseField } from '../../shared_imports';
+import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
+import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
+import { Field, getUseField, UseField, useFormData } from '../../shared_imports';
 import { CodeEditorField } from './code_editor_field';
+import {
+  ECSMappingEditorField,
+  ECSMappingEditorFieldRef,
+} from '../../packs/queries/lazy_ecs_mapping_editor_field';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -22,12 +26,16 @@ interface SavedQueryFormProps {
 }
 
 const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ viewMode }) => {
+  const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
+
   const euiFieldProps = useMemo(
     () => ({
       isDisabled: !!viewMode,
     }),
     [viewMode]
   );
+
+  const [{ query }] = useFormData({ watch: ['query'] });
 
   return (
     <>
@@ -87,6 +95,17 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ viewMode }) =>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <CommonUseField
+            path="ecs_mapping"
+            component={ECSMappingEditorField}
+            query={query}
+            fieldRef={ecsFieldRef}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
