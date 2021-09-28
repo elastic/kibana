@@ -98,10 +98,22 @@ export function useTable(storageKey: string) {
 
   const [query, setQuery] = useState('');
 
-  const onTableChange = () => {
-    // we are already updating the state in fetchMoreData. We would need to check in react
-    // if both methods are needed or we can clean one of them
-    // For now I just keep it so existing react components don't break
+  const onTableChange = ({ page, sort }: { page: Page; sort: Sorting }) => {
+    setPagination({
+      ...pagination,
+      ...{
+        initialPageSize: page.size,
+        pageSize: page.size,
+        initialPageIndex: page.index,
+        pageIndex: page.index,
+        pageSizeOptions: PAGE_SIZE_OPTIONS,
+      },
+    });
+    setSorting(cleanSortingData(sort));
+    setLocalStorageData(storage, {
+      page,
+      sort,
+    });
   };
 
   const getPaginationRouteOptions = useCallback(() => {
