@@ -123,12 +123,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
   const factories = embeddablesService
     ? Array.from(embeddablesService.getEmbeddableFactories()).filter(
         ({ type, isEditable, canCreateNew, isContainerType }) =>
-          isEditable() &&
-          !isContainerType &&
-          canCreateNew() &&
-          !['visualization', 'ml'].some((factoryType) => {
-            return type.includes(factoryType);
-          })
+          isEditable() && !isContainerType && canCreateNew() && type !== 'visualization'
       )
     : [];
 

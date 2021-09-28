@@ -16,6 +16,7 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 import { getMlGlobalServices } from '../../application/app';
 import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
+import { CANVAS_APP } from '../../../../../../x-pack/plugins/canvas/public';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { JobSelectorFlyout } from './components/job_selector_flyout';
 
@@ -90,8 +91,8 @@ export async function resolveJobSelection(
         }
       ); // Close the flyout when user navigates out of the dashboard plugin
 
-      currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId) => {
-        if (appId !== DashboardConstants.DASHBOARDS_ID) {
+      currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId = '') => {
+        if (![DashboardConstants.DASHBOARDS_ID, CANVAS_APP].includes(appId)) {
           flyoutSession.close();
         }
       });

@@ -9,9 +9,9 @@ import { PluginInitializerContext } from 'kibana/public';
 import { CoreStart } from '../../../../src/core/public';
 import { CanvasServices } from './services';
 import { CanvasSetup, CanvasStart, CanvasStartDeps, CanvasPlugin } from './plugin';
+export { CANVAS_APP } from '../common/lib/constants';
 
 export { CanvasSetup, CanvasStart };
-
 export interface WithKibanaProps {
   kibana: {
     services: CoreStart & CanvasStartDeps & { canvas: CanvasServices };
