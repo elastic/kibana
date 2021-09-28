@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon, EuiRange } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State } from '../types';
+import { State, XYState } from '../types';
 import { FormatFactory } from '../../../common';
 import { YConfig } from '../../../common/expressions';
 import { LineStyle, FillStyle } from '../../../common/expressions/xy_chart';
@@ -116,29 +116,35 @@ export const ThresholdPanel = (
   }
 ) => {
   const { state, setState, layerId, accessor } = props;
-  const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index];
+
+  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
+    value: state,
+    onChange: setState,
+  });
+
+  const index = localState.layers.findIndex((l) => l.layerId === layerId);
+  const layer = localState.layers[index];
 
   const setYConfig = useCallback(
     (yConfig: Partial<YConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
-      setState((currState) => {
-        const currLayer = currState.layers[index];
-        const newYConfigs = [...(currLayer.yConfig || [])];
-        const existingIndex = newYConfigs.findIndex(
-          (yAxisConfig) => yAxisConfig.forAccessor === accessor
-        );
-        if (existingIndex !== -1) {
-          newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
-        } else {
-          newYConfigs.push({ forAccessor: accessor, ...yConfig });
-        }
-        return updateLayer(currState, { ...currLayer, yConfig: newYConfigs }, index);
-      });
+      const newYConfigs = [...(layer.yConfig || [])];
+      const existingIndex = newYConfigs.findIndex(
+        (yAxisConfig) => yAxisConfig.forAccessor === accessor
+      );
+      if (existingIndex !== -1) {
+        newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
+      } else {
+        newYConfigs.push({
+          forAccessor: accessor,
+          ...yConfig,
+        });
+      }
+      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
     },
-    [accessor, index, setState]
+    [accessor, index, localState, layer, setLocalState]
   );
 
   const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
@@ -291,24 +297,11 @@ const LineThicknessSlider = ({
   value: number;
   onChange: (value: number) => void;
 }) => {
-  const onChangeWrapped = useCallback(
-    (newValue) => {
-      if (Number.isInteger(newValue)) {
-        onChange(getSafeValue(newValue, newValue, minRange, maxRange));
-      }
-    },
-    [onChange]
-  );
-  const { inputValue, handleInputChange } = useDebouncedValue<number | ''>(
-    { value, onChange: onChangeWrapped },
-    { allowFalsyValue: true }
-  );
-
   return (
     <EuiRange
       fullWidth
       data-test-subj="lnsXY_lineThickness"
-      value={inputValue}
+      value={value}
       showInput
       min={minRange}
       max={maxRange}
@@ -316,10 +309,15 @@ const LineThicknessSlider = ({
       compressed
       onChange={(e) => {
         const newValue = e.currentTarget.value;
-        handleInputChange(newValue === '' ? '' : Number(newValue));
+        const convertedValue = newValue === '' ? '' : Number(newValue);
+        if (Number.isInteger(convertedValue)) {
+          onChange(getSafeValue(convertedValue, Number(convertedValue), minRange, maxRange));
+        }
       }}
       onBlur={() => {
-        handleInputChange(getSafeValue(inputValue, value, minRange, maxRange));
+        if (Number.isInteger(value)) {
+          onChange(getSafeValue(value, value, minRange, maxRange));
+        }
       }}
     />
   );
