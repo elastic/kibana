@@ -12,10 +12,10 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
  * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
  * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
  * needed then it will be safe to remove this saved object and all its migrations.
- * @deprecated
+ * @deprecated Remove this once the legacy notification/side car is gone
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IRuleActionsAttributes extends Record<string, any> {
+export interface LegacyIRuleActionsAttributes extends Record<string, any> {
   ruleAlertId: string;
   actions: RuleAlertAction[];
   ruleThrottle: string;
@@ -26,8 +26,18 @@ export interface IRuleActionsAttributes extends Record<string, any> {
  * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
  * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
  * needed then it will be safe to remove this saved object and all its migrations.
- * @deprecated
+ * @deprecated Remove this once the legacy notification/side car is gone
  */
-export interface IRuleActionsAttributesSavedObjectAttributes
-  extends IRuleActionsAttributes,
+export interface LegacyIRuleActionsAttributesSavedObjectAttributes
+  extends LegacyIRuleActionsAttributes,
     SavedObjectAttributes {}
+
+/**
+ * @deprecated Remove this once the legacy notification/side car is gone
+ */
+export interface LegacyRuleActions {
+  id: string;
+  actions: RuleAlertAction[];
+  ruleThrottle: string;
+  alertThrottle: string | null;
+}
