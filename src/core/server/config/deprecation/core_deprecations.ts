@@ -353,8 +353,6 @@ const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecat
 };
 
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
-  unusedFromRoot('savedObjects.indexCheckTimeout'),
-  unusedFromRoot('server.xsrf.token'),
   unusedFromRoot('optimize.lazy'),
   unusedFromRoot('optimize.lazyPort'),
   unusedFromRoot('optimize.lazyHost'),
@@ -374,8 +372,6 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   unusedFromRoot('optimize.workers'),
   unusedFromRoot('optimize.profile'),
   unusedFromRoot('optimize.validateSyntaxOfNodeModules'),
-  unusedFromRoot('elasticsearch.preserveHost'),
-  unusedFromRoot('elasticsearch.startupTimeout'),
   rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
   rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
