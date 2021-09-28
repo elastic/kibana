@@ -70,16 +70,15 @@ export interface ServerRouteRepository<
   ): ServerRouteRepository<
     TRouteHandlerResources,
     TRouteCreateOptions,
-    TRouteState &
-      {
-        [key in TEndpoint]: ServerRoute<
-          TEndpoint,
-          TRouteParamsRT,
-          TRouteHandlerResources,
-          TReturnType,
-          TRouteCreateOptions
-        >;
-      }
+    TRouteState & {
+      [key in TEndpoint]: ServerRoute<
+        TEndpoint,
+        TRouteParamsRT,
+        TRouteHandlerResources,
+        TReturnType,
+        TRouteCreateOptions
+      >;
+    }
   >;
   merge<
     TServerRouteRepository extends ServerRouteRepository<
@@ -104,27 +103,24 @@ export interface ServerRouteRepository<
   >;
 }
 
-type ClientRequestParamsOfType<
-  TRouteParamsRT extends RouteParamsRT
-> = TRouteParamsRT extends t.Mixed
-  ? MaybeOptional<{
-      params: t.OutputOf<TRouteParamsRT>;
-    }>
-  : {};
+type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
+  TRouteParamsRT extends t.Mixed
+    ? MaybeOptional<{
+        params: t.OutputOf<TRouteParamsRT>;
+      }>
+    : {};
 
-type DecodedRequestParamsOfType<
-  TRouteParamsRT extends RouteParamsRT
-> = TRouteParamsRT extends t.Mixed
-  ? MaybeOptional<{
-      params: t.TypeOf<TRouteParamsRT>;
-    }>
-  : {};
+type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
+  TRouteParamsRT extends t.Mixed
+    ? MaybeOptional<{
+        params: t.TypeOf<TRouteParamsRT>;
+      }>
+    : {};
 
-export type EndpointOf<
-  TServerRouteRepository extends ServerRouteRepository<any, any, any>
-> = TServerRouteRepository extends ServerRouteRepository<any, any, infer TRouteState>
-  ? keyof TRouteState
-  : never;
+export type EndpointOf<TServerRouteRepository extends ServerRouteRepository<any, any, any>> =
+  TServerRouteRepository extends ServerRouteRepository<any, any, infer TRouteState>
+    ? keyof TRouteState
+    : never;
 
 export type ReturnOf<
   TServerRouteRepository extends ServerRouteRepository<any, any, any>,

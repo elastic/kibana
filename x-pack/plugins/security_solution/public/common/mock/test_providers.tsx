@@ -76,7 +76,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <UserPrivilegesProvider
             kibanaCapabilities={
-              ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
+              { siem: { crud_alerts: true, read_alerts: true } } as unknown as Capabilities
             }
           >
             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
@@ -94,7 +94,7 @@ export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook
   return {
     path: 'path',
     type: 'type',
-    value: ('mockedValue' as unknown) as T,
+    value: 'mockedValue' as unknown as T,
     isPristine: false,
     isDirty: false,
     isModified: false,

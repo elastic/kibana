@@ -83,16 +83,16 @@ describe('test endpoint route', () => {
     mockResponse = httpServerMock.createResponseFactory();
     startContract = createMockEndpointAppContextServiceStartContract();
 
-    (startContract.packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>).list.mockImplementation(
-      () => {
-        return Promise.resolve({
-          items: [],
-          total: 0,
-          page: 1,
-          perPage: 1000,
-        });
-      }
-    );
+    (
+      startContract.packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>
+    ).list.mockImplementation(() => {
+      return Promise.resolve({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 1000,
+      });
+    });
   });
 
   describe('with new transform package', () => {
@@ -319,9 +319,9 @@ describe('test endpoint route', () => {
         );
 
         mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.getAgent = jest.fn().mockReturnValue(({
+        mockAgentService.getAgent = jest.fn().mockReturnValue({
           active: true,
-        } as unknown) as Agent);
+        } as unknown as Agent);
 
         [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)
@@ -456,9 +456,9 @@ describe('test endpoint route', () => {
         (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
         );
-        mockAgentService.getAgent = jest.fn().mockReturnValue(({
+        mockAgentService.getAgent = jest.fn().mockReturnValue({
           active: false,
-        } as unknown) as Agent);
+        } as unknown as Agent);
 
         [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(`${HOST_METADATA_LIST_ROUTE}`)

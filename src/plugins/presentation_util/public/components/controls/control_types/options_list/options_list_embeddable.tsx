@@ -15,7 +15,7 @@ import { tap, debounceTime, map, distinctUntilChanged } from 'rxjs/operators';
 
 import { esFilters } from '../../../../../../data/public';
 import { OptionsListStrings } from './options_list_strings';
-import { Embeddable } from '../../../../../../embeddable/public';
+import { Embeddable, IContainer } from '../../../../../../embeddable/public';
 import { InputControlInput, InputControlOutput } from '../../types';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 
@@ -88,9 +88,10 @@ export class OptionsListEmbeddable extends Embeddable<
   constructor(
     input: OptionsListEmbeddableInput,
     output: InputControlOutput,
-    private fetchData: OptionsListDataFetcher
+    private fetchData: OptionsListDataFetcher,
+    parent?: IContainer
   ) {
-    super(input, output);
+    super(input, output, parent);
     this.fetchData = fetchData;
 
     // populate default selections from input

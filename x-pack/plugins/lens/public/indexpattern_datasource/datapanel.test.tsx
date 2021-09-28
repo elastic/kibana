@@ -331,7 +331,7 @@ describe('IndexPattern Data Panel', () => {
     function testProps() {
       const setState = jest.fn();
       core.http.post.mockImplementation(async (path) => {
-        const parts = ((path as unknown) as string).split('/');
+        const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
           indexPatternTitle: `${indexPatternTitle}_testtitle`,
@@ -396,7 +396,7 @@ describe('IndexPattern Data Panel', () => {
 
       if (stateChanges || propChanges) {
         await act(async () => {
-          ((inst.setProps as unknown) as (props: unknown) => {})({
+          (inst.setProps as unknown as (props: unknown) => {})({
             ...props,
             ...((propChanges as object) || {}),
             state: {
@@ -561,7 +561,7 @@ describe('IndexPattern Data Panel', () => {
         }
         ++queryCount;
 
-        const parts = ((path as unknown) as string).split('/');
+        const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         const result = Promise.resolve({
           indexPatternTitle,
@@ -580,7 +580,7 @@ describe('IndexPattern Data Panel', () => {
       inst.update();
 
       act(() => {
-        ((inst.setProps as unknown) as (props: unknown) => {})({
+        (inst.setProps as unknown as (props: unknown) => {})({
           ...props,
           dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
         });
@@ -588,7 +588,7 @@ describe('IndexPattern Data Panel', () => {
       });
 
       await act(async () => {
-        ((inst.setProps as unknown) as (props: unknown) => {})({
+        (inst.setProps as unknown as (props: unknown) => {})({
           ...props,
           dateRange: { fromDate: '2019-01-01', toDate: '2020-01-03' },
         });
@@ -856,10 +856,12 @@ describe('IndexPattern Data Panel', () => {
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
         act(() => {
-          (wrapper
-            .find('[data-test-subj="lnsIndexPatternActions-popover"]')
-            .first()
-            .prop('children') as ReactElement).props.items[0].props.onClick();
+          (
+            wrapper
+              .find('[data-test-subj="lnsIndexPatternActions-popover"]')
+              .first()
+              .prop('children') as ReactElement
+          ).props.items[0].props.onClick();
         });
 
         // wait for indx pattern to be loaded
@@ -890,10 +892,12 @@ describe('IndexPattern Data Panel', () => {
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
         act(() => {
-          (wrapper
-            .find('[data-test-subj="lnsIndexPatternActions-popover"]')
-            .first()
-            .prop('children') as ReactElement).props.items[0].props.onClick();
+          (
+            wrapper
+              .find('[data-test-subj="lnsIndexPatternActions-popover"]')
+              .first()
+              .prop('children') as ReactElement
+          ).props.items[0].props.onClick();
         });
         // wait for indx pattern to be loaded
         await act(async () => await new Promise((r) => setTimeout(r, 0)));

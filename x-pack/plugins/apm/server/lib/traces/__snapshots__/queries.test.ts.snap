@@ -8,15 +8,6 @@ Object {
     ],
   },
   "body": Object {
-    "aggs": Object {
-      "by_transaction_id": Object {
-        "terms": Object {
-          "execution_hint": "map",
-          "field": "transaction.id",
-          "size": "myIndex",
-        },
-      },
-    },
     "query": Object {
       "bool": Object {
         "filter": Array [

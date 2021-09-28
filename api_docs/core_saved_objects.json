@@ -4729,7 +4729,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger",
+                "id": "def-server.SavedObjectsExporter.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
@@ -4739,7 +4739,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClient",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClient",
                     "type": "Object",
                     "tags": [],
                     "label": "savedObjectsClient",
@@ -5052,7 +5052,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.typeRegistry",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.typeRegistry",
                     "type": "Object",
                     "tags": [],
                     "label": "typeRegistry",
@@ -5097,7 +5097,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.exportSizeLimit",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.exportSizeLimit",
                     "type": "number",
                     "tags": [],
                     "label": "exportSizeLimit",
@@ -5107,7 +5107,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.logger",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.logger",
                     "type": "Object",
                     "tags": [],
                     "label": "logger",
@@ -5893,7 +5893,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit",
+                "id": "def-server.SavedObjectsImporter.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
@@ -5903,7 +5903,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClient",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClient",
                     "type": "Object",
                     "tags": [],
                     "label": "savedObjectsClient",
@@ -6216,7 +6216,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit.typeRegistry",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.typeRegistry",
                     "type": "Object",
                     "tags": [],
                     "label": "typeRegistry",
@@ -6261,7 +6261,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit.importSizeLimit",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.importSizeLimit",
                     "type": "number",
                     "tags": [],
                     "label": "importSizeLimit",
@@ -9759,6 +9759,21 @@
             "label": "fields",
             "description": [
               "SavedObject fields to include in the response"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkGetObject.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "\nOptional namespace(s) for the object to be retrieved in. If this is defined, it will supersede the namespace ID that is in the\ntop-level options.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
             "signature": [
               "string[] | undefined"
@@ -15558,7 +15573,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.doc",
+            "id": "def-server.SavedObjectMigrationFn.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "doc",
@@ -15571,7 +15586,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.SavedObjectMigrationFn.$2",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -15957,7 +15972,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.__0",
+            "id": "def-server.SavedObjectsClientFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -16012,7 +16027,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.repositoryFactory",
+            "id": "def-server.SavedObjectsClientFactoryProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "repositoryFactory",
@@ -16066,7 +16081,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.options",
+            "id": "def-server.SavedObjectsClientWrapperFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -16170,7 +16185,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.SavedObjectsExportTransform.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -16189,7 +16204,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.objects",
+            "id": "def-server.SavedObjectsExportTransform.$2",
             "type": "Array",
             "tags": [],
             "label": "objects",
@@ -16326,7 +16341,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.objects",
+            "id": "def-server.SavedObjectsImportHook.$1",
             "type": "Array",
             "tags": [],
             "label": "objects",
@@ -16419,7 +16434,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.SavedObjectTypeExcludeFromUpgradeFilterHook.$1",
             "type": "Object",
             "tags": [],
             "label": "toolkit",

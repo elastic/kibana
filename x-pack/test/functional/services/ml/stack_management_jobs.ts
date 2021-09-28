@@ -86,7 +86,7 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async executeSync() {
-      await testSubjects.click('mlJobMgmtSyncFlyoutSyncButton', 2000);
+      await testSubjects.clickWhenNotDisabled('mlJobMgmtSyncFlyoutSyncButton', { timeout: 5000 });
 
       // check and close success toast
       const resultToast = await toasts.getToastElement(1);
@@ -285,7 +285,18 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async importJobs() {
-      await testSubjects.click('mlJobMgmtImportImportButton', 1000);
+      await testSubjects.clickWhenNotDisabled('mlJobMgmtImportImportButton', { timeout: 5000 });
+
+      // check and close success toast
+      const resultToast = await toasts.getToastElement(1);
+      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
+      const title: string = await titleElement.getVisibleText();
+      expect(title).to.match(/^\d+ job[s]? successfully imported$/);
+
+      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
+      await dismissButton.click();
+
+      // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout', { timeout: 60 * 1000 });
     },
 
@@ -340,7 +351,18 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async selectExportJobs() {
-      await testSubjects.click('mlJobMgmtExportExportButton');
+      await testSubjects.clickWhenNotDisabled('mlJobMgmtExportExportButton', { timeout: 5000 });
+
+      // check and close success toast
+      const resultToast = await toasts.getToastElement(1);
+      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
+      const title: string = await titleElement.getVisibleText();
+      expect(title).to.match(/^Your file is downloading in the background$/);
+
+      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
+      await dismissButton.click();
+
+      // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtExportJobsFlyout', { timeout: 60 * 1000 });
     },
 

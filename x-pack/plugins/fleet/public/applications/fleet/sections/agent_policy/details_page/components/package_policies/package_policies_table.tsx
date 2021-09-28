@@ -102,6 +102,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       {
         field: 'name',
         sortable: true,
+        truncateText: true,
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
@@ -266,11 +267,12 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           : [
               <EuiButton
                 key="addPackagePolicyButton"
+                fill
                 isDisabled={!hasWriteCapabilities}
                 iconType="plusInCircle"
                 onClick={() => {
                   application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-                    path: pagePathGetters.integrations_all()[1],
+                    path: pagePathGetters.integrations_all({})[1],
                     state: { forAgentPolicyId: agentPolicy.id },
                   });
                 }}

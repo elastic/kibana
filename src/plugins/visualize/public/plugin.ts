@@ -81,7 +81,8 @@ export class VisualizePlugin
       void,
       VisualizePluginSetupDependencies,
       VisualizePluginStartDependencies
-    > {
+    >
+{
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
@@ -161,7 +162,7 @@ export class VisualizePlugin
         pluginsStart.data.indexPatterns.clearCache();
         // make sure a default index pattern exists
         // if not, the page will be redirected to management and visualize won't be rendered
-        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
+        await pluginsStart.data.indexPatterns.ensureDefaultDataView();
 
         appMounted();
 

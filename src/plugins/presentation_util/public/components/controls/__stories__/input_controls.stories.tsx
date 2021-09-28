@@ -7,27 +7,30 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-
 import uuid from 'uuid';
+
 import { decorators } from './decorators';
-import { ControlGroupContainerFactory } from '../control_group/embeddable/control_group_container_factory';
-import { EmbeddableFactory } from '../../../../../embeddable/public';
-import { InputControlEmbeddable, InputControlInput, InputControlOutput } from '../types';
-import { getControlsServiceStub } from './controlsService_stub';
+import { providers } from '../../../services/storybook';
+import { getControlsServiceStub } from './controls_service_stub';
+import { ControlGroupContainerFactory } from '../control_group/control_group_container_factory';
 
 export default {
-  title: 'Input Controls',
+  title: 'Controls',
   description: '',
   decorators,
 };
 
 const ControlGroupStoryComponent = () => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const { controlsServiceStub, openFlyout } = getControlsServiceStub();
+
+  providers.overlays.start({});
+  const overlays = providers.overlays.getService();
+
+  const controlsServiceStub = getControlsServiceStub();
 
   useEffect(() => {
     (async () => {
-      const factory = new ControlGroupContainerFactory(controlsServiceStub, openFlyout);
+      const factory = new ControlGroupContainerFactory(controlsServiceStub, overlays);
       const controlGroupContainerEmbeddable = await factory.create({
         inheritParentState: {
           useQuery: false,
@@ -42,7 +45,7 @@ const ControlGroupStoryComponent = () => {
         controlGroupContainerEmbeddable.render(embeddableRoot.current);
       }
     })();
-  }, [embeddableRoot, controlsServiceStub, openFlyout]);
+  }, [embeddableRoot, controlsServiceStub, overlays]);
 
   return <div ref={embeddableRoot} />;
 };

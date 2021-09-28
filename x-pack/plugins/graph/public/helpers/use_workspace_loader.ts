@@ -5,35 +5,48 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, ToastsStart } from 'kibana/public';
+import { SavedObjectsClientContract } from 'kibana/public';
 import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from 'kibana/public';
 import { GraphStore } from '../state_management';
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
-import { getSavedWorkspace } from './saved_workspace_utils';
-
-interface UseWorkspaceLoaderProps {
+import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
+import { getEditUrl } from '../services/url';
+import { SpacesApi } from '../../../spaces/public';
+export interface UseWorkspaceLoaderProps {
   store: GraphStore;
   workspaceRef: React.MutableRefObject<Workspace | undefined>;
   savedObjectsClient: SavedObjectsClientContract;
-  toastNotifications: ToastsStart;
+  coreStart: CoreStart;
+  spaces?: SpacesApi;
 }
 
 interface WorkspaceUrlParams {
   id?: string;
 }
+export interface SharingSavedObjectProps {
+  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+  aliasTargetId?: string;
+}
+
+interface WorkspaceLoadedState {
+  savedWorkspace: GraphWorkspaceSavedObject;
+  indexPatterns: IndexPatternSavedObject[];
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+}
 
 export const useWorkspaceLoader = ({
+  coreStart,
+  spaces,
   workspaceRef,
   store,
   savedObjectsClient,
-  toastNotifications,
 }: UseWorkspaceLoaderProps) => {
-  const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>();
-  const [savedWorkspace, setSavedWorkspace] = useState<GraphWorkspaceSavedObject>();
-  const history = useHistory();
-  const location = useLocation();
+  const [state, setState] = useState<WorkspaceLoadedState>();
+  const { replace: historyReplace } = useHistory();
+  const { search } = useLocation();
   const { id } = useParams<WorkspaceUrlParams>();
 
   /**
@@ -41,7 +54,7 @@ export const useWorkspaceLoader = ({
    * on changes in id parameter and URL query only.
    */
   useEffect(() => {
-    const urlQuery = new URLSearchParams(location.search).get('query');
+    const urlQuery = new URLSearchParams(search).get('query');
 
     function loadWorkspace(
       fetchedSavedWorkspace: GraphWorkspaceSavedObject,
@@ -71,24 +84,43 @@ export const useWorkspaceLoader = ({
         .then((response) => response.savedObjects);
     }
 
-    async function fetchSavedWorkspace() {
-      return (id
+    async function fetchSavedWorkspace(): Promise<{
+      savedObject: GraphWorkspaceSavedObject;
+      sharingSavedObjectProps?: SharingSavedObjectProps;
+    }> {
+      return id
         ? await getSavedWorkspace(savedObjectsClient, id).catch(function (e) {
-            toastNotifications.addError(e, {
+            coreStart.notifications.toasts.addError(e, {
               title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
                 defaultMessage: "Couldn't load graph with ID",
               }),
             });
-            history.replace('/home');
+            historyReplace('/home');
             // return promise that never returns to prevent the controller from loading
             return new Promise(() => {});
           })
-        : await getSavedWorkspace(savedObjectsClient)) as GraphWorkspaceSavedObject;
+        : getEmptyWorkspace();
     }
 
     async function initializeWorkspace() {
       const fetchedIndexPatterns = await fetchIndexPatterns();
-      const fetchedSavedWorkspace = await fetchSavedWorkspace();
+      const {
+        savedObject: fetchedSavedWorkspace,
+        sharingSavedObjectProps: fetchedSharingSavedObjectProps,
+      } = await fetchSavedWorkspace();
+
+      if (spaces && fetchedSharingSavedObjectProps?.outcome === 'aliasMatch') {
+        // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+        const newObjectId = fetchedSharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
+        const newPath = getEditUrl(coreStart.http.basePath.prepend, { id: newObjectId }) + search;
+        spaces.ui.redirectLegacyUrl(
+          newPath,
+          i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {
+            defaultMessage: 'Graph',
+          })
+        );
+        return null;
+      }
 
       /**
        * Deal with situation of request to open saved workspace. Otherwise clean up store,
@@ -99,22 +131,25 @@ export const useWorkspaceLoader = ({
       } else if (workspaceRef.current) {
         clearStore();
       }
-
-      setIndexPatterns(fetchedIndexPatterns);
-      setSavedWorkspace(fetchedSavedWorkspace);
+      setState({
+        savedWorkspace: fetchedSavedWorkspace,
+        indexPatterns: fetchedIndexPatterns,
+        sharingSavedObjectProps: fetchedSharingSavedObjectProps,
+      });
     }
 
     initializeWorkspace();
   }, [
     id,
-    location,
+    search,
     store,
-    history,
+    historyReplace,
     savedObjectsClient,
-    setSavedWorkspace,
-    toastNotifications,
+    setState,
+    coreStart,
     workspaceRef,
+    spaces,
   ]);
 
-  return { savedWorkspace, indexPatterns };
+  return state;
 };

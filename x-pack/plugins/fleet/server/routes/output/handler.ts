@@ -31,28 +31,27 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   }
 };
 
-export const getOneOuputHandler: RequestHandler<
-  TypeOf<typeof GetOneOutputRequestSchema.params>
-> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  try {
-    const output = await outputService.get(soClient, request.params.outputId);
+export const getOneOuputHandler: RequestHandler<TypeOf<typeof GetOneOutputRequestSchema.params>> =
+  async (context, request, response) => {
+    const soClient = context.core.savedObjects.client;
+    try {
+      const output = await outputService.get(soClient, request.params.outputId);
 
-    const body: GetOneOutputResponse = {
-      item: output,
-    };
+      const body: GetOneOutputResponse = {
+        item: output,
+      };
 
-    return response.ok({ body });
-  } catch (error) {
-    if (error.isBoom && error.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Output ${request.params.outputId} not found` },
-      });
+      return response.ok({ body });
+    } catch (error) {
+      if (error.isBoom && error.output.statusCode === 404) {
+        return response.notFound({
+          body: { message: `Output ${request.params.outputId} not found` },
+        });
+      }
+
+      return defaultIngestErrorHandler({ error, response });
     }
-
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
+  };
 
 export const putOuputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.params>,

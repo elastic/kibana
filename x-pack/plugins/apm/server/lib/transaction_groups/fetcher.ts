@@ -63,12 +63,8 @@ function getRequest(
 ) {
   const { start, end } = setup;
 
-  const {
-    searchAggregatedTransactions,
-    environment,
-    kuery,
-    transactionName,
-  } = topTraceOptions;
+  const { searchAggregatedTransactions, environment, kuery, transactionName } =
+    topTraceOptions;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]

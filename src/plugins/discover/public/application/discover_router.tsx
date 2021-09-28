@@ -23,8 +23,8 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
     history,
   };
   return (
-    <Router history={history} data-test-subj="discover-react-router">
-      <KibanaContextProvider services={services}>
+    <KibanaContextProvider services={services}>
+      <Router history={history} data-test-subj="discover-react-router">
         <Switch>
           <Route
             path="/context/:indexPatternId/:id"
@@ -46,7 +46,7 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
           <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
           <NotFoundRoute services={services} />
         </Switch>
-      </KibanaContextProvider>
-    </Router>
+      </Router>
+    </KibanaContextProvider>
   );
 };

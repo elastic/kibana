@@ -22,7 +22,7 @@ export function ServiceDependenciesBreakdownChart({
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/dependencies');
+  } = useApmParams('/services/{serviceName}/dependencies');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

@@ -97,21 +97,16 @@ describe('allRulesReducer', () => {
 
   describe('#setRules', () => {
     it('should update rules and reset loading/selected rule ids', () => {
-      const {
-        selectedRuleIds,
-        loadingRuleIds,
-        loadingRulesAction,
-        pagination,
-        rules,
-      } = rulesTableReducer(initialState, {
-        type: 'setRules',
-        rules: [mockRule('someRuleId')],
-        pagination: {
-          page: 1,
-          perPage: 20,
-          total: 0,
-        },
-      });
+      const { selectedRuleIds, loadingRuleIds, loadingRulesAction, pagination, rules } =
+        rulesTableReducer(initialState, {
+          type: 'setRules',
+          rules: [mockRule('someRuleId')],
+          pagination: {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
+        });
 
       expect(rules).toEqual([mockRule('someRuleId')]);
       expect(selectedRuleIds).toEqual([]);

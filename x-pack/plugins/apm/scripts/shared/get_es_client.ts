@@ -40,7 +40,7 @@ export function getEsClient({
 
     return {
       ...response,
-      body: (response.body as unknown) as ESSearchResponse<
+      body: response.body as unknown as ESSearchResponse<
         TDocument,
         TSearchRequest
       >,
@@ -50,7 +50,7 @@ export function getEsClient({
   // @ts-expect-error
   client.search = search;
 
-  return (client as unknown) as Omit<Client, 'search'> & {
+  return client as unknown as Omit<Client, 'search'> & {
     search: typeof search;
   };
 }

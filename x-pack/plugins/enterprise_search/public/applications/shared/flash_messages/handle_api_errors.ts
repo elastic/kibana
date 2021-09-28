@@ -53,9 +53,9 @@ export const flashAPIErrors = (
   response: HttpResponse<ErrorResponse>,
   { isQueued }: Options = {}
 ) => {
-  const errorFlashMessages: IFlashMessage[] = getErrorsFromHttpResponse(
-    response
-  ).map((message) => ({ type: 'error', message }));
+  const errorFlashMessages: IFlashMessage[] = getErrorsFromHttpResponse(response).map(
+    (message) => ({ type: 'error', message })
+  );
 
   if (isQueued) {
     FlashMessagesLogic.actions.setQueuedMessages(errorFlashMessages);

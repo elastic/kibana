@@ -11,12 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   FIELD_ORIGIN,
+  LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
-} from '../../../../../../../../maps/common/constants';
+  VectorLayerDescriptor,
+} from '../../../../../../../../maps/common';
 import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
-import { VectorLayerDescriptor } from '../../../../../../../../maps/common/descriptor_types';
 import { EmbeddedMapComponent } from '../../../embedded_map';
 import { FieldVisStats } from '../../../../../../../common/types';
 
@@ -85,7 +86,7 @@ export const getChoroplethTopValuesLayer = (
       },
       isTimeAware: true,
     },
-    type: 'VECTOR',
+    type: LAYER_TYPE.VECTOR,
   };
 };
 

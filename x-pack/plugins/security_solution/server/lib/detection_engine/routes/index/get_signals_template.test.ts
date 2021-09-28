@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSignalsTemplate } from './get_signals_template';
+import { createBackwardsCompatibilityMapping, getSignalsTemplate } from './get_signals_template';
 
 describe('get_signals_template', () => {
   test('it should set the lifecycle "name" and "rollover_alias" to be the name of the index passed in', () => {
@@ -123,5 +123,15 @@ describe('get_signals_template', () => {
       '.alerts-security.alerts-space-id'
     );
     expect(template).toMatchSnapshot();
+  });
+
+  test('backwards compatibility mappings for version 45 should match snapshot', () => {
+    const mapping = createBackwardsCompatibilityMapping(45);
+    expect(mapping).toMatchSnapshot();
+  });
+
+  test('backwards compatibility mappings for version 57 should match snapshot', () => {
+    const mapping = createBackwardsCompatibilityMapping(57);
+    expect(mapping).toMatchSnapshot();
   });
 });

@@ -103,10 +103,10 @@ describe('SitemapsTable', () => {
 
       const sitemap = { id: '1', url: '/whatever' };
       expect(table.prop('deleteRoute')(sitemap)).toEqual(
-        '/api/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/sitemaps/1'
+        '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/sitemaps/1'
       );
       expect(table.prop('updateRoute')(sitemap)).toEqual(
-        '/api/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/sitemaps/1'
+        '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/sitemaps/1'
       );
     });
   });

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
@@ -14,15 +19,14 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { unit } from '../../../utils/style';
-import { SparkPlot } from '../charts/spark_plot';
-import { ImpactBar } from '../ImpactBar';
-import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import { ITableColumn, ManagedTable } from '../managed_table';
 import { EmptyMessage } from '../EmptyMessage';
-import { TableFetchWrapper } from '../table_fetch_wrapper';
+import { ImpactBar } from '../ImpactBar';
+import { ListMetric } from '../list_metric';
+import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
+import { TruncateWithTooltip } from '../truncate_with_tooltip';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,
@@ -35,6 +39,7 @@ export type DependenciesItem = Omit<
 interface Props {
   dependencies: DependenciesItem[];
   fixedHeight?: boolean;
+  isSingleColumn?: boolean;
   link?: React.ReactNode;
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
@@ -46,12 +51,17 @@ export function DependenciesTable(props: Props) {
   const {
     dependencies,
     fixedHeight,
+    isSingleColumn = true,
     link,
     title,
     nameColumnTitle,
     status,
     compact = true,
   } = props;
+
+  // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
+  const { isXl } = useBreakpoints();
+  const shouldShowSparkPlots = isSingleColumn || !isXl;
 
   const columns: Array<ITableColumn<DependenciesItem>> = [
     {
@@ -68,12 +78,13 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnLatency', {
         defaultMessage: 'Latency (avg.)',
       }),
-      width: `${unit * 11}px`,
+      align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis1"
+            hideSeries={!shouldShowSparkPlots}
             series={currentStats.latency.timeseries}
             comparisonSeries={previousStats?.latency.timeseries}
             valueLabel={asMillisecondDuration(currentStats.latency.value)}
@@ -87,12 +98,13 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnThroughput', {
         defaultMessage: 'Throughput',
       }),
-      width: `${unit * 11}px`,
+      align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis0"
+            hideSeries={!shouldShowSparkPlots}
             series={currentStats.throughput.timeseries}
             comparisonSeries={previousStats?.throughput.timeseries}
             valueLabel={asTransactionRate(currentStats.throughput.value)}
@@ -106,12 +118,13 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
-      width: `${unit * 10}px`,
+      align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis7"
+            hideSeries={!shouldShowSparkPlots}
             series={currentStats.errorRate.timeseries}
             comparisonSeries={previousStats?.errorRate.timeseries}
             valueLabel={asPercent(currentStats.errorRate.value, 1)}
@@ -125,10 +138,10 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
         defaultMessage: 'Impact',
       }),
-      width: `${unit * 5}px`,
+      align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         return (
-          <EuiFlexGroup gutterSize="xs" direction="column">
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" direction="column">
             <EuiFlexItem>
               <ImpactBar value={currentStats.impact} size="m" />
             </EuiFlexItem>
@@ -183,25 +196,24 @@ export function DependenciesTable(props: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <TableFetchWrapper status={status}>
-          <OverviewTableContainer
-            fixedHeight={fixedHeight}
-            isEmptyAndNotInitiated={
-              items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
-            }
-          >
-            <ManagedTable
-              isLoading={status === FETCH_STATUS.LOADING}
-              columns={columns}
-              items={items}
-              noItemsMessage={noItemsMessage}
-              initialSortField="impactValue"
-              initialSortDirection="desc"
-              initialPageSize={5}
-              pagination={true}
-            />
-          </OverviewTableContainer>
-        </TableFetchWrapper>
+        <OverviewTableContainer
+          fixedHeight={fixedHeight}
+          isEmptyAndNotInitiated={
+            items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
+          }
+        >
+          <ManagedTable
+            isLoading={status === FETCH_STATUS.LOADING}
+            error={status === FETCH_STATUS.FAILURE}
+            columns={columns}
+            items={items}
+            noItemsMessage={noItemsMessage}
+            initialSortField="impactValue"
+            initialSortDirection="desc"
+            initialPageSize={5}
+            pagination={true}
+          />
+        </OverviewTableContainer>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

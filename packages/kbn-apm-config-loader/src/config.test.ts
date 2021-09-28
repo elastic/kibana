@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Labels } from 'elastic-apm-node';
 import {
   packageMock,
   mockedRootDir,
@@ -46,7 +46,8 @@ describe('ApmConfiguration', () => {
   it('sets the git revision from `git rev-parse` command in non distribution mode', () => {
     gitRevExecMock.mockReturnValue('some-git-rev');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName').globalLabels?.git_rev).toBe('some-git-rev');
+    const labels = config.getConfig('serviceName').globalLabels as Labels;
+    expect(labels.git_rev).toBe('some-git-rev');
   });
 
   it('sets the git revision from `pkg.build.sha` in distribution mode', () => {
@@ -58,13 +59,15 @@ describe('ApmConfiguration', () => {
       },
     };
     const config = new ApmConfiguration(mockedRootDir, {}, true);
-    expect(config.getConfig('serviceName').globalLabels?.git_rev).toBe('distribution-sha');
+    const labels = config.getConfig('serviceName').globalLabels as Labels;
+    expect(labels.git_rev).toBe('distribution-sha');
   });
 
   it('reads the kibana uuid from the uuid file', () => {
     readUuidFileMock.mockReturnValue('instance-uuid');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName').globalLabels?.kibana_uuid).toBe('instance-uuid');
+    const labels = config.getConfig('serviceName').globalLabels as Labels;
+    expect(labels.kibana_uuid).toBe('instance-uuid');
   });
 
   it('uses the uuid from the kibana config if present', () => {
@@ -75,7 +78,8 @@ describe('ApmConfiguration', () => {
       },
     };
     const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-    expect(config.getConfig('serviceName').globalLabels?.kibana_uuid).toBe('uuid-from-config');
+    const labels = config.getConfig('serviceName').globalLabels as Labels;
+    expect(labels.kibana_uuid).toBe('uuid-from-config');
   });
 
   it('overrides metricsInterval, breakdownMetrics, captureHeaders, and captureBody when `isDistributable` is true', () => {

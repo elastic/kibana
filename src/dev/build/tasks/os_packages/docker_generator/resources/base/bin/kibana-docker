@@ -200,7 +200,6 @@ kibana_vars=(
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
-    timelion.enabled
     url_drilldown.enabled
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls

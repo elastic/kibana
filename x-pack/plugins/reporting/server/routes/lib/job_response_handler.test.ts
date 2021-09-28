@@ -30,26 +30,26 @@ beforeEach(async () => {
   const schema = createMockConfigSchema();
   core = await createMockReportingCore(schema);
   getDocumentPayload = jest.fn();
-  jobsQuery = ({
+  jobsQuery = {
     delete: jest.fn(),
     get: jest.fn(),
-  } as unknown) as typeof jobsQuery;
-  response = ({
+  } as unknown as typeof jobsQuery;
+  response = {
     badRequest: jest.fn(),
     custom: jest.fn(),
     customError: jest.fn(),
     notFound: jest.fn(),
     ok: jest.fn(),
     unauthorized: jest.fn(),
-  } as unknown) as typeof response;
+  } as unknown as typeof response;
   write = jest.fn((_chunk, _encoding, callback) => callback());
 
   (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(
     new Writable({ write }) as ContentStream
   );
-  (getDocumentPayloadFactory as jest.MockedFunction<
-    typeof getDocumentPayloadFactory
-  >).mockReturnValue(getDocumentPayload);
+  (
+    getDocumentPayloadFactory as jest.MockedFunction<typeof getDocumentPayloadFactory>
+  ).mockReturnValue(getDocumentPayload);
   (jobsQueryFactory as jest.MockedFunction<typeof jobsQueryFactory>).mockReturnValue(jobsQuery);
 });
 
@@ -143,9 +143,9 @@ describe('downloadJobResponseHandler', () => {
     jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as UnwrapPromise<
       ReturnType<typeof jobsQuery.get>
     >);
-    getDocumentPayload.mockResolvedValueOnce(({
+    getDocumentPayload.mockResolvedValueOnce({
       contentType: 'image/jpeg',
-    } as unknown) as UnwrapPromise<ReturnType<typeof getDocumentPayload>>);
+    } as unknown as UnwrapPromise<ReturnType<typeof getDocumentPayload>>);
     await downloadJobResponseHandler(
       core,
       response,
@@ -161,14 +161,14 @@ describe('downloadJobResponseHandler', () => {
     jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as UnwrapPromise<
       ReturnType<typeof jobsQuery.get>
     >);
-    getDocumentPayload.mockResolvedValueOnce(({
+    getDocumentPayload.mockResolvedValueOnce({
       content: new Readable(),
       contentType: 'application/pdf',
       headers: {
         'Content-Length': 10,
       },
       statusCode: 200,
-    } as unknown) as UnwrapPromise<ReturnType<typeof getDocumentPayload>>);
+    } as unknown as UnwrapPromise<ReturnType<typeof getDocumentPayload>>);
     await downloadJobResponseHandler(
       core,
       response,
@@ -191,12 +191,12 @@ describe('downloadJobResponseHandler', () => {
     jobsQuery.get.mockResolvedValueOnce({ jobtype: PDF_JOB_TYPE } as UnwrapPromise<
       ReturnType<typeof jobsQuery.get>
     >);
-    getDocumentPayload.mockResolvedValueOnce(({
+    getDocumentPayload.mockResolvedValueOnce({
       content: 'Error message.',
       contentType: 'application/json',
       headers: {},
       statusCode: 500,
-    } as unknown) as UnwrapPromise<ReturnType<typeof getDocumentPayload>>);
+    } as unknown as UnwrapPromise<ReturnType<typeof getDocumentPayload>>);
     await downloadJobResponseHandler(
       core,
       response,

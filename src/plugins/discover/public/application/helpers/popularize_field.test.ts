@@ -10,17 +10,17 @@ import { Capabilities } from 'kibana/public';
 import { IndexPattern, IndexPatternsService } from '../../../../data/public';
 import { popularizeField } from './popularize_field';
 
-const capabilities = ({
+const capabilities = {
   indexPatterns: {
     save: true,
   },
-} as unknown) as Capabilities;
+} as unknown as Capabilities;
 
 describe('Popularize field', () => {
   test('returns undefined if index pattern lacks id', async () => {
-    const indexPattern = ({} as unknown) as IndexPattern;
+    const indexPattern = {} as unknown as IndexPattern;
     const fieldName = '@timestamp';
-    const indexPatternsService = ({} as unknown) as IndexPatternsService;
+    const indexPatternsService = {} as unknown as IndexPatternsService;
     const result = await popularizeField(
       indexPattern,
       fieldName,
@@ -31,13 +31,13 @@ describe('Popularize field', () => {
   });
 
   test('returns undefined if field not found', async () => {
-    const indexPattern = ({
+    const indexPattern = {
       fields: {
         getByName: () => {},
       },
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
     const fieldName = '@timestamp';
-    const indexPatternsService = ({} as unknown) as IndexPatternsService;
+    const indexPatternsService = {} as unknown as IndexPatternsService;
     const result = await popularizeField(
       indexPattern,
       fieldName,
@@ -51,16 +51,16 @@ describe('Popularize field', () => {
     const field = {
       count: 0,
     };
-    const indexPattern = ({
+    const indexPattern = {
       id: 'id',
       fields: {
         getByName: () => field,
       },
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
     const fieldName = '@timestamp';
-    const indexPatternsService = ({
+    const indexPatternsService = {
       updateSavedObject: async () => {},
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
     const result = await popularizeField(
       indexPattern,
       fieldName,
@@ -75,18 +75,18 @@ describe('Popularize field', () => {
     const field = {
       count: 0,
     };
-    const indexPattern = ({
+    const indexPattern = {
       id: 'id',
       fields: {
         getByName: () => field,
       },
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
     const fieldName = '@timestamp';
-    const indexPatternsService = ({
+    const indexPatternsService = {
       updateSavedObject: async () => {
         throw new Error('unknown error');
       },
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
     const result = await popularizeField(
       indexPattern,
       fieldName,
@@ -100,19 +100,19 @@ describe('Popularize field', () => {
     const field = {
       count: 0,
     };
-    const indexPattern = ({
+    const indexPattern = {
       id: 'id',
       fields: {
         getByName: () => field,
       },
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
     const fieldName = '@timestamp';
-    const indexPatternsService = ({
+    const indexPatternsService = {
       updateSavedObject: jest.fn(),
-    } as unknown) as IndexPatternsService;
-    const result = await popularizeField(indexPattern, fieldName, indexPatternsService, ({
+    } as unknown as IndexPatternsService;
+    const result = await popularizeField(indexPattern, fieldName, indexPatternsService, {
       indexPatterns: { save: false },
-    } as unknown) as Capabilities);
+    } as unknown as Capabilities);
     expect(result).toBeUndefined();
     expect(indexPatternsService.updateSavedObject).not.toHaveBeenCalled();
     expect(field.count).toEqual(0);

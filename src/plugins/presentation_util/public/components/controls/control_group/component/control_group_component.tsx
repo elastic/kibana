@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
+import '../control_group.scss';
+
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import classNames from 'classnames';
 import {
   arrayMove,
   SortableContext,
@@ -25,25 +29,16 @@ import {
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
 
-import './control_group.scss';
-import classNames from 'classnames';
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-
-import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
-import { ControlClone, SortableControl } from './control_group_sortable_item';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
-import { PresentationOverlaysService } from '../../../../services/overlays';
-import { toMountPoint } from '../../../../../../kibana_react/public';
-import { ControlStyle, ControlWidth } from '../../types';
-import { ManageControlGroupComponent } from '../control_group_editor/manage_control_group_component';
 import { ControlGroupStrings } from '../control_group_strings';
+import { ControlGroupContainer } from '../control_group_container';
+import { ControlClone, SortableControl } from './control_group_sortable_item';
+import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
 
 interface ControlGroupProps {
-  openFlyout: PresentationOverlaysService['openFlyout'];
   controlGroupContainer: ControlGroupContainer;
 }
 
-export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroupProps) => {
+export const ControlGroup = ({ controlGroupContainer }: ControlGroupProps) => {
   const [controlIds, setControlIds] = useState<string[]>([]);
 
   // sync controlIds every time input panels change
@@ -71,10 +66,10 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const draggingIndex = useMemo(() => (draggingId ? controlIds.indexOf(draggingId) : -1), [
-    controlIds,
-    draggingId,
-  ]);
+  const draggingIndex = useMemo(
+    () => (draggingId ? controlIds.indexOf(draggingId) : -1),
+    [controlIds, draggingId]
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -93,7 +88,7 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
   };
 
   return (
-    <EuiFlexGroup wrap={false} direction="row" alignItems="center">
+    <EuiFlexGroup wrap={false} direction="row" alignItems="center" className="superWrapper">
       <EuiFlexItem>
         <DndContext
           onDragStart={({ active }) => setDraggingId(active.id)}
@@ -140,13 +135,15 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
           <EuiFlexItem>
-            <ManageControlGroupComponent
-              openFlyout={openFlyout}
-              controlStyle={controlGroupContainer.getInput().controlStyle}
-              setControlStyle={(newStyle) =>
-                controlGroupContainer.updateInput({ controlStyle: newStyle })
-              }
-            />
+            <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
+              <EuiButtonIcon
+                aria-label={ControlGroupStrings.management.getManageButtonTitle()}
+                iconType="gear"
+                color="text"
+                data-test-subj="inputControlsSortingButton"
+                onClick={controlGroupContainer.editControlGroup}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>

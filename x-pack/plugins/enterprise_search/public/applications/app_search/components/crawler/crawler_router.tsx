@@ -18,11 +18,10 @@ import { CrawlerOverview } from './crawler_overview';
 import { CrawlerSingleDomain } from './crawler_single_domain';
 
 export const CrawlerRouter: React.FC = () => {
-  const { fetchCrawlerData, getLatestCrawlRequests } = useActions(CrawlerLogic);
+  const { fetchCrawlerData } = useActions(CrawlerLogic);
 
   useEffect(() => {
     fetchCrawlerData();
-    getLatestCrawlRequests(false);
   }, []);
 
   return (

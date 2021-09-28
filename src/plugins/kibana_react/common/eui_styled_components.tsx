@@ -10,7 +10,7 @@ import type { DecoratorFn } from '@storybook/react';
 import React from 'react';
 import * as styledComponents from 'styled-components';
 import { ThemedStyledComponentsModule, ThemeProvider, ThemeProviderProps } from 'styled-components';
-import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
+import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 
 export interface EuiTheme {
   eui: typeof euiThemeVars;
@@ -51,6 +51,6 @@ const {
   createGlobalStyle,
   keyframes,
   withTheme,
-} = (styledComponents as unknown) as ThemedStyledComponentsModule<EuiTheme>;
+} = styledComponents as unknown as ThemedStyledComponentsModule<EuiTheme>;
 
 export { css, euiStyled, EuiThemeProvider, createGlobalStyle, keyframes, withTheme };

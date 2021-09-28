@@ -218,11 +218,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.hideColumn': i18n.translate('core.euiColumnActions.hideColumn', {
       defaultMessage: 'Hide column',
     }),
-    'euiColumnActions.sort': ({ schemaLabel }: EuiValues) =>
-      i18n.translate('core.euiColumnActions.sort', {
-        defaultMessage: 'Sort {schemaLabel}',
-        values: { schemaLabel },
-      }),
+    'euiColumnActions.sort': ({ schemaLabel }: EuiValues) => (
+      <FormattedMessage
+        id="core.euiColumnActions.sort"
+        defaultMessage="Sort {schemaLabel}"
+        values={{ schemaLabel }}
+      />
+    ),
     'euiColumnActions.moveLeft': i18n.translate('core.euiColumnActions.moveLeft', {
       defaultMessage: 'Move left',
     }),

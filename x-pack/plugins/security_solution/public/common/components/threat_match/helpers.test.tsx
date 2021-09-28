@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
 import { FieldSpec, IndexPattern } from '../../../../../../../src/plugins/data/common';
 import moment from 'moment-timezone';

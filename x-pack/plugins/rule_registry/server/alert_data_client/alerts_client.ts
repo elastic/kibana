@@ -48,8 +48,9 @@ const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
 const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
-type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
-  { [K in Props]-?: NonNullable<Obj[K]> };
+type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
+  [K in Props]-?: NonNullable<Obj[K]>;
+};
 type AlertType = { _index: string; _id: string } & NonNullableProps<
   ParsedTechnicalFields,
   typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER | typeof SPACE_IDS
@@ -393,8 +394,8 @@ export class AlertsClient {
         undefined,
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
         [
-          (authzFilter as unknown) as Filter,
-          ({ term: { [SPACE_IDS]: alertSpaceId } } as unknown) as Filter,
+          authzFilter as unknown as Filter,
+          { term: { [SPACE_IDS]: alertSpaceId } } as unknown as Filter,
         ],
         config
       );

@@ -7,8 +7,7 @@
  */
 
 import React from 'react';
-import { EmbeddableFactoryDefinition } from '../../../../../../embeddable/public';
-import { PresentationOverlaysService } from '../../../../services/overlays';
+import { EmbeddableFactoryDefinition, IContainer } from '../../../../../../embeddable/public';
 import {
   ControlEditorProps,
   GetControlEditorComponentProps,
@@ -25,23 +24,22 @@ import {
 } from './options_list_embeddable';
 
 export class OptionsListEmbeddableFactory
-  implements EmbeddableFactoryDefinition, IEditableControlFactory {
+  implements EmbeddableFactoryDefinition, IEditableControlFactory
+{
   public type = OPTIONS_LIST_CONTROL;
 
   constructor(
     private fetchData: OptionsListDataFetcher,
     private fetchIndexPatterns: OptionsListIndexPatternFetcher,
-    private fetchFields: OptionsListFieldFetcher,
-    private openFlyout: PresentationOverlaysService['openFlyout']
+    private fetchFields: OptionsListFieldFetcher
   ) {
     this.fetchIndexPatterns = fetchIndexPatterns;
     this.fetchFields = fetchFields;
-    this.openFlyout = openFlyout;
     this.fetchData = fetchData;
   }
 
-  public create(initialInput: OptionsListEmbeddableInput) {
-    return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, this.fetchData));
+  public create(initialInput: OptionsListEmbeddableInput, parent?: IContainer) {
+    return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, this.fetchData, parent));
   }
 
   public getControlEditor = ({

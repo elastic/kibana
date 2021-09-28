@@ -6,32 +6,32 @@
  */
 
 import expect from '@kbn/expect';
-import querystring from 'querystring';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// Based on the x-pack/test/functional/es_archives/observability/alerts archive.
-const DATE_WITH_DATA = {
-  rangeFrom: '2021-08-31T13:36:22.109Z',
-  rangeTo: '2021-09-01T13:36:22.109Z',
-};
+async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index);
+  }
+}
+
+const ACTIVE_ALERTS_CELL_COUNT = 48;
+const RECOVERED_ALERTS_CELL_COUNT = 24;
+const TOTAL_ALERTS_CELL_COUNT = 72;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/110920
-  describe.skip('Observability alerts', function () {
+  describe('Observability alerts', function () {
     this.tags('includeFirefox');
 
     const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
+    const retry = getService('retry');
+    const observability = getService('observability');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await pageObjects.common.navigateToUrlWithBrowserHistory(
-        'observability',
-        '/alerts',
-        `?${querystring.stringify(DATE_WITH_DATA)}`
-      );
+      await observability.alerts.navigateToTimeWithData();
     });
 
     after(async () => {
@@ -40,13 +40,164 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Alerts table', () => {
       it('Renders the table', async () => {
-        await testSubjects.existOrFail('events-viewer-panel');
+        await observability.alerts.getTableOrFail();
       });
 
       it('Renders the correct number of cells', async () => {
-        // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
-        const cells = await testSubjects.findAll('dataGridRowCell');
-        expect(cells.length).to.be(54);
+        await retry.try(async () => {
+          const cells = await observability.alerts.getTableCells();
+          expect(cells.length).to.be(TOTAL_ALERTS_CELL_COUNT);
+        });
+      });
+
+      describe('Filtering', () => {
+        afterEach(async () => {
+          await observability.alerts.clearQueryBar();
+        });
+
+        after(async () => {
+          // NOTE: We do this as the query bar takes the place of the datepicker when it is in focus, so we'll reset
+          // back to default.
+          await observability.alerts.submitQuery('');
+        });
+
+        it('Autocompletion works', async () => {
+          await observability.alerts.typeInQueryBar('kibana.alert.s');
+          await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
+          await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
+        });
+
+        it('Applies filters correctly', async () => {
+          await observability.alerts.submitQuery('kibana.alert.status: recovered');
+          await retry.try(async () => {
+            const cells = await observability.alerts.getTableCells();
+            expect(cells.length).to.be(RECOVERED_ALERTS_CELL_COUNT);
+          });
+        });
+
+        it('Displays a no data state when filters produce zero results', async () => {
+          await observability.alerts.submitQuery('kibana.alert.consumer: uptime');
+          await observability.alerts.getNoDataStateOrFail();
+        });
+      });
+
+      describe('Date selection', () => {
+        after(async () => {
+          await observability.alerts.navigateToTimeWithData();
+        });
+
+        it('Correctly applies date picker selections', async () => {
+          await retry.try(async () => {
+            await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
+            // We shouldn't expect any data for the last 15 minutes
+            await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
+            await observability.alerts.getNoDataStateOrFail();
+            await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
+          });
+        });
+      });
+
+      describe('Flyout', () => {
+        it('Can be opened', async () => {
+          await observability.alerts.openAlertsFlyout();
+          await observability.alerts.getAlertsFlyoutOrFail();
+        });
+
+        it('Can be closed', async () => {
+          await observability.alerts.closeAlertsFlyout();
+          await testSubjects.missingOrFail('alertsFlyout');
+        });
+
+        describe('When open', async () => {
+          before(async () => {
+            await observability.alerts.openAlertsFlyout();
+          });
+
+          after(async () => {
+            await observability.alerts.closeAlertsFlyout();
+          });
+
+          it('Displays the correct title', async () => {
+            await retry.try(async () => {
+              const titleText = await (
+                await observability.alerts.getAlertsFlyoutTitle()
+              ).getVisibleText();
+              expect(titleText).to.contain('Log threshold');
+            });
+          });
+
+          it('Displays the correct content', async () => {
+            const flyoutTitles = await observability.alerts.getAlertsFlyoutDescriptionListTitles();
+            const flyoutDescriptions =
+              await observability.alerts.getAlertsFlyoutDescriptionListDescriptions();
+
+            const expectedTitles = [
+              'Status',
+              'Last updated',
+              'Duration',
+              'Expected value',
+              'Actual value',
+              'Rule type',
+            ];
+            const expectedDescriptions = [
+              'Active',
+              'Sep 2, 2021 @ 12:54:09.674',
+              '15 minutes',
+              '100.25',
+              '1957',
+              'Log threshold',
+            ];
+
+            await asyncForEach(flyoutTitles, async (title, index) => {
+              expect(await title.getVisibleText()).to.be(expectedTitles[index]);
+            });
+
+            await asyncForEach(flyoutDescriptions, async (description, index) => {
+              expect(await description.getVisibleText()).to.be(expectedDescriptions[index]);
+            });
+          });
+
+          it('Displays a View in App button', async () => {
+            await observability.alerts.getAlertsFlyoutViewInAppButtonOrFail();
+          });
+        });
+      });
+
+      describe('Cell actions', () => {
+        beforeEach(async () => {
+          await retry.try(async () => {
+            const cells = await observability.alerts.getTableCells();
+            const alertStatusCell = cells[2];
+            await alertStatusCell.moveMouseTo();
+            await retry.waitFor(
+              'cell actions visible',
+              async () => await observability.alerts.copyToClipboardButtonExists()
+            );
+          });
+        });
+
+        afterEach(async () => {
+          await observability.alerts.clearQueryBar();
+        });
+
+        it('Copy button works', async () => {
+          // NOTE: We don't have access to the clipboard in a headless environment,
+          // so we'll just check the button is clickable in the functional tests.
+          await (await observability.alerts.getCopyToClipboardButton()).click();
+        });
+
+        it('Filter for value works', async () => {
+          await (await observability.alerts.getFilterForValueButton()).click();
+          const queryBarValue = await (
+            await observability.alerts.getQueryBar()
+          ).getAttribute('value');
+          expect(queryBarValue).to.be('kibana.alert.status: "active"');
+          // Wait for request
+          await retry.try(async () => {
+            const cells = await observability.alerts.getTableCells();
+            expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
+          });
+        });
       });
     });
   });

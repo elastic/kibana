@@ -1024,7 +1024,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -1085,7 +1085,7 @@
             "children": [
               {
                 "parentPluginId": "ml",
-                "id": "def-public.__0",
+                "id": "def-public.UseIndexDataReturnType.renderCellValue.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -1252,7 +1252,7 @@
         "children": [
           {
             "parentPluginId": "ml",
-            "id": "def-public.__0",
+            "id": "def-public.RenderCellValue.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -2859,7 +2859,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"enabled\" | \"id\" | \"name\" | \"tags\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false

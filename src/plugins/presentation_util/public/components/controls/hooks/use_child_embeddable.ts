@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 import { useEffect, useState } from 'react';
-import { ControlGroupContainer } from '../control_group/embeddable/control_group_container';
 import { InputControlEmbeddable } from '../types';
+import { IContainer } from '../../../../../embeddable/public';
 
 export const useChildEmbeddable = ({
   container,
   embeddableId,
 }: {
-  container: ControlGroupContainer;
+  container: IContainer;
   embeddableId: string;
 }) => {
   const [embeddable, setEmbeddable] = useState<InputControlEmbeddable>();
