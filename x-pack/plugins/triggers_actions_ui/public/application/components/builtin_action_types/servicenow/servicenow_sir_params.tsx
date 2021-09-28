@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
@@ -23,6 +24,7 @@ import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
 import { ServiceNowSIRActionParams, Fields, Choice } from './types';
 import { choicesToEuiOptions } from './helpers';
+import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -50,7 +52,12 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
+  const hasUpdateIncident =
+    incident.correlation_id != null && incident.correlation_id === UPDATE_INCIDENT_VARIABLE;
+  const [updateIncident, setUpdateIncident] = useState<boolean>(hasUpdateIncident);
   const [choices, setChoices] = useState<Fields>(defaultFields);
+
+  const correlationID = updateIncident ? UPDATE_INCIDENT_VARIABLE : NOT_UPDATE_INCIDENT_VARIABLE;
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -87,6 +94,14 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     );
   }, []);
 
+  const onUpdateIncidentSwitchChange = useCallback(() => {
+    const newCorrelationID = !updateIncident
+      ? UPDATE_INCIDENT_VARIABLE
+      : NOT_UPDATE_INCIDENT_VARIABLE;
+    editSubActionProperty('correlation_id', newCorrelationID);
+    setUpdateIncident(!updateIncident);
+  }, [editSubActionProperty, updateIncident]);
+
   const { isLoading: isLoadingChoices } = useGetChoices({
     http,
     toastNotifications: toasts,
@@ -115,7 +130,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: correlationID, correlation_display: 'Alerting' },
           comments: [],
         },
         index
@@ -132,7 +147,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: correlationID, correlation_display: 'Alerting' },
           comments: [],
         },
         index
@@ -277,6 +292,16 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
       />
+      <EuiSpacer size="m" />
+      <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
+        <EuiSwitch
+          label={updateIncident ? i18n.ON : i18n.OFF}
+          name="update-incident-switch"
+          checked={updateIncident}
+          onChange={onUpdateIncidentSwitchChange}
+          aria-describedby="update-incident-form-row"
+        />
+      </EuiFormRow>
     </>
   );
 };

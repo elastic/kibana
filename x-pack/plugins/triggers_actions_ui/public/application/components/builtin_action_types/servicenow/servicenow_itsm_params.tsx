@@ -24,9 +24,7 @@ import { useGetChoices } from './use_get_choices';
 import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
-
-const UPDATE_INCIDENT_VARIABLE = '{{rule.id}}';
-const NOT_UPDATE_INCIDENT_VARIABLE = '{{rule.id}}:{{alert.id}}';
+import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
