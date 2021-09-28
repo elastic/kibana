@@ -11,7 +11,7 @@ import {
 } from '../../../common/transaction_types';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -22,12 +22,16 @@ export async function getTransactionsPerMinute({
   setup,
   bucketSize,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   bucketSize: string;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const { aggregations } = await apmEventClient.search(
     'observability_overview_get_transactions_per_minute',

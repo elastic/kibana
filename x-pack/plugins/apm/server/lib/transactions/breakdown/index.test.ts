@@ -28,8 +28,6 @@ const mockIndices = {
 function getMockSetup(esResponse: any) {
   const clientSpy = jest.fn().mockReturnValueOnce(esResponse);
   return {
-    start: 0,
-    end: 500000,
     apmEventClient: { search: clientSpy } as any,
     internalClient: { search: clientSpy } as any,
     config: new Proxy(
@@ -52,6 +50,8 @@ describe('getTransactionBreakdown', () => {
       setup: getMockSetup(noDataResponse),
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
+      start: 0,
+      end: 500000,
     });
 
     expect(Object.keys(response.timeseries).length).toBe(0);
@@ -64,6 +64,8 @@ describe('getTransactionBreakdown', () => {
       setup: getMockSetup(dataResponse),
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
+      start: 0,
+      end: 500000,
     });
 
     const { timeseries } = response;
@@ -94,6 +96,8 @@ describe('getTransactionBreakdown', () => {
       setup: getMockSetup(dataResponse),
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
+      start: 0,
+      end: 500000,
     });
 
     const { timeseries } = response;
@@ -108,6 +112,8 @@ describe('getTransactionBreakdown', () => {
       setup: getMockSetup(dataResponse),
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
+      start: 0,
+      end: 500000,
     });
 
     const { timeseries } = response;

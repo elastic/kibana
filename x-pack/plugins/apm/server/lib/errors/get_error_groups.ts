@@ -16,7 +16,7 @@ import {
 import { getErrorGroupsProjection } from '../../projections/errors';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { getErrorName } from '../helpers/get_error_name';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 
 export async function getErrorGroups({
   environment,
@@ -25,13 +25,17 @@ export async function getErrorGroups({
   sortField,
   sortDirection = 'desc',
   setup,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -41,8 +45,9 @@ export async function getErrorGroups({
   const projection = getErrorGroupsProjection({
     environment,
     kuery,
-    setup,
     serviceName,
+    start,
+    end,
   });
 
   const order = sortByLatestOccurrence

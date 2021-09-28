@@ -7,13 +7,13 @@
 
 import { Logger } from '@kbn/logging';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromMetricDocuments } from './get_services_from_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
-export type ServicesItemsSetup = Setup & SetupTimeRange;
+export type ServicesItemsSetup = Setup;
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
@@ -23,12 +23,16 @@ export async function getServicesItems({
   setup,
   searchAggregatedTransactions,
   logger,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_services_items', async () => {
     const params = {
@@ -37,6 +41,8 @@ export async function getServicesItems({
       setup,
       searchAggregatedTransactions,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
+      start,
+      end,
     };
 
     const [transactionStats, servicesFromMetricDocuments, healthStatuses] =

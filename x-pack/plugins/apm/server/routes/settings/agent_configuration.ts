@@ -243,10 +243,13 @@ const listAgentConfigurationServicesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
+    const { start, end } = resources.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
+      start,
+      end,
     });
     const serviceNames = await getServiceNames({
       setup,
@@ -268,11 +271,13 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
 
-    const { serviceName } = params.query;
+    const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
+      start,
+      end,
     });
 
     const environments = await getEnvironments({

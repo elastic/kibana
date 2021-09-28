@@ -21,7 +21,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { Setup } from '../../../lib/helpers/setup_request';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
@@ -184,19 +184,22 @@ export async function getLatencyPeriods({
   comparisonEnd,
   kuery,
   environment,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
   kuery: string;
   environment: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
   const options = {
     serviceName,
     transactionType,

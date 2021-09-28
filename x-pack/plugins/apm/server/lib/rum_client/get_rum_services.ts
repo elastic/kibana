@@ -5,18 +5,23 @@
  * 2.0.
  */
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { SetupTimeRange } from '../helpers/setup_request';
 import { SetupUX } from '../../routes/rum_client';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 
 export async function getRumServices({
   setup,
+  start,
+  end,
 }: {
-  setup: SetupUX & SetupTimeRange;
+  setup: SetupUX;
+  start: number;
+  end: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {

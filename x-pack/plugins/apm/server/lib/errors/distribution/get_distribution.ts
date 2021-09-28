@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 import { getBuckets } from './get_buckets';
 
-function getBucketSize({ start, end }: SetupTimeRange) {
+function getBucketSize({ start, end }: { start: number; end: number }) {
   return Math.floor((end - start) / BUCKET_TARGET_COUNT);
 }
 
@@ -19,14 +19,18 @@ export async function getErrorDistribution({
   serviceName,
   groupId,
   setup,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   groupId?: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const bucketSize = getBucketSize({ start: setup.start, end: setup.end });
+  const bucketSize = getBucketSize({ start, end });
   const { buckets, noHits } = await getBuckets({
     environment,
     kuery,
@@ -34,6 +38,8 @@ export async function getErrorDistribution({
     groupId,
     bucketSize,
     setup,
+    start,
+    end,
   });
 
   return {

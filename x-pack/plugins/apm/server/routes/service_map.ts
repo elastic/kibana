@@ -47,14 +47,14 @@ const serviceMapRoute = createApmServerRoute({
 
     const setup = await setupRequest(resources);
     const {
-      query: { serviceName, environment },
+      query: { serviceName, environment, start, end },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
     return getServiceMap({
@@ -63,6 +63,8 @@ const serviceMapRoute = createApmServerRoute({
       environment,
       searchAggregatedTransactions,
       logger,
+      start,
+      end,
     });
   },
 });
@@ -89,14 +91,14 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { environment },
+      query: { environment, start, end },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
 
@@ -105,6 +107,8 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
       setup,
       serviceName,
       searchAggregatedTransactions,
+      start,
+      end,
     });
   },
 });
@@ -131,13 +135,15 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
 
     const {
       path: { backendName },
-      query: { environment },
+      query: { environment, start, end },
     } = params;
 
     return getServiceMapBackendNodeInfo({
       environment,
       setup,
       backendName,
+      start,
+      end,
     });
   },
 });

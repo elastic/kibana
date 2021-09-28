@@ -10,7 +10,7 @@ import {
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../../observability/server';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 
@@ -18,10 +18,14 @@ export async function getTransaction({
   transactionId,
   traceId,
   setup,
+  start,
+  end,
 }: {
   transactionId: string;
   traceId?: string;
-  setup: Setup | (Setup & SetupTimeRange);
+  setup: Setup;
+  start?: number;
+  end?: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -36,7 +40,7 @@ export async function getTransaction({
           filter: asMutableArray([
             { term: { [TRANSACTION_ID]: transactionId } },
             ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
-            ...('start' in setup ? rangeQuery(setup.start, setup.end) : []),
+            ...(start && end ? rangeQuery(start, end) : []),
           ]),
         },
       },

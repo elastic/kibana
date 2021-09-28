@@ -22,13 +22,15 @@ const fallbackToTransactionsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const {
       params: {
-        query: { kuery },
+        query: { kuery, start, end },
       },
     } = resources;
     return {
       fallbackToTransactions: await getIsUsingTransactionEvents({
         setup,
         kuery,
+        start,
+        end,
       }),
     };
   },

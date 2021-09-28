@@ -28,6 +28,8 @@ describe('error queries', () => {
         setup,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -43,6 +45,8 @@ describe('error queries', () => {
         setup,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -58,6 +62,8 @@ describe('error queries', () => {
         setup,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 
