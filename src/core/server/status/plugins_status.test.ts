@@ -19,14 +19,17 @@ describe('PluginStatusService', () => {
   const coreAllAvailable$: Observable<CoreStatus> = of({
     elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
     savedObjects: { level: ServiceStatusLevels.available, summary: 'savedObjects avail' },
+    overall: { level: ServiceStatusLevels.available, summary: 'all avail' },
   });
   const coreOneDegraded$: Observable<CoreStatus> = of({
     elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
     savedObjects: { level: ServiceStatusLevels.degraded, summary: 'savedObjects degraded' },
+    overall: { level: ServiceStatusLevels.degraded, summary: 'one service degraded' },
   });
   const coreOneCriticalOneDegraded$: Observable<CoreStatus> = of({
     elasticsearch: { level: ServiceStatusLevels.critical, summary: 'elasticsearch critical' },
     savedObjects: { level: ServiceStatusLevels.degraded, summary: 'savedObjects degraded' },
+    overall: { level: ServiceStatusLevels.critical, summary: 'one service critical' },
   });
   const pluginDependencies: Map<PluginName, PluginName[]> = new Map([
     ['a', []],

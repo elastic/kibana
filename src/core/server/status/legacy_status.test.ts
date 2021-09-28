@@ -48,6 +48,7 @@ describe('calculateLegacyStatus', () => {
       core: {
         elasticsearch: degraded,
         savedObjects: critical,
+        overall: critical,
       },
       plugins: {
         a: available,
