@@ -8,11 +8,13 @@
 import React from 'react';
 import maki from '@elastic/maki';
 import xml2js from 'xml2js';
-import uuid from 'uuid/v4'
+import uuid from 'uuid/v4';
+import { Image2SDF } from '../../util/image_to_sdf';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
 
+export const CUSTOM_ICON_PREFIX = '__kbn__custom_icon__';
 export const LARGE_MAKI_ICON_SIZE = 15;
 const LARGE_MAKI_ICON_SIZE_AS_STRING = LARGE_MAKI_ICON_SIZE.toString();
 export const SMALL_MAKI_ICON_SIZE = 11;
@@ -34,6 +36,15 @@ maki.svgArray.forEach((svgString) => {
     }
   }
 });
+
+async function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = (error) => reject(error);
+    img.src = src;
+  });
+}
 
 export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map((symbolId) => {
   return {
@@ -60,8 +71,56 @@ export function getMakiSymbolAnchor(symbolId) {
   }
 }
 
-export function getComputedIconName() {
-  return `__kbn__customIcon__${uuid()}`;
+export function getCustomIconId() {
+  return `${CUSTOM_ICON_PREFIX}${uuid()}`;
+}
+
+export async function createSdfIcon(svgString) {
+  const w = 16;
+  const h = 16;
+  const size = Math.max(w, h);
+  const buffer = size / 8;
+  const radius = size / 3;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 200;
+  const ctx = canvas.getContext('2d');
+  const imgUrl = buildSrcUrl(svgString);
+  const image = await loadImage(imgUrl);
+
+  ctx.clearRect(0, 0, w, h);
+  const sdf = new Image2SDF({ buffer, radius, size });
+  const { data: alphaChannel, bufferWidth, bufferHeight } = sdf.draw(
+    image,
+    w,
+    h,
+  );
+  const imageData = ctx.createImageData(bufferWidth, bufferHeight);
+  for (let i = 0; i < alphaChannel.length; i++) {
+    imageData.data[4 * i + 0] = 0;
+    imageData.data[4 * i + 1] = 0;
+    imageData.data[4 * i + 2] = 0;
+    imageData.data[4 * i + 3] = alphaChannel[i];
+  }
+
+  /** Debugging section (uncomment to download SDF image)
+  // TODO Remove this for production
+
+  // const a = document.createElement('a');
+  // const canvas2 = document.createElement('canvas');
+  // canvas2.width = bufferWidth;
+  // canvas2.height = bufferHeight;
+  // const ctx2 = canvas2.getContext('2d');
+  // ctx2.putImageData(imageData, 0, 0);
+  // const blob = await new Promise(resolve => ctx2.canvas.toBlob(resolve));
+  // const domUrl = window.URL || window.webkitURL || window;
+  // a.href = domUrl.createObjectURL(blob);
+  // a.download = 'blob.png';
+  // a.click();
+  // URL.revokeObjectURL(a.href);
+
+  */
+
+  return imageData;
 }
 
 // Style descriptor stores symbolId, for example 'aircraft'

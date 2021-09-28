@@ -108,6 +108,8 @@ export type IconDynamicOptions = {
 
 export type IconStaticOptions = {
   value: string; // icon id
+  icon?: string;
+  label?: string;
 };
 
 export type IconStylePropertyDescriptor =

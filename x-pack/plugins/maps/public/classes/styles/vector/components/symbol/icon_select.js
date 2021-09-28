@@ -17,27 +17,13 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { SymbolIcon } from '../legend/symbol_icon';
-import { getComputedIconName, SYMBOL_OPTIONS } from '../../symbol_utils';
+import { getCustomIconId, SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
-import { Image2Sdf } from '../../../../util/image_to_sdf';
 import { buildSrcUrl } from '../../symbol_utils'
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
-}
-
-const createSdfIcon = async (name, description, image) => {
-  const blobUrl = buildSrcUrl(image);
-  const rawIcon = await new Promise((resolve, reject) => {
-    const img = new Image();
-      img.addEventListener('load', () => resolve(img));
-      img.addEventListener('error', (err) => reject(err));
-      img.src = blobUrl;
-  });
-  const sdfgen = new Image2Sdf();
-  const icon = sdfgen.draw(rawIcon);
-  return icon;
 }
 
 export class IconSelect extends Component {
@@ -47,7 +33,7 @@ export class IconSelect extends Component {
   };
 
   _handleSave = (name, description, image) => {
-    const symbolId = getComputedIconName();
+    const symbolId = getCustomIconId();
     const icons = [...this.props.customIcons, {
       symbolId,
       icon: image,
@@ -102,7 +88,8 @@ export class IconSelect extends Component {
     });
 
     if (selectedOption) {
-      this.props.onChange(selectedOption.key);
+      const { key, icon, label } = selectedOption
+      this.props.onChange({ selectedIconId: key, icon, label });
     }
     this._closePopover();
   };

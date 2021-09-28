@@ -10,8 +10,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IconSelect } from './icon_select';
 
 export function StaticIconForm({ onStaticStyleChange, onCustomIconsChange, customIcons, staticDynamicSelect, styleProperty }) {
-  const onChange = (selectedIconId) => {
-    onStaticStyleChange(styleProperty.getStyleName(), { value: selectedIconId });
+  const onChange = ({ selectedIconId, icon, label }) => {
+    onStaticStyleChange(styleProperty.getStyleName(), { value: selectedIconId, icon, label });
   };
 
   return (
