@@ -49,7 +49,10 @@ export class RequestSelector extends Component<RequestSelectorProps> {
 
   renderRequestCombobox() {
     const options = this.props.requests.map((item) => {
+      const testLabel = item.name.replace(/\s+/, '');
+
       return {
+        'data-test-subj': `inspectorRequestChooser${testLabel}`,
         label: item.name,
         value: item.id,
       };
