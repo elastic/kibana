@@ -607,6 +607,20 @@ export const SYNCHRONIZATION_LINK_LABEL = i18n.translate(
   }
 );
 
+export const SYNCHRONIZATION_DISABLED_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationDisabledTitle',
+  {
+    defaultMessage: 'Source synchronization is disabled.',
+  }
+);
+
+export const SYNCHRONIZATION_DISABLED_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationDisabledDescription',
+  {
+    defaultMessage: 'Contact your administrator to enable synchronization controls.',
+  }
+);
+
 export const DIFFERENT_SYNC_TYPES_LINK_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.differentSyncTypesLinkLabel',
   {

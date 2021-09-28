@@ -188,6 +188,7 @@ export interface ContentSourceFullData extends ContentSourceDetails {
   indexing: IndexingConfig;
   custom: boolean;
   isIndexedSource: boolean;
+  isSyncConfigEnabled: boolean;
   areThumbnailsConfigEnabled: boolean;
   accessToken: string;
   urlField: string;

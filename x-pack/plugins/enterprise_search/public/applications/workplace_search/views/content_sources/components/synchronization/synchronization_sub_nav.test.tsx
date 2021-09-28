@@ -15,7 +15,7 @@ import { useSynchronizationSubNav } from './synchronization_sub_nav';
 
 describe('useSynchronizationSubNav', () => {
   it('renders nav items', () => {
-    setMockValues({ contentSource: { id: '1' } });
+    setMockValues({ contentSource: { id: '1', isSyncConfigEnabled: true } });
 
     expect(useSynchronizationSubNav()).toEqual([
       {

@@ -20,10 +20,10 @@ import { SourceLogic } from '../../source_logic';
 
 export const useSynchronizationSubNav = () => {
   const {
-    contentSource: { id },
+    contentSource: { id, isSyncConfigEnabled },
   } = useValues(SourceLogic);
 
-  if (!id) return undefined;
+  if (!id || !isSyncConfigEnabled) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
