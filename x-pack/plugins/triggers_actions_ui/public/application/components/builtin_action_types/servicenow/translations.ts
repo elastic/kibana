@@ -15,7 +15,7 @@ export const API_URL_LABEL = i18n.translate(
 );
 
 export const API_URL_HELPTEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlTextFieldLabel',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlHelpText',
   {
     defaultMessage: 'Include the full URL',
   }
@@ -246,7 +246,7 @@ export const INSTALL = i18n.translate(
 );
 
 export const INSTALLATION_CALLOUT_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutInfo',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutTitle',
   {
     defaultMessage:
       'To use this connector, you must first install the Elastic App from the ServiceNow App Store',
@@ -265,7 +265,7 @@ export const MIGRATION_SUCCESS_TOAST_TITLE = (connectorName: string) =>
   );
 
 export const MIGRATION_SUCCESS_TOAST_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutInfo',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutText',
   {
     defaultMessage: 'Connector has been successfully migrated.',
   }
@@ -293,7 +293,7 @@ export const SN_INSTANCE_LABEL = i18n.translate(
 );
 
 export const UNKNOWN = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.snInstanceLabel',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.unknown',
   {
     defaultMessage: 'UNKNOWN',
   }

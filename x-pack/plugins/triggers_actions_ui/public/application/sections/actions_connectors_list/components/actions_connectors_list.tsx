@@ -215,9 +215,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                   { defaultMessage: 'Deprecated connector' }
                 )}
                 content={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isLegacyDescription',
                   { defaultMessage: 'Please update your connector' }
                 )}
+                position="right"
               />
             )}
           </>
