@@ -31,8 +31,6 @@ import { ReindexActions } from './reindex_actions';
 import { error } from './error';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
-const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
-const WATCHER_INDICES = ['.watches', '.triggered-watches'];
 
 export interface ReindexService {
   /**
