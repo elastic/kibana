@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-jest.mock('./browsers/install', () => ({
-  installBrowser: jest.fn().mockImplementation(() => ({
-    binaryPath$: {
-      pipe: jest.fn().mockImplementation(() => ({
-        toPromise: () => Promise.resolve(),
-      })),
-    },
-  })),
-}));
+jest.mock('./browsers/install', () =>
+  Promise.resolve({
+    installBrowser: jest.fn().mockImplementation(() => ({
+      binaryPath: 'super/cool/amazing/path',
+    })),
+  })
+);
 
 import { coreMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';

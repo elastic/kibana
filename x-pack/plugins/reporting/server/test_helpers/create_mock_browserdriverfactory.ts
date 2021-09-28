@@ -120,8 +120,7 @@ export const createMockBrowserDriverFactory = async (
     maxAttempts: 1,
   };
 
-  const binaryPath = '/usr/local/share/common/secure/super_awesome_binary';
-  const mockBrowserDriverFactory = chromium.createDriverFactory(core, binaryPath, logger);
+  const mockBrowserDriverFactory = chromium.createDriverFactory(core, captureConfig, logger);
   const mockPage = { setViewport: () => {} } as unknown as Page;
   const mockBrowserDriver = new HeadlessChromiumDriver(core, mockPage, {
     inspect: true,

@@ -15,10 +15,10 @@ import { LayoutParams, PreserveLayout } from '../../lib/layouts';
 import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
 import { ConditionalHeaders } from '../common';
 
-export async function generatePngObservableFactory(reporting: ReportingCore) {
+export function generatePngObservableFactory(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const captureConfig = config.get('capture');
-  const { browserDriverFactory } = await reporting.getPluginStartDeps();
+  const browserDriverFactory = reporting.getBrowserDriverFactory();
 
   return function generatePngObservable(
     logger: LevelLogger,

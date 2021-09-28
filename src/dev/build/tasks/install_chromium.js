@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
 
@@ -18,13 +16,12 @@ export const InstallChromium = {
     for (const platform of config.getNodePlatforms()) {
       log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
 
-      const { binaryPath$ } = installBrowser(
+      await installBrowser(
         log,
         build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
         platform.getName(),
         platform.getArchitecture()
       );
-      await binaryPath$.pipe(first()).toPromise();
     }
   },
 };

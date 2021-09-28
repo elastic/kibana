@@ -8,7 +8,6 @@
 import del from 'del';
 import os from 'os';
 import path from 'path';
-import * as Rx from 'rxjs';
 import { GenericLevelLogger } from '../lib/level_logger';
 import { ChromiumArchivePaths } from './chromium';
 import { ensureBrowserDownloaded } from './download';
@@ -24,9 +23,7 @@ export function installBrowser(
   chromiumPath: string = path.resolve(__dirname, '../../chromium'),
   platform: string = process.platform,
   architecture: string = os.arch()
-): { binaryPath$: Rx.Subject<string> } {
-  const binaryPath$ = new Rx.Subject<string>();
-
+): Promise<string | undefined> {
   const paths = new ChromiumArchivePaths();
   const pkg = paths.find(platform, architecture);
 
@@ -34,26 +31,31 @@ export function installBrowser(
     throw new Error(`Unsupported platform: ${platform}-${architecture}`);
   }
 
-  const backgroundInstall = async () => {
-    const binaryPath = paths.getBinaryPath(pkg);
-    const binaryChecksum = await md5(binaryPath).catch(() => '');
+  return new Promise(async (resolve) => {
+    try {
+      const binaryPath = paths.getBinaryPath(pkg);
+      const binaryChecksum = await md5(binaryPath).catch((error) => {
+        logger.warning(error);
+      });
 
-    if (binaryChecksum !== pkg.binaryChecksum) {
-      await ensureBrowserDownloaded(logger);
-      await del(chromiumPath);
+      if (binaryChecksum !== pkg.binaryChecksum) {
+        logger.warning(
+          `Found browser binary checksum for ${pkg.platform}/${pkg.architecture} ` +
+            `is ${binaryChecksum} but ${pkg.binaryChecksum} was expected. Re-installing...`
+        );
+        await del(chromiumPath);
+        await ensureBrowserDownloaded(logger);
+        const archive = path.join(paths.archivesPath, pkg.archiveFilename);
+        logger.info(`Extracting [${archive}] to [${chromiumPath}]`);
+        await extract(archive, chromiumPath);
+      }
 
-      const archive = path.join(paths.archivesPath, pkg.archiveFilename);
-      logger.info(`Extracting [${archive}] to [${chromiumPath}]`);
-      await extract(archive, chromiumPath);
+      logger.info(`Browser executable: ${binaryPath}`);
+
+      resolve(binaryPath);
+    } catch (err) {
+      // Avoid crashing the server if unable to download the browsers (usually in a dev environment)
+      logger.error(err);
     }
-
-    logger.info(`Browser executable: ${binaryPath}`);
-    binaryPath$.next(binaryPath); // subscribers wait for download and extract to complete
-  };
-
-  backgroundInstall();
-
-  return {
-    binaryPath$,
-  };
+  });
 }

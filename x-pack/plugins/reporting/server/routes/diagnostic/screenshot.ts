@@ -24,8 +24,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       path: `${API_DIAGNOSE_URL}/screenshot`,
       validate: {},
     },
-    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
-      const generatePngObservable = await generatePngObservableFactory(reporting);
+    authorizedUserPreRouting(reporting, (_user, _context, req, res) => {
+      const generatePngObservable = generatePngObservableFactory(reporting);
       const config = reporting.getConfig();
       const decryptedHeaders = req.headers as Record<string, string>;
       const [basePath, protocol, hostname, port] = [

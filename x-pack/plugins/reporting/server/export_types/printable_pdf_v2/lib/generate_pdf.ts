@@ -29,10 +29,10 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   return null;
 };
 
-export async function generatePdfObservableFactory(reporting: ReportingCore) {
+export function generatePdfObservableFactory(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const captureConfig = config.get('capture');
-  const { browserDriverFactory } = await reporting.getPluginStartDeps();
+  const browserDriverFactory = reporting.getBrowserDriverFactory();
 
   return function generatePdfObservable(
     logger: LevelLogger,

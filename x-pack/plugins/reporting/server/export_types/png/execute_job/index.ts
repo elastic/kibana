@@ -30,7 +30,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
       const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
       let apmGeneratePng: { end: () => void } | null | undefined;
 
-      const generatePngObservable = await generatePngObservableFactory(reporting);
+      const generatePngObservable = generatePngObservableFactory(reporting);
       const jobLogger = parentLogger.clone([PNG_JOB_TYPE, 'execute', jobId]);
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),

@@ -8,7 +8,6 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
-import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { LevelLogger, ReportingStore } from './lib';
@@ -75,9 +74,11 @@ export class ReportingPlugin
 
     // async background setup
     (async () => {
+      await reportingCore.getBrowserDriverFactory().install();
+
       const config = await buildConfig(this.initContext, core, this.logger);
       reportingCore.setConfig(config);
-      // Feature registration relies on config, so it cannot be setup before here.
+
       reportingCore.registerFeature();
       this.logger.debug('Setup complete');
     })().catch((e) => {
@@ -98,11 +99,9 @@ export class ReportingPlugin
     (async () => {
       await reportingCore.pluginSetsUp();
 
-      const browserDriverFactory = await initializeBrowserDriverFactory(reportingCore, this.logger);
       const store = new ReportingStore(reportingCore, this.logger);
 
       await reportingCore.pluginStart({
-        browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
         store,

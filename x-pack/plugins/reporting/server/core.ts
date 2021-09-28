@@ -26,6 +26,7 @@ import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { ReportingConfig, ReportingSetup } from './';
+import { chromium } from './browsers';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
@@ -46,7 +47,6 @@ export interface ReportingInternalSetup {
 }
 
 export interface ReportingInternalStart {
-  browserDriverFactory: HeadlessChromiumDriverFactory;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
@@ -66,6 +66,7 @@ export class ReportingCore {
   private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
+  private browserDriverFactory: HeadlessChromiumDriverFactory;
   private config?: ReportingConfig; // final config, includes dynamic values based on OS type
   private executing: Set<string>;
 
@@ -74,6 +75,7 @@ export class ReportingCore {
   constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
     this.kibanaVersion = context.env.packageInfo.version;
     const syncConfig = context.config.get<ReportingConfigType>();
+    this.browserDriverFactory = chromium.createDriverFactory(this, syncConfig.capture, this.logger);
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
     this.monitorTask = new MonitorReportsTask(this, syncConfig, this.logger);
@@ -83,6 +85,10 @@ export class ReportingCore {
     });
 
     this.executing = new Set();
+  }
+
+  public getBrowserDriverFactory() {
+    return this.browserDriverFactory;
   }
 
   public getKibanaVersion() {
@@ -124,7 +130,11 @@ export class ReportingCore {
     if (this.pluginSetupDeps && this.config) {
       return true;
     }
-    return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
+
+    // Waits for 2 observables to trigger:
+    // - pluginSetup to be called
+    // - setConfig to be called
+    return await this.pluginSetup$.pipe(take(2)).toPromise();
   }
 
   /*

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import { getDataPath } from '@kbn/utils';
 import del from 'del';
+import apm from 'elastic-apm-node';
 import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer';
@@ -18,12 +18,13 @@ import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
 import { ReportingCore } from '../../..';
 import { durationToNumber } from '../../../../common/schema_utils';
-import { CaptureConfig } from '../../../../server/types';
+import { ReportingConfigType } from '../../../config';
 import { LevelLogger } from '../../../lib';
+import { installBrowser } from '../../install';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
-import { Metrics, getMetrics } from './metrics';
+import { getMetrics, Metrics } from './metrics';
 
 // Puppeteer type definitions do not match the documentation.
 // See https://pptr.dev/#?product=Puppeteer&version=v8.0.0&show=api-puppeteerlaunchoptions
@@ -37,25 +38,22 @@ declare module 'puppeteer' {
   function launch(options: ReportingLaunchOptions): Promise<puppeteer.Browser>;
 }
 
-type BrowserConfig = CaptureConfig['browser']['chromium'];
-type ViewportConfig = CaptureConfig['viewport'];
+type ViewportConfig = ReportingConfigType['capture']['viewport'];
 
 export class HeadlessChromiumDriverFactory {
-  private binaryPath: string;
-  private captureConfig: CaptureConfig;
-  private browserConfig: BrowserConfig;
+  private binaryPath?: string;
   private userDataDir: string;
   private getChromiumArgs: (viewport: ViewportConfig) => string[];
   private core: ReportingCore;
 
-  constructor(core: ReportingCore, binaryPath: string, logger: LevelLogger) {
-    this.core = core;
-    this.binaryPath = binaryPath;
-    const config = core.getConfig();
-    this.captureConfig = config.get('capture');
-    this.browserConfig = this.captureConfig.browser.chromium;
+  constructor(
+    core: ReportingCore,
+    private captureConfig: ReportingConfigType['capture'],
+    private logger: LevelLogger
+  ) {
+    const browserConfig = this.captureConfig.browser.chromium;
 
-    if (this.browserConfig.disableSandbox) {
+    if (browserConfig.disableSandbox) {
       logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
     }
 
@@ -64,9 +62,21 @@ export class HeadlessChromiumDriverFactory {
       args({
         userDataDir: this.userDataDir,
         viewport,
-        disableSandbox: this.browserConfig.disableSandbox,
-        proxy: this.browserConfig.proxy,
+        disableSandbox: browserConfig.disableSandbox,
+        proxy: browserConfig.proxy,
       });
+    this.core = core;
+  }
+
+  public async install() {
+    return await this.getBinaryPath();
+  }
+
+  private async getBinaryPath() {
+    if (this.binaryPath) {
+      return this.binaryPath;
+    }
+    this.binaryPath = await installBrowser(this.logger);
   }
 
   type = 'chromium';
@@ -85,6 +95,7 @@ export class HeadlessChromiumDriverFactory {
 
       const chromiumArgs = this.getChromiumArgs(viewport);
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
+      const binaryPath = await this.getBinaryPath();
 
       let browser: puppeteer.Browser;
       let page: puppeteer.Page;
@@ -93,9 +104,9 @@ export class HeadlessChromiumDriverFactory {
 
       try {
         browser = await puppeteer.launch({
-          pipe: !this.browserConfig.inspect,
+          pipe: !this.captureConfig.browser.chromium.inspect,
           userDataDir: this.userDataDir,
-          executablePath: this.binaryPath,
+          executablePath: binaryPath,
           ignoreHTTPSErrors: true,
           handleSIGHUP: false,
           args: chromiumArgs,
@@ -180,10 +191,11 @@ export class HeadlessChromiumDriverFactory {
       this.getBrowserLogger(page, logger).subscribe();
       this.getProcessLogger(browser, logger).subscribe();
 
+      const captureConfig = this.captureConfig;
       // HeadlessChromiumDriver: object to "drive" a browser page
       const driver = new HeadlessChromiumDriver(this.core, page, {
-        inspect: !!this.browserConfig.inspect,
-        networkPolicy: this.captureConfig.networkPolicy,
+        inspect: !!captureConfig.browser.chromium.inspect,
+        networkPolicy: captureConfig.networkPolicy,
       });
 
       // Rx.Observable<never>: stream to interrupt page capture

@@ -70,10 +70,10 @@ afterEach(() => (generatePngObservableFactory as jest.Mock).mockReset());
 
 test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
-  const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
+  const generatePngObservable = generatePngObservableFactory(mockReporting) as jest.Mock;
   generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
   await runTask(
     'pngJobId',
@@ -128,10 +128,10 @@ test(`passes browserTimezone to generatePng`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = await generatePngObservableFactory(mockReporting);
+  const generatePngObservable = generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('foo') }));
 
   const { content_type: contentType } = await runTask(
@@ -148,12 +148,12 @@ test(`returns content_type of application/png`, async () => {
 
 test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const testContent = 'raw string from get_screenhots';
-  const generatePngObservable = await generatePngObservableFactory(mockReporting);
+  const generatePngObservable = generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
-  await runTask(
+  runTask(
     'pngJobId',
     getBasePayload({
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],

@@ -32,7 +32,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
       const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;
 
-      const generatePdfObservable = await generatePdfObservableFactory(reporting);
+      const generatePdfObservable = generatePdfObservableFactory(reporting);
 
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
@@ -57,7 +57,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
             logo
           );
         }),
-        tap(({ buffer, warnings }) => {
+        tap(({ buffer }) => {
           apmGeneratePdf?.end();
 
           if (buffer) {

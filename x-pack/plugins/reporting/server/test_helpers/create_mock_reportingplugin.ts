@@ -12,25 +12,17 @@ jest.mock('../browsers');
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
+import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
-import {
-  chromium,
-  HeadlessChromiumDriverFactory,
-  initializeBrowserDriverFactory,
-} from '../browsers';
+import { chromium } from '../browsers';
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
 import { createMockLevelLogger } from './create_mock_levellogger';
-
-(
-  initializeBrowserDriverFactory as jest.Mock<Promise<HeadlessChromiumDriverFactory>>
-).mockImplementation(() => Promise.resolve({} as HeadlessChromiumDriverFactory));
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
