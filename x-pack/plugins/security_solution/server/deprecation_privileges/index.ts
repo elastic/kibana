@@ -26,40 +26,45 @@ interface Deps {
 export const updateSecuritySolutionPrivileges = (
   siemPrivileges: string[]
 ): Partial<Record<typeof SERVER_APP_ID | typeof CASES_FEATURE_ID, string[]>> => {
-  const newSiemPrivileges =
-    siemPrivileges.includes('minimal_read') || siemPrivileges.includes('minimal_all')
-      ? siemPrivileges.reduce<string[]>((acc, priv) => {
-          if (!acc.includes('all') && (priv === 'minimal_all' || priv === 'all')) {
-            return ['all'];
-          } else if (
-            !acc.includes('read') &&
-            !acc.includes('all') &&
-            (priv === 'minimal_read' || priv === 'read')
-          ) {
-            return ['read'];
-          }
-          return acc;
-        }, [])
-      : siemPrivileges.reduce<string[]>((acc, priv) => {
-          if (!acc.includes('all') && priv === 'all') {
-            return ['all'];
-          } else if (!acc.includes('read') && !acc.includes('all') && priv === 'read') {
-            return ['read'];
-          }
-          return acc;
-        }, []);
+  const siemPrivs = new Set<string>();
+  const casesPrivs = new Set<string>();
 
-  const casePrivileges =
-    siemPrivileges.includes('minimal_read') || siemPrivileges.includes('minimal_all')
-      ? siemPrivileges.reduce<string[]>((acc, priv) => {
-          if (priv === 'cases_all' || priv === 'all') {
-            return ['all'];
-          } else if ((priv === 'cases_read' || priv === 'read') && !acc.includes('all')) {
-            return ['read'];
-          }
-          return acc;
-        }, [])
-      : newSiemPrivileges;
+  for (const priv of siemPrivileges) {
+    switch (priv) {
+      case 'all':
+        siemPrivs.add('all');
+        casesPrivs.add('all');
+        break;
+      case 'read':
+        siemPrivs.add('read');
+        casesPrivs.add('read');
+        break;
+      case 'minimal_all':
+        siemPrivs.add('all');
+        break;
+      case 'minimal_read':
+        siemPrivs.add('read');
+        break;
+      case 'cases_all':
+        casesPrivs.add('all');
+        break;
+      case 'cases_read':
+        casesPrivs.add('read');
+        break;
+    }
+  }
+
+  const newSiemPrivileges: string[] = siemPrivs.has('all')
+    ? ['all']
+    : siemPrivs.has('read')
+    ? ['read']
+    : [];
+
+  const casePrivileges: string[] = casesPrivs.has('all')
+    ? ['all']
+    : casesPrivs.has('read')
+    ? ['read']
+    : [];
 
   return {
     ...(newSiemPrivileges.length > 0
