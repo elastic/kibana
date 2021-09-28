@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { DiscoverServices } from '../../../build_services';
 import { IndexPattern } from '../../../../../data/common';
 

@@ -190,7 +190,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     application.navigateToApp('discover', { path });
   };
 
-  const discoverButton = <EuiButton onClick={goToDiscover}>Go To Discover</EuiButton>;
+  const discoverButton = <EuiButton onClick={() => goToDiscover()}>Go To Discover</EuiButton>;
 
   return (
     <EuiPageTemplate

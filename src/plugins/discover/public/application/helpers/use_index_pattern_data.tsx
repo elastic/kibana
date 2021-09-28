@@ -9,6 +9,7 @@
 import { useEffect } from 'react';
 import { filter } from 'rxjs/operators';
 import { TimeRange } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data/common';
 import { DiscoverServices } from '../../build_services';
 import { IndexPattern, isCompleteResponse, SearchSource } from '../../../../data/common';
 
@@ -29,7 +30,7 @@ export const useIndexPatternData = (
         to: 'now',
         mode: 'relative',
       };
-      const ip = indexPattern as unknown as IndexPattern;
+      const ip = (indexPattern as unknown) as IndexPattern;
       searchSource.setField('index', ip);
       searchSource.setField('trackTotalHits', true);
       searchSource.setField(

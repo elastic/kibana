@@ -25,6 +25,7 @@ export function NavigationButton(props: Props) {
       titleSize="s"
       title={title}
       onClick={onClick}
+      description=""
       style={{
         backgroundColor: 'rgba(0, 119, 204, 0.1)',
         color: '#0061a6',

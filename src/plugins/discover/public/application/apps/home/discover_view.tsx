@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiCard, EuiFlexGrid, EuiIcon, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCard, EuiFlexGrid, EuiIcon, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import './discover_view.scss';
 import { ApplicationStart, SavedObjectsClientContract } from 'kibana/public';
