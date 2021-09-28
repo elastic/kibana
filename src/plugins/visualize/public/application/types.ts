@@ -95,7 +95,6 @@ export interface VisualizeServices extends CoreStart {
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   visualizations: VisualizationsStart;
   savedObjectsPublic: SavedObjectsStart;
-  savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
   setActiveUrl: (newUrl: string) => void;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
   restorePreviousUrl: () => void;
