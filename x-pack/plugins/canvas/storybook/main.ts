@@ -9,6 +9,8 @@ import { resolve } from 'path';
 import webpackMerge from 'webpack-merge';
 import { defaultConfig } from '@kbn/storybook';
 
+import type { Configuration } from 'webpack';
+
 import { KIBANA_ROOT } from './constants';
 
 const canvasWebpack = {
@@ -68,5 +70,5 @@ const canvasWebpack = {
 module.exports = {
   ...defaultConfig,
   addons: [...(defaultConfig.addons || []), './addon/target/register'],
-  webpackFinal: (config) => webpackMerge(config, canvasWebpack),
+  webpackFinal: (config: Configuration) => webpackMerge(config, canvasWebpack),
 };
