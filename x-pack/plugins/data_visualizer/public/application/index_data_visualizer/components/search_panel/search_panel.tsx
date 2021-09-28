@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
-import { DatavisualizerFieldTypeFilter } from './field_type_filter';
+import { DataVisualizerFieldTypeFilter } from './field_type_filter';
 import {
   DataView,
   DataViewField,
@@ -163,7 +163,7 @@ export const SearchPanel: FC<Props> = ({
           visibleFieldNames={visibleFieldNames}
           showEmptyFields={showEmptyFields}
         />
-        <DatavisualizerFieldTypeFilter
+        <DataVisualizerFieldTypeFilter
           indexedFieldTypes={indexedFieldTypes}
           setVisibleFieldTypes={setVisibleFieldTypes}
           visibleFieldTypes={visibleFieldTypes}

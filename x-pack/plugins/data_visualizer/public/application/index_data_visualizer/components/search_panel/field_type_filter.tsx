@@ -12,7 +12,7 @@ import { JOB_FIELD_TYPES_OPTIONS, JobFieldType } from '../../../../../common';
 import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 import { MultiSelectPicker, Option } from '../../../common/components/multi_select_picker';
 
-export const DatavisualizerFieldTypeFilter: FC<{
+export const DataVisualizerFieldTypeFilter: FC<{
   indexedFieldTypes: JobFieldType[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
@@ -28,12 +28,7 @@ export const DatavisualizerFieldTypeFilter: FC<{
             <EuiFlexItem grow={true}> {item.name}</EuiFlexItem>
             {indexedFieldName && (
               <EuiFlexItem grow={false}>
-                <FieldTypeIcon
-                  type={indexedFieldName}
-                  fieldName={item.name}
-                  tooltipEnabled={false}
-                  needsAria={true}
-                />
+                <FieldTypeIcon type={indexedFieldName} tooltipEnabled={false} needsAria={true} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
