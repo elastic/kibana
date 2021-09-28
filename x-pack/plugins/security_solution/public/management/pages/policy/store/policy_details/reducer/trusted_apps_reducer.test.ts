@@ -25,10 +25,10 @@ describe('policy trusted apps reducer', () => {
   });
 
   describe('PolicyTrustedApps', () => {
-    describe('policyArtifactsAvailableListPageDataChanged', () => {
-      it('sets available list uninitialised', () => {
+    describe('policyArtifactsAssignableListPageDataChanged', () => {
+      it('sets assignable list uninitialised', () => {
         const result = policyTrustedAppsReducer(initialState, {
-          type: 'policyArtifactsAvailableListPageDataChanged',
+          type: 'policyArtifactsAssignableListPageDataChanged',
           payload: createUninitialisedResourceState(),
         });
 
@@ -36,15 +36,15 @@ describe('policy trusted apps reducer', () => {
           ...initialState,
           artifacts: {
             ...initialState.artifacts,
-            availableList: {
+            assignableList: {
               type: 'UninitialisedResourceState',
             },
           },
         });
       });
-      it('sets available list loading', () => {
+      it('sets assignable list loading', () => {
         const result = policyTrustedAppsReducer(initialState, {
-          type: 'policyArtifactsAvailableListPageDataChanged',
+          type: 'policyArtifactsAssignableListPageDataChanged',
           payload: createLoadingResourceState(createUninitialisedResourceState()),
         });
 
@@ -52,7 +52,7 @@ describe('policy trusted apps reducer', () => {
           ...initialState,
           artifacts: {
             ...initialState.artifacts,
-            availableList: {
+            assignableList: {
               previousState: {
                 type: 'UninitialisedResourceState',
               },
@@ -61,9 +61,9 @@ describe('policy trusted apps reducer', () => {
           },
         });
       });
-      it('sets available list loaded', () => {
+      it('sets assignable list loaded', () => {
         const result = policyTrustedAppsReducer(initialState, {
-          type: 'policyArtifactsAvailableListPageDataChanged',
+          type: 'policyArtifactsAssignableListPageDataChanged',
           payload: createLoadedResourceState(getMockListResponse()),
         });
 
@@ -71,16 +71,16 @@ describe('policy trusted apps reducer', () => {
           ...initialState,
           artifacts: {
             ...initialState.artifacts,
-            availableList: {
+            assignableList: {
               data: getMockListResponse(),
               type: 'LoadedResourceState',
             },
           },
         });
       });
-      it('sets available list failed', () => {
+      it('sets assignable list failed', () => {
         const result = policyTrustedAppsReducer(initialState, {
-          type: 'policyArtifactsAvailableListPageDataChanged',
+          type: 'policyArtifactsAssignableListPageDataChanged',
           payload: createFailedResourceState(getAPIError()),
         });
 
@@ -88,7 +88,7 @@ describe('policy trusted apps reducer', () => {
           ...initialState,
           artifacts: {
             ...initialState.artifacts,
-            availableList: {
+            assignableList: {
               type: 'FailedResourceState',
               error: getAPIError(),
               lastLoadedState: undefined,
@@ -172,10 +172,10 @@ describe('policy trusted apps reducer', () => {
     });
   });
 
-  describe('policyArtifactsAvailableListExistDataChanged', () => {
+  describe('policyArtifactsAssignableListExistDataChanged', () => {
     it('sets exists trusted app uninitialised', () => {
       const result = policyTrustedAppsReducer(initialState, {
-        type: 'policyArtifactsAvailableListExistDataChanged',
+        type: 'policyArtifactsAssignableListExistDataChanged',
         payload: createUninitialisedResourceState(),
       });
 
@@ -183,7 +183,7 @@ describe('policy trusted apps reducer', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: {
+          assignableListEntriesExist: {
             type: 'UninitialisedResourceState',
           },
         },
@@ -191,7 +191,7 @@ describe('policy trusted apps reducer', () => {
     });
     it('sets exists trusted app loading', () => {
       const result = policyTrustedAppsReducer(initialState, {
-        type: 'policyArtifactsAvailableListExistDataChanged',
+        type: 'policyArtifactsAssignableListExistDataChanged',
         payload: createLoadingResourceState(createUninitialisedResourceState()),
       });
 
@@ -199,7 +199,7 @@ describe('policy trusted apps reducer', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: {
+          assignableListEntriesExist: {
             previousState: {
               type: 'UninitialisedResourceState',
             },
@@ -210,7 +210,7 @@ describe('policy trusted apps reducer', () => {
     });
     it('sets exists trusted app loaded negative', () => {
       const result = policyTrustedAppsReducer(initialState, {
-        type: 'policyArtifactsAvailableListExistDataChanged',
+        type: 'policyArtifactsAssignableListExistDataChanged',
         payload: createLoadedResourceState(false),
       });
 
@@ -218,7 +218,7 @@ describe('policy trusted apps reducer', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: {
+          assignableListEntriesExist: {
             data: false,
             type: 'LoadedResourceState',
           },
@@ -227,7 +227,7 @@ describe('policy trusted apps reducer', () => {
     });
     it('sets exists trusted app loaded positive', () => {
       const result = policyTrustedAppsReducer(initialState, {
-        type: 'policyArtifactsAvailableListExistDataChanged',
+        type: 'policyArtifactsAssignableListExistDataChanged',
         payload: createLoadedResourceState(true),
       });
 
@@ -235,7 +235,7 @@ describe('policy trusted apps reducer', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: {
+          assignableListEntriesExist: {
             data: true,
             type: 'LoadedResourceState',
           },
@@ -244,7 +244,7 @@ describe('policy trusted apps reducer', () => {
     });
     it('sets exists trusted app failed', () => {
       const result = policyTrustedAppsReducer(initialState, {
-        type: 'policyArtifactsAvailableListExistDataChanged',
+        type: 'policyArtifactsAssignableListExistDataChanged',
         payload: createFailedResourceState(getAPIError()),
       });
 
@@ -252,7 +252,7 @@ describe('policy trusted apps reducer', () => {
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: {
+          assignableListEntriesExist: {
             type: 'FailedResourceState',
             error: getAPIError(),
             lastLoadedState: undefined,

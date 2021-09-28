@@ -14,12 +14,12 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
   state = initialPolicyDetailsState(),
   action
 ) => {
-  if (action.type === 'policyArtifactsAvailableListPageDataChanged') {
+  if (action.type === 'policyArtifactsAssignableListPageDataChanged') {
     return {
       ...state,
       artifacts: {
         ...state.artifacts,
-        availableList: action.payload,
+        assignableList: action.payload,
       },
     };
   }
@@ -34,12 +34,12 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
     };
   }
 
-  if (action.type === 'policyArtifactsAvailableListExistDataChanged') {
+  if (action.type === 'policyArtifactsAssignableListExistDataChanged') {
     return {
       ...state,
       artifacts: {
         ...state.artifacts,
-        availableListEntriesExist: action.payload,
+        assignableListEntriesExist: action.payload,
       },
     };
   }

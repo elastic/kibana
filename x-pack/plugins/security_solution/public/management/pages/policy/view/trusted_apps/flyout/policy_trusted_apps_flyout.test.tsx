@@ -48,8 +48,8 @@ describe('Policy trusted apps flyout', () => {
 
   afterEach(() => reactTestingLibrary.cleanup());
 
-  it('should renders flyout open correctly without available data', async () => {
-    const waitAvailableListExist = waitForAction('policyArtifactsAvailableListExistDataChanged');
+  it('should renders flyout open correctly without assignable data', async () => {
+    const waitAssignableListExist = waitForAction('policyArtifactsAssignableListExistDataChanged');
 
     TrustedAppsHttpServiceMock.mockImplementation(() => {
       return {
@@ -65,11 +65,11 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAvailableListPageDataChanged');
-    await waitAvailableListExist;
+    await waitForAction('policyArtifactsAssignableListPageDataChanged');
+    await waitAssignableListExist;
 
     expect(component.getByTestId('confirmPolicyTrustedAppsFlyout')).not.toBeNull();
-    expect(component.getByTestId('noAvailableItemsTrustedAppsFlyout')).not.toBeNull();
+    expect(component.getByTestId('noAssignableItemsTrustedAppsFlyout')).not.toBeNull();
   });
 
   it('should renders flyout open correctly without data', async () => {
@@ -87,10 +87,10 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAvailableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged');
 
     mockedContext.store.dispatch({
-      type: 'policyArtifactsAvailableListExistDataChanged',
+      type: 'policyArtifactsAssignableListExistDataChanged',
       payload: createLoadedResourceState(true),
     });
 
@@ -108,7 +108,7 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAvailableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged');
 
     expect(component.getByTestId('confirmPolicyTrustedAppsFlyout')).not.toBeNull();
     expect(component.getByTestId(`${getMockListResponse().data[0].name}_checkbox`)).not.toBeNull();
@@ -126,7 +126,7 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAvailableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged');
 
     const tACardCheckbox = component.getByTestId(`${getMockListResponse().data[0].name}_checkbox`);
 
@@ -157,7 +157,7 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAvailableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged');
 
     const cancelButton = component.getByTestId('cancelPolicyTrustedAppsFlyout');
 
@@ -186,7 +186,7 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAvailableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged');
 
     expect(component.getByTestId('tooMuchResultsWarningMessageTrustedAppsFlyout')).not.toBeNull();
   });
@@ -201,7 +201,7 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAvailableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged');
 
     expect(component.queryByTestId('tooMuchResultsWarningMessageTrustedAppsFlyout')).toBeNull();
   });

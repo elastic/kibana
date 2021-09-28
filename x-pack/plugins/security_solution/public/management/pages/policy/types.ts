@@ -97,9 +97,9 @@ export interface PolicyArtifactsState {
   /** artifacts location params  */
   location: PolicyDetailsArtifactsPageLocation;
   /** A list of artifacts can be linked to the policy  */
-  availableList: AsyncResourceState<GetTrustedListAppsResponse>;
+  assignableList: AsyncResourceState<GetTrustedListAppsResponse>;
   /** Represents if avaialble trusted apps entries exist, regardless of whether the list is showing results  */
-  availableListEntriesExist: AsyncResourceState<boolean>;
+  assignableListEntriesExist: AsyncResourceState<boolean>;
   /** A list of trusted apps going to be updated  */
   trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
 }

@@ -28,12 +28,12 @@ import {
 import {
   policyDetails,
   getCurrentArtifactsLocation,
-  getAvailableArtifactsList,
-  getAvailableArtifactsListIsLoading,
+  getAssignableArtifactsList,
+  getAssignableArtifactsListIsLoading,
   getUpdateArtifactsIsLoading,
   getUpdateArtifactsLoaded,
-  getAvailableArtifactsListExist,
-  getAvailableArtifactsListExistIsLoading,
+  getAssignableArtifactsListExist,
+  getAssignableArtifactsListExistIsLoading,
 } from '../../../store/policy_details/selectors';
 import {
   usePolicyDetailsNavigateCallback,
@@ -49,15 +49,15 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
   const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const policyItem = usePolicyDetailsSelector(policyDetails);
-  const availableArtifactsList = usePolicyDetailsSelector(getAvailableArtifactsList);
-  const isAvailableArtifactsListLoading = usePolicyDetailsSelector(
-    getAvailableArtifactsListIsLoading
+  const assignableArtifactsList = usePolicyDetailsSelector(getAssignableArtifactsList);
+  const isAssignableArtifactsListLoading = usePolicyDetailsSelector(
+    getAssignableArtifactsListIsLoading
   );
   const isUpdateArtifactsLoading = usePolicyDetailsSelector(getUpdateArtifactsIsLoading);
   const isUpdateArtifactsLoaded = usePolicyDetailsSelector(getUpdateArtifactsLoaded);
-  const isAvailableArtifactsListExist = usePolicyDetailsSelector(getAvailableArtifactsListExist);
-  const isAvailableArtifactsListExistLoading = usePolicyDetailsSelector(
-    getAvailableArtifactsListExistIsLoading
+  const isAssignableArtifactsListExist = usePolicyDetailsSelector(getAssignableArtifactsListExist);
+  const isAssignableArtifactsListExistLoading = usePolicyDetailsSelector(
+    getAssignableArtifactsListExistIsLoading
   );
 
   const policyName = policyItem?.name ?? '';
@@ -87,7 +87,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
   const handleOnSearch = useCallback(
     (filter) => {
       dispatch({
-        type: 'policyArtifactsAvailableListPageDataFilter',
+        type: 'policyArtifactsAssignableListPageDataFilter',
         payload: { filter },
       });
     },
@@ -125,19 +125,19 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
 
   const canShowPolicyArtifactsList = useMemo(
     () =>
-      isAvailableArtifactsListExistLoading ||
-      isAvailableArtifactsListLoading ||
-      !isEmpty(availableArtifactsList?.data),
+      isAssignableArtifactsListExistLoading ||
+      isAssignableArtifactsListLoading ||
+      !isEmpty(assignableArtifactsList?.data),
     [
-      availableArtifactsList?.data,
-      isAvailableArtifactsListExistLoading,
-      isAvailableArtifactsListLoading,
+      assignableArtifactsList?.data,
+      isAssignableArtifactsListExistLoading,
+      isAssignableArtifactsListLoading,
     ]
   );
 
   const entriesExists = useMemo(
-    () => isEmpty(availableArtifactsList?.data) && isAvailableArtifactsListExist,
-    [availableArtifactsList?.data, isAvailableArtifactsListExist]
+    () => isEmpty(assignableArtifactsList?.data) && isAssignableArtifactsListExist,
+    [assignableArtifactsList?.data, isAssignableArtifactsListExist]
   );
 
   return (
@@ -159,7 +159,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {(availableArtifactsList?.total || 0) > 100 ? searchWarningMessage : null}
+        {(assignableArtifactsList?.total || 0) > 100 ? searchWarningMessage : null}
         <SearchExceptions
           defaultValue={location.filter}
           onSearch={handleOnSearch}
@@ -175,9 +175,11 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
         {canShowPolicyArtifactsList ? (
           <PolicyArtifactsList
             data-test-subj="artifactsListTrustedAppsFlyout"
-            artifacts={availableArtifactsList}
+            artifacts={assignableArtifactsList}
             defaultSelectedArtifactIds={[]}
-            isListLoading={isAvailableArtifactsListLoading || isAvailableArtifactsListExistLoading}
+            isListLoading={
+              isAssignableArtifactsListLoading || isAssignableArtifactsListExistLoading
+            }
             selectedArtifactsUpdated={(artifactIds) => setSelectedArtifactIds(artifactIds)}
           />
         ) : entriesExists ? (
@@ -192,11 +194,11 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
           />
         ) : (
           <EuiEmptyPrompt
-            data-test-subj="noAvailableItemsTrustedAppsFlyout"
+            data-test-subj="noAssignableItemsTrustedAppsFlyout"
             title={
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noAvailable"
-                defaultMessage="There are no available Trused Apps to assign to this policy"
+                id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noAssignable"
+                defaultMessage="There are no assignable Trused Apps to assign to this policy"
               />
             }
           />

@@ -43,7 +43,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedArtifactIdsByKey]);
 
-    const availableList = useMemo(() => {
+    const assignableList = useMemo(() => {
       if (!artifacts || !artifacts.data.length) return null;
       const items = Array.from(artifacts.data) as TrustedApp[];
       return (
@@ -65,7 +65,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       );
     }, [artifacts, selectedArtifactIdsByKey]);
 
-    return isListLoading ? <Loader size="xl" /> : <div>{availableList}</div>;
+    return isListLoading ? <Loader size="xl" /> : <div>{assignableList}</div>;
   }
 );
 

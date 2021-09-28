@@ -10,8 +10,8 @@ import {
   PostTrustedAppCreateResponse,
   GetTrustedListAppsResponse,
 } from '../../../../../../../common/endpoint/types';
-export interface PolicyArtifactsAvailableListPageDataChanged {
-  type: 'policyArtifactsAvailableListPageDataChanged';
+export interface PolicyArtifactsAssignableListPageDataChanged {
+  type: 'policyArtifactsAssignableListPageDataChanged';
   payload: AsyncResourceState<GetTrustedListAppsResponse>;
 }
 
@@ -27,19 +27,19 @@ export interface PolicyArtifactsUpdateTrustedAppsChanged {
   payload: AsyncResourceState<PostTrustedAppCreateResponse[]>;
 }
 
-export interface PolicyArtifactsAvailableListExistDataChanged {
-  type: 'policyArtifactsAvailableListExistDataChanged';
+export interface PolicyArtifactsAssignableListExistDataChanged {
+  type: 'policyArtifactsAssignableListExistDataChanged';
   payload: AsyncResourceState<boolean>;
 }
 
-export interface PolicyArtifactsAvailableListPageDataFilter {
-  type: 'policyArtifactsAvailableListPageDataFilter';
+export interface PolicyArtifactsAssignableListPageDataFilter {
+  type: 'policyArtifactsAssignableListPageDataFilter';
   payload: { filter: string };
 }
 
 export type PolicyTrustedAppsAction =
-  | PolicyArtifactsAvailableListPageDataChanged
+  | PolicyArtifactsAssignableListPageDataChanged
   | PolicyArtifactsUpdateTrustedApps
   | PolicyArtifactsUpdateTrustedAppsChanged
-  | PolicyArtifactsAvailableListExistDataChanged
-  | PolicyArtifactsAvailableListPageDataFilter;
+  | PolicyArtifactsAssignableListExistDataChanged
+  | PolicyArtifactsAssignableListPageDataFilter;

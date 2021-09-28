@@ -28,20 +28,21 @@ export const getCurrentArtifactsLocation = (
 ): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifacts.location;
 
 /**
- * Returns current available artifacts list
+ * Returns current assignable artifacts list
  */
-export const getAvailableArtifactsList = (
+export const getAssignableArtifactsList = (
   state: Immutable<PolicyDetailsState>
 ): Immutable<GetTrustedListAppsResponse | undefined> =>
-  isLoadedResourceState(state.artifacts.availableList)
-    ? state.artifacts.availableList.data
+  isLoadedResourceState(state.artifacts.assignableList)
+    ? state.artifacts.assignableList.data
     : undefined;
 
 /**
- * Returns if available list is loading
+ * Returns if assignable list is loading
  */
-export const getAvailableArtifactsListIsLoading = (state: Immutable<PolicyDetailsState>): boolean =>
-  isLoadingResourceState(state.artifacts.availableList);
+export const getAssignableArtifactsListIsLoading = (
+  state: Immutable<PolicyDetailsState>
+): boolean => isLoadingResourceState(state.artifacts.assignableList);
 
 /**
  * Returns if update action is loading
@@ -63,22 +64,22 @@ export const getUpdateArtifactsLoaded = (state: Immutable<PolicyDetailsState>): 
 };
 
 /**
- * Returns true if there is data available even if the search didn't returned it.
+ * Returns true if there is data assignable even if the search didn't returned it.
  */
-export const getAvailableArtifactsListExist = (state: Immutable<PolicyDetailsState>): boolean => {
+export const getAssignableArtifactsListExist = (state: Immutable<PolicyDetailsState>): boolean => {
   return (
-    isLoadedResourceState(state.artifacts.availableListEntriesExist) &&
-    state.artifacts.availableListEntriesExist.data
+    isLoadedResourceState(state.artifacts.assignableListEntriesExist) &&
+    state.artifacts.assignableListEntriesExist.data
   );
 };
 
 /**
- * Returns true if there is data available even if the search didn't returned it.
+ * Returns true if there is data assignable even if the search didn't returned it.
  */
-export const getAvailableArtifactsListExistIsLoading = (
+export const getAssignableArtifactsListExistIsLoading = (
   state: Immutable<PolicyDetailsState>
 ): boolean => {
-  return isLoadingResourceState(state.artifacts.availableListEntriesExist);
+  return isLoadingResourceState(state.artifacts.assignableListEntriesExist);
 };
 
 /**

@@ -9,13 +9,13 @@ import { PolicyDetailsState } from '../../../types';
 import { initialPolicyDetailsState } from '../reducer/initial_policy_details_state';
 import {
   getCurrentArtifactsLocation,
-  getAvailableArtifactsList,
-  getAvailableArtifactsListIsLoading,
+  getAssignableArtifactsList,
+  getAssignableArtifactsListIsLoading,
   getUpdateArtifactsIsLoading,
   getUpdateArtifactsIsFailed,
   getUpdateArtifactsLoaded,
-  getAvailableArtifactsListExist,
-  getAvailableArtifactsListExistIsLoading,
+  getAssignableArtifactsListExist,
+  getAssignableArtifactsListExistIsLoading,
   getUpdateArtifacts,
   isOnPolicyTrustedAppsPage,
 } from './trusted_apps_selectors';
@@ -75,60 +75,60 @@ describe('policy trusted apps selectors', () => {
     });
   });
 
-  describe('getAvailableArtifactsList()', () => {
-    it('when available list is uninitialised', () => {
-      const availableList = getAvailableArtifactsList(initialState);
-      expect(availableList).toBeUndefined();
+  describe('getAssignableArtifactsList()', () => {
+    it('when assignable list is uninitialised', () => {
+      const assignableList = getAssignableArtifactsList(initialState);
+      expect(assignableList).toBeUndefined();
     });
-    it('when available list is loading', () => {
-      const availableList = getAvailableArtifactsList({
+    it('when assignable list is loading', () => {
+      const assignableList = getAssignableArtifactsList({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableList: createLoadingResourceState(createUninitialisedResourceState()),
+          assignableList: createLoadingResourceState(createUninitialisedResourceState()),
         },
       });
-      expect(availableList).toBeUndefined();
+      expect(assignableList).toBeUndefined();
     });
-    it('when available list is loaded', () => {
-      const availableList = getAvailableArtifactsList({
+    it('when assignable list is loaded', () => {
+      const assignableList = getAssignableArtifactsList({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableList: createLoadedResourceState(getMockListResponse()),
+          assignableList: createLoadedResourceState(getMockListResponse()),
         },
       });
-      expect(availableList).toEqual(getMockListResponse());
+      expect(assignableList).toEqual(getMockListResponse());
     });
   });
 
-  describe('getAvailableArtifactsListIsLoading()', () => {
-    it('when available list is loading', () => {
-      const isLoading = getAvailableArtifactsListIsLoading({
+  describe('getAssignableArtifactsListIsLoading()', () => {
+    it('when assignable list is loading', () => {
+      const isLoading = getAssignableArtifactsListIsLoading({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableList: createLoadingResourceState(createUninitialisedResourceState()),
+          assignableList: createLoadingResourceState(createUninitialisedResourceState()),
         },
       });
       expect(isLoading).toBeTruthy();
     });
-    it('when available list is uninitialised', () => {
-      const isLoading = getAvailableArtifactsListIsLoading({
+    it('when assignable list is uninitialised', () => {
+      const isLoading = getAssignableArtifactsListIsLoading({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableList: createUninitialisedResourceState(),
+          assignableList: createUninitialisedResourceState(),
         },
       });
       expect(isLoading).toBeFalsy();
     });
-    it('when available list is loaded', () => {
-      const isLoading = getAvailableArtifactsListIsLoading({
+    it('when assignable list is loaded', () => {
+      const isLoading = getAssignableArtifactsListIsLoading({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableList: createLoadedResourceState(getMockListResponse()),
+          assignableList: createLoadedResourceState(getMockListResponse()),
         },
       });
       expect(isLoading).toBeFalsy();
@@ -297,106 +297,110 @@ describe('policy trusted apps selectors', () => {
     });
   });
 
-  describe('getAvailableArtifactsListExist()', () => {
+  describe('getAssignableArtifactsListExist()', () => {
     it('when check artifacts exists is loading', () => {
-      const exists = getAvailableArtifactsListExist({
+      const exists = getAssignableArtifactsListExist({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createLoadingResourceState(createUninitialisedResourceState()),
+          assignableListEntriesExist: createLoadingResourceState(
+            createUninitialisedResourceState()
+          ),
         },
       });
       expect(exists).toBeFalsy();
     });
     it('when check artifacts exists is uninitialised', () => {
-      const exists = getAvailableArtifactsListExist({
+      const exists = getAssignableArtifactsListExist({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createUninitialisedResourceState(),
+          assignableListEntriesExist: createUninitialisedResourceState(),
         },
       });
       expect(exists).toBeFalsy();
     });
     it('when check artifacts exists is loaded with negative result', () => {
-      const exists = getAvailableArtifactsListExist({
+      const exists = getAssignableArtifactsListExist({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createLoadedResourceState(false),
+          assignableListEntriesExist: createLoadedResourceState(false),
         },
       });
       expect(exists).toBeFalsy();
     });
     it('when check artifacts exists is loaded with positive result', () => {
-      const exists = getAvailableArtifactsListExist({
+      const exists = getAssignableArtifactsListExist({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createLoadedResourceState(true),
+          assignableListEntriesExist: createLoadedResourceState(true),
         },
       });
       expect(exists).toBeTruthy();
     });
     it('when check artifacts exists has failed', () => {
-      const exists = getAvailableArtifactsListExist({
+      const exists = getAssignableArtifactsListExist({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createFailedResourceState(getAPIError()),
+          assignableListEntriesExist: createFailedResourceState(getAPIError()),
         },
       });
       expect(exists).toBeFalsy();
     });
   });
 
-  describe('getAvailableArtifactsListExistIsLoading()', () => {
+  describe('getAssignableArtifactsListExistIsLoading()', () => {
     it('when check artifacts exists is loading', () => {
-      const isLoading = getAvailableArtifactsListExistIsLoading({
+      const isLoading = getAssignableArtifactsListExistIsLoading({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createLoadingResourceState(createUninitialisedResourceState()),
+          assignableListEntriesExist: createLoadingResourceState(
+            createUninitialisedResourceState()
+          ),
         },
       });
       expect(isLoading).toBeTruthy();
     });
     it('when check artifacts exists is uninitialised', () => {
-      const isLoading = getAvailableArtifactsListExistIsLoading({
+      const isLoading = getAssignableArtifactsListExistIsLoading({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createUninitialisedResourceState(),
+          assignableListEntriesExist: createUninitialisedResourceState(),
         },
       });
       expect(isLoading).toBeFalsy();
     });
     it('when check artifacts exists is loaded with negative result', () => {
-      const isLoading = getAvailableArtifactsListExistIsLoading({
+      const isLoading = getAssignableArtifactsListExistIsLoading({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createLoadedResourceState(false),
+          assignableListEntriesExist: createLoadedResourceState(false),
         },
       });
       expect(isLoading).toBeFalsy();
     });
     it('when check artifacts exists is loaded with positive result', () => {
-      const isLoading = getAvailableArtifactsListExistIsLoading({
+      const isLoading = getAssignableArtifactsListExistIsLoading({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createLoadedResourceState(true),
+          assignableListEntriesExist: createLoadedResourceState(true),
         },
       });
       expect(isLoading).toBeFalsy();
     });
     it('when check artifacts exists has failed', () => {
-      const isLoading = getAvailableArtifactsListExistIsLoading({
+      const isLoading = getAssignableArtifactsListExistIsLoading({
         ...initialState,
         artifacts: {
           ...initialState.artifacts,
-          availableListEntriesExist: createFailedResourceState(getAPIError()),
+          assignableListEntriesExist: createFailedResourceState(getAPIError()),
         },
       });
       expect(isLoading).toBeFalsy();

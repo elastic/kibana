@@ -94,7 +94,7 @@ export const ArtifactEntryCardMinified = memo(
       <CardContainerPanel
         {...commonProps}
         data-test-subj={dataTestSubj}
-        className="artifactEntryCardMinified"
+        className={`${commonProps.className ?? ''}  artifactEntryCardMinified`}
         id={artifact.name}
         hasShadow={false}
         hasBorder
