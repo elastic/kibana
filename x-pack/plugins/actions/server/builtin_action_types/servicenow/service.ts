@@ -77,7 +77,7 @@ export const createExternalService: ServiceFactory = (
   };
 
   const checkInstance = (res: AxiosResponse) => {
-    if ((res.status >= 200 || res.status < 400) && res.data.result == null) {
+    if (res.status >= 200 && res.status < 400 && res.data.result == null) {
       throw new Error(
         `There is an issue with your Service Now Instance. Please check ${
           res.request?.connection?.servername ?? ''

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import { createExternalService } from './service';
 import * as utils from '../lib/axios_utils';
@@ -47,6 +47,19 @@ const getImportSetAPIResponse = (update = false) => ({
   ],
 });
 
+const getImportSetAPIError = () => ({
+  import_set: 'ISET01',
+  staging_table: 'x_elas2_inc_int_elastic_incident',
+  result: [
+    {
+      transform_map: 'Elastic Incident',
+      status: 'error',
+      error_message: 'An error has occurred while importing the incident',
+      status_message: 'failure',
+    },
+  ],
+});
+
 const mockApplicationVersion = () =>
   requestMock.mockImplementationOnce(() => ({
     data: {
@@ -59,15 +72,26 @@ const mockImportIncident = (update: boolean) =>
     data: getImportSetAPIResponse(update),
   }));
 
+const mockIncidentResponse = (update: boolean) =>
+  requestMock.mockImplementation(() => ({
+    data: {
+      result: {
+        sys_id: '1',
+        number: 'INC01',
+        ...(update
+          ? { sys_updated_on: '2020-03-10 12:24:20' }
+          : { sys_created_on: '2020-03-10 12:24:20' }),
+      },
+    },
+  }));
+
 const createIncident = async (service: ExternalService) => {
   // Get application version
   mockApplicationVersion();
   // Import set api response
   mockImportIncident(false);
   // Get incident response
-  requestMock.mockImplementationOnce(() => ({
-    data: { result: { sys_id: '1', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' } },
-  }));
+  mockIncidentResponse(false);
 
   return await service.createIncident({
     incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
@@ -80,9 +104,7 @@ const updateIncident = async (service: ExternalService) => {
   // Import set api response
   mockImportIncident(true);
   // Get incident response
-  requestMock.mockImplementationOnce(() => ({
-    data: { result: { sys_id: '1', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' } },
-  }));
+  mockIncidentResponse(true);
 
   return await service.updateIncident({
     incidentId: '1',
@@ -257,140 +279,354 @@ describe('ServiceNow service', () => {
   });
 
   describe('createIncident', () => {
-    test('it creates the incident correctly', async () => {
-      const res = await createIncident(service);
-      expect(res).toEqual({
-        title: 'INC01',
-        id: '1',
-        pushedDate: '2020-03-10T12:24:20.000Z',
-        url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+    // new connectors
+    describe('import set table', () => {
+      test('it creates the incident correctly', async () => {
+        const res = await createIncident(service);
+        expect(res).toEqual({
+          title: 'INC01',
+          id: '1',
+          pushedDate: '2020-03-10T12:24:20.000Z',
+          url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+        });
+      });
+
+      test('it should call request with correct arguments', async () => {
+        await createIncident(service);
+        expect(requestMock).toHaveBeenCalledTimes(3);
+        expectImportedIncident(false);
+      });
+
+      test('it should call request with correct arguments when table changes', async () => {
+        service = createExternalService(
+          {
+            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger,
+          configurationUtilities,
+          snExternalServiceConfig['.servicenow-sir']
+        );
+
+        const res = await createIncident(service);
+
+        expect(requestMock).toHaveBeenNthCalledWith(1, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/x_elas2_sir_int/elastic_api/health',
+          method: 'get',
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(2, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
+          method: 'post',
+          data: { u_short_description: 'title', u_description: 'desc' },
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(3, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
+          method: 'get',
+        });
+
+        expect(res.url).toEqual(
+          'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
+        );
+      });
+
+      test('it should throw an error when the application is not installed', async () => {
+        requestMock.mockImplementation(() => {
+          throw new Error('An error has occurred');
+        });
+
+        await expect(
+          service.createIncident({
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to create incident. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown Reason: unknown'
+        );
+      });
+
+      test('it should throw an error when instance is not alive', async () => {
+        requestMock.mockImplementation(() => ({
+          status: 200,
+          data: {},
+          request: { connection: { servername: 'Developer instance' } },
+        }));
+        await expect(
+          service.createIncident({
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          'There is an issue with your Service Now Instance. Please check Developer instance.'
+        );
+      });
+
+      test('it should throw an error when there is an import set api error', async () => {
+        requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
+        await expect(
+          service.createIncident({
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to create incident. Error: An error has occurred while importing the incident Reason: unknown'
+        );
       });
     });
 
-    test('it should call request with correct arguments', async () => {
-      await createIncident(service);
-      expectImportedIncident(false);
-    });
-
-    test('it should call request with correct arguments when table changes', async () => {
-      service = createExternalService(
-        {
-          config: { apiUrl: 'https://dev102283.service-now.com/' },
-          secrets: { username: 'admin', password: 'admin' },
-        },
-        logger,
-        configurationUtilities,
-        snExternalServiceConfig['.servicenow-sir']
-      );
-
-      const res = await createIncident(service);
-      expect(requestMock).toHaveBeenNthCalledWith(2, {
-        axios,
-        logger,
-        configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
-        method: 'post',
-        data: { u_short_description: 'title', u_description: 'desc' },
+    // old connectors
+    describe('table API', () => {
+      beforeEach(() => {
+        service = createExternalService(
+          {
+            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger,
+          configurationUtilities,
+          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false }
+        );
       });
 
-      expect(res.url).toEqual(
-        'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
-      );
-    });
-
-    test('it should throw an error', async () => {
-      requestMock.mockImplementation(() => {
-        throw new Error('An error has occurred');
-      });
-
-      await expect(
-        service.createIncident({
+      test('it creates the incident correctly', async () => {
+        mockIncidentResponse(false);
+        const res = await service.createIncident({
           incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-        })
-      ).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to create incident. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown Reason: unknown'
-      );
-    });
+        });
 
-    test('it should throw an error when instance is not alive', async () => {
-      requestMock.mockImplementation(() => ({
-        status: 200,
-        data: {},
-        request: { connection: { servername: 'Developer instance' } },
-      }));
-      await expect(service.getIncident('1')).rejects.toThrow(
-        'There is an issue with your Service Now Instance. Please check Developer instance.'
-      );
+        expect(res).toEqual({
+          title: 'INC01',
+          id: '1',
+          pushedDate: '2020-03-10T12:24:20.000Z',
+          url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+        });
+
+        expect(requestMock).toHaveBeenCalledTimes(2);
+        expect(requestMock).toHaveBeenNthCalledWith(1, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/now/v2/table/incident',
+          method: 'post',
+          data: { short_description: 'title', description: 'desc' },
+        });
+      });
+
+      test('it should call request with correct arguments when table changes', async () => {
+        service = createExternalService(
+          {
+            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger,
+          configurationUtilities,
+          { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false }
+        );
+
+        mockIncidentResponse(false);
+
+        const res = await service.createIncident({
+          incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(1, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident',
+          method: 'post',
+          data: { short_description: 'title', description: 'desc' },
+        });
+
+        expect(res.url).toEqual(
+          'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
+        );
+      });
     });
   });
 
   describe('updateIncident', () => {
-    test('it updates the incident correctly', async () => {
-      const res = await updateIncident(service);
+    // new connectors
+    describe('import set table', () => {
+      test('it updates the incident correctly', async () => {
+        const res = await updateIncident(service);
 
-      expect(res).toEqual({
-        title: 'INC01',
-        id: '1',
-        pushedDate: '2020-03-10T12:24:20.000Z',
-        url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+        expect(res).toEqual({
+          title: 'INC01',
+          id: '1',
+          pushedDate: '2020-03-10T12:24:20.000Z',
+          url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+        });
+      });
+
+      test('it should call request with correct arguments', async () => {
+        await updateIncident(service);
+        expectImportedIncident(true);
+      });
+
+      test('it should call request with correct arguments when table changes', async () => {
+        service = createExternalService(
+          {
+            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger,
+          configurationUtilities,
+          snExternalServiceConfig['.servicenow-sir']
+        );
+
+        const res = await updateIncident(service);
+        expect(requestMock).toHaveBeenNthCalledWith(1, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/x_elas2_sir_int/elastic_api/health',
+          method: 'get',
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(2, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
+          method: 'post',
+          data: { u_short_description: 'title', u_description: 'desc', elastic_incident_id: '1' },
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(3, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
+          method: 'get',
+        });
+
+        expect(res.url).toEqual(
+          'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
+        );
+      });
+
+      test('it should throw an error when the application is not installed', async () => {
+        requestMock.mockImplementation(() => {
+          throw new Error('An error has occurred');
+        });
+
+        await expect(
+          service.updateIncident({
+            incidentId: '1',
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to update incident with id 1. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown Reason: unknown'
+        );
+      });
+
+      test('it should throw an error when instance is not alive', async () => {
+        requestMock.mockImplementation(() => ({
+          status: 200,
+          data: {},
+          request: { connection: { servername: 'Developer instance' } },
+        }));
+        await expect(
+          service.updateIncident({
+            incidentId: '1',
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          'There is an issue with your Service Now Instance. Please check Developer instance.'
+        );
+      });
+
+      test('it should throw an error when there is an import set api error', async () => {
+        requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
+        await expect(
+          service.updateIncident({
+            incidentId: '1',
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to update incident with id 1. Error: An error has occurred while importing the incident Reason: unknown'
+        );
       });
     });
 
-    test('it should call request with correct arguments', async () => {
-      await updateIncident(service);
-      expectImportedIncident(true);
-    });
-
-    test('it should call request with correct arguments when table changes', async () => {
-      service = createExternalService(
-        {
-          config: { apiUrl: 'https://dev102283.service-now.com/' },
-          secrets: { username: 'admin', password: 'admin' },
-        },
-        logger,
-        configurationUtilities,
-        snExternalServiceConfig['.servicenow-sir']
-      );
-
-      const res = await updateIncident(service);
-      expect(requestMock).toHaveBeenNthCalledWith(2, {
-        axios,
-        logger,
-        configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
-        method: 'post',
-        data: { u_short_description: 'title', u_description: 'desc', elastic_incident_id: '1' },
+    // old connectors
+    describe('table API', () => {
+      beforeEach(() => {
+        service = createExternalService(
+          {
+            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger,
+          configurationUtilities,
+          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false }
+        );
       });
 
-      expect(res.url).toEqual(
-        'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
-      );
-    });
-
-    test('it should throw an error', async () => {
-      requestMock.mockImplementation(() => {
-        throw new Error('An error has occurred');
-      });
-
-      await expect(
-        service.updateIncident({
+      test('it updates the incident correctly', async () => {
+        mockIncidentResponse(true);
+        const res = await service.updateIncident({
           incidentId: '1',
           incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-        })
-      ).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to update incident with id 1. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown Reason: unknown'
-      );
-    });
+        });
 
-    test('it should throw an error when instance is not alive', async () => {
-      requestMock.mockImplementation(() => ({
-        status: 200,
-        data: {},
-        request: { connection: { servername: 'Developer instance' } },
-      }));
-      await expect(service.getIncident('1')).rejects.toThrow(
-        'There is an issue with your Service Now Instance. Please check Developer instance.'
-      );
+        expect(res).toEqual({
+          title: 'INC01',
+          id: '1',
+          pushedDate: '2020-03-10T12:24:20.000Z',
+          url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+        });
+
+        expect(requestMock).toHaveBeenCalledTimes(2);
+        expect(requestMock).toHaveBeenNthCalledWith(1, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
+          method: 'patch',
+          data: { short_description: 'title', description: 'desc' },
+        });
+      });
+
+      test('it should call request with correct arguments when table changes', async () => {
+        service = createExternalService(
+          {
+            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger,
+          configurationUtilities,
+          { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false }
+        );
+
+        mockIncidentResponse(false);
+
+        const res = await service.updateIncident({
+          incidentId: '1',
+          incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+        });
+
+        expect(requestMock).toHaveBeenNthCalledWith(1, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
+          method: 'patch',
+          data: { short_description: 'title', description: 'desc' },
+        });
+
+        expect(res.url).toEqual(
+          'https://dev102283.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=1'
+        );
+      });
     });
   });
 
@@ -528,6 +764,81 @@ describe('ServiceNow service', () => {
       await expect(service.getIncident('1')).rejects.toThrow(
         'There is an issue with your Service Now Instance. Please check Developer instance.'
       );
+    });
+  });
+
+  describe('getUrl', () => {
+    test('it returns the instance url', async () => {
+      expect(service.getUrl()).toBe('https://dev102283.service-now.com');
+    });
+  });
+
+  describe('checkInstance', () => {
+    test('it throws an error if there is no result on data', () => {
+      const res = { status: 200, data: {} } as AxiosResponse;
+      expect(() => service.checkInstance(res)).toThrow();
+    });
+
+    test('it does NOT throws an error if the status > 400', () => {
+      const res = { status: 500, data: {} } as AxiosResponse;
+      expect(() => service.checkInstance(res)).not.toThrow();
+    });
+
+    test('it shows the servername', () => {
+      const res = {
+        status: 200,
+        data: {},
+        request: { connection: { servername: 'https://example.com' } },
+      } as AxiosResponse;
+      expect(() => service.checkInstance(res)).toThrow(
+        'There is an issue with your Service Now Instance. Please check https://example.com.'
+      );
+    });
+
+    describe('getApplicationInformation', () => {
+      test('it returns the application information', async () => {
+        mockApplicationVersion();
+        const res = await service.getApplicationInformation();
+        expect(res).toEqual({
+          name: 'Elastic',
+          scope: 'x_elas2_inc_int',
+          version: '1.0.0',
+        });
+      });
+
+      test('it should throw an error', async () => {
+        requestMock.mockImplementation(() => {
+          throw new Error('An error has occurred');
+        });
+        await expect(service.getApplicationInformation()).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown'
+        );
+      });
+    });
+
+    describe('checkIfApplicationIsInstalled', () => {
+      test('it logs the application information', async () => {
+        mockApplicationVersion();
+        await service.checkIfApplicationIsInstalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Create incident: Application scope: x_elas2_inc_int: Application version1.0.0'
+        );
+      });
+
+      test('it does not log if useOldApi = true', async () => {
+        service = createExternalService(
+          {
+            config: { apiUrl: 'https://dev102283.service-now.com/' },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger,
+          configurationUtilities,
+          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false }
+        );
+        await service.checkIfApplicationIsInstalled();
+        expect(requestMock).not.toHaveBeenCalled();
+        expect(logger.debug).not.toHaveBeenCalled();
+      });
     });
   });
 });
