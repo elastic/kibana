@@ -375,7 +375,10 @@ export function XYChart({
         max = extent.upperBound;
       }
     } else {
-      if (!fit) {
+      const axisHasTreshold = thresholdLayers.some(({ yConfig }) =>
+        yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
+      );
+      if (!fit && axisHasTreshold) {
         // Remove this once the chart will support automatic annotation fit for other type of charts
         for (const series of axis.series) {
           const table = data.tables[series.layer];
