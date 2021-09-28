@@ -30,8 +30,6 @@ import { ReindexActions } from './reindex_actions';
 
 import { error } from './error';
 
-const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
-
 export interface ReindexService {
   /**
    * Checks whether or not the user has proper privileges required to reindex this index.
@@ -162,26 +160,6 @@ export const reindexServiceFactory = (
   };
 
   // ------ Functions used to process the state machine
-
-  const validateNodesMinimumVersion = async (minMajor: number, minMinor: number) => {
-    const { body: nodesResponse } = await esClient.nodes.info();
-
-    const outDatedNodes = Object.values(nodesResponse.nodes).filter((node: any) => {
-      const matches = node.version.match(VERSION_REGEX);
-      const major = parseInt(matches[1], 10);
-      const minor = parseInt(matches[2], 10);
-
-      // All ES nodes must be >= 6.7.0 to pause ML jobs
-      return !(major > minMajor || (major === minMajor && minor >= minMinor));
-    });
-
-    if (outDatedNodes.length > 0) {
-      const nodeList = JSON.stringify(outDatedNodes.map((n: any) => n.name));
-      throw new Error(
-        `Some nodes are not on minimum version (${minMajor}.${minMinor}.0)  required: ${nodeList}`
-      );
-    }
-  };
 
   const stopIndexGroupServices = async (reindexOp: ReindexSavedObject) => {
     return actions.updateReindexOp(reindexOp, {
