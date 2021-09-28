@@ -187,8 +187,9 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
 
 /**
  * Id for the notifications alerting type
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const NOTIFICATIONS_ID = `siem.notifications` as const;
+export const LEGACY_NOTIFICATIONS_ID = `siem.notifications` as const;
 
 /**
  * Special internal structure for tags for signals. This is used
@@ -306,3 +307,5 @@ export const ELASTIC_NAME = 'estc' as const;
 
 export const TRANSFORM_STATS_URL =
   `/api/transform/transforms/${metadataTransformPattern}-*/_stats` as const;
+
+export const RISKY_HOSTS_INDEX = 'ml_host_risk_score_latest' as const;
