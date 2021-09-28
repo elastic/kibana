@@ -124,7 +124,7 @@ describe('deprecations', () => {
             "all",
           ],
           "siem": Array [
-            "read",
+            "all",
           ],
         }
       `);

@@ -29,9 +29,13 @@ export const updateSecuritySolutionPrivileges = (
   const newSiemPrivileges =
     siemPrivileges.includes('minimal_read') || siemPrivileges.includes('minimal_all')
       ? siemPrivileges.reduce<string[]>((acc, priv) => {
-          if (!acc.includes('all') && priv === 'minimal_all') {
+          if (!acc.includes('all') && (priv === 'minimal_all' || priv === 'all')) {
             return ['all'];
-          } else if (!acc.includes('read') && !acc.includes('all') && priv === 'minimal_read') {
+          } else if (
+            !acc.includes('read') &&
+            !acc.includes('all') &&
+            (priv === 'minimal_read' || priv === 'read')
+          ) {
             return ['read'];
           }
           return acc;
