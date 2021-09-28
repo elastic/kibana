@@ -27,7 +27,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['canvas-workpad'] });
-      await soInfo.logSoTypes(log);
+      await soInfo.filterSoTypes(log, '.[] | .key');
+      await soInfo.filterSoTypes(
+        log,
+        'reduce .[].doc_count as $item (0; . + $item)',
+        'TOTAL count of ALL Saved Object types'
+      );
+      await soInfo.filterSoTypes(
+        log,
+        '.[] | select(.key =="canvas-workpad-template") | .doc_count',
+        'TOTAL count of canvas-workpad-template'
+      );
     });
 
     describe('space with no features disabled', () => {
