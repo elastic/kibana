@@ -8,7 +8,7 @@
 
 import { of, BehaviorSubject } from 'rxjs';
 
-import { ServiceStatus, ServiceStatusLevels, CoreStatus } from './types';
+import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel, CoreStatus } from './types';
 import { StatusService } from './status_service';
 import { first } from 'rxjs/operators';
 import { mockCoreContext } from '../core_context.mock';
@@ -38,6 +38,16 @@ describe('StatusService', () => {
     level: ServiceStatusLevels.degraded,
     summary: 'This is degraded!',
   };
+  const critical: ServiceStatus<any> = {
+    level: ServiceStatusLevels.critical,
+    summary: 'This is critical!',
+  };
+
+  const expectedServiceStatus = (level: ServiceStatusLevel) =>
+    expect.objectContaining({
+      level,
+      summary: expect.any(String),
+    });
 
   type SetupDeps = Parameters<StatusService['setup']>[0];
   const setupDeps = (overrides: Partial<SetupDeps>): SetupDeps => {
@@ -73,6 +83,7 @@ describe('StatusService', () => {
         expect(await setup.core$.pipe(first()).toPromise()).toEqual({
           elasticsearch: available,
           savedObjects: degraded,
+          overall: expectedServiceStatus(ServiceStatusLevels.degraded),
         });
       });
 
@@ -93,14 +104,17 @@ describe('StatusService', () => {
         expect(subResult1).toEqual({
           elasticsearch: available,
           savedObjects: degraded,
+          overall: expectedServiceStatus(ServiceStatusLevels.degraded),
         });
         expect(subResult2).toEqual({
           elasticsearch: available,
           savedObjects: degraded,
+          overall: expectedServiceStatus(ServiceStatusLevels.degraded),
         });
         expect(subResult3).toEqual({
           elasticsearch: available,
           savedObjects: degraded,
+          overall: expectedServiceStatus(ServiceStatusLevels.degraded),
         });
       });
 
@@ -132,40 +146,87 @@ describe('StatusService', () => {
         savedObjects$.next(available);
         subscription.unsubscribe();
 
-        expect(statusUpdates).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "elasticsearch": Object {
-                "level": available,
-                "summary": "Available",
-              },
-              "savedObjects": Object {
-                "level": degraded,
-                "summary": "This is degraded!",
-              },
+        expect(statusUpdates).toHaveLength(3);
+
+        expect(statusUpdates[0]).toEqual({
+          elasticsearch: {
+            level: ServiceStatusLevels.available,
+            summary: 'Available',
+          },
+          savedObjects: {
+            level: ServiceStatusLevels.degraded,
+            summary: 'This is degraded!',
+          },
+          overall: expectedServiceStatus(ServiceStatusLevels.degraded),
+        });
+        expect(statusUpdates[1]).toEqual({
+          elasticsearch: {
+            level: ServiceStatusLevels.available,
+            summary: 'Wow another summary',
+          },
+          savedObjects: {
+            level: ServiceStatusLevels.degraded,
+            summary: 'This is degraded!',
+          },
+          overall: expectedServiceStatus(ServiceStatusLevels.degraded),
+        });
+        expect(statusUpdates[2]).toEqual({
+          elasticsearch: {
+            level: ServiceStatusLevels.available,
+            summary: 'Wow another summary',
+          },
+          savedObjects: {
+            level: ServiceStatusLevels.available,
+            summary: 'Available',
+          },
+          overall: expectedServiceStatus(ServiceStatusLevels.available),
+        });
+      });
+
+      it('`overall` level follows the highest service level', async () => {
+        const elasticsearch$ = new BehaviorSubject(available);
+        const savedObjects$ = new BehaviorSubject(degraded);
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: elasticsearch$,
             },
-            Object {
-              "elasticsearch": Object {
-                "level": available,
-                "summary": "Wow another summary",
-              },
-              "savedObjects": Object {
-                "level": degraded,
-                "summary": "This is degraded!",
-              },
+            savedObjects: {
+              status$: savedObjects$,
             },
-            Object {
-              "elasticsearch": Object {
-                "level": available,
-                "summary": "Wow another summary",
-              },
-              "savedObjects": Object {
-                "level": available,
-                "summary": "Available",
-              },
-            },
-          ]
-        `);
+          })
+        );
+
+        const statusUpdates: CoreStatus[] = [];
+        const subscription = setup.core$.subscribe((status) => statusUpdates.push(status));
+
+        savedObjects$.next(available);
+        elasticsearch$.next(critical);
+        elasticsearch$.next(degraded);
+        subscription.unsubscribe();
+
+        expect(statusUpdates).toHaveLength(4);
+
+        expect(statusUpdates[0]).toEqual(
+          expect.objectContaining({
+            overall: expectedServiceStatus(ServiceStatusLevels.degraded),
+          })
+        );
+        expect(statusUpdates[1]).toEqual(
+          expect.objectContaining({
+            overall: expectedServiceStatus(ServiceStatusLevels.available),
+          })
+        );
+        expect(statusUpdates[2]).toEqual(
+          expect.objectContaining({
+            overall: expectedServiceStatus(ServiceStatusLevels.critical),
+          })
+        );
+        expect(statusUpdates[3]).toEqual(
+          expect.objectContaining({
+            overall: expectedServiceStatus(ServiceStatusLevels.degraded),
+          })
+        );
       });
     });
 

@@ -40,7 +40,7 @@ interface Deps {
 
 interface StatusInfo {
   overall: ServiceStatus;
-  core: CoreStatus;
+  core: Omit<CoreStatus, 'overall'>;
   plugins: Record<string, ServiceStatus>;
 }
 
@@ -95,9 +95,10 @@ export const registerStatusRoute = ({
 
       let statusInfo: StatusInfo | LegacyStatusInfo;
       if (!v7format && v8format) {
+        const { overall: coreOverall, ...coreWithoutOverall } = core;
         statusInfo = {
           overall,
-          core,
+          core: coreWithoutOverall,
           plugins,
         };
       } else {
@@ -137,7 +138,7 @@ export const registerStatusRoute = ({
         },
       };
 
-      const statusCode = overall.level >= ServiceStatusLevels.unavailable ? 503 : 200;
+      const statusCode = core.overall.level >= ServiceStatusLevels.unavailable ? 503 : 200;
       return res.custom({ body, statusCode, bypassErrorFormat: true });
     }
   );

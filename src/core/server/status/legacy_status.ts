@@ -65,9 +65,11 @@ export const calculateLegacyStatus = ({
       'uiColor',
     ]),
   };
-  const coreStatuses = Object.entries(core).map(([serviceName, s]) =>
-    serviceStatusToHttpComponent(`core:${serviceName}@${versionWithoutSnapshot}`, s, since)
-  );
+  const coreStatuses = Object.entries(core)
+    .filter(([name]) => name !== 'overall')
+    .map(([serviceName, s]) =>
+      serviceStatusToHttpComponent(`core:${serviceName}@${versionWithoutSnapshot}`, s, since)
+    );
   const pluginStatuses = Object.entries(plugins).map(([pluginName, s]) =>
     serviceStatusToHttpComponent(`plugin:${pluginName}@${versionWithoutSnapshot}`, s, since)
   );

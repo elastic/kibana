@@ -114,6 +114,8 @@ export type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof Service
 export interface CoreStatus {
   elasticsearch: ServiceStatus;
   savedObjects: ServiceStatus;
+  /** Summary of all core services status */
+  overall: ServiceStatus;
 }
 
 /**

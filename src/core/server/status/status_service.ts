@@ -72,7 +72,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
       debounceTime(500),
-      map(([coreStatus, pluginsStatus]) => {
+      map(([{ overall, ...coreStatus }, pluginsStatus]) => {
         const summary = getSummaryStatus([
           ...Object.entries(coreStatus),
           ...Object.entries(pluginsStatus),
@@ -167,6 +167,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       map(([elasticsearchStatus, savedObjectsStatus]) => ({
         elasticsearch: elasticsearchStatus,
         savedObjects: savedObjectsStatus,
+        overall: getSummaryStatus([
+          ['elasticsearch', elasticsearchStatus],
+          ['savedObjects', savedObjectsStatus],
+        ]),
       })),
       distinctUntilChanged(isDeepStrictEqual),
       shareReplay(1)
