@@ -33,7 +33,6 @@ const apisToIntercept = [
   },
 ];
 
-const x = 1;
 describe('Instances table', () => {
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
