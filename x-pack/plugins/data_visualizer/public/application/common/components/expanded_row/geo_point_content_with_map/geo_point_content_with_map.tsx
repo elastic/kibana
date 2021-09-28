@@ -26,7 +26,7 @@ export const GeoPointContentWithMap: FC<{
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {
-    services: { maps: mapsPlugin },
+    services: { maps: mapsPlugin, data },
   } = useDataVisualizerKibana();
 
   // Update the layer list  with updated geo points upon refresh
@@ -42,6 +42,7 @@ export const GeoPointContentWithMap: FC<{
           indexPatternId: indexPattern.id,
           geoFieldName: config.fieldName,
           geoFieldType: config.type as ES_GEO_FIELD_TYPE,
+          filters: data.query.filterManager.getFilters() ?? [],
           query: {
             query: combinedQuery.searchString,
             language: combinedQuery.searchQueryLanguage,
@@ -57,7 +58,7 @@ export const GeoPointContentWithMap: FC<{
     }
     updateIndexPatternSearchLayer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern, combinedQuery, config, mapsPlugin]);
+  }, [indexPattern, combinedQuery, config, mapsPlugin, data.query]);
 
   if (stats?.examples === undefined) return null;
   return (

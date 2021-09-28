@@ -107,7 +107,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   return (
     <ExpandedRowPanel
       dataTestSubj={'fileDataVisualizerChoroplethMapTopValues'}
-      className={'dataVisualizerPanelWrapper '}
+      className={'dataVisualizerPanelWrapper'}
       grow={true}
     >
       <div className={'dataVisualizerMapWrapper'}>

@@ -50,13 +50,13 @@
     border-color: $euiColorVis6;
   }
 
-  .fieldDataCard__content {
+  .dvExpandedRow__content {
     @include euiFontSizeS;
     height: 385px;
     overflow: hidden;
   }
 
-  .fieldDataCard__geoContent {
+  .dvExpandedRow__geoContent {
     z-index: auto;
     flex: 1;
     display: flex;
@@ -71,12 +71,12 @@
     }
   }
 
-  .fieldDataCard__stats {
+  .dvExpandedRow__stats {
     padding: $euiSizeS $euiSizeS 0 $euiSizeS;
     text-align: center;
   }
 
-  .fieldDataCard__valuesTitle {
+  .dvExpandedRow__valuesTitle {
     text-transform: uppercase;
   }
 }

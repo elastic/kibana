@@ -12,12 +12,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export const NotInDocsContent: FC = () => (
   <Fragment>
-    <EuiSpacer size="xxl" />
     <EuiText textAlign="center">
       <EuiIcon type="alert" />
     </EuiText>
-
-    <EuiSpacer size="s" />
     <EuiText textAlign="center">
       <FormattedMessage
         id="xpack.dataVisualizer.dataGrid.field.fieldNotInDocsLabel"

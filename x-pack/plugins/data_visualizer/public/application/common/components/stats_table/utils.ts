@@ -79,13 +79,3 @@ export const calculateTableColumnsDimensions = (width?: number) => {
       return defaultSettings;
   }
 };
-
-export const getKibanaFieldType = (fieldType: string) => {
-  switch (fieldType) {
-    case 'text':
-    case 'keyword':
-      return 'string';
-    default:
-      return fieldType;
-  }
-};

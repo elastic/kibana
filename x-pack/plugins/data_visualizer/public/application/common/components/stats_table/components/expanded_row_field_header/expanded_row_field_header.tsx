@@ -12,7 +12,7 @@ export const ExpandedRowFieldHeader = ({ children }: { children: React.ReactNode
   <EuiText
     size="xs"
     color={'subdued'}
-    className={'fieldDataCard__valuesTitle'}
+    className={'dvExpandedRow__valuesTitle'}
     textAlign={'center'}
   >
     {children}
