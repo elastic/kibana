@@ -32,24 +32,31 @@ export enum AlertExecutionStatusErrorReasons {
   License = 'license',
 }
 
+export type AlertTypeExecutionStatus = Pick<
+  AlertExecutionStatus,
+  'searchDuration' | 'indexDuration' | 'noData' | 'messages'
+>;
+
 export interface AlertExecutionStatus {
+  // set by the rule framework
   status: AlertExecutionStatuses;
   lastExecutionDate: Date;
+  error?: {
+    reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
   delay?: number; // aka "task drift"; milliseconds
   duration?: number; // milliseconds
-  searchDuration?: null | number; // milliseconds
-  indexDuration?: null | number; // milliseconds
   instances?: {
     active: number;
     new: number;
     recovered: number;
   };
+  // set by the rule executor
+  searchDuration?: null | number; // milliseconds
+  indexDuration?: null | number; // milliseconds
   noData?: boolean;
   messages?: string[];
-  error?: {
-    reason: AlertExecutionStatusErrorReasons;
-    message: string;
-  };
 }
 
 export type AlertActionParams = SavedObjectAttributes;

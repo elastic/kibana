@@ -6,7 +6,12 @@
  */
 
 import { Logger } from 'src/core/server';
-import { AlertTaskState, AlertExecutionStatus, RawAlertExecutionStatus } from '../types';
+import {
+  AlertTaskState,
+  AlertExecutionStatus,
+  AlertTypeExecutionStatus,
+  RawAlertExecutionStatus,
+} from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import { AlertExecutionStatuses } from '../../common';
@@ -124,3 +129,16 @@ export const getAlertExecutionStatusPending = (lastExecutionDate: string) => ({
   lastExecutionDate,
   error: null,
 });
+
+export function normalizeAlertTypeExecutionStatus(
+  typeExecutionStatus: AlertTypeExecutionStatus = {}
+): AlertTypeExecutionStatus {
+  let { searchDuration, indexDuration, noData, messages } = typeExecutionStatus;
+
+  if (searchDuration === undefined) searchDuration = null;
+  if (indexDuration === undefined) indexDuration = null;
+  if (noData === undefined) noData = false;
+  if (messages == null) messages = [];
+
+  return { searchDuration, indexDuration, noData, messages };
+}

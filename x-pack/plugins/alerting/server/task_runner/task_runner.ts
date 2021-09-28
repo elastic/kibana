@@ -33,6 +33,7 @@ import {
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
   RuleTypeRegistry,
+  AlertTypeExecutionStatus,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -51,6 +52,7 @@ import {
 } from '../../common';
 import { NormalizedAlertType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
+import { normalizeAlertTypeExecutionStatus } from '../lib/alert_execution_status';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -272,10 +274,19 @@ export class TaskRunner<
         }] namespace`,
       };
 
+      function setExecutorStatus(executorStatus: AlertTypeExecutionStatus): void {
+        const status = normalizeAlertTypeExecutionStatus(executorStatus);
+        executionStatus.searchDuration = status.searchDuration;
+        executionStatus.indexDuration = status.indexDuration;
+        executionStatus.noData = status.noData;
+        executionStatus.messages = status.messages;
+      }
+
       updatedAlertTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.alertType.executor({
           alertId,
           services: {
+            setExecutorStatus,
             ...services,
             alertInstanceFactory: createAlertInstanceFactory<
               InstanceState,

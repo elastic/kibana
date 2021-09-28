@@ -33,6 +33,7 @@ import {
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
+  AlertTypeExecutionStatus,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -75,6 +76,7 @@ export interface AlertServices<
   alertInstanceFactory: (
     id: string
   ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+  setExecutorStatus(executorStatus: AlertTypeExecutionStatus): void;
 }
 
 export interface AlertExecutorOptions<
@@ -183,21 +185,21 @@ export interface AlertMeta extends SavedObjectAttributes {
 export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
   lastExecutionDate: string;
+  error: null | {
+    reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
   delay?: number; // aka "task drift"; milliseconds
   duration?: number; // milliseconds
-  searchDuration?: null | number; // milliseconds
-  indexDuration?: null | number; // milliseconds
-  noData?: null | boolean;
-  messages?: string[];
   instances?: null | {
     active: number;
     new: number;
     recovered: number;
   };
-  error: null | {
-    reason: AlertExecutionStatusErrorReasons;
-    message: string;
-  };
+  searchDuration?: null | number; // milliseconds
+  indexDuration?: null | number; // milliseconds
+  noData?: null | boolean;
+  messages?: string[];
 }
 
 export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Params>, 'id'> &

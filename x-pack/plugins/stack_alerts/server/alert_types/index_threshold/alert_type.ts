@@ -164,15 +164,18 @@ export function getAlertType(
       timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
     };
+    const dataAccessor = await data;
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
-    const result = await (
-      await data
-    ).timeSeriesQuery({
+    const timeStart = Date.now();
+    const result = await dataAccessor.timeSeriesQuery({
       logger,
       esClient,
       query: queryParams,
     });
+    const timeElapsed = Date.now() - timeStart;
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
+
+    services.setExecutorStatus({ searchDuration: timeElapsed });
 
     const groupResults = result.results || [];
     // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
