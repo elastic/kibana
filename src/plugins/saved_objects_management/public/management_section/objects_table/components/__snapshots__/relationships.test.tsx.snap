@@ -215,13 +215,13 @@ exports[`Relationships should render index patterns normally 1`] = `
     >
       <h2>
         <EuiToolTip
-          content="index patterns"
+          content="index-pattern"
           delay="regular"
           display="inlineBlock"
           position="top"
         >
           <EuiIcon
-            aria-label="index patterns"
+            aria-label="index-pattern"
             size="m"
             type="indexPatternApp"
           />
@@ -378,13 +378,13 @@ exports[`Relationships should render invalid relations 1`] = `
     >
       <h2>
         <EuiToolTip
-          content="index patterns"
+          content="index-pattern"
           delay="regular"
           display="inlineBlock"
           position="top"
         >
           <EuiIcon
-            aria-label="index patterns"
+            aria-label="index-pattern"
             size="m"
             type="indexPatternApp"
           />
