@@ -21,7 +21,7 @@ describe('AddToCaseAction', function () {
     expect(await findByText('Add to case')).toBeInTheDocument();
   });
 
-  it('should be able to click open in lens', async function () {
+  it('should be able to click add to case button', async function () {
     const initSeries = {
       data: {
         'uptime-pings-histogram': {

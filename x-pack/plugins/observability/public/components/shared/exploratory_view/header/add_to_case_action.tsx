@@ -14,6 +14,7 @@ import { AllCasesSelectorModalProps } from '../../../../../../cases/public';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { Case, SubCase } from '../../../../../../cases/common';
+import { observabilityFeatureId } from '../../../../../common';
 
 export interface AddToCaseProps {
   timeRange: { from: string; to: string };
@@ -26,7 +27,7 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
   const { cases, http } = kServices;
 
   const getToastText = useCallback(
-    (thaCase) => toMountPoint(<CaseToastText theCase={thaCase} basePath={http.basePath.get()} />),
+    (theCase) => toMountPoint(<CaseToastText theCase={theCase} basePath={http.basePath.get()} />),
     [http.basePath]
   );
 
@@ -44,7 +45,10 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
     },
     onRowClick: onCaseClicked,
     userCanCrud: true,
-    owner: ['observability'],
+    owner: [observabilityFeatureId],
+    onClose: () => {
+      setIsCasesOpen(false);
+    },
   };
 
   return (

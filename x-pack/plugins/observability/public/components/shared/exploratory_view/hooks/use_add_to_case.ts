@@ -13,14 +13,13 @@ import { useKibana } from '../../../../utils/kibana_react';
 import { Case, SubCase } from '../../../../../../cases/common';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { AddToCaseProps } from '../header/add_to_case_action';
+import { observabilityFeatureId } from '../../../../../common';
 
 const appendSearch = (search?: string) =>
   isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
 
 const getCreateCaseUrl = (search?: string | null) =>
   `/cases/create${appendSearch(search ?? undefined)}`;
-
-const appId = 'observability';
 
 async function addToCase(
   http: HttpSetup,
@@ -38,7 +37,7 @@ async function addToCase(
   const payload = {
     comment: `!{lens${JSON.stringify(vizPayload)}}`,
     type: 'user',
-    owner: 'observability',
+    owner: observabilityFeatureId,
   };
 
   return http.post(apiPath, { body: JSON.stringify(payload) });
@@ -58,12 +57,15 @@ export const useAddToCase = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const createCaseUrl = useMemo(() => getUrlForApp(appId) + getCreateCaseUrl(), [getUrlForApp]);
+  const createCaseUrl = useMemo(
+    () => getUrlForApp(observabilityFeatureId) + getCreateCaseUrl(),
+    [getUrlForApp]
+  );
 
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(appId, {
+      return navigateToApp(observabilityFeatureId, {
         path: getCreateCaseUrl(),
       });
     },
@@ -91,7 +93,7 @@ export const useAddToCase = ({
           );
         });
       } else {
-        navigateToApp(appId, {
+        navigateToApp(observabilityFeatureId, {
           path: getCreateCaseUrl(),
           openInNewTab: true,
         });
