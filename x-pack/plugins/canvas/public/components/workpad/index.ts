@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const MAJOR_VERSION = '8.0.0';
+export { Workpad } from './workpad';
+export { Workpad as WorkpadComponent } from './workpad.component';
