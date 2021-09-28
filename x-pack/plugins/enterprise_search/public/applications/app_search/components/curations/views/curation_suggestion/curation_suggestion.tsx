@@ -7,7 +7,14 @@
 
 import React, { useState } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useDecodedParams } from '../../../../utils/encode_path_params';
@@ -57,24 +64,38 @@ export const CurationSuggestion: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiButton
-        color="text"
-        size="s"
-        fullWidth
-        iconType={showOrganicResults ? 'fold' : 'unfold'}
-        iconSide="right"
-        onClick={() => setShowOrganicResults(!showOrganicResults)}
-      >
-        {showOrganicResults ? 'Collapse' : 'Expand'} organic search results
-      </EuiButton>
-      <EuiSpacer />
-      {showOrganicResults && (
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiPanel hasBorder>A search result</EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <EuiPanel hasBorder paddingSize="none">
+        <EuiButtonEmpty
+          color="text"
+          size="s"
+          style={{ width: '100%' }}
+          iconType={showOrganicResults ? 'fold' : 'unfold'}
+          iconSide="right"
+          onClick={() => setShowOrganicResults(!showOrganicResults)}
+        >
+          {showOrganicResults ? 'Collapse' : 'Expand'} organic search results
+        </EuiButtonEmpty>
+        {showOrganicResults && (
+          <EuiPanel hasShadow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <EuiPanel hasBorder>A search result</EuiPanel>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <EuiPanel hasBorder>A search result</EuiPanel>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        )}
+      </EuiPanel>
     </AppSearchPageTemplate>
   );
 };
