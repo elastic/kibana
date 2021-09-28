@@ -176,6 +176,10 @@ test(`initializes once all dependencies are met`, async () => {
       level: ServiceStatusLevels.available,
       summary: '',
     },
+    overall: {
+      level: ServiceStatusLevels.available,
+      summary: '',
+    },
   });
 
   await nextTick();

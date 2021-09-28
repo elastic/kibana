@@ -101,7 +101,9 @@ describe('TaskManagerPlugin', () => {
       setupApi.registerTaskDefinitions({
         setupTimeType: {
           title: 'setupTimeType',
-          createTaskRunner: () => ({ async run() {} }),
+          createTaskRunner: () => ({
+            async run() {},
+          }),
         },
       });
 
@@ -121,7 +123,9 @@ describe('TaskManagerPlugin', () => {
         setupApi.registerTaskDefinitions({
           lateRegisteredType: {
             title: 'lateRegisteredType',
-            createTaskRunner: () => ({ async run() {} }),
+            createTaskRunner: () => ({
+              async run() {},
+            }),
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -263,6 +267,13 @@ function mockCoreStatusAvailability({
     },
     savedObjects: {
       level: savedObjects ? ServiceStatusLevels.available : ServiceStatusLevels.unavailable,
+      summary: '',
+    },
+    overall: {
+      level:
+        elasticsearch && savedObjects
+          ? ServiceStatusLevels.available
+          : ServiceStatusLevels.unavailable,
       summary: '',
     },
   };
