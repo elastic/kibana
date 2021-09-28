@@ -21,7 +21,7 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
@@ -143,18 +143,21 @@ export async function getErrorRatePeriods({
   searchAggregatedTransactions,
   comparisonStart,
   comparisonEnd,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   comparisonStart?: number;
   comparisonEnd?: number;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
   const commonProps = {
     environment,
     kuery,
