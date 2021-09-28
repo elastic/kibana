@@ -94,12 +94,14 @@ export const removeException = () => {
   cy.get(REMOVE_EXCEPTION_BTN).click();
 };
 
-export const waitForTheRuleToBeExecuted = async () => {
-  let status = '';
-  while (status !== 'succeeded') {
+export const waitForTheRuleToBeExecuted = () => {
+  cy.waitUntil(() => {
     cy.get(REFRESH_BUTTON).click({ force: true });
-    status = await cy.get(RULE_STATUS).invoke('text').promisify();
-  }
+    return cy
+      .get(RULE_STATUS)
+      .invoke('text')
+      .then((ruleStatus) => ruleStatus === 'succeeded');
+  });
 };
 
 export const goBackToAllRulesTable = () => {

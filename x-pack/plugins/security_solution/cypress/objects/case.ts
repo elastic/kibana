@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { flatten } from 'lodash';
 import { CompleteTimeline, getTimeline } from './timeline';
 
 export interface TestCase extends TestCaseWithoutTimeline {
@@ -172,8 +173,8 @@ export const getExecuteResponses = () => ({
           value: 'os',
           element: 'subcategory',
         },
-        ...['severity', 'urgency', 'impact', 'priority']
-          .map((element) => [
+        ...flatten(
+          ['severity', 'urgency', 'impact', 'priority'].map((element) => [
             {
               dependent_value: '',
               label: '1 - Critical',
@@ -199,7 +200,7 @@ export const getExecuteResponses = () => ({
               element,
             },
           ])
-          .flat(),
+        ),
       ],
     },
   },

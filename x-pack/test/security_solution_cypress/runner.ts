@@ -117,7 +117,6 @@ export async function SecuritySolutionCypressVisualTestRunner({ getService }: Ft
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
-  await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/empty_kibana');
   await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
 
   await withProcRunner(log, async (procs) => {
