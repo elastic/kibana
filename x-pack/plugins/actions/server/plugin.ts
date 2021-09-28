@@ -264,7 +264,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       this.createRouteHandlerContext(core, this.kibanaIndex)
     );
     if (usageCollection) {
-      initializeActionsTelemetry(this.telemetryLogger, plugins.taskManager, core, this.kibanaIndex);
+      initializeActionsTelemetry(
+        this.telemetryLogger,
+        plugins.taskManager,
+        core,
+        this.kibanaIndex,
+        this.preconfiguredActions
+      );
     }
 
     // Usage counter for telemetry

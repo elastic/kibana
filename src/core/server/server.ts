@@ -217,7 +217,6 @@ export class Server {
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
       executionContext: executionContextSetup,
-      deprecations: deprecationsSetup,
     });
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
