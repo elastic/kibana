@@ -22910,7 +22910,6 @@
     "xpack.securitySolution.pages.common.emptyActionEndpoint": "Endpoint Securityを追加",
     "xpack.securitySolution.pages.common.emptyActionEndpointDescription": "脅威防御、検出、深いセキュリティデータの可視化を実現し、ホストを保護します。",
     "xpack.securitySolution.pages.common.emptyActionSecondary": "入門ガイドを表示します。",
-    "xpack.securitySolution.pages.common.emptyTitle": "Elastic Securityへようこそ。始めましょう。",
     "xpack.securitySolution.pages.fourohfour.pageNotFoundDescription": "ページが見つかりません",
     "xpack.securitySolution.paginatedTable.rowsButtonLabel": "ページごとの行数",
     "xpack.securitySolution.paginatedTable.showingSubtitle": "表示中",
