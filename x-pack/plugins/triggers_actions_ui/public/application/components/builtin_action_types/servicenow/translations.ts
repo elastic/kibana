@@ -298,3 +298,24 @@ export const UNKNOWN = i18n.translate(
     defaultMessage: 'UNKNOWN',
   }
 );
+
+export const UPDATE_INCIDENT_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentCheckboxLabel',
+  {
+    defaultMessage: 'Update incident',
+  }
+);
+
+export const ON = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const OFF = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateIncidentOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
