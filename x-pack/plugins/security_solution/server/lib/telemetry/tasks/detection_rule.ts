@@ -148,6 +148,6 @@ export class TelemetryDetectionRulesTask {
       this.sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
     });
 
-    return 0;
+    return detectionRuleExceptions.length;
   };
 }
