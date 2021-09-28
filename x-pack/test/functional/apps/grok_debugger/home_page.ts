@@ -67,8 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(response).to.eql(testData);
     });
 
-    // This test will need to be fixed.
-    it.skip('applies the correct CSS classes', async () => {
+    it('applies the correct CSS classes', async () => {
       const grokPattern = '\\[(?:-|%{NUMBER:bytes:int})\\]';
 
       await PageObjects.grokDebugger.setPatternInput(grokPattern);
