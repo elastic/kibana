@@ -55,6 +55,7 @@ describe('CurationLogic', () => {
     promotedDocumentsLoading: false,
     hiddenIds: [],
     hiddenDocumentsLoading: false,
+    isAutomated: false,
   };
 
   beforeEach(() => {
@@ -261,6 +262,24 @@ describe('CurationLogic', () => {
           hiddenIds: [],
           hiddenDocumentsLoading: true,
         });
+      });
+    });
+  });
+
+  describe('selectors', () => {
+    describe('isAutomated', () => {
+      it('is true when suggestion status is automated', () => {
+        mount({ curation: { suggestion: { status: 'automated' } } });
+
+        expect(CurationLogic.values.isAutomated).toBe(true);
+      });
+
+      it('is false when suggestion status is not automated', () => {
+        for (status of ['pending', 'applied', 'rejected', 'disabled']) {
+          mount({ curation: { suggestion: { status } } });
+
+          expect(CurationLogic.values.isAutomated).toBe(false);
+        }
       });
     });
   });

@@ -27,6 +27,7 @@ interface CurationValues {
   promotedDocumentsLoading: boolean;
   hiddenIds: string[];
   hiddenDocumentsLoading: boolean;
+  isAutomated: boolean;
 }
 
 interface CurationActions {
@@ -161,6 +162,14 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         clearHiddenIds: () => true,
         onCurationLoad: () => false,
         onCurationError: () => false,
+      },
+    ],
+  }),
+  selectors: ({ selectors }) => ({
+    isAutomated: [
+      () => [selectors.curation],
+      (curation: CurationValues['curation']) => {
+        return curation.suggestion?.status === 'automated';
       },
     ],
   }),

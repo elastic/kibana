@@ -34,14 +34,14 @@ export const Curation: React.FC = () => {
   const { convertToManual, loadCuration, resetCuration } = useActions(
     CurationLogic({ curationId })
   );
-  const { activeQuery, curation, dataLoading, queries } = useValues(CurationLogic({ curationId }));
+  const { isAutomated, activeQuery, dataLoading, queries } = useValues(
+    CurationLogic({ curationId })
+  );
   const { isFlyoutOpen } = useValues(AddResultLogic);
 
   useEffect(() => {
     loadCuration();
   }, [curationId]);
-
-  const isAutomated = curation.suggestion?.status === 'automated';
 
   const pageHeaderActions = isAutomated
     ? [

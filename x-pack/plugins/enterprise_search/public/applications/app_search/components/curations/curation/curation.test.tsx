@@ -92,13 +92,7 @@ describe('Curation', () => {
     beforeEach(() => {
       setMockValues({
         ...values,
-        curation: {
-          ...values.curation,
-          suggestion: {
-            ...values.curation.suggestion,
-            status: 'applied',
-          },
-        },
+        isAutomated: false,
       });
     });
 
@@ -151,14 +145,7 @@ describe('Curation', () => {
       setMockValues({
         ...values,
         activeQuery: 'query A',
-        curation: {
-          ...values.curation,
-          queries: ['query A'],
-          suggestion: {
-            ...values.curation.suggestion,
-            status: 'automated',
-          },
-        },
+        isAutomated: true,
       });
     });
 
