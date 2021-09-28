@@ -7,17 +7,12 @@
 
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CTI_DATASET_KEY_MAP } from '../../../../common/cti/constants';
+import { LinkPanelListItem } from '../../components/link_panel';
+import { EventCounts } from '../../components/link_panel/helpers';
 
-export interface CtiListItem {
-  path: string;
-  title: CtiDatasetTitle;
-  count: number;
-}
+export const ctiTitles = Object.keys(CTI_DATASET_KEY_MAP) as string[];
 
-export type CtiDatasetTitle = keyof typeof CTI_DATASET_KEY_MAP;
-export const ctiTitles = Object.keys(CTI_DATASET_KEY_MAP) as CtiDatasetTitle[];
-
-export const EMPTY_LIST_ITEMS: CtiListItem[] = ctiTitles.map((title) => ({
+export const EMPTY_LIST_ITEMS: LinkPanelListItem[] = ctiTitles.map((title) => ({
   title,
   count: 0,
   path: '',
@@ -30,22 +25,15 @@ export const TAG_REQUEST_BODY = {
   searchFields: ['name'],
 };
 
-export interface EventCounts {
-  [key: string]: number;
-}
-
 export const DASHBOARD_SO_TITLE_PREFIX = '[Filebeat Threat Intel] ';
 export const OVERVIEW_DASHBOARD_LINK_TITLE = 'Overview';
 
-export const getListItemsWithoutLinks = (eventCounts: EventCounts): CtiListItem[] => {
+export const getCtiListItemsWithoutLinks = (eventCounts: EventCounts): LinkPanelListItem[] => {
   return EMPTY_LIST_ITEMS.map((item) => ({
     ...item,
     count: eventCounts[CTI_DATASET_KEY_MAP[item.title]] ?? 0,
   }));
 };
-
-export const isCtiListItem = (item: CtiListItem | Partial<CtiListItem>): item is CtiListItem =>
-  typeof item.title === 'string' && typeof item.path === 'string' && typeof item.count === 'number';
 
 export const isOverviewItem = (item: { path?: string; title?: string }) =>
   item.title === OVERVIEW_DASHBOARD_LINK_TITLE;
