@@ -24,7 +24,6 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiText,
 } from '@elastic/eui';
 import {
   policyDetails,
