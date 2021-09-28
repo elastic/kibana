@@ -30,7 +30,7 @@ export const useIndexPatternData = (
         to: 'now',
         mode: 'relative',
       };
-      const ip = (indexPattern as unknown) as IndexPattern;
+      const ip = indexPattern as unknown as IndexPattern;
       searchSource.setField('index', ip);
       searchSource.setField('trackTotalHits', true);
       searchSource.setField(

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { DiscoverServices } from '../../../build_services';
 import { IndexPattern } from '../../../../../data/common';
 
