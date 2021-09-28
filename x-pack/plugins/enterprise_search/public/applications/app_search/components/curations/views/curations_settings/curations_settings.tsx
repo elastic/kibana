@@ -52,7 +52,7 @@ export const CurationsSettings: React.FC = () => {
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.curations.settings.licenseUpgradeCTATitle',
               {
-                defaultMessage: 'Introducing Automated Curations',
+                defaultMessage: 'Introducing automated curations',
               }
             )}
           </h2>
