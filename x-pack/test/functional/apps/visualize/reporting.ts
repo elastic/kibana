@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'reporting',
     'common',
     'dashboard',
+    'timePicker',
     'visualize',
     'visEditor',
   ]);
@@ -52,7 +53,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('becomes available when saved', async () => {
-        await PageObjects.reporting.setTimepickerInDataRange();
+        const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
+        const toTime = 'Aug 23, 2019 @ 16:18:51.821';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.clickGo();
