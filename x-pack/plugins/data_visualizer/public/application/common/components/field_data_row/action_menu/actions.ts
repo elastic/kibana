@@ -24,9 +24,10 @@ export function getActions(
   combinedQuery: CombinedQuery,
   actionFlyoutRef: MutableRefObject<(() => void | undefined) | undefined>
 ): Array<Action<FieldVisConfig>> {
-  const { lens: lensPlugin } = services;
+  const { lens: lensPlugin, data } = services;
 
   const actions: Array<Action<FieldVisConfig>> = [];
+  const filters = data?.query.filterManager.getFilters() ?? [];
 
   const refreshPage = () => {
     const refresh: Refresh = {
@@ -49,7 +50,7 @@ export function getActions(
       available: (item: FieldVisConfig) =>
         getCompatibleLensDataType(item.type) !== undefined && canUseLensEditor,
       onClick: (item: FieldVisConfig) => {
-        const lensAttributes = getLensAttributes(indexPattern, combinedQuery, item);
+        const lensAttributes = getLensAttributes(indexPattern, combinedQuery, filters, item);
         if (lensAttributes) {
           lensPlugin.navigateToPrefilledEditor({
             id: `dataVisualizer-${item.fieldName}`,

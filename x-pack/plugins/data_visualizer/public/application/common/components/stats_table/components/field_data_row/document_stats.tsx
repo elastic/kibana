@@ -10,13 +10,16 @@ import { EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { roundToDecimalPlace } from '../../../utils';
+import { isIndexBasedFieldVisConfig } from '../../types';
 
 interface Props extends FieldDataRowProps {
   showIcon?: boolean;
 }
 export const DocumentStat = ({ config, showIcon }: Props) => {
   const { stats } = config;
-  if (stats === undefined) return null;
+
+  if (stats === undefined || (isIndexBasedFieldVisConfig(config) && config.aggregatable === false))
+    return null;
 
   const { count, sampleCount } = stats;
 

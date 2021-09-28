@@ -36,9 +36,9 @@ import {
 } from './types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
-import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
-import { calculateTableColumnsDimensions, getKibanaFieldType } from './utils';
+import { calculateTableColumnsDimensions } from './utils';
 import { DistinctValues } from './components/field_data_row/distinct_values';
+import { FieldTypeIcon } from '../field_type_icon';
 
 const FIELD_NAME = 'fieldName';
 
@@ -180,7 +180,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Type',
         }),
         render: (fieldType: JobFieldType) => {
-          return <FieldIcon type={getKibanaFieldType(fieldType)} label={fieldType} />;
+          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} needsAria={true} />;
         },
         width: dimensions.type,
         sortable: true,

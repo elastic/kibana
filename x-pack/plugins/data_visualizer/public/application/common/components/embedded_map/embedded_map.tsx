@@ -39,7 +39,7 @@ export function EmbeddedMapComponent({
   const baseLayers = useRef<LayerDescriptor[]>();
 
   const {
-    services: { embeddable: embeddablePlugin, maps: mapsPlugin },
+    services: { embeddable: embeddablePlugin, maps: mapsPlugin, data },
   } = useDataVisualizerKibana();
 
   const factory:
@@ -73,7 +73,7 @@ export function EmbeddedMapComponent({
       const input: MapEmbeddableInput = {
         id: htmlIdGenerator()(),
         attributes: { title: '' },
-        filters: [],
+        filters: data.query.filterManager.getFilters() ?? [],
         hidePanelTitles: true,
         viewMode: ViewMode.VIEW,
         isLayerTOCOpen: false,
