@@ -98,10 +98,13 @@ export const useAddToCase = ({
           },
           (error) => {
             toasts.addError(error, {
-              title: i18n.translate('xpack.observability.expView.heading.addToCase.notification', {
-                defaultMessage: 'Failed to add visualization to the selected case.',
-                values: { caseTitle: theCase.title },
-              }),
+              title: i18n.translate(
+                'xpack.observability.expView.heading.addToCase.notification.error',
+                {
+                  defaultMessage: 'Failed to add visualization to the selected case.',
+                  values: { caseTitle: theCase.title },
+                }
+              ),
             });
           }
         );
