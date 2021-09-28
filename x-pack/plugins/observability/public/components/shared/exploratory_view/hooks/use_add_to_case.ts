@@ -102,7 +102,6 @@ export const useAddToCase = ({
                 'xpack.observability.expView.heading.addToCase.notification.error',
                 {
                   defaultMessage: 'Failed to add visualization to the selected case.',
-                  values: { caseTitle: theCase.title },
                 }
               ),
             });
