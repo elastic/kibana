@@ -23,6 +23,7 @@ describe('Machine learning deprecation flyout', () => {
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
+    httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeModeEnabled: false });
     httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
       snapshotId: MOCK_SNAPSHOT_ID,
@@ -130,6 +131,27 @@ describe('Machine learning deprecation flyout', () => {
       );
       // Verify the upgrade button text changes
       expect(find('mlSnapshotDetails.upgradeSnapshotButton').text()).toEqual('Retry upgrade');
+    });
+
+    it('Disables actions if ml_upgrade_mode is enabled', async () => {
+      httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeModeEnabled: true });
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      });
+
+      const { actions, exists, component } = testBed;
+
+      component.update();
+
+      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+
+      // Shows an error callout with a docs link
+      expect(exists('mlSnapshotDetails.mlUpgradeModeEnabledError')).toBe(true);
+      expect(exists('mlSnapshotDetails.setUpgradeModeDocsLink')).toBe(true);
+      // Flyout actions should be hidden
+      expect(exists('mlSnapshotDetails.upgradeSnapshotButton')).toBe(false);
+      expect(exists('mlSnapshotDetails.deleteSnapshotButton')).toBe(false);
     });
   });
 

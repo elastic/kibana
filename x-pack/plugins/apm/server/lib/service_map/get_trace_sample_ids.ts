@@ -18,7 +18,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
@@ -26,12 +26,16 @@ export async function getTraceSampleIds({
   serviceName,
   environment,
   setup,
+  start,
+  end,
 }: {
   serviceName?: string;
   environment: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { apmEventClient, config } = setup;
 
   const query = {
     bool: {
