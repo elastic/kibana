@@ -342,7 +342,7 @@ Configuration management tools and automation will need to be updated to use the
 === `elasticsearch.preserveHost` is no longer valid
 *Details:* The deprecated `elasticsearch.preserveHost` setting in the `kibana.yml` file has been removed.
 
-*Impact:* Configure {kibana-ref}/settings.html#elasticsearch-requestHeadersWhitelist[`elasticsearch.requestHeadersWhitelist`] to whitelist client-side headers or {kibana-ref}/settings.html#elasticsearch-customHeaders[`elasticsearch-customHeaders`] for custom headers.
+*Impact:* Configure {kibana-ref}/settings.html#elasticsearch-requestHeadersWhitelist[`elasticsearch.requestHeadersWhitelist`] to whitelist client-side headers or {kibana-ref}/settings.html#elasticsearch-customHeaders[`elasticsearch.customHeaders`] for custom headers.
 
 [float]
 === `elasticsearch.startupTimeout` is no longer valid
