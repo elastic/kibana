@@ -113,6 +113,8 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   return intervalDuration.as('milliseconds');
 }
 
+const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
+
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginStart['theme'];
@@ -372,6 +374,36 @@ export function XYChart({
         min = extent.lowerBound;
         max = extent.upperBound;
       }
+    } else {
+      if (!fit) {
+        // Remove this once the chart will support automatic annotation fit for other type of charts
+        for (const series of axis.series) {
+          const table = data.tables[series.layer];
+          for (const row of table.rows) {
+            for (const column of table.columns) {
+              if (column.id === series.accessor) {
+                const value = row[column.id];
+                if (typeof value === 'number') {
+                  max = max != null ? Math.max(value, max) : value;
+                  min = min != null ? Math.min(value, min) : value;
+                }
+              }
+            }
+          }
+        }
+        for (const { layerId, yConfig } of thresholdLayers) {
+          const table = data.tables[layerId];
+          for (const { axisMode, forAccessor } of yConfig || []) {
+            if (axis.groupId === axisMode) {
+              for (const row of table.rows) {
+                const value = row[forAccessor];
+                max = max != null ? Math.max(value, max) : value;
+                min = min != null ? Math.min(value, min) : value;
+              }
+            }
+          }
+        }
+      }
     }
 
     return {
@@ -611,9 +643,6 @@ export function XYChart({
             : {};
 
           const table = data.tables[layerId];
-
-          const isPrimitive = (value: unknown): boolean =>
-            value != null && typeof value !== 'object';
 
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
