@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const BRANCH = '8.x';
+export const MAJOR_VERSION = '8.0.0';
