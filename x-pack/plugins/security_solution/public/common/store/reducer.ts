@@ -58,7 +58,11 @@ export const createInitialState = (
       SourcererScopeName.detections,
       signalIndexName
     ),
-    [SourcererScopeName.timeline]: defaultDataView.patternList,
+    [SourcererScopeName.timeline]: getScopePatternListSelection(
+      defaultDataView,
+      SourcererScopeName.timeline,
+      signalIndexName
+    ),
   };
   const preloadedState: PreloadedState<State> = {
     app: { ...initialAppState, enableExperimental },

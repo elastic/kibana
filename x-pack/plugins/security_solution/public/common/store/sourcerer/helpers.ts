@@ -23,14 +23,15 @@ export const getScopePatternListSelection = (
   sourcererScope: SourcererScopeName,
   signalIndexName: SourcererModel['signalIndexName']
 ): string[] => {
-  let patternList: string[] = theDataView != null ? theDataView.patternList : [];
+  let patternList: string[] =
+    theDataView != null && theDataView.id !== null ? theDataView.patternList : [];
 
   // when our SIEM DATA_VIEW is set, here are the defaults
   if (theDataView && theDataView.id === DEFAULT_DATA_VIEW_ID) {
     if (sourcererScope === SourcererScopeName.default) {
       patternList = patternList.filter((index) => index !== signalIndexName).sort();
     } else if (sourcererScope === SourcererScopeName.detections) {
-      patternList = signalIndexName != null ? [signalIndexName] : []; // set to signalIndexName whether or not it exists yet in the patternList // patternList.filter((index) => index === signalIndexName);
+      patternList = signalIndexName != null ? [signalIndexName] : []; // set to signalIndexName whether or not it exists yet in the patternList
     }
   }
   return patternList.sort();
@@ -57,7 +58,10 @@ export const validateSelectedPatterns = (
       ...state.sourcererScopes[id],
       ...rest,
       selectedPatterns,
-      ...(isEmpty(selectedPatterns) || dataView == null
+      ...((isEmpty(selectedPatterns) || dataView == null) &&
+      dataView != null &&
+      // if there is an error in the data view, dont set defaults
+      dataView.id !== null
         ? id === SourcererScopeName.timeline
           ? defaultDataViewByEventType({ state, eventType })
           : { selectedPatterns: getScopePatternListSelection(dataView, id, state.signalIndexName) }
