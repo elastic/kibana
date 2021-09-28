@@ -17,7 +17,7 @@ import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_u
 import { TrustedAppsHttpService } from '../../../../trusted_apps/service';
 import { PolicyDetailsState } from '../../../types';
 import { getMockCreateResponse, getMockListResponse } from '../../../test_utils';
-import { createLoadedResourceState } from '../../../../../state';
+import { createLoadedResourceState, isLoadedResourceState } from '../../../../../state';
 
 jest.mock('../../../../trusted_apps/service');
 
@@ -47,7 +47,9 @@ describe('Policy trusted apps flyout', () => {
   afterEach(() => reactTestingLibrary.cleanup());
 
   it('should renders flyout open correctly without assignable data', async () => {
-    const waitAssignableListExist = waitForAction('policyArtifactsAssignableListExistDataChanged');
+    const waitAssignableListExist = waitForAction('policyArtifactsAssignableListExistDataChanged', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
 
     TrustedAppsHttpServiceMock.mockImplementation(() => {
       return {
@@ -63,7 +65,10 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAssignableListPageDataChanged');
+
+    await waitForAction('policyArtifactsAssignableListPageDataChanged', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
     await waitAssignableListExist;
 
     expect(component.getByTestId('confirmPolicyTrustedAppsFlyout')).not.toBeNull();
@@ -85,7 +90,9 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAssignableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
 
     mockedContext.store.dispatch({
       type: 'policyArtifactsAssignableListExistDataChanged',
@@ -106,14 +113,18 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAssignableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
 
     expect(component.getByTestId('confirmPolicyTrustedAppsFlyout')).not.toBeNull();
     expect(component.getByTestId(`${getMockListResponse().data[0].name}_checkbox`)).not.toBeNull();
   });
 
   it('should confirm flyout action', async () => {
-    const waitForUpdate = waitForAction('policyArtifactsUpdateTrustedAppsChanged');
+    const waitForUpdate = waitForAction('policyArtifactsUpdateTrustedAppsChanged', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
     const waitChangeUrl = waitForAction('userChangedUrl');
     const component = render();
     mockedContext.store.dispatch({
@@ -124,7 +135,9 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAssignableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
 
     const tACardCheckbox = component.getByTestId(`${getMockListResponse().data[0].name}_checkbox`);
 
@@ -155,7 +168,9 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAssignableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
 
     const cancelButton = component.getByTestId('cancelPolicyTrustedAppsFlyout');
 
@@ -184,7 +199,9 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAssignableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
 
     expect(component.getByTestId('tooMuchResultsWarningMessageTrustedAppsFlyout')).not.toBeNull();
   });
@@ -199,7 +216,9 @@ describe('Policy trusted apps flyout', () => {
         hash: '',
       },
     });
-    await waitForAction('policyArtifactsAssignableListPageDataChanged');
+    await waitForAction('policyArtifactsAssignableListPageDataChanged', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
 
     expect(component.queryByTestId('tooMuchResultsWarningMessageTrustedAppsFlyout')).toBeNull();
   });
