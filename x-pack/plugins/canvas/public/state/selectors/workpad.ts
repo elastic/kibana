@@ -17,6 +17,8 @@ import {
   CanvasElement,
   CanvasVariable,
   ResolvedArgType,
+  CanvasNode,
+  WithAst,
 } from '../../../types';
 import {
   ExpressionContext,
@@ -33,7 +35,7 @@ type WorkpadInfo = Modify<CanvasWorkpad, { pages: undefined }>;
 
 const workpadRoot = 'persistent.workpad';
 
-const appendAst = (element: CanvasElement): PositionedElement => ({
+const appendAst = <T extends { expression: string }>(element: T): WithAst<T> => ({
   ...element,
   ast: safeElementFromExpression(element.expression) as ExpressionAstExpression,
 });
@@ -311,7 +313,7 @@ export function getGlobalFilterGroups(state: State) {
 // element getters
 export function getSelectedToplevelNodes(
   state: State
-): State['transient']['selectedTopLevelNodes'] {
+): State['transient']['selectedToplevelNodes'] {
   return get(state, 'transient.selectedToplevelNodes', []);
 }
 
@@ -357,32 +359,29 @@ export function getElements(
 
 const augment =
   (type: string) =>
-  <T extends CanvasElement | CanvasGroup>(n: T): T => ({
+  (n: CanvasElement | CanvasGroup): CanvasNode => ({
+    expression: 'shape fill="rgba(255,255,255,0)" | render', // fixme unify with mw/aeroelastic
     ...n,
     position: { ...n.position, type },
-    ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic
   });
 
-const getNodesOfPage = (page: CanvasPage): Array<CanvasElement | CanvasGroup> => {
-  const elements: Array<CanvasElement | CanvasGroup> = get(page, 'elements').map(
-    augment('element')
-  );
+const getNodesOfPage = (page: CanvasPage): CanvasNode[] => {
+  const elements = get(page, 'elements').map(augment('element'));
   const groups = get(page, 'groups', [] as CanvasGroup[]).map(augment('group'));
 
   return elements.concat(groups);
 };
 
-export function getNodesForPage(page: CanvasPage, withAst: true): PositionedElement[];
-export function getNodesForPage(page: CanvasPage, withAst: false): CanvasElement[];
+export function getNodesForPage(page: CanvasPage, withAst: true): WithAst<CanvasNode[]>;
+export function getNodesForPage(page: CanvasPage, withAst: false): CanvasNode[];
 export function getNodesForPage(
   page: CanvasPage,
   withAst: boolean
-): CanvasElement[] | PositionedElement[];
-
+): WithAst<CanvasNode[]> | CanvasNode[];
 export function getNodesForPage(
   page: CanvasPage,
   withAst: boolean
-): Array<CanvasElement | CanvasGroup> {
+): CanvasNode[] | WithAst<CanvasNode[]> {
   const elements = getNodesOfPage(page);
 
   if (!elements) {
@@ -398,16 +397,17 @@ export function getNodesForPage(
     return elements.map((el) => omit(el, ['ast']));
   }
 
-  // @ts-expect-error All of this AST business needs to be cleaned up.
   return elements.map(appendAst);
 }
 
 // todo unify or DRY up with `getElements`
+export function getNodes(state: State, pageId: string, withAst?: true): Array<WithAst<CanvasNode>>;
+export function getNodes(state: State, pageId: string, withAst: false): CanvasNode[];
 export function getNodes(
   state: State,
   pageId: string,
   withAst = true
-): CanvasElement[] | PositionedElement[] {
+): Array<WithAst<CanvasNode>> | CanvasNode[] {
   const id = pageId || getSelectedPage(state);
   if (!id) {
     return [];
@@ -432,11 +432,7 @@ export function getElementById(
   }
 }
 
-export function getNodeById(
-  state: State,
-  id: string,
-  pageId: string
-): PositionedElement | undefined {
+export function getNodeById(state: State, id: string, pageId: string): CanvasNode | undefined {
   // do we need to pass a truthy empty array instead of `true`?
   const group = getNodes(state, pageId, true).find((el) => el.id === id);
   if (group) {

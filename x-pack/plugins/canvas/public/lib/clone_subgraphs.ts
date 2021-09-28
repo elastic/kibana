@@ -8,9 +8,14 @@
 // @ts-expect-error untyped local
 import { arrayToMap } from './aeroelastic/functional';
 import { getId } from './get_id';
-import { PositionedElement } from '../../types';
+import { ElementPosition } from '../../types';
 
-export const cloneSubgraphs = (nodes: PositionedElement[]) => {
+interface BaseSupgraphType {
+  id: string;
+  position: ElementPosition;
+}
+
+export const cloneSubgraphs = <T extends BaseSupgraphType>(nodes: T[]): T[] => {
   const idMap = arrayToMap(nodes.map((n) => n.id));
 
   // We simultaneously provide unique id values for all elements (across all pages)

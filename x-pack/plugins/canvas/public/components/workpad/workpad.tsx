@@ -33,7 +33,6 @@ type ContainerProps = Pick<Props, 'registerLayout' | 'unregisterLayout'>;
 export const Workpad: FC<ContainerProps> = (props) => {
   const dispatch = useDispatch();
   const [grid, setGrid] = useState<boolean>(false);
-  const [transition, setTransition] = useState<any | null>(null);
   const [prevSelectedPageNumber] = useState<number>(0);
 
   const { isFullscreen, setFullscreen, undo, redo, autoplayInterval, nextPage, previousPage } =
@@ -58,6 +57,10 @@ export const Workpad: FC<ContainerProps> = (props) => {
     };
   });
 
+  const [transition, setTransition] = useState<any>(() => {
+    return propsFromState.pages[propsFromState.selectedPageNumber - 1].transition;
+  });
+
   const fetchAllRenderables = useCallback(() => {
     dispatch(fetchAllRenderablesAction());
   }, [dispatch]);
@@ -72,10 +75,10 @@ export const Workpad: FC<ContainerProps> = (props) => {
   const getAnimation = useCallback(
     (pageNumber) => {
       if (!transition || !transition.name) {
-        return null;
+        return undefined;
       }
       if (![propsFromState.selectedPageNumber, prevSelectedPageNumber].includes(pageNumber)) {
-        return null;
+        return undefined;
       }
       const { enter, exit } = transitionsRegistry.get(transition.name);
       const laterPageNumber = Math.max(propsFromState.selectedPageNumber, prevSelectedPageNumber);

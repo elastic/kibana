@@ -20,7 +20,7 @@ export type Matrix3d = [F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F];
 export type TransformMatrix3d = Readonly<Matrix3d>;
 
 // plain, JSON-bijective value
-export type Json = JsonPrimitive | JsonArray | JsonMap;
+export type Json = JsonPrimitive | JsonArray | JsonMap | TransformMatrix2d | TransformMatrix3d;
 type JsonPrimitive = null | boolean | number | string;
 interface JsonArray extends Array<Json> {}
 interface JsonMap {
@@ -28,13 +28,26 @@ interface JsonMap {
 }
 
 // state object
-export type State = JsonMap & WithActionId;
+export type State = JsonMap & WithActionId & WithCurrentScene;
 export type ActionId = number;
 interface WithActionId {
-  primaryUpdate: { type: string; payload: { uid: ActionId; [propName: string]: Json } };
-  [propName: string]: Json; // allow other arbitrary props
+  primaryUpdate?: { type: string; payload: { uid: ActionId; [propName: string]: Json } };
 }
 
+interface Shape extends Record<string, any> {
+  id: string;
+  type: string;
+}
+
+interface WithCurrentScene {
+  currentScene: {
+    gestureEnd: boolean;
+    shapes: Shape[];
+    cursor?: string;
+    selectedPrimaryShapes: string[];
+    [propName: string]: Json;
+  };
+}
 // reselect-based data flow
 export type PlainFun = (...args: Json[]) => Json;
 export type Selector = (...fns: Resolve[]) => Resolve;
@@ -49,5 +62,5 @@ export type CommitFn = (type: TypeName, payload: Payload) => void;
 export interface Store {
   getCurrentState: () => State;
   setCurrentState: (state: State) => void;
-  commit: (type: TypeName, payload: Payload) => void;
+  commit: (type: TypeName, payload: Payload) => State;
 }

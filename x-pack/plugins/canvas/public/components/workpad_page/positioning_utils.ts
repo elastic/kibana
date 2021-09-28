@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PositionedElement, ElementPosition } from '../../../types';
+import { PositionedElement, ElementPosition, CanvasNode } from '../../../types';
 import { multiply, rotateZ, translate } from '../../lib/aeroelastic/matrix';
 
 export const isGroupId = (id: string) => id.startsWith('group');
@@ -54,16 +54,15 @@ export const elementToShape = (
 });
 
 const simplePosition = (
-  { id, position, filter }: { id: string; position: ElementPosition; filter: string },
+  { id, position }: { id: string; position: ElementPosition },
   z: number
 ) => ({
   ...headerData(id),
   width: position.width,
   height: position.height,
   transformMatrix: transformData(position, z),
-  filter,
 });
 
-export const simplePositioning = ({ elements }: { elements: PositionedElement[] }) => ({
+export const simplePositioning = ({ elements }: { elements: CanvasNode[] }) => ({
   elements: elements.map(simplePosition),
 });

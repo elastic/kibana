@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  useCallback,
+  useMemo,
+  MouseEvent as ReactMouseEvent,
+  WheelEvent as ReactWheelEvent,
+} from 'react';
 import { CommitFn } from '../../../lib/aeroelastic';
 import { WORKPAD_CONTAINER_ID } from '../../workpad_app/workpad_app.component';
 
@@ -85,7 +91,15 @@ const setupHandler = (commit: CommitFn, canvasOrigin: CanvasOriginFn, zoomScale?
 
 const handleMouseMove = (
   commit: CommitFn | undefined,
-  { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey, target }: MouseEvent,
+  {
+    clientX,
+    clientY,
+    altKey,
+    metaKey,
+    shiftKey,
+    ctrlKey,
+    target,
+  }: ReactMouseEvent | ReactWheelEvent,
   canvasOrigin: CanvasOriginFn,
   zoomScale?: number
 ) => {
@@ -100,7 +114,7 @@ const handleMouseMove = (
   }
 };
 
-const handleMouseLeave = (commit: CommitFn | undefined, { buttons, target }: MouseEvent) => {
+const handleMouseLeave = (commit: CommitFn | undefined, { buttons, target }: ReactMouseEvent) => {
   if (!isInCanvas(target)) {
     return;
   }
@@ -112,7 +126,7 @@ const handleMouseLeave = (commit: CommitFn | undefined, { buttons, target }: Mou
 
 const handleMouseDown = (
   commit: CommitFn | undefined,
-  e: MouseEvent,
+  e: ReactMouseEvent,
   canvasOrigin: CanvasOriginFn,
   zoomScale: number,
   allowDrag = true
@@ -142,7 +156,7 @@ const handleMouseDown = (
 };
 
 export const eventHandlers = {
-  onMouseDown: (props: Props) => (e: MouseEvent) =>
+  onMouseDown: (props: Props) => (e: ReactMouseEvent) =>
     handleMouseDown(
       props.commit,
       e,
@@ -150,10 +164,58 @@ export const eventHandlers = {
       props.zoomScale,
       props.canDragElement(e.target)
     ),
-  onMouseMove: (props: Props) => (e: MouseEvent) =>
+  onMouseMove: (props: Props) => (e: ReactMouseEvent) =>
     handleMouseMove(props.commit, e, props.canvasOrigin, props.zoomScale),
-  onMouseLeave: (props: Props) => (e: MouseEvent) => handleMouseLeave(props.commit, e),
-  onWheel: (props: Props) => (e: WheelEvent) =>
+  onMouseLeave: (props: Props) => (e: ReactMouseEvent) => handleMouseLeave(props.commit, e),
+  onWheel: (props: Props) => (e: ReactWheelEvent) =>
     handleMouseMove(props.commit, e, props.canvasOrigin),
   resetHandler: () => () => resetHandler(),
+};
+
+export interface EventHandlers {
+  onMouseDown: (e: ReactMouseEvent) => void;
+  onMouseMove: (e: ReactMouseEvent) => void;
+  onMouseLeave: (e: ReactMouseEvent) => void;
+  onWheel: (e: ReactWheelEvent) => void;
+  resetHandler: () => void;
+}
+
+export const useEventHandlers = ({
+  commit,
+  canvasOrigin,
+  zoomScale,
+  canDragElement,
+}: Props): EventHandlers => {
+  const onMouseDown = useCallback(
+    (e: ReactMouseEvent) => {
+      handleMouseDown(commit, e, canvasOrigin, zoomScale, canDragElement(e.target));
+    },
+    [commit, canvasOrigin, zoomScale, canDragElement]
+  );
+
+  const onMouseMove = useCallback(
+    (e: ReactMouseEvent) => {
+      handleMouseMove(commit, e, canvasOrigin, zoomScale);
+    },
+    [commit, canvasOrigin, zoomScale]
+  );
+
+  const onMouseLeave = useCallback((e: ReactMouseEvent) => handleMouseLeave(commit, e), [commit]);
+  const onWheel = useCallback(
+    (e: ReactWheelEvent) => handleMouseMove(commit, e, canvasOrigin),
+    [commit, canvasOrigin]
+  );
+
+  const resetHandlerCallback = useCallback(() => resetHandler(), []);
+
+  return useMemo(
+    () => ({
+      onMouseDown,
+      onMouseMove,
+      onMouseLeave,
+      onWheel,
+      resetHandler: resetHandlerCallback,
+    }),
+    [onMouseDown, onMouseMove, onMouseLeave, onWheel, resetHandlerCallback]
+  );
 };

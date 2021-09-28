@@ -9,13 +9,11 @@ import React, { FC, useContext } from 'react';
 import { connect } from 'react-redux';
 import { compose, withHandlers, withProps } from 'recompose';
 import { Dispatch } from 'redux';
-import { State, PositionedElement } from '../../../../types';
+import { State, CanvasNodeWithAst } from '../../../../types';
 import { getClipboardData } from '../../../lib/clipboard';
 // @ts-expect-error untyped local
 import { flatten } from '../../../lib/aeroelastic/functional';
-// @ts-expect-error untyped local
 import { globalStateUpdater } from '../../workpad_page/integration_utils';
-// @ts-expect-error untyped local
 import { crawlTree } from '../../workpad_page/integration_utils';
 // @ts-expect-error untyped local
 import { insertNodes, elementLayer, removeElements } from '../../../state/actions/elements';
@@ -60,25 +58,25 @@ const withGlobalState =
  */
 const mapStateToProps = (state: State) => {
   const pageId = getSelectedPage(state);
-  const nodes = getNodes(state, pageId) as PositionedElement[];
+  const nodes = getNodes(state, pageId);
   const selectedToplevelNodes = getSelectedToplevelNodes(state);
 
   const selectedPrimaryShapeObjects = selectedToplevelNodes
-    .map((id: string) => nodes.find((s: PositionedElement) => s.id === id))
-    .filter((shape?: PositionedElement) => shape) as PositionedElement[];
+    .map((id: string) => nodes.find((s) => s.id === id))
+    .filter<CanvasNodeWithAst>((shape): shape is CanvasNodeWithAst => shape !== undefined);
 
-  const selectedPersistentPrimaryNodes = flatten(
-    selectedPrimaryShapeObjects.map((shape: PositionedElement) =>
-      nodes.find((n: PositionedElement) => n.id === shape.id) // is it a leaf or a persisted group?
+  const selectedPersistentPrimaryNodes = selectedPrimaryShapeObjects
+    .map((shape) =>
+      nodes.find((n) => n.id === shape.id) // is it a leaf or a persisted group?
         ? [shape.id]
-        : nodes.filter((s: PositionedElement) => s.position.parent === shape.id).map((s) => s.id)
+        : nodes.filter((s) => s.position.parent === shape.id).map((s) => s.id)
     )
-  );
+    .flat();
 
   const selectedNodeIds: string[] = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
   const selectedNodes = selectedNodeIds
     .map((id: string) => nodes.find((s) => s.id === id))
-    .filter((node: PositionedElement | undefined): node is PositionedElement => {
+    .filter<CanvasNodeWithAst>((node): node is CanvasNodeWithAst => {
       return !!node;
     });
 
@@ -91,13 +89,13 @@ const mapStateToProps = (state: State) => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  insertNodes: (selectedNodes: PositionedElement[], pageId: string) =>
+  insertNodes: (selectedNodes: CanvasNodeWithAst[], pageId: string) =>
     dispatch(insertNodes(selectedNodes, pageId)),
   removeNodes: (nodeIds: string[], pageId: string) => dispatch(removeElements(nodeIds, pageId)),
-  selectToplevelNodes: (nodes: PositionedElement[]) =>
+  selectToplevelNodes: (nodes: CanvasNodeWithAst[]) =>
     dispatch(
       selectToplevelNodes(
-        nodes.filter((e: PositionedElement) => !e.position.parent).map((e) => e.id)
+        nodes.filter((e: CanvasNodeWithAst) => !e.position.parent).map((e) => e.id)
       )
     ),
   elementLayer: (pageId: string, elementId: string, movement: number) => {

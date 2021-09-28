@@ -197,6 +197,7 @@ describe('json', () => {
     plain = undefined; // it's undefined
     // @ts-expect-error
     plain = (a) => a; // it's a function
+
     // @ts-expect-error
     plain = [new Date()]; // it's a time
     // @ts-expect-error

@@ -23,18 +23,13 @@ const BUFFER = 24;
  * of the `InteractiveWorkpadPage` to the corners of the `WorkpadApp`, allowing
  * mouse events started outside to fire and be tracked within.
  */
-export class InteractionBoundary extends PureComponent<void, State, void> {
-  // Implemented with state, as I think there'll be cases where we want to
-  // re-evaluate the size of the interaction boundary in the future.
-  constructor() {
-    super();
-    this.state = {
-      height: '0',
-      width: '0',
-      marginLeft: '0',
-      marginTop: '0',
-    };
-  }
+export class InteractionBoundary extends PureComponent<{}, State, {}> {
+  state = {
+    height: '0',
+    width: '0',
+    marginLeft: '0',
+    marginTop: '0',
+  };
 
   componentDidMount() {
     const container = $('#' + WORKPAD_CONTAINER_ID);

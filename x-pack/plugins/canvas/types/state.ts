@@ -80,7 +80,7 @@ interface TransientState {
   zoomScale: number;
   elementStats: ElementStatsType;
   fullScreen: boolean;
-  selectedTopLevelNodes: string[];
+  selectedToplevelNodes: string[];
   resolvedArgs: { [key: string]: ResolvedArgType | undefined };
   refresh: {
     interval: number;

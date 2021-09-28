@@ -9,7 +9,6 @@ import React, { FC, useEffect } from 'react';
 import PropTypes from 'prop-types';
 // @ts-expect-error untyped library
 import Style from 'style-it';
-// @ts-expect-error untyped local
 import { WorkpadPage } from '../workpad_page';
 import { RoutingLink } from '../routing';
 import { CanvasWorkpad } from '../../../types';

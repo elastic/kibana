@@ -10,7 +10,7 @@ import { getClipboardData, setClipboardData } from './clipboard';
 import { cloneSubgraphs } from './clone_subgraphs';
 import { pluginServices } from '../services';
 import { getId } from './get_id';
-import { PositionedElement } from '../../types';
+import { CanvasNode } from '../../types';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
 
 const extractId = (node: { id: string }): string => node.id;
@@ -23,11 +23,11 @@ export interface Props {
   /**
    * array of selected elements
    */
-  selectedNodes: PositionedElement[];
+  selectedNodes: CanvasNode[];
   /**
    * adds elements to the page
    */
-  insertNodes: (elements: PositionedElement[], pageId: string) => void;
+  insertNodes: (elements: CanvasNode[], pageId: string) => void;
   /**
    * changes the layer position of an element
    */
@@ -35,7 +35,7 @@ export interface Props {
   /**
    * selects elements on the page
    */
-  selectToplevelNodes: (elements: PositionedElement[]) => void;
+  selectToplevelNodes: (elements: CanvasNode[]) => void;
   /**
    * deletes elements from the page
    */
@@ -47,7 +47,7 @@ export interface Props {
   /**
    * sets new position for multiple elements
    */
-  setMultiplePositions: (elements: PositionedElement[]) => void;
+  setMultiplePositions: (elements: CanvasNode[]) => void;
 }
 
 // handlers for clone, delete, and saving custom elements

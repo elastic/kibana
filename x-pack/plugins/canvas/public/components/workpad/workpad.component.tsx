@@ -8,16 +8,15 @@
 import React, { FC } from 'react';
 // @ts-expect-error
 import Style from 'style-it';
-// @ts-expect-error
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 import { HEADER_BANNER_HEIGHT, WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
-import { CommitFn, CanvasPage } from '../../../types';
+import { CommitFn, CanvasPage, PageTransition } from '../../../types';
 import { WorkpadShortcuts } from './workpad_shortcuts.component';
 
 export interface Props {
   fetchAllRenderables: () => void;
-  getAnimation: (pageNumber: number) => { name: string; direction: string } | null;
+  getAnimation: (pageNumber: number) => PageTransition | undefined;
   grid: boolean;
   hasHeaderBanner?: boolean;
   height: number;

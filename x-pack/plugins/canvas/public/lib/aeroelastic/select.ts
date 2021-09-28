@@ -12,6 +12,7 @@ export const select =
   (...fns: Resolve[]) => {
     let prevId: ActionId = NaN;
     let cache: Json = null;
-    const old = (object: State): boolean => prevId === (prevId = object.primaryUpdate.payload.uid);
+    const old = (object: State): boolean =>
+      prevId === (prevId = object.primaryUpdate ? object.primaryUpdate.payload.uid : NaN);
     return (obj: State) => (old(obj) ? cache : (cache = fun(...fns.map((f) => f(obj)))));
   };

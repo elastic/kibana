@@ -6,6 +6,7 @@
  */
 
 import { ElementPosition } from './elements';
+import { ExpressionAstExpression } from './';
 
 export interface CanvasAsset {
   '@created': string;
@@ -81,3 +82,26 @@ export interface CanvasWorkpadBoundingBox {
 export type LayoutState = any;
 
 export type CommitFn = (type: string, payload: any) => LayoutState;
+
+export interface PageTransition {
+  name: string;
+  direction: string;
+}
+
+export interface CanvasNodePosition extends ElementPosition {
+  type: string;
+}
+
+interface CanvasElementNode extends CanvasElement {
+  position: CanvasNodePosition;
+}
+
+interface CanvasGroupNode extends CanvasGroup {
+  position: CanvasNodePosition;
+  expression: string;
+}
+
+export type WithAst<T extends {}> = T & { ast: ExpressionAstExpression };
+
+export type CanvasNode = CanvasElementNode | CanvasGroupNode;
+export type CanvasNodeWithAst = WithAst<CanvasNode>;
