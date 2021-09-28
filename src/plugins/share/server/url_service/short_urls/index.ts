@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './url_service';
-export * from './locators';
-export * from './short_urls';
+export * from './types';
+export * from './short_url_client';
+export * from './short_url_client_factory';
