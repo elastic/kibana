@@ -132,7 +132,6 @@ describe('EQL search strategy', () => {
         expect(request).toEqual(
           expect.objectContaining({
             ignore_unavailable: true,
-            ignore_throttled: true,
           })
         );
       });
