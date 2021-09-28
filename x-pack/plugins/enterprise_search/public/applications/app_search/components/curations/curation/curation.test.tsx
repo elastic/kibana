@@ -25,6 +25,8 @@ import { AppSearchPageTemplate } from '../../layout';
 
 import { CurationLogic } from './curation_logic';
 
+import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
+import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 import { AddResultFlyout } from './results';
 
 import { Curation } from './';
@@ -57,6 +59,9 @@ describe('Curation', () => {
     const wrapper = shallow(<Curation />);
 
     expect(wrapper.is(AppSearchPageTemplate));
+    expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
+    expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
+    expect(wrapper.find(HiddenDocuments)).toHaveLength(1);
   });
 
   it('renders the add result flyout when open', () => {
@@ -132,6 +137,13 @@ describe('Curation', () => {
         expect(actions.resetCuration).not.toHaveBeenCalled();
       });
     });
+
+    it('includes UX to manage queries and to select an active one', () => {
+      const wrapper = shallow(<Curation />);
+
+      expect(wrapper.find(ActiveQuerySelect)).toHaveLength(1);
+      expect(wrapper.find(ManageQueriesModal)).toHaveLength(1);
+    });
   });
 
   describe('automated curations', () => {
@@ -184,6 +196,13 @@ describe('Curation', () => {
         convertToManualButton.simulate('click');
         expect(actions.convertToManual).not.toHaveBeenCalled();
       });
+    });
+
+    it('hides the UX to manage queries and to select an active one', () => {
+      const wrapper = shallow(<Curation />);
+
+      expect(wrapper.find(ActiveQuerySelect)).toHaveLength(0);
+      expect(wrapper.find(ManageQueriesModal)).toHaveLength(0);
     });
   });
 });

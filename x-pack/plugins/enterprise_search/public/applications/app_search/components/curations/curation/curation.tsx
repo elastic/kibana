@@ -85,16 +85,19 @@ export const Curation: React.FC = () => {
       }}
       isLoading={dataLoading}
     >
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="xl" responsive={false}>
-        <EuiFlexItem>
-          <ActiveQuerySelect />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ManageQueriesModal />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="xl" />
+      {!isAutomated && (
+        <>
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="xl" responsive={false}>
+            <EuiFlexItem>
+              <ActiveQuerySelect />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ManageQueriesModal />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xl" />
+        </>
+      )}
 
       <PromotedDocuments />
       <EuiSpacer />
