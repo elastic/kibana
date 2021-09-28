@@ -235,9 +235,9 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         name: (
-          <div className={'columnHeaderTitle'}>
+          <div className={'columnHeader__title'}>
             {dimensions.showIcon ? (
-              <EuiIcon type={'visBarVertical'} className={'columnHeaderIcon'} />
+              <EuiIcon type={'visBarVertical'} className={'columnHeader__icon'} />
             ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
@@ -322,7 +322,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       {(resizeRef) => (
         <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
           <EuiInMemoryTable<T>
-            className={'dataVisualizerTable'}
+            className={'dvTable'}
             items={items}
             itemId={FIELD_NAME}
             columns={columns}

@@ -57,7 +57,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   return (
     <ExpandedRowPanel
       dataTestSubj={'dataVisualizerFieldDataTopValues'}
-      className={classNames('dataVisualizerPanelWrapper', compressed ? 'compressed' : undefined)}
+      className={classNames('dvPanel__wrapper', compressed ? 'dvPanel--compressed' : undefined)}
     >
       <ExpandedRowFieldHeader>
         <FormattedMessage
@@ -68,7 +68,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
 
       <div
         data-test-subj="dataVisualizerFieldDataTopValuesContent"
-        className={classNames('fieldDataTopValuesContainer', 'dataVisualizerTopValuesWrapper')}
+        className={classNames('fieldDataTopValuesContainer', 'dvTopValues__wrapper')}
       >
         {Array.isArray(topValues) &&
           topValues.map((value) => (

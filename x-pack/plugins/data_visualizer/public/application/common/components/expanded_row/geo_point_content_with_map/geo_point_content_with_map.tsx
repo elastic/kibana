@@ -65,10 +65,7 @@ export const GeoPointContentWithMap: FC<{
     <ExpandedRowContent dataTestSubj={'dataVisualizerIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
       <ExamplesList examples={stats.examples} />
-      <ExpandedRowPanel
-        className={'dataVisualizerPanelWrapper dataVisualizerMapWrapper'}
-        grow={true}
-      >
+      <ExpandedRowPanel className={'dvPanel__wrapper dvMap__wrapper'} grow={true}>
         <EmbeddedMapComponent layerList={layerList} />
       </ExpandedRowPanel>
     </ExpandedRowContent>

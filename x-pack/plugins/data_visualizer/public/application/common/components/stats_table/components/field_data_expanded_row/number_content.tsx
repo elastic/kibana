@@ -109,13 +109,10 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerNumberContent'}>
       <DocumentStatsTable config={config} />
-      <ExpandedRowPanel
-        className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}
-        grow={1}
-      >
+      <ExpandedRowPanel className={'dvSummaryTable__wrapper dvPanel__wrapper'} grow={1}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
-          className={'dataVisualizerSummaryTable'}
+          className={'dvSummaryTable'}
           compressed
           items={summaryTableItems}
           columns={summaryTableColumns}
@@ -136,7 +133,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
       {distribution && (
         <ExpandedRowPanel
           dataTestSubj={'dataVisualizerFieldDataMetricDistribution'}
-          className="dataVisualizerPanelWrapper"
+          className="dvPanel__wrapper"
           grow={false}
         >
           <EuiFlexItem grow={false}>

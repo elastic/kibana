@@ -81,11 +81,11 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowPanel
       dataTestSubj={'dataVisualizerDocumentStatsContent'}
-      className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}
+      className={'dvSummaryTable__wrapper dvPanel__wrapper'}
     >
       <ExpandedRowFieldHeader>{metaTableTitle}</ExpandedRowFieldHeader>
       <EuiBasicTable
-        className={'dataVisualizerSummaryTable'}
+        className={'dvSummaryTable'}
         compressed
         items={metaTableItems}
         columns={metaTableColumns}

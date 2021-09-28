@@ -81,10 +81,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   }
 
   return (
-    <div
-      className="dataVisualizerFieldExpandedRow"
-      data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}
-    >
+    <div className="dvExpandedRow" data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>
       {loading === true ? <LoadingIndicator /> : getCardContent()}
     </div>
   );

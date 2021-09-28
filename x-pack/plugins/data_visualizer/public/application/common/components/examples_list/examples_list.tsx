@@ -43,7 +43,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   return (
     <ExpandedRowPanel
       dataTestSubj="dataVisualizerFieldDataExamplesList"
-      className="dataVisualizerTextContent dataVisualizerPanelWrapper"
+      className="dvText__wrapper dvPanel__wrapper"
     >
       <ExpandedRowFieldHeader>
         <FormattedMessage

@@ -26,7 +26,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
 
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerTextContent'}>
-      <EuiFlexItem grow={false} className="dataVisualizerTextContent">
+      <EuiFlexItem grow={false} className="dvText__wrapper">
         {numExamples > 0 && <ExamplesList examples={examples} />}
         {numExamples === 0 && (
           <Fragment>

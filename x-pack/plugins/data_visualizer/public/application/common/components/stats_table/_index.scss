@@ -5,7 +5,7 @@
 $panelWidthS:     #{'max(20%, 225px)'};
 $panelWidthL:     #{'max(40%, 450px)'};
 
-.dataVisualizerFieldExpandedRow {
+.dvExpandedRow {
   padding-left: $euiSize * 4;
   width: 100%;
 
@@ -19,14 +19,13 @@ $panelWidthL:     #{'max(40%, 450px)'};
 }
 
 @include euiBreakpoint('m', 'l', 'xl') {
-  .dataVisualizerTable {
-
-    .columnHeaderTitle {
+  .dvTable {
+    .columnHeader__title {
       display: flex;
       align-items: center;
     }
 
-    .columnHeaderIcon {
+    .columnHeader__icon {
       padding-right: $euiSizeXS;
     }
 
@@ -52,7 +51,7 @@ $panelWidthL:     #{'max(40%, 450px)'};
       }
     }
 
-    .dataVisualizerSummaryTable {
+    .dvSummaryTable {
       .euiTableRow > .euiTableRowCell {
         border-bottom: 0;
       }
@@ -61,32 +60,31 @@ $panelWidthL:     #{'max(40%, 450px)'};
       }
     }
 
-    .dataVisualizerSummaryTableWrapper {
+    .dvSummaryTable__wrapper {
       min-width: $panelWidthS;
       max-width: $panelWidthS;
     }
 
-    .dataVisualizerTopValuesWrapper {
+    .dvTopValues__wrapper {
       min-width: fit-content;
     }
 
-    .dataVisualizerUniformPanel {
-      min-width: $panelWidthS;
-      max-width: $panelWidthS;
-    }
-
-    .dataVisualizerPanelWrapper {
+    .dvPanel__wrapper {
       margin: $euiSizeXS $euiSizeM $euiSizeM 0;
-      &.compressed {
+      &.dvPanel--compressed {
         width: $panelWidthS;
+      }
+      &.dvPanel--uniform {
+        min-width: $panelWidthS;
+        max-width: $panelWidthS;
       }
     }
 
-    .dataVisualizerMapWrapper {
+    .dvMap__wrapper {
       height: $euiSize * 15; //240px
     }
 
-    .dataVisualizerTextContent {
+    .dvText__wrapper {
       min-width: $panelWidthS;
     }
   }
