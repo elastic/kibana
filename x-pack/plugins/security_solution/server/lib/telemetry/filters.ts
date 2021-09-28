@@ -136,6 +136,7 @@ export const exceptionListEventFields: AllowlistFields = {
   name: true,
   os: true,
   os_types: true,
+  version: true,
 };
 
 /**
@@ -143,7 +144,7 @@ export const exceptionListEventFields: AllowlistFields = {
  *
  * @param allowlist
  * @param event
- * @returns
+ * @returns TelemetryEvent with explicitly required fields
  */
 export function copyAllowlistedFields(
   allowlist: AllowlistFields,

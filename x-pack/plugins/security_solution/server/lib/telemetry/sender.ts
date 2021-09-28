@@ -18,7 +18,7 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryReceiver } from './receiver';
 import { allowlistEventFields, copyAllowlistedFields } from './filters';
-import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
+import { DiagnosticTask, EndpointTask, ExceptionListsTask, DetectionRulesTask } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
@@ -42,6 +42,7 @@ export class TelemetryEventsSender {
   private diagnosticTask?: DiagnosticTask;
   private endpointTask?: EndpointTask;
   private exceptionListsTask?: ExceptionListsTask;
+  private detectionRulesTask?: DetectionRulesTask;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -59,6 +60,12 @@ export class TelemetryEventsSender {
     if (taskManager) {
       this.diagnosticTask = new DiagnosticTask(this.logger, taskManager, this, telemetryReceiver);
       this.endpointTask = new EndpointTask(this.logger, taskManager, this, telemetryReceiver);
+      this.detectionRulesTask = new DetectionRulesTask(
+        this.logger,
+        taskManager,
+        this,
+        telemetryReceiver
+      );
       this.exceptionListsTask = new ExceptionListsTask(
         this.logger,
         taskManager,
@@ -80,6 +87,7 @@ export class TelemetryEventsSender {
       this.logger.debug(`starting security telemetry tasks`);
       this.diagnosticTask.start(taskManager);
       this.endpointTask.start(taskManager);
+      this.detectionRulesTask?.start(taskManager);
       this.exceptionListsTask?.start(taskManager);
     }
 

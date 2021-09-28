@@ -14,7 +14,7 @@ import {
 } from '../../../../../task_manager/server';
 import {
   batchTelemetryRecords,
-  getPreviousEpMetaTaskTimestamp,
+  getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
 } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
@@ -76,7 +76,7 @@ export class TelemetryEndpointTask {
           return {
             run: async () => {
               const taskExecutionTime = moment().utc().toISOString();
-              const lastExecutionTimestamp = getPreviousEpMetaTaskTimestamp(
+              const lastExecutionTimestamp = getPreviousDailyTaskTimestamp(
                 taskExecutionTime,
                 taskInstance.state?.lastExecutionTimestamp
               );

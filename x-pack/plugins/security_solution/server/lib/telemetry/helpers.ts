@@ -11,6 +11,7 @@ import { PackagePolicy } from '../../../../fleet/common/types/models/package_pol
 import { copyAllowlistedFields, exceptionListEventFields } from './filters';
 import { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
 import {
+  LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
@@ -46,7 +47,7 @@ export const getPreviousDiagTaskTimestamp = (
  * @param lastExecutionTimestamp
  * @returns the timestamp to search from
  */
-export const getPreviousEpMetaTaskTimestamp = (
+export const getPreviousDailyTaskTimestamp = (
   executeTo: string,
   lastExecutionTimestamp?: string
 ) => {
@@ -132,6 +133,31 @@ export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionLi
 };
 
 /**
+ * Maps detection rule exception list items to shared telemetry object
+ *
+ * @param exceptionListItem
+ * @param ruleId
+ * @param ruleVersion
+ * @returns collection of endpoint exceptions
+ */
+export const ruleExceptionListItemToTelemetryEvent = (
+  exceptionListItem: ExceptionListItemSchema,
+  ruleId: string,
+  ruleVersion: number
+) => {
+  return {
+    id: exceptionListItem.item_id,
+    name: ruleId,
+    version: ruleVersion.toString(),
+    description: exceptionListItem.description,
+    created_at: exceptionListItem.created_at,
+    updated_at: exceptionListItem.updated_at,
+    entries: exceptionListItem.entries,
+    os_types: exceptionListItem.os_types,
+  } as ExceptionListItem;
+};
+
+/**
  * Consructs the list telemetry schema from a collection of endpoint exceptions
  *
  * @param listData
@@ -141,6 +167,8 @@ export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionLi
 export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
   return listData.map((item) => {
     const template: ListTemplate = {
+      '@timestamp': new Date().getTime(),
+      detection_rule: [],
       trusted_application: [],
       endpoint_exception: [],
       endpoint_event_filter: [],
@@ -151,6 +179,11 @@ export const templateExceptionList = (listData: ExceptionListItem[], listType: s
       exceptionListEventFields,
       item as unknown as TelemetryEvent
     );
+
+    if (listType === LIST_DETECTION_RULE_EXCEPTION) {
+      template.detection_rule.push(filteredListItem);
+      return template;
+    }
 
     if (listType === LIST_TRUSTED_APPLICATION) {
       template.trusted_application.push(filteredListItem);

@@ -228,7 +228,36 @@ export interface ExceptionListItem {
 }
 
 export interface ListTemplate {
-  trusted_application: TelemetryEvent[];
+  '@timestamp': number;
+  detection_rule: TelemetryEvent[];
   endpoint_exception: TelemetryEvent[];
   endpoint_event_filter: TelemetryEvent[];
+  trusted_application: TelemetryEvent[];
+}
+
+// Detection Rule types
+
+interface ExceptionListEntry {
+  id: string;
+  list_id: string;
+  type: string;
+  namespace_type: string;
+}
+
+interface DetectionRuleParms {
+  ruleId: string;
+  version: number;
+  type: string;
+  exceptionsList: ExceptionListEntry[];
+}
+
+export interface RuleSearchResult {
+  alert: {
+    name: string;
+    enabled: boolean;
+    tags: string[];
+    createdAt: string;
+    updatedAt: string;
+    params: DetectionRuleParms;
+  };
 }
