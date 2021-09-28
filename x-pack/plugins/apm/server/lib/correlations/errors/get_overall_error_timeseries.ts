@@ -14,9 +14,9 @@ import {
 import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
 
 export async function getOverallErrorTimeseries(options: CorrelationsOptions) {
-  const { setup } = options;
+  const { setup, start, end } = options;
   const filters = getCorrelationsFilters(options);
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end, numBuckets: 15 });
 
   const params = {
