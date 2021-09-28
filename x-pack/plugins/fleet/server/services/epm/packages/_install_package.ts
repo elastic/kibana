@@ -7,7 +7,11 @@
 
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
-import { MAX_TIME_COMPLETE_INSTALL, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import {
+  MAX_TIME_COMPLETE_INSTALL,
+  ASSETS_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../common';
 import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
@@ -210,7 +214,7 @@ export async function _installPackage({
       const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
         page: 1,
         perPage: 10000,
-        kuery: `ingest-package-policies.package.name:${pkgName}`,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
       });
 
       await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);

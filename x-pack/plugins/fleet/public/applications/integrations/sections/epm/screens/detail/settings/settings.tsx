@@ -19,8 +19,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiSwitch,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -42,6 +40,8 @@ import {
 } from '../../../../../constants';
 
 import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
+
+import { KeepPoliciesUpToDateSwitch } from '../components';
 
 import { InstallButton } from './install_button';
 import { UpdateButton } from './update_button';
@@ -131,16 +131,22 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
 
         notifications.toasts.addSuccess({
           title: toMountPoint(
+            <FormattedMessage
+              id="xpack.fleet.integrations.integrationSaved"
+              defaultMessage="Integration settings saved"
+            />
+          ),
+          text: toMountPoint(
             !keepPoliciesUpToDateSwitchValue ? (
               <FormattedMessage
                 id="xpack.fleet.integrations.keepPoliciesUpToDateEnabledSuccess"
-                defaultMessage="Fleet will automatically keep policies up to date for {title}"
+                defaultMessage="Fleet will automatically keep integration policies up to date for {title}"
                 values={{ title }}
               />
             ) : (
               <FormattedMessage
                 id="xpack.fleet.integrations.keepPoliciesUpToDateDisabledSuccess"
-                defaultMessage="Fleet will not automatically keep policies up to date for {title}"
+                defaultMessage="Fleet will not automatically keep integration policies up to date for {title}"
                 values={{ title }}
               />
             )
@@ -148,7 +154,10 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
         });
       } catch (error) {
         notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateError', {
+          title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
+            defaultMessage: 'Error saving integration settings',
+          }),
+          toastMessage: i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateError', {
             defaultMessage: 'Error saving integration settings for {title}',
             values: { title },
           }),
@@ -271,28 +280,10 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
               </table>
               {shouldShowKeepPoliciesUpToDateSwitch && (
                 <>
-                  <EuiSwitch
-                    label={i18n.translate(
-                      'xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateLabel',
-                      { defaultMessage: 'Keep integration policies up to date automatically' }
-                    )}
+                  <KeepPoliciesUpToDateSwitch
                     checked={keepPoliciesUpToDateSwitchValue}
                     onChange={handleKeepPoliciesUpToDateSwitchChange}
                   />
-                  <EuiSpacer size="s" />
-                  <EuiText color="subdued" size="xs">
-                    <EuiFlexGroup alignItems="center" gutterSize="none">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="iInCircle" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateDescription"
-                          defaultMessage="When enabled, Fleet will attempt to upgrade and deploy integration policies automatically"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiText>
                   <EuiSpacer size="l" />
                 </>
               )}
