@@ -15,7 +15,7 @@ import { AggregationOptionsByType } from '../../../../../../../src/core/types/el
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import {
   getTimeseriesAggregation,
@@ -27,7 +27,7 @@ interface Options extends CorrelationsOptions {
   fieldNames: string[];
 }
 export async function getCorrelationsForFailedTransactions(options: Options) {
-  const { fieldNames, setup } = options;
+  const { fieldNames, setup, start, end } = options;
   const { apmEventClient } = setup;
   const filters = getCorrelationsFilters(options);
 
@@ -82,19 +82,23 @@ export async function getCorrelationsForFailedTransactions(options: Options) {
   );
 
   const topSigTerms = processSignificantTermAggs({ sigTermAggs });
-  return getErrorRateTimeSeries({ setup, filters, topSigTerms });
+  return getErrorRateTimeSeries({ setup, filters, topSigTerms, start, end });
 }
 
 export async function getErrorRateTimeSeries({
   setup,
   filters,
   topSigTerms,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   filters: ESFilter[];
   topSigTerms: TopSigTerm[];
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end, numBuckets: 15 });
 
   if (isEmpty(topSigTerms)) {
