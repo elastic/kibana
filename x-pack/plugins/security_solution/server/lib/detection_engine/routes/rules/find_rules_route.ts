@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,
@@ -16,14 +15,14 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
 import { buildSiemResponse } from '../utils';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
-import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: RuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
   router.get(
     {
@@ -53,8 +52,9 @@ export const findRulesRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        const execLogClient = context.securitySolution.getExecutionLogClient();
         const rules = await findRules({
+          isRuleRegistryEnabled,
           rulesClient,
           perPage: query.per_page,
           page: query.page,
@@ -64,11 +64,16 @@ export const findRulesRoute = (
           fields: query.fields,
         });
         const alertIds = rules.data.map((rule) => rule.id);
+
         const [ruleStatuses, ruleActions] = await Promise.all([
-          ruleStatusClient.findBulk(alertIds, 1),
-          getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
+          execLogClient.findBulk({
+            ruleIds: alertIds,
+            logsCount: 1,
+            spaceId: context.securitySolution.getSpaceId(),
+          }),
+          legacyGetBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
-        const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
+        const transformed = transformFindAlerts(rules, ruleStatuses, ruleActions);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

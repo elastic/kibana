@@ -379,6 +379,7 @@ test('returns `preboot` http server contract on preboot', async () => {
     auth: Symbol('auth'),
     basePath: Symbol('basePath'),
     csp: Symbol('csp'),
+    getServerInfo: jest.fn(),
   };
 
   mockHttpServer.mockImplementation(() => ({
@@ -397,6 +398,7 @@ test('returns `preboot` http server contract on preboot', async () => {
     registerRouteHandlerContext: expect.any(Function),
     registerRoutes: expect.any(Function),
     registerStaticDir: expect.any(Function),
+    getServerInfo: expect.any(Function),
   });
 });
 

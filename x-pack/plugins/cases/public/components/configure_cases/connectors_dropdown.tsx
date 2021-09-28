@@ -13,6 +13,7 @@ import { ConnectorTypes } from '../../../common';
 import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
+import { getConnectorIcon } from '../utils';
 
 export interface Props {
   connectors: ActionConnector[];
@@ -81,10 +82,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
               <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIconExtended
-                    type={
-                      triggersActionsUi.actionTypeRegistry.get(connector.actionTypeId)?.iconClass ??
-                      ''
-                    }
+                    type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}
                     size={ICON_SIZE}
                   />
                 </EuiFlexItem>

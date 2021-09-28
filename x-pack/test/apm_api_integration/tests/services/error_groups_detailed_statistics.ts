@@ -12,14 +12,15 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
+import { createApmApiClient } from '../../common/apm_api_supertest';
 import { getErrorGroupIds } from './get_error_group_ids';
 
-type ErrorGroupsDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+type ErrorGroupsDetailedStatistics =
+  APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const apmApiSupertest = createApmApiSupertest(supertest);
+  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiSupertest = createApmApiClient(supertest);
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -41,6 +42,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               numBuckets: 20,
               transactionType: 'request',
               groupIds: JSON.stringify(groupIds),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -67,6 +70,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               numBuckets: 20,
               transactionType: 'request',
               groupIds: JSON.stringify(groupIds),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -100,6 +105,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               numBuckets: 20,
               transactionType: 'request',
               groupIds: JSON.stringify(['foo']),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -135,6 +142,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -179,6 +188,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               comparisonStart: start,
               comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );

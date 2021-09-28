@@ -14,10 +14,7 @@
       "tags": [],
       "label": "RemoteClustersPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
-        "lineNumber": 20
-      },
+      "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -27,10 +24,7 @@
           "tags": [],
           "label": "isUiEnabled",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
-            "lineNumber": 21
-          },
+          "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
           "deprecated": false
         }
       ],
@@ -52,10 +46,7 @@
       "tags": [],
       "label": "RemoteClustersPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
-        "lineNumber": 24
-      },
+      "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -65,10 +56,7 @@
           "tags": [],
           "label": "isUiEnabled",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
-            "lineNumber": 25
-          },
+          "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
           "deprecated": false
         }
       ],

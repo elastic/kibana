@@ -6,16 +6,18 @@
  */
 
 import { useSeriesStorage } from './use_series_storage';
-import { SeriesUrl, UrlFilter } from '../types';
+import { UrlFilter } from '../types';
 
 export interface UpdateFilter {
   field: string;
-  value: string | string[];
+  value: string;
   negate?: boolean;
 }
 
-export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; series: SeriesUrl }) => {
-  const { setSeries } = useSeriesStorage();
+export const useSeriesFilters = ({ seriesId }: { seriesId: string }) => {
+  const { getSeries, setSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const filters = series.filters ?? [];
 
@@ -24,14 +26,10 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
       .map((filter) => {
         if (filter.field === field) {
           if (negate) {
-            const notValuesN = filter.notValues?.filter((val) =>
-              value instanceof Array ? !value.includes(val) : val !== value
-            );
+            const notValuesN = filter.notValues?.filter((val) => val !== value);
             return { ...filter, notValues: notValuesN };
           } else {
-            const valuesN = filter.values?.filter((val) =>
-              value instanceof Array ? !value.includes(val) : val !== value
-            );
+            const valuesN = filter.values?.filter((val) => val !== value);
             return { ...filter, values: valuesN };
           }
         }
@@ -45,9 +43,9 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
   const addFilter = ({ field, value, negate }: UpdateFilter) => {
     const currFilter: UrlFilter = { field };
     if (negate) {
-      currFilter.notValues = value instanceof Array ? value : [value];
+      currFilter.notValues = [value];
     } else {
-      currFilter.values = value instanceof Array ? value : [value];
+      currFilter.values = [value];
     }
     if (filters.length === 0) {
       setSeries(seriesId, { ...series, filters: [currFilter] });
@@ -67,26 +65,13 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
     const currNotValues = currFilter.notValues ?? [];
     const currValues = currFilter.values ?? [];
 
-    const notValues = currNotValues.filter((val) =>
-      value instanceof Array ? !value.includes(val) : val !== value
-    );
-
-    const values = currValues.filter((val) =>
-      value instanceof Array ? !value.includes(val) : val !== value
-    );
+    const notValues = currNotValues.filter((val) => val !== value);
+    const values = currValues.filter((val) => val !== value);
 
     if (negate) {
-      if (value instanceof Array) {
-        notValues.push(...value);
-      } else {
-        notValues.push(value);
-      }
+      notValues.push(value);
     } else {
-      if (value instanceof Array) {
-        values.push(...value);
-      } else {
-        values.push(value);
-      }
+      values.push(value);
     }
 
     currFilter.notValues = notValues.length > 0 ? notValues : undefined;

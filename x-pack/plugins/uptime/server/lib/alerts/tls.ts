@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
+import { ALERT_REASON, ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState, generateAlertMessage } from './common';
 import { TLS } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
-import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { TlsTranslations } from '../../../common/translations';
 
 import { ActionGroupIdsOf } from '../../../../alerting/common';
@@ -22,8 +21,6 @@ import { savedObjectsAdapter } from '../saved_objects';
 import { createUptimeESClient } from '../lib';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
-
-export const DEFAULT_SIZE = 20;
 
 interface TlsAlertState {
   commonName: string;
@@ -130,10 +127,8 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
 
     const { certs, total }: CertResult = await libs.requests.getCerts({
       uptimeEsClient,
-      from: DEFAULT_FROM,
-      to: DEFAULT_TO,
-      index: 0,
-      size: DEFAULT_SIZE,
+      pageIndex: 0,
+      size: 1000,
       notValidAfter: `now+${
         dynamicSettings?.certExpirationThreshold ??
         DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
@@ -172,7 +167,8 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
             'tls.server.x509.not_after': cert.not_after,
             'tls.server.x509.not_before': cert.not_before,
             'tls.server.hash.sha256': cert.sha256,
-            reason: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
+            [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING,
+            [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
           },
         });
         alertInstance.replaceState({

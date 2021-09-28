@@ -5,171 +5,72 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import deepEqual from 'react-fast-compare';
+import { useDispatch, useSelector } from 'react-redux';
+// @ts-expect-error unconverted component
+import { elementLayer } from '../../state/actions/elements';
+import { getSelectedPage, getNodes, getSelectedToplevelNodes } from '../../state/selectors/workpad';
+// @ts-expect-error unconverted lib
+import { flatten } from '../../lib/aeroelastic/functional';
+import { layerHandlerCreators } from '../../lib/element_handler_creators';
+// @ts-expect-error unconverted component
+import { crawlTree } from '../workpad_page/integration_utils';
+import { State } from '../../../types';
+import { SidebarHeader as Component } from './sidebar_header.component';
 
-import { ToolTipShortcut } from '../tool_tip_shortcut/';
-import { ShortcutStrings } from '../../../i18n/shortcuts';
-
-const strings = {
-  getBringForwardAriaLabel: () =>
-    i18n.translate('xpack.canvas.sidebarHeader.bringForwardArialLabel', {
-      defaultMessage: 'Move element up one layer',
-    }),
-  getBringToFrontAriaLabel: () =>
-    i18n.translate('xpack.canvas.sidebarHeader.bringToFrontArialLabel', {
-      defaultMessage: 'Move element to top layer',
-    }),
-  getSendBackwardAriaLabel: () =>
-    i18n.translate('xpack.canvas.sidebarHeader.sendBackwardArialLabel', {
-      defaultMessage: 'Move element down one layer',
-    }),
-  getSendToBackAriaLabel: () =>
-    i18n.translate('xpack.canvas.sidebarHeader.sendToBackArialLabel', {
-      defaultMessage: 'Move element to bottom layer',
-    }),
+const getSelectedNodes = (state: State, pageId: string): Array<string | undefined> => {
+  const nodes = getNodes(state, pageId);
+  const selectedToplevelNodes = getSelectedToplevelNodes(state);
+  const selectedPrimaryShapeObjects = selectedToplevelNodes
+    .map((id) => nodes.find((s) => s.id === id))
+    .filter((shape) => shape);
+  const selectedPersistentPrimaryNodes = flatten(
+    selectedPrimaryShapeObjects.map((shape) =>
+      nodes.find((n) => n.id === shape?.id) // is it a leaf or a persisted group?
+        ? [shape?.id]
+        : nodes.filter((s) => s.position?.parent === shape?.id).map((s) => s.id)
+    )
+  );
+  const selectedNodeIds = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
+  return selectedNodeIds.map((id: string) => nodes.find((s) => s.id === id));
 };
 
-const shortcutHelp = ShortcutStrings.getShortcutHelp();
+const createHandlers = function <T>(
+  handlers: Record<keyof T, (...args: any[]) => any>,
+  context: Record<string, unknown>
+) {
+  return Object.keys(handlers).reduce<Record<keyof T, (...args: any[]) => any>>((acc, val) => {
+    acc[val as keyof T] = handlers[val as keyof T](context);
+    return acc;
+  }, {} as Record<keyof T, (...args: any[]) => any>);
+};
 
 interface Props {
-  /**
-   * title to display in the header
-   */
   title: string;
-  /**
-   * indicated whether or not layer controls should be displayed
-   */
-  showLayerControls?: boolean;
-  /**
-   * moves selected element to top layer
-   */
-  bringToFront: () => void;
-  /**
-   * moves selected element up one layer
-   */
-  bringForward: () => void;
-  /**
-   * moves selected element down one layer
-   */
-  sendBackward: () => void;
-  /**
-   * moves selected element to bottom layer
-   */
-  sendToBack: () => void;
 }
 
-export const SidebarHeader: FunctionComponent<Props> = ({
-  title,
-  showLayerControls,
-  bringToFront,
-  bringForward,
-  sendBackward,
-  sendToBack,
-}) => (
-  <EuiFlexGroup
-    className="canvasLayout__sidebarHeader"
-    gutterSize="none"
-    alignItems="center"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem grow={false}>
-      <EuiTitle size="xs">
-        <h3>{title}</h3>
-      </EuiTitle>
-    </EuiFlexItem>
-    {showLayerControls ? (
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="bottom"
-              content={
-                <span>
-                  {shortcutHelp.BRING_TO_FRONT}
-                  <ToolTipShortcut namespace="ELEMENT" action="BRING_TO_FRONT" />
-                </span>
-              }
-            >
-              <EuiButtonIcon
-                color="text"
-                iconType="sortUp"
-                onClick={bringToFront}
-                aria-label={strings.getBringToFrontAriaLabel()}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="bottom"
-              content={
-                <span>
-                  {shortcutHelp.BRING_FORWARD}
-                  <ToolTipShortcut namespace="ELEMENT" action="BRING_FORWARD" />
-                </span>
-              }
-            >
-              <EuiButtonIcon
-                color="text"
-                iconType="arrowUp"
-                onClick={bringForward}
-                aria-label={strings.getBringForwardAriaLabel()}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="bottom"
-              content={
-                <span>
-                  {shortcutHelp.SEND_BACKWARD}
-                  <ToolTipShortcut namespace="ELEMENT" action="SEND_BACKWARD" />
-                </span>
-              }
-            >
-              <EuiButtonIcon
-                color="text"
-                iconType="arrowDown"
-                onClick={sendBackward}
-                aria-label={strings.getSendBackwardAriaLabel()}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="bottom"
-              content={
-                <span>
-                  {shortcutHelp.SEND_TO_BACK}
-                  <ToolTipShortcut namespace="ELEMENT" action="SEND_TO_BACK" />
-                </span>
-              }
-            >
-              <EuiButtonIcon
-                color="text"
-                iconType="sortDown"
-                onClick={sendToBack}
-                aria-label={strings.getSendToBackAriaLabel()}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    ) : null}
-  </EuiFlexGroup>
-);
+export const SidebarHeader: React.FC<Props> = (props) => {
+  const pageId = useSelector<State, string>((state) => getSelectedPage(state));
+  const selectedNodes = useSelector<State, Array<string | undefined>>(
+    (state) => getSelectedNodes(state, pageId),
+    deepEqual
+  );
 
-SidebarHeader.propTypes = {
-  title: PropTypes.string.isRequired,
-  showLayerControls: PropTypes.bool, // TODO: remove when we support relayering multiple elements
-  bringToFront: PropTypes.func.isRequired,
-  bringForward: PropTypes.func.isRequired,
-  sendBackward: PropTypes.func.isRequired,
-  sendToBack: PropTypes.func.isRequired,
-};
+  const dispatch = useDispatch();
 
-SidebarHeader.defaultProps = {
-  showLayerControls: false,
+  const elementLayerDispatch = (selectedPageId: string, elementId: string, movement: number) => {
+    dispatch(elementLayer({ pageId: selectedPageId, elementId, movement }));
+  };
+
+  const handlersContext = {
+    ...props,
+    pageId,
+    selectedNodes,
+    elementLayer: elementLayerDispatch,
+  };
+
+  const layerHandlers = createHandlers(layerHandlerCreators, handlersContext);
+
+  return <Component {...props} {...layerHandlers} />;
 };

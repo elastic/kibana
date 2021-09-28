@@ -7,7 +7,7 @@
 
 import { jsonRt } from '@kbn/io-ts-utils';
 import { createServerRouteRepository } from '@kbn/server-route-repository';
-import { ServerRoute } from '@kbn/server-route-repository/target/typings';
+import { ServerRoute } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { CoreSetup, Logger } from 'src/core/server';
 import { APMConfig } from '../..';
@@ -26,15 +26,15 @@ const getRegisterRouteDependencies = () => {
     put,
   });
 
-  const coreSetup = ({
+  const coreSetup = {
     http: {
       createRouter,
     },
-  } as unknown) as CoreSetup;
+  } as unknown as CoreSetup;
 
-  const logger = ({
+  const logger = {
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   return {
     mocks: {
@@ -45,14 +45,14 @@ const getRegisterRouteDependencies = () => {
       coreSetup,
       logger,
     },
-    dependencies: ({
+    dependencies: {
       core: {
         setup: coreSetup,
       },
       logger,
       config: {} as APMConfig,
       plugins: {},
-    } as unknown) as RegisterRouteDependencies,
+    } as unknown as RegisterRouteDependencies,
   };
 };
 

@@ -51,7 +51,8 @@ interface SetupDeps {
 
 /** @internal */
 export class HttpService
-  implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart> {
+  implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart>
+{
   private readonly prebootServer: HttpServer;
   private isPrebootServerStopped = false;
   private readonly httpServer: HttpServer;
@@ -128,6 +129,7 @@ export class HttpService
 
         prebootSetup.registerRouterAfterListening(router);
       },
+      getServerInfo: prebootSetup.getServerInfo,
     };
 
     return this.internalPreboot;

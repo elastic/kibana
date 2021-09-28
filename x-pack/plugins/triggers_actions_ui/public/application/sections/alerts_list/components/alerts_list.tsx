@@ -50,7 +50,7 @@ import {
   deleteAlerts,
 } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
-import { hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
@@ -60,7 +60,6 @@ import {
   ALERTS_FEATURE_ID,
   AlertExecutionStatusErrorReasons,
 } from '../../../../../../alerting/common';
-import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
@@ -142,6 +141,9 @@ export const AlertsList: React.FunctionComponent = () => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
   };
+
+  const isRuleTypeEditableInContext = (ruleTypeId: string) =>
+    ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
   useEffect(() => {
     loadAlertsData();
@@ -462,11 +464,11 @@ export const AlertsList: React.FunctionComponent = () => {
       name: '',
       width: '10%',
       render(item: AlertTableItem) {
-        return (
+        return item.isEditable && isRuleTypeEditableInContext(item.alertTypeId) ? (
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
             <EuiFlexItem grow={false} className="alertSidebarItem">
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} data-test-subj="alertSidebarEditAction">
                   <EuiButtonIcon
                     color={'primary'}
                     title={i18n.translate(
@@ -474,6 +476,7 @@ export const AlertsList: React.FunctionComponent = () => {
                       { defaultMessage: 'Edit' }
                     )}
                     className="alertSidebarItem__action"
+                    data-test-subj="editActionHoverButton"
                     onClick={() => onRuleEdit(item)}
                     iconType={'pencil'}
                     aria-label={i18n.translate(
@@ -482,7 +485,7 @@ export const AlertsList: React.FunctionComponent = () => {
                     )}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} data-test-subj="alertSidebarDeleteAction">
                   <EuiButtonIcon
                     color={'danger'}
                     title={i18n.translate(
@@ -490,6 +493,7 @@ export const AlertsList: React.FunctionComponent = () => {
                       { defaultMessage: 'Delete' }
                     )}
                     className="alertSidebarItem__action"
+                    data-test-subj="deleteActionHoverButton"
                     onClick={() => setAlertsToDelete([item.id])}
                     iconType={'trash'}
                     aria-label={i18n.translate(
@@ -500,6 +504,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <CollapsedItemActions
                 key={item.id}
@@ -510,7 +515,7 @@ export const AlertsList: React.FunctionComponent = () => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        );
+        ) : null;
       },
     },
   ];

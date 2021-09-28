@@ -11,7 +11,7 @@ import { Dispatch } from 'redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiSpacer, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -42,7 +42,7 @@ import {
 } from '../../../../common/components/exceptions/viewer/exception_item';
 import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
-import { SearchBar } from '../../../components/search_bar';
+import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ABOUT_EVENT_FILTERS } from './translations';
 
@@ -188,12 +188,11 @@ export const EventFiltersListPage = memo(() => {
 
   return (
     <AdministrationListPage
-      beta={false}
       headerBackComponent={backButton}
       title={
         <FormattedMessage
           id="xpack.securitySolution.eventFilters.list.pageTitle"
-          defaultMessage="Event Filters"
+          defaultMessage="Event filters"
         />
       }
       subtitle={ABOUT_EVENT_FILTERS}
@@ -208,7 +207,7 @@ export const EventFiltersListPage = memo(() => {
           >
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.pageAddButton"
-              defaultMessage="Add Event Filter"
+              defaultMessage="Add event filter"
             />
           </EuiButton>
         )
@@ -226,7 +225,7 @@ export const EventFiltersListPage = memo(() => {
 
       {doesDataExist && (
         <>
-          <SearchBar
+          <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
@@ -237,11 +236,11 @@ export const EventFiltersListPage = memo(() => {
           <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.totalCount"
-              defaultMessage="{total, plural, one {# event filter} other {# event filters}}"
+              defaultMessage="Showing {total, plural, one {# event filter} other {# event filters}}"
               values={{ total: totalCountListItems }}
             />
           </EuiText>
-          <EuiHorizontalRule margin="m" />
+          <EuiSpacer size="s" />
         </>
       )}
 

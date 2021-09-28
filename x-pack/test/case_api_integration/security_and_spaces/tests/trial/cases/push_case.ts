@@ -31,6 +31,7 @@ import {
   createConnector,
   getServiceNowConnector,
   getConnectorMappingsFromES,
+  getCase,
 } from '../../../../common/lib/utils';
 import {
   ExternalServiceSimulator,
@@ -100,6 +101,72 @@ export default ({ getService }: FtrProviderContext): void => {
           'api/_actions-FTS-external-service-simulators/servicenow/nav_to.do?uri=incident.do?sys_id=123'
         )
       ).to.equal(true);
+    });
+
+    it('preserves the connector.id after pushing a case', async () => {
+      const { postedCase, connector } = await createCaseWithConnector({
+        supertest,
+        servicenowSimulatorURL,
+        actionsRemover,
+      });
+      const theCase = await pushCase({
+        supertest,
+        caseId: postedCase.id,
+        connectorId: connector.id,
+      });
+
+      expect(theCase.connector.id).to.eql(connector.id);
+    });
+
+    it('preserves the external_service.connector_id after updating the connector', async () => {
+      const { postedCase, connector: pushConnector } = await createCaseWithConnector({
+        supertest,
+        servicenowSimulatorURL,
+        actionsRemover,
+      });
+
+      const theCaseAfterPush = await pushCase({
+        supertest,
+        caseId: postedCase.id,
+        connectorId: pushConnector.id,
+      });
+
+      const newConnector = await createConnector({
+        supertest,
+        req: {
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        },
+      });
+
+      actionsRemover.add('default', newConnector.id, 'action', 'actions');
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: theCaseAfterPush.version,
+              connector: {
+                id: newConnector.id,
+                name: newConnector.name,
+                type: newConnector.connector_type_id,
+                fields: {
+                  urgency: '2',
+                  impact: '2',
+                  severity: '2',
+                  category: 'software',
+                  subcategory: 'os',
+                },
+              } as CaseConnector,
+            },
+          ],
+        },
+      });
+
+      const theCaseAfterUpdate = await getCase({ supertest, caseId: postedCase.id });
+      expect(theCaseAfterUpdate.connector.id).to.eql(newConnector.id);
+      expect(theCaseAfterUpdate.external_service?.connector_id).to.eql(pushConnector.id);
     });
 
     it('should create the mappings when pushing a case', async () => {
@@ -208,6 +275,8 @@ export default ({ getService }: FtrProviderContext): void => {
         action: 'push-to-service',
         action_by: defaultUser,
         old_value: null,
+        old_val_connector_id: null,
+        new_val_connector_id: connector.id,
         case_id: `${postedCase.id}`,
         comment_id: null,
         sub_case_id: '',
@@ -217,7 +286,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(parsedNewValue).to.eql({
         pushed_at: pushedCase.external_service!.pushed_at,
         pushed_by: defaultUser,
-        connector_id: connector.id,
         connector_name: connector.name,
         external_id: '123',
         external_title: 'INC01',

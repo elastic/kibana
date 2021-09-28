@@ -15,51 +15,53 @@ import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../../../src/plu
 import { SavedObjectMigrationContext } from 'kibana/server';
 
 describe('7.12.0 -> 7.13.0', () => {
-  const mockCompletedSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> = {
-    id: 'id',
-    type: SEARCH_SESSION_TYPE,
-    attributes: {
-      name: 'my_name',
-      appId: 'my_app_id',
-      sessionId: 'sessionId',
-      urlGeneratorId: 'my_url_generator_id',
-      initialState: {},
-      restoreState: {},
-      persisted: true,
-      idMapping: {},
-      realmType: 'realmType',
-      realmName: 'realmName',
-      username: 'username',
-      created: '2021-03-26T00:00:00.000Z',
-      expires: '2021-03-30T00:00:00.000Z',
-      touched: '2021-03-29T00:00:00.000Z',
-      status: SearchSessionStatus.COMPLETE,
-    },
-    references: [],
-  };
+  const mockCompletedSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> =
+    {
+      id: 'id',
+      type: SEARCH_SESSION_TYPE,
+      attributes: {
+        name: 'my_name',
+        appId: 'my_app_id',
+        sessionId: 'sessionId',
+        urlGeneratorId: 'my_url_generator_id',
+        initialState: {},
+        restoreState: {},
+        persisted: true,
+        idMapping: {},
+        realmType: 'realmType',
+        realmName: 'realmName',
+        username: 'username',
+        created: '2021-03-26T00:00:00.000Z',
+        expires: '2021-03-30T00:00:00.000Z',
+        touched: '2021-03-29T00:00:00.000Z',
+        status: SearchSessionStatus.COMPLETE,
+      },
+      references: [],
+    };
 
-  const mockInProgressSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> = {
-    id: 'id',
-    type: SEARCH_SESSION_TYPE,
-    attributes: {
-      name: 'my_name',
-      appId: 'my_app_id',
-      sessionId: 'sessionId',
-      urlGeneratorId: 'my_url_generator_id',
-      initialState: {},
-      restoreState: {},
-      persisted: true,
-      idMapping: {},
-      realmType: 'realmType',
-      realmName: 'realmName',
-      username: 'username',
-      created: '2021-03-26T00:00:00.000Z',
-      expires: '2021-03-30T00:00:00.000Z',
-      touched: '2021-03-29T00:00:00.000Z',
-      status: SearchSessionStatus.IN_PROGRESS,
-    },
-    references: [],
-  };
+  const mockInProgressSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> =
+    {
+      id: 'id',
+      type: SEARCH_SESSION_TYPE,
+      attributes: {
+        name: 'my_name',
+        appId: 'my_app_id',
+        sessionId: 'sessionId',
+        urlGeneratorId: 'my_url_generator_id',
+        initialState: {},
+        restoreState: {},
+        persisted: true,
+        idMapping: {},
+        realmType: 'realmType',
+        realmName: 'realmName',
+        username: 'username',
+        created: '2021-03-26T00:00:00.000Z',
+        expires: '2021-03-30T00:00:00.000Z',
+        touched: '2021-03-29T00:00:00.000Z',
+        status: SearchSessionStatus.IN_PROGRESS,
+      },
+      references: [],
+    };
 
   const migration = searchSessionSavedObjectMigrations['7.13.0'];
   test('"completed" is populated from "touched" for completed session', () => {

@@ -18,10 +18,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ComboBoxField, useFormData } from '../../../../../../shared_imports';
+import { ComboBoxField, useFormData, useKibana } from '../../../../../../shared_imports';
 import { useLoadSnapshotPolicies } from '../../../../../services/api';
 
-import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField } from '../../../form';
 
 import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../../';
@@ -29,7 +28,9 @@ import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../../';
 const waitForSnapshotFormField = 'phases.delete.actions.wait_for_snapshot.policy';
 
 export const SnapshotPoliciesField: React.FunctionComponent = () => {
-  const { getUrlForApp } = useEditPolicyContext();
+  const {
+    services: { getUrlForApp },
+  } = useKibana();
   const { error, isLoading, data, resendRequest } = useLoadSnapshotPolicies();
   const [formData] = useFormData({
     watch: waitForSnapshotFormField,

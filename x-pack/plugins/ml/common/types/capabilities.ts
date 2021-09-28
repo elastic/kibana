@@ -40,6 +40,7 @@ export const adminMlCapabilities = {
   canDeleteJob: false,
   canOpenJob: false,
   canCloseJob: false,
+  canResetJob: false,
   canUpdateJob: false,
   canForecastJob: false,
   canCreateDatafeed: false,

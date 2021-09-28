@@ -9,7 +9,7 @@
 import { CoreSetup } from 'kibana/public';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { NON_AGGREGATABLE_FIELD_TYPES, OMIT_FIELDS } from '../../../../common/constants';
 import { FieldRequestConfig } from '../../../../common/types';
 import { getVisualizerFieldStats, getVisualizerOverallStats } from '../services/visualizer_stats';

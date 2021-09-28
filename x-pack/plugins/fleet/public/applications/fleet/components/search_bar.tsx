@@ -7,8 +7,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 
+import { fromKueryExpression } from '@kbn/es-query';
+
 import type { IFieldType } from '../../../../../../../src/plugins/data/public';
-import { QueryStringInput, esKuery } from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
 import { useStartServices } from '../hooks';
 import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -38,7 +40,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     }
 
     try {
-      esKuery.fromKueryExpression(value);
+      fromKueryExpression(value);
       return true;
     } catch (e) {
       return false;

@@ -22,7 +22,9 @@ const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) =>
       deprecation,
       path: CONFIG_PATH,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -47,6 +49,15 @@ describe('deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "setting \\"xpack.task_manager.max_workers\\" (1000) greater than 100 is deprecated. Values greater than 100 will not be supported starting in 8.0.",
+      ]
+    `);
+  });
+
+  it('logs a deprecation warning for the enabled config', () => {
+    const { messages } = applyTaskManagerDeprecations({ enabled: true });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"xpack.task_manager.enabled\\" is deprecated. The ability to disable this plugin will be removed in 8.0.0.",
       ]
     `);
   });

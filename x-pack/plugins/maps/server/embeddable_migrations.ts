@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { moveAttribution } from '../common/migrations/move_attribution';
 
@@ -17,10 +17,10 @@ import { moveAttribution } from '../common/migrations/move_attribution';
  * This is the embeddable migration registry.
  */
 export const embeddableMigrations = {
-  '7.14.0': (state: SerializableState) => {
+  '7.14.0': (state: SerializableRecord) => {
     return {
       ...state,
       attributes: moveAttribution(state as { attributes: MapSavedObjectAttributes }),
-    } as SerializableState;
+    } as SerializableRecord;
   },
 };

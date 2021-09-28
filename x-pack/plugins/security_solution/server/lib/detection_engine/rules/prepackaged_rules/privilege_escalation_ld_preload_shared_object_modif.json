@@ -41,7 +41,7 @@
           "subtechnique": [
             {
               "id": "T1574.006",
-              "name": "LD_PRELOAD",
+              "name": "Dynamic Linker Hijacking",
               "reference": "https://attack.mitre.org/techniques/T1574/006/"
             }
           ]
@@ -51,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

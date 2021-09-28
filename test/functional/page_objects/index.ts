@@ -24,12 +24,12 @@ import { VisualBuilderPageObject } from './visual_builder_page';
 import { VisualizePageObject } from './visualize_page';
 import { VisualizeEditorPageObject } from './visualize_editor_page';
 import { VisualizeChartPageObject } from './visualize_chart_page';
-import { TileMapPageObject } from './tile_map_page';
 import { TimeToVisualizePageObject } from './time_to_visualize_page';
 import { TagCloudPageObject } from './tag_cloud_page';
 import { VegaChartPageObject } from './vega_chart_page';
 import { SavedObjectsPageObject } from './management/saved_objects_page';
 import { LegacyDataTableVisPageObject } from './legacy/data_table_vis';
+import { IndexPatternFieldEditorPageObject } from './management/indexpattern_field_editor_page';
 
 export const pageObjects = {
   common: CommonPageObject,
@@ -51,9 +51,9 @@ export const pageObjects = {
   visualize: VisualizePageObject,
   visEditor: VisualizeEditorPageObject,
   visChart: VisualizeChartPageObject,
-  tileMap: TileMapPageObject,
   timeToVisualize: TimeToVisualizePageObject,
   tagCloud: TagCloudPageObject,
   vegaChart: VegaChartPageObject,
   savedObjects: SavedObjectsPageObject,
+  indexPatternFieldEditorObjects: IndexPatternFieldEditorPageObject,
 };

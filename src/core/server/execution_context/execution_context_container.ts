@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaServerExecutionContext } from './execution_context_service';
 import type { KibanaExecutionContext } from '../../types';
 
 // Switch to the standard Baggage header. blocked by
@@ -47,27 +46,23 @@ function enforceMaxLength(header: string): string {
  */
 export interface IExecutionContextContainer {
   toString(): string;
-  toJSON(): Readonly<KibanaServerExecutionContext>;
+  toJSON(): Readonly<KibanaExecutionContext>;
+}
+
+function stringify(ctx: KibanaExecutionContext): string {
+  const stringifiedCtx = `${ctx.type}:${ctx.name}:${encodeURIComponent(ctx.id)}`;
+  return ctx.parent ? `${stringify(ctx.parent)};${stringifiedCtx}` : stringifiedCtx;
 }
 
 export class ExecutionContextContainer implements IExecutionContextContainer {
-  readonly #context: Readonly<KibanaServerExecutionContext>;
-  constructor(context: Readonly<KibanaServerExecutionContext>) {
-    this.#context = context;
+  readonly #context: Readonly<KibanaExecutionContext>;
+  constructor(context: KibanaExecutionContext, parent?: IExecutionContextContainer) {
+    this.#context = { parent: parent?.toJSON(), ...context };
   }
   toString(): string {
-    const ctx = this.#context;
-    const contextStringified =
-      ctx.type && ctx.id && ctx.name
-        ? // id may contain non-ASCII symbols
-          `kibana:${encodeURIComponent(ctx.type)}:${encodeURIComponent(
-            ctx.name
-          )}:${encodeURIComponent(ctx.id)}`
-        : '';
-    const result = contextStringified ? `${ctx.requestId};${contextStringified}` : ctx.requestId;
-    return enforceMaxLength(result);
+    return enforceMaxLength(stringify(this.#context));
   }
-  toJSON(): Readonly<KibanaServerExecutionContext> {
+  toJSON() {
     return this.#context;
   }
 }

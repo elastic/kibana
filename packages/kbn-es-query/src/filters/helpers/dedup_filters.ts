@@ -18,6 +18,8 @@ import { compareFilters, FilterCompareOptions } from './compare_filters';
  * @param {object} comparatorOptions - Parameters to use for comparison
  *
  * @returns {object} An array of filters that were not in existing
+ *
+ * @internal
  */
 export const dedupFilters = (
   existingFilters: Filter[],

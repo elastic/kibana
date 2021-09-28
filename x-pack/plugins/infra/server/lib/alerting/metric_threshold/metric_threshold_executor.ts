@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { first, last } from 'lodash';
+import { first, last, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { RecoveredActionGroup } from '../../../../../alerting/common';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import {
+  ActionGroupIdsOf,
+  RecoveredActionGroup,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../../alerting/common';
+import { AlertTypeState, AlertInstance } from '../../../../../alerting/server';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
@@ -17,21 +24,55 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
+import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { createFormatter } from '../../../../common/formatters';
 import { AlertStates, Comparator } from './types';
 import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
-import {
-  MetricThresholdAlertExecutorOptions,
-  MetricThresholdAlertType,
-} from './register_metric_threshold_alert_type';
 
-export const createMetricThresholdExecutor = (
-  libs: InfraBackendLibs
-): MetricThresholdAlertType['executor'] =>
-  async function (options: MetricThresholdAlertExecutorOptions) {
-    const { services, params } = options;
+export type MetricThresholdAlertTypeParams = Record<string, any>;
+export type MetricThresholdAlertTypeState = AlertTypeState & {
+  groups: string[];
+  groupBy?: string | string[];
+};
+export type MetricThresholdAlertInstanceState = AlertInstanceState; // no specific instace state used
+export type MetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instace state used
+
+type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
+>;
+
+type MetricThresholdAlertInstance = AlertInstance<
+  MetricThresholdAlertInstanceState,
+  MetricThresholdAlertInstanceContext,
+  MetricThresholdAllowedActionGroups
+>;
+
+type MetricThresholdAlertInstanceFactory = (
+  id: string,
+  reason: string,
+  threshold?: number | undefined,
+  value?: number | undefined
+) => MetricThresholdAlertInstance;
+
+export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
+  libs.metricsRules.createLifecycleRuleExecutor<
+    MetricThresholdAlertTypeParams,
+    MetricThresholdAlertTypeState,
+    MetricThresholdAlertInstanceState,
+    MetricThresholdAlertInstanceContext,
+    MetricThresholdAllowedActionGroups
+  >(async function (options) {
+    const { services, params, state } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+    const { alertWithLifecycle, savedObjectsClient } = services;
+    const alertInstanceFactory: MetricThresholdAlertInstanceFactory = (id, reason) =>
+      alertWithLifecycle({
+        id,
+        fields: {
+          [ALERT_REASON]: reason,
+        },
+      });
 
     const { sourceId, alertOnNoData } = params as {
       sourceId?: string;
@@ -39,18 +80,32 @@ export const createMetricThresholdExecutor = (
     };
 
     const source = await libs.sources.getSourceConfiguration(
-      services.savedObjectsClient,
+      savedObjectsClient,
       sourceId || 'default'
     );
     const config = source.configuration;
+
+    const previousGroupBy = state.groupBy;
+    const prevGroups = isEqual(previousGroupBy, params.groupBy)
+      ? // Filter out the * key from the previous groups, only include it if it's one of
+        // the current groups. In case of a groupBy alert that starts out with no data and no
+        // groups, we don't want to persist the existence of the * alert instance
+        state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
+      : [];
+
     const alertResults = await evaluateAlert(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedAlertParams,
-      config
+      config,
+      prevGroups
     );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
-    const groups = Object.keys(first(alertResults)!);
+    const resultGroups = Object.keys(first(alertResults)!);
+    // Merge the list of currently fetched groups and previous groups, and uniquify them. This is necessary for reporting
+    // no data results on groups that get removed
+    const groups = [...new Set([...prevGroups, ...resultGroups])];
+
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
@@ -114,8 +169,7 @@ export const createMetricThresholdExecutor = (
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alertInstance = services.alertInstanceFactory(`${group}`);
-
+        const alertInstance = alertInstanceFactory(`${group}`, reason);
         alertInstance.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],
@@ -133,7 +187,9 @@ export const createMetricThresholdExecutor = (
         });
       }
     }
-  };
+
+    return { groups, groupBy: params.groupBy };
+  });
 
 export const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',
@@ -171,14 +227,8 @@ const formatAlertResult = <AlertResult>(
   } & AlertResult,
   useWarningThreshold?: boolean
 ) => {
-  const {
-    metric,
-    currentValue,
-    threshold,
-    comparator,
-    warningThreshold,
-    warningComparator,
-  } = alertResult;
+  const { metric, currentValue, threshold, comparator, warningThreshold, warningComparator } =
+    alertResult;
   const noDataValue = i18n.translate(
     'xpack.infra.metrics.alerting.threshold.noDataFormattedValue',
     {

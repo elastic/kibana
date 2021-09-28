@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
-  EuiCodeEditor,
+  EuiCodeBlock,
   EuiComboBox,
   EuiFieldText,
   EuiForm,
@@ -326,16 +326,17 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         </EuiFormRow>
       )}
       {isUnsupportedAgg && (
-        <EuiCodeEditor
-          mode="json"
-          theme="textmate"
-          width="100%"
-          height="200px"
-          value={JSON.stringify(getEsAggFromAggConfig(defaultData), null, 2)}
-          setOptions={{ fontSize: '12px', showLineNumbers: false }}
-          isReadOnly
-          aria-label="Read only code editor"
-        />
+        <EuiCodeBlock
+          aria-label={i18n.translate('xpack.transform.agg.popoverForm.codeBlock', {
+            defaultMessage: 'JSON of transform aggregation',
+          })}
+          fontSize="s"
+          language="json"
+          paddingSize="s"
+          style={{ width: '100%', height: '200px' }}
+        >
+          {JSON.stringify(getEsAggFromAggConfig(defaultData), null, 2)}
+        </EuiCodeBlock>
       )}
       <EuiFormRow hasEmptyLabelSpace>
         <EuiButton

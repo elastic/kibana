@@ -49,7 +49,8 @@ export type TaskManagerStartContract = Pick<
   } & { supportsEphemeralTasks: () => boolean };
 
 export class TaskManagerPlugin
-  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
+  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
+{
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;
@@ -95,6 +96,14 @@ export class TaskManagerPlugin
       this.config!
     );
 
+    core.status.derivedStatus$.subscribe((status) =>
+      this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
+    );
+    serviceStatus$.subscribe((status) =>
+      this.logger.debug(`status serviceStatus now set to ${status.level}`)
+    );
+
+    // here is where the system status is updated
     core.status.set(
       combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
         map(([derivedStatus, serviceStatus]) =>
@@ -109,7 +118,14 @@ export class TaskManagerPlugin
         usageCollection,
         monitoredHealth$,
         this.config.ephemeral_tasks.enabled,
-        this.config.ephemeral_tasks.request_capacity
+        this.config.ephemeral_tasks.request_capacity,
+        this.config.unsafe.exclude_task_types
+      );
+    }
+
+    if (this.config.unsafe.exclude_task_types.length) {
+      this.logger.warn(
+        `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
       );
     }
 
@@ -126,7 +142,11 @@ export class TaskManagerPlugin
     };
   }
 
-  public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
+  public start({
+    savedObjects,
+    elasticsearch,
+    executionContext,
+  }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     const serializer = savedObjects.createSerializer();
@@ -150,6 +170,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       taskStore,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
@@ -160,6 +181,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       pool: this.taskPollingLifecycle.pool,

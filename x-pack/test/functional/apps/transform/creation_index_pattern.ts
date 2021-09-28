@@ -578,6 +578,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
+            type: testData.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

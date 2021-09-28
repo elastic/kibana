@@ -52,7 +52,7 @@ export const appModuleName = 'monitoring';
 
 type IPrivate = <T>(provider: (...injectable: unknown[]) => T) => T;
 
-const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.bootstrap'];
+const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 export const localAppModule = ({
   core,

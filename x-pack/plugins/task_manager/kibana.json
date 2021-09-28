@@ -2,6 +2,10 @@
   "id": "taskManager",
   "server": true,
   "version": "8.0.0",
+  "owner": {
+    "name": "Kibana Alerting",
+    "githubTeam": "kibana-alerting-services"
+  },
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "task_manager"],
   "optionalPlugins": ["usageCollection"],

@@ -15,7 +15,6 @@ import { first } from 'rxjs/operators';
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
 import { HttpResponse, HttpFetchOptionsWithPath } from './types';
-import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 
 function delay<T>(duration: number) {
   return new Promise<T>((r) => setTimeout(r, duration));
@@ -230,41 +229,20 @@ describe('Fetch', () => {
 
     it('should inject context headers if provided', async () => {
       fetchMock.get('*', {});
-      const executionContainerMock = executionContextServiceMock.createContainer();
-      executionContainerMock.toHeader.mockReturnValueOnce({ 'x-kbn-context': 'value' });
+
       await fetchInstance.fetch('/my/path', {
-        context: executionContainerMock,
+        context: {
+          type: 'test-type',
+          name: 'test-name',
+          description: 'test-description',
+          id: '42',
+        },
       });
 
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        'x-kbn-context': 'value',
+        'x-kbn-context':
+          '%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22description%22%3A%22test-description%22%2C%22id%22%3A%2242%22%7D',
       });
-    });
-
-    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
-    it('should not allow overwriting of kbn-system-api when asSystemRequest: true', async () => {
-      fetchMock.get('*', {});
-      await expect(
-        fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-          asSystemRequest: true,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
-      );
-    });
-
-    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
-    it('should not allow overwriting of kbn-system-api when asSystemRequest: false', async () => {
-      fetchMock.get('*', {});
-      await expect(
-        fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-          asSystemRequest: false,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
-      );
     });
 
     it('should return response', async () => {

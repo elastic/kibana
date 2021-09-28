@@ -70,8 +70,8 @@ export function FieldValueSelection({
   values = [],
   selectedValue,
   excludedValue,
-  allowExclusions = true,
   compressed = true,
+  allowExclusions = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
@@ -143,7 +143,7 @@ export function FieldValueSelection({
       .filter((opt) => opt?.checked === 'off')
       .map(({ label: labelN }) => labelN);
 
-    return isEqual(selectedValue ?? [], currSelected) && isEqual(excludedValue, currExcluded);
+    return isEqual(selectedValue ?? [], currSelected) && isEqual(excludedValue ?? [], currExcluded);
   };
 
   return (
@@ -174,8 +174,8 @@ export function FieldValueSelection({
           }}
           options={options}
           onChange={onChange}
-          allowExclusions={allowExclusions}
           isLoading={loading && !query && options.length === 0}
+          allowExclusions={allowExclusions}
         >
           {(list, search) => (
             <div style={{ width: 240 }}>
@@ -191,6 +191,13 @@ export function FieldValueSelection({
               )}
               <EuiPopoverFooter paddingSize="s">
                 <EuiButton
+                  aria-label={i18n.translate(
+                    'xpack.observability.fieldValueSelection.apply.label',
+                    {
+                      defaultMessage: 'Apply the selected filters for {label}',
+                      values: { label },
+                    }
+                  )}
                   fill
                   fullWidth
                   size="s"

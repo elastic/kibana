@@ -63,6 +63,7 @@ describe('getSource', () => {
           ...documentSourceDescriptor,
           applyGlobalQuery: false,
           applyGlobalTime: false,
+          applyForceRefresh: false,
         }),
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
@@ -86,6 +87,7 @@ describe('getSource', () => {
         geoField: sourceDescriptor.geoField,
         applyGlobalQuery: sourceDescriptor.applyGlobalQuery,
         applyGlobalTime: sourceDescriptor.applyGlobalTime,
+        applyForceRefresh: sourceDescriptor.applyForceRefresh,
       };
       expect(abstractEsSourceDescriptor).toEqual({
         type: sourceDescriptor.type,
@@ -94,6 +96,7 @@ describe('getSource', () => {
         indexPatternId: 'myIndexPattern',
         applyGlobalQuery: false,
         applyGlobalTime: false,
+        applyForceRefresh: false,
       } as AbstractESSourceDescriptor);
     });
   });

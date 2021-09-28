@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
-  IIndexPattern,
+  IndexPattern,
   TimeRange,
   Query,
   esFilters,
@@ -47,7 +47,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean };
@@ -69,7 +69,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editPath: string;
   editApp: string;
   editUrl: string;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   visTypeName: string;
 }
 
@@ -85,7 +85,8 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+{
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
@@ -186,7 +187,11 @@ export class VisualizeEmbeddable
     if (!adapters) return;
 
     return this.deps.start().plugins.inspector.open(adapters, {
-      title: this.getTitle(),
+      title:
+        this.getTitle() ||
+        i18n.translate('visualizations.embeddable.inspectorTitle', {
+          defaultMessage: 'Inspector',
+        }),
     });
   };
 
@@ -340,14 +345,6 @@ export class VisualizeEmbeddable
               data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
             };
           }
-          // do not trigger the filter click event if the filter bar is not visible
-          if (
-            triggerId === VIS_EVENT_TO_TRIGGER.filter &&
-            !this.input.id &&
-            !this.vis.type.options.showFilterBar
-          ) {
-            return;
-          }
 
           getUiActions().getTrigger(triggerId).exec(context);
         }
@@ -384,6 +381,15 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
+    const context = {
+      type: 'visualization',
+      name: this.vis.type.title,
+      id: this.vis.id ?? 'an_unsaved_vis',
+      description: this.vis.title || this.input.title || this.vis.type.name,
+      url: this.output.editUrl,
+      parent: this.parent?.getInput().executionContext,
+    };
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
@@ -393,14 +399,9 @@ export class VisualizeEmbeddable
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
+      interactive: !this.input.disableTriggers,
       inspectorAdapters: this.inspectorAdapters,
-      executionContext: this.deps.start().core.executionContext.create({
-        type: 'visualization',
-        name: this.vis.type.name,
-        id: this.vis.id ?? 'an_unsaved_vis',
-        description: this.vis.title ?? this.vis.type.title,
-        url: this.output.editUrl,
-      }),
+      executionContext: context,
     };
     if (this.abortController) {
       this.abortController.abort();

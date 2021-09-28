@@ -73,6 +73,7 @@ httpPreboot.registerRoutes('my-plugin', (router) => {
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [basePath](./kibana-plugin-core-server.httpservicepreboot.basepath.md) | <code>IBasePath</code> | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
+|  [getServerInfo](./kibana-plugin-core-server.httpservicepreboot.getserverinfo.md) | <code>() =&gt; HttpServerInfo</code> | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running preboot http server. |
 
 ## Methods
 

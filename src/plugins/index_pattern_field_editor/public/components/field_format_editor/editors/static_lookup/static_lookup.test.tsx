@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { StaticLookupFormatEditorFormatParams } from './static_lookup';
-import { FieldFormat } from 'src/plugins/data/public';
+import { FieldFormat } from 'src/plugins/field_formats/common';
 
 import { StaticLookupFormatEditor } from './static_lookup';
 
@@ -33,7 +33,7 @@ describe('StaticLookupFormatEditor', () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -47,7 +47,7 @@ describe('StaticLookupFormatEditor', () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={{
           lookupEntries: [{}, {}, {}] as StaticLookupFormatEditorFormatParams['lookupEntries'],
           unknownKeyValue: 'test value',

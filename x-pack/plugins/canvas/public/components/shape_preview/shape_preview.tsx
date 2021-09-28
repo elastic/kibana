@@ -37,7 +37,9 @@ export const ShapePreview: FC<Props> = ({ shape }) => {
   const [shapeData, setShapeData] = useState<SvgConfig>(getDefaultShapeData());
 
   const shapeRef = useCallback<RefCallback<ShapeRef>>((node) => {
-    if (node !== null) setShapeData(node.getData());
+    if (node !== null) {
+      setShapeData(node.getData());
+    }
   }, []);
 
   if (!shape) return <div className="canvasShapePreview" />;

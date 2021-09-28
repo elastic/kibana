@@ -16,9 +16,11 @@ describe('when using the EndpointHostIsolationStatus component', () => {
   let render: (
     renderProps?: Partial<EndpointHostIsolationStatusProps>
   ) => ReturnType<AppContextTestRender['render']>;
+  let appContext: AppContextTestRender;
 
   beforeEach(() => {
-    const appContext = createAppRootMockRenderer();
+    appContext = createAppRootMockRenderer();
+
     render = (renderProps = {}) =>
       appContext.render(
         <EndpointHostIsolationStatus
@@ -43,8 +45,7 @@ describe('when using the EndpointHostIsolationStatus component', () => {
     expect(getByTestId('test').textContent).toBe('Isolated');
   });
 
-  // FIXME: un-skip when we bring back the pending isolation statuses
-  it.skip.each([
+  it.each([
     ['Isolating', { pendingIsolate: 2 }],
     ['Releasing', { pendingUnIsolate: 2 }],
     ['4 actions pending', { isIsolated: true, pendingUnIsolate: 2, pendingIsolate: 2 }],
@@ -53,5 +54,25 @@ describe('when using the EndpointHostIsolationStatus component', () => {
     expect(getByTestId('test').textContent).toBe(expectedLabel);
     // Validate that the text color is set to `subdued`
     expect(getByTestId('test-pending').classList.contains('euiTextColor--subdued')).toBe(true);
+  });
+
+  describe('and the disableIsolationUIPendingStatuses experimental feature flag is true', () => {
+    beforeEach(() => {
+      appContext.setExperimentalFlag({ disableIsolationUIPendingStatuses: true });
+    });
+
+    it('should render `null` if not isolated', () => {
+      const renderResult = render({ pendingIsolate: 10, pendingUnIsolate: 20 });
+      expect(renderResult.container.textContent).toBe('');
+    });
+
+    it('should show `Isolated` when no pending actions and isolated', () => {
+      const { getByTestId } = render({
+        isIsolated: true,
+        pendingIsolate: 10,
+        pendingUnIsolate: 20,
+      });
+      expect(getByTestId('test').textContent).toBe('Isolated');
+    });
   });
 });

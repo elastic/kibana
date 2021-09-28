@@ -287,6 +287,7 @@ export class JobCreator {
     if (enable) {
       this._job_config.results_index_name = this._job_config.job_id;
     } else {
+      // @ts-expect-error The operand of a 'delete' operator must be optional
       delete this._job_config.results_index_name;
     }
   }

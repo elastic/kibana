@@ -11,11 +11,11 @@ import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
 
 describe('Transaction action menu', () => {
-  const basePath = ({
+  const basePath = {
     prepend: (url: string) => {
       return `some-basepath${url}`;
     },
-  } as unknown) as IBasePath;
+  } as unknown as IBasePath;
   const date = '2020-02-06T11:00:00.000Z';
   const timestamp = { us: new Date(date).getTime() };
 
@@ -26,18 +26,18 @@ describe('Transaction action menu', () => {
     refreshInterval: 0,
   };
 
-  const location = ({
+  const location = {
     search:
       '?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
-  } as unknown) as Location;
+  } as unknown as Location;
 
   it('shows required sections only', () => {
-    const transaction = ({
+    const transaction = {
       timestamp,
       trace: { id: '123' },
       transaction: { id: '123' },
       '@timestamp': date,
-    } as unknown) as Transaction;
+    } as unknown as Transaction;
     expect(
       getSections({
         transaction,
@@ -55,8 +55,7 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href:
-                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
+              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
               condition: true,
             },
           ],
@@ -69,8 +68,7 @@ describe('Transaction action menu', () => {
             {
               key: 'sampleDocument',
               label: 'View sample document',
-              href:
-                'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
@@ -80,13 +78,13 @@ describe('Transaction action menu', () => {
   });
 
   it('shows pod and required sections only', () => {
-    const transaction = ({
+    const transaction = {
       kubernetes: { pod: { uid: '123' } },
       timestamp,
       trace: { id: '123' },
       transaction: { id: '123' },
       '@timestamp': date,
-    } as unknown) as Transaction;
+    } as unknown as Transaction;
     expect(
       getSections({
         transaction,
@@ -105,15 +103,13 @@ describe('Transaction action menu', () => {
             {
               key: 'podLogs',
               label: 'Pod logs',
-              href:
-                'some-basepath/app/logs/link-to/pod-logs/123?time=1580986800',
+              href: 'some-basepath/app/logs/link-to/pod-logs/123?time=1580986800',
               condition: true,
             },
             {
               key: 'podMetrics',
               label: 'Pod metrics',
-              href:
-                'some-basepath/app/metrics/link-to/pod-detail/123?from=1580986500000&to=1580987100000',
+              href: 'some-basepath/app/metrics/link-to/pod-detail/123?from=1580986500000&to=1580987100000',
               condition: true,
             },
           ],
@@ -126,8 +122,7 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href:
-                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
+              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
               condition: true,
             },
           ],
@@ -140,8 +135,7 @@ describe('Transaction action menu', () => {
             {
               key: 'sampleDocument',
               label: 'View sample document',
-              href:
-                'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
@@ -151,13 +145,13 @@ describe('Transaction action menu', () => {
   });
 
   it('shows host and required sections only', () => {
-    const transaction = ({
+    const transaction = {
       host: { hostname: 'foo' },
       timestamp,
       trace: { id: '123' },
       transaction: { id: '123' },
       '@timestamp': date,
-    } as unknown) as Transaction;
+    } as unknown as Transaction;
     expect(
       getSections({
         transaction,
@@ -175,15 +169,13 @@ describe('Transaction action menu', () => {
             {
               key: 'hostLogs',
               label: 'Host logs',
-              href:
-                'some-basepath/app/logs/link-to/host-logs/foo?time=1580986800',
+              href: 'some-basepath/app/logs/link-to/host-logs/foo?time=1580986800',
               condition: true,
             },
             {
               key: 'hostMetrics',
               label: 'Host metrics',
-              href:
-                'some-basepath/app/metrics/link-to/host-detail/foo?from=1580986500000&to=1580987100000',
+              href: 'some-basepath/app/metrics/link-to/host-detail/foo?from=1580986500000&to=1580987100000',
               condition: true,
             },
           ],
@@ -196,8 +188,7 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href:
-                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
+              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
               condition: true,
             },
           ],
@@ -210,8 +201,7 @@ describe('Transaction action menu', () => {
             {
               key: 'sampleDocument',
               label: 'View sample document',
-              href:
-                'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],

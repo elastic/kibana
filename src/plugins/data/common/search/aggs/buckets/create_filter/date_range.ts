@@ -8,10 +8,10 @@
 
 import moment from 'moment';
 import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
+import { DateRange } from '../../../expressions';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { DateRangeKey } from '../lib/date_range';
 
-export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRangeKey) => {
+export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRange) => {
   const filter: RangeFilterParams = {};
   if (from) filter.gte = moment(from).toISOString();
   if (to) filter.lt = moment(to).toISOString();

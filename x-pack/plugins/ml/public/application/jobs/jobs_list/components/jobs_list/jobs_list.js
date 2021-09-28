@@ -104,7 +104,7 @@ export class JobsList extends Component {
   render() {
     const { loading, isManagementTable, spacesApi } = this.props;
     const selectionControls = {
-      selectable: (job) => job.deleting !== true,
+      selectable: (job) => job.blocked === undefined,
       selectableMessage: (selectable, rowItem) =>
         selectable === false
           ? i18n.translate('xpack.ml.jobsList.cannotSelectRowForJobMessage', {
@@ -140,7 +140,7 @@ export class JobsList extends Component {
         render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
-            isDisabled={item.deleting === true}
+            isDisabled={item.blocked !== undefined}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
             aria-label={
               this.state.itemIdToExpandedRowMap[item.id]
@@ -297,6 +297,7 @@ export class JobsList extends Component {
               refresh={this.props.refreshJobs}
             />
           ),
+          'data-test-subj': 'mlJobListColumnSpaces',
         });
       }
       // Remove actions if Ml not enabled in current space
@@ -337,6 +338,7 @@ export class JobsList extends Component {
         actions: actionsMenuContent(
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
+          this.props.showResetJobModal,
           this.props.showStartDatafeedModal,
           this.props.refreshJobs,
           this.props.showCreateAlertFlyout

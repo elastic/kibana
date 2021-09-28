@@ -7,7 +7,7 @@
 
 import { Subject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Logger } from '../../../../src/core/server';
+import { Logger, ExecutionContextStart } from '../../../../src/core/server';
 
 import { Result, asErr, asOk } from './lib/result_type';
 import { TaskManagerConfig } from './config';
@@ -28,6 +28,7 @@ export interface EphemeralTaskLifecycleOpts {
   elasticsearchAndSOAvailability$: Observable<boolean>;
   pool: TaskPool;
   lifecycleEvent: Observable<TaskLifecycleEvent>;
+  executionContext: ExecutionContextStart;
 }
 
 export type EphemeralTaskInstanceRequest = Omit<EphemeralTaskInstance, 'startedAt'>;
@@ -46,6 +47,7 @@ export class EphemeralTaskLifecycle {
   private config: TaskManagerConfig;
   private middleware: Middleware;
   private lifecycleSubscription: Subscription = Subscription.EMPTY;
+  private readonly executionContext: ExecutionContextStart;
 
   constructor({
     logger,
@@ -54,6 +56,7 @@ export class EphemeralTaskLifecycle {
     pool,
     lifecycleEvent,
     config,
+    executionContext,
   }: EphemeralTaskLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -61,6 +64,7 @@ export class EphemeralTaskLifecycle {
     this.pool = pool;
     this.lifecycleEvent = lifecycleEvent;
     this.config = config;
+    this.executionContext = executionContext;
 
     if (this.enabled) {
       this.lifecycleSubscription = this.lifecycleEvent
@@ -179,6 +183,7 @@ export class EphemeralTaskLifecycle {
       beforeRun: this.middleware.beforeRun,
       beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
+      executionContext: this.executionContext,
     });
   };
 }

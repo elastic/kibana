@@ -9,12 +9,19 @@ import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asInteger } from '../../../../common/utils/formatters';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
+import {
+  AlertMetadata,
+  getIntervalAndTimeRange,
+  isNewApmRuleFromStackManagement,
+  TimeUnit,
+} from '../helper';
+import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 export interface AlertParams {
@@ -47,19 +54,26 @@ export function ErrorCountAlertTrigger(props: Props) {
       threshold: 25,
       windowSize: 1,
       windowUnit: 'm',
+      environment: ENVIRONMENT_ALL.value,
     }
   );
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (params.windowSize && params.windowUnit) {
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit as TimeUnit,
+      });
+      if (interval && start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
           params: {
             query: {
-              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
               environment: params.environment,
               serviceName: params.serviceName,
+              interval,
+              start,
+              end,
             },
           },
         });
@@ -72,6 +86,10 @@ export function ErrorCountAlertTrigger(props: Props) {
       params.serviceName,
     ]
   );
+
+  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
+    return <NewAlertEmptyPrompt />;
+  }
 
   const fields = [
     <ServiceField value={params.serviceName} />,

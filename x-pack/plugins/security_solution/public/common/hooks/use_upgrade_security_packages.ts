@@ -7,9 +7,8 @@
 
 import { useEffect } from 'react';
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../lib/kibana';
 import { epmRouteService, BulkInstallPackagesResponse } from '../../../../fleet/common';
-import { StartServices } from '../../types';
 import { useUserPrivileges } from '../components/user_privileges';
 
 /**
@@ -31,7 +30,7 @@ const sendUpgradeSecurityPackages = async (
 };
 
 export const useUpgradeSecurityPackages = () => {
-  const context = useKibana<StartServices>();
+  const context = useKibana();
   const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
 
   useEffect(() => {
@@ -47,20 +46,23 @@ export const useUpgradeSecurityPackages = () => {
 
       (async () => {
         try {
+          // Make sure fleet is initialized first
+          await context.services.fleet?.isInitialized();
+
           // ignore the response for now since we aren't notifying the user
           await sendUpgradeSecurityPackages(context.services.http, { signal });
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
 
-          // ignore the error that occurs from aborting a request
+          // log to console, except if the error occurred due to aborting a request
           if (!abortController.signal.aborted) {
             // eslint-disable-next-line no-console
             console.error(error);
           }
         }
-
-        return abortRequests;
       })();
+
+      return abortRequests;
     }
-  }, [canAccessFleet, context.services.http]);
+  }, [canAccessFleet, context.services.fleet, context.services.http]);
 };

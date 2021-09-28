@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
@@ -18,6 +18,7 @@ export const updateSavedQueryRoute = (router: IRouter) => {
         params: schema.object({}, { unknowns: 'allow' }),
         body: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;

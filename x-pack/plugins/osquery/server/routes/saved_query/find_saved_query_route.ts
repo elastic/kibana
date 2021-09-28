@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
@@ -17,6 +17,7 @@ export const findSavedQueryRoute = (router: IRouter) => {
       validate: {
         query: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;

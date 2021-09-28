@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// a11y tests for spaces, space selection and spacce creation and feature controls
+// a11y tests for spaces, space selection and space creation and feature controls
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // EUI issue - https://github.com/elastic/eui/issues/3999
-    it.skip('a11y test for color picker', async () => {
+    it('a11y test for color picker', async () => {
       await PageObjects.spaceSelector.clickColorPicker();
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);

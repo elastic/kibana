@@ -6,7 +6,12 @@
  */
 import { mockHttpValues } from '../../../../../__mocks__/kea_logic';
 
-import { extractDomainAndEntryPointFromUrl, getDomainWithProtocol } from './utils';
+import {
+  domainValidationFailureResultChange,
+  domainValidationStateToPanelColor,
+  extractDomainAndEntryPointFromUrl,
+  getDomainWithProtocol,
+} from './utils';
 
 describe('extractDomainAndEntryPointFromUrl', () => {
   it('extracts a provided entry point and domain', () => {
@@ -51,7 +56,7 @@ describe('getDomainWithProtocol', () => {
 
     expect(result).toEqual('https://elastic.co');
     expect(http.post).toHaveBeenCalledTimes(1);
-    expect(http.post).toHaveBeenCalledWith('/api/app_search/crawler/validate_url', {
+    expect(http.post).toHaveBeenCalledWith('/internal/app_search/crawler/validate_url', {
       body: JSON.stringify({ url: 'https://elastic.co', checks: ['tcp', 'url_request'] }),
     });
   });
@@ -64,7 +69,7 @@ describe('getDomainWithProtocol', () => {
 
     expect(result).toEqual('http://elastic.co');
     expect(http.post).toHaveBeenCalledTimes(2);
-    expect(http.post).toHaveBeenLastCalledWith('/api/app_search/crawler/validate_url', {
+    expect(http.post).toHaveBeenLastCalledWith('/internal/app_search/crawler/validate_url', {
       body: JSON.stringify({ url: 'http://elastic.co', checks: ['tcp', 'url_request'] }),
     });
   });
@@ -85,5 +90,35 @@ describe('getDomainWithProtocol', () => {
 
     expect(result).toEqual('elastic.co');
     expect(http.post).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('domainValidationStateToPanelColor', () => {
+  it('returns expected values', () => {
+    expect(domainValidationStateToPanelColor('valid')).toEqual('success');
+    expect(domainValidationStateToPanelColor('invalid')).toEqual('danger');
+    expect(domainValidationStateToPanelColor('')).toEqual('subdued');
+    expect(domainValidationStateToPanelColor('loading')).toEqual('subdued');
+  });
+});
+
+describe('domainValidationFailureResultChange', () => {
+  it('returns the expected results', () => {
+    expect(domainValidationFailureResultChange('initialValidation')).toMatchObject({
+      networkConnectivity: expect.any(Object),
+      indexingRestrictions: expect.any(Object),
+      contentVerification: expect.any(Object),
+    });
+
+    expect(domainValidationFailureResultChange('networkConnectivity')).toMatchObject({
+      indexingRestrictions: expect.any(Object),
+      contentVerification: expect.any(Object),
+    });
+
+    expect(domainValidationFailureResultChange('indexingRestrictions')).toMatchObject({
+      contentVerification: expect.any(Object),
+    });
+
+    expect(domainValidationFailureResultChange('contentVerification')).toEqual({});
   });
 });

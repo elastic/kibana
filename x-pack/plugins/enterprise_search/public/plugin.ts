@@ -136,11 +136,10 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.registerSolution({
         id: ENTERPRISE_SEARCH_PLUGIN.ID,
         title: ENTERPRISE_SEARCH_PLUGIN.NAME,
-        subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
         icon: 'logoEnterpriseSearch',
         description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
-        appDescriptions: ENTERPRISE_SEARCH_PLUGIN.APP_DESCRIPTIONS,
         path: ENTERPRISE_SEARCH_PLUGIN.URL,
+        order: 100,
       });
 
       plugins.home.featureCatalogue.register({
@@ -192,7 +191,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
-      this.data = await http.get('/api/enterprise_search/config_data');
+      this.data = await http.get('/internal/enterprise_search/config_data');
       this.hasInitialized = true;
     } catch {
       this.data.errorConnecting = true;

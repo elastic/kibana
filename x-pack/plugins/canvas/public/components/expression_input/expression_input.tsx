@@ -318,7 +318,7 @@ export class ExpressionInput extends React.Component<Props> {
                 provideHover: this.providerHover,
               }}
               options={{
-                fontSize: isCompact ? 12 : 16,
+                fontSize: isCompact ? 12 : 14,
                 scrollBeyondLastLine: false,
                 quickSuggestions: true,
                 minimap: {

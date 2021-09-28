@@ -62,7 +62,13 @@ export class CountAggField implements IESAggField {
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const indexPattern = await this._source.getIndexPattern();
     const tooltipProperty = new TooltipProperty(this.getName(), await this.getLabel(), value);
-    return new ESAggTooltipProperty(tooltipProperty, indexPattern, this, this._getAggType());
+    return new ESAggTooltipProperty(
+      tooltipProperty,
+      indexPattern,
+      this,
+      this._getAggType(),
+      this._source.getApplyGlobalQuery()
+    );
   }
 
   getValueAggDsl(indexPattern: IndexPattern): unknown | null {

@@ -8,6 +8,7 @@
 
 import moment from 'moment-timezone';
 
+/** @internal */
 export function getTimeZoneFromSettings(dateFormatTZ: string) {
   const detectedTimezone = moment.tz.guess();
 

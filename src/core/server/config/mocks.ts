@@ -6,9 +6,24 @@
  * Side Public License, v 1.
  */
 
-export {
-  getEnvOptions,
-  rawConfigServiceMock,
-  configServiceMock,
-  configMock,
-} from '@kbn/config/target/mocks';
+import type {
+  getEnvOptions as getEnvOptionsTyped,
+  rawConfigServiceMock as rawConfigServiceMockTyped,
+  configServiceMock as configServiceMockTyped,
+  configMock as configMockTyped,
+} from '@kbn/config/target_types/mocks';
+
+import {
+  getEnvOptions as getEnvOptionsNonTyped,
+  rawConfigServiceMock as rawConfigServiceMockNonTyped,
+  configServiceMock as configServiceMockNonTyped,
+  configMock as configMockNonTyped,
+  // @ts-expect-error
+} from '@kbn/config/target_node/mocks';
+
+const getEnvOptions: typeof getEnvOptionsTyped = getEnvOptionsNonTyped;
+const rawConfigServiceMock: typeof rawConfigServiceMockTyped = rawConfigServiceMockNonTyped;
+const configServiceMock: typeof configServiceMockTyped = configServiceMockNonTyped;
+const configMock: typeof configMockTyped = configMockNonTyped;
+
+export { getEnvOptions, rawConfigServiceMock, configServiceMock, configMock };

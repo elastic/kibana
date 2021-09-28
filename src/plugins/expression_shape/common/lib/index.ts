@@ -8,3 +8,4 @@
 
 export * from './view_box';
 export * from './available_shapes';
+export * from './get_id';

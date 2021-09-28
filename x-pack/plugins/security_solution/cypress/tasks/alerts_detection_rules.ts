@@ -110,13 +110,17 @@ export const deleteSelectedRules = () => {
 
 export const deleteRuleFromDetailsPage = () => {
   cy.get(ALL_ACTIONS).should('be.visible');
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ALL_ACTIONS).trigger('click');
-      return $el.find(RULE_DETAILS_DELETE_BTN);
-    })
-    .should(($el) => expect($el).to.be.visible);
-  cy.get(RULE_DETAILS_DELETE_BTN).pipe(($el) => $el.trigger('click'));
+  // We cannot use cy.root().pipe($el) withing this function and instead have to use a cy.wait()
+  // for the click handler to be registered. If you see flake here because of click handler issues
+  // increase the cy.wait(). The reason we cannot use cypress pipe is because multiple clicks on ALL_ACTIONS
+  // causes the pop up to show and then the next click for it to hide. Multiple clicks can cause
+  // the DOM to queue up and once we detect that the element is visible it can then become invisible later
+  cy.wait(1000);
+  cy.get(ALL_ACTIONS).click();
+  cy.get(RULE_DETAILS_DELETE_BTN).should('be.visible');
+  cy.get(RULE_DETAILS_DELETE_BTN)
+    .pipe(($el) => $el.trigger('click'))
+    .should(($el) => expect($el).to.be.not.visible);
 };
 
 export const duplicateSelectedRules = () => {

@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source.signal.original_time).sort();
+          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
           expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
         });
 
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source.signal.original_time).sort();
+          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
           expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
         });
       });
@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source.signal.original_time).sort();
+          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
           expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
         });
 
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source.signal.original_time).sort();
+          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
           expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
         });
       });
@@ -215,7 +215,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsResponse = await getSignalsByIds(supertest, [id, id]);
           const hits = signalsResponse.hits.hits
-            .map((hit) => hit._source.signal.original_time)
+            .map((hit) => hit._source?.signal.original_time)
             .sort();
           expect(hits).to.eql([undefined]);
         });
@@ -239,15 +239,21 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Signals generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       describe('KQL', () => {

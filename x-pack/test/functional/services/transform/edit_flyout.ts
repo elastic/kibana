@@ -37,6 +37,21 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       );
     },
 
+    async assertTransformEditFlyoutRetentionPolicySelectEnabled(expectedValue: boolean) {
+      await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
+        timeout: 1000,
+      });
+      const isEnabled = await testSubjects.isEnabled(
+        `transformEditFlyoutRetentionPolicyFieldSelect`
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected 'transformEditFlyoutRetentionPolicyFieldSelect' input to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
     async assertTransformEditFlyoutInputEnabled(input: string, expectedValue: boolean) {
       await testSubjects.existOrFail(`transformEditFlyout${input}Input`, { timeout: 1000 });
       const isEnabled = await testSubjects.isEnabled(`transformEditFlyout${input}Input`);

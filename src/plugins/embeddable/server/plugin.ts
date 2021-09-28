@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { identity } from 'lodash';
 import {
@@ -23,11 +24,10 @@ import {
 } from '../common/lib';
 import {
   PersistableStateService,
-  SerializableState,
   PersistableStateMigrateFn,
   MigrateFunctionsObject,
 } from '../../kibana_utils/common';
-import { EmbeddableStateWithType } from '../common/types';
+import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
@@ -44,8 +44,9 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private migrateFn: PersistableStateMigrateFn | undefined;
 
   public setup(core: CoreSetup) {
-    const commonContract = {
-      getEmbeddableFactory: this.getEmbeddableFactory,
+    const commonContract: CommonEmbeddableStartContract = {
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
 
@@ -66,8 +67,9 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   }
 
   public start(core: CoreStart) {
-    const commonContract = {
-      getEmbeddableFactory: this.getEmbeddableFactory,
+    const commonContract: CommonEmbeddableStartContract = {
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
 
@@ -96,7 +98,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       inject: enhancement.inject || identity,
       extract:
         enhancement.extract ||
-        ((state: SerializableState) => {
+        ((state: SerializableRecord) => {
           return { state, references: [] };
         }),
       migrations: enhancement.migrations || {},
@@ -109,7 +111,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
         id: 'unknown',
         telemetry: (state, stats) => stats,
         inject: identity,
-        extract: (state: SerializableState) => {
+        extract: (state: SerializableRecord) => {
           return { state, references: [] };
         },
         migrations: {},

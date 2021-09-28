@@ -9,6 +9,7 @@ import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { LensPublicStart } from '../../../plugins/lens/public';
 import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
@@ -58,6 +59,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;

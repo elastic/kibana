@@ -5,6 +5,7 @@
 /.chromium
 .DS_Store
 .node_binaries
+/.beats
 .native_modules
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
@@ -74,6 +75,9 @@ report.asciidoc
 
 # TS incremental build cache
 *.tsbuildinfo
+
+# Automatically generated and user-modifiable
+/tsconfig.refs.json
 
 # Yarn local mirror content
 .yarn-local-mirror

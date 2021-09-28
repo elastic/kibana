@@ -308,7 +308,12 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
             values: { defaultValue: DEFAULT_RESULTS_FIELD },
           })}
           checked={useResultsFieldDefault === true}
-          onChange={() => setUseResultsFieldDefault(!useResultsFieldDefault)}
+          onChange={() => {
+            if (!useResultsFieldDefault === true) {
+              setFormState({ resultsField: undefined });
+            }
+            setUseResultsFieldDefault(!useResultsFieldDefault);
+          }}
           data-test-subj="mlAnalyticsCreateJobWizardUseResultsFieldDefault"
         />
       </EuiFormRow>

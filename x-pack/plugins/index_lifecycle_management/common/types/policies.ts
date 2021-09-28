@@ -18,6 +18,7 @@ export type PhaseExceptDelete = keyof Omit<Phases, 'delete'>;
 export interface SerializedPolicy {
   name: string;
   phases: Phases;
+  _meta?: Record<string, any>;
 }
 
 export interface Phases {
@@ -167,7 +168,8 @@ export interface AllocateAction {
 }
 
 export interface ShrinkAction {
-  number_of_shards: number;
+  number_of_shards?: number;
+  max_primary_shard_size?: string;
 }
 
 export interface ForcemergeAction {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldFormat } from 'src/plugins/data/public';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
 import type { Datatable } from 'src/plugins/expressions';
 import { DatatableArgs } from './datatable';
 
@@ -100,13 +100,13 @@ describe('transpose_helpes', () => {
   }
 
   function buildFormatters() {
-    return ({
+    return {
       bucket1: { convert: (x: unknown) => x },
       bucket2: { convert: (x: unknown) => x },
       bucket3: { convert: (x: unknown) => x },
       metric1: { convert: (x: unknown) => x },
       metric2: { convert: (x: unknown) => x },
-    } as unknown) as Record<string, FieldFormat>;
+    } as unknown as Record<string, FieldFormat>;
   }
 
   it('should transpose table by one column', () => {

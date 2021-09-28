@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }) {
 
     const GEO_POINT = 'geo_point';
     const pointGeojsonFiles = ['point.json', 'multi_point.json'];
-    pointGeojsonFiles.forEach(async (pointFile) => {
+    pointGeojsonFiles.forEach((pointFile) => {
       it(`should index with type geo_point for file: ${pointFile}`, async () => {
         if (!(await browser.checkBrowserPermission('clipboard-read'))) {
           return;
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
       'multi_polygon.json',
       'polygon.json',
     ];
-    nonPointGeojsonFiles.forEach(async (shapeFile) => {
+    nonPointGeojsonFiles.forEach((shapeFile) => {
       it(`should index with type geo_shape for file: ${shapeFile}`, async () => {
         if (!(await browser.checkBrowserPermission('clipboard-read'))) {
           return;

@@ -11,6 +11,9 @@ import type { PhraseFilter } from './phrase_filter';
 import type { RangeFilter } from './range_filter';
 import { Filter, FILTERS } from './types';
 
+/**
+ * @internal used only by the filter bar to create filter pills.
+ */
 export function getFilterParams(filter: Filter) {
   switch (filter.meta.type) {
     case FILTERS.PHRASE:

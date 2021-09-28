@@ -18,7 +18,7 @@ export const extractReferences = (
   let searchSourceFields: SearchSourceFields & { indexRefName?: string } = { ...state };
   const references: SavedObjectReference[] = [];
   if (searchSourceFields.index) {
-    const indexId = searchSourceFields.index.id || ((searchSourceFields.index as any) as string);
+    const indexId = searchSourceFields.index.id || (searchSourceFields.index as any as string);
     const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     references.push({
       name: refName,

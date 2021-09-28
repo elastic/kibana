@@ -6,114 +6,104 @@
  */
 import url from 'url';
 import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
-const serviceOverviewPath = '/app/apm/services/kibana/overview';
-const baseUrl = url.format({
-  pathname: serviceOverviewPath,
+const serviceOverviewHref = url.format({
+  pathname: '/app/apm/services/opbeans-node/overview',
   query: { rangeFrom: start, rangeTo: end },
 });
 
 const apisToIntercept = [
   {
-    endpoint: '/api/apm/services/kibana/transactions/charts/latency',
-    as: 'latencyChartRequest',
+    endpoint: '/api/apm/services/opbeans-node/transactions/charts/latency',
+    name: 'latencyChartRequest',
   },
   {
-    endpoint: '/api/apm/services/kibana/throughput',
-    as: 'throughputChartRequest',
+    endpoint: '/api/apm/services/opbeans-node/throughput',
+    name: 'throughputChartRequest',
   },
   {
-    endpoint: '/api/apm/services/kibana/transactions/charts/error_rate',
-    as: 'errorRateChartRequest',
-  },
-  {
-    endpoint:
-      '/api/apm/services/kibana/transactions/groups/detailed_statistics',
-    as: 'transactionGroupsDetailedRequest',
+    endpoint: '/api/apm/services/opbeans-node/transactions/charts/error_rate',
+    name: 'errorRateChartRequest',
   },
   {
     endpoint:
-      '/api/apm/services/kibana/service_overview_instances/detailed_statistics',
-    as: 'instancesDetailedRequest',
+      '/api/apm/services/opbeans-node/transactions/groups/detailed_statistics',
+    name: 'transactionGroupsDetailedRequest',
   },
   {
     endpoint:
-      '/api/apm/services/kibana/service_overview_instances/main_statistics',
-    as: 'instancesMainStatisticsRequest',
+      '/api/apm/services/opbeans-node/service_overview_instances/detailed_statistics',
+    name: 'instancesDetailedRequest',
   },
   {
-    endpoint: '/api/apm/services/kibana/error_groups/main_statistics',
-    as: 'errorGroupsMainStatisticsRequest',
+    endpoint:
+      '/api/apm/services/opbeans-node/service_overview_instances/main_statistics',
+    name: 'instancesMainStatisticsRequest',
   },
   {
-    endpoint: '/api/apm/services/kibana/transaction/charts/breakdown',
-    as: 'transactonBreakdownRequest',
+    endpoint: '/api/apm/services/opbeans-node/error_groups/main_statistics',
+    name: 'errorGroupsMainStatisticsRequest',
   },
   {
-    endpoint: '/api/apm/services/kibana/transactions/groups/main_statistics',
-    as: 'transactionsGroupsMainStatisticsRequest',
+    endpoint: '/api/apm/services/opbeans-node/transaction/charts/breakdown',
+    name: 'transactonBreakdownRequest',
+  },
+  {
+    endpoint:
+      '/api/apm/services/opbeans-node/transactions/groups/main_statistics',
+    name: 'transactionsGroupsMainStatisticsRequest',
   },
 ];
 
 describe('Service overview - header filters', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+
   describe('Filtering by transaction type', () => {
     it('changes url when selecting different value', () => {
-      cy.visit(baseUrl);
-      cy.contains('Kibana');
+      cy.visit(serviceOverviewHref);
+      cy.contains('opbeans-node');
       cy.url().should('not.include', 'transactionType');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
       );
-      cy.get('[data-test-subj="headerFilterTransactionType"]').select(
-        'taskManager'
-      );
-      cy.url().should('include', 'transactionType=taskManager');
+      cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
+      cy.url().should('include', 'transactionType=Worker');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
-        'taskManager'
+        'Worker'
       );
     });
 
     it('calls APIs with correct transaction type', () => {
-      apisToIntercept.map(({ endpoint, as }) => {
-        cy.intercept('GET', endpoint).as(as);
+      apisToIntercept.map(({ endpoint, name }) => {
+        cy.intercept('GET', endpoint).as(name);
       });
-      cy.visit(baseUrl);
-      cy.contains('Kibana');
+      cy.visit(serviceOverviewHref);
+      cy.contains('opbeans-node');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
       );
 
       cy.expectAPIsToHaveBeenCalledWith({
-        apisIntercepted: apisToIntercept.map(({ as }) => `@${as}`),
+        apisIntercepted: apisToIntercept.map(({ name }) => `@${name}`),
         value: 'transactionType=request',
       });
 
-      cy.get('[data-test-subj="headerFilterTransactionType"]').select(
-        'taskManager'
-      );
-      cy.url().should('include', 'transactionType=taskManager');
+      cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
+      cy.url().should('include', 'transactionType=Worker');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
-        'taskManager'
+        'Worker'
       );
       cy.expectAPIsToHaveBeenCalledWith({
-        apisIntercepted: apisToIntercept.map(({ as }) => `@${as}`),
-        value: 'transactionType=taskManager',
+        apisIntercepted: apisToIntercept.map(({ name }) => `@${name}`),
+        value: 'transactionType=Worker',
       });
     });
   });

@@ -19,7 +19,7 @@ import { getFieldTypeName } from './get_field_type_name';
 export interface FieldNameCellProps {
   data: EventFieldsData;
   field: string;
-  fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
+  fieldFromBrowserField: BrowserField;
   fieldMapping?: IndexPatternField;
   scripted?: boolean;
 }

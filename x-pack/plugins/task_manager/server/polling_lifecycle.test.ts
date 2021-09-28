@@ -20,7 +20,9 @@ import type { TaskClaiming as TaskClaimingClass } from './queries/task_claiming'
 import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
+import { executionContextServiceMock } from '../../../../src/core/server/mocks';
 
+const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
 jest.mock('./queries/task_claiming', () => {
   return {
@@ -62,6 +64,9 @@ describe('TaskPollingLifecycle', () => {
         enabled: true,
         request_capacity: 10,
       },
+      unsafe: {
+        exclude_task_types: [],
+      },
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
@@ -69,6 +74,7 @@ describe('TaskPollingLifecycle', () => {
     middleware: createInitialMiddleware(),
     maxWorkersConfiguration$: of(100),
     pollIntervalConfiguration$: of(100),
+    executionContext,
   };
 
   beforeEach(() => {

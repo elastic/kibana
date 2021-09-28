@@ -19,7 +19,6 @@ import {
   getQueryableUniqueIndexPatternIds,
 } from '../../selectors/map_selectors';
 import { MapStoreState } from '../../reducers/store';
-import { getCoreChrome } from '../../kibana_services';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -35,10 +34,7 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    exitFullScreen: () => {
-      dispatch(exitFullScreen());
-      getCoreChrome().setIsVisible(true);
-    },
+    exitFullScreen: () => dispatch(exitFullScreen()),
     cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
   };
 }

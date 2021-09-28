@@ -6,91 +6,21 @@
  * Side Public License, v 1.
  */
 
-/*
- * esQuery and esKuery:
- */
+// TODO: https://github.com/elastic/kibana/issues/109904
+/* eslint-disable @kbn/eslint/no_export_all */
 
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
+
+export * from './deprecated';
 
 /*
  * Filters:
  */
 
-export * from './deprecated';
-
 export { getEsQueryConfig } from '../common';
 export { FilterLabel, FilterItem } from './ui';
 export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
-
-/*
- * Field Formatters:
- */
-
-import {
-  FieldFormat,
-  FieldFormatsRegistry,
-  DEFAULT_CONVERTER_COLOR,
-  HTML_CONTEXT_TYPE,
-  TEXT_CONTEXT_TYPE,
-  FIELD_FORMAT_IDS,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-} from '../common/field_formats';
-
-import { DateNanosFormat, DateFormat } from './field_formats';
-export { baseFormattersPublic, FieldFormatsStart } from './field_formats';
-
-// Field formats helpers namespace:
-export const fieldFormats = {
-  FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
-
-  DEFAULT_CONVERTER_COLOR,
-  HTML_CONTEXT_TYPE,
-  TEXT_CONTEXT_TYPE,
-  FIELD_FORMAT_IDS,
-
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-};
-
-export {
-  IFieldFormat,
-  FieldFormatInstanceType,
-  IFieldFormatsRegistry,
-  FieldFormatsContentType,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
-  FieldFormatId,
-  FieldFormat,
-} from '../common';
 
 /**
  * Exporters (CSV)
@@ -115,13 +45,11 @@ import {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
-  validateIndexPattern,
+  validateDataView,
   flattenHitWrapper,
-  formatHitProvider,
-} from './index_patterns';
+} from './data_views';
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsService } from './data_views';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -129,20 +57,19 @@ export const indexPatterns = {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   isFilterable,
   isNestedField,
-  validate: validateIndexPattern,
+  validate: validateDataView,
   flattenHitWrapper,
-  formatHitProvider,
 };
 
 export {
   IndexPatternsContract,
+  DataViewsContract,
   IndexPattern,
-  IIndexPatternFieldList,
   IndexPatternField,
-} from './index_patterns';
+  TypeMeta,
+} from './data_views';
 
 export {
   IIndexPattern,
@@ -151,16 +78,18 @@ export {
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
-  TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
+  GetFieldsOptions,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  AggregationRestrictions,
   IndexPatternType,
+  IndexPatternListItem,
 } from '../common';
 
-export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
+export { DuplicateDataViewError } from '../common/data_views/errors';
 
 /*
  * Autocomplete query suggestions:
@@ -253,19 +182,10 @@ export type {
   ISearchStartSearchSource,
   ISearchGeneric,
   ISearchSource,
-  SearchInterceptor,
-  SearchInterceptorDeps,
   SearchRequest,
   SearchSourceFields,
-  // expression functions and types
-  EsdslExpressionFunctionDefinition,
-  EsRawResponseExpressionTypeDefinition,
   // errors
   IEsError,
-  SearchError,
-  SearchTimeoutError,
-  TimeoutErrorMode,
-  PainlessError,
   Reason,
   WaitUntilNextSessionCompletesOptions,
 } from './search';
@@ -274,7 +194,6 @@ export {
   parseSearchSourceJSON,
   injectSearchSourceReferences,
   extractSearchSourceReferences,
-  getEsPreference,
   getSearchParamsFromRequest,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
@@ -286,6 +205,7 @@ export {
 
 export type {
   SearchSource,
+  // TODO: remove these when data_enhanced is merged into data
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
@@ -358,7 +278,6 @@ export type {
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
-  InputTimeRange,
   TimefilterContract,
   TimeHistoryContract,
   QueryStateChange,

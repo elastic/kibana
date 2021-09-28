@@ -6,7 +6,9 @@
  */
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { TimelineNonEcsData } from '../../../search_strategy';
+import { RowRenderer } from '../../..';
+import { Ecs } from '../../../ecs';
+import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 import { ColumnHeaderOptions } from '../columns';
 
 /** The following props are provided to the function called by `renderCellValue` */
@@ -19,4 +21,7 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   timelineId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFlyoutAlert?: (data: any) => void;
+  ecsData?: Ecs;
+  rowRenderers?: RowRenderer[];
+  browserFields?: BrowserFields;
 };

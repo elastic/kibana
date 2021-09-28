@@ -19,7 +19,7 @@ import { ContextValue } from './services_context';
 
 export const serviceContextMock = {
   create: (): ContextValue => {
-    const storage = new StorageMock(({} as unknown) as Storage, 'test');
+    const storage = new StorageMock({} as unknown as Storage, 'test');
     const http = httpServiceMock.createSetupContract();
     const api = createApi({ http });
     const esHostService = createEsHostService({ api });
@@ -32,7 +32,7 @@ export const serviceContextMock = {
         settings: new SettingsMock(storage),
         history: new HistoryMock(storage),
         notifications: notificationServiceMock.createSetupContract(),
-        objectStorageClient: ({} as unknown) as ObjectStorageClient,
+        objectStorageClient: {} as unknown as ObjectStorageClient,
       },
       docLinkVersion: 'NA',
     };

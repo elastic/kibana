@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { SerializableState, MigrateFunction } from './types';
+import { SerializableRecord } from '@kbn/utility-types';
+import { MigrateFunction } from './types';
 import { migrateToLatest } from './migrate_to_latest';
 
-interface StateV1 extends SerializableState {
+interface StateV1 extends SerializableRecord {
   name: string;
 }
 
-interface StateV2 extends SerializableState {
+interface StateV2 extends SerializableRecord {
   firstName: string;
   lastName: string;
 }
 
-interface StateV3 extends SerializableState {
+interface StateV3 extends SerializableRecord {
   firstName: string;
   lastName: string;
   isAdmin: boolean;
@@ -56,7 +57,7 @@ test('returns the same object if there are no migrations to be applied', () => {
 test('applies a single migration', () => {
   const newState = migrateToLatest(
     {
-      '0.0.2': (migrationV2 as unknown) as MigrateFunction,
+      '0.0.2': migrationV2 as unknown as MigrateFunction,
     },
     {
       state: { name: 'Foo' },
@@ -73,7 +74,7 @@ test('applies a single migration', () => {
 test('does not apply migration if it has the same version as state', () => {
   const newState = migrateToLatest(
     {
-      '0.0.54': (migrationV2 as unknown) as MigrateFunction,
+      '0.0.54': migrationV2 as unknown as MigrateFunction,
     },
     {
       state: { name: 'Foo' },
@@ -89,7 +90,7 @@ test('does not apply migration if it has the same version as state', () => {
 test('does not apply migration if it has lower version', () => {
   const newState = migrateToLatest(
     {
-      '0.2.2': (migrationV2 as unknown) as MigrateFunction,
+      '0.2.2': migrationV2 as unknown as MigrateFunction,
     },
     {
       state: { name: 'Foo' },
@@ -105,8 +106,8 @@ test('does not apply migration if it has lower version', () => {
 test('applies two migrations consecutively', () => {
   const newState = migrateToLatest(
     {
-      '7.14.0': (migrationV2 as unknown) as MigrateFunction,
-      '7.14.2': (migrationV3 as unknown) as MigrateFunction,
+      '7.14.0': migrationV2 as unknown as MigrateFunction,
+      '7.14.2': migrationV3 as unknown as MigrateFunction,
     },
     {
       state: { name: 'Foo' },
@@ -125,9 +126,9 @@ test('applies two migrations consecutively', () => {
 test('applies only migrations which are have higher semver version', () => {
   const newState = migrateToLatest(
     {
-      '7.14.0': (migrationV2 as unknown) as MigrateFunction, // not applied
+      '7.14.0': migrationV2 as unknown as MigrateFunction, // not applied
       '7.14.1': (() => ({})) as MigrateFunction, // not applied
-      '7.14.2': (migrationV3 as unknown) as MigrateFunction,
+      '7.14.2': migrationV3 as unknown as MigrateFunction,
     },
     {
       state: { firstName: 'FooBar', lastName: 'Baz' },

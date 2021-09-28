@@ -22,7 +22,8 @@ export interface RemoteClustersPluginSetup {
 }
 
 export class RemoteClustersUIPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any> {
+  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(

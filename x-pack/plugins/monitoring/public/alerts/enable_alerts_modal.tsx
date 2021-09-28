@@ -42,7 +42,7 @@ export const EnableAlertsModal: React.FC<Props> = ({ alerts }: Props) => {
     {
       id: 'create-alerts',
       label: i18n.translate('xpack.monitoring.alerts.modal.yesOption', {
-        defaultMessage: 'Yes (Recommended - create default rules in this kibana spaces)',
+        defaultMessage: 'Yes (Recommended - create default rules in this kibana space)',
       }),
     },
     {
@@ -134,7 +134,10 @@ export const EnableAlertsModal: React.FC<Props> = ({ alerts }: Props) => {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={remindLaterClick}>
+        <EuiButtonEmpty
+          onClick={remindLaterClick}
+          data-test-subj="alerts-modal-remind-later-button"
+        >
           <FormattedMessage
             id="xpack.monitoring.alerts.modal.remindLater"
             defaultMessage="Remind me later"

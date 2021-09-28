@@ -27,6 +27,9 @@ import {
 } from './types';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
 
+const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
+const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
+
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
  * plugin and dispatching proper context and dependencies into plugin's lifecycle hooks.
@@ -40,6 +43,7 @@ export class PluginWrapper<
   TPluginsStart extends object = object
 > {
   public readonly path: string;
+  public readonly source: 'oss' | 'x-pack' | 'external';
   public readonly manifest: PluginManifest;
   public readonly opaqueId: PluginOpaqueId;
   public readonly name: PluginManifest['id'];
@@ -70,6 +74,7 @@ export class PluginWrapper<
     }
   ) {
     this.path = params.path;
+    this.source = getPluginSource(params.path);
     this.manifest = params.manifest;
     this.opaqueId = params.opaqueId;
     this.initializerContext = params.initializerContext;
@@ -203,4 +208,13 @@ export class PluginWrapper<
   ): instance is PrebootPlugin<TSetup, TPluginsSetup> {
     return this.manifest.type === PluginType.preboot;
   }
+}
+
+function getPluginSource(path: string): 'oss' | 'x-pack' | 'external' {
+  if (OSS_PATH_REGEX.test(path)) {
+    return 'oss';
+  } else if (XPACK_PATH_REGEX.test(path)) {
+    return 'x-pack';
+  }
+  return 'external';
 }

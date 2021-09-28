@@ -20,7 +20,7 @@ import {
   HIDE_TOC_DETAILS,
   SET_DRAW_MODE,
 } from '../actions';
-import { DRAW_MODE } from '../../common';
+import { DRAW_MODE } from '../../common/constants';
 
 export enum FLYOUT_STATE {
   NONE = 'NONE',

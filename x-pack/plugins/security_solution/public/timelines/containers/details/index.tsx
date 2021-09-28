@@ -22,12 +22,14 @@ import {
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
+import { EntityType } from '../../../../../timelines/common';
 
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
 
 export interface UseTimelineEventsDetailsProps {
+  entityType?: EntityType;
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
@@ -35,6 +37,7 @@ export interface UseTimelineEventsDetailsProps {
 }
 
 export const useTimelineEventsDetails = ({
+  entityType = EntityType.EVENTS,
   docValueFields,
   indexName,
   eventId,
@@ -45,15 +48,12 @@ export const useTimelineEventsDetails = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    timelineDetailsRequest,
-    setTimelineDetailsRequest,
-  ] = useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const [timelineDetailsRequest, setTimelineDetailsRequest] =
+    useState<TimelineEventsDetailsRequestOptions | null>(null);
   const { addError, addWarning } = useAppToasts();
 
-  const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
-    null
-  );
+  const [timelineDetailsResponse, setTimelineDetailsResponse] =
+    useState<EventsArgs['detailsData']>(null);
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
@@ -105,6 +105,7 @@ export const useTimelineEventsDetails = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         docValueFields,
+        entityType,
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
@@ -114,7 +115,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [docValueFields, eventId, indexName]);
+  }, [docValueFields, entityType, eventId, indexName]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);

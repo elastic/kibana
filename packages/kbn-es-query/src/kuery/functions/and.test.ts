@@ -55,6 +55,24 @@ describe('kuery functions', () => {
           )
         );
       });
+
+      test("should wrap subqueries in an ES bool query's must clause for scoring if enabled", () => {
+        const node = nodeTypes.function.buildNode('and', [childNode1, childNode2]);
+        const result = and.toElasticsearchQuery(node, indexPattern, {
+          filtersInMustClause: true,
+        });
+
+        expect(result).toHaveProperty('bool');
+        expect(Object.keys(result).length).toBe(1);
+        expect(result.bool).toHaveProperty('must');
+        expect(Object.keys(result.bool).length).toBe(1);
+
+        expect(result.bool.must).toEqual(
+          [childNode1, childNode2].map((childNode) =>
+            ast.toElasticsearchQuery(childNode, indexPattern)
+          )
+        );
+      });
     });
   });
 });

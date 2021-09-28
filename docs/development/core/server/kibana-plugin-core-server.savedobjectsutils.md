@@ -24,5 +24,6 @@ export declare class SavedObjectsUtils
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [generateId()](./kibana-plugin-core-server.savedobjectsutils.generateid.md) | <code>static</code> | Generates a random ID for a saved objects. |
+|  [getConvertedObjectId(namespace, type, id)](./kibana-plugin-core-server.savedobjectsutils.getconvertedobjectid.md) | <code>static</code> | Uses a single-namespace object's "legacy ID" to determine what its new ID will be after it is converted to a multi-namespace type. |
 |  [isRandomId(id)](./kibana-plugin-core-server.savedobjectsutils.israndomid.md) | <code>static</code> | Validates that a saved object ID has been randomly generated. |
 

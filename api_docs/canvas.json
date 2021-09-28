@@ -11,10 +11,7 @@
         "tags": [],
         "label": "WithKibanaProps",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/canvas/public/index.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/canvas/public/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -39,10 +36,7 @@
               "CanvasServices",
               "; }; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/canvas/public/index.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/canvas/public/index.ts",
             "deprecated": false
           }
         ],
@@ -64,10 +58,7 @@
       "signature": [
         "CanvasApi"
       ],
-      "source": {
-        "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 68
-      },
+      "path": "x-pack/plugins/canvas/public/plugin.tsx",
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -82,10 +73,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 69
-      },
+      "path": "x-pack/plugins/canvas/public/plugin.tsx",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -104,7 +92,65 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "canvas",
+        "id": "def-common.CANVAS_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "CANVAS_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"CANVAS_APP_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/canvas/common/locator.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "canvas",
+        "id": "def-common.CanvasAppLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "CanvasAppLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "canvas",
+            "scope": "common",
+            "docId": "kibCanvasPluginApi",
+            "section": "def-common.CanvasAppLocatorParams",
+            "text": "CanvasAppLocatorParams"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/canvas/common/locator.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "canvas",
+        "id": "def-common.CanvasAppLocatorParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CanvasAppLocatorParams",
+        "description": [],
+        "signature": [
+          "{ view: \"workpadPDF\"; id: string; page: number; }"
+        ],
+        "path": "x-pack/plugins/canvas/common/locator.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "canvas",
@@ -113,10 +159,7 @@
         "tags": [],
         "label": "UI_SETTINGS",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/canvas/common/index.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/canvas/common/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -126,10 +169,7 @@
             "tags": [],
             "label": "ENABLE_LABS_UI",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/canvas/common/index.ts",
-              "lineNumber": 9
-            },
+            "path": "x-pack/plugins/canvas/common/index.ts",
             "deprecated": false
           }
         ],

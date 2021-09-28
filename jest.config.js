@@ -13,6 +13,8 @@ module.exports = {
     '<rootDir>/packages/*/jest.config.js',
     '<rootDir>/src/*/jest.config.js',
     '<rootDir>/src/plugins/*/jest.config.js',
+    '<rootDir>/src/plugins/chart_expressions/*/jest.config.js',
+    '<rootDir>/src/plugins/vis_types/*/jest.config.js',
     '<rootDir>/test/*/jest.config.js',
     '<rootDir>/x-pack/plugins/*/jest.config.js',
   ],

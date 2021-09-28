@@ -49,9 +49,9 @@ const LinkBack = styled.div.attrs({
 `;
 LinkBack.displayName = 'LinkBack';
 
-const Badge = (styled(EuiBadge)`
+const Badge = styled(EuiBadge)`
   letter-spacing: 0;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
 const HeaderSection = styled(EuiPageHeaderSection)`
@@ -84,27 +84,29 @@ export interface HeaderPageProps extends HeaderProps {
   titleNode?: React.ReactElement;
 }
 
-const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo(({ backOptions }) => {
-  const { navigateToUrl } = useKibana().services.application;
-  const { formatUrl } = useFormatUrl(backOptions.pageId);
+export const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo(
+  ({ backOptions }) => {
+    const { navigateToUrl } = useKibana().services.application;
+    const { formatUrl } = useFormatUrl(backOptions.pageId);
 
-  const backUrl = formatUrl(backOptions.path ?? '');
-  return (
-    <LinkBack>
-      <LinkIcon
-        dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
-        onClick={(ev: Event) => {
-          ev.preventDefault();
-          navigateToUrl(backUrl);
-        }}
-        href={backUrl}
-        iconType="arrowLeft"
-      >
-        {backOptions.text}
-      </LinkIcon>
-    </LinkBack>
-  );
-});
+    const backUrl = formatUrl(backOptions.path ?? '');
+    return (
+      <LinkBack>
+        <LinkIcon
+          dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
+          onClick={(ev: Event) => {
+            ev.preventDefault();
+            navigateToUrl(backUrl);
+          }}
+          href={backUrl}
+          iconType="arrowLeft"
+        >
+          {backOptions.text}
+        </LinkIcon>
+      </LinkBack>
+    );
+  }
+);
 HeaderLinkBack.displayName = 'HeaderLinkBack';
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({

@@ -1,5 +1,9 @@
 {
   "id": "observability",
+  "owner": {
+    "name": "Observability UI",
+    "githubTeam": "observability-ui"
+  },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": [
@@ -7,10 +11,11 @@
     "observability"
   ],
   "optionalPlugins": [
+    "embeddable",
     "home",
-    "discover",
     "lens",
     "licensing",
+    "spaces",
     "usageCollection"
   ],
   "requiredPlugins": [
@@ -24,9 +29,5 @@
   ],
   "ui": true,
   "server": true,
-  "requiredBundles": [
-    "data",
-    "kibanaReact",
-    "kibanaUtils"
-  ]
+  "requiredBundles": ["data", "kibanaReact", "kibanaUtils"]
 }

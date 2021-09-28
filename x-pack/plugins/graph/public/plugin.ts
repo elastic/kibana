@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { SpacesApi } from '../../spaces/public';
 import {
   AppNavLinkStatus,
   AppUpdater,
@@ -44,10 +45,12 @@ export interface GraphPluginStartDependencies {
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
   home?: HomePublicPluginStart;
+  spaces?: SpacesApi;
 }
 
 export class GraphPlugin
-  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies> {
+  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies>
+{
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
@@ -84,7 +87,6 @@ export class GraphPlugin
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        await pluginsStart.kibanaLegacy.loadAngularBootstrap();
         coreStart.chrome.docTitle.change(
           i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' })
         );
@@ -104,13 +106,14 @@ export class GraphPlugin
           canEditDrillDownUrls: config.canEditDrillDownUrls,
           graphSavePolicy: config.savePolicy,
           storage: new Storage(window.localStorage),
-          capabilities: coreStart.application.capabilities.graph,
+          capabilities: coreStart.application.capabilities,
           chrome: coreStart.chrome,
           toastNotifications: coreStart.notifications.toasts,
           indexPatterns: pluginsStart.data!.indexPatterns,
           overlays: coreStart.overlays,
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
+          spaces: pluginsStart.spaces,
         });
       },
     });

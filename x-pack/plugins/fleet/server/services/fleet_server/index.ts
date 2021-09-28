@@ -59,6 +59,13 @@ export async function startFleetServerSetup() {
   try {
     // We need licence to be initialized before using the SO service.
     await licenseService.getLicenseInformation$()?.pipe(first())?.toPromise();
+
+    const customUrl = appContextService.getConfig()?.registryUrl;
+    const isEnterprise = licenseService.isEnterprise();
+    if (customUrl && isEnterprise) {
+      logger.info('Custom registry url is an experimental feature and is unsupported.');
+    }
+
     await runFleetServerMigration();
     _isFleetServerSetup = true;
   } catch (err) {

@@ -13,16 +13,19 @@ import { useUrlParams } from '../../../../context/url_params_context/use_url_par
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
+import { Environment } from '../../../../../common/environment_rt';
 
 export const MaybeViewTraceLink = ({
   transaction,
   waterfall,
+  environment,
 }: {
   transaction: ITransaction;
   waterfall: IWaterfall;
+  environment: Environment;
 }) => {
   const {
-    urlParams: { environment, latencyAggregationType },
+    urlParams: { latencyAggregationType },
   } = useUrlParams();
 
   const viewFullTraceButtonLabel = i18n.translate(

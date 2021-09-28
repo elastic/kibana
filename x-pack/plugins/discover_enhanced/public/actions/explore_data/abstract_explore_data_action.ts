@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { DiscoverStart } from '../../../../../../src/plugins/discover/public';
 import { ViewMode, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
-import { KibanaLegacyStart } from '../../../../../../src/plugins/kibana_legacy/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { KibanaLocation } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
@@ -18,11 +17,6 @@ export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
 export interface PluginDeps {
   discover: Pick<DiscoverStart, 'locator'>;
-  kibanaLegacy?: {
-    dashboardConfig: {
-      getHideWriteControls: KibanaLegacyStart['dashboardConfig']['getHideWriteControls'];
-    };
-  };
 }
 
 export interface CoreDeps {
@@ -53,11 +47,6 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
 
     if (capabilities.discover && !capabilities.discover.show) return false;
     if (!plugins.discover.locator) return false;
-    const isDashboardOnlyMode = !!this.params
-      .start()
-      .plugins.kibanaLegacy?.dashboardConfig.getHideWriteControls();
-    if (isDashboardOnlyMode) return false;
-
     if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
 

@@ -49,6 +49,8 @@ describe('Columns', () => {
         onRowSelected={jest.fn()}
         leadingControlColumns={[]}
         trailingControlColumns={[]}
+        setEventsLoading={jest.fn()}
+        setEventsDeleted={jest.fn()}
       />
     );
 

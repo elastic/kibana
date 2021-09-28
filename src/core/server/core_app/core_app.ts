@@ -64,7 +64,7 @@ export class CoreApp {
         httpResources: corePreboot.httpResources.createRegistrar(router),
         router,
         uiPlugins,
-        onResourceNotFound: (res) => res.renderAnonymousCoreApp(),
+        onResourceNotFound: (res) => res.renderCoreApp(),
       });
     });
   }

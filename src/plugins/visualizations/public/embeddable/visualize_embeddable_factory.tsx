@@ -59,10 +59,7 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<
-      VisualizationsStartDeps,
-      'inspector' | 'embeddable' | 'savedObjectsClient' | 'executionContext'
-    >
+    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient'>
   >;
 }
 
@@ -73,7 +70,8 @@ export class VisualizeEmbeddableFactory
       VisualizeOutput | EmbeddableOutput,
       VisualizeEmbeddable | DisabledLabEmbeddable,
       VisualizationAttributes
-    > {
+    >
+{
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   private attributeService?: AttributeService<
@@ -208,7 +206,7 @@ export class VisualizeEmbeddableFactory
       savedVis.copyOnSave = false;
       savedVis.description = '';
       savedVis.searchSourceFields = visObj?.data.searchSource?.getSerializedFields();
-      const serializedVis = ((visObj as unknown) as Vis).serialize();
+      const serializedVis = (visObj as unknown as Vis).serialize();
       const { params, data } = serializedVis;
       savedVis.visState = {
         title,
@@ -254,7 +252,7 @@ export class VisualizeEmbeddableFactory
   }
 
   public inject(_state: EmbeddableStateWithType, references: SavedObjectReference[]) {
-    const state = (_state as unknown) as VisualizeInput;
+    const state = _state as unknown as VisualizeInput;
 
     const { type, params } = state.savedVis ?? {};
 
@@ -267,7 +265,7 @@ export class VisualizeEmbeddableFactory
   }
 
   public extract(_state: EmbeddableStateWithType) {
-    const state = (_state as unknown) as VisualizeInput;
+    const state = _state as unknown as VisualizeInput;
     const references = [];
 
     if (state.savedVis?.data.searchSource) {

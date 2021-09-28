@@ -10,7 +10,7 @@ import { hashedItemStore, getStatesFromKbnUrl } from '../../kibana_utils/public'
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '../../data/common';
 import { DiscoverAppLocatorDefinition } from './locator';
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import { SerializableRecord } from '@kbn/utility-types';
 
 const indexPatternId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -215,7 +215,7 @@ describe('Discover url generator', () => {
     const { path } = await locator.getLocation({
       columns: ['_source'],
       interval: 'auto',
-      sort: [['timestamp, asc']] as string[][] & SerializableState,
+      sort: [['timestamp, asc']] as string[][] & SerializableRecord,
       savedQuery: '__savedQueryId__',
     });
 

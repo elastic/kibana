@@ -6,7 +6,6 @@
  */
 
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
-import { Comparator } from './types';
 import * as mocks from './test_mocks';
 // import { RecoveredActionGroup } from '../../../../../alerting/common';
 import {
@@ -14,10 +13,19 @@ import {
   AlertServicesMock,
   AlertInstanceMock,
 } from '../../../../../alerting/server/mocks';
+import { LifecycleAlertServices } from '../../../../../rule_registry/server';
+import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
+import { createLifecycleRuleExecutorMock } from '../../../../../rule_registry/server/utils/create_lifecycle_rule_executor_mock';
 import { InfraSources } from '../../sources';
-import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { AlertInstanceContext, AlertInstanceState } from '../../../../../alerting/server';
+import {
+  Aggregators,
+  Comparator,
+  CountMetricExpressionParams,
+  NonCountMetricExpressionParams,
+} from './types';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -27,11 +35,36 @@ interface AlertTestInstance {
 
 let persistAlertInstances = false; // eslint-disable-line prefer-const
 
+type TestRuleState = Record<string, unknown> & {
+  aRuleStateKey: string;
+  groups: string[];
+  groupBy?: string | string[];
+};
+
+const initialRuleState: TestRuleState = {
+  aRuleStateKey: 'INITIAL_RULE_STATE_VALUE',
+  groups: [],
+};
+
 const mockOptions = {
   alertId: '',
   startedAt: new Date(),
   previousStartedAt: null,
-  state: {},
+  state: {
+    wrapped: initialRuleState,
+    trackedAlerts: {
+      TEST_ALERT_0: {
+        alertId: 'TEST_ALERT_0',
+        alertUuid: 'TEST_ALERT_0_UUID',
+        started: '2020-01-01T12:00:00.000Z',
+      },
+      TEST_ALERT_1: {
+        alertId: 'TEST_ALERT_1',
+        alertUuid: 'TEST_ALERT_1_UUID',
+        started: '2020-01-02T12:00:00.000Z',
+      },
+    },
+  },
   spaceId: '',
   name: '',
   tags: [],
@@ -60,24 +93,23 @@ const mockOptions = {
 
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
-      executor(({
+      executor({
+        ...mockOptions,
         services,
         params: {
           sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
             },
           ],
         },
-        /**
-         * TODO: Remove this use of `as` by utilizing a proper type
-         */
-      } as unknown) as MetricThresholdAlertExecutorOptions);
+      });
     test('alerts as expected with the > comparator', async () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
@@ -129,20 +161,29 @@ describe('The metric threshold alert type', () => {
   });
 
   describe('querying with a groupBy parameter', () => {
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    afterAll(() => clearInstances());
+    const execute = (
+      comparator: Comparator,
+      threshold: number[],
+      groupBy: string[] = ['something'],
+      metric?: string,
+      state?: any
+    ) =>
       executor({
         ...mockOptions,
         services,
         params: {
-          groupBy: 'something',
+          groupBy,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
             },
           ],
         },
+        state: state ?? mockOptions.state.wrapped,
       });
     const instanceIdA = 'a';
     const instanceIdB = 'b';
@@ -166,28 +207,56 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceIdA).action.group).toBe('a');
       expect(mostRecentAction(instanceIdB).action.group).toBe('b');
     });
+    test('reports previous groups and the groupBy parameter in its state', async () => {
+      const stateResult = await execute(Comparator.GT, [0.75]);
+      expect(stateResult.groups).toEqual(expect.arrayContaining(['a', 'b']));
+      expect(stateResult.groupBy).toEqual(['something']);
+    });
+    test('persists previous groups that go missing, until the groupBy param changes', async () => {
+      const stateResult1 = await execute(Comparator.GT, [0.75], ['something'], 'test.metric.2');
+      expect(stateResult1.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult2 = await execute(
+        Comparator.GT,
+        [0.75],
+        ['something'],
+        'test.metric.1',
+        stateResult1
+      );
+      expect(stateResult2.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult3 = await execute(
+        Comparator.GT,
+        [0.75],
+        ['something', 'something-else'],
+        'test.metric.1',
+        stateResult2
+      );
+      expect(stateResult3.groups).toEqual(expect.arrayContaining(['a', 'b']));
+    });
   });
 
   describe('querying with multiple criteria', () => {
+    afterAll(() => clearInstances());
     const execute = (
       comparator: Comparator,
       thresholdA: number[],
       thresholdB: number[],
-      groupBy: string = ''
+      groupBy: string = '',
+      sourceId: string = 'default'
     ) =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           groupBy,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold: thresholdA,
             },
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold: thresholdB,
               metric: 'test.metric.2',
@@ -202,7 +271,7 @@ describe('The metric threshold alert type', () => {
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
       const instanceID = '*';
-      await execute(Comparator.LT_OR_EQ, [1.0], [3.0]);
+      await execute(Comparator.LT_OR_EQ, [1.0], [2.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
     test('alerts only on groups that meet all criteria when querying with a groupBy parameter', async () => {
@@ -221,49 +290,88 @@ describe('The metric threshold alert type', () => {
       expect(reasons[0]).toContain('test.metric.1');
       expect(reasons[1]).toContain('test.metric.2');
       expect(reasons[0]).toContain('current value is 1');
-      expect(reasons[1]).toContain('current value is 3.5');
+      expect(reasons[1]).toContain('current value is 3');
       expect(reasons[0]).toContain('threshold of 1');
       expect(reasons[1]).toContain('threshold of 3');
     });
   });
   describe('querying with the count aggregator', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseCountCriterion,
               comparator,
               threshold,
-              aggType: 'count',
-              metric: undefined,
-            },
+            } as CountMetricExpressionParams,
           ],
         },
       });
     test('alerts based on the doc_count value instead of the aggregatedValue', async () => {
-      await execute(Comparator.GT, [2]);
+      await execute(Comparator.GT, [0.9]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      await execute(Comparator.LT, [1.5]);
+      await execute(Comparator.LT, [0.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
+    });
+    describe('with a groupBy parameter', () => {
+      const executeGroupBy = (
+        comparator: Comparator,
+        threshold: number[],
+        sourceId: string = 'default',
+        state?: any
+      ) =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId,
+            groupBy: 'something',
+            criteria: [
+              {
+                ...baseCountCriterion,
+                comparator,
+                threshold,
+              },
+            ],
+          },
+          state: state ?? mockOptions.state.wrapped,
+        });
+      const instanceIdA = 'a';
+      const instanceIdB = 'b';
+
+      test('successfully detects and alerts on a document count of 0', async () => {
+        const resultState = await executeGroupBy(Comparator.LT_OR_EQ, [0]);
+        expect(mostRecentAction(instanceIdA)).toBe(undefined);
+        expect(mostRecentAction(instanceIdB)).toBe(undefined);
+        await executeGroupBy(Comparator.LT_OR_EQ, [0], 'empty-response', resultState);
+        expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+        expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+        await executeGroupBy(Comparator.LT_OR_EQ, [0]);
+        expect(mostRecentAction(instanceIdA)).toBe(undefined);
+        expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      });
     });
   });
   describe('querying with the p99 aggregator', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
-              aggType: 'p99',
+              aggType: Aggregators.P99,
               metric: 'test.metric.2',
             },
           ],
@@ -277,18 +385,20 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the p95 aggregator', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator,
               threshold,
-              aggType: 'p95',
+              aggType: Aggregators.P95,
               metric: 'test.metric.1',
             },
           ],
@@ -302,17 +412,19 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe("querying a metric that hasn't reported data", () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
-    const execute = (alertOnNoData: boolean) =>
+    const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
+          sourceId,
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator: Comparator.GT,
-              threshold: 1,
+              threshold: [1],
               metric: 'test.metric.3',
             },
           ],
@@ -329,20 +441,64 @@ describe('The metric threshold alert type', () => {
     });
   });
 
-  describe("querying a rate-aggregated metric that hasn't reported data", () => {
+  describe('querying a groupBy alert that starts reporting no data, and then later reports data', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
-    const execute = () =>
+    const instanceIdA = 'a';
+    const instanceIdB = 'b';
+    const execute = (metric: string, state?: any) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy: 'something',
+          sourceId: 'default',
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [0],
+              metric,
+            },
+          ],
+          alertOnNoData: true,
+        },
+        state: state ?? mockOptions.state.wrapped,
+      });
+    const resultState: any[] = [];
+    test('first sends a No Data alert with the * group, but then reports groups when data is available', async () => {
+      resultState.push(await execute('test.metric.3'));
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      resultState.push(await execute('test.metric.3', resultState.pop()));
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      resultState.push(await execute('test.metric.1', resultState.pop()));
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+    });
+    test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
+      await execute('test.metric.3', resultState.pop());
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+    });
+  });
+
+  describe("querying a rate-aggregated metric that hasn't reported data", () => {
+    afterAll(() => clearInstances());
+    const instanceID = '*';
+    const execute = (sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator: Comparator.GT,
-              threshold: 1,
+              threshold: [1],
               metric: 'test.metric.3',
-              aggType: 'rate',
+              aggType: Aggregators.RATE,
             },
           ],
           alertOnNoData: true,
@@ -370,7 +526,7 @@ describe('The metric threshold alert type', () => {
         params: {
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               comparator: Comparator.GT,
               threshold,
             },
@@ -408,6 +564,7 @@ describe('The metric threshold alert type', () => {
   */
 
   describe('querying a metric with a percentage metric', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = () =>
       executor({
@@ -417,7 +574,7 @@ describe('The metric threshold alert type', () => {
           sourceId: 'default',
           criteria: [
             {
-              ...baseCriterion,
+              ...baseNonCountCriterion,
               metric: 'test.metric.pct',
               comparator: Comparator.GT,
               threshold: [0.75],
@@ -450,15 +607,31 @@ const mockLibs: any = {
     config: createMockStaticConfiguration({}),
   }),
   configuration: createMockStaticConfiguration({}),
+  metricsRules: {
+    createLifecycleRuleExecutor: createLifecycleRuleExecutorMock,
+  },
 };
 
 const executor = createMetricThresholdExecutor(mockLibs);
 
-const services: AlertServicesMock = alertsMock.createAlertServices();
+const alertsServices = alertsMock.createAlertServices();
+const services: AlertServicesMock &
+  LifecycleAlertServices<AlertInstanceState, AlertInstanceContext, string> = {
+  ...alertsServices,
+  ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
+};
 services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
   const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
   if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
+  if (params.index === 'empty-response') return mocks.emptyMetricResponse;
   const metric = params?.body.query.bool.filter[1]?.exists.field;
+  if (metric === 'test.metric.3') {
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      params?.body.aggs.aggregatedIntervals?.aggregations.aggregatedValueMax
+        ? mocks.emptyRateResponse
+        : mocks.emptyMetricResponse
+    );
+  }
   if (params?.body.aggs.groupings) {
     if (params?.body.aggs.groupings.composite.after) {
       return elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -476,24 +649,23 @@ services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: a
   }
   if (metric === 'test.metric.2') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.alternateMetricResponse(from)
-    );
-  } else if (metric === 'test.metric.3') {
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      params?.body.aggs.aggregatedIntervals.aggregations.aggregatedValueMax
-        ? mocks.emptyRateResponse
-        : mocks.emptyMetricResponse
+      mocks.alternateMetricResponse()
     );
   }
-  return elasticsearchClientMock.createSuccessTransportRequestPromise(
-    mocks.basicMetricResponse(from)
-  );
+  return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse());
 });
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
   if (sourceId === 'alternate')
     return {
       id: 'alternate',
       attributes: { metricAlias: 'alternatebeat-*' },
+      type,
+      references: [],
+    };
+  if (sourceId === 'empty-response')
+    return {
+      id: 'empty',
+      attributes: { metricAlias: 'empty-response' },
       type,
       references: [],
     };
@@ -524,12 +696,27 @@ services.alertInstanceFactory.mockImplementation((instanceID: string) => {
 });
 
 function mostRecentAction(id: string) {
-  return alertInstances.get(id)!.actionQueue.pop();
+  const instance = alertInstances.get(id);
+  if (!instance) return undefined;
+  return instance.actionQueue.pop();
 }
 
-const baseCriterion = {
-  aggType: 'avg',
+function clearInstances() {
+  alertInstances.clear();
+}
+
+const baseNonCountCriterion: Pick<
+  NonCountMetricExpressionParams,
+  'aggType' | 'metric' | 'timeSize' | 'timeUnit'
+> = {
+  aggType: Aggregators.AVERAGE,
   metric: 'test.metric.1',
+  timeSize: 1,
+  timeUnit: 'm',
+};
+
+const baseCountCriterion: Pick<CountMetricExpressionParams, 'aggType' | 'timeSize' | 'timeUnit'> = {
+  aggType: Aggregators.COUNT,
   timeSize: 1,
   timeUnit: 'm',
 };

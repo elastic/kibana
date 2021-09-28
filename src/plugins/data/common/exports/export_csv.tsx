@@ -8,8 +8,8 @@
 
 // Inspired by the inspector CSV exporter
 
-import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { Datatable } from 'src/plugins/expressions';
+import { FormatFactory } from '../../../field_formats/common';
 import { createEscapeValue } from './escape_value';
 
 export const LINE_FEED_CHARACTER = '\r\n';

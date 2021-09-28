@@ -6,18 +6,18 @@
  */
 
 /** The minimum (fixed) width of the Actions column */
-export const MINIMUM_ACTIONS_COLUMN_WIDTH = 148; // px;
+export const MINIMUM_ACTIONS_COLUMN_WIDTH = 100; // px;
 
 /** Additional column width to include when checkboxes are shown **/
 export const SHOW_CHECK_BOXES_COLUMN_WIDTH = 24; // px;
 
 /** The (fixed) width of the Actions column */
-export const DEFAULT_ACTIONS_COLUMN_WIDTH = SHOW_CHECK_BOXES_COLUMN_WIDTH * 5; // px;
+export const DEFAULT_ACTIONS_COLUMN_WIDTH = SHOW_CHECK_BOXES_COLUMN_WIDTH * 3; // px;
 /**
  * The (fixed) width of the Actions column when the timeline body is used as
  * an events viewer, which has fewer actions than a regular events viewer
  */
-export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = SHOW_CHECK_BOXES_COLUMN_WIDTH * 4; // px;
+export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = SHOW_CHECK_BOXES_COLUMN_WIDTH * 2; // px;
 
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px

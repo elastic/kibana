@@ -86,6 +86,7 @@ const FormattedFieldValueComponent: React.FC<{
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        isDraggable={isDraggable}
         tooltipContent={null}
         value={`${value}`}
       >
@@ -201,11 +202,11 @@ const FormattedFieldValueComponent: React.FC<{
             </EuiFlexGroup>
           }
         >
-          <>{value}</>
+          <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
         </EuiToolTip>
       </TruncatableText>
     ) : (
-      <>{value}</>
+      <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
     );
   } else {
     const contentValue = getOrEmptyTagFromValue(value);
@@ -214,6 +215,7 @@ const FormattedFieldValueComponent: React.FC<{
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        isDraggable={isDraggable}
         value={`${value}`}
         tooltipContent={
           fieldType === DATE_FIELD_TYPE || fieldType === EVENT_DURATION_FIELD_NAME

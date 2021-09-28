@@ -24,6 +24,7 @@ import {
 import {
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
+  OperatorOption,
   containsValueListEntry,
   filterExceptionItems,
   getDefaultEmptyEntry,
@@ -90,6 +91,7 @@ export interface ExceptionBuilderProps {
   onChange: (arg: OnChangeProps) => void;
   ruleName: string;
   isDisabled?: boolean;
+  operatorsList?: OperatorOption[];
 }
 
 export const ExceptionBuilderComponent = ({
@@ -109,6 +111,7 @@ export const ExceptionBuilderComponent = ({
   ruleName,
   isDisabled = false,
   osTypes,
+  operatorsList,
 }: ExceptionBuilderProps): JSX.Element => {
   const [
     {
@@ -413,6 +416,7 @@ export const ExceptionBuilderComponent = ({
                 setErrorsExist={setErrorsExist}
                 osTypes={osTypes}
                 isDisabled={isDisabled}
+                operatorsList={operatorsList}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

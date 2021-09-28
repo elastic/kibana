@@ -6,7 +6,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
+import { Agent, PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
@@ -17,6 +17,16 @@ export * from './trusted_apps';
  * Supported React-Router state for the Policy Details page
  */
 export interface PolicyDetailsRouteState {
+  /**
+   * Override the "back link" displayed at the top-left corner of page with custom routing
+   */
+  backLink?: {
+    /** link label text */
+    label: string;
+    navigateTo: Parameters<ApplicationStart['navigateToApp']>;
+    href?: string;
+  };
+
   /**
    * Where the user should be redirected to when the `Save` button is clicked and the update was successful
    */
@@ -301,6 +311,21 @@ export type AlertEvent = Partial<{
     feature: ECSField<string>;
     self_injection: ECSField<boolean>;
   }>;
+  destination: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  source: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  registry: Partial<{
+    path: ECSField<string>;
+    value: ECSField<string>;
+    data: Partial<{
+      strings: ECSField<string>;
+    }>;
+  }>;
   Target: Partial<{
     process: Partial<{
       thread: Partial<{
@@ -358,6 +383,10 @@ export type AlertEvent = Partial<{
         identifier: ECSField<string>;
       }>;
     }>;
+  }>;
+  rule: Partial<{
+    id: ECSField<string>;
+    description: ECSField<string>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
@@ -507,6 +536,7 @@ export type HostMetadata = Immutable<{
        */
       isolation?: boolean;
     };
+    capabilities?: string[];
   };
   agent: {
     id: string;
@@ -514,6 +544,16 @@ export type HostMetadata = Immutable<{
   };
   host: Host;
   data_stream: DataStream;
+}>;
+
+export type UnitedAgentMetadata = Immutable<{
+  agent: {
+    id: string;
+  };
+  united: {
+    endpoint: HostMetadata;
+    agent: Agent;
+  };
 }>;
 
 export interface LegacyEndpointEvent {
@@ -677,6 +717,8 @@ export type SafeEndpointEvent = Partial<{
     }>;
   }>;
   network: Partial<{
+    transport: ECSField<string>;
+    type: ECSField<string>;
     direction: ECSField<string>;
     forwarded_ip: ECSField<string>;
   }>;
@@ -828,8 +870,7 @@ type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
   [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
     P[K]
   >;
-} &
-  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
+} & { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
 
 /**
  * Takes the props of a schema.object type, and returns a version that excludes
@@ -865,6 +906,7 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields;
     memory_protection: ProtectionFields & SupportedFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
@@ -882,6 +924,10 @@ export interface PolicyConfig {
         message: string;
         enabled: boolean;
       };
+      behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
     };
     antivirus_registration: {
       enabled: boolean;
@@ -895,8 +941,13 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -913,8 +964,13 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -941,15 +997,22 @@ export interface UIPolicyConfig {
     | 'antivirus_registration'
     | 'advanced'
     | 'memory_protection'
+    | 'behavior_protection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  mac: Pick<
+    PolicyConfig['mac'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  linux: Pick<
+    PolicyConfig['linux'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
 }
 
 /** Policy:  Protection fields */
@@ -977,7 +1040,7 @@ export type PolicyData = PackagePolicy & NewPolicyData;
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewPackagePolicy & {
+export type NewPolicyData = UpdatePackagePolicy & {
   inputs: [
     {
       type: 'endpoint';
@@ -1040,7 +1103,8 @@ export interface HostPolicyResponseAppliedAction {
   message: string;
 }
 
-export type HostPolicyResponseConfiguration = HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
+export type HostPolicyResponseConfiguration =
+  HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;

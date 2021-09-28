@@ -48,7 +48,7 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.LINUX]: 'Linux',
   [INSTRUCTION_VARIANT.PHP]: 'PHP',
   [INSTRUCTION_VARIANT.FLEET]: i18n.translate('home.tutorial.instruction_variant.fleet', {
-    defaultMessage: 'Elastic APM (beta) in Fleet',
+    defaultMessage: 'Elastic APM in Fleet',
   }),
 };
 

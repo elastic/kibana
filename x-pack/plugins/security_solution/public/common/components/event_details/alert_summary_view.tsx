@@ -19,8 +19,11 @@ import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
+  ALERTS_HEADERS_RULE_NAME,
   SIGNAL_STATUS,
+  ALERTS_HEADERS_TARGET_IMPORT_HASH,
   TIMESTAMP,
+  ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
 import {
   AGENT_STATUS_FIELD_NAME,
@@ -33,12 +36,12 @@ import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
-import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
+import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
 import { TimelineEventsDetailsItem } from '../../../../common';
-import { EventFieldsData } from './types';
+import { EventCode } from '../../../../common/ecs/event';
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -49,7 +52,15 @@ const StyledEmptyComponent = styled.div`
   padding: ${(props) => `${props.theme.eui.paddingSizes.xs} 0`};
 `;
 
-const fields = [
+interface EventSummaryField {
+  id: string;
+  label?: string;
+  linkField?: string;
+  fieldType?: string;
+  overrideField?: string;
+}
+
+const defaultDisplayFields: EventSummaryField[] = [
   { id: 'signal.status', label: SIGNAL_STATUS },
   { id: '@timestamp', label: TIMESTAMP },
   {
@@ -69,24 +80,44 @@ const fields = [
   { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
 
-const processFields = [
-  ...fields,
+const processCategoryFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
   { id: 'process.name' },
   { id: 'process.parent.name' },
   { id: 'process.args' },
 ];
 
-const networkFields = [
-  ...fields,
+const networkCategoryFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
   { id: 'destination.address' },
   { id: 'destination.port' },
   { id: 'process.name' },
+];
+
+const memoryShellCodeAlertFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
+  { id: 'rule.name', label: ALERTS_HEADERS_RULE_NAME },
+  {
+    id: 'Target.process.thread.Ext.start_address_details.memory_pe.imphash',
+    label: ALERTS_HEADERS_TARGET_IMPORT_HASH,
+  },
+];
+
+const behaviorAlertFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
+  { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
+];
+
+const memorySignatureAlertFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
+  { id: 'rule.name', label: ALERTS_HEADERS_RULE_NAME },
 ];
 
 const getDescription = ({
   data,
   eventId,
   fieldFromBrowserField,
+  isDraggable,
   linkValue,
   timelineId,
   values,
@@ -95,23 +126,20 @@ const getDescription = ({
     return <StyledEmptyComponent>{getEmptyValue()}</StyledEmptyComponent>;
   }
 
-  const eventFieldsData = {
-    ...data,
-    ...(fieldFromBrowserField ? fieldFromBrowserField : {}),
-  } as EventFieldsData;
   return (
     <>
       <FieldValueCell
         contextId={timelineId}
-        data={eventFieldsData}
+        data={data}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
+        isDraggable={isDraggable}
         values={values}
       />
       <ActionCell
         contextId={timelineId}
-        data={eventFieldsData}
+        data={data}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
@@ -122,36 +150,67 @@ const getDescription = ({
   );
 };
 
-const getSummaryRows = ({
+function getEventFieldsToDisplay({
+  eventCategory,
+  eventCode,
+}: {
+  eventCategory: string;
+  eventCode?: string;
+}): EventSummaryField[] {
+  switch (eventCode) {
+    // memory protection fields
+    case EventCode.SHELLCODE_THREAD:
+      return memoryShellCodeAlertFields;
+    case EventCode.MEMORY_SIGNATURE:
+      return memorySignatureAlertFields;
+    case EventCode.BEHAVIOR:
+      return behaviorAlertFields;
+  }
+
+  switch (eventCategory) {
+    case 'network':
+      return networkCategoryFields;
+
+    case 'process':
+      return processCategoryFields;
+  }
+
+  return defaultDisplayFields;
+}
+
+export const getSummaryRows = ({
   data,
   browserFields,
   timelineId,
   eventId,
+  isDraggable = false,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   timelineId: string;
   eventId: string;
+  isDraggable?: boolean;
 }) => {
-  const categoryField = find({ category: 'event', field: 'event.category' }, data) as
-    | TimelineEventsDetailsItem
-    | undefined;
-  const eventCategory = Array.isArray(categoryField?.originalValue)
-    ? categoryField?.originalValue[0]
-    : categoryField?.originalValue;
+  const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
 
-  const tableFields =
-    eventCategory === 'network'
-      ? networkFields
-      : eventCategory === 'process'
-      ? processFields
-      : fields;
+  const eventCategory = Array.isArray(eventCategoryField?.originalValue)
+    ? eventCategoryField?.originalValue[0]
+    : eventCategoryField?.originalValue;
+
+  const eventCodeField = find({ category: 'event', field: 'event.code' }, data);
+
+  const eventCode = Array.isArray(eventCodeField?.originalValue)
+    ? eventCodeField?.originalValue?.[0]
+    : eventCodeField?.originalValue;
+
+  const tableFields = getEventFieldsToDisplay({ eventCategory, eventCode });
 
   return data != null
     ? tableFields.reduce<SummaryRow[]>((acc, item) => {
         const initialDescription = {
           contextId: timelineId,
           eventId,
+          isDraggable,
           value: null,
           fieldType: 'string',
           linkValue: undefined,
@@ -178,13 +237,19 @@ const getSummaryRows = ({
         const browserField = get([category, 'fields', fieldName], browserFields);
         const description = {
           ...initialDescription,
-          data: { ...field, ...(item.overrideField ? { field: item.overrideField } : {}) },
+          data: {
+            field: field.field,
+            format: browserField?.format ?? '',
+            type: browserField?.type ?? '',
+            isObjectArray: field.isObjectArray,
+            ...(item.overrideField ? { field: item.overrideField } : {}),
+          },
           values: field.values,
           linkValue: linkValue ?? undefined,
           fieldFromBrowserField: browserField,
         };
 
-        if (item.id === 'agent.id' && !endpointAlertCheck({ data })) {
+        if (item.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
           return acc;
         }
 
@@ -244,15 +309,14 @@ const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
+  isDraggable?: boolean;
   timelineId: string;
   title?: string;
-}> = ({ browserFields, data, eventId, timelineId, title }) => {
-  const summaryRows = useMemo(() => getSummaryRows({ browserFields, data, eventId, timelineId }), [
-    browserFields,
-    data,
-    eventId,
-    timelineId,
-  ]);
+}> = ({ browserFields, data, eventId, isDraggable, timelineId, title }) => {
+  const summaryRows = useMemo(
+    () => getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId }),
+    [browserFields, data, eventId, isDraggable, timelineId]
+  );
 
   const ruleId = useMemo(() => {
     const item = data.find((d) => d.field === 'signal.rule.id');
@@ -264,7 +328,6 @@ const AlertSummaryViewComponent: React.FC<{
 
   return (
     <>
-      <EuiSpacer size="l" />
       <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
       {maybeRule?.note && (
         <>

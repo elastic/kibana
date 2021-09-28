@@ -29,6 +29,12 @@ export const GetTrustedAppsRequestSchema = {
   }),
 };
 
+export const GetTrustedAppsSummaryRequestSchema = {
+  query: schema.object({
+    kuery: schema.maybe(schema.string()),
+  }),
+};
+
 const ConditionEntryTypeSchema = schema.conditional(
   schema.siblingRef('field'),
   ConditionEntryField.PATH,

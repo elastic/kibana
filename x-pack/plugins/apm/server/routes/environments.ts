@@ -27,21 +27,26 @@ const environmentsRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { serviceName } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const { serviceName, start, end } = params.query;
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      start,
+      end,
+      kuery: '',
+    });
 
     const environments = await getEnvironments({
       setup,
       serviceName,
       searchAggregatedTransactions,
+      start,
+      end,
     });
 
     return { environments };
   },
 });
 
-export const environmentsRouteRepository = createApmServerRouteRepository().add(
-  environmentsRoute
-);
+export const environmentsRouteRepository =
+  createApmServerRouteRepository().add(environmentsRoute);

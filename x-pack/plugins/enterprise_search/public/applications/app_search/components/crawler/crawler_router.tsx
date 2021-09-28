@@ -5,19 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { ENGINE_CRAWLER_PATH } from '../../routes';
+import { useActions } from 'kea';
 
-import { CrawlerLanding } from './crawler_landing';
+import { ENGINE_CRAWLER_DOMAIN_PATH, ENGINE_CRAWLER_PATH } from '../../routes';
+
+import { CrawlerLogic } from './crawler_logic';
+
 import { CrawlerOverview } from './crawler_overview';
+import { CrawlerSingleDomain } from './crawler_single_domain';
 
 export const CrawlerRouter: React.FC = () => {
+  const { fetchCrawlerData } = useActions(CrawlerLogic);
+
+  useEffect(() => {
+    fetchCrawlerData();
+  }, []);
+
   return (
     <Switch>
       <Route exact path={ENGINE_CRAWLER_PATH}>
-        {process.env.NODE_ENV === 'development' ? <CrawlerOverview /> : <CrawlerLanding />}
+        <CrawlerOverview />
+      </Route>
+      <Route exact path={ENGINE_CRAWLER_DOMAIN_PATH}>
+        <CrawlerSingleDomain />
       </Route>
     </Switch>
   );

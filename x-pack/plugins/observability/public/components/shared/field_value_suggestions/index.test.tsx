@@ -95,7 +95,6 @@ describe('FieldValueSuggestions', () => {
           selectedValue={[]}
           filters={[]}
           asCombobox={false}
-          allowExclusions={true}
         />
       </EuiThemeProvider>
     );
@@ -120,7 +119,6 @@ describe('FieldValueSuggestions', () => {
           excludedValue={['Pak']}
           filters={[]}
           asCombobox={false}
-          allowExclusions={true}
         />
       </EuiThemeProvider>
     );

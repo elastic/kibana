@@ -7,19 +7,16 @@
 
 import sinon, { SinonFakeServer } from 'sinon';
 import { API_BASE_PATH } from '../../../common/constants';
-import { UpgradeAssistantStatus } from '../../../common/types';
+import { ESUpgradeStatus, DeprecationLoggingStatus } from '../../../common/types';
 import { ResponseError } from '../../../public/application/lib/api';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadEsDeprecationsResponse = (
-    response?: UpgradeAssistantStatus,
-    error?: ResponseError
-  ) => {
+  const setLoadEsDeprecationsResponse = (response?: ESUpgradeStatus, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 
-    server.respondWith('GET', `${API_BASE_PATH}/status`, [
+    server.respondWith('GET', `${API_BASE_PATH}/es_deprecations`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -27,7 +24,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setLoadDeprecationLoggingResponse = (
-    response?: { isEnabled: boolean },
+    response?: DeprecationLoggingStatus,
     error?: ResponseError
   ) => {
     const status = error ? error.statusCode || 400 : 200;
@@ -41,7 +38,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setUpdateDeprecationLoggingResponse = (
-    response?: { isEnabled: boolean },
+    response?: DeprecationLoggingStatus,
     error?: ResponseError
   ) => {
     const status = error ? error.statusCode || 400 : 200;
@@ -54,11 +51,13 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setUpdateIndexSettingsResponse = (response?: object) => {
+  const setUpdateIndexSettingsResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
     server.respondWith('POST', `${API_BASE_PATH}/:indexName/index_settings`, [
-      200,
+      status,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
+      JSON.stringify(body),
     ]);
   };
 
@@ -67,6 +66,17 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const body = error ? error : response;
 
     server.respondWith('POST', `${API_BASE_PATH}/ml_snapshots`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setUpgradeMlSnapshotStatusResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/ml_snapshots/:jobId/:snapshotId`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -91,6 +101,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setUpdateIndexSettingsResponse,
     setUpgradeMlSnapshotResponse,
     setDeleteMlSnapshotResponse,
+    setUpgradeMlSnapshotStatusResponse,
   };
 };
 

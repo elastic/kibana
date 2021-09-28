@@ -8,9 +8,10 @@
 
 import { noop, map, omitBy, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { cidrToAst, ipRangeToAst } from '../../expressions';
+
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-
 import { createFilterIpRange } from './create_filter/ip_range';
 import { IpRangeKey, RangeIpRangeAggKey, CidrMaskIpRangeAggKey } from './lib/ip_range';
 import { aggIpRangeFnName } from './ip_range_fn';
@@ -93,6 +94,10 @@ export const getIpRangeBucketAgg = () =>
 
           output.params.ranges = ranges;
         },
+        toExpressionAst: (ranges: AggParamsIpRange['ranges']) => [
+          ...map(ranges?.[IP_RANGE_TYPES.FROM_TO], ipRangeToAst),
+          ...map(ranges?.[IP_RANGE_TYPES.MASK], cidrToAst),
+        ],
       },
     ],
   });

@@ -192,12 +192,28 @@ export interface RawAlertExecutionStatus extends SavedObjectAttributes {
 export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Params>, 'id'> &
   Partial<Omit<Alert<Params>, 'id'>>;
 
+export interface AlertWithLegacyId<Params extends AlertTypeParams = never> extends Alert<Params> {
+  legacyId: string | null;
+}
+
+export type SanitizedAlertWithLegacyId<Params extends AlertTypeParams = never> = Omit<
+  AlertWithLegacyId<Params>,
+  'apiKey'
+>;
+
+export type PartialAlertWithLegacyId<Params extends AlertTypeParams = never> = Pick<
+  AlertWithLegacyId<Params>,
+  'id'
+> &
+  Partial<Omit<AlertWithLegacyId<Params>, 'id'>>;
+
 export interface RawAlert extends SavedObjectAttributes {
   enabled: boolean;
   name: string;
   tags: string[];
   alertTypeId: string;
   consumer: string;
+  legacyId: string | null;
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;

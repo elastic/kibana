@@ -21,25 +21,22 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
-import { CoreStart, ApplicationStart } from 'kibana/public';
-import {
-  DataPublicPluginStart,
-  ExecutionContextSearch,
-  TimefilterContract,
-} from 'src/plugins/data/public';
+import type { CoreStart, ApplicationStart } from 'kibana/public';
+import type { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
-import {
+import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
   ReactExpressionRendererType,
 } from '../../../../../../../src/plugins/expressions/public';
 import {
-  Datasource,
-  Visualization,
   FramePublicAPI,
   isLensBrushEvent,
   isLensFilterEvent,
   isLensEditEvent,
+  VisualizationMap,
+  DatasourceMap,
+  DatasourceFixAction,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
@@ -58,34 +55,32 @@ import {
   updateVisualizationState,
   updateDatasourceState,
   setSaveable,
+  useLensSelector,
+  selectExecutionContext,
+  selectIsFullscreenDatasource,
+  selectVisualization,
+  selectDatasourceStates,
+  selectActiveDatasourceId,
+  selectSearchSessionId,
 } from '../../../state_management';
+import type { LensInspector } from '../../../lens_inspector_service';
 
 export interface WorkspacePanelProps {
-  activeVisualizationId: string | null;
-  visualizationMap: Record<string, Visualization>;
-  visualizationState: unknown;
-  activeDatasourceId: string | null;
-  datasourceMap: Record<string, Datasource>;
-  datasourceStates: Record<
-    string,
-    {
-      state: unknown;
-      isLoading: boolean;
-    }
-  >;
+  visualizationMap: VisualizationMap;
+  datasourceMap: DatasourceMap;
   framePublicAPI: FramePublicAPI;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
-  isFullscreen: boolean;
+  lensInspector: LensInspector;
 }
 
 interface WorkspaceState {
   expressionBuildError?: Array<{
     shortMessage: string;
-    longMessage: string;
-    fixAction?: { label: string; newState: (framePublicAPI: FramePublicAPI) => Promise<unknown> };
+    longMessage: React.ReactNode;
+    fixAction?: DatasourceFixAction<unknown>;
   }>;
   expandError: boolean;
 }
@@ -120,29 +115,31 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
 
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
-  activeDatasourceId,
-  activeVisualizationId,
-  visualizationMap,
-  visualizationState,
-  datasourceMap,
-  datasourceStates,
   framePublicAPI,
+  visualizationMap,
+  datasourceMap,
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
   suggestionForDraggedField,
-  isFullscreen,
+  lensInspector,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
   const dispatchLens = useLensDispatch();
+  const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
+  const visualization = useLensSelector(selectVisualization);
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
+
+  const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
   });
 
-  const activeVisualization = activeVisualizationId
-    ? visualizationMap[activeVisualizationId]
+  const activeVisualization = visualization.activeId
+    ? visualizationMap[visualization.activeId]
     : null;
 
   const missingIndexPatterns = getMissingIndexPattern(
@@ -175,64 +172,60 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
         activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
         activeVisualization,
-        visualizationState,
+        visualization.state,
         framePublicAPI
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeVisualization, visualizationState, activeDatasourceId, datasourceMap, datasourceStates]
+    [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
-  const expression = useMemo(
-    () => {
-      if (!configurationValidationError?.length && !missingRefsErrors.length) {
-        try {
-          const ast = buildExpression({
-            visualization: activeVisualization,
-            visualizationState,
-            datasourceMap,
-            datasourceStates,
-            datasourceLayers: framePublicAPI.datasourceLayers,
-          });
+  const expression = useMemo(() => {
+    if (!configurationValidationError?.length && !missingRefsErrors.length) {
+      try {
+        const ast = buildExpression({
+          visualization: activeVisualization,
+          visualizationState: visualization.state,
+          datasourceMap,
+          datasourceStates,
+          datasourceLayers,
+        });
 
-          if (ast) {
-            // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
-            // turning it into a string will make sure the expression renderer only re-renders if the
-            // expression actually changed.
-            return toExpression(ast);
-          } else {
-            return null;
-          }
-        } catch (e) {
-          const buildMessages = activeVisualization?.getErrorMessages(visualizationState);
-          const defaultMessage = {
-            shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
-              defaultMessage: 'An unexpected error occurred while preparing the chart',
-            }),
-            longMessage: e.toString(),
-          };
-          // Most likely an error in the expression provided by a datasource or visualization
-          setLocalState((s) => ({
-            ...s,
-            expressionBuildError: buildMessages ?? [defaultMessage],
-          }));
+        if (ast) {
+          // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
+          // turning it into a string will make sure the expression renderer only re-renders if the
+          // expression actually changed.
+          return toExpression(ast);
+        } else {
+          return null;
         }
+      } catch (e) {
+        const buildMessages = activeVisualization?.getErrorMessages(visualization.state);
+        const defaultMessage = {
+          shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
+            defaultMessage: 'An unexpected error occurred while preparing the chart',
+          }),
+          longMessage: e.toString(),
+        };
+        // Most likely an error in the expression provided by a datasource or visualization
+        setLocalState((s) => ({
+          ...s,
+          expressionBuildError: buildMessages ?? [defaultMessage],
+        }));
       }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      activeVisualization,
-      visualizationState,
-      datasourceMap,
-      datasourceStates,
-      framePublicAPI.dateRange,
-      framePublicAPI.query,
-      framePublicAPI.filters,
-    ]
-  );
+    }
+  }, [
+    activeVisualization,
+    visualization.state,
+    datasourceMap,
+    datasourceStates,
+    datasourceLayers,
+    configurationValidationError?.length,
+    missingRefsErrors.length,
+  ]);
 
   const expressionExists = Boolean(expression);
   const hasLoaded = Boolean(
-    activeVisualization && visualizationState && datasourceMap && datasourceStates
+    activeVisualization && visualization.state && datasourceMap && datasourceStates
   );
   useEffect(() => {
     if (hasLoaded) {
@@ -341,7 +334,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       <VisualizationWrapper
         expression={expression}
         framePublicAPI={framePublicAPI}
-        timefilter={plugins.data.query.timefilter.timefilter}
+        lensInspector={lensInspector}
         onEvent={onEvent}
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
@@ -392,8 +385,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   return (
     <WorkspacePanelWrapper
       framePublicAPI={framePublicAPI}
-      visualizationState={visualizationState}
-      visualizationId={activeVisualizationId}
+      visualizationState={visualization.state}
+      visualizationId={visualization.activeId}
       datasourceStates={datasourceStates}
       datasourceMap={datasourceMap}
       visualizationMap={visualizationMap}
@@ -407,7 +400,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 export const VisualizationWrapper = ({
   expression,
   framePublicAPI,
-  timefilter,
+  lensInspector,
   onEvent,
   setLocalState,
   localState,
@@ -417,44 +410,41 @@ export const VisualizationWrapper = ({
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
-  timefilter: TimefilterContract;
+  lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{
       shortMessage: string;
-      longMessage: string;
-      fixAction?: { label: string; newState: (framePublicAPI: FramePublicAPI) => Promise<unknown> };
+      longMessage: React.ReactNode;
+      fixAction?: DatasourceFixAction<unknown>;
     }>;
-    missingRefsErrors?: Array<{ shortMessage: string; longMessage: string }>;
+    missingRefsErrors?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
   application: ApplicationStart;
   activeDatasourceId: string | null;
 }) => {
-  const context: ExecutionContextSearch = useMemo(
+  const context = useLensSelector(selectExecutionContext);
+  const searchContext: ExecutionContextSearch = useMemo(
     () => ({
-      query: framePublicAPI.query,
+      query: context.query,
       timeRange: {
-        from: framePublicAPI.dateRange.fromDate,
-        to: framePublicAPI.dateRange.toDate,
+        from: context.dateRange.fromDate,
+        to: context.dateRange.toDate,
       },
-      filters: framePublicAPI.filters,
+      filters: context.filters,
     }),
-    [
-      framePublicAPI.query,
-      framePublicAPI.dateRange.fromDate,
-      framePublicAPI.dateRange.toDate,
-      framePublicAPI.filters,
-    ]
+    [context]
   );
+  const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const dispatchLens = useLensDispatch();
 
   const onData$ = useCallback(
-    (data: unknown, inspectorAdapters?: Partial<DefaultInspectorAdapters>) => {
-      if (inspectorAdapters && inspectorAdapters.tables) {
-        dispatchLens(onActiveDataChange({ ...inspectorAdapters.tables.tables }));
+    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+      if (adapters && adapters.tables) {
+        dispatchLens(onActiveDataChange({ ...adapters.tables.tables }));
       }
     },
     [dispatchLens]
@@ -464,10 +454,8 @@ export const VisualizationWrapper = ({
     validationError:
       | {
           shortMessage: string;
-          longMessage: string;
-          fixAction?:
-            | { label: string; newState: (framePublicAPI: FramePublicAPI) => Promise<unknown> }
-            | undefined;
+          longMessage: React.ReactNode;
+          fixAction?: DatasourceFixAction<unknown>;
         }
       | undefined
   ) {
@@ -480,7 +468,10 @@ export const VisualizationWrapper = ({
             data-test-subj="errorFixAction"
             onClick={async () => {
               trackUiEvent('error_fix_action');
-              const newState = await validationError.fixAction?.newState(framePublicAPI);
+              const newState = await validationError.fixAction?.newState({
+                ...framePublicAPI,
+                ...context,
+              });
               dispatchLens(
                 updateDatasourceState({
                   updater: newState,
@@ -508,7 +499,7 @@ export const VisualizationWrapper = ({
           .map((validationError) => (
             <>
               <p
-                key={validationError.longMessage}
+                key={validationError.shortMessage}
                 className="eui-textBreakWord"
                 data-test-subj="configuration-failure-error"
               >
@@ -638,10 +629,11 @@ export const VisualizationWrapper = ({
         className="lnsExpressionRenderer__component"
         padding="m"
         expression={expression!}
-        searchContext={context}
-        searchSessionId={framePublicAPI.searchSessionId}
+        searchContext={searchContext}
+        searchSessionId={searchSessionId}
         onEvent={onEvent}
         onData$={onData$}
+        inspectorAdapters={lensInspector.adapters}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error);

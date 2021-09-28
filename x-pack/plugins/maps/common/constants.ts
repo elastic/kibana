@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
 export const EMS_APP_NAME = 'kibana';
-export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
 export const EMS_FILES_API_PATH = 'ems/files';
@@ -44,6 +43,7 @@ export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
 export const GET_MATCHING_INDEXES_PATH = `/${GIS_API_PATH}/getMatchingIndexes`;
+export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
@@ -91,7 +91,6 @@ export enum SOURCE_TYPES {
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
-  REGIONMAP_FILE = 'REGIONMAP_FILE',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
   TABLE_SOURCE = 'TABLE_SOURCE',
@@ -130,7 +129,7 @@ export enum ES_GEO_FIELD_TYPE {
   GEO_SHAPE = 'geo_shape',
 }
 
-// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IFieldType.type is compared to value
+// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IndexPatternField.type is compared to value
 export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
 export enum ES_SPATIAL_RELATIONS {
@@ -310,7 +309,7 @@ export type RawValue = string | string[] | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
 
-export const INDEX_META_DATA_CREATED_BY = 'maps-drawing-data-ingest';
+export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 

@@ -61,13 +61,19 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   // grouping related
   const osqueryPolicyData = useOsqueryPolicies();
-  const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
-    osqueryPolicyData
-  );
+  const {
+    loading: groupsLoading,
+    totalCount: totalNumAgents,
+    groups,
+  } = useAgentGroups(osqueryPolicyData);
   const grouper = useMemo(() => new AgentGrouper(), []);
-  const { agentsLoading, agents } = useAllAgents(osqueryPolicyData, debouncedSearchValue, {
-    perPage,
-  });
+  const { isLoading: agentsLoading, data: agents } = useAllAgents(
+    osqueryPolicyData,
+    debouncedSearchValue,
+    {
+      perPage,
+    }
+  );
 
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
@@ -108,8 +114,8 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     grouper.setTotalAgents(totalNumAgents);
     grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
     grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents!);
+    // @ts-expect-error update types
+    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
     const newOptions = grouper.generateOptions();
     setOptions(newOptions);
   }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents, grouper]);

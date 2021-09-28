@@ -9,6 +9,7 @@
 import { defaults, isEqual, omit, map } from 'lodash';
 import type { FilterMeta, Filter } from '../build_filters';
 
+/** @public */
 export interface FilterCompareOptions {
   index?: boolean;
   disabled?: boolean;
@@ -19,6 +20,7 @@ export interface FilterCompareOptions {
 
 /**
  * Include disabled, negate and store when comparing filters
+ * @public
  */
 export const COMPARE_ALL_OPTIONS: FilterCompareOptions = {
   index: true,
@@ -60,6 +62,8 @@ const mapFilterArray = (
  * @param {FilterCompareOptions} comparatorOptions Parameters to use for comparison
  *
  * @returns {bool} Filters are the same
+ *
+ * @public
  */
 export const compareFilters = (
   first: Filter | Filter[],

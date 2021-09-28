@@ -9,6 +9,7 @@
 import { getFilterField, cleanFilter, Filter } from '../filters';
 import { IndexPatternBase } from './types';
 
+/** @internal */
 export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternBase) => {
   if (!indexPattern) return filter;
 

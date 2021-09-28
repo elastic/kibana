@@ -43,7 +43,7 @@ export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.aler
 export const BUTTON_MANAGE_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.buttonManageRules',
   {
-    defaultMessage: 'Manage detection rules',
+    defaultMessage: 'Manage rules',
   }
 );
 
@@ -143,3 +143,18 @@ export const ML_RULES_UNAVAILABLE = (totalRules: number) =>
     defaultMessage:
       '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine Learning to enable.',
   });
+
+export const FEATURE_NO_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.noPermissionsTitle',
+  {
+    defaultMessage: 'Privileges required',
+  }
+);
+
+export const ALERTS_FEATURE_NO_PERMISSIONS_MSG = i18n.translate(
+  'xpack.securitySolution.detectionEngine.noPermissionsMessage',
+  {
+    defaultMessage:
+      'To view alerts, you must update privileges. For more information, contact your Kibana administrator.',
+  }
+);

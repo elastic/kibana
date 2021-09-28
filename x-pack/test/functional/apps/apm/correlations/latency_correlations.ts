@@ -17,7 +17,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
-  const testData = { serviceName: 'opbeans-go' };
+  const testData = {
+    latencyCorrelationsTab: 'Latency correlations',
+    logLogChartTitle: 'Latency distribution',
+    serviceName: 'opbeans-go',
+    transactionsTab: 'Transactions',
+    transaction: 'GET /api/stats',
+  };
 
   describe('latency correlations', () => {
     describe('space with no features disabled', () => {
@@ -90,48 +96,72 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const apmMainTemplateHeaderServiceName = await testSubjects.getVisibleTextAll(
             'apmMainTemplateHeaderServiceName'
           );
-          expect(apmMainTemplateHeaderServiceName).to.contain('opbeans-go');
+          expect(apmMainTemplateHeaderServiceName).to.contain(testData.serviceName);
         });
       });
 
-      it('shows the correlations flyout', async function () {
-        await testSubjects.click('apmViewCorrelationsButton');
+      it('navigates to the transactions tab', async function () {
+        await find.clickByDisplayedLinkText(testData.transactionsTab);
 
         await retry.try(async () => {
-          await testSubjects.existOrFail('apmCorrelationsFlyout', {
-            timeout: 10000,
-          });
+          const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
+          const apmMainContainerTextItems = apmMainContainerText[0].split('\n');
 
-          const apmCorrelationsFlyoutHeader = await testSubjects.getVisibleText(
-            'apmCorrelationsFlyoutHeader'
+          expect(apmMainContainerTextItems).to.contain(testData.transaction);
+        });
+      });
+
+      it(`navigates to the 'GET /api/stats' transactions`, async function () {
+        await find.clickByDisplayedLinkText(testData.transaction);
+
+        await retry.try(async () => {
+          const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
+          const apmMainContainerTextItems = apmMainContainerText[0].split('\n');
+
+          expect(apmMainContainerTextItems).to.contain(testData.transaction);
+          expect(apmMainContainerTextItems).to.contain(testData.latencyCorrelationsTab);
+
+          // The default tab 'Trace samples' should show the log log chart without the correlations analysis part.
+          // First assert that the log log chart and its header are present
+          const apmTransactionDistributionChartTitle = await testSubjects.getVisibleText(
+            'apmTransactionDistributionChartTitle'
           );
+          expect(apmTransactionDistributionChartTitle).to.be(testData.logLogChartTitle);
+          await testSubjects.existOrFail('apmCorrelationsChart');
+          // Then assert that the correlation analysis part is not present
+          await testSubjects.missingOrFail('apmCorrelationsLatencyCorrelationsTablePanelTitle');
+        });
+      });
 
-          expect(apmCorrelationsFlyoutHeader).to.contain('Correlations BETA');
+      it('shows the correlations tab', async function () {
+        await testSubjects.click('apmLatencyCorrelationsTabButton');
+
+        await retry.try(async () => {
+          await testSubjects.existOrFail('apmLatencyCorrelationsTabContent');
         });
       });
 
       it('loads the correlation results', async function () {
         await retry.try(async () => {
           // Assert that the data fully loaded to 100%
-          const apmCorrelationsLatencyCorrelationsProgressTitle = await testSubjects.getVisibleText(
-            'apmCorrelationsLatencyCorrelationsProgressTitle'
+          const apmLatencyCorrelationsProgressTitle = await testSubjects.getVisibleText(
+            'apmCorrelationsProgressTitle'
           );
-          expect(apmCorrelationsLatencyCorrelationsProgressTitle).to.be('Progress: 100%');
+          expect(apmLatencyCorrelationsProgressTitle).to.be('Progress: 100%');
 
           // Assert that the Correlations Chart and its header are present
           const apmCorrelationsLatencyCorrelationsChartTitle = await testSubjects.getVisibleText(
             'apmCorrelationsLatencyCorrelationsChartTitle'
           );
-          expect(apmCorrelationsLatencyCorrelationsChartTitle).to.be(
-            `Latency distribution for ${testData.serviceName} (Log-Log Plot)`
-          );
-          await testSubjects.existOrFail('apmCorrelationsChart', {
-            timeout: 10000,
-          });
+          expect(apmCorrelationsLatencyCorrelationsChartTitle).to.be(testData.logLogChartTitle);
+          await testSubjects.existOrFail('apmCorrelationsChart');
+          await testSubjects.existOrFail('apmCorrelationsLatencyCorrelationsTablePanelTitle');
 
           // Assert that results for the given service didn't find any correlations
           const apmCorrelationsTable = await testSubjects.getVisibleText('apmCorrelationsTable');
-          expect(apmCorrelationsTable).to.be('No significant correlations found');
+          expect(apmCorrelationsTable).to.be(
+            'No significant correlations\nCorrelations will only be identified if they have significant impact.\nTry selecting another time range or remove any added filter.'
+          );
         });
       });
     });

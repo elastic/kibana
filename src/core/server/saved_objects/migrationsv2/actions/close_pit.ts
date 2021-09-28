@@ -23,19 +23,18 @@ export interface ClosePitParams {
  * Closes PIT.
  * See https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
  * */
-export const closePit = ({
-  client,
-  pitId,
-}: ClosePitParams): TaskEither.TaskEither<RetryableEsClientError, {}> => () => {
-  return client
-    .closePointInTime({
-      body: { id: pitId },
-    })
-    .then((response) => {
-      if (!response.body.succeeded) {
-        throw new Error(`Failed to close PointInTime with id: ${pitId}`);
-      }
-      return Either.right({});
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+export const closePit =
+  ({ client, pitId }: ClosePitParams): TaskEither.TaskEither<RetryableEsClientError, {}> =>
+  () => {
+    return client
+      .closePointInTime({
+        body: { id: pitId },
+      })
+      .then((response) => {
+        if (!response.body.succeeded) {
+          throw new Error(`Failed to close PointInTime with id: ${pitId}`);
+        }
+        return Either.right({});
+      })
+      .catch(catchRetryableEsClientErrors);
+  };

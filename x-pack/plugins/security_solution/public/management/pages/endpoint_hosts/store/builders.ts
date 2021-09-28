@@ -24,9 +24,14 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
           disabled: false,
           page: 1,
           pageSize: 50,
-          startDate: undefined,
-          endDate: undefined,
+          startDate: 'now-1d',
+          endDate: 'now',
           isInvalidDateRange: false,
+          autoRefreshOptions: {
+            enabled: false,
+            duration: DEFAULT_POLL_INTERVAL,
+          },
+          recentlyUsedDateRanges: [],
         },
         logData: createUninitialisedResourceState(),
       },
@@ -59,5 +64,6 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     hostStatus: undefined,
     isolationRequestState: createUninitialisedResourceState(),
     endpointPendingActions: createLoadedResourceState(new Map()),
+    metadataTransformStats: createUninitialisedResourceState(),
   };
 };

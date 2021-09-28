@@ -80,14 +80,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.sleep(100);
 
-      PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing ')`);
+      await PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing ')`);
 
       await PageObjects.lens.typeFormula('count(kql=');
 
       input = await find.activeElement();
       await input.type(`Men\'s Clothing`);
 
-      PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing')`);
+      await PageObjects.common.sleep(100);
+
+      await PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing')`);
     });
 
     it('should insert single quotes and escape when needed to create valid field name', async () => {
@@ -109,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.switchToFormula();
-      PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
 
       await PageObjects.lens.typeFormula('unique_count(');
       const input = await find.activeElement();
@@ -118,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.sleep(100);
 
-      PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
     });
 
     it('should persist a broken formula on close', async () => {
@@ -230,6 +232,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics', 0)).to.eql(
+        'count()'
+      );
+    });
+
+    it('should keep the formula if the user does not fully transition to a static value', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer('threshold');
+
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_yThresholdLeftPanel > lns-dimensionTrigger',
+          operation: 'formula',
+          formula: `count()`,
+          keepOpen: true,
+        },
+        1
+      );
+
+      await PageObjects.lens.switchToStaticValue();
+      await PageObjects.lens.closeDimensionEditor();
+      await PageObjects.common.sleep(1000);
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yThresholdLeftPanel', 0)).to.eql(
         'count()'
       );
     });

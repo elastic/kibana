@@ -3,7 +3,11 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["devTools"],
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["devTools", "share"],
   "optionalPlugins": ["usageCollection", "home"],
   "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "home"]
 }

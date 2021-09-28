@@ -44,13 +44,6 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
-export const NO_INDICATOR_ENRICHMENTS_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsTitle',
-  {
-    defaultMessage: 'No Indicator Matches Found',
-  }
-);
-
 export const NO_INDICATOR_ENRICHMENTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsDescription',
   {
@@ -69,7 +62,8 @@ export const NO_INVESTIGATION_ENRICHMENTS_TITLE = i18n.translate(
 export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsDescription',
   {
-    defaultMessage: 'We did not find any threat intelligence in last 30 days to enrich this alert.',
+    defaultMessage:
+      "We haven't found field value has additional information available from threat intelligence sources we searched in the past 30 days by default.",
   }
 );
 
@@ -88,16 +82,8 @@ export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
   }
 );
 
-export const IF_CTI_NOT_ENABLED = i18n.translate(
-  'xpack.securitySolution.alertDetails.ifCtiNotEnabled',
-  {
-    defaultMessage:
-      "If you haven't enabled any threat intelligence sources and want to learn more about this capability, ",
-  }
-);
-
 export const CHECK_DOCS = i18n.translate('xpack.securitySolution.alertDetails.checkDocs', {
-  defaultMessage: 'please check out our documentation.',
+  defaultMessage: 'please check out our documentation',
 });
 
 export const INVESTIGATION_QUERY_TITLE = i18n.translate(
@@ -106,3 +92,28 @@ export const INVESTIGATION_QUERY_TITLE = i18n.translate(
     defaultMessage: 'Enrichment with Threat Intelligence',
   }
 );
+
+export const CHANGE_ENRICHMENT_LOOKBACK = i18n.translate(
+  'xpack.securitySolution.alertDetails.changeEnrichmentQueryLookback',
+  {
+    defaultMessage: 'search a different time range',
+  }
+);
+
+export const ENRICHMENT_LOOKBACK_START_DATE = i18n.translate(
+  'xpack.securitySolution.alertDetails.enrichmentQueryStartDate',
+  {
+    defaultMessage: 'Start date',
+  }
+);
+
+export const ENRICHMENT_LOOKBACK_END_DATE = i18n.translate(
+  'xpack.securitySolution.alertDetails.enrichmentQueryEndDate',
+  {
+    defaultMessage: 'End date',
+  }
+);
+
+export const REFRESH = i18n.translate('xpack.securitySolution.alertDetails.refresh', {
+  defaultMessage: 'Refresh',
+});

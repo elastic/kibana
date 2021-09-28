@@ -7,7 +7,7 @@
 
 import { SOURCE_DATA_REQUEST_ID } from '../../../common/constants';
 import { findLayerById, setLayer } from './layer_utils';
-import { DataMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
+import { DataRequestMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
 import { MapState } from './types';
 
 export function startDataRequest(
@@ -15,7 +15,7 @@ export function startDataRequest(
   layerId: string,
   dataRequestId: string,
   requestToken: symbol,
-  requestMeta: DataMeta
+  requestMeta: DataRequestMeta
 ): MapState {
   const layerDescriptor = findLayerById(state, layerId);
   if (!layerDescriptor) {
@@ -30,7 +30,7 @@ export function startDataRequest(
     : {
         dataId: dataRequestId,
       };
-  dataRequest.dataMetaAtStart = requestMeta;
+  dataRequest.dataRequestMetaAtStart = requestMeta;
   dataRequest.dataRequestToken = requestToken;
   return setDataRequest(state, layerId, dataRequest);
 }
@@ -49,7 +49,7 @@ export function stopDataRequest(
   layerId: string,
   dataRequestId: string,
   requestToken: symbol,
-  responseMeta?: DataMeta,
+  responseMeta?: DataRequestMeta,
   data?: object
 ): MapState {
   const dataRequest = getDataRequest(state, layerId, dataRequestId, requestToken);
@@ -57,11 +57,11 @@ export function stopDataRequest(
     ? setDataRequest(state, layerId, {
         ...dataRequest,
         data,
-        dataMeta: {
-          ...(dataRequest.dataMetaAtStart ? dataRequest.dataMetaAtStart : {}),
+        dataRequestMeta: {
+          ...(dataRequest.dataRequestMetaAtStart ? dataRequest.dataRequestMetaAtStart : {}),
           ...(responseMeta ? responseMeta : {}),
         },
-        dataMetaAtStart: undefined,
+        dataRequestMetaAtStart: undefined,
         dataRequestToken: undefined,
       })
     : state;

@@ -6,13 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import {
-  FieldLabels,
-  OPERATION_COLUMN,
-  RECORDS_FIELD,
-  REPORT_METRIC_FIELD,
-  ReportTypes,
-} from '../constants';
+import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
@@ -32,7 +26,7 @@ import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
-    reportType: ReportTypes.KPI,
+    reportType: 'kpi-over-time',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar', 'area'],
     xAxisColumn: {

@@ -22,6 +22,7 @@ import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 
 export const queryExecutor = async ({
   rule,
@@ -59,6 +60,7 @@ export const queryExecutor = async ({
     version,
     index: ruleParams.index,
   });
+
   const esFilter = await getFilter({
     type: ruleParams.type,
     filters: ruleParams.filters,
@@ -83,6 +85,7 @@ export const queryExecutor = async ({
     signalsIndex: ruleParams.outputIndex,
     filter: esFilter,
     pageSize: searchAfterSize,
+    buildReasonMessage: buildReasonMessageForQueryAlert,
     buildRuleMessage,
     bulkCreate,
     wrapHits,

@@ -26,7 +26,7 @@ import {
   DataPublicPluginStart,
   esFilters,
   Filter,
-  IIndexPattern,
+  IndexPattern,
   Query,
   QueryState,
   syncQueryStateWithUrl,
@@ -127,7 +127,7 @@ export const App = ({
 };
 
 function useIndexPattern(data: DataPublicPluginStart) {
-  const [indexPattern, setIndexPattern] = useState<IIndexPattern>();
+  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
   useEffect(() => {
     const fetchIndexPattern = async () => {
       const defaultIndexPattern = await data.indexPatterns.getDefault();

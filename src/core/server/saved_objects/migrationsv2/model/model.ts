@@ -31,6 +31,19 @@ import {
   throwBadControlState,
   throwBadResponse,
 } from './helpers';
+import { createBatches } from './create_batches';
+
+const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
+const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
+  _id,
+  docSizeBytes,
+  maxBatchSizeBytes,
+}: {
+  _id: string;
+  docSizeBytes: number;
+  maxBatchSizeBytes: number;
+}) =>
+  `The document with _id "${_id}" is ${docSizeBytes} bytes which exceeds the configured maximum batch size of ${maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`;
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
@@ -433,7 +446,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (res.right.outdatedDocuments.length > 0) {
         return {
           ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX',
+          controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
           progress,
@@ -476,11 +489,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX') {
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_TRANSFORM') {
     // We follow a similar control flow as for
     // outdated document search -> outdated document transform -> transform documents bulk index
     // collecting issues along the way rather than failing
-    // REINDEX_SOURCE_TO_TEMP_INDEX handles the document transforms
+    // REINDEX_SOURCE_TO_TEMP_TRANSFORM handles the document transforms
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
     // Increment the processed documents, no matter what the results are.
@@ -489,12 +502,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isRight(res)) {
       if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
-          transformedDocs: [...res.right.processedDocs],
-          progress,
-        };
+        const batches = createBatches(
+          res.right.processedDocs,
+          stateP.tempIndex,
+          stateP.maxBatchSizeBytes
+        );
+        if (Either.isRight(batches)) {
+          return {
+            ...stateP,
+            controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
+            transformedDocBatches: batches.right,
+            currentBatch: 0,
+            progress,
+          };
+        } else {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
+              _id: batches.left.document._id,
+              docSizeBytes: batches.left.docSizeBytes,
+              maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
+            }),
+          };
+        }
       } else {
         // we don't have any transform issues with the current batch of outdated docs but
         // we have carried through previous transformation issues.
@@ -525,20 +556,38 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-        // we're still on the happy path with no transformation failures seen.
-        corruptDocumentIds: [],
-        transformErrors: [],
-      };
+      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
+          currentBatch: stateP.currentBatch + 1,
+        };
+      } else {
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+          // we're still on the happy path with no transformation failures seen.
+          corruptDocumentIds: [],
+          transformErrors: [],
+        };
+      }
     } else {
-      if (isLeftTypeof(res.left, 'target_index_had_write_block')) {
-        // the temp index has a write block, meaning that another instance already finished and moved forward.
-        // close the PIT search and carry on with the happy path.
+      if (
+        isLeftTypeof(res.left, 'target_index_had_write_block') ||
+        isLeftTypeof(res.left, 'index_not_found_exception')
+      ) {
+        // When the temp index has a write block or has been deleted another
+        // instance already completed this step. Close the PIT search and carry
+        // on with the happy path.
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
+        };
+      } else if (isLeftTypeof(res.left, 'request_entity_too_large_exception')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
         };
       }
       throwBadResponse(stateP, res.left);
@@ -667,13 +716,31 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // we haven't seen corrupt documents or any transformation errors thus far in the migration
       // index the migrated docs
       if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        return {
-          ...stateP,
-          controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-          transformedDocs: [...res.right.processedDocs],
-          hasTransformedDocs: true,
-          progress,
-        };
+        const batches = createBatches(
+          res.right.processedDocs,
+          stateP.targetIndex,
+          stateP.maxBatchSizeBytes
+        );
+        if (Either.isRight(batches)) {
+          return {
+            ...stateP,
+            controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
+            transformedDocBatches: batches.right,
+            currentBatch: 0,
+            hasTransformedDocs: true,
+            progress,
+          };
+        } else {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
+              _id: batches.left.document._id,
+              docSizeBytes: batches.left.docSizeBytes,
+              maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
+            }),
+          };
+        }
       } else {
         // We have seen corrupt documents and/or transformation errors
         // skip indexing and go straight to reading and transforming more docs
@@ -701,6 +768,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
+        return {
+          ...stateP,
+          controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
+          currentBatch: stateP.currentBatch + 1,
+        };
+      }
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
@@ -709,7 +783,23 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         hasTransformedDocs: true,
       };
     } else {
-      throwBadResponse(stateP, res as never);
+      if (isLeftTypeof(res.left, 'request_entity_too_large_exception')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
+        };
+      } else if (
+        isLeftTypeof(res.left, 'target_index_had_write_block') ||
+        isLeftTypeof(res.left, 'index_not_found_exception')
+      ) {
+        // we fail on these errors since the target index will never get
+        // deleted and should only have a write block if a newer version of
+        // Kibana started an upgrade
+        throwBadResponse(stateP, res.left as never);
+      } else {
+        throwBadResponse(stateP, res.left);
+      }
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

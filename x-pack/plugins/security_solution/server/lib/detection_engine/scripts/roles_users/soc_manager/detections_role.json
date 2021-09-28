@@ -20,6 +20,14 @@
       {
         "names": [".siem-signals-*"],
         "privileges": ["read", "write", "manage"]
+      },
+      {
+        "names": [
+          "metrics-endpoint.metadata_current_*",
+          ".fleet-agents*",
+          ".fleet-actions*"
+        ],
+        "privileges": ["read"]
       }
     ]
   },
@@ -27,7 +35,7 @@
     {
       "feature": {
         "ml": ["read"],
-        "siem": ["all"],
+        "siem": ["all", "read_alerts", "crud_alerts"],
         "actions": ["all"],
         "builtInAlerts": ["all"]
       },

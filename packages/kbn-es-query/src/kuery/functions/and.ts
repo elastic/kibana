@@ -7,7 +7,7 @@
  */
 
 import * as ast from '../ast';
-import { IndexPatternBase, KueryNode } from '../..';
+import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 
 export function buildNodeParams(children: KueryNode[]) {
   return {
@@ -18,14 +18,16 @@ export function buildNodeParams(children: KueryNode[]) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config: Record<string, any> = {},
+  config: KueryQueryOptions = {},
   context: Record<string, any> = {}
 ) {
+  const { filtersInMustClause } = config;
   const children = node.arguments || [];
+  const key = filtersInMustClause ? 'must' : 'filter';
 
   return {
     bool: {
-      filter: children.map((child: KueryNode) => {
+      [key]: children.map((child: KueryNode) => {
         return ast.toElasticsearchQuery(child, indexPattern, config, context);
       }),
     },

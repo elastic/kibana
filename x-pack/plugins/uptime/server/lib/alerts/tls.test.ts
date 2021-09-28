@@ -5,12 +5,11 @@
  * 2.0.
  */
 import moment from 'moment';
-
-import { tlsAlertFactory, getCertSummary, DEFAULT_SIZE } from './tls';
+import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { tlsAlertFactory, getCertSummary } from './tls';
 import { TLS } from '../../../common/constants/alerts';
 import { CertResult, DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
-import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
 import { savedObjectsAdapter, UMSavedObjectsAdapter } from '../saved_objects';
@@ -116,16 +115,15 @@ describe('tls alert', () => {
             'tls.server.x509.not_after': cert.not_after,
             'tls.server.x509.not_before': cert.not_before,
             'tls.server.hash.sha256': cert.sha256,
+            [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING,
           }),
           id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
         });
       });
       expect(mockGetter).toBeCalledWith(
         expect.objectContaining({
-          from: DEFAULT_FROM,
-          to: DEFAULT_TO,
-          index: 0,
-          size: DEFAULT_SIZE,
+          pageIndex: 0,
+          size: 1000,
           notValidAfter: `now+${DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
           notValidBefore: `now-${DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold}d`,
           sortBy: 'common_name',

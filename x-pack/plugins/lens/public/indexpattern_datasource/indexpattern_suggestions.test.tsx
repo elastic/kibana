@@ -8,6 +8,7 @@
 import { DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
 import type { IndexPatternPrivateState } from './types';
+import 'jest-canvas-mock';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
@@ -1169,6 +1170,91 @@ describe('IndexPattern Data Source suggestions', () => {
         const suggestions = getSuggestionSubset(
           getDatasourceSuggestionsForField(modifiedState, '1', documentField)
         );
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            table: expect.objectContaining({
+              changeType: 'extended',
+              columns: [
+                {
+                  columnId: 'ref',
+                  operation: {
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: '',
+                    scale: undefined,
+                  },
+                },
+                {
+                  columnId: 'newid',
+                  operation: {
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Count of records',
+                    scale: 'ratio',
+                  },
+                },
+              ],
+            }),
+          })
+        );
+      });
+
+      it('should apply layers filter if passed and model the suggestion based on that', () => {
+        (generateId as jest.Mock).mockReturnValue('newid');
+        const initialState = stateWithNonEmptyTables();
+
+        const modifiedState: IndexPatternPrivateState = {
+          ...initialState,
+          layers: {
+            thresholdLayer: {
+              indexPatternId: '1',
+              columnOrder: ['threshold'],
+              columns: {
+                threshold: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: 'Static Value: 0',
+                  operationType: 'static_value',
+                  params: { value: '0' },
+                  references: [],
+                  scale: 'ratio',
+                },
+              },
+            },
+            currentLayer: {
+              indexPatternId: '1',
+              columnOrder: ['metric', 'ref'],
+              columns: {
+                metric: {
+                  label: '',
+                  customLabel: true,
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'average',
+                  sourceField: 'bytes',
+                },
+                ref: {
+                  label: '',
+                  customLabel: true,
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['metric'],
+                },
+              },
+            },
+          },
+        };
+
+        const suggestions = getSuggestionSubset(
+          getDatasourceSuggestionsForField(
+            modifiedState,
+            '1',
+            documentField,
+            (layerId) => layerId !== 'thresholdLayer'
+          )
+        );
+        // should ignore the threshold layer
         expect(suggestions).toContainEqual(
           expect.objectContaining({
             table: expect.objectContaining({

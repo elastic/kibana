@@ -8,6 +8,7 @@
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SuggestionRequest, VisualizationSuggestion } from '../types';
+import { layerTypes } from '../../common';
 import type { PieVisualizationState } from '../../common/expressions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 
@@ -75,6 +76,7 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
+                layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
@@ -84,6 +86,7 @@ export function suggestions({
                 categoryDisplay: 'default',
                 legendDisplay: 'default',
                 nestedLegend: false,
+                layerType: layerTypes.DATA,
               },
         ],
       },
@@ -134,6 +137,7 @@ export function suggestions({
                   state.layers[0].categoryDisplay === 'inside'
                     ? 'default'
                     : state.layers[0].categoryDisplay,
+                layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
@@ -143,6 +147,7 @@ export function suggestions({
                 categoryDisplay: 'default',
                 legendDisplay: 'default',
                 nestedLegend: false,
+                layerType: layerTypes.DATA,
               },
         ],
       },

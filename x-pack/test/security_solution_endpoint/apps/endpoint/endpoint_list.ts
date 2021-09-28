@@ -20,14 +20,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const expectedData = [
     [
-      'Hostname',
-      'Agent Status',
-      'Integration Policy',
-      'Policy Status',
-      'Operating System',
-      'IP Address',
+      'Endpoint',
+      'Agent status',
+      'Policy',
+      'Policy status',
+      'OS',
+      'IP address',
       'Version',
-      'Last Active',
+      'Last active',
       'Actions',
     ],
     [
@@ -186,7 +186,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'Policy Status',
             'IP Address',
             'Hostname',
-            'Sensor Version',
+            'Version',
           ];
           const keys = await pageObjects.endpoint.endpointFlyoutDescriptionKeys(
             'endpointDetailsFlyout'
@@ -233,14 +233,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
-            'Hostname',
-            'Agent Status',
-            'Integration Policy',
-            'Policy Status',
-            'Operating System',
-            'IP Address',
+            'Endpoint',
+            'Agent status',
+            'Policy',
+            'Policy status',
+            'OS',
+            'IP address',
             'Version',
-            'Last Active',
+            'Last active',
             'Actions',
           ],
           ['No items found'],
@@ -263,14 +263,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
-            'Hostname',
-            'Agent Status',
-            'Integration Policy',
-            'Policy Status',
-            'Operating System',
-            'IP Address',
+            'Endpoint',
+            'Agent status',
+            'Policy',
+            'Policy status',
+            'OS',
+            'IP address',
             'Version',
-            'Last Active',
+            'Last active',
             'Actions',
           ],
           [

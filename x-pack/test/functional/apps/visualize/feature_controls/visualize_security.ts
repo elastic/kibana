@@ -32,6 +32,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/visualize/default');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      // ensure we're logged out so we can login as the appropriate users
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
@@ -81,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Visualize Library', 'Stack Management']);
+        expect(navLinks).to.contain('Visualize Library');
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {

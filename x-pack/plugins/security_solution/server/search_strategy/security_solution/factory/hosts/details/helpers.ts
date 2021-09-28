@@ -209,7 +209,11 @@ export const getHostEndpoint = async (
           // Get Agent Status
           agentService.getAgentStatusById(esClient.asCurrentUser, fleetAgentId),
           // Get a list of pending actions (if any)
-          getPendingActionCounts(esClient.asCurrentUser, [fleetAgentId]).then((results) => {
+          getPendingActionCounts(
+            esClient.asCurrentUser,
+            endpointContext.service.getEndpointMetadataService(),
+            [fleetAgentId]
+          ).then((results) => {
             return results[0].pending_actions;
           }),
         ]);

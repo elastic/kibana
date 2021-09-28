@@ -43,7 +43,8 @@ import { installPrepackagedTimelines } from '../../../timeline/routes/prepackage
 export const addPrepackedRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  security: SetupPlugins['security']
+  security: SetupPlugins['security'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.put(
     {
@@ -79,7 +80,9 @@ export const addPrepackedRulesRoute = (
           frameworkRequest,
           config.maxTimelineImportExportSize,
           config.prebuiltRulesFromFileSystem,
-          config.prebuiltRulesFromSavedObjects
+          config.prebuiltRulesFromSavedObjects,
+          undefined,
+          isRuleRegistryEnabled
         );
         return response.ok({ body: validated ?? {} });
       } catch (err) {
@@ -109,13 +112,15 @@ export const createPrepackagedRules = async (
   maxTimelineImportExportSize: ConfigType['maxTimelineImportExportSize'],
   prebuiltRulesFromFileSystem: ConfigType['prebuiltRulesFromFileSystem'],
   prebuiltRulesFromSavedObjects: ConfigType['prebuiltRulesFromSavedObjects'],
-  exceptionsClient?: ExceptionListClient
+  exceptionsClient?: ExceptionListClient,
+  isRuleRegistryEnabled?: boolean | undefined
 ): Promise<PrePackagedRulesAndTimelinesSchema | null> => {
   const esClient = context.core.elasticsearch.client;
   const savedObjectsClient = context.core.savedObjects.client;
   const exceptionsListClient =
     context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
   const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
+  const ruleStatusClient = context.securitySolution.getExecutionLogClient();
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
   }
@@ -130,11 +135,14 @@ export const createPrepackagedRules = async (
     prebuiltRulesFromFileSystem,
     prebuiltRulesFromSavedObjects
   );
-  const prepackagedRules = await getExistingPrepackagedRules({ rulesClient });
+  const prepackagedRules = await getExistingPrepackagedRules({
+    rulesClient,
+    isRuleRegistryEnabled: isRuleRegistryEnabled ?? false,
+  });
   const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();
-  if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
+  if (!isRuleRegistryEnabled && (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0)) {
     const signalsIndexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
     if (!signalsIndexExists) {
       throw new PrepackagedRulesError(
@@ -144,7 +152,14 @@ export const createPrepackagedRules = async (
     }
   }
 
-  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall, signalsIndex));
+  await Promise.all(
+    installPrepackagedRules(
+      rulesClient,
+      rulesToInstall,
+      signalsIndex,
+      isRuleRegistryEnabled ?? false
+    )
+  );
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
     frameworkRequest,
@@ -154,7 +169,14 @@ export const createPrepackagedRules = async (
     timeline,
     importTimelineResultSchema
   );
-  await updatePrepackagedRules(rulesClient, savedObjectsClient, rulesToUpdate, signalsIndex);
+  await updatePrepackagedRules(
+    rulesClient,
+    context.securitySolution.getSpaceId(),
+    ruleStatusClient,
+    rulesToUpdate,
+    signalsIndex,
+    isRuleRegistryEnabled ?? false
+  );
 
   const prepackagedRulesOutput: PrePackagedRulesAndTimelinesSchema = {
     rules_installed: rulesToInstall.length,

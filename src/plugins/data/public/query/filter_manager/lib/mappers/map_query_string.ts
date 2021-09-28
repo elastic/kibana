@@ -13,7 +13,7 @@ export const mapQueryString = (filter: Filter) => {
     return {
       type: FILTERS.QUERY_STRING,
       key: 'query',
-      value: filter.query.query_string.query,
+      value: filter.query?.query_string?.query,
     };
   }
 

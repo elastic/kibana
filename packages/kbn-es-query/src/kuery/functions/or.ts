@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import * as ast from '../ast';
-import { IndexPatternBase, KueryNode } from '../..';
+import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 
 export function buildNodeParams(children: KueryNode[]) {
   return {
@@ -18,9 +19,9 @@ export function buildNodeParams(children: KueryNode[]) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config: Record<string, any> = {},
+  config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-) {
+): estypes.QueryDslQueryContainer {
   const children = node.arguments || [];
 
   return {

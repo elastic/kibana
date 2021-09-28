@@ -29,7 +29,7 @@ describe('SourceInfoCard', () => {
     expect(wrapper.find(SourceIcon)).toHaveLength(1);
     expect(wrapper.find(EuiBadge)).toHaveLength(1);
     expect(wrapper.find(EuiHealth)).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(3);
+    expect(wrapper.find(EuiText)).toHaveLength(1);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
   });
 });

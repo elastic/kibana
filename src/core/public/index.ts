@@ -28,7 +28,6 @@ import './index.scss';
 
 import {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
@@ -65,7 +64,6 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
-import type { ExecutionContextServiceStart } from './execution_context';
 
 export type {
   PackageInfo,
@@ -105,6 +103,8 @@ export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
@@ -185,8 +185,6 @@ export type {
 } from './notifications';
 
 export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
-
-export type { IExecutionContextContainer, ExecutionContextServiceStart } from './execution_context';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
@@ -276,8 +274,6 @@ export interface CoreStart {
   fatalErrors: FatalErrorsStart;
   /** {@link DeprecationsServiceStart} */
   deprecations: DeprecationsServiceStart;
-  /** {@link ExecutionContextServiceStart} */
-  executionContext: ExecutionContextServiceStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -292,7 +288,6 @@ export interface CoreStart {
 export type {
   Capabilities,
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,

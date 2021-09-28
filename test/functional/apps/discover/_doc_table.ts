@@ -218,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.header.waitUntilLoadingHasFinished();
           }
           // remove the second column
-          await PageObjects.discover.clickFieldListItemAdd(extraColumns[1]);
+          await PageObjects.discover.clickFieldListItemRemove(extraColumns[1]);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test that the second column is no longer there
           const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
@@ -228,13 +228,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should make the document table scrollable', async function () {
         await PageObjects.discover.clearFieldSearchInput();
-        const dscTable = await find.byCssSelector('.dscTable');
+        const dscTableWrapper = await find.byCssSelector('.kbnDocTableWrapper');
         const fieldNames = await PageObjects.discover.getAllFieldNames();
-        const clientHeight = await dscTable.getAttribute('clientHeight');
+        const clientHeight = await dscTableWrapper.getAttribute('clientHeight');
         let fieldCounter = 0;
         const checkScrollable = async () => {
-          const scrollWidth = await dscTable.getAttribute('scrollWidth');
-          const clientWidth = await dscTable.getAttribute('clientWidth');
+          const scrollWidth = await dscTableWrapper.getAttribute('scrollWidth');
+          const clientWidth = await dscTableWrapper.getAttribute('clientWidth');
           log.debug(`scrollWidth: ${scrollWidth}, clientWidth: ${clientWidth}`);
           return Number(scrollWidth) > Number(clientWidth);
         };
@@ -251,7 +251,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await checkScrollable();
         });
         // so now we need to check if the horizontal scrollbar is displayed
-        const newClientHeight = await dscTable.getAttribute('clientHeight');
+        const newClientHeight = await dscTableWrapper.getAttribute('clientHeight');
         expect(Number(clientHeight)).to.be.above(Number(newClientHeight));
       });
     });

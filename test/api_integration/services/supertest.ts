@@ -9,12 +9,12 @@
 import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import { format as formatUrl } from 'url';
 
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 
 export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-  return supertestAsPromised(kibanaServerUrl);
+  return supertest(kibanaServerUrl);
 }
 
 export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
@@ -27,6 +27,5 @@ export function ElasticsearchSupertestProvider({ getService }: FtrProviderContex
     agentOptions = { ca: esServerConfig!.certificateAuthorities };
   }
 
-  // @ts-ignore - supertestAsPromised doesn't like the agentOptions, but still passes it correctly to supertest
-  return supertestAsPromised.agent(elasticSearchServerUrl, agentOptions);
+  return supertest.agent(elasticSearchServerUrl, agentOptions);
 }

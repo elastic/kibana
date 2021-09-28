@@ -42,10 +42,10 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { DataVisualizerPluginStart } from '../../data_visualizer/public';
-import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
+import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -127,7 +127,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     }
 
     if (pluginsSetup.management) {
-      registerManagementSection(pluginsSetup.management, core).enable();
+      registerManagementSection(pluginsSetup.management, core, {
+        usageCollection: pluginsSetup.usageCollection,
+      }).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -149,12 +151,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       // register various ML plugin features which require a full license
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const {
-        registerEmbeddables,
-        registerMlUiActions,
-        registerSearchLinks,
-        registerMlAlerts,
-      } = await import('./register_helper');
+      const { registerEmbeddables, registerMlUiActions, registerSearchLinks, registerMlAlerts } =
+        await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
       const fullLicense = isFullLicense(license);

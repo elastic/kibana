@@ -205,11 +205,6 @@ const credentialsProvidedByEnvironment = (): boolean =>
  * Kibana's `/internal/security/login` endpoint, bypassing the login page (for speed).
  */
 const loginViaEnvironmentCredentials = () => {
-  const providerName =
-    Cypress.env('protocol') === 'http' || Cypress.config().baseUrl!.includes('staging')
-      ? 'basic'
-      : 'cloud-basic';
-
   cy.log(
     `Authenticating via environment credentials from the \`CYPRESS_${ELASTICSEARCH_USERNAME}\` and \`CYPRESS_${ELASTICSEARCH_PASSWORD}\` environment variables`
   );
@@ -218,7 +213,7 @@ const loginViaEnvironmentCredentials = () => {
   cy.request({
     body: {
       providerType: 'basic',
-      providerName,
+      providerName: 'basic',
       currentURL: '/',
       params: {
         username: Cypress.env(ELASTICSEARCH_USERNAME),

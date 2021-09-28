@@ -14,7 +14,11 @@ import { getAsset, getPathParts } from '../../archive';
 import type { ArchiveEntry } from '../../archive';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
-import { FLEET_FINAL_PIPELINE_CONTENT, FLEET_FINAL_PIPELINE_ID } from '../../../../constants';
+import {
+  FLEET_FINAL_PIPELINE_CONTENT,
+  FLEET_FINAL_PIPELINE_ID,
+  FLEET_FINAL_PIPELINE_VERSION,
+} from '../../../../constants';
 
 import { deletePipelineRefs } from './remove';
 
@@ -195,7 +199,12 @@ export async function ensureFleetFinalPipelineIsInstalled(esClient: Elasticsearc
     esClientRequestOptions
   );
 
-  if (res.statusCode === 404) {
+  const installedVersion = res?.body[FLEET_FINAL_PIPELINE_ID]?.version;
+  if (
+    res.statusCode === 404 ||
+    !installedVersion ||
+    installedVersion < FLEET_FINAL_PIPELINE_VERSION
+  ) {
     await installPipeline({
       esClient,
       pipeline: {

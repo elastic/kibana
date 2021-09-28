@@ -8,11 +8,20 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+/**
+ * A field's sub type
+ * @public
+ */
 export interface IFieldSubType {
   multi?: { parent: string };
   nested?: { path: string };
 }
-export interface IndexPatternFieldBase {
+
+/**
+ * A base interface for an index pattern field
+ * @public
+ */
+export interface DataViewFieldBase {
   name: string;
   /**
    * Kibana field type
@@ -31,8 +40,29 @@ export interface IndexPatternFieldBase {
   scripted?: boolean;
 }
 
-export interface IndexPatternBase {
-  fields: IndexPatternFieldBase[];
+/**
+ * @deprecated Use DataViewField instead. All index pattern interfaces were renamed.
+ */
+export type IndexPatternFieldBase = DataViewFieldBase;
+
+/**
+ * A base interface for an index pattern
+ * @public
+ */
+export interface DataViewBase {
+  fields: DataViewFieldBase[];
   id?: string;
   title?: string;
+}
+
+/**
+ * @deprecated Use DataViewBase instead.  All index pattern interfaces were renamed.
+ */
+export type IndexPatternBase = DataViewBase;
+
+export interface BoolQuery {
+  must: estypes.QueryDslQueryContainer[];
+  must_not: estypes.QueryDslQueryContainer[];
+  filter: estypes.QueryDslQueryContainer[];
+  should: estypes.QueryDslQueryContainer[];
 }

@@ -18,7 +18,7 @@ import {
   ScopedAnnotationsClientFactory,
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
-import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
+import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
@@ -100,11 +100,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
-    const ruleDataClient = plugins.ruleRegistry.ruleDataService.getRuleDataClient(
-      'observability',
-      plugins.ruleRegistry.ruleDataService.getFullAssetName(),
-      () => Promise.resolve()
-    );
+    const { ruleDataService } = plugins.ruleRegistry;
 
     registerRoutes({
       core: {
@@ -113,7 +109,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       },
       logger: this.initContext.logger.get(),
       repository: getGlobalObservabilityServerRouteRepository(),
-      ruleDataClient,
+      ruleDataService,
     });
 
     return {

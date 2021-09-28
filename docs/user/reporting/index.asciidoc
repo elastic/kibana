@@ -7,9 +7,9 @@
 --
 
 :keywords: analyst, concept, task, reporting
-:description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website. 
+:description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
 
-{kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads. 
+{kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads.
 
 You access the options from the *Share* menu in the toolbar. The sharing options include the following:
 
@@ -34,9 +34,9 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 Create and download PDF, PNG, or CSV reports of saved searches, dashboards, visualizations, and workpads.
 
 [[reporting-layout-sizing]]
-The layout and size of the report depends on what you are sharing. 
+The layout and size of the report depends on what you are sharing.
 For saved searches, dashboards, and visualizations, the layout depends on the size of the panels.
-For workpads, the layout depends on the size of the worksheet dimensions. 
+For workpads, the layout depends on the size of the worksheet dimensions.
 
 To change the output size, change the size of the browser, which resizes the shareable container before the report generates. It might take some trial and error before you're satisfied.
 
@@ -66,6 +66,11 @@ NOTE: When you create a dashboard report that includes a data table or saved sea
 . When the report generates, a message appears. On the message, click **Download report**.
 
 . To view and manage reports, open the main menu, then click *Stack Management > Reporting*.
+
+NOTE: Reports are stored in {es} and managed by the `kibana-reporting` {ilm}
+({ilm-init}) policy. By default, the policy stores reports forever. To learn
+more about {ilm-init} policies, refer to the {es}
+{ref}/index-lifecycle-management.html[{ilm-init} documentation].
 
 [float]
 [[share-a-direct-link]]
@@ -102,7 +107,7 @@ Create a JSON file for a workpad.
 
 . Open the main menu, then click *Canvas*.
 
-. Open the workpad you want to share. 
+. Open the workpad you want to share.
 
 . From the toolbar, click *Share*, then select *Download as JSON*.
 
@@ -110,7 +115,7 @@ Create a JSON file for a workpad.
 [[add-workpad-website]]
 == Share workpads on a website
 
-beta[] *Canvas* allows you to create _shareables_, which are workpads that you download and securely share on a website. 
+beta[] *Canvas* allows you to create _shareables_, which are workpads that you download and securely share on a website.
 To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
 . Open the main menu, then click *Canvas*.
@@ -139,7 +144,7 @@ Some users might not have access to the dashboard or visualization. For more inf
 
 . Open the main menu, then open the dashboard or visualization you want to share.
 
-. Click *Share > Embed code*. 
+. Click *Share > Embed code*.
 
 . Specify how you want to generate the code:
 

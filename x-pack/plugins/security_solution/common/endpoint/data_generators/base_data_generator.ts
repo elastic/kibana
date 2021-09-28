@@ -12,6 +12,61 @@ const OS_FAMILY = ['windows', 'macos', 'linux'];
 /** Array of 14 day offsets */
 const DAY_OFFSETS = Array.from({ length: 14 }, (_, i) => 8.64e7 * (i + 1));
 
+const USERS = [
+  'elastic',
+  'shay',
+  'Damian',
+  'Sarai',
+  'Deirdre',
+  'Shawana',
+  'Treena',
+  'Ellamae',
+  'Myriam',
+  'Roberto',
+  'Cordell',
+  'Demetrice',
+  'Audrea',
+  'Shanel',
+  'Gail',
+  'Hermila',
+  'Mara',
+  'Elden',
+  'Malisa',
+  'Derick',
+  'Teddy',
+  'Dovie',
+  'Betty',
+  'Kay',
+  'Sharice',
+  'Evalyn',
+  'Teressa',
+  'Teisha',
+  'Marianne',
+  'Cherelle',
+  'Tabitha',
+  'Deneen',
+  'Leo',
+  'Tess',
+  'Clair',
+  'Marty',
+  'Dexter',
+  'Candis',
+  'Dina',
+  'Bennett',
+  'Vesta',
+  'Trinity',
+  'Drusilla',
+  'Bree',
+  'Bryon',
+  'Johnson',
+  'Justa',
+  'Jada',
+  'Armand',
+  'Raeann',
+  'Yolande',
+  'Genevieve',
+];
+
 /**
  * A generic base class to assist in creating domain specific data generators. It includes
  * several general purpose random data generators for use within the class and exposes one
@@ -34,6 +89,10 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
    */
   public generate(): GeneratedDoc {
     throw new Error('method not implemented!');
+  }
+
+  public randomUser(): string {
+    return this.randomChoice(USERS);
   }
 
   /** Returns a future ISO date string */

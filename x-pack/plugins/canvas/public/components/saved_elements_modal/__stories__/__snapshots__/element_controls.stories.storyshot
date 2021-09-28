@@ -16,7 +16,6 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
     >
       <span
         className="euiToolTipAnchor"
-        onKeyUp={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
@@ -45,7 +44,6 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
     >
       <span
         className="euiToolTipAnchor"
-        onKeyUp={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >

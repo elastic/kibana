@@ -12,28 +12,27 @@ import {
   SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { maybe } from '../../../common/utils/maybe';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 
-export interface KeyValue {
-  key: string;
-  value: any | undefined;
-}
-
 export async function getServiceInstanceMetadataDetails({
   serviceName,
   serviceNodeName,
   setup,
+  start,
+  end,
 }: {
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [SERVICE_NODE_NAME]: serviceNodeName } },

@@ -101,7 +101,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
   /**
    * @apiGroup JobAuditMessages
    *
-   * @api {put} /api/ml/job_audit_messages/clear_messages/{jobId} Index annotation
+   * @api {put} /api/ml/job_audit_messages/clear_messages Clear messages
    * @apiName ClearJobAuditMessages
    * @apiDescription Clear the job audit messages.
    *
@@ -121,8 +121,8 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       async ({ client, mlClient, request, response, jobSavedObjectService }) => {
         try {
           const { clearJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
-          const { jobId } = request.body;
-          const resp = await clearJobAuditMessages(jobId);
+          const { jobId, notificationIndices } = request.body;
+          const resp = await clearJobAuditMessages(jobId, notificationIndices);
 
           return response.ok({
             body: resp,

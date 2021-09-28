@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
 import {
-  ACTION_TYPES_URL,
   ActionConnector,
   ActionTypeConnector,
   CASE_CONFIGURE_CONNECTORS_URL,
@@ -22,6 +22,7 @@ import { KibanaServices } from '../../common/lib/kibana';
 
 import { ApiProps } from '../types';
 import {
+  convertArrayToCamelCase,
   convertToCamelCase,
   decodeCaseConfigurationsResponse,
   decodeCaseConfigureResponse,
@@ -60,15 +61,6 @@ export const getCaseConfigure = async ({
   return null;
 };
 
-export const getConnectorMappings = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
-  const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {
-    method: 'GET',
-    signal,
-  });
-
-  return response;
-};
-
 export const postCaseConfigure = async (
   caseConfiguration: CasesConfigureRequest,
   signal: AbortSignal
@@ -105,10 +97,10 @@ export const patchCaseConfigure = async (
 };
 
 export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionTypeConnector[]> => {
-  const response = await KibanaServices.get().http.fetch(ACTION_TYPES_URL, {
+  const response = await KibanaServices.get().http.fetch(getAllConnectorTypesUrl(), {
     method: 'GET',
     signal,
   });
 
-  return response;
+  return convertArrayToCamelCase(response) as ActionTypeConnector[];
 };

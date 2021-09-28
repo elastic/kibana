@@ -7,3 +7,4 @@
  */
 
 export { shapeFunction } from './shape_function';
+export { progressFunction } from './progress_function';

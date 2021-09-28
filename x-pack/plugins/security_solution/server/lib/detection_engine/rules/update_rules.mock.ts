@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import { UpdateRulesOptions } from './types';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import {
-  getUpdateRulesSchemaMock,
   getUpdateMachineLearningSchemaMock,
+  getUpdateRulesSchemaMock,
 } from '../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 
-export const getUpdateRulesOptionsMock = (): UpdateRulesOptions => ({
+export const getUpdateRulesOptionsMock = (isRuleRegistryEnabled: boolean) => ({
+  spaceId: 'default',
   rulesClient: rulesClientMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
+  ruleStatusClient: ruleExecutionLogClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
   ruleUpdate: getUpdateRulesSchemaMock(),
+  isRuleRegistryEnabled,
 });
 
-export const getUpdateMlRulesOptionsMock = (): UpdateRulesOptions => ({
+export const getUpdateMlRulesOptionsMock = (isRuleRegistryEnabled: boolean) => ({
+  spaceId: 'default',
   rulesClient: rulesClientMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
+  ruleStatusClient: ruleExecutionLogClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
   ruleUpdate: getUpdateMachineLearningSchemaMock(),
+  isRuleRegistryEnabled,
 });

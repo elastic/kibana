@@ -1,12 +1,12 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },
+  "exclude": ["public/applications/**/cypress/**/*"],
   "include": [
     "common/**/*",
     "public/**/*",

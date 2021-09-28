@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { IHTTPSimpleFields, ConfigKeys, ScheduleUnit, DataStream } from '../types';
+import { IHTTPSimpleFields, ConfigKeys, DataStream } from '../types';
+import { defaultValues as commonDefaultValues } from '../common/default_values';
 
 interface IHTTPSimpleFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<IHTTPSimpleFields>>;
@@ -19,17 +20,11 @@ interface IHTTPSimpleFieldsContextProvider {
   defaultValues?: IHTTPSimpleFields;
 }
 
-export const initialValues = {
+export const initialValues: IHTTPSimpleFields = {
+  ...commonDefaultValues,
   [ConfigKeys.URLS]: '',
   [ConfigKeys.MAX_REDIRECTS]: '0',
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
-  [ConfigKeys.SCHEDULE]: {
-    number: '3',
-    unit: ScheduleUnit.MINUTES,
-  },
-  [ConfigKeys.APM_SERVICE_NAME]: '',
-  [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: '16',
 };
 
 const defaultContext: IHTTPSimpleFieldsContext = {

@@ -247,7 +247,6 @@ describe('PluginStatusService', () => {
       subscription.unsubscribe();
 
       expect(statusUpdates).toEqual([
-        { a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' } },
         { a: { level: ServiceStatusLevels.degraded, summary: 'a degraded' } },
         { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
         { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
@@ -274,7 +273,6 @@ describe('PluginStatusService', () => {
       subscription.unsubscribe();
 
       expect(statusUpdates).toEqual([
-        { a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' } },
         { a: { level: ServiceStatusLevels.degraded, summary: 'a degraded' } },
         { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
         { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
@@ -355,6 +353,35 @@ describe('PluginStatusService', () => {
       expect(() => {
         service.getDependenciesStatus$('dont-exist');
       }).toThrowError();
+    });
+
+    it('debounces plugins custom status registration', async () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies,
+      });
+      const available: ServiceStatus = {
+        level: ServiceStatusLevels.available,
+        summary: 'a available',
+      };
+
+      const statusUpdates: Array<Record<string, ServiceStatus>> = [];
+      const subscription = service
+        .getDependenciesStatus$('b')
+        .subscribe((status) => statusUpdates.push(status));
+
+      const pluginA$ = new BehaviorSubject(available);
+      service.set('a', pluginA$);
+
+      expect(statusUpdates).toStrictEqual([]);
+
+      const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      // Waiting for the debounce timeout should cut a new update
+      await delay(25);
+      subscription.unsubscribe();
+
+      expect(statusUpdates).toStrictEqual([{ a: available }]);
     });
 
     it('debounces events in quick succession', async () => {

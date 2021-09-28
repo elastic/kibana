@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCode,
-  EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
@@ -20,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
+import { EuiCodeEditor } from '../../../../shared_imports';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 

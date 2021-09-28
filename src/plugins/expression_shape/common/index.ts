@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110893
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export * from './constants';
 export * from './types';
 
-export { getAvailableShapes } from './lib/available_shapes';
+export { getAvailableShapes, getAvailableProgressShapes } from './lib/available_shapes';
