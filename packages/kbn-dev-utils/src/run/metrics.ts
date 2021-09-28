@@ -42,7 +42,7 @@ export class Metrics {
     });
   }
 
-  async reportError(command?: string) {
+  async reportError(errorMessage?: string, command?: string) {
     return await this.reporter.timings({
       timings: [
         {
@@ -51,6 +51,7 @@ export class Metrics {
           ms: Date.now() - this.startTime,
           meta: {
             success: false,
+            errorMessage,
             ...Object.fromEntries(this.meta),
           },
         },

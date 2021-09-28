@@ -74,7 +74,7 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
     });
   } catch (error) {
     cleanup.execute(error);
-    await metrics.reportError();
+    await metrics.reportError(error?.message);
     // process.exitCode is set by `cleanup` when necessary
     process.exit();
   } finally {
