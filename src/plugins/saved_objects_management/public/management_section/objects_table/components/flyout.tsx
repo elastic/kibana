@@ -281,8 +281,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       return;
     }
 
+    const allowedTypeNames = allowedTypes.map((type) => type.name);
     contents = contents
-      .filter((content) => allowedTypes.includes(content._type))
+      .filter((content) => allowedTypeNames.includes(content._type))
       .map((doc) => ({
         ...doc,
         // The server assumes that documents with no migrationVersion are up to date.
