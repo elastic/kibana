@@ -261,9 +261,9 @@ URL that it derived from the actual server address and `xpack.security.public` s
 
 [float]
 === Legacy `optimize.*` settings are no longer supported
-*Details:*  The legacy optimizer has been removed and deprecations for unused `optimize.*` settings have been logged since 7.10. The following settings have been removed.
+*Details:*  The legacy optimizer has been removed and any `optimize.*` settings have been deprecated since 7.10. These settings have been removed as they are no longer in use.
 
-*Impact:* Any of the following legacy `optimize.*` settings will prevent Kibana from starting up. Going forward, to run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. See https://github.com/elastic/kibana/pull/73154 for more details.
+*Impact:* Any of the legacy `optimize.*` settings will prevent Kibana from starting up. Going forward, to run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. See https://github.com/elastic/kibana/pull/73154 for more details.
 
 [float]
 === kibana.keystore has moved from the `data` folder to the `config` folder
