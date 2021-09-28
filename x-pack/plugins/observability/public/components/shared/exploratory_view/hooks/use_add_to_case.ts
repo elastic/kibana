@@ -77,21 +77,34 @@ export const useAddToCase = ({
       if (theCase && lensAttributes) {
         setIsCasesOpen(false);
         setIsSaving(true);
-        addToCase(http, theCase, lensAttributes, timeRange).then(() => {
-          setIsSaving(false);
-          toasts.addSuccess(
-            {
+        addToCase(http, theCase, lensAttributes, timeRange).then(
+          () => {
+            setIsSaving(false);
+            toasts.addSuccess(
+              {
+                title: i18n.translate(
+                  'xpack.observability.expView.heading.addToCase.notification',
+                  {
+                    defaultMessage: 'Successfully added visualization to the case: {caseTitle}',
+                    values: { caseTitle: theCase.title },
+                  }
+                ),
+                text: getToastText(theCase),
+              },
+              {
+                toastLifeTimeMs: 10000,
+              }
+            );
+          },
+          (error) => {
+            toasts.addError(error, {
               title: i18n.translate('xpack.observability.expView.heading.addToCase.notification', {
-                defaultMessage: 'Successfully added visualization to the case: {caseTitle}',
+                defaultMessage: 'Failed to add visualization to the selected case.',
                 values: { caseTitle: theCase.title },
               }),
-              text: getToastText(theCase),
-            },
-            {
-              toastLifeTimeMs: 10000,
-            }
-          );
-        });
+            });
+          }
+        );
       } else {
         navigateToApp(observabilityFeatureId, {
           path: getCreateCaseUrl(),
