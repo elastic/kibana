@@ -8,7 +8,7 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { METRIC_JAVA_GC_TIME } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
 import { ChartBase } from '../../../types';
 
@@ -37,12 +37,16 @@ function getGcTimeChart({
   setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
   return fetchAndTransformGcMetrics({
     environment,
@@ -50,6 +54,8 @@ function getGcTimeChart({
     setup,
     serviceName,
     serviceNodeName,
+    start,
+    end,
     chartBase,
     fieldName: METRIC_JAVA_GC_TIME,
     operationName: 'get_gc_time_charts',

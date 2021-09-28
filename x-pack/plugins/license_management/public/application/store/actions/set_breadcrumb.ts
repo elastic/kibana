@@ -8,12 +8,10 @@
 import { ThunkAction } from 'redux-thunk';
 import { BreadcrumbService } from '../../breadcrumbs';
 
-export const setBreadcrumb = (
-  section: 'dashboard' | 'upload'
-): ThunkAction<any, any, { breadcrumbService: BreadcrumbService }, any> => (
-  dispatch,
-  getState,
-  { breadcrumbService }
-) => {
-  breadcrumbService.setBreadcrumbs(section);
-};
+export const setBreadcrumb =
+  (
+    section: 'dashboard' | 'upload'
+  ): ThunkAction<any, any, { breadcrumbService: BreadcrumbService }, any> =>
+  (dispatch, getState, { breadcrumbService }) => {
+    breadcrumbService.setBreadcrumbs(section);
+  };

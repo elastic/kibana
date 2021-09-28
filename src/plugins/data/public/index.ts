@@ -45,12 +45,11 @@ import {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   validateDataView,
   flattenHitWrapper,
-} from './index_patterns';
+} from './data_views';
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsService } from './data_views';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -58,7 +57,6 @@ export const indexPatterns = {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   isFilterable,
   isNestedField,
   validate: validateDataView,
@@ -71,7 +69,7 @@ export {
   IndexPattern,
   IndexPatternField,
   TypeMeta,
-} from './index_patterns';
+} from './data_views';
 
 export {
   IIndexPattern,
@@ -91,7 +89,7 @@ export {
   IndexPatternListItem,
 } from '../common';
 
-export { DuplicateDataViewError } from '../common/index_patterns/errors';
+export { DuplicateDataViewError } from '../common/data_views/errors';
 
 /*
  * Autocomplete query suggestions:

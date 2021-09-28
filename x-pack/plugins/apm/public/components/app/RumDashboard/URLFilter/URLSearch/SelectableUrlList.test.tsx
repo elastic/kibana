@@ -90,11 +90,10 @@ describe('SelectableUrlList', () => {
   });
 
   it('hides popover on escape', async () => {
-    const {
-      getByText,
-      getByLabelText,
-      queryByText,
-    } = render(<WrappedComponent />, { customHistory });
+    const { getByText, getByLabelText, queryByText } = render(
+      <WrappedComponent />,
+      { customHistory }
+    );
 
     const input = getByLabelText(I18LABELS.filterByUrl);
     fireEvent.click(input);

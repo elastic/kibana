@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiLink, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 
+import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../constants';
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 
 interface LicenseCalloutProps {
@@ -20,7 +21,7 @@ export const LicenseCallout: React.FC<LicenseCalloutProps> = ({ message }) => {
     <>
       {message}{' '}
       <EuiLink target="_blank" external href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-        <strong>Explore Platinum features</strong>
+        <strong>{EXPLORE_PLATINUM_FEATURES_LINK}</strong>
       </EuiLink>
     </>
   );

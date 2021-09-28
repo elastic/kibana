@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { topTransactionGroupsFetcher, TopTraceOptions } from './fetcher';
 
 export async function getTopTransactionGroupList(
   options: TopTraceOptions,
-  setup: Setup & SetupTimeRange
+  setup: Setup
 ) {
   return await topTransactionGroupsFetcher(options, setup);
 }

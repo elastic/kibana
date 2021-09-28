@@ -64,7 +64,7 @@ export const importTimelinesRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const res = await importTimelines(
-          (file as unknown) as Readable,
+          file as unknown as Readable,
           config.maxTimelineImportExportSize,
           frameworkRequest,
           isImmutable === 'true'

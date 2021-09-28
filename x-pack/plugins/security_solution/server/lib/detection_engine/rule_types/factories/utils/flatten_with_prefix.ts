@@ -5,16 +5,26 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import { SearchTypes } from '../../../../../../common/detection_engine/types';
 
 export const flattenWithPrefix = (
   prefix: string,
-  obj: Record<string, SearchTypes>
+  maybeObj: unknown
 ): Record<string, SearchTypes> => {
-  return Object.keys(obj).reduce((acc: Record<string, SearchTypes>, key) => {
+  if (maybeObj != null && isPlainObject(maybeObj)) {
+    return Object.keys(maybeObj as Record<string, SearchTypes>).reduce(
+      (acc: Record<string, SearchTypes>, key) => {
+        return {
+          ...acc,
+          ...flattenWithPrefix(`${prefix}.${key}`, (maybeObj as Record<string, SearchTypes>)[key]),
+        };
+      },
+      {}
+    );
+  } else {
     return {
-      ...acc,
-      [`${prefix}.${key}`]: obj[key],
+      [prefix]: maybeObj as SearchTypes,
     };
-  }, {});
+  }
 };

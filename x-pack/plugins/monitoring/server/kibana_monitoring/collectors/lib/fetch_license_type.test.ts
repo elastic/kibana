@@ -11,7 +11,7 @@ import { fetchLicenseType } from './fetch_license_type';
 describe('fetchLicenseType', () => {
   const clusterUuid = '1abcde2';
   const availableCcs: string[] = [];
-  const callCluster = ({
+  const callCluster = {
     search: jest.fn().mockImplementation(() => ({
       body: {
         hits: {
@@ -27,7 +27,7 @@ describe('fetchLicenseType', () => {
         },
       },
     })),
-  } as unknown) as ElasticsearchClient;
+  } as unknown as ElasticsearchClient;
 
   it('should get the license type', async () => {
     const result = await fetchLicenseType(callCluster, availableCcs, clusterUuid);
@@ -35,7 +35,7 @@ describe('fetchLicenseType', () => {
   });
 
   it('should handle no license data', async () => {
-    const customCallCluster = ({
+    const customCallCluster = {
       search: jest.fn().mockImplementation(() => ({
         body: {
           hits: {
@@ -43,7 +43,7 @@ describe('fetchLicenseType', () => {
           },
         },
       })),
-    } as unknown) as ElasticsearchClient;
+    } as unknown as ElasticsearchClient;
     const result = await fetchLicenseType(customCallCluster, availableCcs, clusterUuid);
     expect(result).toStrictEqual(null);
   });

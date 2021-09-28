@@ -72,9 +72,9 @@ describe('isCompatible', () => {
     expectedResult: boolean = true
   ): Promise<void> {
     uiActionsEnhanced.getActionFactories.mockImplementation(() => [
-      ({
+      {
         supportedTriggers: () => actionFactoriesTriggers,
-      } as unknown) as UiActionsEnhancedActionFactory,
+      } as unknown as UiActionsEnhancedActionFactory,
     ]);
 
     let embeddable = new MockEmbeddable(

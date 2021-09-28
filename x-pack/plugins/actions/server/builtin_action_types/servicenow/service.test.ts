@@ -388,8 +388,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url:
-          'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^ORname=incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
+        url: 'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^ORname=incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });
     });
 
@@ -421,8 +420,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url:
-          'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^ORname=sn_si_incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
+        url: 'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^ORname=sn_si_incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });
     });
 
@@ -458,8 +456,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url:
-          'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
     });
 
@@ -492,8 +489,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url:
-          'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
     });
 

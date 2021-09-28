@@ -31,7 +31,8 @@ export interface Params {
 }
 
 export class DashboardToDiscoverDrilldown
-  implements Drilldown<Config, ApplyGlobalFilterActionContext> {
+  implements Drilldown<Config, ApplyGlobalFilterActionContext>
+{
   constructor(protected readonly params: Params) {}
 
   public readonly id = SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN;

@@ -67,11 +67,6 @@ describe('When using the Trusted App Form', () => {
   const getOsField = (dataTestSub: string = dataTestSubjForForm): HTMLButtonElement => {
     return renderResult.getByTestId(`${dataTestSub}-osSelectField`) as HTMLButtonElement;
   };
-  const getGlobalSwitchField = (dataTestSub: string = dataTestSubjForForm): HTMLButtonElement => {
-    return renderResult.getByTestId(
-      `${dataTestSub}-effectedPolicies-globalSwitch`
-    ) as HTMLButtonElement;
-  };
   const getDescriptionField = (dataTestSub: string = dataTestSubjForForm): HTMLTextAreaElement => {
     return renderResult.getByTestId(`${dataTestSub}-descriptionField`) as HTMLTextAreaElement;
   };
@@ -184,9 +179,9 @@ describe('When using the Trusted App Form', () => {
 
     it('should show an initial condition entry with labels', () => {
       const defaultCondition = getCondition();
-      const labels = Array.from(
-        defaultCondition.querySelectorAll('.euiFormRow__labelWrapper')
-      ).map((label) => (label.textContent || '').trim());
+      const labels = Array.from(defaultCondition.querySelectorAll('.euiFormRow__labelWrapper')).map(
+        (label) => (label.textContent || '').trim()
+      );
       expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
     });
 
@@ -252,54 +247,49 @@ describe('When using the Trusted App Form', () => {
   });
 
   describe('the Policy Selection area', () => {
-    it('should show loader when setting `policies.isLoading` to true', () => {
+    beforeEach(() => {
+      const policy = generator.generatePolicyPackagePolicy();
+      policy.name = 'test policy A';
+      policy.id = '123';
+
+      formProps.policies.options = [policy];
+    });
+
+    it('should have `global` switch on if effective scope is global and policy options hidden', () => {
+      render();
+      const globalButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-global`
+      ) as HTMLButtonElement;
+
+      expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+      expect(renderResult.queryByTestId('policy-123')).toBeNull();
+    });
+
+    it('should have policy options visible and specific policies checked if scope is per-policy', () => {
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'policy',
+        policies: ['123'],
+      };
+      render();
+      const perPolicyButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-perPolicy`
+      ) as HTMLButtonElement;
+
+      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual('false');
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual('true');
+    });
+    it('should show loader when setting `policies.isLoading` to true and scope is per-policy', () => {
       formProps.policies.isLoading = true;
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'policy',
+        policies: ['123'],
+      };
       render();
       expect(
         renderResult.getByTestId(`${dataTestSubjForForm}-effectedPolicies-policiesSelectable`)
           .textContent
       ).toEqual('Loading options');
-    });
-
-    describe('and policies exist', () => {
-      beforeEach(() => {
-        const policy = generator.generatePolicyPackagePolicy();
-        policy.name = 'test policy A';
-        policy.id = '123';
-
-        formProps.policies.options = [policy];
-      });
-
-      it('should display the policies available, but disabled if ', () => {
-        render();
-        expect(renderResult.getByTestId('policy-123'));
-      });
-
-      it('should have `global` switch on if effective scope is global and policy options disabled', () => {
-        render();
-        expect(getGlobalSwitchField().getAttribute('aria-checked')).toEqual('true');
-        expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual(
-          'true'
-        );
-        expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual(
-          'false'
-        );
-      });
-
-      it('should have specific policies checked if scope is per-policy', () => {
-        (formProps.trustedApp as NewTrustedApp).effectScope = {
-          type: 'policy',
-          policies: ['123'],
-        };
-        render();
-        expect(getGlobalSwitchField().getAttribute('aria-checked')).toEqual('false');
-        expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual(
-          'false'
-        );
-        expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual(
-          'true'
-        );
-      });
     });
   });
 

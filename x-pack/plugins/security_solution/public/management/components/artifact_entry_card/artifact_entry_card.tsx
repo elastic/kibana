@@ -102,7 +102,7 @@ export const ArtifactEntryCard = memo(
           </EuiText>
         </EuiPanel>
 
-        <EuiHorizontalRule margin="xs" />
+        <EuiHorizontalRule margin="none" />
 
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
           <CriteriaConditions

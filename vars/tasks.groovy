@@ -39,7 +39,7 @@ def test() {
 }
 
 def ossCiGroups() {
-  def ciGroups = 1..12
+  def ciGroups = 1..11
   tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
 }
 
