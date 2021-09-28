@@ -10,6 +10,8 @@ import type {
   Category,
 } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
+import type { PackageListItem } from '../../../../../../../common/types/models';
+
 import type { CategoryFacet } from './category_facets';
 
 export function mergeAndReplaceCategoryCounts(
@@ -44,6 +46,48 @@ export function mergeAndReplaceCategoryCounts(
 
   merged.sort((a, b) => {
     return a.id.localeCompare(b.id);
+  });
+
+  return merged;
+}
+
+export function findReplacementsForEprPackage(
+  replacements: CustomIntegration[],
+  packageName: string,
+  category: Category,
+  release: 'beta' | 'experimental' | 'ga'
+): CustomIntegration[] {
+  if (release === 'ga') {
+    return [];
+  }
+
+  const filtered = replacements.filter((customIntegration: CustomIntegration) => {
+    return (
+      customIntegration.eprOverlap === packageName &&
+      (!category || customIntegration.categories.includes(category))
+    );
+  });
+  return filtered;
+}
+
+export function mergeEprPackagesWithReplacements(
+  eprPackages: PackageListItem[],
+  replacements: CustomIntegration[],
+  category: Category
+): Array<PackageListItem | CustomIntegration> {
+  const merged: Array<PackageListItem | CustomIntegration> = [];
+  eprPackages.forEach((eprPackage) => {
+    const hits = findReplacementsForEprPackage(
+      replacements,
+      eprPackage.name,
+      category,
+      eprPackage.release
+    );
+    if (hits.length) {
+      merged.push(...hits);
+    } else {
+      merged.push(eprPackage);
+    }
   });
 
   return merged;

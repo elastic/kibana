@@ -27,21 +27,7 @@ export class CustomIntegrationsPlugin
       async getAppendCustomIntegrations(): Promise<CustomIntegration[]> {
         return core.http.get(ROUTES_APPEND_CUSTOM_INTEGRATIONS);
       },
-
-      findReplacementsForEprPackage(
-        integrations: CustomIntegration[],
-        packageName: string,
-        release: 'beta' | 'experimental' | 'ga'
-      ): CustomIntegration[] {
-        if (release === 'ga') {
-          return [];
-        }
-        const replacements = integrations.filter((customIntegration: CustomIntegration) => {
-          return customIntegration.eprOverlap === packageName;
-        });
-        return replacements;
-      },
-    } as CustomIntegrationsSetup;
+    };
   }
 
   public start(core: CoreStart): CustomIntegrationsStart {

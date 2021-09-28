@@ -38,7 +38,7 @@ import type { IntegrationCardItem } from '../../../../../../../common/types/mode
 
 import type { Category } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
-import { mergeAndReplaceCategoryCounts } from './util';
+import { mergeAndReplaceCategoryCounts, mergeEprPackagesWithReplacements } from './util';
 import { CategoryFacets } from './category_facets';
 import type { CategoryFacet } from './category_facets';
 
@@ -267,6 +267,7 @@ const AvailablePackages: React.FC = memo(() => {
   const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories({
     include_policy_templates: true,
   });
+
   const eprPackages = useMemo(
     () => packageListToIntegrationsList(categoryPackagesRes?.response || []),
     [categoryPackagesRes]
@@ -276,6 +277,24 @@ const AvailablePackages: React.FC = memo(() => {
     () => packageListToIntegrationsList(allCategoryPackagesRes?.response || []),
     [allCategoryPackagesRes]
   );
+
+  const { loading: isLoadingReplacementCustomIntegrations, value: replacementCustomIntegrations } =
+    useGetReplacementCustomIntegrations();
+
+  const mergedEprPackages: Array<PackageListItem | CustomIntegration> = useMemo(() => {
+    return !isLoadingReplacementCustomIntegrations
+      ? mergeEprPackagesWithReplacements(
+          eprPackages || [],
+          replacementCustomIntegrations || [],
+          selectedCategory as Category
+        )
+      : [];
+  }, [
+    eprPackages,
+    replacementCustomIntegrations,
+    isLoadingReplacementCustomIntegrations,
+    selectedCategory,
+  ]);
 
   const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
     useGetAppendCustomIntegrations();
@@ -288,11 +307,6 @@ const AvailablePackages: React.FC = memo(() => {
       })
     : [];
 
-  const { loading: isLoadingReplacementCustomIntegrations, value: replacementCustomIntegrations } =
-    useGetReplacementCustomIntegrations();
-
-  console.log('repl', replacementCustomIntegrations);
-
   const title = useMemo(
     () =>
       i18n.translate('xpack.fleet.epmList.allTitle', {
@@ -302,7 +316,7 @@ const AvailablePackages: React.FC = memo(() => {
   );
 
   const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
-    ...eprPackages,
+    ...mergedEprPackages,
     ...filteredAddableIntegrations,
   ];
   eprAndCustomPackages.sort((a, b) => {
