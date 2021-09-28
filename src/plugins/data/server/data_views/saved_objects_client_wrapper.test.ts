@@ -12,7 +12,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { DataViewSavedObjectConflictError } from '../../common/data_views';
 
 describe('SavedObjectsClientPublicToCommon', () => {
-  const soClient = ({ resolve: jest.fn() } as unknown) as SavedObjectsClientContract;
+  const soClient = { resolve: jest.fn() } as unknown as SavedObjectsClientContract;
 
   test('get saved object - exactMatch', async () => {
     const mockedSavedObject = {
