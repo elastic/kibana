@@ -260,6 +260,12 @@ URL that it derived from the actual server address and `xpack.security.public` s
 *Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
 [float]
+=== Legacy `optimize.*` settings are no longer supported
+*Details:*  The legacy optimizer has been removed and deprecations for unused `optimize.*` settings have been logged since 7.10. The following settings have been removed.
+
+*Impact:* Any of the following legacy `optimize.*` settings will prevent Kibana from starting up. Going forward, to run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. See https://github.com/elastic/kibana/pull/73154 for more details.
+
+[float]
 === kibana.keystore has moved from the `data` folder to the `config` folder
 *Details:* By default, kibana.keystore has moved from the configured `path.data` folder to `<root>/config` for archive distributions
 and `/etc/kibana` for package distributions.  If a pre-existing keystore exists in the data directory that path will continue to be used.
