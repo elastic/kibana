@@ -266,6 +266,41 @@ describe('CurationLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('convertToManual', () => {
+      it('should make an API call and re-load the curation on success', async () => {
+        http.put.mockReturnValueOnce(Promise.resolve());
+        mount({ activeQuery: 'some query' });
+        jest.spyOn(CurationLogic.actions, 'loadCuration');
+
+        CurationLogic.actions.convertToManual();
+        await nextTick();
+
+        expect(http.put).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          {
+            body: JSON.stringify([
+              {
+                query: 'some query',
+                type: 'curation',
+                status: 'applied',
+              },
+            ]),
+          }
+        );
+        expect(CurationLogic.actions.loadCuration).toHaveBeenCalled();
+      });
+
+      it('flashes any error messages', async () => {
+        http.put.mockReturnValueOnce(Promise.reject('error'));
+        mount({ activeQuery: 'some query' });
+
+        CurationLogic.actions.convertToManual();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
     describe('loadCuration', () => {
       it('should set dataLoading state', () => {
         mount({ dataLoading: false }, { curationId: 'cur-123456789' });

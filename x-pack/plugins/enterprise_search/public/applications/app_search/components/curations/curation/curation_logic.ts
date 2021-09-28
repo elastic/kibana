@@ -30,6 +30,7 @@ interface CurationValues {
 }
 
 interface CurationActions {
+  convertToManual(): void;
   loadCuration(): void;
   onCurationLoad(curation: Curation): { curation: Curation };
   updateCuration(): void;
@@ -53,6 +54,7 @@ interface CurationProps {
 export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, CurationProps>>({
   path: ['enterprise_search', 'app_search', 'curation_logic'],
   actions: () => ({
+    convertToManual: true,
     loadCuration: true,
     onCurationLoad: (curation) => ({ curation }),
     updateCuration: true,
@@ -163,6 +165,25 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     ],
   }),
   listeners: ({ actions, values, props }) => ({
+    convertToManual: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        await http.put(`/internal/app_search/engines/${engineName}/search_relevance_suggestions`, {
+          body: JSON.stringify([
+            {
+              query: values.activeQuery,
+              type: 'curation',
+              status: 'applied',
+            },
+          ]),
+        });
+        actions.loadCuration();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     loadCuration: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
