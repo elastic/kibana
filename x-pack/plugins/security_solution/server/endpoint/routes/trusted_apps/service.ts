@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from 'kibana/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isEqual } from 'lodash/fp';
 import { ExceptionListClient } from '../../../../../lists/server';
 
 import {
@@ -34,6 +34,7 @@ import {
   TrustedAppNotFoundError,
   TrustedAppVersionConflictError,
   TrustedAppPolicyNotExistsError,
+  TrustedAppPolicyPermissionsError,
 } from './errors';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../fleet/common';
@@ -61,6 +62,31 @@ const getNonExistingPoliciesFromTrustedApp = async (
   }
 
   return policies.filter((policy) => policy.version === undefined);
+};
+
+const isUserTryingToModifyEffectScopeWithoutPermissions = (
+  currentTrustedApp: ExceptionListItemSchema,
+  updatedTrustedApp: PutTrustedAppUpdateRequest,
+  license?: string
+): boolean => {
+  if (updatedTrustedApp.effectScope.type === 'global') {
+    return false;
+  } else if (license === 'platinium') {
+    return false;
+  } else if (
+    isEqual(
+      currentTrustedApp.tags.map((policy) => policy.replace('policy:', '')),
+      updatedTrustedApp.effectScope.policies
+    )
+  ) {
+    return false;
+  } else {
+    console.log(
+      currentTrustedApp.tags.map((policy) => policy.replace('policy:', '')),
+      updatedTrustedApp.effectScope.policies
+    );
+    return true;
+  }
 };
 
 export const deleteTrustedApp = async (
@@ -166,6 +192,16 @@ export const updateTrustedApp = async (
 
   if (!currentTrustedApp) {
     throw new TrustedAppNotFoundError(id);
+  }
+
+  if (
+    isUserTryingToModifyEffectScopeWithoutPermissions(
+      currentTrustedApp,
+      updatedTrustedApp,
+      'platiniumNO'
+    )
+  ) {
+    throw new TrustedAppPolicyPermissionsError(updatedTrustedApp.name);
   }
 
   const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(

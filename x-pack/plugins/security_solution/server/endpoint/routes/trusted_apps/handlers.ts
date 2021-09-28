@@ -33,6 +33,7 @@ import {
   TrustedAppNotFoundError,
   TrustedAppVersionConflictError,
   TrustedAppPolicyNotExistsError,
+  TrustedAppPolicyPermissionsError,
 } from './errors';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 
@@ -83,6 +84,11 @@ const errorHandler = <E extends Error>(
   }
 
   if (error instanceof TrustedAppPolicyNotExistsError) {
+    logger.error(error);
+    return res.badRequest({ body: { message: error.message, attributes: { type: error.type } } });
+  }
+
+  if (error instanceof TrustedAppPolicyPermissionsError) {
     logger.error(error);
     return res.badRequest({ body: { message: error.message, attributes: { type: error.type } } });
   }
