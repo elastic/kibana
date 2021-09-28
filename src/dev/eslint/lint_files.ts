@@ -26,7 +26,6 @@ async function lintFilesOnContent(cli: CLIEngine, files: File[]) {
     warningCount: 0,
     fixableErrorCount: 0,
     fixableWarningCount: 0,
-    usedDeprecatedRules: [],
   };
 
   for (let i = 0; i < files.length; i++) {
@@ -36,7 +35,6 @@ async function lintFilesOnContent(cli: CLIEngine, files: File[]) {
     report.warningCount += r.warningCount;
     report.fixableErrorCount += r.fixableErrorCount;
     report.fixableWarningCount += r.fixableWarningCount;
-    report.usedDeprecatedRules.push(...r.usedDeprecatedRules);
   }
 
   return report;
