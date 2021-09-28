@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   // FLAKY https://github.com/elastic/kibana/issues/113067
-  describe('spaces', () => {
+  describe.skip('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
