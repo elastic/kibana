@@ -18,7 +18,6 @@ import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import {
-  ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../services';
@@ -32,7 +31,6 @@ const SavedObjectsTablePage = ({
   taggingApi,
   spacesApi,
   allowedTypes,
-  serviceRegistry,
   actionRegistry,
   columnRegistry,
   setBreadcrumbs,
@@ -42,7 +40,6 @@ const SavedObjectsTablePage = ({
   taggingApi?: SavedObjectsTaggingApi;
   spacesApi?: SpacesApi;
   allowedTypes: SavedObjectManagementTypeInfo[];
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
