@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { getStoredAnnotations } from './get_stored_annotations';
 
 export async function getServiceAnnotations({
@@ -19,14 +19,18 @@ export async function getServiceAnnotations({
   annotationsClient,
   client,
   logger,
+  start,
+  end,
 }: {
   serviceName: string;
   environment: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   annotationsClient?: ScopedAnnotationsClient;
   client: ElasticsearchClient;
   logger: Logger;
+  start: number;
+  end: number;
 }) {
   // start fetching derived annotations (based on transactions), but don't wait on it
   // it will likely be significantly slower than the stored annotations
@@ -35,16 +39,19 @@ export async function getServiceAnnotations({
     serviceName,
     environment,
     searchAggregatedTransactions,
+    start,
+    end,
   });
 
   const storedAnnotations = annotationsClient
     ? await getStoredAnnotations({
-        setup,
         serviceName,
         environment,
         annotationsClient,
         client,
         logger,
+        start,
+        end,
       })
     : [];
 
