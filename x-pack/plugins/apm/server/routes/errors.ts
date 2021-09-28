@@ -35,7 +35,8 @@ const errorsRoute = createApmServerRoute({
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const { environment, kuery, sortField, sortDirection } = params.query;
+    const { environment, kuery, sortField, sortDirection, start, end } =
+      params.query;
 
     const errorGroups = await getErrorGroups({
       environment,
@@ -44,6 +45,8 @@ const errorsRoute = createApmServerRoute({
       sortField,
       sortDirection,
       setup,
+      start,
+      end,
     });
 
     return { errorGroups };
@@ -64,7 +67,7 @@ const errorGroupsRoute = createApmServerRoute({
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName, groupId } = params.path;
-    const { environment, kuery } = params.query;
+    const { environment, kuery, start, end } = params.query;
 
     return getErrorGroupSample({
       environment,
@@ -72,6 +75,8 @@ const errorGroupsRoute = createApmServerRoute({
       kuery,
       serviceName,
       setup,
+      start,
+      end,
     });
   },
 });
@@ -96,13 +101,15 @@ const errorDistributionRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, kuery, groupId } = params.query;
+    const { environment, kuery, groupId, start, end } = params.query;
     return getErrorDistribution({
       environment,
       kuery,
       serviceName,
       groupId,
       setup,
+      start,
+      end,
     });
   },
 });
