@@ -56,6 +56,7 @@
 /examples/url_generators_examples/ @elastic/kibana-app-services
 /examples/url_generators_explorer/ @elastic/kibana-app-services
 /examples/field_formats_example/ @elastic/kibana-app-services
+/examples/partial_results_example/ @elastic/kibana-app-services
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
@@ -381,9 +382,9 @@
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
-/x-pack/plugins/cases @elastic/security-threat-hunting-cases
+/x-pack/plugins/cases @elastic/security-threat-hunting
 /x-pack/plugins/timelines @elastic/security-threat-hunting
-/x-pack/test/case_api_integration @elastic/security-threat-hunting-cases
+/x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 
 ## Security Solution sub teams - security-onboarding-and-lifecycle-mgt
