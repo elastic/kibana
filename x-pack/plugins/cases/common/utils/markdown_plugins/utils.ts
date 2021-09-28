@@ -11,24 +11,8 @@ import markdown from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import unified from 'unified';
 
-import { TimeRange } from 'src/plugins/data/server';
-import { SerializableRecord } from '@kbn/utility-types';
-import { LENS_ID, LensParser, LensSerializer } from './lens';
-import { TimelineSerializer, TimelineParser, TIMELINE_ID } from './timeline';
-
-export interface LensMarkdownNode extends Node {
-  timeRange: TimeRange;
-  attributes: SerializableRecord;
-  type: string;
-  id: string;
-}
-
-export interface TimelineMarkdownNode extends Node {
-  type: string;
-  title: string;
-  url: string;
-  id: string;
-}
+import { LENS_ID, LensParserPlugin, LensSerializer, LensMarkdownNode } from './lens';
+import { TimelineSerializer, TimelineParserPlugin, TimelineMarkdownNode } from './timeline';
 
 /**
  * A node that has children of other nodes describing the markdown elements or a specific lens visualization.
@@ -45,7 +29,7 @@ export const getLensVisualizations = (parsedComment?: Array<LensMarkdownNode | N
  * plain markdown.
  */
 export const parseCommentString = (comment: string) => {
-  const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
+  const processor = unified().use([[markdown, {}], LensParserPlugin, TimelineParserPlugin]);
   return processor.parse(comment) as MarkdownNode;
 };
 
@@ -68,26 +52,3 @@ export const stringifyMarkdownComment = (comment: MarkdownNode) =>
       ],
     ])
     .stringify(comment);
-
-// TODO: move these to their respective directory
-
-export const isLensMarkdownNode = (node?: unknown): node is LensMarkdownNode => {
-  const unsafeNode = node as LensMarkdownNode;
-  return (
-    unsafeNode != null &&
-    unsafeNode.timeRange != null &&
-    unsafeNode.attributes != null &&
-    unsafeNode.type === LENS_ID
-  );
-};
-
-export const isTimelineMarkdownNode = (node?: unknown): node is TimelineMarkdownNode => {
-  const unsafeNode = node as TimelineMarkdownNode;
-
-  return (
-    unsafeNode != null &&
-    unsafeNode.title != null &&
-    unsafeNode.url != null &&
-    unsafeNode.type === TIMELINE_ID
-  );
-};

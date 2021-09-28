@@ -22,13 +22,12 @@ import {
 } from '../../../../../../src/core/server';
 import { CommentType, AssociationType } from '../../../common';
 import {
-  isLensMarkdownNode,
-  LensMarkdownNode,
   MarkdownNode,
   parseCommentString,
   stringifyMarkdownComment,
 } from '../../../common/utils/markdown_plugins/utils';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
+import { isLensMarkdownNode, LensMarkdownNode } from '../../../common/utils/markdown_plugins/lens';
 
 interface UnsanitizedComment {
   comment: string;

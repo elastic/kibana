@@ -9,7 +9,7 @@ import { Plugin } from 'unified';
 import { RemarkTokenizer } from '@elastic/eui';
 import { LENS_ID } from './constants';
 
-export const LensParser: Plugin = function () {
+export const LensParserPlugin: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.blockTokenizers;
   const methods = Parser.prototype.blockMethods;

@@ -15,7 +15,15 @@ import { Eat } from './types';
 export const TIMELINE_ID = 'timeline';
 const PREFIX = '[';
 
-export const TimelineParser: Plugin = function () {
+/**
+ * This parser plugin is duplicated from the security_solution plugin. Eventually we should create a markdown package
+ * that can be used by security_solution and cases. If we move only the parsing logic to a package it'll increase the
+ * size of the plugins drastically because of the need for unified and other libraries.
+ *
+ * https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/public/common/components/markdown_editor/plugins/timeline/parser.ts
+ */
+
+export const TimelineParserPlugin: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.blockTokenizers;
   const methods = Parser.prototype.blockMethods;

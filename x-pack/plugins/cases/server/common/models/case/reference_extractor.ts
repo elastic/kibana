@@ -13,9 +13,12 @@ import { LensServerPluginSetup } from '../../../../../lens/server';
 import {
   parseCommentString,
   getLensVisualizations,
-  TimelineMarkdownNode,
-  isTimelineMarkdownNode,
 } from '../../../../common/utils/markdown_plugins/utils';
+import {
+  isTimelineMarkdownNode,
+  TimelineMarkdownNode,
+} from '../../../../common/utils/markdown_plugins/timeline';
+import { TIMELINE_SAVED_OBJECT_TYPE } from '../../constants';
 
 type Extractor = (stringToParse?: string) => SavedObjectReference[];
 
@@ -94,11 +97,10 @@ const extractTimelineReferenceFromString: Extractor = (
 
   const parsedComment = getTimelineNodes(comment);
 
-  // TODO: use a const for type
   const allReferences = parsedComment.map(({ id, title }) => ({
     id,
     name: title,
-    type: 'siem-ui-timeline',
+    type: TIMELINE_SAVED_OBJECT_TYPE,
   }));
 
   return dedupReferences(allReferences);

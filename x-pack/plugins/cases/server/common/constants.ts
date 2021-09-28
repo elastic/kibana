@@ -44,3 +44,9 @@ export const COMMENT_REF_NAME = `associated-${CASE_COMMENT_SAVED_OBJECT}`;
  * The name of the saved object reference indicating the subCaseId reference
  */
 export const SUB_CASE_REF_NAME = `associated-${SUB_CASE_SAVED_OBJECT}`;
+
+/**
+ * This needs to match the string registered for the timeline type in this file:
+ * https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/timelines.ts#L11
+ */
+export const TIMELINE_SAVED_OBJECT_TYPE = 'siem-ui-timeline';

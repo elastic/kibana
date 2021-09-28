@@ -6,8 +6,8 @@
  */
 
 import { plugin } from './plugin';
-import { LensParser } from './parser';
+import { LensParserPlugin } from '../../../../../common/utils/markdown_plugins/lens';
 import { LensMarkDownRenderer } from './processor';
 import { VISUALIZATION } from './translations';
 
-export { plugin, LensParser as parser, LensMarkDownRenderer as renderer, VISUALIZATION };
+export { plugin, LensParserPlugin as parser, LensMarkDownRenderer as renderer, VISUALIZATION };

@@ -6,12 +6,12 @@
  */
 
 import type { Node } from 'unist';
+import { SerializableRecord } from '@kbn/utility-types';
+import { TimeRange } from 'src/plugins/data/server';
 
-export interface TimelineMarkdownNode extends Node {
+export interface LensMarkdownNode extends Node {
+  timeRange: TimeRange;
+  attributes: SerializableRecord;
   type: string;
-  title: string;
-  url: string;
   id: string;
 }
-
-export type Eat = Function & { now: Function };
