@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './url_service';
-export * from './locators';
-export * from './short_urls';
+const REGEX = /^\/app\/[^/]+.+$/;
+
+export function shortUrlAssertValid(url: string) {
+  if (!REGEX.test(url) || url.includes('/../')) throw new Error(`Invalid short URL: ${url}`);
+}

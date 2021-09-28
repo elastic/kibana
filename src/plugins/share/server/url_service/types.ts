@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './url_service';
-export * from './locators';
-export * from './short_urls';
+import { UrlService } from '../../common/url_service';
+import { ServerShortUrlClientFactoryCreateParams } from './short_urls';
+
+export type ServerUrlService = UrlService<ServerShortUrlClientFactoryCreateParams>;

@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './url_service';
-export * from './locators';
-export * from './short_urls';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('get_short_url', () => {
+    loadTestFile(require.resolve('./validation'));
+    loadTestFile(require.resolve('./main'));
+  });
+}
