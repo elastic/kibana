@@ -36,7 +36,7 @@ export class PluginsStatusService {
 
   constructor(private readonly deps: Deps) {
     this.defaultInheritedStatus$ = this.deps.core$.pipe(
-      map((coreStatus) => {
+      map(({ overall, ...coreStatus }) => {
         return getSummaryStatus(Object.entries(coreStatus), {
           allAvailableSummary: `All dependencies are available`,
         });
@@ -82,7 +82,7 @@ export class PluginsStatusService {
         // Helps eliminate memory overhead of creating thousands of Observables unnecessarily.
         if (this.anyCustomStatuses(plugin)) {
           return combineLatest([this.deps.core$, this.getDependenciesStatus$(plugin)]).pipe(
-            map(([coreStatus, pluginStatuses]) => {
+            map(([{ overall, ...coreStatus }, pluginStatuses]) => {
               return getSummaryStatus(
                 [...Object.entries(coreStatus), ...Object.entries(pluginStatuses)],
                 {
