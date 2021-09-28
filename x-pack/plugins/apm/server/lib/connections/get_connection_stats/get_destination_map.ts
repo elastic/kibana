@@ -111,7 +111,7 @@ export const getDestinationMap = ({
                   ] as const),
                   sort: [
                     {
-                      '@timestamp': 'desc' as const,
+                      '@timestamp': 'asc' as const,
                     },
                   ],
                 },
