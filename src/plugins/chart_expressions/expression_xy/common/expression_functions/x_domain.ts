@@ -57,78 +57,79 @@ export const xDomain = (): ExpressionFunctionDefinition<
   ExpressionValueXDomain
 > => ({
   name: X_DOMAIN_EXPRESSION,
-  help: i18n.translate('expressionXy.function.valueaxis.help', {
-    defaultMessage: 'Generates value axis object',
+  help: i18n.translate('expressionXy.function.xDomain.help', {
+    defaultMessage: 'Generates the axis settings',
   }),
   type: X_DOMAIN_EXPRESSION,
   args: {
     minInterval: {
       types: ['number'],
       help: i18n.translate('expressionXy.function.xDomain.minInterval.help', {
-        defaultMessage: 'Min interval',
+        defaultMessage: 'Minimum interval between two axis points',
       }),
     },
 
     intervalUnit: {
       types: ['string'],
       help: i18n.translate('expressionXy.function.xDomain.intervalUnit.help', {
-        defaultMessage: 'intervalUnit',
+        defaultMessage: 'Interval unit',
       }),
     },
 
     intervalValue: {
       types: ['number'],
       help: i18n.translate('expressionXy.function.xDomain.intervalValue.help', {
-        defaultMessage: 'intervalValue',
+        defaultMessage: 'Interval value',
       }),
     },
 
     column: {
       types: ['vis_dimension'],
-      help: i18n.translate('expressionXy.function.column.intervalValue.help', {
-        defaultMessage: 'column',
+      help: i18n.translate('expressionXy.function.xDomain.column.help', {
+        defaultMessage: 'The column which is the domain (axis) values',
       }),
     },
 
     timezone: {
       types: ['string'],
       help: i18n.translate('expressionXy.function.xDomain.timezone.help', {
-        defaultMessage: 'timezone',
+        defaultMessage: 'Timezone',
       }),
     },
 
     considerInterval: {
       types: ['boolean'],
       help: i18n.translate('expressionXy.function.xDomain.considerInterval.help', {
-        defaultMessage: 'considerInterval',
+        defaultMessage:
+          'Flag, which is showing if the minimum interval should be added to the max domain point or ignored',
       }),
     },
 
     min: {
       types: ['number'],
       help: i18n.translate('expressionXy.function.xDomain.min.help', {
-        defaultMessage: 'min',
+        defaultMessage: 'Minimum point of the domain (axis)',
       }),
     },
 
     max: {
       types: ['number'],
       help: i18n.translate('expressionXy.function.xDomain.max.help', {
-        defaultMessage: 'max',
+        defaultMessage: 'Maximum point of the domain (axis)',
       }),
     },
 
     logBase: {
       types: ['string'],
       help: i18n.translate('expressionXy.function.xDomain.logBase.help', {
-        defaultMessage: 'logBase',
+        defaultMessage: 'The logarithm base for scaling the axis values',
       }),
     },
 
     coordinates: {
       types: ['string', 'number'],
       help: i18n.translate('expressionXy.function.xDomain.coordinates.help', {
-        defaultMessage: 'coordinates',
+        defaultMessage: 'The list of predefined points on the axis',
       }),
       multi: true,
     },
