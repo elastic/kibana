@@ -64,10 +64,13 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
 
   const policyName = policyItem?.name ?? '';
 
-  const handleListFlyoutClose = () =>
-    navigateCallback({
-      show: undefined,
-    });
+  const handleListFlyoutClose = useCallback(
+    () =>
+      navigateCallback({
+        show: undefined,
+      }),
+    [navigateCallback]
+  );
 
   useEffect(() => {
     if (isUpdateArtifactsLoaded) {
@@ -77,8 +80,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
         payload: { type: 'UninitialisedResourceState' },
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isUpdateArtifactsLoaded]);
+  }, [dispatch, handleListFlyoutClose, isUpdateArtifactsLoaded]);
 
   const handleOnConfirmAction = useCallback(() => {
     dispatch({
