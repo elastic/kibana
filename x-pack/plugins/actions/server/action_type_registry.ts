@@ -23,6 +23,7 @@ import {
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
+  ActionTypeTokens,
 } from './types';
 
 export interface ActionTypeRegistryOpts {
@@ -106,9 +107,10 @@ export class ActionTypeRegistry {
   public register<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Tokens extends ActionTypeTokens = ActionTypeTokens,
     Params extends ActionTypeParams = ActionTypeParams,
     ExecutorResultData = void
-  >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
+  >(actionType: ActionType<Config, Secrets, Tokens, Params, ExecutorResultData>) {
     if (this.has(actionType.id)) {
       throw new Error(
         i18n.translate(
@@ -153,9 +155,10 @@ export class ActionTypeRegistry {
   public get<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Tokens extends ActionTypeTokens = ActionTypeTokens,
     Params extends ActionTypeParams = ActionTypeParams,
     ExecutorResultData = void
-  >(id: string): ActionType<Config, Secrets, Params, ExecutorResultData> {
+  >(id: string): ActionType<Config, Secrets, Tokens, Params, ExecutorResultData> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeErrorMessage', {
@@ -166,7 +169,13 @@ export class ActionTypeRegistry {
         })
       );
     }
-    return this.actionTypes.get(id)! as ActionType<Config, Secrets, Params, ExecutorResultData>;
+    return this.actionTypes.get(id)! as ActionType<
+      Config,
+      Secrets,
+      Tokens,
+      Params,
+      ExecutorResultData
+    >;
   }
 
   /**

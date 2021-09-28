@@ -57,6 +57,7 @@ import {
   PreConfiguredAction,
   ActionTypeConfig,
   ActionTypeSecrets,
+  ActionTypeTokens,
   ActionTypeParams,
   ActionsRequestHandlerContext,
 } from './types';
@@ -91,10 +92,11 @@ export interface PluginSetupContract {
   registerType<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Tokens extends ActionTypeTokens = ActionTypeTokens,
     Params extends ActionTypeParams = ActionTypeParams,
     ExecutorResultData = void
   >(
-    actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
+    actionType: ActionType<Config, Secrets, Tokens, Params, ExecutorResultData>
   ): void;
   isPreconfiguredConnector(connectorId: string): boolean;
 }
@@ -155,6 +157,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
+
+  private savedObjectsServiceStart?: CoreStart['savedObjects'];
+  private elasticsearchServiceStart?: CoreStart['elasticsearch'];
+  private taskManagerStartContract?: TaskManagerStartContract;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -235,11 +241,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       this.preconfiguredActions
     );
 
+    const getActionsClientWithRequest = this.getActionsClientWithRequest.bind(this);
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
       actionsConfigUtils,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
+      getActionsClientWithRequest,
     });
 
     const usageCollection = plugins.usageCollection;
@@ -290,10 +298,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+        Tokens extends ActionTypeTokens = ActionTypeTokens,
         Params extends ActionTypeParams = ActionTypeParams,
         ExecutorResultData = void
       >(
-        actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
+        actionType: ActionType<Config, Secrets, Tokens, Params, ExecutorResultData>
       ) => {
         ensureSufficientLicense(actionType);
         actionTypeRegistry.register(actionType);
@@ -306,13 +315,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     };
   }
 
-  public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+  public async getActionsClientWithRequest(
+    request: KibanaRequest,
+    authorizationContext?: ActionExecutionSource<unknown>
+  ) {
     const {
-      logger,
-      licenseState,
       actionExecutor,
       actionTypeRegistry,
-      taskRunnerFactory,
       kibanaIndexConfig,
       isESOCanEncrypt,
       preconfiguredActions,
@@ -320,61 +329,75 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getUnsecuredSavedObjectsClient,
     } = this;
 
+    if (isESOCanEncrypt !== true) {
+      throw new Error(
+        `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      );
+    }
+
+    const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
+      this.savedObjectsServiceStart as CoreStart['savedObjects'],
+      request
+    );
+
+    const kibanaIndex = kibanaIndexConfig.kibana.index;
+
+    return new ActionsClient({
+      unsecuredSavedObjectsClient,
+      actionTypeRegistry: actionTypeRegistry!,
+      defaultKibanaIndex: kibanaIndex,
+      scopedClusterClient: (
+        this.elasticsearchServiceStart as CoreStart['elasticsearch']
+      ).client.asScoped(request),
+      preconfiguredActions,
+      request,
+      authorization: instantiateAuthorization(
+        request,
+        await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
+      ),
+      actionExecutor: actionExecutor!,
+      ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
+        taskManager: this.taskManagerStartContract as TaskManagerStartContract,
+        actionTypeRegistry: actionTypeRegistry!,
+        isESOCanEncrypt: isESOCanEncrypt!,
+        preconfiguredActions,
+      }),
+      executionEnqueuer: createExecutionEnqueuerFunction({
+        taskManager: this.taskManagerStartContract as TaskManagerStartContract,
+        actionTypeRegistry: actionTypeRegistry!,
+        isESOCanEncrypt: isESOCanEncrypt!,
+        preconfiguredActions,
+      }),
+      auditLogger: this.security?.audit.asScoped(request),
+      usageCounter: this.usageCounter,
+    });
+  }
+
+  public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    const {
+      logger,
+      licenseState,
+      actionExecutor,
+      actionTypeRegistry,
+      taskRunnerFactory,
+      preconfiguredActions,
+      instantiateAuthorization,
+    } = this;
+
+    this.taskManagerStartContract = plugins.taskManager;
+    this.savedObjectsServiceStart = core.savedObjects;
+    this.elasticsearchServiceStart = core.elasticsearch;
+
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
 
-    const getActionsClientWithRequest = async (
-      request: KibanaRequest,
-      authorizationContext?: ActionExecutionSource<unknown>
-    ) => {
-      if (isESOCanEncrypt !== true) {
-        throw new Error(
-          `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-        );
-      }
-
-      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
-        core.savedObjects,
-        request
-      );
-
-      const kibanaIndex = kibanaIndexConfig.kibana.index;
-
-      return new ActionsClient({
-        unsecuredSavedObjectsClient,
-        actionTypeRegistry: actionTypeRegistry!,
-        defaultKibanaIndex: kibanaIndex,
-        scopedClusterClient: core.elasticsearch.client.asScoped(request),
-        preconfiguredActions,
-        request,
-        authorization: instantiateAuthorization(
-          request,
-          await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
-        ),
-        actionExecutor: actionExecutor!,
-        ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
-          actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
-          preconfiguredActions,
-        }),
-        executionEnqueuer: createExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
-          actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
-          preconfiguredActions,
-        }),
-        auditLogger: this.security?.audit.asScoped(request),
-        usageCounter: this.usageCounter,
-      });
-    };
-
     // Ensure the public API cannot be used to circumvent authorization
     // using our legacy exemption mechanism by passing in a legacy SO
     // as authorizationContext which would then set a Legacy AuthorizationMode
+    const getActionsClientWithRequest = this.getActionsClientWithRequest.bind(this);
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 

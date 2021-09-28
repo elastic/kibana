@@ -9,7 +9,12 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from 'src/core/server';
 import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
-import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
+import {
+  validateParams,
+  validateConfig,
+  validateSecrets,
+  validateTokens,
+} from './validate_with_schema';
 import {
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
@@ -119,7 +124,7 @@ export class ActionExecutor {
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-        const { actionTypeId, name, config, secrets } = await getActionInfo(
+        const { actionTypeId, name, config, secrets, tokens } = await getActionInfo(
           await getActionsClientWithRequest(request, source),
           encryptedSavedObjectsClient,
           preconfiguredActions,
@@ -142,11 +147,13 @@ export class ActionExecutor {
         let validatedParams: Record<string, unknown>;
         let validatedConfig: Record<string, unknown>;
         let validatedSecrets: Record<string, unknown>;
+        let validatedTokens: Record<string, unknown>;
 
         try {
           validatedParams = validateParams(actionType, params);
           validatedConfig = validateConfig(actionType, config);
           validatedSecrets = validateSecrets(actionType, secrets);
+          validatedTokens = validateTokens(actionType, tokens);
         } catch (err) {
           span?.setOutcome('failure');
           return { status: 'error', actionId, message: err.message, retry: false };
@@ -207,9 +214,11 @@ export class ActionExecutor {
           rawResult = await actionType.executor({
             actionId,
             services,
+            request,
             params: validatedParams,
             config: validatedConfig,
             secrets: validatedSecrets,
+            tokens: validatedTokens,
             isEphemeral,
             taskInfo,
           });
@@ -282,6 +291,7 @@ interface ActionInfo {
   name: string;
   config: unknown;
   secrets: unknown;
+  tokens: unknown;
 }
 
 async function getActionInfo(
@@ -301,6 +311,7 @@ async function getActionInfo(
       name: pcAction.name,
       config: pcAction.config,
       secrets: pcAction.secrets,
+      tokens: pcAction.tokens,
     };
   }
 
@@ -309,7 +320,7 @@ async function getActionInfo(
   const { actionTypeId, config, name } = await actionsClient.get({ id: actionId });
 
   const {
-    attributes: { secrets },
+    attributes: { secrets, tokens },
   } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
     namespace: namespace === 'default' ? undefined : namespace,
   });
@@ -319,5 +330,6 @@ async function getActionInfo(
     name,
     config,
     secrets,
+    tokens,
   };
 }

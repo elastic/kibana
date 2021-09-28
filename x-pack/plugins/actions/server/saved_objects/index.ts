@@ -65,7 +65,7 @@ export function setupSavedObjects(
   // - everything else excluded from AAD
   encryptedSavedObjects.registerType({
     type: ACTION_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['secrets']),
+    attributesToEncrypt: new Set(['secrets', 'tokens']),
     attributesToExcludeFromAAD: new Set(['name']),
   });
 

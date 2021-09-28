@@ -20,6 +20,7 @@ import { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servi
 import { getActionType as getJiraActionType } from './jira';
 import { getActionType as getResilientActionType } from './resilient';
 import { getActionType as getTeamsActionType } from './teams';
+import { ActionsClient } from '../actions_client';
 export { ActionParamsType as EmailActionParams, ActionTypeId as EmailActionTypeId } from './email';
 export {
   ActionParamsType as IndexActionParams,
@@ -54,15 +55,22 @@ export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,
   actionTypeRegistry,
   logger,
+  getActionsClientWithRequest,
   publicBaseUrl,
 }: {
   actionsConfigUtils: ActionsConfigurationUtilities;
   actionTypeRegistry: ActionTypeRegistry;
   logger: Logger;
+  getActionsClientWithRequest: () => Promise<ActionsClient>;
   publicBaseUrl?: string;
 }) {
   actionTypeRegistry.register(
-    getEmailActionType({ logger, configurationUtilities, publicBaseUrl })
+    getEmailActionType({
+      logger,
+      configurationUtilities,
+      publicBaseUrl,
+      getActionsClientWithRequest,
+    })
   );
   actionTypeRegistry.register(getIndexActionType({ logger }));
   actionTypeRegistry.register(getPagerDutyActionType({ logger, configurationUtilities }));

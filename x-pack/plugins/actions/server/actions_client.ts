@@ -44,6 +44,7 @@ import {
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
 import { RunNowResult } from '../../task_manager/server';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
+import { validateTokens } from './lib/validate_with_schema';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -217,10 +218,11 @@ export class ActionsClient {
     const { attributes, references, version } =
       await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = attributes;
-    const { name, config, secrets } = action;
+    const { name, config, secrets, tokens } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    const validatedActionTypeTokens = validateTokens(actionType, tokens);
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
@@ -241,6 +243,7 @@ export class ActionsClient {
         isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+        tokens: validatedActionTypeTokens as SavedObjectAttributes,
       },
       omitBy(
         {

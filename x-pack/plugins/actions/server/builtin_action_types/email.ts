@@ -13,21 +13,24 @@ import SMTPConnection from 'nodemailer/lib/smtp-connection';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
-import { Logger } from '../../../../../src/core/server';
+import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
 import { AdditionalEmailServices } from '../../common';
+import { ActionsClient } from '../actions_client';
 
 export type EmailActionType = ActionType<
   ActionTypeConfigType,
   ActionTypeSecretsType,
+  ActionTypeTokensType,
   ActionParamsType,
   unknown
 >;
 export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
   ActionTypeConfigType,
   ActionTypeSecretsType,
+  ActionTypeTokensType,
   ActionParamsType
 >;
 
@@ -161,16 +164,25 @@ function validateParams(paramsObject: unknown): string | void {
   }
 }
 
+// tokens definition
+
+export type ActionTypeTokensType = TypeOf<typeof TokensSchema>;
+const TokensSchema = schema.object({
+  accessToken: schema.nullable(schema.string()),
+  tokenType: schema.nullable(schema.string()),
+});
+
 interface GetActionTypeParams {
   logger: Logger;
   publicBaseUrl?: string;
   configurationUtilities: ActionsConfigurationUtilities;
+  getActionsClientWithRequest: (request: KibanaRequest) => Promise<ActionsClient>;
 }
 
 // action type definition
 export const ActionTypeId = '.email';
 export function getActionType(params: GetActionTypeParams): EmailActionType {
-  const { logger, publicBaseUrl, configurationUtilities } = params;
+  const { logger, publicBaseUrl, configurationUtilities, getActionsClientWithRequest } = params;
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
@@ -185,7 +197,12 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       params: ParamsSchema,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger, publicBaseUrl, configurationUtilities }),
+    executor: curry(executor)({
+      logger,
+      publicBaseUrl,
+      configurationUtilities,
+      getActionsClientWithRequest,
+    }),
   };
 }
 
@@ -208,17 +225,21 @@ async function executor(
     logger,
     publicBaseUrl,
     configurationUtilities,
+    getActionsClientWithRequest,
   }: {
     logger: GetActionTypeParams['logger'];
     publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
     configurationUtilities: ActionsConfigurationUtilities;
+    getActionsClientWithRequest: (request: KibanaRequest) => Promise<ActionsClient>;
   },
   execOptions: EmailActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
   const config = execOptions.config;
   const secrets = execOptions.secrets;
+  const tokens = execOptions.tokens || {};
   const params = execOptions.params;
+  const request = execOptions.request;
 
   const transport: Transport = {};
 
@@ -230,6 +251,14 @@ async function executor(
   }
   if (secrets.clientSecret != null) {
     transport.clientSecret = secrets.clientSecret;
+  }
+
+  if (tokens.accessToken != null) {
+    transport.accessToken = tokens.accessToken;
+  }
+
+  if (tokens.tokenType != null) {
+    transport.tokenType = tokens.tokenType;
   }
 
   if (config.service === AdditionalEmailServices.EXCHANGE) {
@@ -260,6 +289,18 @@ async function executor(
     kibanaFooterLink: params.kibanaFooterLink,
   });
 
+  const updateTokensOnAction = async (updatedTokens: ActionTypeTokensType) => {
+    const actionsClient = await getActionsClientWithRequest(request);
+    const storedAction = await actionsClient.get({ id: actionId });
+    const action = {
+      ...storedAction,
+      secrets,
+      config,
+      tokens: updatedTokens,
+    };
+    await actionsClient.update({ id: actionId, action });
+  };
+
   const sendEmailOptions: SendEmailOptions = {
     transport,
     routing: {
@@ -274,6 +315,7 @@ async function executor(
     },
     hasAuth: config.hasAuth,
     configurationUtilities,
+    updateTokensOnAction,
   };
 
   let result;

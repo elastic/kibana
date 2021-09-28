@@ -21,6 +21,9 @@
       },
       "secrets": {
         "type": "binary"
+      },
+      "tokens": {
+        "type": "binary"
       }
     }
   },

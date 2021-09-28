@@ -31,6 +31,7 @@ export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type ActionTypeConfig = Record<string, unknown>;
 export type ActionTypeSecrets = Record<string, unknown>;
+export type ActionTypeTokens = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 
 export interface Services {
@@ -53,11 +54,13 @@ export interface ActionsPlugin {
 }
 
 // the parameters passed to an action type executor function
-export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
+export interface ActionTypeExecutorOptions<Config, Secrets, Tokens, Params> {
   actionId: string;
   services: Services;
+  request: KibanaRequest;
   config: Config;
   secrets: Secrets;
+  tokens: Tokens;
   params: Params;
   isEphemeral?: boolean;
   taskInfo?: TaskInfo;
@@ -74,9 +77,11 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
 
 export interface PreConfiguredAction<
   Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Tokens extends ActionTypeTokens = ActionTypeTokens
 > extends ActionResult<Config> {
   secrets: Secrets;
+  tokens?: Tokens;
 }
 
 export interface FindActionResult extends ActionResult {
@@ -84,8 +89,8 @@ export interface FindActionResult extends ActionResult {
 }
 
 // signature of the action type executor function
-export type ExecutorType<Config, Secrets, Params, ResultData> = (
-  options: ActionTypeExecutorOptions<Config, Secrets, Params>
+export type ExecutorType<Config, Secrets, Tokens, Params, ResultData> = (
+  options: ActionTypeExecutorOptions<Config, Secrets, Tokens, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
 interface ValidatorType<Type> {
@@ -100,6 +105,7 @@ export interface ActionValidationService {
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Tokens extends ActionTypeTokens = ActionTypeTokens,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
 > {
@@ -111,13 +117,14 @@ export interface ActionType<
     params?: ValidatorType<Params>;
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
+    tokens?: ValidatorType<Tokens>;
   };
   renderParameterTemplates?(
     params: Params,
     variables: Record<string, unknown>,
     actionId?: string
   ): Params;
-  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  executor: ExecutorType<Config, Secrets, Tokens, Params, ExecutorResultData>;
 }
 
 export interface RawAction extends SavedObjectAttributes {
@@ -126,6 +133,7 @@ export interface RawAction extends SavedObjectAttributes {
   isMissingSecrets: boolean;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
+  tokens: SavedObjectAttributes;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

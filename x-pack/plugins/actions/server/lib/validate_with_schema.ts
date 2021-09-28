@@ -6,44 +6,64 @@
  */
 
 import Boom from '@hapi/boom';
-import { ActionType, ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
+import {
+  ActionType,
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeTokens,
+  ActionTypeParams,
+} from '../types';
 
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Tokens extends ActionTypeTokens = ActionTypeTokens,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
+>(actionType: ActionType<Config, Secrets, Params, Tokens, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'params', value);
 }
 
 export function validateConfig<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Tokens extends ActionTypeTokens = ActionTypeTokens,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
+>(actionType: ActionType<Config, Secrets, Params, Tokens, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'config', value);
 }
 
 export function validateSecrets<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Tokens extends ActionTypeTokens = ActionTypeTokens,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
+>(actionType: ActionType<Config, Secrets, Params, Tokens, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'secrets', value);
 }
 
-type ValidKeys = 'params' | 'config' | 'secrets';
+export function validateTokens<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Tokens extends ActionTypeTokens = ActionTypeTokens,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(actionType: ActionType<Config, Secrets, Params, Tokens, ExecutorResultData>, value: unknown) {
+  return validateWithSchema(actionType, 'tokens', value);
+}
+
+type ValidKeys = 'params' | 'config' | 'secrets' | 'tokens';
 
 function validateWithSchema<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Tokens extends ActionTypeTokens = ActionTypeTokens,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
 >(
-  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
+  actionType: ActionType<Config, Secrets, Params, Tokens, ExecutorResultData>,
   key: ValidKeys,
   value: unknown
 ): Record<string, unknown> {
@@ -68,6 +88,12 @@ function validateWithSchema<
           name = 'action type secrets';
           if (actionType.validate.secrets) {
             return actionType.validate.secrets.validate(value);
+          }
+          break;
+        case 'tokens':
+          name = 'action type tokens';
+          if (actionType.validate.tokens) {
+            return actionType.validate.tokens.validate(value);
           }
           break;
         default:

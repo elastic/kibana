@@ -17,6 +17,7 @@ import { sendEmailGraphApi } from './send_email_graph_api';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 import { ProxySettings } from '../../types';
 import { AdditionalEmailServices } from '../../../common';
+import { ActionTypeTokensType } from '../email';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -30,6 +31,7 @@ export interface SendEmailOptions {
   content: Content;
   hasAuth: boolean;
   configurationUtilities: ActionsConfigurationUtilities;
+  updateTokensOnAction: (updatedTokens: ActionTypeTokensType) => Promise<void>;
 }
 
 // config validation ensures either service is set or host/port are set
@@ -45,6 +47,8 @@ export interface Transport {
   clientSecret?: string;
   tenantId?: string;
   oauthTokenUrl?: string;
+  tokenType?: string;
+  accessToken?: string;
 }
 
 export interface Routing {
@@ -81,19 +85,27 @@ async function sendEmailWithExchange(
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
   // request access token for microsoft exchange online server with Graph API scope
 
-  const tokenResult = await requestOAuthClientCredentialsToken(
-    oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
-    logger,
-    {
-      scope: GRAPH_API_OAUTH_SCOPE,
-      clientId,
-      clientSecret,
-    },
-    configurationUtilities
-  );
+  let accessToken = transport.accessToken;
+  let tokenType = transport.tokenType;
+
+  if (!accessToken) {
+    const tokenResult = await requestOAuthClientCredentialsToken(
+      oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
+      logger,
+      {
+        scope: GRAPH_API_OAUTH_SCOPE,
+        clientId,
+        clientSecret,
+      },
+      configurationUtilities
+    );
+    accessToken = tokenResult.accessToken;
+    tokenType = tokenResult.tokenType;
+    await options.updateTokensOnAction({ accessToken, tokenType });
+  }
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
+    Authorization: `${tokenType} ${accessToken}`,
   };
 
   return await sendEmailGraphApi(

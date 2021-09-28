@@ -8,7 +8,7 @@
 import { ActionType } from '../types';
 import { LICENSE_TYPE } from '../../../licensing/common/types';
 import { ServerLogActionTypeId, IndexActionTypeId } from '../builtin_action_types';
-import { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
+import { ActionTypeConfig, ActionTypeSecrets, ActionTypeTokens, ActionTypeParams } from '../types';
 
 const CASE_ACTION_TYPE_ID = '.case';
 
@@ -21,9 +21,10 @@ const ACTIONS_SCOPED_WITHIN_STACK = new Set([
 export function ensureSufficientLicense<
   Config extends ActionTypeConfig,
   Secrets extends ActionTypeSecrets,
+  Tokens extends ActionTypeTokens,
   Params extends ActionTypeParams,
   ExecutorResultData
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
+>(actionType: ActionType<Config, Secrets, Tokens, Params, ExecutorResultData>) {
   if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
     throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
   }
