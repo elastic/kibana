@@ -36,8 +36,6 @@ export function PackageCard({
   const betaBadgeLabelTooltipContent =
     release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined;
 
-  // console.log('ic', icons);
-
   return (
     <Card
       title={title || ''}
