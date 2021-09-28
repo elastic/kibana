@@ -61,7 +61,20 @@ describe('Flyout', () => {
       } as any,
       overlays,
       http,
-      allowedTypes: [],
+      allowedTypes: [
+        {
+          name: 'search',
+          displayName: 'search',
+          hidden: false,
+          namespaceType: 'single',
+        },
+        {
+          name: 'index-pattern',
+          displayName: 'index-pattern',
+          hidden: false,
+          namespaceType: 'single',
+        },
+      ],
       serviceRegistry: serviceRegistryMock.create(),
       search,
       basePath,
