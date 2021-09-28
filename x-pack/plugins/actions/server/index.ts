@@ -94,7 +94,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     },
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
-      if (actions.hasOwnProperty('rejectUnauthorized')) {
+      if (actions?.hasOwnProperty('rejectUnauthorized')) {
         addDeprecation({
           message:
             `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, ` +
@@ -120,7 +120,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     },
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
-      if (actions.hasOwnProperty('proxyRejectUnauthorizedCertificates')) {
+      if (actions?.hasOwnProperty('proxyRejectUnauthorizedCertificates')) {
         addDeprecation({
           message:
             `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, ` +
