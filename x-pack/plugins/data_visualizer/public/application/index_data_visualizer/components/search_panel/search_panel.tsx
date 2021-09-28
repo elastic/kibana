@@ -12,7 +12,7 @@ import { Query, fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } f
 import { QueryStringInput } from '../../../../../../../../src/plugins/data/public';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
-import { DatavisualizerFieldTypeFilter } from './field_type_filter';
+import { DataVisualizerFieldTypeFilter } from './field_type_filter';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { JobFieldType } from '../../../../../common/types';
 import {
@@ -148,7 +148,7 @@ export const SearchPanel: FC<Props> = ({
         visibleFieldNames={visibleFieldNames}
         showEmptyFields={showEmptyFields}
       />
-      <DatavisualizerFieldTypeFilter
+      <DataVisualizerFieldTypeFilter
         indexedFieldTypes={indexedFieldTypes}
         setVisibleFieldTypes={setVisibleFieldTypes}
         visibleFieldTypes={visibleFieldTypes}
