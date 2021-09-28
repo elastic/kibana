@@ -31,6 +31,8 @@ const actionParams = {
       category: 'software',
       subcategory: 'os',
       externalId: null,
+      correlation_id: 'alertID',
+      correlation_display: 'Alerting',
     },
     comments: [],
   },

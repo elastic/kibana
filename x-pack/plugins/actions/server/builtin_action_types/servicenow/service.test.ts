@@ -14,6 +14,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { serviceNowCommonFields, serviceNowChoices } from './mocks';
+import { snExternalServiceConfig } from './config';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
@@ -30,15 +31,12 @@ axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const patchMock = utils.patch as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
-const table = 'incident';
-const actionTypeId = '.servicenow';
 
 describe('ServiceNow service', () => {
   let service: ExternalService;
 
   beforeEach(() => {
     service = createExternalService(
-      table,
       {
         // The trailing slash at the end of the url is intended.
         // All API calls need to have the trailing slash removed.
@@ -47,7 +45,7 @@ describe('ServiceNow service', () => {
       },
       logger,
       configurationUtilities,
-      actionTypeId
+      snExternalServiceConfig.servicenow
     );
   });
 
@@ -59,14 +57,13 @@ describe('ServiceNow service', () => {
     test('throws without url', () => {
       expect(() =>
         createExternalService(
-          table,
           {
             config: { apiUrl: null },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          actionTypeId
+          snExternalServiceConfig.servicenow
         )
       ).toThrow();
     });
@@ -74,14 +71,13 @@ describe('ServiceNow service', () => {
     test('throws without username', () => {
       expect(() =>
         createExternalService(
-          table,
           {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          actionTypeId
+          snExternalServiceConfig.servicenow
         )
       ).toThrow();
     });
@@ -89,14 +85,13 @@ describe('ServiceNow service', () => {
     test('throws without password', () => {
       expect(() =>
         createExternalService(
-          table,
           {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: undefined },
           },
           logger,
           configurationUtilities,
-          actionTypeId
+          snExternalServiceConfig.servicenow
         )
       ).toThrow();
     });
@@ -127,14 +122,13 @@ describe('ServiceNow service', () => {
 
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
-        'sn_si_incident',
         {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        actionTypeId
+        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
       );
 
       requestMock.mockImplementation(() => ({
@@ -210,14 +204,13 @@ describe('ServiceNow service', () => {
 
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
-        'sn_si_incident',
         {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        actionTypeId
+        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
       );
 
       requestMock.mockImplementation(() => ({
@@ -308,14 +301,13 @@ describe('ServiceNow service', () => {
 
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
-        'sn_si_incident',
         {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        actionTypeId
+        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
       );
 
       patchMock.mockImplementation(() => ({
@@ -410,14 +402,13 @@ describe('ServiceNow service', () => {
 
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
-        'sn_si_incident',
         {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        actionTypeId
+        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
       );
 
       requestMock.mockImplementation(() => ({
@@ -479,14 +470,13 @@ describe('ServiceNow service', () => {
 
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
-        'sn_si_incident',
         {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        actionTypeId
+        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
       );
 
       requestMock.mockImplementation(() => ({

@@ -33,6 +33,14 @@ const defaultFields: Fields = {
   priority: [],
 };
 
+const valuesToString = (value: string | string[] | null): string | null => {
+  if (Array.isArray(value)) {
+    return value.join(',');
+  }
+
+  return value;
+};
+
 const ServiceNowSIRParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
@@ -188,7 +196,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'source_ip'}
-          inputTargetValue={incident?.source_ip ?? undefined}
+          inputTargetValue={valuesToString(incident?.source_ip) ?? undefined}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -198,7 +206,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'dest_ip'}
-          inputTargetValue={incident?.dest_ip ?? undefined}
+          inputTargetValue={valuesToString(incident?.dest_ip) ?? undefined}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -208,7 +216,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'malware_url'}
-          inputTargetValue={incident?.malware_url ?? undefined}
+          inputTargetValue={valuesToString(incident?.malware_url) ?? undefined}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -218,7 +226,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'malware_hash'}
-          inputTargetValue={incident?.malware_hash ?? undefined}
+          inputTargetValue={valuesToString(incident?.malware_hash) ?? undefined}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />

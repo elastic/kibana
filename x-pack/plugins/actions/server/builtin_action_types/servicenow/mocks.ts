@@ -95,6 +95,16 @@ const createMock = (): jest.Mocked<ExternalService> => {
       })
     ),
     findIncidents: jest.fn(),
+    getApplicationInformation: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        name: 'Elastic',
+        scope: 'x_elas2_inc_int',
+        version: '1.0.0',
+      })
+    ),
+    checkIfApplicationIsInstalled: jest.fn(),
+    getUrl: jest.fn().mockImplementation(() => 'https://instance.service-now.com'),
+    checkInstance: jest.fn(),
   };
 
   return service;
@@ -114,6 +124,8 @@ const executorParams: ExecutorSubActionPushParams = {
     impact: '3',
     category: 'software',
     subcategory: 'os',
+    correlation_id: 'alertID',
+    correlation_display: 'Alerting',
   },
   comments: [
     {

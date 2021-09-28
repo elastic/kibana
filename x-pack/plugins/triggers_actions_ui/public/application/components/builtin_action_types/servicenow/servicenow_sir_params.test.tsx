@@ -33,6 +33,8 @@ const actionParams = {
       priority: '1',
       subcategory: '20',
       externalId: null,
+      correlation_id: 'alertID',
+      correlation_display: 'Alerting',
     },
     comments: [],
   },
