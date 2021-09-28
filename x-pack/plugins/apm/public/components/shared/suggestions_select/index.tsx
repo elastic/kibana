@@ -6,6 +6,7 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { debounce } from 'lodash';
 import React, { useCallback, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
@@ -96,7 +97,7 @@ export function SuggestionsSelect({
       isLoading={status === FETCH_STATUS.LOADING}
       onChange={handleChange}
       onCreateOption={handleCreateOption}
-      onSearchChange={setSearchValue}
+      onSearchChange={debounce(setSearchValue, 500)}
       options={options}
       placeholder={placeholder}
       selectedOptions={selectedOptions}

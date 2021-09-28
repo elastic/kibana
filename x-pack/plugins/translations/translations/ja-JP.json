@@ -6197,7 +6197,6 @@
     "xpack.apm.alertAnnotationCriticalTitle": "重大アラート",
     "xpack.apm.alertAnnotationNoSeverityTitle": "アラート",
     "xpack.apm.alertAnnotationWarningTitle": "警告アラート",
-    "xpack.apm.alerting.fields.all_option": "すべて",
     "xpack.apm.alerting.fields.environment": "環境",
     "xpack.apm.alerting.fields.service": "サービス",
     "xpack.apm.alerting.fields.type": "型",
