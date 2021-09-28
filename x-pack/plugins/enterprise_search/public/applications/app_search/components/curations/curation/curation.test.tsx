@@ -40,6 +40,7 @@ describe('Curation', () => {
   };
 
   const actions = {
+    convertToManual: jest.fn(),
     loadCuration: jest.fn(),
     resetCuration: jest.fn(),
   };
@@ -154,6 +155,34 @@ describe('Curation', () => {
       const wrapper = shallow(<Curation />);
 
       expect(getShallowPageTitle(wrapper).find(EuiBadge)).toHaveLength(1);
+    });
+
+    describe('convert to manaul button', () => {
+      let convertToManualButton: ShallowWrapper;
+      let confirmSpy: jest.SpyInstance;
+
+      beforeAll(() => {
+        const wrapper = shallow(<Curation />);
+        convertToManualButton = getPageHeaderActions(wrapper).childAt(0);
+
+        confirmSpy = jest.spyOn(window, 'confirm');
+      });
+
+      afterAll(() => {
+        confirmSpy.mockRestore();
+      });
+
+      it('resets the curation upon user confirmation', () => {
+        confirmSpy.mockReturnValueOnce(true);
+        convertToManualButton.simulate('click');
+        expect(actions.convertToManual).toHaveBeenCalled();
+      });
+
+      it('does not reset the curation if the user cancels', () => {
+        confirmSpy.mockReturnValueOnce(false);
+        convertToManualButton.simulate('click');
+        expect(actions.convertToManual).not.toHaveBeenCalled();
+      });
     });
   });
 });

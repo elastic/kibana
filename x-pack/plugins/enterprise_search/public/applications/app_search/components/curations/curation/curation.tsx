@@ -14,7 +14,13 @@ import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton, EuiBadge } from '@elas
 
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../../constants';
 import { AppSearchPageTemplate } from '../../layout';
-import { AUTOMATED_LABEL, MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
+import {
+  AUTOMATED_LABEL,
+  COVERT_TO_MANUAL_BUTTON_LABEL,
+  CONVERT_TO_MANUAL_CONFIRMATION,
+  MANAGE_CURATION_TITLE,
+  RESTORE_CONFIRMATION,
+} from '../constants';
 import { getCurationsBreadcrumbs } from '../utils';
 
 import { AutomatedIcon } from './automated_icon';
@@ -25,7 +31,9 @@ import { AddResultLogic, AddResultFlyout } from './results';
 
 export const Curation: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
-  const { loadCuration, resetCuration } = useActions(CurationLogic({ curationId }));
+  const { convertToManual, loadCuration, resetCuration } = useActions(
+    CurationLogic({ curationId })
+  );
   const { curation, dataLoading, queries } = useValues(CurationLogic({ curationId }));
   const { isFlyoutOpen } = useValues(AddResultLogic);
 
@@ -34,6 +42,30 @@ export const Curation: React.FC = () => {
   }, [curationId]);
 
   const isAutomated = curation.suggestion?.status === 'automated';
+
+  const pageHeaderActions = isAutomated
+    ? [
+        <EuiButton
+          color="primary"
+          fill
+          iconType="exportAction"
+          onClick={() => {
+            if (window.confirm(CONVERT_TO_MANUAL_CONFIRMATION)) convertToManual();
+          }}
+        >
+          {COVERT_TO_MANUAL_BUTTON_LABEL}
+        </EuiButton>,
+      ]
+    : [
+        <EuiButton
+          color="danger"
+          onClick={() => {
+            if (window.confirm(RESTORE_CONFIRMATION)) resetCuration();
+          }}
+        >
+          {RESTORE_DEFAULTS_BUTTON_LABEL}
+        </EuiButton>,
+      ];
 
   return (
     <AppSearchPageTemplate
@@ -52,16 +84,7 @@ export const Curation: React.FC = () => {
             )}
           </>
         ),
-        rightSideItems: [
-          <EuiButton
-            color="danger"
-            onClick={() => {
-              if (window.confirm(RESTORE_CONFIRMATION)) resetCuration();
-            }}
-          >
-            {RESTORE_DEFAULTS_BUTTON_LABEL}
-          </EuiButton>,
-        ],
+        rightSideItems: pageHeaderActions,
       }}
       isLoading={dataLoading}
     >
