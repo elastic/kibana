@@ -120,6 +120,7 @@ describe('test endpoint route', () => {
               type: ElasticsearchAssetType.transform,
             },
           ],
+          keep_policies_up_to_date: false,
         })
       );
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
