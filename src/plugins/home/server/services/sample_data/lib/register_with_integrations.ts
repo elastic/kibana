@@ -11,22 +11,22 @@ import { CustomIntegrationsPluginSetup } from '../../../../../custom_integration
 import { SampleDatasetSchema } from './sample_dataset_schema';
 import { HOME_APP_BASE_PATH } from '../../../../common/constants';
 
-export function registerSampleDataSetWithIntegration(
+export function registerSampleDatasetWithIntegration(
   customIntegrations: CustomIntegrationsPluginSetup,
   core: CoreSetup,
-  dataSet: SampleDatasetSchema
+  sampleDataset: SampleDatasetSchema
 ) {
   customIntegrations.registerCustomIntegration({
-    id: dataSet.id,
-    title: dataSet.name,
-    description: dataSet.description,
+    id: sampleDataset.id,
+    title: sampleDataset.name,
+    description: sampleDataset.description,
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial_directory/sampleData`,
     isBeta: false,
-    icons: dataSet.icon
+    icons: sampleDataset.icon
       ? [
           {
             type: 'svg',
-            src: core.http.basePath.prepend(dataSet.icon),
+            src: core.http.basePath.prepend(sampleDataset.icon),
           },
         ]
       : [],
