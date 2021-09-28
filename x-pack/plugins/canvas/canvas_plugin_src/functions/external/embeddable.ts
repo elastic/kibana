@@ -17,7 +17,7 @@ import {
 import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { decode } from '../../../common/lib/embeddable_dataurl';
+import { decode, encode } from '../../../common/lib/embeddable_dataurl';
 
 interface Arguments {
   config: string;
@@ -89,20 +89,19 @@ export function embeddable(): ExpressionFunctionDefinition<
     },
 
     extract(state) {
+      const input = decode(state.config[0] as string);
       const refName = 'embeddable.id';
-      const refType = 'embeddable.embeddableType';
+
       const references: SavedObjectReference[] = [
         {
           name: refName,
-          type: refType,
-          id: state.id[0] as string,
+          type: state.type[0] as string,
+          id: input.savedObjectId as string,
         },
       ];
+
       return {
-        state: {
-          ...state,
-          id: [refName],
-        },
+        state,
         references,
       };
     },
@@ -110,7 +109,9 @@ export function embeddable(): ExpressionFunctionDefinition<
     inject(state, references) {
       const reference = references.find((ref) => ref.name === 'embeddable.id');
       if (reference) {
-        state.id[0] = reference.id;
+        const input = decode(state.config[0] as string);
+        input.savedObjectId = reference.id;
+        state.config[0] = encode(input);
       }
       return state;
     },
