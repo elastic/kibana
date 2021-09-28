@@ -65,7 +65,6 @@ describe('Flyout', () => {
       serviceRegistry: serviceRegistryMock.create(),
       search,
       basePath,
-      allowedTypes: [],
     };
   });
 
