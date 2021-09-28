@@ -43,14 +43,12 @@ describe('AddToCaseAction', function () {
     fireEvent.click(await findByText('Add to case'));
 
     expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledWith({
-      createCaseNavigation: {
-        href: '/app/observability/cases/create',
-        onClick: expect.any(Function),
-      },
-      onRowClick: expect.any(Function),
-      owner: ['observability'],
-      userCanCrud: true,
-    });
+    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        createCaseNavigation: expect.objectContaining({ href: '/app/observability/cases/create' }),
+        owner: ['observability'],
+        userCanCrud: true,
+      })
+    );
   });
 });
