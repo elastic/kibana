@@ -20,7 +20,9 @@ import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } 
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
-import { packagePolicyService } from './package_policy';
+import type { InputsOverride, NewPackagePolicy, NewPackagePolicyInput } from '../../common';
+
+import { overridePackageInputs, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
@@ -988,6 +990,95 @@ describe('Package policy service', () => {
           )
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
+    });
+  });
+
+  describe('overridePackageInputs', () => {
+    it('should override variable in base package policy', () => {
+      const basePackagePolicy: NewPackagePolicy = {
+        name: 'base-package-policy',
+        description: 'Base Package Policy',
+        namespace: 'default',
+        enabled: true,
+        policy_id: 'xxxx',
+        output_id: 'xxxx',
+        package: {
+          name: 'test-package',
+          title: 'Test Package',
+          version: '0.0.1',
+        },
+        inputs: [
+          {
+            type: 'logs',
+            policy_template: 'template_1',
+            enabled: true,
+            vars: {
+              path: {
+                type: 'text',
+                value: ['/var/log/logfile.log'],
+              },
+            },
+            streams: [],
+          },
+        ],
+      };
+
+      const packageInfo: PackageInfo = {
+        name: 'test-package',
+        description: 'Test Package',
+        title: 'Test Package',
+        version: '0.0.1',
+        latestVersion: '0.0.1',
+        release: 'experimental',
+        format_version: '1.0.0',
+        owner: { github: 'elastic/fleet' },
+        policy_templates: [
+          {
+            name: 'template_1',
+            title: 'Template 1',
+            description: 'Template 1',
+            inputs: [
+              {
+                type: 'logs',
+                title: 'Log',
+                description: 'Log Input',
+                vars: [
+                  {
+                    name: 'path',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        // @ts-ignore
+        assets: {},
+      };
+
+      const inputsOverride: NewPackagePolicyInput[] = [
+        {
+          type: 'logs',
+          enabled: true,
+          streams: [],
+          vars: {
+            path: {
+              type: 'text',
+              value: '/var/log/new-logfile.log',
+            },
+          },
+        },
+      ];
+
+      const result = overridePackageInputs(
+        basePackagePolicy,
+        packageInfo,
+        // TODO: Update this type assertion when the `InputsOverride` type is updated such
+        // that it no longer causes unresolvable type errors when used directly
+        inputsOverride as InputsOverride[],
+        false
+      );
+      expect(result.inputs[0]?.vars?.path.value).toBe('/var/log/new-logfile.log');
     });
   });
 });

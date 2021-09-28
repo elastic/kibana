@@ -12,6 +12,9 @@ import type {
 } from './package_policy';
 import type { NewAgentPolicy } from './agent_policy';
 
+// TODO: This type is not usable directly, and instead we typically use a type assertion
+// e.g. `NewPackagePolicyInput as InputsOverride[]`. This type should be altered so that it's
+// possible to use it directly in tests, etc
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
 };
