@@ -101,6 +101,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     setCustomIntegrations(deps.customIntegrations);
 
+    // TODO: this is a contract leak and an issue.  We shouldn't be setting a module-level
+    // variable from plugin setup.  Refactor to an abstraction, if necessary.
     // Set up http client
     setHttpClient(core.http);
 

@@ -28,12 +28,12 @@ const environmentsRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
-    const { serviceName } = params.query;
+    const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
     const size = await context.core.uiSettings.client.get<number>(
@@ -44,6 +44,8 @@ const environmentsRoute = createApmServerRoute({
       serviceName,
       searchAggregatedTransactions,
       size,
+      start,
+      end,
     });
 
     return { environments };
