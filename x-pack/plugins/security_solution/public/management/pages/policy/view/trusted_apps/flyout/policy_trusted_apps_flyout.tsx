@@ -24,6 +24,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiText,
 } from '@elastic/eui';
 import {
   policyDetails,
@@ -230,19 +231,20 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              className="eui-textTruncate"
+              style={{ maxWidth: '300px' }}
               data-test-subj="confirmPolicyTrustedAppsFlyout"
               fill
               onClick={handleOnConfirmAction}
               isLoading={isUpdateArtifactsLoading}
               disabled={isEmpty(selectedArtifactIds)}
+              title={policyName}
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.confirm"
                 defaultMessage="Assing to {policyName}"
                 values={{
-                  policyName: `${policyName.substring(0, 20)}${
-                    policyName.length > 20 ? '...' : ''
-                  }`,
+                  policyName,
                 }}
               />
             </EuiButton>
