@@ -232,7 +232,11 @@ const getMetric: (
         aggType,
         dropPartialBucketsOptions,
         calculatedTimerange,
-        isNumber(result.hits.total) ? result.hits.total : result.hits.total.value
+        result.hits
+          ? isNumber(result.hits.total)
+            ? result.hits.total
+            : result.hits.total.value
+          : 0
       ),
     };
   } catch (e) {
