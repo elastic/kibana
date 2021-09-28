@@ -38,7 +38,7 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest }: Pr
                   },
                   {
                     term: {
-                      'synthetics.type': 'journey/metrics',
+                      'synthetics.type': 'step/metrics',
                     },
                   },
                 ],
@@ -55,7 +55,7 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest }: Pr
   const metrics: MarkerItems = [];
 
   if (data && hasNavigationRequest) {
-    const metricDocs = (data.hits.hits as unknown) as Array<{ fields: any }>;
+    const metricDocs = data.hits.hits as unknown as Array<{ fields: any }>;
     let navigationStart = 0;
     let navigationStartExist = false;
 
