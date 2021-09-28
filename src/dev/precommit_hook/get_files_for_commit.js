@@ -21,7 +21,7 @@ import { File } from '../file';
  */
 export async function getFilesForCommit(gitRef) {
   const simpleGit = new SimpleGit(REPO_ROOT);
-  const gitCatPrefix = ':' + gitRef ? gitRef + ':' : '';
+  const gitCatPrefix = gitRef ? gitRef + ':' : ':';
 
   const output = await fcb((cb) => {
     if (gitRef) {
