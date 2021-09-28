@@ -8,7 +8,7 @@
 
 import { ElasticsearchClient } from '../../elasticsearch';
 import { next } from './next';
-import { State } from './types';
+import { State } from './state';
 
 describe('migrations v2 next', () => {
   it.todo('when state.retryDelay > 0 delays execution of the next action');

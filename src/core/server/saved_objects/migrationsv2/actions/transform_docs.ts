@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { TransformRawDocs } from '../types';
+import type { TransformRawDocs } from '../state';
 import type { SavedObjectsRawDoc } from '../../serialization';
 import {
   DocumentsTransformFailed,

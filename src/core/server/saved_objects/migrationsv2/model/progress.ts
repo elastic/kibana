@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MigrationLog, Progress } from '../types';
+import type { MigrationLog, Progress } from '../state';
 
 /**
  * Returns an initial state of the progress object (everything undefined)
