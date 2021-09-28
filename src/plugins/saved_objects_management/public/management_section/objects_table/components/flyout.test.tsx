@@ -61,10 +61,11 @@ describe('Flyout', () => {
       } as any,
       overlays,
       http,
-      allowedTypes: ['search', 'index-pattern', 'visualization'],
+      allowedTypes: [],
       serviceRegistry: serviceRegistryMock.create(),
       search,
       basePath,
+      allowedTypes: [],
     };
   });
 
