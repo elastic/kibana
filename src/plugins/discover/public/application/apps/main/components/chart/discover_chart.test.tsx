@@ -25,7 +25,7 @@ setHeaderActionMenuMounter(jest.fn());
 function getProps(timefield?: string) {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
-  services.data.query.timefilter.timefilter.getTime = () => {
+  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
@@ -100,10 +100,10 @@ function getProps(timefield?: string) {
 describe('Discover chart', () => {
   test('render without timefield', () => {
     const component = mountWithIntl(<DiscoverChart {...getProps()} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
   test('render with filefield', () => {
     const component = mountWithIntl(<DiscoverChart {...getProps('timefield')} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 });
