@@ -87,7 +87,7 @@
 # Specifies the path where Kibana creates the process ID file.
 #pid.file: /run/kibana/kibana.pid
 
-# Set the value of this setting to off to suppress all logging output, or to debug to log everything
+# Set the value of this setting to off to suppress all logging output, or to debug to log everything.
 # logging.root.level: debug
 
 # Enables you to specify a file where Kibana stores log output.
@@ -101,9 +101,14 @@
 #   - name: elasticsearch.queries
 #     level: debug
 
-# Logs http responses
+# Logs http responses.
 # logging.loggers:
 #   - name: http.server.response
+#     level: debug
+
+# Logs system usage information.
+# logging.loggers:
+#   - name: metrics.ops
 #     level: debug
 
 # Set the interval in milliseconds to sample system and process performance
