@@ -160,6 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(204);
 
+      let previousTotal: number = 0;
       let previousStatus: string | undefined;
       await retry.try(async () => {
         const runningSearchResult = await es.search({
@@ -178,7 +179,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
+
         const total = (runningSearchResult.body.hits.total as estypes.SearchTotalHits).value;
+        log.warning(`Total: ${total}, previousTotal: ${previousTotal}`);
+        if (previousTotal > 0 && total === 0) {
+          return;
+        }
+        previousTotal = total;
         log.warning(`Total: ${total}, Previous status: ${previousStatus}`);
         expect(total).to.eql(1);
         const hitsMetadata = runningSearchResult.body.hits as estypes.SearchHitsMetadata<{
