@@ -14,8 +14,6 @@ import { HttpStart } from 'kibana/public';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../event_filters/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST } from './constants';
 
-let listExists = false;
-
 async function createHostIsolationExceptionList(http: HttpStart) {
   try {
     await http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
@@ -27,14 +25,14 @@ async function createHostIsolationExceptionList(http: HttpStart) {
       throw err;
     }
   }
-  listExists = true;
 }
 
+let listExistsPromise: Promise<void>;
 async function ensureHostIsolationExceptionsListExists(http: HttpStart) {
-  if (listExists) {
-    return;
+  if (!listExistsPromise) {
+    listExistsPromise = createHostIsolationExceptionList(http);
   }
-  return createHostIsolationExceptionList(http);
+  await listExistsPromise;
 }
 
 export async function getHostIsolationExceptionItems({
