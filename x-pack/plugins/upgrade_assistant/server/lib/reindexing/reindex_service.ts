@@ -11,7 +11,6 @@ import { first } from 'rxjs/operators';
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
 import {
-  IndexGroup,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,

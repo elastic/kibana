@@ -63,9 +63,6 @@ describe('reindexService', () => {
       findAllByStatus: jest.fn(unimplemented('findAllInProgressOperations')),
       getFlatSettings: jest.fn(unimplemented('getFlatSettings')),
       cleanupChanges: jest.fn(),
-      incrementIndexGroupReindexes: jest.fn(unimplemented('incrementIndexGroupReindexes')),
-      decrementIndexGroupReindexes: jest.fn(unimplemented('decrementIndexGroupReindexes')),
-      runWhileIndexGroupLocked: jest.fn(async (group: string, f: any) => f({ attributes: {} })),
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
     log = loggingSystemMock.create().get();

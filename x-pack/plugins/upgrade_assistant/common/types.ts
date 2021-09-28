@@ -114,11 +114,6 @@ export interface ReindexWarning {
   };
 }
 
-export enum IndexGroup {
-  ml = '___ML_REINDEX_LOCK___',
-  watcher = '___WATCHER_REINDEX_LOCK___',
-}
-
 // Telemetry types
 export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
 export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';

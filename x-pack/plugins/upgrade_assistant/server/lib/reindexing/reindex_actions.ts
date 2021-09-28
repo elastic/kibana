@@ -13,7 +13,6 @@ import {
   ElasticsearchClient,
 } from 'src/core/server';
 import {
-  IndexGroup,
   REINDEX_OP_TYPE,
   ReindexOperation,
   ReindexOptions,
@@ -91,31 +90,6 @@ export interface ReindexActions {
     indexName: string,
     withTypeName?: boolean
   ): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
-
-  /**
-   * Atomically increments the number of reindex operations running for an index group.
-   */
-  incrementIndexGroupReindexes(group: IndexGroup): Promise<void>;
-
-  /**
-   * Atomically decrements the number of reindex operations running for an index group.
-   */
-  decrementIndexGroupReindexes(group: IndexGroup): Promise<void>;
-
-  /**
-   * Runs a callback function while locking an index group.
-   * @param func A function to run with the locked index group lock document. Must return a promise that resolves
-   * to the updated ReindexSavedObject.
-   */
-  runWhileIndexGroupLocked(
-    group: IndexGroup,
-    func: (lockDoc: ReindexSavedObject) => Promise<ReindexSavedObject>
-  ): Promise<void>;
-
-  /**
-   * Exposed only for testing, DO NOT USE.
-   */
-  _fetchAndLockIndexGroupDoc(group: IndexGroup): Promise<ReindexSavedObject>;
 }
 
 export const reindexActionsFactory = (
@@ -267,77 +241,6 @@ export const reindexActionsFactory = (
       }
 
       return flatSettings.body[indexName];
-    },
-
-    async _fetchAndLockIndexGroupDoc(indexGroup) {
-      const fetchDoc = async () => {
-        try {
-          // The IndexGroup enum value (a string) serves as the ID of the lock doc
-          return await client.get<ReindexOperation>(REINDEX_OP_TYPE, indexGroup);
-        } catch (e) {
-          if (client.errors.isNotFoundError(e)) {
-            return await client.create<ReindexOperation>(
-              REINDEX_OP_TYPE,
-              {
-                indexName: null,
-                newIndexName: null,
-                locked: null,
-                status: null,
-                lastCompletedStep: null,
-                reindexTaskId: null,
-                reindexTaskPercComplete: null,
-                errorMessage: null,
-                runningReindexCount: 0,
-              } as any,
-              { id: indexGroup }
-            );
-          } else {
-            throw e;
-          }
-        }
-      };
-
-      const lockDoc = async (attempt = 1): Promise<ReindexSavedObject> => {
-        try {
-          // Refetch the document each time to avoid version conflicts.
-          return await acquireLock(await fetchDoc());
-        } catch (e) {
-          if (attempt >= 10) {
-            throw new Error(`Could not acquire lock for ML jobs`);
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          return lockDoc(attempt + 1);
-        }
-      };
-
-      return lockDoc();
-    },
-
-    async incrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
-        this.updateReindexOp(lockDoc, {
-          runningReindexCount: lockDoc.attributes.runningReindexCount! + 1,
-        })
-      );
-    },
-
-    async decrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
-        this.updateReindexOp(lockDoc, {
-          runningReindexCount: lockDoc.attributes.runningReindexCount! - 1,
-        })
-      );
-    },
-
-    async runWhileIndexGroupLocked(indexGroup, func) {
-      let lockDoc = await this._fetchAndLockIndexGroupDoc(indexGroup);
-
-      try {
-        lockDoc = await func(lockDoc);
-      } finally {
-        await releaseLock(lockDoc);
-      }
     },
   };
 };
