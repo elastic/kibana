@@ -12,13 +12,14 @@ import { MarkerItems } from '../waterfall/context/waterfall_chart';
 
 export interface Props {
   checkGroup: string;
+  stepIndex: number;
   hasNavigationRequest?: boolean;
 }
 export const BROWSER_TRACE_TYPE = 'browser.relative_trace.type';
 export const BROWSER_TRACE_NAME = 'browser.relative_trace.name';
 export const BROWSER_TRACE_START = 'browser.relative_trace.start.us';
 
-export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest }: Props) => {
+export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, stepIndex }: Props) => {
   const { settings } = useSelector(selectDynamicSettings);
 
   const heartbeatIndices = settings?.heartbeatIndices || '';
@@ -31,6 +32,11 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest }: Pr
             query: {
               bool: {
                 filter: [
+                  {
+                    term: {
+                      'synthetics.step.index': stepIndex,
+                    },
+                  },
                   {
                     term: {
                       'monitor.check_group': checkGroup,

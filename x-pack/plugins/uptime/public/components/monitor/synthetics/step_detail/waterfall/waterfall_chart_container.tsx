@@ -47,6 +47,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
 
   const { metrics } = useStepWaterfallMetrics({
     checkGroup,
+    stepIndex,
     hasNavigationRequest: networkEvents?.hasNavigationRequest,
   });
 

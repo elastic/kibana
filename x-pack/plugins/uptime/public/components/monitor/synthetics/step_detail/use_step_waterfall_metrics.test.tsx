@@ -52,6 +52,7 @@ describe('useStepWaterfallMetrics', () => {
         useStepWaterfallMetrics({
           checkGroup: '44D-444FFF-444-FFF-3333',
           hasNavigationRequest: true,
+          stepIndex: 1,
         }),
       {}
     );
@@ -66,12 +67,17 @@ describe('useStepWaterfallMetrics', () => {
               filter: [
                 {
                   term: {
+                    'synthetics.step.index': 1,
+                  },
+                },
+                {
+                  term: {
                     'monitor.check_group': '44D-444FFF-444-FFF-3333',
                   },
                 },
                 {
                   term: {
-                    'synthetics.type': 'journey/metrics',
+                    'synthetics.type': 'step/metrics',
                   },
                 },
               ],
