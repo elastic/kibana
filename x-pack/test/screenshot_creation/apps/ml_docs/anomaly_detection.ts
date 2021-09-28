@@ -14,7 +14,17 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const screenshot = getService('screenshots');
 
-  describe('docs anomaly detection', function () {
+  async function takeScreenshot(name: string) {
+    await screenshot.take(`${name}_new`, undefined, ['ml_docs', 'anomaly_detection']);
+  }
+
+  async function removeFocusFromElement() {
+    // open and close the Kibana nav to un-focus the last used element
+    await ml.navigation.openKibanaNav();
+    await ml.navigation.closeKibanaNav();
+  }
+
+  describe('anomaly detection', function () {
     this.tags(['mlqa']);
 
     before(async () => {
@@ -33,34 +43,34 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
-      await ml.testExecution.logTestStep('loads the advanced wizard');
+      await ml.testExecution.logTestStep('load the advanced wizard');
       await ml.jobManagement.navigateToNewJobSourceSelection();
       await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(ECOMMERCE_INDEX_PATTERN);
       await ml.jobTypeSelection.selectAdvancedJob();
 
-      await ml.testExecution.logTestStep('continues to the pick fields step');
+      await ml.testExecution.logTestStep('continue to the pick fields step');
       await ml.jobWizardCommon.assertConfigureDatafeedSectionExists();
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
-      await ml.testExecution.logTestStep('adds detector');
+      await ml.testExecution.logTestStep('add detector');
       await ml.jobWizardAdvanced.openCreateDetectorModal();
       await ml.jobWizardAdvanced.selectDetectorFunction('lat_long');
       await ml.jobWizardAdvanced.selectDetectorField('geoip.location');
       await ml.jobWizardAdvanced.selectDetectorByField('user');
       await ml.jobWizardAdvanced.confirmAddDetectorModal();
 
-      await ml.testExecution.logTestStep('sets the bucket span');
+      await ml.testExecution.logTestStep('set the bucket span');
       await ml.jobWizardCommon.assertBucketSpanInputExists();
       await ml.jobWizardCommon.setBucketSpan('15m');
 
-      await ml.testExecution.logTestStep('sets influencers');
+      await ml.testExecution.logTestStep('set influencers');
       await ml.jobWizardCommon.assertInfluencerInputExists();
       await ml.jobWizardCommon.assertInfluencerSelection([]);
       for (const influencer of ['geoip.country_iso_code', 'day_of_week', 'category.keyword']) {
         await ml.jobWizardCommon.addInfluencer(influencer);
       }
 
-      await ml.testExecution.logTestStep('sets the model memory limit');
+      await ml.testExecution.logTestStep('set the model memory limit');
       await ml.jobWizardCommon.assertModelMemoryLimitInputExists({
         withAdvancedSection: false,
       });
@@ -68,12 +78,9 @@ export default function ({ getService }: FtrProviderContext) {
         withAdvancedSection: false,
       });
 
-      await ml.testExecution.logTestStep('takes the screenshot');
-      // open and close the Kibana nav to un-focus the last used element
-      await ml.navigation.openKibanaNav();
-      await ml.navigation.closeKibanaNav();
-
-      await screenshot.take('ecommerce-advanced-wizard-geopoint_new');
+      await ml.testExecution.logTestStep('take screenshot');
+      await removeFocusFromElement();
+      await takeScreenshot('ecommerce-advanced-wizard-geopoint');
     });
   });
 }

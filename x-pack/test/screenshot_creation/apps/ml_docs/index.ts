@@ -14,25 +14,19 @@ export const LOGS_INDEX_PATTERN = 'kibana_sample_data_logs';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
-  describe('machine learning', function () {
+  describe('machine learning docs', function () {
     this.tags(['mlqa']);
 
     before(async () => {
-      await ml.securityCommon.createMlRoles();
-      await ml.securityCommon.createMlUsers();
-
       await ml.testResources.installAllKibanaSampleData();
     });
 
     after(async () => {
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
       await ml.testResources.removeAllKibanaSampleData();
-
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./docs_anomaly_detection'));
+    loadTestFile(require.resolve('./anomaly_detection'));
+    loadTestFile(require.resolve('./data_frame_analytics'));
   });
 }
