@@ -37,8 +37,8 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import deepmerge from 'deepmerge';
 
-import ECSSchema from '../../common/schemas/ecs/v1.11.0.json';
-import osquerySchema from '../../common/schemas/osquery/v4.9.0.json';
+import ECSSchema from '../../common/schemas/ecs/v1.12.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.0.1.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import {

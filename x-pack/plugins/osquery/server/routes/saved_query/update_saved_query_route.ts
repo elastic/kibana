@@ -119,6 +119,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
                 query,
                 version,
                 interval,
+                ecs_mapping,
               };
 
               return draftPack;
