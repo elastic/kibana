@@ -33,9 +33,9 @@ export const legacyInjectRuleIdReferences = ({
   });
   if (referenceFound) {
     if (referenceFound.id !== ruleAlertId) {
-      // This condition should not be reached but we log a warning if we encounter it to help if we migrations
+      // This condition should not be reached but we log an error if we encounter it to help if we migrations
       // did not run correctly or we create a regression in the future.
-      logger.warn(
+      logger.error(
         [
           'The id of the "saved object reference id": ',
           referenceFound.id,
@@ -49,7 +49,7 @@ export const legacyInjectRuleIdReferences = ({
   } else {
     logger.error(
       [
-        'The saved object references were not found for the "ruleAlertId" when we were expecting to find it. ',
+        'The saved object reference was not found for the "ruleAlertId" when we were expecting to find it. ',
         'Kibana migrations might not have run correctly or someone might have removed the saved object references manually. ',
         'Returning the last known good "ruleAlertId" which might not work. "ruleAlertId" with its id being returned is: ',
         ruleAlertId,
