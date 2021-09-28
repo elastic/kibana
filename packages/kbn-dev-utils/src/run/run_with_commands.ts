@@ -124,8 +124,6 @@ export class RunWithCommands<T> {
 
         await command.run(extendedContext);
       });
-
-      await metrics.reportSuccess(commandName);
     } catch (error) {
       cleanup.execute(error);
       await metrics.reportError(commandName);
@@ -134,5 +132,7 @@ export class RunWithCommands<T> {
     } finally {
       cleanup.execute();
     }
+
+    await metrics.reportSuccess(commandName);
   }
 }
