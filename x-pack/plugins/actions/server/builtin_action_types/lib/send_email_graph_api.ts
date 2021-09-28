@@ -26,7 +26,7 @@ export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
-): Promise<AxiosResponse> {
+): Promise<{ isAccessTokenInvalidError: boolean; response?: AxiosResponse }> {
   const { options, headers, messageHTML, graphApiUrl } = sendEmailOptions;
 
   const axiosInstance = axios.create();
@@ -43,7 +43,10 @@ export async function sendEmailGraphApi(
     validateStatus: () => true,
   });
   if (res.status === 202) {
-    return res.data;
+    return { isAccessTokenInvalidError: false, response: res.data };
+  }
+  if (res.data && res.data.error && res.data.error.code === 'InvalidAuthenticationToken') {
+    return { isAccessTokenInvalidError: true };
   }
   const errString = stringify(res.data);
   logger.warn(

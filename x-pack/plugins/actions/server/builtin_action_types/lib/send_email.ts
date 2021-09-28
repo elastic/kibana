@@ -81,12 +81,40 @@ async function sendEmailWithExchange(
   options: SendEmailOptions,
   messageHTML: string
 ): Promise<unknown> {
-  const { transport, configurationUtilities } = options;
-  const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
+  const { configurationUtilities } = options;
   // request access token for microsoft exchange online server with Graph API scope
+  const headers = await getGraphApiHeaders(options, logger);
+  const result = await sendEmailGraphApi(
+    {
+      options,
+      headers,
+      messageHTML,
+      graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
+    },
+    logger,
+    configurationUtilities
+  );
 
-  let accessToken = transport.accessToken;
-  let tokenType = transport.tokenType;
+  if (result.isAccessTokenInvalidError) {
+    return await sendEmailGraphApi(
+      {
+        options,
+        headers: await getGraphApiHeaders(options, logger),
+        messageHTML,
+        graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
+      },
+      logger,
+      configurationUtilities
+    );
+  }
+
+  return result;
+}
+
+async function getGraphApiHeaders(options: SendEmailOptions, logger: Logger) {
+  const { clientId, clientSecret, tenantId, oauthTokenUrl } = options.transport;
+  let accessToken = options.transport.accessToken;
+  let tokenType = options.transport.tokenType;
 
   if (!accessToken) {
     const tokenResult = await requestOAuthClientCredentialsToken(
@@ -97,7 +125,7 @@ async function sendEmailWithExchange(
         clientId,
         clientSecret,
       },
-      configurationUtilities
+      options.configurationUtilities
     );
     accessToken = tokenResult.accessToken;
     tokenType = tokenResult.tokenType;
@@ -107,17 +135,7 @@ async function sendEmailWithExchange(
     'Content-Type': 'application/json',
     Authorization: `${tokenType} ${accessToken}`,
   };
-
-  return await sendEmailGraphApi(
-    {
-      options,
-      headers,
-      messageHTML,
-      graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
-    },
-    logger,
-    configurationUtilities
-  );
+  return headers;
 }
 
 // send an email using nodemailer
