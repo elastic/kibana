@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import semver from 'semver';
 import LRU from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
@@ -547,7 +548,6 @@ export class ManifestManager {
         return;
       }
 
-      const artifactsToDelete = [];
       const badArtifacts = [];
 
       const manifestArtifactsIds = manifest
@@ -559,7 +559,6 @@ export class ManifestManager {
         const isArtifactInManifest = manifestArtifactsIds.includes(artifactId);
 
         if (!isArtifactInManifest) {
-          artifactsToDelete.push(this.artifactClient.deleteArtifact(artifactId));
           badArtifacts.push(fleetArtifact);
         }
       }
@@ -572,7 +571,16 @@ export class ManifestManager {
         new EndpointError(`Cleaning up ${badArtifacts.length} orphan artifacts`, badArtifacts)
       );
 
-      Promise.all(artifactsToDelete);
+      await pMap(
+        badArtifacts,
+        async (badArtifact) => this.artifactClient.deleteArtifact(getArtifactId(badArtifact)),
+        {
+          concurrency: 5,
+          /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
+           * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
+          stopOnError: false,
+        }
+      );
 
       this.logger.info(`All orphan artifacts has been removed successfully`);
     } catch (error) {
