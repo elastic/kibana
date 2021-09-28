@@ -17,8 +17,10 @@ interface Props {
   seriesId: number;
   series: SeriesUrl;
   seriesConfig?: SeriesConfig;
+  onEditClick?: () => void;
 }
-export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
+
+export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: Props) {
   const { setSeries, allSeries } = useSeriesStorage();
 
   const { href: discoverHref } = useDiscoverLink({ series, seriesConfig });
@@ -40,18 +42,23 @@ export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
   };
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('xpack.observability.seriesEditor.sampleDocuments', {
-            defaultMessage: 'View sample documents in new tab',
-          })}
-        >
+        <EuiToolTip content={EDIT_SERIES_LABEL}>
+          <EuiButtonIcon
+            iconType="pencil"
+            color="text"
+            aria-label={EDIT_SERIES_LABEL}
+            size="s"
+            onClick={onEditClick}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={VIEW_SAMPLE_DOCUMENTS_LABEL}>
           <EuiButtonIcon
             iconType="discoverApp"
-            aria-label={i18n.translate('xpack.observability.seriesEditor.sampleDocuments', {
-              defaultMessage: 'View sample documents in new tab',
-            })}
+            aria-label={VIEW_SAMPLE_DOCUMENTS_LABEL}
             size="s"
             color="text"
             target="_blank"
@@ -62,16 +69,10 @@ export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('xpack.observability.seriesEditor.hide', {
-            defaultMessage: 'Hide series',
-          })}
-        >
+        <EuiToolTip content={HIDE_SERIES_LABEL}>
           <EuiButtonIcon
             iconType={series.hidden ? 'eyeClosed' : 'eye'}
-            aria-label={i18n.translate('xpack.observability.seriesEditor.hide', {
-              defaultMessage: 'Hide series',
-            })}
+            aria-label={HIDE_SERIES_LABEL}
             size="s"
             color="text"
             onClick={toggleSeries}
@@ -80,17 +81,11 @@ export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('xpack.observability.seriesEditor.clone', {
-            defaultMessage: 'Copy series',
-          })}
-        >
+        <EuiToolTip content={COPY_SERIES_LABEL}>
           <EuiButtonIcon
             iconType={'copy'}
             color="text"
-            aria-label={i18n.translate('xpack.observability.seriesEditor.clone', {
-              defaultMessage: 'Copy series',
-            })}
+            aria-label={COPY_SERIES_LABEL}
             size="s"
             onClick={copySeries}
           />
@@ -102,3 +97,22 @@ export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
     </EuiFlexGroup>
   );
 }
+
+const EDIT_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.edit', {
+  defaultMessage: 'Edit series',
+});
+
+const HIDE_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.hide', {
+  defaultMessage: 'Hide series',
+});
+
+const COPY_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.clone', {
+  defaultMessage: 'Copy series',
+});
+
+const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(
+  'xpack.observability.seriesEditor.sampleDocuments',
+  {
+    defaultMessage: 'View sample documents in new tab',
+  }
+);

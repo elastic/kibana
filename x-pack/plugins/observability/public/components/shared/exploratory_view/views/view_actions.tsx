@@ -19,7 +19,7 @@ export function ViewActions() {
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton onClick={() => applyChanges()} isDisabled={noChanges} fill>
+        <EuiButton onClick={() => applyChanges()} isDisabled={noChanges} fill size="s">
           {i18n.translate('xpack.observability.expView.seriesBuilder.apply', {
             defaultMessage: 'Apply changes',
           })}
