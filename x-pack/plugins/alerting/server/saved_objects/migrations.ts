@@ -54,6 +54,17 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAl
 export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
 
+/**
+ * Returns true if the alert type is that of "siem.notifications" which is a legacy notification system that was deprecated in 7.16.0
+ * in favor of using the newer alerting notifications system.
+ * @param doc The saved object alert type document
+ * @returns true if this is a legacy "siem.notifications" rule, otherwise false
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const isSecuritySolutionLegacyNotification = (
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): boolean => doc.attributes.alertTypeId === 'siem.notifications';
+
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   isPreconfigured: (connectorId: string) => boolean
@@ -106,6 +117,12 @@ export function getMigrations(
     pipeMigrations(setLegacyId, getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured))
   );
 
+  const migrationSecurityLegacyNotificationRules716 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionLegacyNotification(doc),
+    pipeMigrations(addRuleIdsToLegacyNotificationReferences)
+  );
+
   const migrationRules800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
@@ -120,6 +137,10 @@ export function getMigrations(
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
     '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
+    '7.16.0-legacyNotificationRules': executeMigrationWithErrorHandling(
+      migrationSecurityLegacyNotificationRules716,
+      '7.16.0'
+    ),
     '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
   };
 }
@@ -574,6 +595,48 @@ function removeMalformedExceptionsList(
   }
 }
 
+/**
+ * This migrates rule_id's within the legacy siem.notification to saved object references on an upgrade.
+ * We only migrate if we find these conditions:
+ *   - ruleAlertId is a string and not null, undefined, or malformed data.
+ *   - The existing references do not already have a ruleAlertId found within it.
+ * Some of these issues could crop up during either user manual errors of modifying things, earlier migration
+ * issues, etc... so we are safer to check them as possibilities
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * @param doc The document that might have ruleId's to migrate into the references
+ * @returns The document migrated with saved object references
+ */
+function addRuleIdsToLegacyNotificationReferences(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: {
+      params: { ruleAlertId },
+    },
+    references,
+  } = doc;
+  if (!isString(ruleAlertId)) {
+    // early return if we are not a string such as being undefined or null or malformed.
+    return doc;
+  } else {
+    const existingReferences = references ?? [];
+    const existingReferenceFound = existingReferences.find((reference) => {
+      return reference.id === ruleAlertId && reference.type === 'rule';
+    });
+    if (existingReferenceFound) {
+      // skip this if the references already exists for some uncommon reason so we do not add an additional one.
+      return doc;
+    } else {
+      const savedObjectReference: SavedObjectReference = {
+        id: ruleAlertId,
+        name: 'param:ruleAlertId_0',
+        type: 'rule',
+      };
+      const newReferences = [...existingReferences, savedObjectReference];
+      return { ...doc, references: [...(references ?? []), ...newReferences] };
+    }
+  }
+}
 function setLegacyId(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
