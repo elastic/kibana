@@ -17,18 +17,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { Result } from '../../../result';
 import { Result as ResultType } from '../../../result/types';
 import './curation_result_panel.scss';
 
 interface Props {
-  variant: 'current' | 'suggested';
-  results?: ResultType[];
+  variant: 'current' | 'promoted' | 'suggested' | 'hidden';
+  results: ResultType[] | [];
 }
 
 export const CurationResultPanel: React.FC<Props> = ({ variant = 'current', results }) => {
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup className="curationResultPanel__header" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiNotificationBadge>3</EuiNotificationBadge>
         </EuiFlexItem>
@@ -46,11 +47,27 @@ export const CurationResultPanel: React.FC<Props> = ({ variant = 'current', resu
         )}
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <div className={`curationResultPanel curationResultPanel--${variant}`}>
-        <EuiPanel hasShadow={false}>
-          <p>Just some stuff</p>
-        </EuiPanel>
-      </div>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent={results.length > 0 ? 'flexStart' : 'center'}
+        gutterSize="s"
+        direction="column"
+        className={`curationResultPanel curationResultPanel--${variant}`}
+      >
+        {results.length > 0 ? (
+          results.map((result) => (
+            <EuiFlexItem grow={false}>
+              <Result result={result} isMetaEngine={false} />
+            </EuiFlexItem>
+          ))
+        ) : (
+          <EuiText size="s">
+            <p>
+              <b>There are currently no promoted documents for this query</b>
+            </p>
+          </EuiText>
+        )}
+      </EuiFlexGroup>
     </>
   );
 };

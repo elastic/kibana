@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -19,14 +20,24 @@ import { i18n } from '@kbn/i18n';
 
 import { useDecodedParams } from '../../../../utils/encode_path_params';
 import { AppSearchPageTemplate } from '../../../layout';
+import { Result } from '../../../result';
+import { Result as ResultType } from '../../../result/types';
 import { getCurationsBreadcrumbs } from '../../utils';
 
 import { CurationActionBar } from './curation_action_bar';
 import { CurationResultPanel } from './curation_result_panel';
 
+import { DATA } from './temp_data';
+
 export const CurationSuggestion: React.FC = () => {
   const { query } = useDecodedParams();
   const [showOrganicResults, setShowOrganicResults] = useState(false);
+  const [currentOrganicResults, setCurrentOrganicResults] = useState<ResultType[]>(
+    [...DATA].splice(5, 4)
+  );
+  const [proposedOrganicResults, setProposedOrganicResults] = useState<ResultType[]>(
+    [...DATA].splice(2, 4)
+  );
 
   const queryTitle = query === '""' ? query : `${query}`;
 
@@ -53,14 +64,14 @@ export const CurationSuggestion: React.FC = () => {
             <h2>Current</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <CurationResultPanel variant="current" />
+          <CurationResultPanel variant="current" results={[...DATA].splice(0, 3)} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h2>Suggested</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <CurationResultPanel variant="suggested" />
+          <CurationResultPanel variant="suggested" results={[...DATA].splice(3, 2)} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -76,24 +87,35 @@ export const CurationSuggestion: React.FC = () => {
           {showOrganicResults ? 'Collapse' : 'Expand'} organic search results
         </EuiButtonEmpty>
         {showOrganicResults && (
-          <EuiPanel hasShadow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column">
-                  <EuiFlexItem>
-                    <EuiPanel hasBorder>A search result</EuiPanel>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column">
-                  <EuiFlexItem>
-                    <EuiPanel hasBorder>A search result</EuiPanel>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+          <>
+            <EuiHorizontalRule margin="none" />
+            <EuiPanel hasShadow={false}>
+              <EuiFlexGroup gutterSize="m">
+                <EuiFlexItem>
+                  {currentOrganicResults.length > 0 && (
+                    <EuiFlexGroup direction="column" gutterSize="s">
+                      {currentOrganicResults.map((result: ResultType) => (
+                        <EuiFlexItem grow={false}>
+                          <Result result={result} isMetaEngine={false} />
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {proposedOrganicResults.length > 0 && (
+                    <EuiFlexGroup direction="column" gutterSize="s">
+                      {proposedOrganicResults.map((result: ResultType) => (
+                        <EuiFlexItem grow={false}>
+                          <Result result={result} isMetaEngine={false} />
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </>
         )}
       </EuiPanel>
     </AppSearchPageTemplate>
