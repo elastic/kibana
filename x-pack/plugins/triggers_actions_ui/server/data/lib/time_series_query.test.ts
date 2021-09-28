@@ -10,12 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { Logger } from '../../../../../../src/core/server';
-import {
-  TimeSeriesQueryParameters,
-  TimeSeriesQuery,
-  timeSeriesQuery,
-  getResultFromEs,
-} from './time_series_query';
+import { TimeSeriesQuery, timeSeriesQuery, getResultFromEs } from './time_series_query';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 
