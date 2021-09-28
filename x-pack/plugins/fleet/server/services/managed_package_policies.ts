@@ -52,11 +52,7 @@ export const upgradeManagedPackagePolicies = async (
       .debug(
         `Upgrading ${policyIdsToUpgrade.length} package policies: ${policyIdsToUpgrade.join(', ')}`
       );
-    try {
-      await packagePolicyService.upgrade(soClient, esClient, policyIdsToUpgrade);
-      // Swallow errors from upgrades
-    } catch (error) {
-      appContextService.getLogger().error(error);
-    }
+
+    await packagePolicyService.upgrade(soClient, esClient, policyIdsToUpgrade);
   }
 };

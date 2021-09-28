@@ -314,11 +314,16 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies.flatMap<string>(
-    ({ policy }) => policy?.package_policies as string[]
-  );
+  try {
+    const fulfilledPolicyPackagePolicyIds = fulfilledPolicies.flatMap<string>(
+      ({ policy }) => policy?.package_policies as string[]
+    );
 
-  await upgradeManagedPackagePolicies(soClient, esClient, fulfilledPolicyPackagePolicyIds);
+    await upgradeManagedPackagePolicies(soClient, esClient, fulfilledPolicyPackagePolicyIds);
+    // Swallow errors that occur when upgrading
+  } catch (error) {
+    appContextService.getLogger().error(error);
+  }
 
   return {
     policies: fulfilledPolicies.map((p) =>
