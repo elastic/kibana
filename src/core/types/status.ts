@@ -28,7 +28,10 @@ export interface ServiceStatus extends Omit<ServiceStatusFromServer, 'level'> {
  * but overwriting the `level` to its stringified version.
  */
 export type CoreStatus = {
-  [ServiceName in keyof CoreStatusFromServer]: Omit<CoreStatusFromServer[ServiceName], 'level'> & {
+  [ServiceName in keyof Omit<CoreStatusFromServer, 'overall'>]: Omit<
+    CoreStatusFromServer[ServiceName],
+    'level'
+  > & {
     level: ServiceStatusLevel;
   };
 };
