@@ -28,7 +28,6 @@ const uiMetricFromDataPluginSchema: MakeSchemaFrom<UIMetricUsage> = {
   kibana: commonSchema, // It's a forward app so we'll likely never report it
   management: commonSchema,
   short_url_redirect: commonSchema, // It's a forward app so we'll likely never report it
-  timelion: commonSchema,
   visualize: commonSchema,
 
   // X-Pack

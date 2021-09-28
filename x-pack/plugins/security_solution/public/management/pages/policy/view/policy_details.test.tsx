@@ -98,9 +98,8 @@ describe('Policy Details', () => {
     it('should display back to list button and policy title', () => {
       policyView.update();
 
-      const backToListLink = policyView.find('LinkIcon[dataTestSubj="policyDetailsBackLink"]');
-      expect(backToListLink.prop('iconType')).toBe('arrowLeft');
-      expect(backToListLink.prop('href')).toBe(`/app/security${endpointListPath}`);
+      const backToListLink = policyView.find('BackToExternalAppButton');
+      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security${endpointListPath}`);
       expect(backToListLink.text()).toBe('Back to endpoint hosts');
 
       const pageTitle = policyView.find('span[data-test-subj="header-page-title"]');

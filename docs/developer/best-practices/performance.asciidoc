@@ -59,9 +59,10 @@ longer necessary for us to include the `optimizer` in the
 distributable version of {kib}. Every plugin artifact contains all
 plugin dependencies required to run the plugin, except some
 stateful dependencies shared across plugin bundles via 
-`@kbn/ui-shared-deps`. This means that plugin artifacts _tend to
-be larger_ than they were in the legacy platform. To understand the
-current size of your plugin artifact, run `@kbn/optimizer` with:
+`@kbn/ui-shared-deps-npm` and `@kbn/ui-shared-deps-src`. This means
+that plugin artifacts _tend to be larger_ than they were in the
+legacy platform. To understand the current size of your plugin
+artifact, run `@kbn/optimizer` with:
 
 [source,bash]
 ----

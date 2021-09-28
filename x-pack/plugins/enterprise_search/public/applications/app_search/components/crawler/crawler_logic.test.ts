@@ -21,15 +21,15 @@ import {
   CrawlerPolicies,
   CrawlerRules,
   CrawlerStatus,
-  CrawlRequest,
   CrawlRule,
 } from './types';
 import { crawlerDataServerToClient } from './utils';
 
 const DEFAULT_VALUES: CrawlerValues = {
-  crawlRequests: [],
+  events: [],
   dataLoading: true,
   domains: [],
+  mostRecentCrawlRequest: null,
   mostRecentCrawlRequestStatus: CrawlerStatus.Success,
   timeoutId: null,
 };
@@ -56,6 +56,8 @@ const MOCK_SERVER_CRAWLER_DATA: CrawlerDataFromServer = {
       available_deduplication_fields: ['title', 'description'],
     },
   ],
+  events: [],
+  most_recent_crawl_request: null,
 };
 
 const MOCK_CLIENT_CRAWLER_DATA = crawlerDataServerToClient(MOCK_SERVER_CRAWLER_DATA);
@@ -119,6 +121,23 @@ describe('CrawlerLogic', () => {
             availableDeduplicationFields: ['title', 'description'],
           },
         ],
+        events: [
+          {
+            id: '618d0e66abe97bc688328900',
+            status: CrawlerStatus.Pending,
+            stage: 'crawl',
+            createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+            beganAt: null,
+            completedAt: null,
+          },
+        ],
+        mostRecentCrawlRequest: {
+          id: '618d0e66abe97bc688328900',
+          status: CrawlerStatus.Pending,
+          createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+          beganAt: null,
+          completedAt: null,
+        },
       };
 
       beforeEach(() => {
@@ -127,30 +146,14 @@ describe('CrawlerLogic', () => {
 
       it('should set all received data as top-level values', () => {
         expect(CrawlerLogic.values.domains).toEqual(crawlerData.domains);
+        expect(CrawlerLogic.values.events).toEqual(crawlerData.events);
+        expect(CrawlerLogic.values.mostRecentCrawlRequest).toEqual(
+          crawlerData.mostRecentCrawlRequest
+        );
       });
 
       it('should set dataLoading to false', () => {
         expect(CrawlerLogic.values.dataLoading).toEqual(false);
-      });
-    });
-
-    describe('onReceiveCrawlRequests', () => {
-      const crawlRequests: CrawlRequest[] = [
-        {
-          id: '618d0e66abe97bc688328900',
-          status: CrawlerStatus.Pending,
-          createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
-          beganAt: null,
-          completedAt: null,
-        },
-      ];
-
-      beforeEach(() => {
-        CrawlerLogic.actions.onReceiveCrawlRequests(crawlRequests);
-      });
-
-      it('should set the crawl requests', () => {
-        expect(CrawlerLogic.values.crawlRequests).toEqual(crawlRequests);
       });
     });
   });
@@ -170,20 +173,90 @@ describe('CrawlerLogic', () => {
         );
       });
 
+      it('creates a new timeout when there is an active process crawl', async () => {
+        jest.spyOn(CrawlerLogic.actions, 'createNewTimeoutForCrawlerData');
+        http.get.mockReturnValueOnce(
+          Promise.resolve({
+            ...MOCK_SERVER_CRAWLER_DATA,
+            most_recent_crawl_request: null,
+            events: [
+              {
+                id: '618d0e66abe97bc688328900',
+                status: CrawlerStatus.Running,
+                stage: 'process',
+                createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+                beganAt: null,
+                completedAt: null,
+              },
+            ],
+          })
+        );
+
+        CrawlerLogic.actions.fetchCrawlerData();
+        await nextTick();
+
+        expect(CrawlerLogic.actions.createNewTimeoutForCrawlerData).toHaveBeenCalled();
+      });
+
+      describe('on success', () => {
+        [
+          CrawlerStatus.Pending,
+          CrawlerStatus.Starting,
+          CrawlerStatus.Running,
+          CrawlerStatus.Canceling,
+        ].forEach((status) => {
+          it(`creates a new timeout for status ${status}`, async () => {
+            jest.spyOn(CrawlerLogic.actions, 'createNewTimeoutForCrawlerData');
+            http.get.mockReturnValueOnce(
+              Promise.resolve({
+                ...MOCK_SERVER_CRAWLER_DATA,
+                most_recent_crawl_request: { status },
+              })
+            );
+
+            CrawlerLogic.actions.fetchCrawlerData();
+            await nextTick();
+
+            expect(CrawlerLogic.actions.createNewTimeoutForCrawlerData).toHaveBeenCalled();
+          });
+        });
+
+        [CrawlerStatus.Success, CrawlerStatus.Failed, CrawlerStatus.Canceled].forEach((status) => {
+          it(`clears the timeout and fetches data for status ${status}`, async () => {
+            jest.spyOn(CrawlerLogic.actions, 'clearTimeoutId');
+            jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
+            http.get.mockReturnValueOnce(
+              Promise.resolve({
+                ...MOCK_SERVER_CRAWLER_DATA,
+                most_recent_crawl_request: { status },
+              })
+            );
+
+            CrawlerLogic.actions.fetchCrawlerData();
+            await nextTick();
+
+            expect(CrawlerLogic.actions.clearTimeoutId).toHaveBeenCalled();
+            expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
+          });
+        });
+      });
+
       it('calls flashApiErrors when there is an error on the request for crawler data', async () => {
+        jest.spyOn(CrawlerLogic.actions, 'createNewTimeoutForCrawlerData');
         http.get.mockReturnValueOnce(Promise.reject('error'));
 
         CrawlerLogic.actions.fetchCrawlerData();
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(CrawlerLogic.actions.createNewTimeoutForCrawlerData).toHaveBeenCalled();
       });
     });
 
     describe('startCrawl', () => {
       describe('success path', () => {
-        it('creates a new crawl request and then fetches the latest crawl requests', async () => {
-          jest.spyOn(CrawlerLogic.actions, 'getLatestCrawlRequests');
+        it('creates a new crawl request and then fetches the latest crawler data', async () => {
+          jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
           http.post.mockReturnValueOnce(Promise.resolve());
 
           CrawlerLogic.actions.startCrawl();
@@ -192,7 +265,7 @@ describe('CrawlerLogic', () => {
           expect(http.post).toHaveBeenCalledWith(
             '/internal/app_search/engines/some-engine/crawler/crawl_requests'
           );
-          expect(CrawlerLogic.actions.getLatestCrawlRequests).toHaveBeenCalled();
+          expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
         });
       });
 
@@ -210,8 +283,8 @@ describe('CrawlerLogic', () => {
 
     describe('stopCrawl', () => {
       describe('success path', () => {
-        it('stops the crawl starts and then fetches the latest crawl requests', async () => {
-          jest.spyOn(CrawlerLogic.actions, 'getLatestCrawlRequests');
+        it('stops the crawl starts and then fetches the latest crawler data', async () => {
+          jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
           http.post.mockReturnValueOnce(Promise.resolve());
 
           CrawlerLogic.actions.stopCrawl();
@@ -220,13 +293,13 @@ describe('CrawlerLogic', () => {
           expect(http.post).toHaveBeenCalledWith(
             '/internal/app_search/engines/some-engine/crawler/crawl_requests/cancel'
           );
-          expect(CrawlerLogic.actions.getLatestCrawlRequests).toHaveBeenCalled();
+          expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
         });
       });
 
       describe('on failure', () => {
         it('flashes an error message', async () => {
-          jest.spyOn(CrawlerLogic.actions, 'getLatestCrawlRequests');
+          jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
           http.post.mockReturnValueOnce(Promise.reject('error'));
 
           CrawlerLogic.actions.stopCrawl();
@@ -237,19 +310,19 @@ describe('CrawlerLogic', () => {
       });
     });
 
-    describe('createNewTimeoutForCrawlRequests', () => {
+    describe('createNewTimeoutForCrawlerData', () => {
       it('saves the timeout ID in the logic', () => {
         jest.spyOn(CrawlerLogic.actions, 'onCreateNewTimeout');
-        jest.spyOn(CrawlerLogic.actions, 'getLatestCrawlRequests');
+        jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
 
-        CrawlerLogic.actions.createNewTimeoutForCrawlRequests(2000);
+        CrawlerLogic.actions.createNewTimeoutForCrawlerData(2000);
 
         expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 2000);
         expect(CrawlerLogic.actions.onCreateNewTimeout).toHaveBeenCalled();
 
         jest.runAllTimers();
 
-        expect(CrawlerLogic.actions.getLatestCrawlRequests).toHaveBeenCalled();
+        expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
       });
 
       it('clears a timeout if one already exists', () => {
@@ -258,130 +331,32 @@ describe('CrawlerLogic', () => {
           timeoutId,
         });
 
-        CrawlerLogic.actions.createNewTimeoutForCrawlRequests(2000);
+        CrawlerLogic.actions.createNewTimeoutForCrawlerData(2000);
 
         expect(clearTimeout).toHaveBeenCalledWith(timeoutId);
-      });
-    });
-
-    describe('getLatestCrawlRequests', () => {
-      describe('on success', () => {
-        [
-          CrawlerStatus.Pending,
-          CrawlerStatus.Starting,
-          CrawlerStatus.Running,
-          CrawlerStatus.Canceling,
-        ].forEach((status) => {
-          it(`creates a new timeout for status ${status}`, async () => {
-            jest.spyOn(CrawlerLogic.actions, 'createNewTimeoutForCrawlRequests');
-            http.get.mockReturnValueOnce(Promise.resolve([{ status }]));
-
-            CrawlerLogic.actions.getLatestCrawlRequests();
-            await nextTick();
-
-            expect(CrawlerLogic.actions.createNewTimeoutForCrawlRequests).toHaveBeenCalled();
-          });
-        });
-
-        [CrawlerStatus.Success, CrawlerStatus.Failed, CrawlerStatus.Canceled].forEach((status) => {
-          it(`clears the timeout and fetches data for status ${status}`, async () => {
-            jest.spyOn(CrawlerLogic.actions, 'clearTimeoutId');
-            jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
-            http.get.mockReturnValueOnce(Promise.resolve([{ status }]));
-
-            CrawlerLogic.actions.getLatestCrawlRequests();
-            await nextTick();
-
-            expect(CrawlerLogic.actions.clearTimeoutId).toHaveBeenCalled();
-            expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
-          });
-
-          it(`optionally supresses fetching data for status ${status}`, async () => {
-            jest.spyOn(CrawlerLogic.actions, 'clearTimeoutId');
-            jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
-            http.get.mockReturnValueOnce(Promise.resolve([{ status }]));
-
-            CrawlerLogic.actions.getLatestCrawlRequests(false);
-            await nextTick();
-
-            expect(CrawlerLogic.actions.clearTimeoutId).toHaveBeenCalled();
-            expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalledTimes(0);
-          });
-        });
-      });
-
-      describe('on failure', () => {
-        it('creates a new timeout', async () => {
-          jest.spyOn(CrawlerLogic.actions, 'createNewTimeoutForCrawlRequests');
-          http.get.mockReturnValueOnce(Promise.reject());
-
-          CrawlerLogic.actions.getLatestCrawlRequests();
-          await nextTick();
-
-          expect(CrawlerLogic.actions.createNewTimeoutForCrawlRequests).toHaveBeenCalled();
-        });
       });
     });
   });
 
   describe('selectors', () => {
     describe('mostRecentCrawlRequestStatus', () => {
-      it('is Success when there are no crawl requests', () => {
+      it('is Success when there is no recent crawl request', () => {
         mount({
-          crawlRequests: [],
+          mostRecentCrawlRequest: null,
         });
 
         expect(CrawlerLogic.values.mostRecentCrawlRequestStatus).toEqual(CrawlerStatus.Success);
       });
 
-      it('is Success when there are only crawl requests', () => {
+      it('is the most recent crawl request status', () => {
         mount({
-          crawlRequests: [
-            {
-              id: '2',
-              status: CrawlerStatus.Skipped,
-              createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
-              beganAt: null,
-              completedAt: null,
-            },
-            {
-              id: '1',
-              status: CrawlerStatus.Skipped,
-              createdAt: 'Mon, 30 Aug 2020 17:00:00 +0000',
-              beganAt: null,
-              completedAt: null,
-            },
-          ],
-        });
-
-        expect(CrawlerLogic.values.mostRecentCrawlRequestStatus).toEqual(CrawlerStatus.Success);
-      });
-
-      it('is the first non-skipped crawl request status', () => {
-        mount({
-          crawlRequests: [
-            {
-              id: '3',
-              status: CrawlerStatus.Skipped,
-              createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
-              beganAt: null,
-              completedAt: null,
-            },
-            {
-              id: '2',
-              status: CrawlerStatus.Failed,
-              createdAt: 'Mon, 30 Aug 2020 17:00:00 +0000',
-              beganAt: null,
-              completedAt: null,
-            },
-            {
-              id: '1',
-              status: CrawlerStatus.Success,
-              createdAt: 'Mon, 29 Aug 2020 17:00:00 +0000',
-              beganAt: null,
-              completedAt: null,
-            },
-          ],
+          mostRecentCrawlRequest: {
+            id: '2',
+            status: CrawlerStatus.Failed,
+            createdAt: 'Mon, 30 Aug 2020 17:00:00 +0000',
+            beganAt: null,
+            completedAt: null,
+          },
         });
 
         expect(CrawlerLogic.values.mostRecentCrawlRequestStatus).toEqual(CrawlerStatus.Failed);

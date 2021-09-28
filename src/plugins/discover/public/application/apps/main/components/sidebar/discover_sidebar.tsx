@@ -8,7 +8,7 @@
 
 import './discover_sidebar.scss';
 import { throttle } from 'lodash';
-import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -69,14 +69,14 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   /**
    * a statistics of the distribution of fields in the given hits
    */
-  fieldCounts: Record<string, number>;
+  fieldCounts?: Record<string, number>;
   /**
    * hits fetched from ES, displayed in the doc table
    */
-  documents: ElasticSearchHit[];
+  documents?: ElasticSearchHit[];
 }
 
-export function DiscoverSidebar({
+export function DiscoverSidebarComponent({
   alwaysShowActionButtons = false,
   columns,
   fieldCounts,
@@ -101,7 +101,8 @@ export function DiscoverSidebar({
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
   const { indexPatternFieldEditor } = services;
-  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission =
+    indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
@@ -109,8 +110,10 @@ export function DiscoverSidebar({
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
-    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
-    setFields(newFields);
+    if (documents) {
+      const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+      setFields(newFields);
+    }
   }, [selectedIndexPattern, fieldCounts, documents]);
 
   const scrollDimensions = useResizeObserver(scrollContainer);
@@ -129,9 +132,10 @@ export function DiscoverSidebar({
     [documents, columns, selectedIndexPattern]
   );
 
-  const popularLimit = useMemo(() => services.uiSettings.get(FIELDS_LIMIT_SETTING), [
-    services.uiSettings,
-  ]);
+  const popularLimit = useMemo(
+    () => services.uiSettings.get(FIELDS_LIMIT_SETTING),
+    [services.uiSettings]
+  );
 
   const {
     selected: selectedFields,
@@ -265,7 +269,7 @@ export function DiscoverSidebar({
 
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
 
-  if (!selectedIndexPattern || !fields) {
+  if (!selectedIndexPattern) {
     return null;
   }
 
@@ -344,7 +348,7 @@ export function DiscoverSidebar({
         <EuiFlexItem className="eui-yScroll">
           <div
             ref={(el) => {
-              if (el && !el.dataset.dynamicScroll) {
+              if (documents && el && !el.dataset.dynamicScroll) {
                 el.dataset.dynamicScroll = 'true';
                 setScrollContainer(el);
               }
@@ -352,7 +356,7 @@ export function DiscoverSidebar({
             onScroll={throttle(lazyScroll, 100)}
             className="eui-yScroll"
           >
-            {fields.length > 0 && (
+            {Array.isArray(fields) && fields.length > 0 && (
               <div>
                 {selectedFields &&
                 selectedFields.length > 0 &&
@@ -500,3 +504,5 @@ export function DiscoverSidebar({
     </EuiPageSideBar>
   );
 }
+
+export const DiscoverSidebar = memo(DiscoverSidebarComponent);

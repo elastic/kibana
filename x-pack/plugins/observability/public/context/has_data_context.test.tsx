@@ -74,16 +74,16 @@ describe('HasDataContextProvider', () => {
       absoluteEnd: new Date(relativeEnd).valueOf(),
     }));
     jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
-      core: ({ http: { get: jest.fn() } } as unknown) as CoreStart,
+      core: { http: { get: jest.fn() } } as unknown as CoreStart,
     } as PluginContextValue);
   });
 
   describe('when no plugin has registered', () => {
-    it('hasAnyData returns false and all apps return undefined', async () => {
+    it('hasAnyData returns undefined and all apps return undefined', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toMatchObject({
         hasDataMap: {},
-        hasAnyData: false,
+        hasAnyData: undefined,
         isAllRequestsComplete: false,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),
@@ -132,7 +132,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -188,7 +188,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -246,7 +246,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -301,7 +301,7 @@ describe('HasDataContextProvider', () => {
           });
           expect(result.current).toEqual({
             hasDataMap: {},
-            hasAnyData: false,
+            hasAnyData: undefined,
             isAllRequestsComplete: false,
             forceUpdate: expect.any(String),
             onRefreshTimeRange: expect.any(Function),
@@ -346,7 +346,7 @@ describe('HasDataContextProvider', () => {
           });
           expect(result.current).toEqual({
             hasDataMap: {},
-            hasAnyData: false,
+            hasAnyData: undefined,
             isAllRequestsComplete: false,
             forceUpdate: expect.any(String),
             onRefreshTimeRange: expect.any(Function),
@@ -406,7 +406,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -484,7 +484,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -515,7 +515,7 @@ describe('HasDataContextProvider', () => {
   describe('with alerts', () => {
     beforeAll(() => {
       jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
-        core: ({
+        core: {
           http: {
             get: async () => {
               return {
@@ -526,7 +526,7 @@ describe('HasDataContextProvider', () => {
               };
             },
           },
-        } as unknown) as CoreStart,
+        } as unknown as CoreStart,
       } as PluginContextValue);
     });
 
@@ -534,7 +534,7 @@ describe('HasDataContextProvider', () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
         hasDataMap: {},
-        hasAnyData: false,
+        hasAnyData: undefined,
         isAllRequestsComplete: false,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),

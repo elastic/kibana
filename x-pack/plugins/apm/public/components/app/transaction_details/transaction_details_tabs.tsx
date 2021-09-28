@@ -32,7 +32,7 @@ const tabs = [
 ];
 
 export function TransactionDetailsTabs() {
-  const { query } = useApmParams('/services/:serviceName/transactions/view');
+  const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { urlParams } = useUrlParams();
   const history = useHistory();

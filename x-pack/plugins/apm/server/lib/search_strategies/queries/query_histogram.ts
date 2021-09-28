@@ -23,12 +23,11 @@ import { getRequestBase } from './get_request_base';
 export const getTransactionDurationHistogramRequest = (
   params: SearchStrategyParams,
   interval: number,
-  fieldName?: FieldValuePair['fieldName'],
-  fieldValue?: FieldValuePair['fieldValue']
+  termFilters?: FieldValuePair[]
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
   body: {
-    query: getQueryWithParams({ params, fieldName, fieldValue }),
+    query: getQueryWithParams({ params, termFilters }),
     size: 0,
     aggs: {
       transaction_duration_histogram: {
@@ -42,16 +41,10 @@ export const fetchTransactionDurationHistogram = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   interval: number,
-  fieldName?: FieldValuePair['fieldName'],
-  fieldValue?: FieldValuePair['fieldValue']
+  termFilters?: FieldValuePair[]
 ): Promise<HistogramItem[]> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationHistogramRequest(
-      params,
-      interval,
-      fieldName,
-      fieldValue
-    )
+    getTransactionDurationHistogramRequest(params, interval, termFilters)
   );
 
   if (resp.body.aggregations === undefined) {
@@ -61,8 +54,9 @@ export const fetchTransactionDurationHistogram = async (
   }
 
   return (
-    (resp.body.aggregations
-      .transaction_duration_histogram as estypes.AggregationsMultiBucketAggregate<HistogramItem>)
-      .buckets ?? []
+    (
+      resp.body.aggregations
+        .transaction_duration_histogram as estypes.AggregationsMultiBucketAggregate<HistogramItem>
+    ).buckets ?? []
   );
 };

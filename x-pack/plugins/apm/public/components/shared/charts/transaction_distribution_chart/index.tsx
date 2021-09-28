@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
+import { flatten } from 'lodash';
+
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -30,25 +32,24 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import type {
-  FieldValuePair,
-  HistogramItem,
-} from '../../../../../common/search_strategies/types';
+import type { HistogramItem } from '../../../../../common/search_strategies/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
 import { ChartContainer } from '../chart_container';
 
+export interface TransactionDistributionChartData {
+  id: string;
+  histogram: HistogramItem[];
+}
+
 interface TransactionDistributionChartProps {
-  fieldName?: FieldValuePair['fieldName'];
-  fieldValue?: FieldValuePair['fieldValue'];
+  data: TransactionDistributionChartData[];
   hasData: boolean;
-  histogram?: HistogramItem[];
   markerCurrentTransaction?: number;
   markerValue: number;
   markerPercentile: number;
-  overallHistogram?: HistogramItem[];
   onChartSelection?: BrushEndListener;
   selection?: [number, number];
   status: FETCH_STATUS;
@@ -69,29 +70,24 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
   },
 });
 
+// TODO Revisit this approach since it actually manipulates the numbers
+// showing in the chart and its tooltips.
 const CHART_PLACEHOLDER_VALUE = 0.0001;
 
 // Elastic charts will show any lone bin (i.e. a populated bin followed by empty bin)
 // as a circular marker instead of a bar
 // This provides a workaround by making the next bin not empty
-export const replaceHistogramDotsWithBars = (
-  originalHistogram: HistogramItem[] | undefined
-) => {
-  if (originalHistogram === undefined) return;
-  const histogram = [...originalHistogram];
-  {
-    for (let i = 0; i < histogram.length - 1; i++) {
-      if (
-        histogram[i].doc_count > 0 &&
-        histogram[i].doc_count !== CHART_PLACEHOLDER_VALUE &&
-        histogram[i + 1].doc_count === 0
-      ) {
-        histogram[i + 1].doc_count = CHART_PLACEHOLDER_VALUE;
-      }
+export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
+  histogramItems.reduce((histogramItem, _, i) => {
+    if (
+      histogramItem[i - 1]?.doc_count > 0 &&
+      histogramItem[i - 1]?.doc_count !== CHART_PLACEHOLDER_VALUE &&
+      histogramItem[i].doc_count === 0
+    ) {
+      histogramItem[i].doc_count = CHART_PLACEHOLDER_VALUE;
     }
-    return histogram;
-  }
-};
+    return histogramItem;
+  }, histogramItems);
 
 // Create and call a duration formatter for every value since the durations for the
 // x axis might have a wide range of values e.g. from low milliseconds to large seconds.
@@ -100,14 +96,11 @@ const xAxisTickFormat: TickFormatter<number> = (d) =>
   getDurationFormatter(d, 0.9999)(d).formatted;
 
 export function TransactionDistributionChart({
-  fieldName,
-  fieldValue,
+  data,
   hasData,
-  histogram: originalHistogram,
   markerCurrentTransaction,
   markerValue,
   markerPercentile,
-  overallHistogram,
   onChartSelection,
   selection,
   status,
@@ -115,10 +108,11 @@ export function TransactionDistributionChart({
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
 
-  const patchedOverallHistogram = useMemo(
-    () => replaceHistogramDotsWithBars(overallHistogram),
-    [overallHistogram]
-  );
+  const areaSeriesColors = [
+    euiTheme.eui.euiColorVis1,
+    euiTheme.eui.euiColorVis2,
+    euiTheme.eui.euiColorVis5,
+  ];
 
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
@@ -137,14 +131,14 @@ export function TransactionDistributionChart({
 
   // This will create y axis ticks for 1, 10, 100, 1000 ...
   const yMax =
-    Math.max(...(overallHistogram ?? []).map((d) => d.doc_count)) ?? 0;
+    Math.max(
+      ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
+    ) ?? 0;
   const yTicks = Math.ceil(Math.log10(yMax));
   const yAxisDomain = {
     min: 0.9,
     max: Math.pow(10, yTicks),
   };
-
-  const histogram = replaceHistogramDotsWithBars(originalHistogram);
 
   const selectionAnnotation =
     selection !== undefined
@@ -260,35 +254,20 @@ export function TransactionDistributionChart({
             ticks={yTicks}
             gridLine={{ visible: true }}
           />
-          <AreaSeries
-            id={i18n.translate(
-              'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-              { defaultMessage: 'All transactions' }
-            )}
-            xScaleType={ScaleType.Log}
-            yScaleType={ScaleType.Log}
-            data={patchedOverallHistogram ?? []}
-            curve={CurveType.CURVE_STEP_AFTER}
-            xAccessor="key"
-            yAccessors={['doc_count']}
-            color={euiTheme.eui.euiColorVis1}
-            fit="lookahead"
-          />
-          {Array.isArray(histogram) &&
-            fieldName !== undefined &&
-            fieldValue !== undefined && (
-              <AreaSeries
-                // id is used as the label for the legend
-                id={`${fieldName}:${fieldValue}`}
-                xScaleType={ScaleType.Log}
-                yScaleType={ScaleType.Log}
-                data={histogram}
-                curve={CurveType.CURVE_STEP_AFTER}
-                xAccessor="key"
-                yAccessors={['doc_count']}
-                color={euiTheme.eui.euiColorVis2}
-              />
-            )}
+          {data.map((d, i) => (
+            <AreaSeries
+              key={d.id}
+              id={d.id}
+              xScaleType={ScaleType.Log}
+              yScaleType={ScaleType.Log}
+              data={replaceHistogramDotsWithBars(d.histogram)}
+              curve={CurveType.CURVE_STEP_AFTER}
+              xAccessor="key"
+              yAccessors={['doc_count']}
+              color={areaSeriesColors[i]}
+              fit="lookahead"
+            />
+          ))}
         </Chart>
       </ChartContainer>
     </div>

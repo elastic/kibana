@@ -491,7 +491,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.filters",
+                "id": "def-public.FilterManager.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "filters",
@@ -504,7 +504,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.collector",
+                "id": "def-public.FilterManager.telemetry.$2",
                 "type": "Unknown",
                 "tags": [],
                 "label": "collector",
@@ -915,7 +915,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.connectToQueryState.$3.syncConfig",
+            "id": "def-public.connectToQueryState.$3",
             "type": "Object",
             "tags": [],
             "label": "syncConfig",
@@ -925,7 +925,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.connectToQueryState.$3.syncConfig.time",
+                "id": "def-public.connectToQueryState.$3.time",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "time",
@@ -938,7 +938,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.connectToQueryState.$3.syncConfig.refreshInterval",
+                "id": "def-public.connectToQueryState.$3.refreshInterval",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "refreshInterval",
@@ -951,7 +951,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.connectToQueryState.$3.syncConfig.filters",
+                "id": "def-public.connectToQueryState.$3.filters",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "filters",
@@ -966,7 +966,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.connectToQueryState.$3.syncConfig.query",
+                "id": "def-public.connectToQueryState.$3.query",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "query",
@@ -1782,7 +1782,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.SavedQueryService.saveQuery.$2.config",
+                "id": "def-public.SavedQueryService.saveQuery.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
@@ -1792,7 +1792,7 @@
                 "children": [
                   {
                     "parentPluginId": "data",
-                    "id": "def-public.SavedQueryService.saveQuery.$2.config.overwrite",
+                    "id": "def-public.SavedQueryService.saveQuery.$2.overwrite",
                     "type": "boolean",
                     "tags": [],
                     "label": "overwrite",
@@ -2396,7 +2396,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.getAbsoluteTimeRange.$2.forceNow",
+            "id": "def-common.getAbsoluteTimeRange.$2",
             "type": "Object",
             "tags": [],
             "label": "{ forceNow }",
@@ -2406,7 +2406,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.getAbsoluteTimeRange.$2.forceNow.forceNow",
+                "id": "def-common.getAbsoluteTimeRange.$2.forceNow",
                 "type": "Object",
                 "tags": [],
                 "label": "forceNow",
@@ -2501,7 +2501,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.getTime.$3.options",
+            "id": "def-common.getTime.$3",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -2511,7 +2511,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.getTime.$3.options.forceNow",
+                "id": "def-common.getTime.$3.forceNow",
                 "type": "Object",
                 "tags": [],
                 "label": "forceNow",
@@ -2524,7 +2524,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.getTime.$3.options.fieldName",
+                "id": "def-common.getTime.$3.fieldName",
                 "type": "string",
                 "tags": [],
                 "label": "fieldName",
@@ -2615,39 +2615,6 @@
     "interfaces": [
       {
         "parentPluginId": "data",
-        "id": "def-common.RefreshInterval",
-        "type": "Interface",
-        "tags": [],
-        "label": "RefreshInterval",
-        "description": [],
-        "path": "src/plugins/data/common/query/timefilter/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.RefreshInterval.pause",
-            "type": "boolean",
-            "tags": [],
-            "label": "pause",
-            "description": [],
-            "path": "src/plugins/data/common/query/timefilter/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.RefreshInterval.value",
-            "type": "number",
-            "tags": [],
-            "label": "value",
-            "description": [],
-            "path": "src/plugins/data/common/query/timefilter/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.TimeRangeBounds",
         "type": "Interface",
         "tags": [],
@@ -2688,6 +2655,20 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "data",
+        "id": "def-common.RefreshInterval",
+        "type": "Type",
+        "tags": [],
+        "label": "RefreshInterval",
+        "description": [],
+        "signature": [
+          "{ pause: boolean; value: number; }"
+        ],
+        "path": "src/plugins/data/common/query/timefilter/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "data",
         "id": "def-common.TimeRange",

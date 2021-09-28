@@ -1,27 +1,5 @@
 {
   "attributes": {
-    "description": "",
-    "hits": 0,
-    "timelion_chart_height": 275,
-    "timelion_columns": 2,
-    "timelion_interval": "auto",
-    "timelion_rows": 2,
-    "timelion_sheet": [
-      ".es(*)"
-    ],
-    "title": "New TimeLion Sheet",
-    "version": 1
-  },
-  "coreMigrationVersion": "8.0.0",
-  "id": "190f3e90-2ec3-11e8-ba48-69fc4e41e1f6",
-  "references": [],
-  "type": "timelion-sheet",
-  "updated_at": "2018-03-23T17:53:30.872Z",
-  "version": "WzgsMl0="
-}
-
-{
-  "attributes": {
     "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"id\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
     "title": "saved_objects*"
   },

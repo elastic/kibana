@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import type { Query } from 'src/plugins/data/common';
 import {
   DrawState,
   EditState,
@@ -14,7 +15,6 @@ import {
   LayerDescriptor,
   MapCenter,
   MapExtent,
-  MapQuery,
   Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
@@ -39,9 +39,8 @@ export type MapContext = Partial<MapViewContext> & {
   };
   timeFilters?: TimeRange;
   timeslice?: Timeslice;
-  query?: MapQuery;
+  query?: Query;
   filters: Filter[];
-  refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
   editState?: EditState;
   searchSessionId?: string;

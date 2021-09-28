@@ -124,9 +124,9 @@ describe('Result', () => {
 
   describe('dragging', () => {
     // In the real world, the drag library sets data attributes, role, tabIndex, etc.
-    const mockDragHandleProps = ({
+    const mockDragHandleProps = {
       someMockProp: true,
-    } as unknown) as DraggableProvidedDragHandleProps;
+    } as unknown as DraggableProvidedDragHandleProps;
 
     it('will render a drag handle with the passed props', () => {
       const wrapper = shallow(<Result {...props} dragHandleProps={mockDragHandleProps} />);

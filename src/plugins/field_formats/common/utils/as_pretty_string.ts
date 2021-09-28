@@ -9,7 +9,7 @@
 /**
  * Convert a value to a presentable string
  */
-export function asPrettyString(val: any): string {
+export function asPrettyString(val: unknown): string {
   if (val === null || val === undefined) return ' - ';
   switch (typeof val) {
     case 'string':

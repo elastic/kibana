@@ -27,15 +27,17 @@ import type { NodesVersionCompatibility } from './version_check/ensure_es_versio
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 import { isValidConnection } from './is_valid_connection';
+import { isInlineScriptingEnabled } from './is_scripting_enabled';
 
-interface SetupDeps {
+export interface SetupDeps {
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
 }
 
 /** @internal */
 export class ElasticsearchService
-  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart> {
+  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart>
+{
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private stop$ = new Subject();
@@ -96,6 +98,7 @@ export class ElasticsearchService
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
+
   public async start(): Promise<InternalElasticsearchServiceStart> {
     if (!this.client || !this.esNodesCompatibility$) {
       throw new Error('ElasticsearchService needs to be setup before calling start');
@@ -113,6 +116,18 @@ export class ElasticsearchService
     if (!config.skipStartupConnectionCheck) {
       // Ensure that the connection is established and the product is valid before moving on
       await isValidConnection(this.esNodesCompatibility$);
+
+      // Ensure inline scripting is enabled on the ES cluster
+      const scriptingEnabled = await isInlineScriptingEnabled({
+        client: this.client.asInternalUser,
+      });
+      if (!scriptingEnabled) {
+        throw new Error(
+          'Inline scripting is disabled on the Elasticsearch cluster, and is mandatory for Kibana to function. ' +
+            'Please enabled inline scripting, then restart Kibana. ' +
+            'Refer to https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-security.html for more info.'
+        );
+      }
     }
 
     return {

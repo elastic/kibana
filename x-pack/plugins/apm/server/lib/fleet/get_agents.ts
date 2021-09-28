@@ -23,9 +23,8 @@ export async function getFleetAgents({
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
   // @ts-ignore
-  const savedObjectsClient: SavedObjectsClientContract = await getInternalSavedObjectsClient(
-    core.setup
-  );
+  const savedObjectsClient: SavedObjectsClientContract =
+    await getInternalSavedObjectsClient(core.setup);
 
   return await fleetPluginStart.agentPolicyService.getByIds(
     savedObjectsClient,

@@ -78,7 +78,7 @@ export function createQuery(options: {
 
   const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
-  let typeFilter;
+  let typeFilter: any;
   if (type) {
     typeFilter = { bool: { should: [{ term: { type } }, { term: { 'metricset.name': type } }] } };
   } else if (types) {

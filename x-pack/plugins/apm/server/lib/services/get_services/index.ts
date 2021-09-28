@@ -6,12 +6,10 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { isEmpty } from 'lodash';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
-import { hasHistoricalAgentData } from './has_historical_agent_data';
 
 export async function getServices({
   environment,
@@ -19,12 +17,16 @@ export async function getServices({
   setup,
   searchAggregatedTransactions,
   logger,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_services', async () => {
     const [items, hasLegacyData] = await Promise.all([
@@ -34,18 +36,14 @@ export async function getServices({
         setup,
         searchAggregatedTransactions,
         logger,
+        start,
+        end,
       }),
-      getLegacyDataStatus(setup),
+      getLegacyDataStatus(setup, start, end),
     ]);
-
-    const noDataInCurrentTimeRange = isEmpty(items);
-    const hasHistoricalData = noDataInCurrentTimeRange
-      ? await hasHistoricalAgentData(setup)
-      : true;
 
     return {
       items,
-      hasHistoricalData,
       hasLegacyData,
     };
   });

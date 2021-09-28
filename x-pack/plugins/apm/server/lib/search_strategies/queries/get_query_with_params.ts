@@ -16,25 +16,17 @@ import type {
 } from '../../../../common/search_strategies/types';
 import { rangeRt } from '../../../routes/default_api_types';
 import { getCorrelationsFilters } from '../../correlations/get_filters';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
-export const getTermsQuery = (
-  fieldName: FieldValuePair['fieldName'] | undefined,
-  fieldValue: FieldValuePair['fieldValue'] | undefined
-) => {
-  return fieldName && fieldValue ? [{ term: { [fieldName]: fieldValue } }] : [];
+export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
+  return { term: { [fieldName]: fieldValue } };
 };
 
 interface QueryParams {
   params: SearchStrategyParams;
-  fieldName?: FieldValuePair['fieldName'];
-  fieldValue?: FieldValuePair['fieldValue'];
+  termFilters?: FieldValuePair[];
 }
-export const getQueryWithParams = ({
-  params,
-  fieldName,
-  fieldValue,
-}: QueryParams) => {
+export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
   const {
     environment,
     kuery,
@@ -51,22 +43,24 @@ export const getQueryWithParams = ({
     getOrElse<t.Errors, { start: number; end: number }>((errors) => {
       throw new Error(failure(errors).join('\n'));
     })
-  ) as Setup & SetupTimeRange;
+  ) as Setup & { start: number; end: number };
 
-  const filters = getCorrelationsFilters({
+  const correlationFilters = getCorrelationsFilters({
     setup,
     environment,
     kuery,
     serviceName,
     transactionType,
     transactionName,
+    start: setup.start,
+    end: setup.end,
   });
 
   return {
     bool: {
       filter: [
-        ...filters,
-        ...getTermsQuery(fieldName, fieldValue),
+        ...correlationFilters,
+        ...(Array.isArray(termFilters) ? termFilters.map(getTermsQuery) : []),
       ] as estypes.QueryDslQueryContainer[],
     },
   };
