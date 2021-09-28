@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { esFilters, SortDirection } from '../../../../../data/public';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { IndexPattern, IndexPatternField } from '../../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
@@ -26,6 +26,7 @@ import { popularizeField } from '../../helpers/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { useLabs } from '../../../../../presentation_util/public';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -39,7 +40,8 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
   const services = getServices();
   const { uiSettings: config, capabilities, indexPatterns, navigation, filterManager } = services;
 
-  const isLegacy = useMemo(() => config.get(DOC_TABLE_LEGACY), [config]);
+  const { isProjectEnabled } = useLabs();
+  const isLegacy = !isProjectEnabled('labs:discover:enableNewTable');
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
 
   /**

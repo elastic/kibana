@@ -10,19 +10,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiSpacer,
-  EuiButton,
-  EuiText,
-  EuiWrappingPopover,
-  EuiCode,
-  EuiHorizontalRule,
-  EuiButtonEmpty,
-  EuiTextAlign,
-} from '@elastic/eui';
+import { EuiWrappingPopover, EuiButtonEmpty, EuiTextAlign } from '@elastic/eui';
 import './open_options_popover.scss';
-import { DOC_TABLE_LEGACY } from '../../../../../../common';
 import { getServices } from '../../../../../kibana_services';
 
 const container = document.createElement('div');
@@ -34,60 +23,11 @@ interface OptionsPopoverProps {
 }
 
 export function OptionsPopover(props: OptionsPopoverProps) {
-  const {
-    core: { uiSettings },
-    addBasePath,
-  } = getServices();
-  const isLegacy = uiSettings.get(DOC_TABLE_LEGACY);
-
-  const mode = isLegacy
-    ? i18n.translate('discover.openOptionsPopover.legacyTableText', {
-        defaultMessage: 'Classic table',
-      })
-    : i18n.translate('discover.openOptionsPopover.dataGridText', {
-        defaultMessage: 'New table',
-      });
+  const { addBasePath } = getServices();
 
   return (
     <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={props.onClose} isOpen>
       <div className="dscOptionsPopover">
-        <EuiText color="subdued" size="s">
-          <p>
-            <FormattedMessage
-              id="discover.topNav.optionsPopover.currentViewMode"
-              defaultMessage="{viewModeLabel}: {currentViewMode}"
-              values={{
-                viewModeLabel: (
-                  <strong>
-                    <FormattedMessage
-                      id="discover.topNav.optionsPopover.currentViewModeLabel"
-                      defaultMessage="Current view mode"
-                    />
-                  </strong>
-                ),
-                currentViewMode: <EuiCode data-test-subj="docTableMode">{mode}</EuiCode>,
-              }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued" size="s">
-          <FormattedMessage
-            id="discover.topNav.openOptionsPopover.description"
-            defaultMessage="Great news! Discover has better ways to sort data, drag and drop columns, and compare documents. Toggle 'Use classic table' in Advanced Settings to get started."
-          />
-        </EuiText>
-        <EuiSpacer />
-        <EuiButton
-          iconType="tableDensityNormal"
-          fullWidth
-          href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
-        >
-          {i18n.translate('discover.openOptionsPopover.goToAdvancedSettings', {
-            defaultMessage: 'Get started',
-          })}
-        </EuiButton>
-        <EuiHorizontalRule margin="s" />
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
             iconType="gear"

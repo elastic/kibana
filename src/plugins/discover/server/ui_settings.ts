@@ -21,7 +21,6 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
-  DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
@@ -153,23 +152,6 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
-  },
-  [DOC_TABLE_LEGACY]: {
-    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use classic table',
-    }),
-    value: true,
-    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
-      defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
-        'Turn on this option to use the classic table. Turn off to use the new table. ',
-    }),
-    category: ['discover'],
-    schema: schema.boolean(),
-    metric: {
-      type: METRIC_TYPE.CLICK,
-      name: 'discover:useLegacyDataGrid',
-    },
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {

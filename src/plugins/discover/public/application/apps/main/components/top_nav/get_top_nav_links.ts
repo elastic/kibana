@@ -16,7 +16,6 @@ import { DiscoverServices } from '../../../../../build_services';
 import { SavedSearch } from '../../../../../saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
-import { openOptionsPopover } from './open_options_popover';
 
 /**
  * Helper function to build the top nav links
@@ -48,10 +47,9 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.optionsDescription', {
       defaultMessage: 'Options',
     }),
-    run: (anchorElement: HTMLElement) =>
-      openOptionsPopover({
-        I18nContext: services.core.i18n.Context,
-        anchorElement,
+    run: () =>
+      services.core.application.navigateToApp('management', {
+        path: 'kibana/settings?query=category:(discover)',
       }),
     testId: 'discoverOptionsButton',
   };

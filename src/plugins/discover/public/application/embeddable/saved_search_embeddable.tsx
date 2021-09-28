@@ -32,7 +32,6 @@ import { UiActionsStart } from '../../../../ui_actions/public';
 import { getServices } from '../../kibana_services';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
@@ -379,10 +378,8 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       return;
     }
-    const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const props = {
       searchProps,
-      useLegacyTable,
       refs: domNode,
     };
     ReactDOM.render(<SavedSearchEmbeddableComponent {...props} />, domNode);

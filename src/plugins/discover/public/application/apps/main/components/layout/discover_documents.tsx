@@ -62,7 +62,7 @@ function DiscoverDocumentsComponent({
   const { isProjectEnabled } = useLabs();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isLegacy = isProjectEnabled('doc_table:legacy');
+  const isLegacy = !isProjectEnabled('labs:discover:enableNewTable');
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState: DataDocumentsMsg = useDataState(documents$);

@@ -8,11 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DOC_TABLE_LEGACY = 'doc_table:legacy';
 export const LABS_PROJECT_PREFIX = 'labs:';
 export const DEFER_BELOW_FOLD = `${LABS_PROJECT_PREFIX}dashboard:deferBelowFold` as const;
+export const ENABLE_NEW_TABLE = `${LABS_PROJECT_PREFIX}discover:enableNewTable` as const;
 
-export const projectIDs = [DEFER_BELOW_FOLD, DOC_TABLE_LEGACY] as const;
+export const projectIDs = [DEFER_BELOW_FOLD, ENABLE_NEW_TABLE] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation', 'discover'] as const;
 
@@ -35,18 +35,17 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     }),
     solutions: ['dashboard'],
   },
-  [DOC_TABLE_LEGACY]: {
-    id: DOC_TABLE_LEGACY,
-    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use classic table',
+  [ENABLE_NEW_TABLE]: {
+    id: ENABLE_NEW_TABLE,
+    name: i18n.translate('presentationUtil.labs.enableNewTable', {
+      defaultMessage: 'Use new table',
     }),
-    isActive: true,
+    isActive: false,
     isDisplayed: true,
     environments: ['kibana', 'browser', 'session'],
-    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
+    description: i18n.translate('presentationUtil.labs.enableNewTableDescription', {
       defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
-        'Turn on this option to use the classic table. Turn off to use the new table. ',
+        'Use a new table layout in Discover that includes better data sorting, drag-and-drop columns, and a full screen view.',
     }),
     solutions: ['discover'],
   },
