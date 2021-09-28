@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import type { SecurityLicense } from '../../common/licensing';
 import type {
   PrivilegeDeprecationsRolesByFeatureIdRequest,
@@ -33,7 +35,6 @@ export const getPrivilegeDeprecationsServices = (
       const { body: elasticsearchRoles } = await context.esClient.asCurrentUser.security.getRole<
         Record<string, ElasticsearchRole>
       >();
-
       kibanaRoles = Object.entries(elasticsearchRoles).map(([roleName, elasticsearchRole]) =>
         transformElasticsearchRoleToRole(
           // @ts-expect-error @elastic/elasticsearch `XPackRole` type doesn't define `applications` and `transient_metadata`.
@@ -46,18 +47,36 @@ export const getPrivilegeDeprecationsServices = (
       const statusCode = getErrorStatusCode(e);
       const isUnauthorized = statusCode === 403;
       const message = isUnauthorized
-        ? `You must have the 'manage_security' cluster privilege to fix role deprecations.`
-        : `Error retrieving roles for privilege deprecations: ${getDetailedErrorMessage(e)}`;
+        ? i18n.translate(
+            'xpack.security.privilegeDeprecationsServices.error.unauthorized.message',
+            {
+              defaultMessage: `You must have the 'manage_security' cluster privilege to fix role deprecations.`,
+            }
+          )
+        : i18n.translate(
+            'xpack.security.privilegeDeprecationsServices.error.retrievingRoles.message',
+            {
+              defaultMessage: `Error retrieving roles for privilege deprecations: {message}`,
+              values: {
+                message: getDetailedErrorMessage(e),
+              },
+            }
+          );
 
       return {
         errors: [
           {
-            title: 'title',
+            title: i18n.translate('xpack.security.privilegeDeprecationsServices.error.title', {
+              defaultMessage: `Error in privilege deprecations services`,
+            }),
             level: 'fetch_error',
             message,
             correctiveActions: {
               manualSteps: [
-                'A user with the "manage_security" cluster privilege is required to perform this check.',
+                i18n.translate('xpack.security.privilegeDeprecationsServices.manualSteps.message', {
+                  defaultMessage:
+                    'A user with the "manage_security" cluster privilege is required to perform this check.',
+                }),
               ],
             },
           },
