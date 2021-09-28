@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { IndexPattern } from '../..';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
 import { AggConfigs, AggTypesRegistryStart } from '../../';
@@ -1113,14 +1113,12 @@ describe('SearchSource', () => {
           },
         };
 
-        searchSourceDependencies.search = jest.fn().mockReturnValue(of(Promise.reject('aaaaa')));
+        searchSourceDependencies.search = jest.fn().mockReturnValue(throwError('aaaaa'));
 
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);
-
         await searchSource
           .fetch$(options)
-          .pipe(catchError((e) => e))
           .toPromise()
           .catch(() => {});
 
