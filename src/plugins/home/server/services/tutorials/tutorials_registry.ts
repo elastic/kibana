@@ -47,6 +47,31 @@ function registerTutorialWithCustomIntegrations(
   });
 }
 
+function registerBeatsTutorialsWithCustomIntegrations(
+  core: CoreSetup,
+  customIntegrations: CustomIntegrationsPluginSetup,
+  tutorial: TutorialSchema
+) {
+  customIntegrations.registerCustomIntegration({
+    id: tutorial.name,
+    title: tutorial.name,
+    categories: [], // For beats packages, we don't know categories
+    uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
+    description: tutorial.shortDescription,
+    icons: tutorial.euiIconType
+      ? [
+          {
+            type: tutorial.euiIconType.endsWith('svg') ? 'svg' : 'eui',
+            src: core.http.basePath.prepend(tutorial.euiIconType),
+          },
+        ]
+      : [],
+    shipper: 'beats',
+    eprOverlap: tutorial.moduleName,
+    isBeta: false,
+  });
+}
+
 export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
@@ -106,9 +131,16 @@ export class TutorialsRegistry {
     };
   }
 
-  public start() {
+  public start(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
     // pre-populate with built in tutorials
     this.tutorialProviders.push(...builtInTutorials);
+
+    if (customIntegrations) {
+      builtInTutorials.forEach((provider) => {
+        const tutorial = provider({});
+        registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
+      });
+    }
     return {};
   }
 }
