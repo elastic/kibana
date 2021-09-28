@@ -45,23 +45,20 @@ export type NavigationCallback = (
   ...args: Parameters<Parameters<typeof useCallback>[0]>
 ) => Partial<PolicyDetailsArtifactsPageLocation>;
 
-export function usePolicyDetailsNavigateCallback(callback: NavigationCallback) {
+export function usePolicyDetailsNavigateCallback() {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const history = useHistory();
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
 
   return useCallback(
-    (...args) => {
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) =>
       history.push(
         getPolicyDetailsArtifactsListPath(policyId, {
           ...location,
-          ...callback(...args),
+          ...args,
         })
-      );
-    },
-    // TODO: needs more investigation, but if callback is in dependencies list memoization will never happen
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [history, location]
+      ),
+    [history, location, policyId]
   );
 }
 

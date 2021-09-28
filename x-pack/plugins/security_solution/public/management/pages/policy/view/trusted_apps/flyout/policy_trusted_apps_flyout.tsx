@@ -60,11 +60,14 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
     getAssignableArtifactsListExistIsLoading
   );
 
+  const navigateCallback = usePolicyDetailsNavigateCallback();
+
   const policyName = policyItem?.name ?? '';
 
-  const handleListFlyoutClose = usePolicyDetailsNavigateCallback(() => ({
-    show: undefined,
-  }));
+  const handleListFlyoutClose = () =>
+    navigateCallback({
+      show: undefined,
+    });
 
   useEffect(() => {
     if (isUpdateArtifactsLoaded) {
