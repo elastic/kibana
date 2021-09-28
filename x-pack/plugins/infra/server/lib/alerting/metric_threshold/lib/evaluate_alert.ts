@@ -239,7 +239,7 @@ const getMetric: (
           : 0
       ),
     };
-  } catch (e) {
+  } catch (e: any) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it
       const causedByType = e.body?.error?.caused_by?.type;
