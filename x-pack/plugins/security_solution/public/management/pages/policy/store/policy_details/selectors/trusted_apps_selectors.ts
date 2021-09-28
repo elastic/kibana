@@ -15,6 +15,7 @@ import {
 } from '../../../../../../../common/endpoint/types';
 import { MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH } from '../../../../../common/constants';
 import {
+  getLastLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
@@ -32,10 +33,8 @@ export const getCurrentArtifactsLocation = (
  */
 export const getAssignableArtifactsList = (
   state: Immutable<PolicyDetailsState>
-): Immutable<GetTrustedListAppsResponse | undefined> =>
-  isLoadedResourceState(state.artifacts.assignableList)
-    ? state.artifacts.assignableList.data
-    : undefined;
+): Immutable<GetTrustedListAppsResponse> | undefined =>
+  getLastLoadedResourceState(state.artifacts.assignableList)?.data;
 
 /**
  * Returns if assignable list is loading

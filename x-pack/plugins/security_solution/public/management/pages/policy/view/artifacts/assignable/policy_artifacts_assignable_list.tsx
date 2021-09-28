@@ -15,14 +15,14 @@ import {
 import { Loader } from '../../../../../../common/components/loader';
 import { ArtifactEntryCardMinified } from '../../../../../components/artifact_entry_card';
 
-export interface PolicyArtifactsListProps {
+export interface PolicyArtifactsAssignableListProps {
   artifacts: Immutable<GetTrustedListAppsResponse | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
   defaultSelectedArtifactIds: string[];
   selectedArtifactsUpdated: (ids: string[]) => void;
   isListLoading: boolean;
 }
 
-export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
+export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignableListProps>(
   ({ artifacts, isListLoading, defaultSelectedArtifactIds, selectedArtifactsUpdated }) => {
     const [selectedArtifactIdsByKey, setSelectedArtifactIdsByKey] = useState(
       defaultSelectedArtifactIds.reduce(
@@ -69,4 +69,4 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
   }
 );
 
-PolicyArtifactsList.displayName = 'PolicyArtifactsList';
+PolicyArtifactsAssignableList.displayName = 'PolicyArtifactsAssignableList';

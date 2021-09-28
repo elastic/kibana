@@ -5,7 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { PolicyArtifactsList, PolicyArtifactsListProps } from './policy_artifacts_list';
+import {
+  PolicyArtifactsAssignableList,
+  PolicyArtifactsAssignableListProps,
+} from './policy_artifacts_assignable_list';
 import * as reactTestingLibrary from '@testing-library/react';
 import {
   AppContextTestRender,
@@ -17,14 +20,16 @@ import { getMockListResponse } from '../../../test_utils';
 describe('Policy artifacts list', () => {
   let mockedContext: AppContextTestRender;
   let selectedArtifactsUpdatedMock: jest.Mock;
-  let render: (props: PolicyArtifactsListProps) => ReturnType<AppContextTestRender['render']>;
+  let render: (
+    props: PolicyArtifactsAssignableListProps
+  ) => ReturnType<AppContextTestRender['render']>;
   const act = reactTestingLibrary.act;
 
   afterEach(() => reactTestingLibrary.cleanup());
   beforeEach(() => {
     selectedArtifactsUpdatedMock = jest.fn();
     mockedContext = createAppRootMockRenderer();
-    render = (props) => mockedContext.render(<PolicyArtifactsList {...props} />);
+    render = (props) => mockedContext.render(<PolicyArtifactsAssignableList {...props} />);
   });
 
   it('should artifacts list loading state', async () => {

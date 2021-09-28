@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { PolicyArtifactsList } from './policy_artifacts_list';
+export { PolicyArtifactsAssignableList } from './policy_artifacts_assignable_list';

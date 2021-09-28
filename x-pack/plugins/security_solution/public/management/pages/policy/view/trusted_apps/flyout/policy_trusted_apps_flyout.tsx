@@ -40,7 +40,7 @@ import {
   usePolicyDetailsSelector,
   usePolicyTrustedAppsNotification,
 } from '../../policy_hooks';
-import { PolicyArtifactsList } from '../../artifacts/list';
+import { PolicyArtifactsAssignableList } from '../../artifacts/assignable';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 
 export const PolicyTrustedAppsFlyout = React.memo(() => {
@@ -123,7 +123,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
     []
   );
 
-  const canShowPolicyArtifactsList = useMemo(
+  const canShowPolicyArtifactsAssignableList = useMemo(
     () =>
       isAssignableArtifactsListExistLoading ||
       isAssignableArtifactsListLoading ||
@@ -172,8 +172,8 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
         />
         <EuiSpacer size="m" />
 
-        {canShowPolicyArtifactsList ? (
-          <PolicyArtifactsList
+        {canShowPolicyArtifactsAssignableList ? (
+          <PolicyArtifactsAssignableList
             data-test-subj="artifactsListTrustedAppsFlyout"
             artifacts={assignableArtifactsList}
             defaultSelectedArtifactIds={[]}
