@@ -1,9 +1,9 @@
 logging:
   root:
     level: fatal
-    appenders: [default]
+    appenders: [console-json]
   appenders:
-    default:
+    console-json:
       type: console
       layout:
         type: json

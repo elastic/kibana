@@ -156,8 +156,8 @@ export default function (program) {
       [getConfigPath()]
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
-    .option('-Q, --silent', 'Prevent all logging')
-    .option('--verbose', 'Turns on verbose logging')
+    .option('-Q, --silent', 'Set the root logger level to off')
+    .option('--verbose', 'Set the root logger level to all')
     .option('-H, --host <host>', 'The host to bind to')
     .option(
       '--plugin-dir <path>',
