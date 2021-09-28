@@ -233,18 +233,20 @@ describe('saved_visualize_utils', () => {
 
   describe('findListItems', () => {
     function testProps() {
-      const savedObjects = coreMock.createStart().savedObjects
-        .client as jest.Mocked<SavedObjectsClientContract>;
-      (savedObjects.find as jest.Mock).mockImplementation(() => ({
+      (savedObjectsClient.find as jest.Mock).mockImplementation(() => ({
         total: 0,
         savedObjects: [],
       }));
       return {
-        savedObjectsClient: savedObjects,
+        savedObjectsClient,
         search: '',
         size: 10,
       };
     }
+
+    beforeEach(() => {
+      savedObjectsClient.find.mockClear();
+    });
 
     it('searches visualization title and description', async () => {
       const props = testProps();
