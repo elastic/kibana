@@ -97,6 +97,8 @@ export function loadInitial(
   }
 ) {
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
+  const currentSessionId = data.search.session.getSessionId();
+
   const { lens } = store.getState();
   if (
     !initialInput ||
@@ -109,9 +111,9 @@ export function loadInitial(
       .then((result) => {
         store.dispatch(
           initEmpty({
-            // este init empty hace algo mal
             newState: {
               ...emptyState,
+              searchSessionId: currentSessionId || data.search.session.start(),
               datasourceStates: Object.entries(result).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,
@@ -135,6 +137,7 @@ export function loadInitial(
         redirectCallback();
       });
   }
+
   getPersisted({ initialInput, lensServices, history })
     .then(
       (persisted) => {
@@ -163,7 +166,6 @@ export function loadInitial(
             {}
           );
 
-          const currentSessionId = data.search.session.getSessionId();
           initializeDatasources(
             datasourceMap,
             docDatasourceStates,
@@ -173,7 +175,7 @@ export function loadInitial(
               isFullEditor: true,
             }
           )
-            .then((result) =>
+            .then((result) => {
               store.dispatch(
                 setState({
                   sharingSavedObjectProps,
@@ -203,8 +205,8 @@ export function loadInitial(
                   ),
                   isLoading: false,
                 })
-              )
-            )
+              );
+            })
             .catch((e: { message: string }) =>
               notifications.toasts.addDanger({
                 title: e.message,
@@ -223,9 +225,10 @@ export function loadInitial(
         redirectCallback();
       }
     )
-    .catch((e: { message: string }) =>
+    .catch((e: { message: string }) => {
       notifications.toasts.addDanger({
         title: e.message,
-      })
-    );
+      });
+      redirectCallback();
+    });
 }

@@ -13,7 +13,13 @@ import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance, EditorFrameProps } from '../types';
 import { Document } from '../persistence';
-import { visualizationMap, datasourceMap, makeDefaultServices, mountWithProvider } from '../mocks';
+import {
+  visualizationMap,
+  datasourceMap,
+  makeDefaultServices,
+  mountWithProvider,
+  mockStoreDeps,
+} from '../mocks';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   SavedObjectSaveModal,
@@ -110,11 +116,11 @@ describe('Lens App', () => {
         </I18nProvider>
       );
     };
-
+    const storeDeps = mockStoreDeps({ lensServices: services });
     const { instance, lensStore } = await mountWithProvider(
       <App {...props} />,
       {
-        data: services.data,
+        storeDeps,
         preloadedState,
       },
       { wrappingComponent }

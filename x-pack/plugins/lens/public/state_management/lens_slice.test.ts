@@ -17,12 +17,8 @@ import {
 import { makeLensStore, defaultState } from '../mocks';
 
 describe('lensSlice', () => {
-  const store = makeLensStore({});
+  const { store } = makeLensStore({});
   const customQuery = { query: 'custom' } as Query;
-
-  // TODO: need to move some initialization logic from mounter
-  // describe('initialization', () => {
-  // })
 
   describe('state update', () => {
     it('setState: updates state ', () => {
@@ -44,7 +40,7 @@ describe('lensSlice', () => {
       store.dispatch(
         updateVisualizationState({
           visualizationId: 'testVis',
-          newState: newVisState,
+          updater: newVisState,
         })
       );
 
@@ -79,8 +75,8 @@ describe('lensSlice', () => {
       const newVisState = {};
       store.dispatch(
         switchVisualization({
-          visualizationId: 'testVis2',
-          visualizationState: newVisState,
+          newVisualizationId: 'testVis2',
+          initialState: newVisState,
         })
       );
 
@@ -93,8 +89,8 @@ describe('lensSlice', () => {
 
       store.dispatch(
         switchVisualization({
-          visualizationId: 'testVis2',
-          visualizationState: newVisState,
+          newVisualizationId: 'testVis2',
+          initialState: newVisState,
           datasourceState: newDatasourceState,
           datasourceId: 'testDatasource',
         })
@@ -117,7 +113,7 @@ describe('lensSlice', () => {
 
     it('not initialize already initialized datasource on switch', () => {
       const datasource2State = {};
-      const customStore = makeLensStore({
+      const { store: customStore } = makeLensStore({
         preloadedState: {
           datasourceStates: {
             testDatasource: {
