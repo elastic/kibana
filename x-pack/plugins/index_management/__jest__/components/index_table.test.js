@@ -33,6 +33,7 @@ import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors/extension_service';
 import { ExtensionsService } from '../../public/services';
+import { kibanaVersion } from '../client_integration/helpers';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { notificationServiceMock } from '../../../../../src/core/public/notifications/notifications_service.mock';
@@ -266,11 +267,22 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
 
-    // We have manually defined above that the `.admin1` and `.admin3` indices are hidden.
+    // We have manually set `.admin1` and `.admin3` as hidden indices
     // We **don't** expect them to be in this list as by default we don't show hidden indices
     let indicesInTable = namesText(rendered);
     expect(indicesInTable).not.toContain('.admin1');
     expect(indicesInTable).not.toContain('.admin3');
+
+    if (kibanaVersion.major >= 8) {
+      // From 8.x indices starting with a period are treated as normal indices
+      expect(indicesInTable).toContain('.admin0');
+      expect(indicesInTable).toContain('.admin2');
+    } else if (kibanaVersion.major < 8) {
+      // In 7.x those are treated as system and are thus hidden
+      expect(indicesInTable).not.toContain('.admin0');
+      expect(indicesInTable).not.toContain('.admin2');
+    }
+
     snapshot(indicesInTable);
 
     // Enable "Show hidden indices"
@@ -281,6 +293,12 @@ describe('index table', () => {
     indicesInTable = namesText(rendered);
     expect(indicesInTable).toContain('.admin1');
     expect(indicesInTable).toContain('.admin3');
+
+    if (kibanaVersion.major < 8) {
+      expect(indicesInTable).toContain('.admin0');
+      expect(indicesInTable).toContain('.admin2');
+    }
+
     snapshot(indicesInTable);
   });
 
