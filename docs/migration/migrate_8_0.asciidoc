@@ -342,13 +342,13 @@ Configuration management tools and automation will need to be updated to use the
 === `elasticsearch.preserveHost` is no longer valid
 *Details:* The deprecated `elasticsearch.preserveHost` setting in the `kibana.yml` file has been removed.
 
-*Impact:* Configure {kibana-ref}/settings.html#elasticsearch-requestHeadersWhitelist[`elasticsearch.requestHeadersWhitelist`] to whitelist client-side headers or {kibana-ref}/settings.html#elasticsearch-customHeaders[`elasticsearch.customHeaders`] for custom headers.
+*Impact:* Configure {kibana-ref}/settings.html#elasticsearch-requestHeadersWhitelist[`elasticsearch.requestHeadersWhitelist`] to whitelist client-side headers.
 
 [float]
 === `elasticsearch.startupTimeout` is no longer valid
 *Details:* The deprecated `elasticsearch.startupTimeout` setting in the `kibana.yml` file has been removed.
 
-*Impact:* Kibana will keep on trying to connect to Elasticsearch until it manages to connect. Use {kibana-ref}/settings.html#elasticsearch-sniffOnStart[`elasticsearch.sniffOnStart`] to attempt to find other Elasticsearch nodes on startup. 
+*Impact:* Kibana will keep on trying to connect to Elasticsearch until it manages to connect.
 
 [float]
 === `savedObjects.indexCheckTimeout` is no longer valid
