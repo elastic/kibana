@@ -9,7 +9,7 @@ import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useInspectorContext } from '../../../../context/inspector/use_inspector_context';
 import { enableInspectEsQueries } from '../../../../../../observability/common/ui_settings_keys';
 
