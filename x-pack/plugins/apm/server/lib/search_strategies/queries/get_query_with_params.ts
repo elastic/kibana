@@ -16,7 +16,7 @@ import type {
 } from '../../../../common/search_strategies/types';
 import { rangeRt } from '../../../routes/default_api_types';
 import { getCorrelationsFilters } from '../../correlations/get_filters';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
   return { term: { [fieldName]: fieldValue } };
@@ -43,7 +43,7 @@ export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
     getOrElse<t.Errors, { start: number; end: number }>((errors) => {
       throw new Error(failure(errors).join('\n'));
     })
-  ) as Setup & SetupTimeRange;
+  ) as Setup & { start: number; end: number };
 
   const correlationFilters = getCorrelationsFilters({
     setup,
@@ -52,6 +52,8 @@ export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
     serviceName,
     transactionType,
     transactionName,
+    start: setup.start,
+    end: setup.end,
   });
 
   return {

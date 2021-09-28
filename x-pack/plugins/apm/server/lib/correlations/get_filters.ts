@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -18,12 +18,14 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 
 export interface CorrelationsOptions {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   environment: string;
   kuery: string;
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;
+  start: number;
+  end: number;
 }
 
 export function getCorrelationsFilters({
@@ -33,8 +35,9 @@ export function getCorrelationsFilters({
   serviceName,
   transactionType,
   transactionName,
+  start,
+  end,
 }: CorrelationsOptions) {
-  const { start, end } = setup;
   const correlationsFilters: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     ...rangeQuery(start, end),
