@@ -42,7 +42,13 @@
 }
 
 .lnsWorkspacePanel__dragDrop {
-  border: $euiBorderWidthThin solid transparent;
+  @include kbnThemeStyle('v7') {
+    border: $euiBorderThin;
+  }
+
+  @include kbnThemeStyle('v8') {
+    border: $euiBorderWidthThin solid transparent;
+  }
 
   &.lnsDragDrop-isDropTarget {
     @include lnsDroppable;
