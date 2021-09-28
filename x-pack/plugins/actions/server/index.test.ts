@@ -44,9 +44,9 @@ describe('index', () => {
 
     it('should properly unset deprecated configs', () => {
       const { messages, changedPaths } = applyStackAlertDeprecations({
-        customHostSettings: [{ ssl: { rejectUnauthorized: true } }],
-        rejectUnauthorized: true,
-        proxyRejectUnauthorizedCertificates: true,
+        customHostSettings: [{ ssl: { rejectUnauthorized: false } }],
+        rejectUnauthorized: false,
+        proxyRejectUnauthorizedCertificates: false,
       });
       expect(changedPaths.unset).toStrictEqual([
         'xpack.actions.customHostSettings.ssl.rejectUnauthorized',
