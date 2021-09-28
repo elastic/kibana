@@ -103,7 +103,7 @@ export function MachineLearningCustomUrlsProvider({
     },
 
     async assertCustomUrlLabel(index: number, expectedLabel: string) {
-      await testSubjects.existOrFail(`mlJobEditCustomUrlLabelInput_${index}`);
+      await testSubjects.existOrFail(`mlJobEditCustomUrlLabelInput_${index}`, { timeout: 1000 });
       const actualLabel = await testSubjects.getAttribute(
         `mlJobEditCustomUrlLabelInput_${index}`,
         'value'
