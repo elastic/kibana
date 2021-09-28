@@ -35,44 +35,14 @@ export interface Setup {
   indices: ApmIndicesConfig;
 }
 
-export interface SetupTimeRange {
-  start: number;
-  end: number;
-}
-
-export interface SetupRequestParams {
-  query: {
-    _inspect?: boolean;
-
-    /**
-     * Timestamp in ms since epoch
-     */
-    start?: number;
-
-    /**
-     * Timestamp in ms since epoch
-     */
-    end?: number;
-  };
-}
-
-type InferSetup<TParams extends SetupRequestParams> = Setup &
-  (TParams extends { query: { start: number } } ? { start: number } : {}) &
-  (TParams extends { query: { end: number } } ? { end: number } : {}) &
-  (TParams extends { query: Partial<SetupTimeRange> }
-    ? Partial<SetupTimeRange>
-    : {});
-
-export async function setupRequest<TParams extends SetupRequestParams>({
+export async function setupRequest({
   context,
   params,
   core,
   plugins,
   request,
   config,
-}: APMRouteHandlerResources & {
-  params: TParams;
-}): Promise<InferSetup<TParams>> {
+}: APMRouteHandlerResources) {
   return withApmSpan('setup_request', async () => {
     const { query } = params;
 
@@ -86,7 +56,7 @@ export async function setupRequest<TParams extends SetupRequestParams>({
       ),
     ]);
 
-    const coreSetupRequest = {
+    return {
       indices,
       apmEventClient: createApmEventClient({
         esClient: context.core.elasticsearch.client.asCurrentUser,
@@ -110,12 +80,6 @@ export async function setupRequest<TParams extends SetupRequestParams>({
           : undefined,
       config,
     };
-
-    return {
-      ...('start' in query ? { start: query.start } : {}),
-      ...('end' in query ? { end: query.end } : {}),
-      ...coreSetupRequest,
-    } as InferSetup<TParams>;
   });
 }
 
