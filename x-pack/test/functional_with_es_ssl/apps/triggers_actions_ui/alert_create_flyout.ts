@@ -277,15 +277,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await testSubjects.click('cancelSaveAlertButton');
-      await testSubjects.existOrFail('confirmAlertCloseModal');
-      await testSubjects.click('confirmAlertCloseModal > confirmModalConfirmButton');
-    });
-
-    it('should show error for invalid es_query alert', async () => {
-      const alertName = generateUniqueKey();
-      await defineEsQueryAlert(alertName);
-
       // Invalid query
       await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
         clearWithKeyboard: true,
@@ -293,10 +284,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
-
-      await testSubjects.click('cancelSaveAlertButton');
-      await testSubjects.existOrFail('confirmAlertCloseModal');
-      await testSubjects.click('confirmAlertCloseModal > confirmModalConfirmButton');
     });
   });
 };
