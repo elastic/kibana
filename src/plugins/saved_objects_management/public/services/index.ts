@@ -17,11 +17,6 @@ export {
   SavedObjectsManagementColumnServiceSetup,
 } from './column_service';
 export {
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
-  SavedObjectsManagementServiceRegistryEntry,
-} from './service_registry';
-export {
   SavedObjectsManagementAction,
   SavedObjectsManagementColumn,
   SavedObjectsManagementRecord,
