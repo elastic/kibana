@@ -36,25 +36,4 @@ describe('configuration deprecations', () => {
       ]
     `);
   });
-
-  it('should log deprecation warnings for core deprecations', async () => {
-    root = kbnTestServer.createRoot({
-      optimize: {
-        lazy: true,
-        lazyPort: 9090,
-      },
-    });
-
-    await root.preboot();
-    await root.setup();
-
-    const logs = loggingSystemMock.collect(mockLoggingSystem);
-    expect(logs.warn.flat()).toMatchInlineSnapshot(`
-      Array [
-        "You no longer need to configure \\"optimize.lazy\\".",
-        "You no longer need to configure \\"optimize.lazyPort\\".",
-        "\\"logging.silent\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level:off\\" in your logging configuration. ",
-      ]
-    `);
-  });
 });
