@@ -128,16 +128,16 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total, markerItem
       <WaterfallChart
         tickFormat={useCallback((d: number) => `${Number(d).toFixed(0)} ms`, [])}
         domain={domain}
-        barStyleAccessor={useCallback((datum) => {
-          if (!datum.datum.config.isHighlighted) {
+        barStyleAccessor={useCallback(({ datum }) => {
+          if (!datum.config?.isHighlighted) {
             return {
               rect: {
-                fill: datum.datum.config.colour,
+                fill: datum.config?.colour,
                 opacity: '0.1',
               },
             };
           }
-          return datum.datum.config.colour;
+          return datum.config.colour;
         }, [])}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}
