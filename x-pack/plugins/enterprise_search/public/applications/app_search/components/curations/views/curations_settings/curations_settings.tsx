@@ -62,7 +62,13 @@ export const CurationsSettings: React.FC = () => {
             id="xpack.enterpriseSearch.appSearch.curations.settings.licenseUpgradeCTASubtitle"
             defaultMessage="Upgrade to a {platinumLicenseName} license to harness the power of machine learning. By analyzing your engine's analytics, App Search is able to suggest new or updated curations. Effortlessly help your users find exactly what they're looking for. Start a free trial today."
             values={{
-              platinumLicenseName: <strong>Platinum</strong>,
+              platinumLicenseName: (
+                <strong>
+                  {i18n.translate('xpack.enterpriseSearch.appSearch.curations.settings.platinum', {
+                    defaultMessage: 'Platinum',
+                  })}
+                </strong>
+              ),
             }}
           />
         }
