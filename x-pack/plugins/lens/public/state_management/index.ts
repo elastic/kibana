@@ -8,17 +8,13 @@
 import { configureStore, getDefaultMiddleware, DeepPartial } from '@reduxjs/toolkit';
 import { createLogger } from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import { lensSlice } from './lens_slice';
+import { makeLensReducer, lensActions } from './lens_slice';
 import { timeRangeMiddleware } from './time_range_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
 import { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';
 export * from './types';
 export * from './selectors';
-
-export const reducer = {
-  lens: lensSlice.reducer,
-};
 
 export const {
   loadInitial,
@@ -36,7 +32,8 @@ export const {
   submitSuggestion,
   switchDatasource,
   setToggleFullscreen,
-} = lensSlice.actions;
+  initEmpty,
+} = lensActions;
 
 export const makeConfigureStore = (
   storeDeps: LensStoreDeps,
@@ -60,7 +57,9 @@ export const makeConfigureStore = (
   }
 
   return configureStore({
-    reducer,
+    reducer: {
+      lens: makeLensReducer(storeDeps),
+    },
     middleware,
     preloadedState,
   });

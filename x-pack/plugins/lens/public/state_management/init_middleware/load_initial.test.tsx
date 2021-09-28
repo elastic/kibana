@@ -113,7 +113,7 @@ describe('init_middleware', () => {
     });
     expect(datasourceMap.testDatasource.initialize).toHaveBeenCalled();
     expect(datasourceMap.testDatasource2.initialize).not.toHaveBeenCalled();
-    expect(visualizationMap.testVis.initialize).toHaveBeenCalled();
+    expect(visualizationMap.testVis.initialize).toHaveBeenCalled(); // that's being moved to redux
     expect(visualizationMap.testVis2.initialize).not.toHaveBeenCalled();
   });
 
