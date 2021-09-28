@@ -7552,7 +7552,6 @@
     "xpack.apm.ux.localFilters.titles.webApplication": "Web 应用程序",
     "xpack.apm.ux.median": "中值",
     "xpack.apm.ux.metrics": "指标",
-    "xpack.apm.ux.overview": "仪表板",
     "xpack.apm.ux.overview.heading": "仪表板",
     "xpack.apm.ux.percentile.50thMedian": "第 50 个（中值）",
     "xpack.apm.ux.percentile.75th": "第 75 个",
