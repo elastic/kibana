@@ -21,29 +21,24 @@ import { File } from '../file';
  */
 export async function getFilesForCommit(gitRef) {
   const simpleGit = new SimpleGit(REPO_ROOT);
-  const gitRefForDiff = gitRef ? gitRef : '--cached';
-  const output = await fcb((cb) => simpleGit.diff(['--name-status', gitRefForDiff], cb));
+  const gitCatPrefix = ':' + gitRef ? gitRef + ':' : '';
+
+  const output = await fcb((cb) => {
+    if (gitRef) {
+      simpleGit.show(['--diff-filter=d', '--name-only', '--pretty=format:', gitRef], cb);
+    } else {
+      simpleGit.diff(['--diff-filter=d', '--name-only', '--cached'], cb);
+    }
+  });
 
   return (
     output
       .split('\n')
       // Ignore blank lines
       .filter((line) => line.trim().length > 0)
-      // git diff --name-status outputs lines with two OR three parts
-      // separated by a tab character
-      .map((line) => line.trim().split('\t'))
-      .map(([status, ...paths]) => {
-        // ignore deleted files
-        if (status === 'D') {
-          return undefined;
-        }
-
-        // the status is always in the first column
-        // .. If the file is edited the line will only have two columns
-        // .. If the file is renamed it will have three columns
-        // .. In any case, the last column is the CURRENT path to the file
-        return new File(paths[paths.length - 1]);
-      })
-      .filter(Boolean)
+      .map(
+        (path) =>
+          new File(path, () => fcb((cb) => simpleGit.catFile(['-p', gitCatPrefix + path], cb)))
+      )
   );
 }

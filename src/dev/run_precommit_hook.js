@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { run, combineErrors, createFlagError } from '@kbn/dev-utils';
+import { run, combineErrors, createFlagError, createFailError } from '@kbn/dev-utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
@@ -21,6 +21,13 @@ run(
       : undefined;
     if (maxFilesCount !== undefined && (!Number.isFinite(maxFilesCount) || maxFilesCount < 1)) {
       throw createFlagError('expected --max-files to be a number greater than 0');
+    }
+
+    const virtualFilesCount = files.filter((file) => file.isVirtual()).length;
+    if (virtualFilesCount > 0 && virtualFilesCount < files.length) {
+      throw createFailError('Mixing of virtual and on-filesystem files is unsupported');
+    } else if (virtualFilesCount > 0 && flags.fix) {
+      throw createFailError('Fixing of virtual files is unsupported');
     }
 
     if (maxFilesCount && files.length > maxFilesCount) {

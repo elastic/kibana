@@ -12,11 +12,13 @@ export class File {
   private path: string;
   private relativePath: string;
   private ext: string;
+  private getContentCB: () => string;
 
-  constructor(path: string) {
+  constructor(path: string, getContentCB: () => string = undefined) {
     this.path = resolve(path);
     this.relativePath = relative(process.cwd(), this.path);
     this.ext = extname(this.path);
+    this.getContentCB = getContentCB;
   }
 
   public getAbsolutePath() {
@@ -55,6 +57,11 @@ export class File {
     );
   }
 
+  // Virtual files cannot be read as usual, an helper is needed
+  public isVirtual() {
+    return this.getContentCB !== undefined;
+  }
+
   public getRelativeParentDirs() {
     const parents: string[] = [];
 
@@ -80,5 +87,9 @@ export class File {
 
   public toJSON() {
     return this.relativePath;
+  }
+
+  public getContent() {
+    return this.getContentCB ? this.getContentCB() : undefined;
   }
 }
