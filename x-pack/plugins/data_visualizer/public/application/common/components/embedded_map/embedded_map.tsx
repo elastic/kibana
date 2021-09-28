@@ -143,7 +143,7 @@ export function EmbeddedMapComponent({
   return (
     <div
       data-test-subj="dataVisualizerEmbeddedMapContent"
-      className="embeddedMapContent"
+      className="embeddedMap__content"
       ref={embeddableRoot}
     />
   );

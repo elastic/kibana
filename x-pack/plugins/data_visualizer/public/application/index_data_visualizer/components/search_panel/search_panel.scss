@@ -1,16 +1,16 @@
-.dvSearchPanelControls {
+.dvSearchPanel__controls {
   flex-direction: row;
   padding: 8px;
 }
 
 @include euiBreakpoint('xs', 's', 'm', 'l') {
-  .dvSearchPanel {
+  .dvSearchPanel__container {
     flex-direction: column;
   }
   .dvSearchBar {
     min-width:  #{'max(100%, 500px)'};
   }
-  .dvSearchPanelControls {
+  .dvSearchPanel__controls {
     padding: 0;
   }
   // prevent margin -16 which scrunches the filter bar

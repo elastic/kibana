@@ -30,7 +30,7 @@ export const TotalFieldsCount: FC<TotalFieldsCountProps> = ({ fieldsCountStats }
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
-      className="dataVisualizerFieldCountContainer"
+      className="dvFieldCount__item"
       data-test-subj="dataVisualizerFieldsSummary"
       responsive={false}
     >

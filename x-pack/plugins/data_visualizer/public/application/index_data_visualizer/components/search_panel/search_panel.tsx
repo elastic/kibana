@@ -124,7 +124,7 @@ export const SearchPanel: FC<Props> = ({
       gutterSize="s"
       alignItems="flexStart"
       data-test-subj="dataVisualizerSearchPanel"
-      className={'dvSearchPanel'}
+      className={'dvSearchPanel__container'}
       responsive={false}
     >
       <EuiFlexItem grow={9} className={'dvSearchBar'}>
@@ -150,7 +150,7 @@ export const SearchPanel: FC<Props> = ({
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={2} className={'dvSearchPanelControls'}>
+      <EuiFlexItem grow={2} className={'dvSearchPanel__controls'}>
         <ShardSizeFilter
           samplerShardSize={samplerShardSize}
           setSamplerShardSize={setSamplerShardSize}

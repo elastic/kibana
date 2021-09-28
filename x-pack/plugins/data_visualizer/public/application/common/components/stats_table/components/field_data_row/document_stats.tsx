@@ -31,7 +31,7 @@ export const DocumentStat = ({ config, showIcon }: Props) => {
 
   return (
     <>
-      {showIcon ? <EuiIcon type="document" size={'m'} className={'columnHeaderIcon'} /> : null}
+      {showIcon ? <EuiIcon type="document" size={'m'} className={'columnHeader__icon'} /> : null}
       <EuiText size={'xs'}>
         {docsCount} ({docsPercent}%)
       </EuiText>

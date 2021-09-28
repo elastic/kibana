@@ -1,4 +1,4 @@
-.dataVisualizerFieldCountPanel {
+.dvFieldCount__panel {
   margin-left: $euiSizeXS;
   @include euiBreakpoint('xs', 's') {
     flex-direction: column;
@@ -6,7 +6,7 @@
   }
 }
 
-.dataVisualizerFieldCountContainer {
+.dvFieldCount__item {
   max-width: 300px;
   min-width: 300px;
 }

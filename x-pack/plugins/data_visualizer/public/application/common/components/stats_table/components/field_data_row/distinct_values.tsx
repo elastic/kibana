@@ -18,7 +18,7 @@ export const DistinctValues = ({ cardinality, showIcon }: Props) => {
   if (cardinality === undefined) return null;
   return (
     <>
-      {showIcon ? <EuiIcon type="database" size={'m'} className={'columnHeaderIcon'} /> : null}
+      {showIcon ? <EuiIcon type="database" size={'m'} className={'columnHeader__icon'} /> : null}
       <EuiText size={'xs'}>{cardinality}</EuiText>
     </>
   );

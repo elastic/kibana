@@ -107,10 +107,10 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   return (
     <ExpandedRowPanel
       dataTestSubj={'fileDataVisualizerChoroplethMapTopValues'}
-      className={'dataVisualizerPanelWrapper'}
+      className={'dvPanel__wrapper'}
       grow={true}
     >
-      <div className={'dataVisualizerMapWrapper'}>
+      <div className={'dvMap__wrapper'}>
         <EmbeddedMapComponent layerList={layerList} />
       </div>
 

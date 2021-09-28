@@ -93,10 +93,10 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
     <ExpandedRowContent dataTestSubj={'dataVisualizerBooleanContent'}>
       <DocumentStatsTable config={config} />
 
-      <ExpandedRowPanel className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}>
+      <ExpandedRowPanel className={'dvSummaryTable__wrapper dvPanel__wrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable
-          className={'dataVisualizerSummaryTable'}
+          className={'dvSummaryTable'}
           compressed
           items={summaryTableItems}
           columns={summaryTableColumns}
@@ -104,7 +104,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
         />
       </ExpandedRowPanel>
 
-      <ExpandedRowPanel className={'dataVisualizerUniformPanel dataVisualizerPanelWrapper'}>
+      <ExpandedRowPanel className={'dvPanel__wrapper dvPanel--uniform'}>
         <ExpandedRowFieldHeader>
           <FormattedMessage
             id="xpack.dataVisualizer.dataGrid.field.cardBoolean.valuesLabel"
