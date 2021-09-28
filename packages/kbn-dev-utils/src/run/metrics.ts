@@ -23,7 +23,7 @@ export class Metrics {
     this.reporter = CiStatsReporter.fromEnv(log);
     this.meta = new Map();
     this.startTime = Date.now();
-    this.filePath = path.relative(REPO_ROOT, process.argv[1]);
+    this.filePath = path.relative(REPO_ROOT, process.argv[1]).replace('.js', '');
   }
 
   async reportSuccess(command?: string) {
