@@ -7,12 +7,16 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { AnyArtifact, ArtifactInfo } from '../types';
-import { EffectScope, TrustedApp } from '../../../../../common/endpoint/types';
+import { EffectScope, MaybeImmutable } from '../../../../../common/endpoint/types';
 import { tagsToEffectScope } from '../../../../../common/endpoint/service/trusted_apps/mapping';
+import { isTrustedApp } from './is_trusted_app';
 
-export const toArtifactInfo = (item: AnyArtifact): ArtifactInfo => {
+export const toArtifactInfo = (_item: MaybeImmutable<AnyArtifact>): ArtifactInfo => {
+  const item = _item as AnyArtifact;
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { name, created_by, created_at, updated_at, updated_by, description = '', entries } = item;
+
   return {
     name,
     created_by,
@@ -20,14 +24,10 @@ export const toArtifactInfo = (item: AnyArtifact): ArtifactInfo => {
     updated_at,
     updated_by,
     description,
-    entries: (entries as unknown) as ArtifactInfo['entries'],
+    entries: entries as unknown as ArtifactInfo['entries'],
     os: isTrustedApp(item) ? item.os : getOsFromExceptionItem(item),
     effectScope: isTrustedApp(item) ? item.effectScope : getEffectScopeFromExceptionItem(item),
   };
-};
-
-const isTrustedApp = (item: AnyArtifact): item is TrustedApp => {
-  return 'effectScope' in item;
 };
 
 const getOsFromExceptionItem = (item: ExceptionListItemSchema): string => {

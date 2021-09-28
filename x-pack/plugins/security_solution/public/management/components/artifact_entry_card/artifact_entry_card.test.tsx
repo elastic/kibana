@@ -13,7 +13,7 @@ import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators
 import { act, fireEvent, getByTestId } from '@testing-library/react';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { AnyArtifact } from './types';
-import { isTrustedApp } from './hooks/use_normalized_artifact';
+import { isTrustedApp } from './utils';
 
 const getCommonItemDataOverrides = () => {
   return {

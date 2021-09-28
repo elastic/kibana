@@ -7,14 +7,15 @@
 
 import { useMemo } from 'react';
 import { AnyArtifact, ArtifactInfo } from '../types';
-import { toArtifactInfo } from '../utils/to_artifact_info';
+import { toArtifactInfo } from '../utils';
+import { MaybeImmutable } from '../../../../../common/endpoint/types';
 
 /**
  * Takes in any artifact and return back a new data structure used internally with by the card's components
  *
  * @param item
  */
-export const useNormalizedArtifact = (item: AnyArtifact): ArtifactInfo => {
+export const useNormalizedArtifact = (item: MaybeImmutable<AnyArtifact>): ArtifactInfo => {
   return useMemo(() => {
     return toArtifactInfo(item);
   }, [item]);
