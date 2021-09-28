@@ -45,7 +45,7 @@ import {
   PreviewPanel,
   RollupBetaWarning,
 } from '.';
-import { DescriptionField } from "./form_fields";
+import { DescriptionField } from './form_fields';
 
 export interface Props {
   /**

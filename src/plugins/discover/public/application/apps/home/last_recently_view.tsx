@@ -25,7 +25,7 @@ export function LastRecentlyAccessedView(props: LastRecentlyAccessedViewProps) {
       return 'unknown';
     }
     return lastAccessedAt;
-  }
+  };
   return (
     <EuiCard
       layout="horizontal"

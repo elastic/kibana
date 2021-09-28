@@ -23,13 +23,13 @@ export const useIndexPatternData = (
 
   useEffect(() => {
     async function createSearchSource() {
-      const searchSource = await searchSourceService.searchSource.create({type: 'index_pattern'});
+      const searchSource = await searchSourceService.searchSource.create({ type: 'index_pattern' });
       const timeRange: TimeRange = {
         from: 'now-7y',
         to: 'now',
         mode: 'relative',
       };
-      const ip = (indexPattern as unknown) as IndexPattern;
+      const ip = indexPattern as unknown as IndexPattern;
       searchSource.setField('index', ip);
       searchSource.setField('trackTotalHits', true);
       searchSource.setField(
