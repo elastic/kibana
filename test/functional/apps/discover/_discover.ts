@@ -236,8 +236,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
-        await queryBar.clearQuery();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await queryBar.clearQuery();
 
         log.debug(
           'check that the newest doc timestamp is now -7 hours from the UTC time in the first test'
