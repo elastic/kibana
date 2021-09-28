@@ -35,9 +35,12 @@ import {
 } from '../../../public/application/components';
 import { componentTemplatesMockDependencies } from '../../../public/application/components/component_templates/__jest__';
 import { init as initHttpRequests } from './http_requests';
+import { MAJOR_VERSION } from './constants';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const { GlobalFlyoutProvider } = GlobalFlyout;
+
+export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 export const services = {
   extensionsService: new ExtensionsService(),

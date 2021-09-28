@@ -17,5 +17,3 @@ export {
 } from './setup_environment';
 
 export { TestSubjects } from './test_subjects';
-
-export { BRANCH } from './constants';
