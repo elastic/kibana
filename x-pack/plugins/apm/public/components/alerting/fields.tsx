@@ -5,18 +5,32 @@
  * 2.0.
  */
 
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiComboBoxOptionOption, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { getEnvironmentLabel } from '../../../common/environment_filter_values';
-import { EnvironmentsSelect } from '../shared/selects/environments_select';
-import { ServiceNamesSelect } from '../shared/selects/service_names_select';
-import { TransactionTypesSelect } from '../shared/selects/transaction_types_select';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../common/elasticsearch_fieldnames';
+import {
+  ENVIRONMENT_ALL,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
+import { SuggestionsSelect } from '../shared/suggestions_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
 
-const ALL_OPTION = i18n.translate('xpack.apm.alerting.fields.all_option', {
+const allOptionText = i18n.translate('xpack.apm.alerting.fields.allOption', {
   defaultMessage: 'All',
 });
+const allOption: EuiComboBoxOptionOption<string> = {
+  label: allOptionText,
+  value: allOptionText,
+};
+const environmentAllOption: EuiComboBoxOptionOption<string> = {
+  label: ENVIRONMENT_ALL.text,
+  value: ENVIRONMENT_ALL.value,
+};
 
 export function ServiceField({
   allowAll = true,
@@ -29,16 +43,25 @@ export function ServiceField({
 }) {
   return (
     <PopoverExpression
-      value={currentValue || ALL_OPTION}
+      value={currentValue || allOption.value}
       title={i18n.translate('xpack.apm.alerting.fields.service', {
         defaultMessage: 'Service',
       })}
     >
-      <ServiceNamesSelect
-        allowAll={allowAll}
-        compressed={true}
+      <SuggestionsSelect
+        allOption={allowAll ? allOption : undefined}
+        customOptionText={i18n.translate(
+          'xpack.apm.serviceNamesSelectCustomOptionText',
+          {
+            defaultMessage: 'Add \\{searchValue\\} as a new service name',
+          }
+        )}
         defaultValue={currentValue}
+        field={SERVICE_NAME}
         onChange={onChange}
+        placeholder={i18n.translate('xpack.apm.serviceNamesSelectPlaceholder', {
+          defaultMessage: 'Select service name',
+        })}
       />
     </PopoverExpression>
   );
@@ -58,10 +81,20 @@ export function EnvironmentField({
         defaultMessage: 'Environment',
       })}
     >
-      <EnvironmentsSelect
-        compressed={true}
-        defaultValue={currentValue}
+      <SuggestionsSelect
+        allOption={environmentAllOption}
+        customOptionText={i18n.translate(
+          'xpack.apm.environmentsSelectCustomOptionText',
+          {
+            defaultMessage: 'Add \\{searchValue\\} as a new environment',
+          }
+        )}
+        defaultValue={getEnvironmentLabel(currentValue)}
+        field={SERVICE_ENVIRONMENT}
         onChange={onChange}
+        placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
+          defaultMessage: 'Select environment',
+        })}
       />
     </PopoverExpression>
   );
@@ -78,11 +111,24 @@ export function TransactionTypeField({
     defaultMessage: 'Type',
   });
   return (
-    <PopoverExpression value={currentValue || ALL_OPTION} title={label}>
-      <TransactionTypesSelect
-        compressed={true}
+    <PopoverExpression value={currentValue || allOption.value} title={label}>
+      <SuggestionsSelect
+        allOption={allOption}
+        customOptionText={i18n.translate(
+          'xpack.apm.transactionTypesSelectCustomOptionText',
+          {
+            defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
+          }
+        )}
         defaultValue={currentValue}
+        field={TRANSACTION_TYPE}
         onChange={onChange}
+        placeholder={i18n.translate(
+          'xpack.apm.transactionTypesSelectPlaceholder',
+          {
+            defaultMessage: 'Select transaction type',
+          }
+        )}
       />
     </PopoverExpression>
   );
