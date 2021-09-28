@@ -56,7 +56,6 @@ export function CategoryFacets({
               isSelected={category.id === selectedCategory}
               key={category.id}
               id={category.id}
-              // quantity={category.count}
               onClick={() => onCategoryChange(category)}
             >
               {title}
