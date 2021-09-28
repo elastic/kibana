@@ -17,24 +17,24 @@ interface Props extends FieldDataRowProps {
 }
 export const DocumentStat = ({ config, showIcon }: Props) => {
   const { stats } = config;
-
-  if (stats === undefined || (isIndexBasedFieldVisConfig(config) && config.aggregatable === false))
-    return null;
-
+  if (stats === undefined) return null;
   const { count, sampleCount } = stats;
 
-  const docsCount = count ?? 0;
+  // If field exists is docs but we don't have count stats then don't show
+  // Otherwise if field doesn't appear in docs at all, show 0%
+  const docsCount =
+    count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
   const docsPercent =
-    count !== undefined && sampleCount !== undefined
-      ? roundToDecimalPlace((count / sampleCount) * 100)
+    docsCount !== undefined && sampleCount !== undefined
+      ? roundToDecimalPlace((docsCount / sampleCount) * 100)
       : 0;
 
-  return (
+  return docsCount !== undefined ? (
     <>
       {showIcon ? <EuiIcon type="document" size={'m'} className={'columnHeaderIcon'} /> : null}
       <EuiText size={'xs'}>
         {docsCount} ({docsPercent}%)
       </EuiText>
     </>
-  );
+  ) : null;
 };
