@@ -54,7 +54,7 @@ describe('SynchronizationLogic', () => {
 
   describe('listeners', () => {
     describe('handleSelectedTabChanged', () => {
-      it('calls sets navigatingBetweenTabs', async () => {
+      it('calls setNavigatingBetweenTabs', async () => {
         const setNavigatingBetweenTabsSpy = jest.spyOn(
           SynchronizationLogic.actions,
           'setNavigatingBetweenTabs'

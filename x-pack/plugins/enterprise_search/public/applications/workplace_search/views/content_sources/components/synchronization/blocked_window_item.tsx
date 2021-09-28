@@ -106,8 +106,8 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
             valueOfSelected={'permissions'}
             options={syncOptions}
             onChange={handleSyncTypeChange}
-            itemClassName="scottyItem"
-            popoverClassName="scottyPopover"
+            itemClassName="blockedWindowSelectItem"
+            popoverClassName="blockedWindowSelectPopover"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
