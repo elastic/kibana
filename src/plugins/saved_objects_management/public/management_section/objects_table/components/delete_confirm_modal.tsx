@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectWithMetadata } from '../../../../common';
+import type { SavedObjectWithMetadata, SavedObjectManagementTypeInfo } from '../../../../common';
 import { getSavedObjectLabel } from '../../../lib';
 
 export interface DeleteConfirmModalProps {
@@ -35,6 +35,7 @@ export interface DeleteConfirmModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   selectedObjects: SavedObjectWithMetadata[];
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
@@ -42,6 +43,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   onConfirm,
   onCancel,
   selectedObjects,
+  allowedTypes,
 }) => {
   const undeletableObjects = useMemo(() => {
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
@@ -145,7 +147,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               ),
               width: '50px',
               render: (type, { icon }) => (
-                <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+                <EuiToolTip position="top" content={getSavedObjectLabel(type, allowedTypes)}>
                   <EuiIcon type={icon} />
                 </EuiToolTip>
               ),

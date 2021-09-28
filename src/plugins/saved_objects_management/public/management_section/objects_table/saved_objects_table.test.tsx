@@ -28,6 +28,7 @@ import {
   applicationServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
+import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
 import {
@@ -38,7 +39,14 @@ import {
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 
-const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
+const convertType = (type: string): SavedObjectManagementTypeInfo => ({
+  name: type,
+  displayName: type,
+  hidden: false,
+  namespaceType: 'single',
+});
+
+const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'].map(convertType);
 
 const allSavedObjects = [
   {
@@ -377,7 +385,7 @@ describe('SavedObjectsTable', () => {
 
       expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        types: allowedTypes,
+        types: allowedTypes.map((type) => type.name),
         includeReferencesDeep: true,
       });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
@@ -406,7 +414,7 @@ describe('SavedObjectsTable', () => {
 
       expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        types: allowedTypes,
+        types: allowedTypes.map((type) => type.name),
         search: 'test*',
         includeReferencesDeep: true,
       });

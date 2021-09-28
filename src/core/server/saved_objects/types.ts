@@ -357,6 +357,10 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
    */
   importableAndExportable?: boolean;
   /**
+   * When specified, will be used instead of the type's name in SO management section's labels.
+   */
+  displayName?: string;
+  /**
    * When set to false, the type will not be listed or searchable in the SO management section.
    * Main usage of setting this property to false for a type is when objects from the type should
    * be included in the export via references or export hooks, but should not directly appear in the SOM.

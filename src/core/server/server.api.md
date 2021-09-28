@@ -2739,6 +2739,7 @@ export interface SavedObjectsType<Attributes = any> {
 // @public
 export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
     defaultSearchField?: string;
+    displayName?: string;
     getEditUrl?: (savedObject: SavedObject<Attributes>) => string;
     getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
         path: string;

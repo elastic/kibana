@@ -395,6 +395,7 @@ exports[`Flyout should render import step 1`] = `
 
 exports[`Flyout summary should display summary when import is complete 1`] = `
 <ImportSummary
+  allowedTypes={Array []}
   basePath={
     BasePath {
       "basePath": "",
