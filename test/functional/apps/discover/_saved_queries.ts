@@ -29,11 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const setUpQueriesWithFilters = async () => {
     // set up a query with filters and a time filter
     log.debug('set up a query with filters to save');
-    await queryBar.setQuery('response:200');
-    await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
     const fromTime = 'Sep 20, 2015 @ 08:00:00.000';
     const toTime = 'Sep 21, 2015 @ 08:00:00.000';
     await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+    await queryBar.setQuery('response:200');
   };
 
   describe('saved queries saved objects', function describeIndexTests() {
@@ -60,16 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('saved query selection', () => {
       before(async () => await setUpQueriesWithFilters());
 
-      after(
-        async () =>
-          await savedQueryManagementComponent.deleteSavedQuery(
-            'test-unselect-saved-query12112312311x'
-          )
-      );
-
       it(`should unselect saved query when navigating to a 'new'`, async function () {
         await savedQueryManagementComponent.saveNewQuery(
-          'test-unselect-saved-query12112312311x',
+          'test-unselect-saved-query',
           'mock',
           true,
           true
@@ -94,6 +87,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
+
+        // reset state
+        await savedQueryManagementComponent.deleteSavedQuery('test-unselect-saved-query');
       });
     });
 
