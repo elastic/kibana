@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ServiceField, TransactionTypeField } from './fields';
-import { act, fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { expectTextsInDocument } from '../../utils/testHelpers';
 
 describe('alerting fields', () => {
