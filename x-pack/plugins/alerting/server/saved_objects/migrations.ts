@@ -114,13 +114,11 @@ export function getMigrations(
   const migrateRules716 = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(setLegacyId, getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured))
-  );
-
-  const migrationSecurityLegacyNotificationRules716 = createEsoMigration(
-    encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionLegacyNotification(doc),
-    pipeMigrations(addRuleIdsToLegacyNotificationReferences)
+    pipeMigrations(
+      setLegacyId,
+      getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured),
+      addRuleIdsToLegacyNotificationReferences
+    )
   );
 
   const migrationRules800 = createEsoMigration(
@@ -137,10 +135,6 @@ export function getMigrations(
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
     '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
-    '7.16.0-legacyNotificationRules': executeMigrationWithErrorHandling(
-      migrationSecurityLegacyNotificationRules716,
-      '7.16.0'
-    ),
     '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
   };
 }
@@ -615,8 +609,8 @@ function addRuleIdsToLegacyNotificationReferences(
     },
     references,
   } = doc;
-  if (!isString(ruleAlertId)) {
-    // early return if we are not a string such as being undefined or null or malformed.
+  if (!isSecuritySolutionLegacyNotification(doc) || !isString(ruleAlertId)) {
+    // early return if we are not a string or if we are not a security solution notification saved object.
     return doc;
   } else {
     const existingReferences = references ?? [];
@@ -629,14 +623,15 @@ function addRuleIdsToLegacyNotificationReferences(
     } else {
       const savedObjectReference: SavedObjectReference = {
         id: ruleAlertId,
-        name: 'param:ruleAlertId_0',
+        name: 'param:rule_0',
         type: 'rule',
       };
       const newReferences = [...existingReferences, savedObjectReference];
-      return { ...doc, references: [...(references ?? []), ...newReferences] };
+      return { ...doc, references: newReferences };
     }
   }
 }
+
 function setLegacyId(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {

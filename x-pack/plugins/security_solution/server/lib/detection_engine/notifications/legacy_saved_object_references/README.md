@@ -136,7 +136,7 @@ Post migration this structure should look like this after Kibana has started and
 ```json
 "data..omitted": "data..omitted",
 "params" : {
-  "ruleAlertId" : "933ca720-1be1-11ec-a722-83da1c22a481" <-- Post-migration this structure is on disk but is no longer preferred. Instead this ID is serialized from references.
+  "ruleAlertId" : "933ca720-1be1-11ec-a722-83da1c22a481" <-- Post-migration this is not used but rather the serialized version references is used instead.
 },
 "actions" : [
   {
@@ -154,8 +154,8 @@ Post migration this structure should look like this after Kibana has started and
       "type" : "action"
     },
     {
-      "id" : "933ca720-1be1-11ec-a722-83da1c22a481", <-- Our id here is preferred and used.
-      "name" : "rule_0", <-- We add the name of our reference which is rule_0
+      "id" : "933ca720-1be1-11ec-a722-83da1c22a481", <-- Our id here is preferred and used during serialization.
+      "name" : "rule_0", <-- We add the name of our reference which is rule_0 similar to action_0
       "type" : "rule" <-- We add the type which is type of rule to the references
     }
   ]
@@ -163,10 +163,9 @@ Post migration this structure should look like this after Kibana has started and
 "data..omitted": "data..omitted",
 ```
 
-Only if for some reason a migration has failed due to a bug would we fallback and try to use `"ruleAlertId" : "933ca720-1be1-11ec-a722-83da1c22a481"`, otherwise all access will come from the 
-references array's version. If the migration fails or the fallback to `"ruleAlertId" : "933ca720-1be1-11ec-a722-83da1c22a481"` does happen, then the code emits several error messages to the
+Only if for some reason a migration has failed due to a bug would we fallback and try to use `"ruleAlertId" : "933ca720-1be1-11ec-a722-83da1c22a481"`, as it was last stored within SavedObjects. Otherwise all access will come from the 
+references array's version. If the migration fails or the fallback to the last known saved object id `"ruleAlertId" : "933ca720-1be1-11ec-a722-83da1c22a481"` does happen, then the code emits several error messages to the
 user which should further encourage the user to help migrate the legacy notification system to the newer notification system.
-
 
 ## Useful queries
 
