@@ -18,4 +18,4 @@ export * from './strategy';
 export * from './style';
 export * from './telemetry';
 
-export type { Store, State as AeroState } from '../public/lib/aeroelastic';
+export type { Store, State as AeroState, Shape } from '../public/lib/aeroelastic';

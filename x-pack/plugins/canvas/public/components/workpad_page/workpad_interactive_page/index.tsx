@@ -116,7 +116,6 @@ export const InteractivePage: FC<WorkpadPageProps> = (props) => {
 
 type AeroStoreLayerProps = Pick<
   InteractiveWorkpadPageProps,
-  | 'elements'
   | 'elementLayer'
   | 'selectedNodes'
   | 'pageStyle'
@@ -128,6 +127,7 @@ type AeroStoreLayerProps = Pick<
 > &
   WorkpadPageProps & {
     updateGlobalState: (state: AeroState) => void;
+    elements: CanvasNode[];
   };
 
 const AeroStoreLayer: FC<AeroStoreLayerProps> = ({

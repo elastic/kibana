@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PositionedElement, ElementPosition, CanvasNode } from '../../../types';
+import { ElementPosition, CanvasNode } from '../../../types';
 import { multiply, rotateZ, translate } from '../../lib/aeroelastic/matrix';
 
 export const isGroupId = (id: string) => id.startsWith('group');

@@ -21,13 +21,13 @@ import {
 import { WorkpadShortcuts } from '../../workpad_shortcuts';
 import { InteractionBoundary } from './interaction_boundary';
 import { EventHandlers } from './event_handlers';
-import { CanvasPage, CanvasNode } from '../../../../types';
+import { CanvasPage, CanvasNode, Shape } from '../../../../types';
 
 export interface InteractiveWorkpadPageProps extends EventHandlers {
   pageId: string;
   pageStyle?: CanvasPage['style'];
   className?: string;
-  elements: any[];
+  elements: Shape[];
   cursor?: string;
   height: number;
   width: number;

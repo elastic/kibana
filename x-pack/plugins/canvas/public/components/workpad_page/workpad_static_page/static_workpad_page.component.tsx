@@ -9,7 +9,15 @@ import React, { FC } from 'react';
 // @ts-expect-error
 import { ElementWrapper } from '../../element_wrapper';
 import { isGroupId } from '../positioning_utils';
-import { StaticPageProps } from './static_workpad_page';
+import { WorkpadPageProps } from '../workpad_page';
+import { CanvasPage, Shape } from '../../../../types';
+
+export interface StaticPageProps extends WorkpadPageProps {
+  elements: Shape[];
+  pageStyle?: CanvasPage['style'];
+  className: string;
+  animationStyle: Record<string, any>;
+}
 
 export const StaticWorkpadPage: FC<StaticPageProps> = ({
   pageId,
