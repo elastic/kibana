@@ -16,7 +16,7 @@ import { usageCollectionPluginMock } from '../../../../usage_collection/server/m
 import { UsageCollectionSetup } from '../../../../usage_collection/server/plugin';
 import { coreMock } from '../../../../../core/server/mocks';
 
-describe('TutorialsRegistry', () => {
+describe('SampleDataRegistry', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCustomIntegrationsPluginSetup: MockedKeys<CustomIntegrationsPluginSetup>;
   let mockUsageCollectionPluginSetup: MockedKeys<UsageCollectionSetup>;
