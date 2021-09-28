@@ -387,8 +387,9 @@ export function XYChart({
               if (column.id === series.accessor) {
                 const value = row[column.id];
                 if (typeof value === 'number') {
-                  max = max != null ? Math.max(value, max) : value;
-                  min = min != null ? Math.min(value, min) : value;
+                  // keep the 0 in view
+                  max = Math.max(value, max || 0, 0);
+                  min = Math.min(value, min || 0, 0);
                 }
               }
             }
@@ -400,8 +401,9 @@ export function XYChart({
             if (axis.groupId === axisMode) {
               for (const row of table.rows) {
                 const value = row[forAccessor];
-                max = max != null ? Math.max(value, max) : value;
-                min = min != null ? Math.min(value, min) : value;
+                // keep the 0 in view
+                max = Math.max(value, max || 0, 0);
+                min = Math.min(value, min || 0, 0);
               }
             }
           }
