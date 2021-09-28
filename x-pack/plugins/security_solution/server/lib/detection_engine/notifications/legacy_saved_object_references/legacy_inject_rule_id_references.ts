@@ -17,7 +17,7 @@ import { LegacyRulesNotificationParams } from '../legacy_types';
  * @param logger The kibana injected logger
  * @param ruleAlertId The alert id to merge the saved object reference from.
  * @param savedObjectReferences The saved object references which should contain a "ruleAlertId"
- * @returns The exceptionsList with the saved object reference replacing any value in the saved object's id.
+ * @returns The "ruleAlertId" with the saved object reference replacing any value in the saved object's id.
  */
 export const legacyInjectRuleIdReferences = ({
   logger,

@@ -155,7 +155,7 @@ Post migration this structure should look like this after Kibana has started and
     },
     {
       "id" : "933ca720-1be1-11ec-a722-83da1c22a481", <-- Our id here is preferred and used during serialization.
-      "name" : "rule_0", <-- We add the name of our reference which is rule_0 similar to action_0
+      "name" : "param:rule_0", <-- We add the name of our reference which is param:rule_0 similar to action_0 but with "param"
       "type" : "rule" <-- We add the type which is type of rule to the references
     }
   ]
@@ -169,6 +169,8 @@ user which should further encourage the user to help migrate the legacy notifica
 
 ## Useful queries
 
+This gives you back the legacy notifications.
+
 ```json
 # Get the alert type of "siem-notifications" which is part of the legacy system.
 GET .kibana/_search
@@ -177,6 +179,36 @@ GET .kibana/_search
     "term": {
       "alert.alertTypeId": "siem.notifications"
     }
+  }
+}
+```
+
+If you need to ad-hoc test what happens when the migration runs you can get the id of an alert and downgrade it, then
+restart Kibana. The `ctx._source.references.remove(1)` removes the last element of the references array which is assumed
+to have a rule. But it might not, so ensure you check your data structure and adjust accordingly.
+```json
+POST .kibana/_update/alert:933ca720-1be1-11ec-a722-83da1c22a481
+{
+  "script" : {
+    "source": """
+    ctx._source.migrationVersion.alert = "7.15.0";
+    ctx._source.references.remove(1);
+    """,
+    "lang": "painless"
+  }
+}
+```
+
+If you just want to remove your your "param:rule_0" and it is the second array element to test the errors within the console
+then you would use
+```json
+POST .kibana/_update/alert:933ca720-1be1-11ec-a722-83da1c22a481
+{
+  "script" : {
+    "source": """
+    ctx._source.references.remove(1);
+    """,
+    "lang": "painless"
   }
 }
 ```
