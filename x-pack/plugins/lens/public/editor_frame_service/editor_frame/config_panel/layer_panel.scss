@@ -118,7 +118,8 @@
 }
 
 .lnsLayerPanel__styleEditor {
-  padding: 0 $euiSizeS $euiSizeS;
+  margin-top: -$euiSizeS;
+  padding: 0 $euiSize $euiSize;
 }
 
 .lnsLayerPanel__colorIndicator {
