@@ -15,7 +15,6 @@ import { createRequestMock } from '../__mocks__/request.mock';
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
   detectReindexWarnings: jest.fn(),
-  getIndexGroup: jest.fn(),
   createReindexOperation: jest.fn(),
   findAllInProgressOperations: jest.fn(),
   findReindexOperation: jest.fn(),
@@ -66,7 +65,6 @@ describe('reindex API', () => {
 
     mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();
-    mockReindexService.getIndexGroup.mockReset();
     mockReindexService.createReindexOperation.mockReset();
     mockReindexService.findAllInProgressOperations.mockReset();
     mockReindexService.findReindexOperation.mockReset();
