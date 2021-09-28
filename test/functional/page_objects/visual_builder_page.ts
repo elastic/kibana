@@ -284,7 +284,8 @@ export class VisualBuilderPageObject extends FtrService {
     const drilldownEl = await this.testSubjects.find('drilldownUrl');
 
     await drilldownEl.clearValue();
-    await drilldownEl.type(value);
+    await drilldownEl.type(value, { charByChar: true });
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   /**
