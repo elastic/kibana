@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiFlexItem,
-  EuiFormControlLayout,
-  EuiFormLabel,
-  EuiIcon,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFormLabel, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 import React, { forwardRef, HTMLAttributes } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
