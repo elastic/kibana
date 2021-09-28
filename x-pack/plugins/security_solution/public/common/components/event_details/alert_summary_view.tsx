@@ -32,12 +32,11 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
 import { SummaryView } from './summary_view';
-import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
+import { AlertSummaryRow, getSummaryColumns, SummaryRow, ThreatDetailsRow } from './helpers';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
-import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
 import { TimelineEventsDetailsItem } from '../../../../common';
@@ -47,11 +46,6 @@ export const Indent = styled.div`
   padding: 0 8px;
   word-break: break-word;
 `;
-
-const StyledEmptyComponent = styled.div`
-  padding: ${(props) => `${props.theme.eui.paddingSizes.xs} 0`};
-`;
-
 interface EventSummaryField {
   id: string;
   label?: string;
@@ -121,34 +115,28 @@ const getDescription = ({
   linkValue,
   timelineId,
   values,
-}: AlertSummaryRow['description']) => {
-  if (isEmpty(values)) {
-    return <StyledEmptyComponent>{getEmptyValue()}</StyledEmptyComponent>;
-  }
-
-  return (
-    <>
-      <FieldValueCell
-        contextId={timelineId}
-        data={data}
-        eventId={eventId}
-        fieldFromBrowserField={fieldFromBrowserField}
-        linkValue={linkValue}
-        isDraggable={isDraggable}
-        values={values}
-      />
-      <ActionCell
-        contextId={timelineId}
-        data={data}
-        eventId={eventId}
-        fieldFromBrowserField={fieldFromBrowserField}
-        linkValue={linkValue}
-        timelineId={timelineId}
-        values={values}
-      />
-    </>
-  );
-};
+}: AlertSummaryRow['description']) => (
+  <>
+    <FieldValueCell
+      contextId={timelineId}
+      data={data}
+      eventId={eventId}
+      fieldFromBrowserField={fieldFromBrowserField}
+      linkValue={linkValue}
+      isDraggable={isDraggable}
+      values={values}
+    />
+    <ActionCell
+      contextId={timelineId}
+      data={data}
+      eventId={eventId}
+      fieldFromBrowserField={fieldFromBrowserField}
+      linkValue={linkValue}
+      timelineId={timelineId}
+      values={values}
+    />
+  </>
+);
 
 function getEventFieldsToDisplay({
   eventCategory,
@@ -314,7 +302,15 @@ const AlertSummaryViewComponent: React.FC<{
   title?: string;
 }> = ({ browserFields, data, eventId, isDraggable, timelineId, title }) => {
   const summaryRows = useMemo(
-    () => getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId }),
+    () =>
+      getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId }).filter(
+        ({ description }) =>
+          !isEmpty(
+            (description as AlertSummaryRow['description']).values ??
+              (description as ThreatDetailsRow['description']).value
+          )
+      ),
+
     [browserFields, data, eventId, isDraggable, timelineId]
   );
 
