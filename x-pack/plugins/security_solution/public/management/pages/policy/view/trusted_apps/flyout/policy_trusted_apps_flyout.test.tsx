@@ -38,8 +38,6 @@ describe('Policy trusted apps flyout', () => {
         }),
       };
     });
-  });
-  beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     getState = () => mockedContext.store.getState().management.policyDetails;
