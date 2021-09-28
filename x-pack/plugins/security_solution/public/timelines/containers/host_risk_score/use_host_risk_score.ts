@@ -19,6 +19,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { inputsActions } from '../../../common/store/actions';
 import { RISKY_HOSTS_INDEX } from '../../../../common/constants';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 import {
   DataPublicPluginStart,
@@ -78,7 +79,10 @@ export interface HostRiskScore {
 }
 
 export const useHostRiskScore = ({ hostName }: { hostName?: string }): HostRiskScore => {
-  const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(undefined);
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(
+    riskyHostsFeatureEnabled ? undefined : false
+  );
 
   const { addError } = useAppToasts();
   const { data } = useKibana().services;
@@ -126,14 +130,14 @@ export const useHostRiskScore = ({ hostName }: { hostName?: string }): HostRiskS
   }, [addError, error, setIsModuleEnabled]);
 
   useEffect(() => {
-    if (hostName) {
+    if (hostName && riskyHostsFeatureEnabled) {
       start({
         data,
         hostName,
         defaultIndex: [RISKY_HOSTS_INDEX],
       });
     }
-  }, [start, data, hostName]);
+  }, [start, data, hostName, riskyHostsFeatureEnabled]);
 
   const source = result?.rawResponse?.hits?.hits?.[0]?._source;
   return {
