@@ -960,7 +960,7 @@
         "label": "createLifecycleRuleTypeFactory",
         "description": [],
         "signature": [
-          "({ logger, ruleDataClient, }: { logger: ",
+          "({ logger, ruleDataClient }: { logger: ",
           "Logger",
           "; ruleDataClient: ",
           {
@@ -1004,7 +1004,7 @@
             "id": "def-server.createLifecycleRuleTypeFactory.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  logger,\n  ruleDataClient,\n}",
+            "label": "{ logger, ruleDataClient }",
             "description": [],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
             "deprecated": false,
@@ -1055,7 +1055,7 @@
         "label": "createPersistenceRuleTypeFactory",
         "description": [],
         "signature": [
-          "({ logger, ruleDataClient, }: { ruleDataClient: ",
+          "({ logger, ruleDataClient }: { ruleDataClient: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -1151,7 +1151,7 @@
             "id": "def-server.createPersistenceRuleTypeFactory.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  logger,\n  ruleDataClient,\n}",
+            "label": "{ logger, ruleDataClient }",
             "description": [],
             "signature": [
               "{ ruleDataClient: ",
@@ -1624,7 +1624,7 @@
               {
                 "pluginId": "data",
                 "scope": "server",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-server.FieldDescriptor",
                 "text": "FieldDescriptor"
               },
@@ -2238,7 +2238,7 @@
         "label": "RuleRegistryPluginConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly write: Readonly<{} & { enabled: boolean; }>; readonly unsafe: Readonly<{} & { legacyMultiTenancy: Readonly<{} & { enabled: boolean; }>; indexUpgrade: Readonly<{} & { enabled: boolean; }>; }>; }"
+          "any"
         ],
         "path": "x-pack/plugins/rule_registry/server/config.ts",
         "deprecated": false,
