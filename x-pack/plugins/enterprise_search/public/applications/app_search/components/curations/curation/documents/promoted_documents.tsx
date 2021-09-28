@@ -21,6 +21,7 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DataPanel } from '../../../data_panel';
 
@@ -29,7 +30,7 @@ import { CurationLogic } from '../curation_logic';
 import { AddResultButton, CurationResult, convertToResultFormat } from '../results';
 
 export const PromotedDocuments: React.FC = () => {
-  const { curation, promotedIds, promotedDocumentsLoading } = useValues(CurationLogic);
+  const { curation, isAutomated, promotedIds, promotedDocumentsLoading } = useValues(CurationLogic);
   const documents = curation.promoted;
   const hasDocuments = documents.length > 0;
 
@@ -53,13 +54,23 @@ export const PromotedDocuments: React.FC = () => {
           )}
         </h2>
       }
-      subtitle={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.description',
-        {
-          defaultMessage:
-            'Promoted results appear before organic results. Documents can be re-ordered.',
-        }
-      )}
+      subtitle={
+        <FormattedMessage
+          id="xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.description"
+          defaultMessage="Promoted results appear before organic results.{manualDescription}"
+          values={{
+            manualDescription: !isAutomated && (
+              <>
+                {' '}
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.manualDescription"
+                  defaultMessage="Documents can be re-ordered."
+                />
+              </>
+            ),
+          }}
+        />
+      }
       action={
         hasDocuments && (
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
@@ -67,7 +78,12 @@ export const PromotedDocuments: React.FC = () => {
               <AddResultButton />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButtonEmpty onClick={clearPromotedIds} iconType="menuDown" size="s">
+              <EuiButtonEmpty
+                onClick={clearPromotedIds}
+                iconType="menuDown"
+                size="s"
+                disabled={isAutomated}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.removeAllButtonLabel',
                   { defaultMessage: 'Demote all' }
@@ -89,6 +105,7 @@ export const PromotedDocuments: React.FC = () => {
                 draggableId={document.id}
                 customDragHandle
                 spacing="none"
+                isDragDisabled={isAutomated}
               >
                 {(provided) => (
                   <CurationResult
@@ -98,6 +115,7 @@ export const PromotedDocuments: React.FC = () => {
                       {
                         ...DEMOTE_DOCUMENT_ACTION,
                         onClick: () => removePromotedId(document.id),
+                        disabled: isAutomated,
                       },
                     ]}
                     dragHandleProps={provided.dragHandleProps}
@@ -109,13 +127,22 @@ export const PromotedDocuments: React.FC = () => {
         </EuiDragDropContext>
       ) : (
         <EuiEmptyPrompt
-          body={i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.emptyDescription',
-            {
-              defaultMessage:
-                'Star documents from the organic results below, or search and promote a result manually.',
-            }
-          )}
+          body={
+            isAutomated
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.automatedEmptyDescription',
+                  {
+                    defaultMessage: "We haven't identified any documents to promote",
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.emptyDescription',
+                  {
+                    defaultMessage:
+                      'Star documents from the organic results below, or search and promote a result manually.',
+                  }
+                )
+          }
           actions={<AddResultButton />}
         />
       )}

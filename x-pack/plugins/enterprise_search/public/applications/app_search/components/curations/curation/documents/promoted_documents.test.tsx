@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -13,6 +12,7 @@ import { shallow } from 'enzyme';
 
 import { EuiDragDropContext, EuiDraggable, EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
 
+import { mountWithIntl } from '../../../../../test_helpers';
 import { DataPanel } from '../../../data_panel';
 import { CurationResult } from '../results';
 
@@ -57,7 +57,32 @@ describe('PromotedDocuments', () => {
     });
   });
 
-  it('renders an empty state & hides the panel actions when empty', () => {
+  it('informs the user documents can be re-ordered if the curation is manual', () => {
+    setMockValues({ ...values, isAutomated: false });
+    const wrapper = shallow(<PromotedDocuments />);
+    const subtitle = mountWithIntl(wrapper.prop('subtitle'));
+
+    expect(subtitle.text()).toContain('Documents can be re-ordered');
+  });
+
+  describe('empty state', () => {
+    it('renders', () => {
+      setMockValues({ ...values, curation: { promoted: [] } });
+      const wrapper = shallow(<PromotedDocuments />);
+
+      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    });
+
+    it('hide information about starring documents if the curation is automated', () => {
+      setMockValues({ ...values, curation: { promoted: [] }, isAutomated: true });
+      const wrapper = shallow(<PromotedDocuments />);
+      const emptyPromptBody = mountWithIntl(<>{wrapper.find(EuiEmptyPrompt).prop('body')}</>);
+
+      expect(emptyPromptBody.text()).not.toContain('Star documents');
+    });
+  });
+
+  it('hides the panel actions when empty', () => {
     setMockValues({ ...values, curation: { promoted: [] } });
     const wrapper = shallow(<PromotedDocuments />);
 
@@ -89,7 +114,7 @@ describe('PromotedDocuments', () => {
       expect(actions.clearPromotedIds).toHaveBeenCalled();
     });
 
-    describe('draggging', () => {
+    describe('dragging', () => {
       it('calls setPromotedIds with the reordered list when users are done dragging', () => {
         const wrapper = shallow(<PromotedDocuments />);
         wrapper.find(EuiDragDropContext).simulate('dragEnd', {
