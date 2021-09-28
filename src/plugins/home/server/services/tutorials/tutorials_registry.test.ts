@@ -151,7 +151,7 @@ describe('TutorialsRegistry', () => {
 
   describe('start', () => {
     test('exposes proper contract', () => {
-      const start = new TutorialsRegistry().start();
+      const start = new TutorialsRegistry().start(mockCoreSetup, mockCustomIntegrationsPluginSetup);
       expect(start).toBeDefined();
     });
   });

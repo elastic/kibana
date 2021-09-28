@@ -126,11 +126,11 @@ export class TutorialsRegistry {
     };
   }
 
-  public start(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
+  public start(core: CoreSetup | undefined, customIntegrations?: CustomIntegrationsPluginSetup) {
     // pre-populate with built in tutorials
     this.tutorialProviders.push(...builtInTutorials);
 
-    if (customIntegrations) {
+    if (customIntegrations && core) {
       builtInTutorials.forEach((provider) => {
         const tutorial = provider({});
         registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);

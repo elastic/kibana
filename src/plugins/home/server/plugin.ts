@@ -31,7 +31,7 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   private readonly tutorialsRegistry = new TutorialsRegistry();
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
   private customIntegrations?: CustomIntegrationsPluginSetup;
-  private core: CoreSetup;
+  private core?: CoreSetup;
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     this.customIntegrations = plugins.customIntegrations;
