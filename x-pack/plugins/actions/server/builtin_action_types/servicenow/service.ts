@@ -114,6 +114,7 @@ export const createExternalService: ServiceFactory = (
         url: getVersionUrl(),
         logger,
         configurationUtilities,
+        method: 'get',
       });
 
       checkInstance(res);
@@ -141,6 +142,7 @@ export const createExternalService: ServiceFactory = (
         url: `${tableApiIncidentUrl}/${id}`,
         logger,
         configurationUtilities,
+        method: 'get',
       });
 
       checkInstance(res);

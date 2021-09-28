@@ -93,6 +93,9 @@ describe('api', () => {
           caller_id: 'elastic',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
+          opened_by: 'elastic',
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -118,6 +121,8 @@ describe('api', () => {
           comments: 'A comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
         },
         incidentId: 'incident-1',
       });
@@ -132,6 +137,8 @@ describe('api', () => {
           comments: 'Another comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
         },
         incidentId: 'incident-1',
       });
@@ -157,6 +164,8 @@ describe('api', () => {
           work_notes: 'A comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
         },
         incidentId: 'incident-1',
       });
@@ -171,6 +180,8 @@ describe('api', () => {
           work_notes: 'Another comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
         },
         incidentId: 'incident-1',
       });
@@ -243,6 +254,8 @@ describe('api', () => {
           subcategory: 'os',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -267,6 +280,8 @@ describe('api', () => {
           subcategory: 'os',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
         },
         incidentId: 'incident-3',
       });
@@ -281,6 +296,8 @@ describe('api', () => {
           comments: 'A comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
         },
         incidentId: 'incident-2',
       });
@@ -305,6 +322,8 @@ describe('api', () => {
           subcategory: 'os',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
         },
         incidentId: 'incident-3',
       });
@@ -319,6 +338,8 @@ describe('api', () => {
           work_notes: 'A comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'alertID',
         },
         incidentId: 'incident-2',
       });

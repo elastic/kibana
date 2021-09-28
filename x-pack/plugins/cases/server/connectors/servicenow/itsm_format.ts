@@ -22,7 +22,7 @@ export const format: ServiceNowITSMFormat = (theCase, alerts) => {
     impact,
     category,
     subcategory,
-    correlation_id: theCase.id,
+    correlation_id: theCase.id ?? null,
     correlation_display: 'Elastic Case',
   };
 };

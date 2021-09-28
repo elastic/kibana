@@ -29,8 +29,97 @@ jest.mock('../lib/axios_utils', () => {
 
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
-const patchMock = utils.patch as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
+
+const getImportSetAPIResponse = (update = false) => ({
+  import_set: 'ISET01',
+  staging_table: 'x_elas2_inc_int_elastic_incident',
+  result: [
+    {
+      transform_map: 'Elastic Incident',
+      table: 'incident',
+      display_name: 'number',
+      display_value: 'INC01',
+      record_link: 'https://dev102283.service-now.com/api/now/table/incident/1',
+      status: update ? 'updated' : 'inserted',
+      sys_id: '1',
+    },
+  ],
+});
+
+const mockApplicationVersion = () =>
+  requestMock.mockImplementationOnce(() => ({
+    data: {
+      result: { name: 'Elastic', scope: 'x_elas2_inc_int', version: '1.0.0' },
+    },
+  }));
+
+const mockImportIncident = (update: boolean) =>
+  requestMock.mockImplementationOnce(() => ({
+    data: getImportSetAPIResponse(update),
+  }));
+
+const createIncident = async (service: ExternalService) => {
+  // Get application version
+  mockApplicationVersion();
+  // Import set api response
+  mockImportIncident(false);
+  // Get incident response
+  requestMock.mockImplementationOnce(() => ({
+    data: { result: { sys_id: '1', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' } },
+  }));
+
+  return await service.createIncident({
+    incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+  });
+};
+
+const updateIncident = async (service: ExternalService) => {
+  // Get application version
+  mockApplicationVersion();
+  // Import set api response
+  mockImportIncident(true);
+  // Get incident response
+  requestMock.mockImplementationOnce(() => ({
+    data: { result: { sys_id: '1', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' } },
+  }));
+
+  return await service.updateIncident({
+    incidentId: '1',
+    incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+  });
+};
+
+const expectImportedIncident = (update: boolean) => {
+  expect(requestMock).toHaveBeenNthCalledWith(1, {
+    axios,
+    logger,
+    configurationUtilities,
+    url: 'https://dev102283.service-now.com/api/x_elas2_inc_int/elastic_api/health',
+    method: 'get',
+  });
+
+  expect(requestMock).toHaveBeenNthCalledWith(2, {
+    axios,
+    logger,
+    configurationUtilities,
+    url: 'https://dev102283.service-now.com/api/now/import/x_elas2_inc_int_elastic_incident',
+    method: 'post',
+    data: {
+      u_short_description: 'title',
+      u_description: 'desc',
+      ...(update ? { elastic_incident_id: '1' } : {}),
+    },
+  });
+
+  expect(requestMock).toHaveBeenNthCalledWith(3, {
+    axios,
+    logger,
+    configurationUtilities,
+    url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
+    method: 'get',
+  });
+};
 
 describe('ServiceNow service', () => {
   let service: ExternalService;
@@ -45,7 +134,7 @@ describe('ServiceNow service', () => {
       },
       logger,
       configurationUtilities,
-      snExternalServiceConfig.servicenow
+      snExternalServiceConfig['.servicenow']
     );
   });
 
@@ -63,7 +152,7 @@ describe('ServiceNow service', () => {
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig.servicenow
+          snExternalServiceConfig['.servicenow']
         )
       ).toThrow();
     });
@@ -77,7 +166,7 @@ describe('ServiceNow service', () => {
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig.servicenow
+          snExternalServiceConfig['.servicenow']
         )
       ).toThrow();
     });
@@ -91,7 +180,7 @@ describe('ServiceNow service', () => {
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig.servicenow
+          snExternalServiceConfig['.servicenow']
         )
       ).toThrow();
     });
@@ -117,6 +206,7 @@ describe('ServiceNow service', () => {
         logger,
         configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
+        method: 'get',
       });
     });
 
@@ -128,7 +218,7 @@ describe('ServiceNow service', () => {
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
+        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' }
       );
 
       requestMock.mockImplementation(() => ({
@@ -141,6 +231,7 @@ describe('ServiceNow service', () => {
         logger,
         configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
+        method: 'get',
       });
     });
 
@@ -167,14 +258,7 @@ describe('ServiceNow service', () => {
 
   describe('createIncident', () => {
     test('it creates the incident correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: { result: { sys_id: '1', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' } },
-      }));
-
-      const res = await service.createIncident({
-        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-      });
-
+      const res = await createIncident(service);
       expect(res).toEqual({
         title: 'INC01',
         id: '1',
@@ -184,22 +268,8 @@ describe('ServiceNow service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: { result: { sys_id: '1', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' } },
-      }));
-
-      await service.createIncident({
-        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-      });
-
-      expect(requestMock).toHaveBeenCalledWith({
-        axios,
-        logger,
-        configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/incident',
-        method: 'post',
-        data: { short_description: 'title', description: 'desc' },
-      });
+      await createIncident(service);
+      expectImportedIncident(false);
     });
 
     test('it should call request with correct arguments when table changes', async () => {
@@ -210,24 +280,17 @@ describe('ServiceNow service', () => {
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
+        snExternalServiceConfig['.servicenow-sir']
       );
 
-      requestMock.mockImplementation(() => ({
-        data: { result: { sys_id: '1', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' } },
-      }));
-
-      const res = await service.createIncident({
-        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-      });
-
-      expect(requestMock).toHaveBeenCalledWith({
+      const res = await createIncident(service);
+      expect(requestMock).toHaveBeenNthCalledWith(2, {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident',
+        url: 'https://dev102283.service-now.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
         method: 'post',
-        data: { short_description: 'title', description: 'desc' },
+        data: { u_short_description: 'title', u_description: 'desc' },
       });
 
       expect(res.url).toEqual(
@@ -245,7 +308,7 @@ describe('ServiceNow service', () => {
           incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
         })
       ).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to create incident. Error: An error has occurred'
+        '[Action][ServiceNow]: Unable to create incident. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown Reason: unknown'
       );
     });
 
@@ -263,14 +326,7 @@ describe('ServiceNow service', () => {
 
   describe('updateIncident', () => {
     test('it updates the incident correctly', async () => {
-      patchMock.mockImplementation(() => ({
-        data: { result: { sys_id: '1', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' } },
-      }));
-
-      const res = await service.updateIncident({
-        incidentId: '1',
-        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-      });
+      const res = await updateIncident(service);
 
       expect(res).toEqual({
         title: 'INC01',
@@ -281,22 +337,8 @@ describe('ServiceNow service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      patchMock.mockImplementation(() => ({
-        data: { result: { sys_id: '1', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' } },
-      }));
-
-      await service.updateIncident({
-        incidentId: '1',
-        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-      });
-
-      expect(patchMock).toHaveBeenCalledWith({
-        axios,
-        logger,
-        configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
-        data: { short_description: 'title', description: 'desc' },
-      });
+      await updateIncident(service);
+      expectImportedIncident(true);
     });
 
     test('it should call request with correct arguments when table changes', async () => {
@@ -307,24 +349,17 @@ describe('ServiceNow service', () => {
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
+        snExternalServiceConfig['.servicenow-sir']
       );
 
-      patchMock.mockImplementation(() => ({
-        data: { result: { sys_id: '1', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' } },
-      }));
-
-      const res = await service.updateIncident({
-        incidentId: '1',
-        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
-      });
-
-      expect(patchMock).toHaveBeenCalledWith({
+      const res = await updateIncident(service);
+      expect(requestMock).toHaveBeenNthCalledWith(2, {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
-        data: { short_description: 'title', description: 'desc' },
+        url: 'https://dev102283.service-now.com/api/now/import/x_elas2_sir_int_elastic_si_incident',
+        method: 'post',
+        data: { u_short_description: 'title', u_description: 'desc', elastic_incident_id: '1' },
       });
 
       expect(res.url).toEqual(
@@ -333,7 +368,7 @@ describe('ServiceNow service', () => {
     });
 
     test('it should throw an error', async () => {
-      patchMock.mockImplementation(() => {
+      requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
 
@@ -343,26 +378,8 @@ describe('ServiceNow service', () => {
           incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
         })
       ).rejects.toThrow(
-        '[Action][ServiceNow]: Unable to update incident with id 1. Error: An error has occurred'
+        '[Action][ServiceNow]: Unable to update incident with id 1. Error: [Action][ServiceNow]: Unable to get application version. Error: An error has occurred Reason: unknown Reason: unknown'
       );
-    });
-
-    test('it creates the comment correctly', async () => {
-      patchMock.mockImplementation(() => ({
-        data: { result: { sys_id: '11', number: 'INC011', sys_updated_on: '2020-03-10 12:24:20' } },
-      }));
-
-      const res = await service.updateIncident({
-        incidentId: '1',
-        incident: { comment: 'comment-1' },
-      });
-
-      expect(res).toEqual({
-        title: 'INC011',
-        id: '11',
-        pushedDate: '2020-03-10T12:24:20.000Z',
-        url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=11',
-      });
     });
 
     test('it should throw an error when instance is not alive', async () => {
@@ -388,7 +405,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^ORname=incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
+        url: 'https://dev102283.service-now.com/api/now/table/sys_dictionary?sysparm_query=name=task^ORname=incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });
     });
 
@@ -408,7 +425,7 @@ describe('ServiceNow service', () => {
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
+        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' }
       );
 
       requestMock.mockImplementation(() => ({
@@ -420,7 +437,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^ORname=sn_si_incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
+        url: 'https://dev102283.service-now.com/api/now/table/sys_dictionary?sysparm_query=name=task^ORname=sn_si_incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });
     });
 
@@ -456,7 +473,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://dev102283.service-now.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
     });
 
@@ -476,7 +493,7 @@ describe('ServiceNow service', () => {
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig.servicenow, table: 'sn_si_incident' }
+        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' }
       );
 
       requestMock.mockImplementation(() => ({
@@ -489,7 +506,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://dev102283.service-now.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
     });
 
