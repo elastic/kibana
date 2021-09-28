@@ -278,7 +278,7 @@ export class TaskRunner<
         const status = normalizeAlertTypeExecutionStatus(executorStatus);
         executionStatus.searchDuration = status.searchDuration;
         executionStatus.indexDuration = status.indexDuration;
-        executionStatus.noData = status.noData;
+        executionStatus.experimental = status.experimental;
         executionStatus.messages = status.messages;
       }
 

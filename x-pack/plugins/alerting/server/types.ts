@@ -198,8 +198,13 @@ export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   };
   searchDuration?: null | number; // milliseconds
   indexDuration?: null | number; // milliseconds
-  noData?: null | boolean;
   messages?: string[];
+  experimental?: null | {
+    noData?: null | boolean;
+    ruleStatus?: null | string;
+    ruleStatusOrder?: null | number;
+    gapDuration?: null | number;
+  };
 }
 
 export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Params>, 'id'> &

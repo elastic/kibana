@@ -44,7 +44,7 @@ export function alertExecutionStatusToRaw({
   searchDuration,
   indexDuration,
   instances,
-  noData,
+  experimental,
   messages,
 }: Partial<AlertExecutionStatus>): RawAlertExecutionStatus {
   // explicitly using null (in case undefined) due to partial update concerns
@@ -56,9 +56,9 @@ export function alertExecutionStatusToRaw({
     searchDuration: searchDuration ?? null,
     indexDuration: indexDuration ?? null,
     instances: instances ?? null,
-    noData: noData ?? false,
     messages: messages ?? [],
     error: error ?? null,
+    experimental: experimental ?? null,
   };
 }
 
@@ -81,8 +81,10 @@ export function alertExecutionStatusFromRaw(
 
   const parsedDate = new Date(parsedDateMillis);
 
-  const { delay, duration, instances, searchDuration, indexDuration, noData, messages } =
+  const { delay, duration, instances, searchDuration, indexDuration, messages, experimental } =
     rawAlertExecutionStatus;
+
+  const { noData, ruleStatus, ruleStatusOrder, gapDuration } = experimental ?? {};
 
   const executionStatus: AlertExecutionStatus = {
     status,
@@ -109,16 +111,32 @@ export function alertExecutionStatusFromRaw(
     executionStatus.instances = instances;
   }
 
-  if (noData != null) {
-    executionStatus.noData = noData;
-  }
-
   if (messages != null) {
     executionStatus.messages = messages;
   }
 
   if (error) {
     executionStatus.error = error;
+  }
+
+  if (experimental) {
+    executionStatus.experimental = {};
+
+    if (noData != null) {
+      executionStatus.experimental.noData = noData;
+    }
+
+    if (ruleStatus != null) {
+      executionStatus.experimental.ruleStatus = ruleStatus;
+    }
+
+    if (ruleStatusOrder != null) {
+      executionStatus.experimental.ruleStatusOrder = ruleStatusOrder;
+    }
+
+    if (gapDuration != null) {
+      executionStatus.experimental.gapDuration = gapDuration;
+    }
   }
 
   return executionStatus;
@@ -133,12 +151,22 @@ export const getAlertExecutionStatusPending = (lastExecutionDate: string) => ({
 export function normalizeAlertTypeExecutionStatus(
   typeExecutionStatus: AlertTypeExecutionStatus = {}
 ): AlertTypeExecutionStatus {
-  let { searchDuration, indexDuration, noData, messages } = typeExecutionStatus;
+  let { searchDuration, indexDuration, messages, experimental } = typeExecutionStatus;
 
   if (searchDuration === undefined) searchDuration = null;
   if (indexDuration === undefined) indexDuration = null;
-  if (noData === undefined) noData = false;
   if (messages == null) messages = [];
 
-  return { searchDuration, indexDuration, noData, messages };
+  if (experimental == null) {
+    experimental = null;
+  } else {
+    let { noData, ruleStatus, ruleStatusOrder, gapDuration } = experimental;
+    if (noData === undefined) noData = null;
+    if (ruleStatus === undefined) ruleStatus = null;
+    if (ruleStatusOrder === undefined) ruleStatusOrder = null;
+    if (gapDuration === undefined) gapDuration = null;
+    experimental = { noData, ruleStatus, ruleStatusOrder, gapDuration };
+  }
+
+  return { searchDuration, indexDuration, messages, experimental };
 }

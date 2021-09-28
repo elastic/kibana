@@ -7,13 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
+import {
+  AlertType,
+  AlertExecutorOptions,
+  StackAlertsStartDeps,
+  AlertTypeExecutionStatus,
+} from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import {
   CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
+  TimeSeriesResult,
 } from '../../../../triggers_actions_ui/server';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
@@ -175,7 +181,15 @@ export function getAlertType(
     const timeElapsed = Date.now() - timeStart;
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
 
-    services.setExecutorStatus({ searchDuration: timeElapsed });
+    const executorStatus: AlertTypeExecutionStatus = {
+      searchDuration: timeElapsed,
+    };
+
+    if (isNoData(result)) {
+      executorStatus.experimental = { noData: true };
+    }
+
+    services.setExecutorStatus(executorStatus);
 
     const groupResults = result.results || [];
     // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
@@ -215,4 +229,14 @@ export function getAlertType(
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
   }
+}
+
+function isNoData({ results }: TimeSeriesResult): boolean {
+  if (results == null || results.length === 0) return true;
+
+  for (const { metrics } of results) {
+    if (metrics != null && metrics.length !== 0) return false;
+  }
+
+  return true;
 }

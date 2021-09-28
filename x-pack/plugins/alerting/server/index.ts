@@ -29,6 +29,7 @@ export type {
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
+  AlertTypeExecutionStatus,
 } from './types';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export { PluginSetupContract, PluginStartContract } from './plugin';

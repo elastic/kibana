@@ -122,8 +122,15 @@
           },
           "searchDuration": { "type": "long" },
           "indexDuration": { "type": "long" },
-          "noData": { "type": "boolean" },
-          "messages": { "type": "text" }
+          "messages": { "type": "text" },
+          "experimental": { 
+            "properties": {
+              "noData": { "type": "boolean" },
+              "ruleStatus": { "type": "keyword" },
+              "ruleStatusOrder": { "type": "long" },
+              "gapDuration": { "type": "long" }
+            }
+          }
         }
       }
     }

@@ -34,7 +34,7 @@ export enum AlertExecutionStatusErrorReasons {
 
 export type AlertTypeExecutionStatus = Pick<
   AlertExecutionStatus,
-  'searchDuration' | 'indexDuration' | 'noData' | 'messages'
+  'searchDuration' | 'indexDuration' | 'messages' | 'experimental'
 >;
 
 export interface AlertExecutionStatus {
@@ -55,8 +55,13 @@ export interface AlertExecutionStatus {
   // set by the rule executor
   searchDuration?: null | number; // milliseconds
   indexDuration?: null | number; // milliseconds
-  noData?: boolean;
   messages?: string[];
+  experimental?: null | {
+    noData?: null | boolean;
+    ruleStatus?: null | string;
+    ruleStatusOrder?: null | number;
+    gapDuration?: null | number;
+  };
 }
 
 export type AlertActionParams = SavedObjectAttributes;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { TimeSeriesQuery } from './time_series_query';
+export { TimeSeriesQuery, TimeSeriesResult } from './time_series_query';
 export {
   CoreQueryParams,
   CoreQueryParamsSchemaProperties,

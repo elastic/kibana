@@ -11,6 +11,7 @@ import { registerRoutes } from './routes';
 
 export {
   TimeSeriesQuery,
+  TimeSeriesResult,
   CoreQueryParams,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,

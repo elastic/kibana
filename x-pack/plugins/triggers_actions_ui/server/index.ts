@@ -12,6 +12,7 @@ import { TriggersActionsPlugin } from './plugin';
 export { PluginStartContract } from './plugin';
 export {
   TimeSeriesQuery,
+  TimeSeriesResult,
   CoreQueryParams,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
