@@ -50,10 +50,7 @@ const unitOptions = [
 ];
 
 export const FrequencyItem: React.FC<Props> = ({ label, description, duration, estimate }) => {
-  // TODO: This is a temporary solution to display the next sync date. Does not account for API edge cases.
-  // Discussion is ongoing on a permanent fix from the API.
-  const [numString, unit] = moment.duration(duration).humanize().split(' ');
-  const interval = parseInt(numString, 10);
+  const [interval, unit] = formatDuration(duration);
   const { lastRun, nextStart, duration: durationEstimate } = estimate;
   const estimateDisplay = durationEstimate && moment.duration(durationEstimate).humanize();
 
@@ -136,4 +133,25 @@ export const FrequencyItem: React.FC<Props> = ({ label, description, duration, e
       <EuiSpacer size="s" />
     </>
   );
+};
+
+// In most cases, the user will use the form to set the sync frequency, in which case the duration
+// will be in the format of "PT3D" (ISO 8601). However, if an operator has set the sync frequency via
+// the API, the duration could be a complex format, such as "P1DT2H3M4S". It was decided that in this
+// case, we should omit seconds and go with the least common denominator from minutes.
+//
+// Example: "P1DT2H3M4S" -> "1563 Minutes"
+const formatDuration = (duration: string): [interval: number, unit: string] => {
+  const momentDuration = moment.duration(duration);
+  if (duration.includes('M')) {
+    return [Math.round(momentDuration.asMinutes()), unitOptions[0].value];
+  }
+  if (duration.includes('H')) {
+    return [Math.round(momentDuration.asHours()), unitOptions[1].value];
+  }
+  if (duration.includes('D')) {
+    return [Math.round(momentDuration.asDays()), unitOptions[2].value];
+  }
+
+  return [1, unitOptions[0].value];
 };

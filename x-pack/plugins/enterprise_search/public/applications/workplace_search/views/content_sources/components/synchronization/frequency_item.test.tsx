@@ -24,10 +24,41 @@ describe('FrequencyItem', () => {
       lastRun: '2021-09-25T21:39:24+00:00',
     },
   };
+
   it('renders', () => {
     const wrapper = shallow(<FrequencyItem {...props} />);
 
     expect(wrapper.find(EuiSuperSelect)).toHaveLength(1);
     expect(wrapper.find(EuiFieldNumber)).toHaveLength(1);
+  });
+
+  describe('ISO8601 formatting', () => {
+    it('handles minutes display', () => {
+      const wrapper = shallow(<FrequencyItem {...props} duration="P1DT2H3M4S" />);
+
+      expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(1563);
+      expect(wrapper.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('minutes');
+    });
+
+    it('handles hours display', () => {
+      const wrapper = shallow(<FrequencyItem {...props} duration="P1DT2H" />);
+
+      expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(26);
+      expect(wrapper.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('hours');
+    });
+
+    it('handles days display', () => {
+      const wrapper = shallow(<FrequencyItem {...props} duration="P3D" />);
+
+      expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(3);
+      expect(wrapper.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('days');
+    });
+
+    it('handles seconds display (defaults to 1 minute)', () => {
+      const wrapper = shallow(<FrequencyItem {...props} duration="P44S" />);
+
+      expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(1);
+      expect(wrapper.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('minutes');
+    });
   });
 });
