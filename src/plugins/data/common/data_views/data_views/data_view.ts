@@ -10,6 +10,7 @@
 
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import type { estypes } from '@elastic/elasticsearch';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '../..';
 import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
@@ -158,7 +159,7 @@ export class DataView implements IIndexPattern {
   };
 
   getComputedFields() {
-    const scriptFields: Record<string, { script: { source: string; lang: string } }> = {};
+    const scriptFields: Record<string, estypes.ScriptField> = {};
     if (!this.fields) {
       return {
         storedFields: ['*'],
@@ -185,7 +186,7 @@ export class DataView implements IIndexPattern {
       scriptFields[field.name] = {
         script: {
           source: field.script as string,
-          lang: field.lang as string,
+          lang: field.lang,
         },
       };
     });
