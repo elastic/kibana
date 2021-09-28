@@ -1805,6 +1805,20 @@
         "path": "x-pack/plugins/timelines/public/index.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.TimelineContext",
+        "type": "Object",
+        "tags": [],
+        "label": "TimelineContext",
+        "description": [],
+        "signature": [
+          "React.Context<{ timelineId: string | null; }>"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/t_grid/shared/index.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "start": {
@@ -14189,7 +14203,7 @@
           "\nA `TGridCellAction` function accepts `data`, where each row of data is\nrepresented as a `TimelineNonEcsData[]`. For example, `data[0]` would\ncontain a `TimelineNonEcsData[]` with the first row of data.\n\nA `TGridCellAction` returns a function that has access to all the\n`EuiDataGridColumnCellActionProps`, _plus_ access to `data`,\n which enables code like the following example to be written:\n\nExample:\n```\n({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {\n  const value = getMappedNonEcsValue({\n    data: data[rowIndex], // access a specific row's values\n    fieldName: columnId,\n  });\n\n  return (\n    <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType=\"heart\">\n      {'Love it'}\n     </Component>\n  );\n};\n```"
         ],
         "signature": [
-          "({ browserFields, data, timelineId, pageSize, }: { browserFields: Readonly<Record<string, Partial<",
+          "({ browserFields, data, globalFilters, pageSize, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -14205,7 +14219,9 @@
             "section": "def-common.TimelineNonEcsData",
             "text": "TimelineNonEcsData"
           },
-          "[][]; timelineId: string; pageSize: number; }) => (props: ",
+          "[][]; globalFilters?: ",
+          "Filter",
+          "[] | undefined; pageSize: number; timelineId: string; }) => (props: ",
           "EuiDataGridColumnCellActionProps",
           ") => React.ReactNode"
         ],
@@ -14237,7 +14253,9 @@
                 "section": "def-common.TimelineNonEcsData",
                 "text": "TimelineNonEcsData"
               },
-              "[][]; timelineId: string; pageSize: number; }"
+              "[][]; globalFilters?: ",
+              "Filter",
+              "[] | undefined; pageSize: number; timelineId: string; }"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false
