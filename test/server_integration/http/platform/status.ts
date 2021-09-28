@@ -54,7 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
         async () => (await getStatus('statusPluginA')).level === 'degraded'
       );
       expect((await getStatus('statusPluginA')).level).to.eql('degraded');
-      expect((await getStatus('statusPluginB')).level).to.eql('degraded');
+      // expect((await getStatus('statusPluginB')).level).to.eql('degraded');
+      expect(await getStatus('statusPluginB')).to.eql({});
 
       await setStatus('available');
       await retry.waitForWithTimeout(
