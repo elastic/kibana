@@ -43,13 +43,13 @@ export const FileBasedNumberContentPreview = ({ config }: { config: FileBasedFie
       </EuiFlexGroup>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
-          <EuiText size={'xs'}>{stats.min} </EuiText>
+          <EuiText size={'xs'}>{stats.min}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size={'xs'}>{stats.median} </EuiText>
+          <EuiText size={'xs'}>{stats.median}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size={'xs'}>{stats.max} </EuiText>
+          <EuiText size={'xs'}>{stats.max}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
