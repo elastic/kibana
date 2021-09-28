@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from 'src/core/public';
 
@@ -52,6 +54,14 @@ const breadcrumbGetters: {
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
   const { chrome, http, application } = useStartServices();
+  const pageRef = useRef<Page | undefined>();
+
+  if (pageRef.current === page) {
+    return;
+  }
+
+  pageRef.current = page;
+
   const breadcrumbs: ChromeBreadcrumb[] =
     breadcrumbGetters[page]?.(values).map((breadcrumb) => {
       const href = breadcrumb.href
@@ -68,9 +78,11 @@ export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
           : undefined,
       };
     }) || [];
+
   const docTitle: string[] = [...breadcrumbs]
     .reverse()
     .map((breadcrumb) => breadcrumb.text as string);
+
   chrome.docTitle.change(docTitle);
   chrome.setBreadcrumbs(breadcrumbs);
 }
