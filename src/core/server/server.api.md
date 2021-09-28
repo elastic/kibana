@@ -457,6 +457,7 @@ export interface CoreStart {
 export interface CoreStatus {
     // (undocumented)
     elasticsearch: ServiceStatus;
+    overall: ServiceStatus;
     // (undocumented)
     savedObjects: ServiceStatus;
 }
