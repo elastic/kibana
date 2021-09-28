@@ -8,6 +8,7 @@
 import { TOGGLE_NAVIGATION_BTN } from '../screens/navigation';
 
 export const INTEGRATIONS = 'app/integrations#/';
+export const FLEET = 'app/fleet/';
 
 export const navigateTo = (page: string) => {
   cy.visit(page);
