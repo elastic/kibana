@@ -6,47 +6,40 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import * as useUiSettingHook from '../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
+import { render } from '../../../utils/test_helper';
 import type { TopAlert } from '../';
 import { AlertsFlyout } from './';
 
 describe('AlertsFlyout', () => {
-  jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => '');
-
+  jest
+    .spyOn(useUiSettingHook, 'useUiSetting')
+    .mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   const observabilityRuleTypeRegistryMock = createObservabilityRuleTypeRegistryMock();
 
   it('should include a indicator for an active alert', async () => {
-    const descriptionListItems = shallow(
+    const flyout = render(
       <AlertsFlyout
         alert={activeAlert}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
         onClose={jest.fn()}
       />
-    )
-      .find('EuiDescriptionList')
-      .dive();
+    );
 
-    const alertStatusIndicator = descriptionListItems.find('AlertStatusIndicator');
-    expect(alertStatusIndicator.exists()).toEqual(true);
-    expect(alertStatusIndicator.props()).toEqual({ alertStatus: 'active' });
+    expect(flyout.getByText('Active')).toBeInTheDocument();
   });
 
   it('should include a indicator for a recovered alert', async () => {
-    const descriptionListItems = shallow(
+    const flyout = render(
       <AlertsFlyout
         alert={recoveredAlert}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
         onClose={jest.fn()}
       />
-    )
-      .find('EuiDescriptionList')
-      .dive();
+    );
 
-    const alertStatusIndicator = descriptionListItems.find('AlertStatusIndicator');
-    expect(alertStatusIndicator.exists()).toEqual(true);
-    expect(alertStatusIndicator.props()).toEqual({ alertStatus: 'recovered' });
+    expect(flyout.getByText('Recovered')).toBeInTheDocument();
   });
 });
 

@@ -9,16 +9,23 @@
 import { ALERT_STATUS } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { CellValueElementProps } from '../../../../timelines/common';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import * as PluginHook from '../../hooks/use_plugin_context';
+import { render } from '../../utils/test_helper';
 import { getRenderCellValue } from './render_cell_value';
-import { AlertStatusIndicator } from '../../components/shared/alert_status_indicator';
 
 interface AlertsTableRow {
   alertStatus: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
 }
 
 describe('getRenderCellValue', () => {
-  jest.spyOn(PluginHook, 'usePluginContext').mockImplementation(() => ({} as any));
+  const observabilityRuleTypeRegistryMock = createObservabilityRuleTypeRegistryMock();
+  jest.spyOn(PluginHook, 'usePluginContext').mockImplementation(
+    () =>
+      ({
+        observabilityRuleTypeRegistry: observabilityRuleTypeRegistryMock,
+      } as any)
+  );
 
   const renderCellValue = getRenderCellValue({
     setFlyoutAlert: jest.fn(),
@@ -26,25 +33,27 @@ describe('getRenderCellValue', () => {
 
   describe('when column is alert status', () => {
     it('should return an active indicator when alert status is active', async () => {
-      const cellValue = renderCellValue({
-        ...requiredProperties,
-        columnId: ALERT_STATUS,
-        data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_ACTIVE }),
-      }) as JSX.Element;
+      const cell = render(
+        renderCellValue({
+          ...requiredProperties,
+          columnId: ALERT_STATUS,
+          data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_ACTIVE }),
+        })
+      );
 
-      expect(cellValue.type).toEqual(AlertStatusIndicator);
-      expect(cellValue.props).toEqual({ alertStatus: ALERT_STATUS_ACTIVE });
+      expect(cell.getByText('Active')).toBeInTheDocument();
     });
 
     it('should return a recovered indicator when alert status is recovered', async () => {
-      const cellValue = renderCellValue({
-        ...requiredProperties,
-        columnId: ALERT_STATUS,
-        data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_RECOVERED }),
-      }) as JSX.Element;
+      const cell = render(
+        renderCellValue({
+          ...requiredProperties,
+          columnId: ALERT_STATUS,
+          data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_RECOVERED }),
+        })
+      );
 
-      expect(cellValue.type).toEqual(AlertStatusIndicator);
-      expect(cellValue.props).toEqual({ alertStatus: ALERT_STATUS_RECOVERED });
+      expect(cell.getByText('Recovered')).toBeInTheDocument();
     });
   });
 });
