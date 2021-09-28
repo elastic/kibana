@@ -150,7 +150,7 @@ export function MachineLearningDataVisualizerTableProvider(
       const docCount = await testSubjects.getVisibleText(docCountFormattedSelector);
       expect(docCount).to.eql(
         docCountFormatted,
-        `Expected field document count to be '${docCountFormatted}' (got '${docCount}')`
+        `Expected field ${fieldName}'s document count to be '${docCountFormatted}' (got '${docCount}')`
       );
     }
 

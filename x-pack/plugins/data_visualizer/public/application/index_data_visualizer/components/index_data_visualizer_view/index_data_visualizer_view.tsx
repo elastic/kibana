@@ -735,11 +735,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
 
       const nonMetricConfig = {
-        ...fieldData,
+        ...(fieldData ? fieldData : {}),
         fieldFormat: currentIndexPattern.getFormatterForField(field),
         aggregatable: field.aggregatable,
         scripted: field.scripted,
-        loading: fieldData?.existsInDocs ?? false,
+        loading: fieldData?.existsInDocs,
         deletable: field.runtimeField !== undefined,
       };
 
