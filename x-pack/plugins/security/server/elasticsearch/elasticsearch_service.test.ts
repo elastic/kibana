@@ -49,6 +49,7 @@ describe('ElasticsearchService', () => {
           summary: 'Service is NOT working',
         },
         savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+        overall: { level: ServiceStatusLevels.unavailable, summary: 'Services are NOT working' },
       });
 
       const mockStatus = coreMock.createSetup().status;
@@ -75,6 +76,7 @@ describe('ElasticsearchService', () => {
       mockStatusSubject.next({
         elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
         savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+        overall: { level: ServiceStatusLevels.unavailable, summary: 'savedObjects is NOT working' },
       });
       expect(mockHandler).not.toHaveBeenCalled();
 
@@ -83,6 +85,7 @@ describe('ElasticsearchService', () => {
       mockStatusSubject.next({
         elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
         savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+        overall: { level: ServiceStatusLevels.unavailable, summary: 'savedObjects is NOT working' },
       });
       expect(mockHandler).toHaveBeenCalledTimes(1);
     });
@@ -95,6 +98,7 @@ describe('ElasticsearchService', () => {
       mockStatusSubject.next({
         elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
         savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+        overall: { level: ServiceStatusLevels.unavailable, summary: 'savedObjects is NOT working' },
       });
 
       const mockHandler = jest.fn();
@@ -153,6 +157,7 @@ describe('ElasticsearchService', () => {
       mockStatusSubject.next({
         elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
         savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+        overall: { level: ServiceStatusLevels.unavailable, summary: 'savedObjects is NOT working' },
       });
 
       const mockHandler = jest.fn();
