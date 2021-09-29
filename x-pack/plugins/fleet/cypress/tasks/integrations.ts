@@ -10,7 +10,6 @@ import {
   CONFIRM_MODAL_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   INTEGRATION_NAME_LINK,
-  SETTINGS_TAB,
 } from '../screens/integrations';
 
 export const addIntegration = () => {
@@ -31,7 +30,7 @@ function closeModalIfVisible() {
 }
 
 export const deleteIntegrations = async (integration: string) => {
-  const ids = [];
+  const ids: string[] = [];
   cy.get(INTEGRATION_NAME_LINK)
     .each(($a) => {
       const href = $a.attr('href') as string;

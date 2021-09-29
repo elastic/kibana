@@ -7,8 +7,11 @@
   "retries": {
     "runMode": 2
   },
+  "screenshotsFolder": "../../../target/kibana-fleet/cypress/screenshots",
   "trashAssetsBeforeRuns": false,
-  "video": false,
+  "video": true,
+  "videosFolder": "../../../target/kibana-fleet/cypress/videos",
   "viewportHeight": 900,
-  "viewportWidth": 1440
+  "viewportWidth": 1440,
+  "screenshotOnRunFailure": true
 }
