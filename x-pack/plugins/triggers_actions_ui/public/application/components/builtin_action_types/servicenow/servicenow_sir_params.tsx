@@ -33,12 +33,12 @@ const defaultFields: Fields = {
   priority: [],
 };
 
-const valuesToString = (value: string | string[] | null): string | null => {
+const valuesToString = (value: string | string[] | null): string | undefined => {
   if (Array.isArray(value)) {
     return value.join(',');
   }
 
-  return value;
+  return value ?? undefined;
 };
 
 const ServiceNowSIRParamsFields: React.FunctionComponent<
@@ -189,7 +189,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'short_description'}
-          inputTargetValue={incident?.short_description ?? undefined}
+          inputTargetValue={incident?.short_description}
           errors={errors['subActionParams.incident.short_description'] as string[]}
         />
       </EuiFormRow>
@@ -200,7 +200,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'source_ip'}
-          inputTargetValue={valuesToString(incident?.source_ip) ?? undefined}
+          inputTargetValue={valuesToString(incident?.source_ip)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -210,7 +210,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'dest_ip'}
-          inputTargetValue={valuesToString(incident?.dest_ip) ?? undefined}
+          inputTargetValue={valuesToString(incident?.dest_ip)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -220,7 +220,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'malware_url'}
-          inputTargetValue={valuesToString(incident?.malware_url) ?? undefined}
+          inputTargetValue={valuesToString(incident?.malware_url)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -230,7 +230,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'malware_hash'}
-          inputTargetValue={valuesToString(incident?.malware_hash) ?? undefined}
+          inputTargetValue={valuesToString(incident?.malware_hash)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />

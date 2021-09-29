@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isString } from 'lodash';
+import { isEmpty, isString } from 'lodash';
 
 import {
   ExecutorSubActionPushParamsSIR,
@@ -29,10 +29,14 @@ const formatObservables = (observables: string | string[], type: ObservableTypes
    */
   const obsAsArray = Array.isArray(observables) ? observables : observables.split(SPLIT_REGEX);
   const uniqueObservables = new Set(obsAsArray);
-  return [...uniqueObservables].map((obs) => ({ value: obs, type }));
+  return [...uniqueObservables].filter((obs) => !isEmpty(obs)).map((obs) => ({ value: obs, type }));
 };
 
 const combineObservables = (a: string | string[], b: string | string[]): string | string[] => {
+  if (isEmpty(a) && isEmpty(b)) {
+    return [];
+  }
+
   if (isString(a) && Array.isArray(b)) {
     return [...b, ...a.split(SPLIT_REGEX)];
   }
