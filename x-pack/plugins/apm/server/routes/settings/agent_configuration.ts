@@ -205,7 +205,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       logger.debug(
         `[Central configuration] Config was not found for ${service.name}/${service.environment}`
       );
-      throw Boom.notFound();
+      return null;
     }
 
     // whether to update `applied_by_agent` field
