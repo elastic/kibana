@@ -37,6 +37,7 @@ export class TelemetryReceiver {
   private esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
+  private kibanaIndex?: string;
   private readonly max_records = 10_000;
 
   constructor(logger: Logger) {
@@ -45,9 +46,11 @@ export class TelemetryReceiver {
 
   public async start(
     core?: CoreStart,
+    kibanaIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient
   ) {
+    this.kibanaIndex = kibanaIndex;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
@@ -257,7 +260,7 @@ export class TelemetryReceiver {
 
     const query: SearchRequest = {
       expand_wildcards: 'open,hidden',
-      index: '.kibana*',
+      index: `${this.kibanaIndex}*`,
       ignore_unavailable: true,
       size: this.max_records,
       body: {
