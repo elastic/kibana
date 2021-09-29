@@ -8,3 +8,4 @@
 export const ElasticsearchOverview: FunctionComponent<Props>;
 export const ElasticsearchNodes: FunctionComponent<Props>;
 export const ElasticsearchIndices: FunctionComponent<Props>;
+export const NodeReact: FunctionComponent<Props>;

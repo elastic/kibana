@@ -26,7 +26,7 @@ describe('CurationsOverview', () => {
     setMockValues({ curations: [] });
     const wrapper = shallow(<CurationsOverview />);
 
-    expect(wrapper.is(EmptyState)).toBe(true);
+    expect(wrapper.find(EmptyState).exists()).toBe(true);
   });
 
   it('renders a curations table when there are curations present', () => {

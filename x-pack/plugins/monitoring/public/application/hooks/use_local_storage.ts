@@ -19,8 +19,7 @@ export const useLocalStorage = <Value>(key: string, defaultValue: Value): [Value
     try {
       parsedData = (monitoringDataStorage && JSON.parse(monitoringDataStorage)) || {};
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Monitoring UI: error parsing locally stored monitoring data', e);
+      throw new Error('Monitoring UI: error parsing locally stored monitoring data');
     }
     return parsedData;
   };

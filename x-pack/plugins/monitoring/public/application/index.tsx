@@ -21,9 +21,11 @@ import { RouteInit } from './route_init';
 import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { BeatsOverviewPage } from './pages/beats/overview';
+import { BeatsInstancesPage } from './pages/beats/instances';
 import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
+import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
@@ -88,6 +90,13 @@ const MonitoringApp: React.FC<{
                   />
 
                   <RouteInit
+                    path="/elasticsearch/nodes/:node"
+                    component={ElasticsearchNodePage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
                     path="/elasticsearch/nodes"
                     component={ElasticsearchNodesPage}
                     codePaths={[CODE_PATH_ELASTICSEARCH]}
@@ -102,6 +111,13 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* Beats Views */}
+                  <RouteInit
+                    path="/beats/beats"
+                    component={BeatsInstancesPage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/beats"
                     component={BeatsOverviewPage}
