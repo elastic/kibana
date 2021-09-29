@@ -9,13 +9,5 @@ import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { EmbeddableInput } from '../../../expression_types';
 
 export function toExpression(input: EmbeddableInput, embeddableType: string): string {
-  const expressionParts = [] as string[];
-
-  expressionParts.push('embeddable');
-
-  expressionParts.push(`config="${encode(input)}"`);
-
-  expressionParts.push(`type="${embeddableType}"`);
-
-  return expressionParts.join(' ');
+  return `embeddable config="${encode(input)}" type="${embeddableType}"`;
 }
