@@ -37,12 +37,6 @@ export function reportFailuresToFile(failures: TestFailure[]) {
       .flat()
       .join('\n');
 
-    process.env.BUJILDKITE_BUILD_ID = 'de8a19f8-f2da-418c-8b8e-9c2ce6419cee';
-    process.env.BUILDKITE_JOB_ID = 'da9f73cb-e613-414a-8d2d-f68ef5005ab8';
-    process.env.BUILDKITE_BUILD_URL = 'https://buildkite.com/elastic/kibana-hourly/builds/603';
-    process.env.BUILDKITE_LABEL = 'Default CI Group';
-    process.env.BUILDKITE_PARALLEL_JOB = '1';
-
     const failureJSON = JSON.stringify(
       {
         ...failure,
