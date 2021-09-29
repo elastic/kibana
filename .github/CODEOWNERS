@@ -7,6 +7,7 @@
 
 # Tech leads
 /dev_docs @elastic/kibana-tech-leads
+/src/dev/license_checker/config.ts @elastic/kibana-tech-leads
 /packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
 # Virtual teams
