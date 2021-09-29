@@ -56,7 +56,7 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
   };
 
   const getNextPageButton = async () => {
-    return await testSubjects.find(NEXT_BUTTON_SELECTOR, 20000);
+    return await testSubjects.find(NEXT_BUTTON_SELECTOR);
   };
 
   const getNextPageButtonOrFail = async () => {
@@ -87,10 +87,6 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     return await (await getPrevPageButton()).getAttribute('disabled');
   };
 
-  const getNextButtonDisabledValue = async () => {
-    return await (await getNextPageButton()).getAttribute('disabled');
-  };
-
   return {
     getPageSizeSelector,
     getPageSizeSelectorOrFail,
@@ -109,6 +105,5 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     goToPrevPage,
     goToFirstPage,
     getPrevButtonDisabledValue,
-    getNextButtonDisabledValue,
   };
 }

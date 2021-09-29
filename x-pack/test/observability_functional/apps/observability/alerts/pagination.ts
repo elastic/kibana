@@ -123,13 +123,6 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(tableRows.length).to.be(10);
         });
-
-        it('Next page button is disabled', async () => {
-          await (await observability.alerts.pagination.getPaginationButtonTwo()).click();
-          const nextButtonDisabledValue =
-            await observability.alerts.pagination.getNextButtonDisabledValue();
-          expect(nextButtonDisabledValue).to.be('true');
-        });
       });
     });
   });
