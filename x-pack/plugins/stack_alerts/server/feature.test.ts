@@ -12,13 +12,20 @@ import { featuresPluginMock } from '../../features/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 describe('Stack Alerts Feature Privileges', () => {
-  test('feature privilege should contain all built-in rule types', async () => {
+  test('feature privilege should contain all built-in rule types', () => {
     const context = coreMock.createPluginInitializerContext();
     const plugin = new AlertingBuiltinsPlugin(context);
     const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices = jest.fn().mockResolvedValue([
+      {
+        application: {},
+      },
+      { triggersActionsUi: {} },
+    ]);
+
     const alertingSetup = alertsMock.createSetup();
     const featuresSetup = featuresPluginMock.createSetup();
-    await plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
+    plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
     const typesInFeaturePrivilege = BUILT_IN_ALERTS_FEATURE.alerting ?? [];
     const typesInFeaturePrivilegeAll =
