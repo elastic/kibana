@@ -218,6 +218,7 @@ const ThreatSummaryEnrichmentData: React.FC<{
 
             {indicator.map(({ fieldsData, index, field, provider, browserField, value }) => (
               <EnrichedDataRow
+                key={field}
                 field={field}
                 value={
                   <EnrichmentDescription
@@ -247,6 +248,7 @@ const ThreatSummaryEnrichmentData: React.FC<{
 
             {investigation.map(({ fieldsData, index, field, provider, browserField, value }) => (
               <EnrichedDataRow
+                key={field}
                 field={field}
                 value={
                   <EnrichmentDescription
@@ -307,7 +309,7 @@ const HostRiskDataBlock: React.FC<{
 
         {hostRisk.isModuleEnabled &&
           hostRisk.fields.map(({ field, value }) => (
-            <EnrichedDataRow field={field} value={value} />
+            <EnrichedDataRow field={field} value={value} key={field} />
           ))}
       </EuiPanel>
       <EuiSpacer size="m" />

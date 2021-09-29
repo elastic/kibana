@@ -122,4 +122,31 @@ describe('AlertSummaryView', () => {
     );
     expect(wrapper.find('div[data-test-subj="summary-view"]').render()).toMatchSnapshot();
   });
+
+  test("doesn't render empty fields", () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'signal' && item.field === 'signal.rule.name') {
+          return {
+            category: 'signal',
+            field: 'signal.rule.name',
+            values: undefined,
+            originalValue: undefined,
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+
+    const wrapper = mount(
+      <TestProviders>
+        <AlertSummaryView {...renderProps} />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="event-field-${props.eventId}-signal.rule.name"]`).exists()
+    ).toEqual(false);
+  });
 });

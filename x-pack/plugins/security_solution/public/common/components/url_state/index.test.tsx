@@ -13,13 +13,13 @@ import { SecurityPageName } from '../../../app/types';
 import { RouteSpyState } from '../../utils/route/types';
 import { CONSTANTS } from './constants';
 import {
+  getMockProps,
   getMockPropsObj,
   mockHistory,
   mockSetFilterQuery,
   mockSetAbsoluteRangeDatePicker,
   mockSetRelativeRangeDatePicker,
   testCases,
-  getMockProps,
 } from './test_dependencies';
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';

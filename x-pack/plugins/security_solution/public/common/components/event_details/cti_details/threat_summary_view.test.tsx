@@ -25,7 +25,7 @@ describe('ThreatSummaryView', () => {
   const data = mockAlertDetailsData as TimelineEventsDetailsItem[];
   const browserFields = mockBrowserFields;
 
-  it('renders a row for each enrichment', () => {
+  it("renders 'Enriched with Threat Intelligence' panel with fields", () => {
     const enrichments = [
       buildEventEnrichmentMock({ 'matched.id': ['test.id'], 'matched.field': ['test.field'] }),
       buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
@@ -43,8 +43,11 @@ describe('ThreatSummaryView', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="threat-summary-view"] .euiTableRow')).toHaveLength(
-      enrichments.length
+    const panel = wrapper.find(
+      'ThreatSummaryPanelHeader[title="Enriched with Threat Intelligence"]'
     );
+    expect(panel.exists()).toBeTruthy();
+
+    expect(wrapper.find('EnrichedDataRow')).toHaveLength(enrichments.length);
   });
 });

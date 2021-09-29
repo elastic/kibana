@@ -11,6 +11,7 @@ import { allHosts } from './all';
 import { hostDetails } from './details';
 import { hostOverview } from './overview';
 import { riskyHosts } from './risky_hosts';
+import { riskScore } from './risk_score';
 import { firstOrLastSeenHost } from './last_first_seen';
 import { uncommonProcesses } from './uncommon_processes';
 import { authentications, authenticationsEntities } from './authentications';
@@ -40,6 +41,7 @@ describe('hostsFactory', () => {
       [HostsQueries.authentications]: authentications,
       [HostsQueries.authenticationsEntities]: authenticationsEntities,
       [HostsQueries.riskyHosts]: riskyHosts,
+      [HostsQueries.riskScore]: riskScore,
       [HostsKpiQueries.kpiAuthentications]: hostsKpiAuthentications,
       [HostsKpiQueries.kpiAuthenticationsEntities]: hostsKpiAuthenticationsEntities,
       [HostsKpiQueries.kpiHosts]: hostsKpiHosts,
