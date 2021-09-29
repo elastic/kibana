@@ -711,3 +711,17 @@ export const SYNC_DISABLED_MESSAGE = i18n.translate(
     defaultMessage: 'Source synchronization disabled.',
   }
 );
+
+export const SYNC_SETTINGS_UPDATED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sync_settings_updated_message',
+  {
+    defaultMessage: 'Source synchronization settings updated.',
+  }
+);
+
+export const SYNC_UNSAVED_CHANGES_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncUnsavedChangesMessage',
+  {
+    defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
+  }
+);
