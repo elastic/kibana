@@ -20,7 +20,13 @@ function lintFilesOnFS(cli: CLIEngine, files: File[]) {
 
 // For files living somewhere else (ie. git object)
 async function lintFilesOnContent(cli: CLIEngine, files: File[]) {
-  const report = {
+  const report: {
+    results: any[];
+    errorCount: number;
+    warningCount: number;
+    fixableErrorCount: number;
+    fixableWarningCount: number;
+  } = {
     results: [],
     errorCount: 0,
     warningCount: 0,
