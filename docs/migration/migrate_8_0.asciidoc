@@ -376,10 +376,4 @@ Configuration management tools and automation will need to be updated to use the
 
 *Impact:* Use {kibana-ref}/banners-settings-kb.html#banners-settings-kb[`xpack.banners.placement: 'top'`] instead.
 
-[float]
-=== `xpack.xpack_main.xpack_api_polling_frequency_millis` is no longer valid
-*Details:* The deprecated `xpack.xpack_main.xpack_api_polling_frequency_millis` setting is no longer valid
-
-*Impact:* Configure `xpack.licensing.api_polling_frequency` instead.
-
 // end::notable-breaking-changes[]
