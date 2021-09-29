@@ -132,6 +132,7 @@ export type ServiceNowSIRIncident = Omit<
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
+  config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   logger: Logger;
   commentFieldKey: string;

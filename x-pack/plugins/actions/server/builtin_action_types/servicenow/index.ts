@@ -173,6 +173,7 @@ async function executor(
     data = await api.pushToService({
       externalService,
       params: pushToServiceParams,
+      config,
       secrets,
       logger,
       commentFieldKey: externalServiceConfig.commentFieldKey,
