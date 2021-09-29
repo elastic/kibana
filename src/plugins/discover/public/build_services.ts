@@ -32,7 +32,6 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
@@ -52,7 +51,6 @@ export interface DiscoverServices {
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
@@ -95,7 +93,6 @@ export function buildServices(
     },
     navigation: plugins.navigation,
     share: plugins.share,
-    kibanaLegacy: plugins.kibanaLegacy,
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
