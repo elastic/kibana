@@ -25,7 +25,7 @@ export function reportFailuresToFile(failures: TestFailure[]) {
   for (const failure of failures.slice(0, 20)) {
     const hash = createHash('md5').update(failure.name).digest('hex');
     const filenameBase = `${
-      process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '-' : ''
+      process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
     }${hash}`;
     const dir = join('target', 'test_failures');
 
