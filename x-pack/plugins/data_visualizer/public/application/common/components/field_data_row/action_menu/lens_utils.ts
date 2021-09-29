@@ -15,7 +15,7 @@ import type {
   XYLayerConfig,
 } from '../../../../../../../lens/public';
 import { FieldVisConfig } from '../../stats_table/types';
-import { JOB_FIELD_TYPES, SavedSearchSavedObject } from '../../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../../common';
 
 interface ColumnsAndLayer {
   columns: Record<string, IndexPatternColumn>;
@@ -242,7 +242,6 @@ function getColumnsAndLayer(
 // 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip'
 export function getLensAttributes(
   defaultIndexPattern: IndexPattern | undefined,
-  savedSearch: SavedSearchSavedObject | null,
   combinedQuery: CombinedQuery,
   filters: Filter[],
   item: FieldVisConfig
@@ -271,7 +270,6 @@ export function getLensAttributes(
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
-      ...(savedSearch ? savedSearch.references : []),
     ],
     state: {
       datasourceStates: {

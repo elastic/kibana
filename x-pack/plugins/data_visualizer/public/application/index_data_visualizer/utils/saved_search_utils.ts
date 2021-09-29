@@ -36,9 +36,19 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | Sa
     typeof search?.searchSourceJSON === 'string'
       ? (JSON.parse(search.searchSourceJSON) as {
           query: Query;
-          filter: any[];
+          filter: Filter[];
         })
       : undefined;
+
+  // Remove indexRefName because saved search might no longer be relevant
+  // if user modifies the query or filter
+  // after opening a saved search
+  if (parsed && Array.isArray(parsed.filter)) {
+    parsed.filter.forEach((f) => {
+      // @ts-expect-error indexRefName does appear in meta for newly created saved search
+      f.meta.indexRefName = undefined;
+    });
+  }
   return parsed;
 }
 

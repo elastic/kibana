@@ -17,11 +17,9 @@ import {
   dataVisualizerRefresh$,
   Refresh,
 } from '../../../../index_data_visualizer/services/timefilter_refresh_service';
-import type { SavedSearchSavedObject } from '../../../../../../common';
 
 export function getActions(
   indexPattern: IndexPattern,
-  currentSavedSearch: SavedSearchSavedObject | null,
   services: Partial<DataVisualizerKibanaReactContextValue['services']>,
   combinedQuery: CombinedQuery,
   actionFlyoutRef: MutableRefObject<(() => void | undefined) | undefined>
@@ -52,13 +50,7 @@ export function getActions(
       available: (item: FieldVisConfig) =>
         getCompatibleLensDataType(item.type) !== undefined && canUseLensEditor,
       onClick: (item: FieldVisConfig) => {
-        const lensAttributes = getLensAttributes(
-          indexPattern,
-          currentSavedSearch,
-          combinedQuery,
-          filters,
-          item
-        );
+        const lensAttributes = getLensAttributes(indexPattern, combinedQuery, filters, item);
         if (lensAttributes) {
           lensPlugin.navigateToPrefilledEditor({
             id: `dataVisualizer-${item.fieldName}`,
