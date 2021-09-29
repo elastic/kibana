@@ -202,6 +202,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
     <EuiInMemoryTable
       loading={isLoading}
       hasActions={true}
+      tableLayout="auto"
       message={
         isLoading ? (
           <FormattedMessage

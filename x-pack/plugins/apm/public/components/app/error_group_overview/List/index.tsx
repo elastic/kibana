@@ -47,7 +47,8 @@ const Culprit = euiStyled.div`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
 
-type ErrorGroupItem = APIReturnType<'GET /api/apm/services/{serviceName}/errors'>['errorGroups'][0];
+type ErrorGroupItem =
+  APIReturnType<'GET /api/apm/services/{serviceName}/errors'>['errorGroups'][0];
 
 interface Props {
   items: ErrorGroupItem[];

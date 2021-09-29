@@ -27,12 +27,14 @@ import { ListMetric } from '../list_metric';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { getLatencyColumnLabel } from './get_latency_column_label';
 
-type TransactionGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+type TransactionGroupMainStatistics =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 type ServiceTransactionGroupItem = ValuesType<
   TransactionGroupMainStatistics['transactionGroups']
 >;
-type TransactionGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
+type TransactionGroupDetailedStatistics =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,

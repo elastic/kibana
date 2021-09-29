@@ -51,14 +51,14 @@ describe('TopAggregateParamEditor', () => {
     aggParam = {
       options,
     };
-    agg = ({
+    agg = {
       params: {
         field: {
           type: 'number',
         },
       },
       getAggParams: jest.fn(() => [{ name: 'aggregate', options }]),
-    } as any) as IAggConfig;
+    } as any as IAggConfig;
     defaultProps = {
       ...aggParamCommonPropsMock,
       agg,

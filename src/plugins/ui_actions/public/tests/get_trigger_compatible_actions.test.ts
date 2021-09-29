@@ -32,14 +32,14 @@ beforeEach(() => {
 
 test('can register action', async () => {
   const { setup } = uiActions;
-  const helloWorldAction = createHelloWorldAction(({} as unknown) as OverlayStart);
+  const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
 
   setup.registerAction(helloWorldAction);
 });
 
 test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = uiActions;
-  const helloWorldAction = createHelloWorldAction(({} as unknown) as OverlayStart);
+  const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
 
   setup.registerAction(helloWorldAction);
 

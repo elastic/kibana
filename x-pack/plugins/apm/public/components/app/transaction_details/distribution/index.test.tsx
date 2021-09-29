@@ -59,9 +59,9 @@ function Wrapper({
     search: fromQuery({ transactionName: 'the-transaction-name' }),
   });
 
-  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+  const mockPluginContext = merge({}, mockApmPluginContextValue, {
     core: { http: { get: httpGet } },
-  }) as unknown) as ApmPluginContextValue;
+  }) as unknown as ApmPluginContextValue;
 
   return (
     <EuiThemeProvider darkMode={false}>

@@ -38,8 +38,10 @@ import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-consta
 import { getPackagePoliciesResponse, getTrustedAppByPolicy } from './mocks';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
-const packagePolicyClient = createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
-const savedObjectClient = savedObjectsClientMock.create() as jest.Mocked<SavedObjectsClientContract>;
+const packagePolicyClient =
+  createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
+const savedObjectClient =
+  savedObjectsClientMock.create() as jest.Mocked<SavedObjectsClientContract>;
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   _version: 'abc123',

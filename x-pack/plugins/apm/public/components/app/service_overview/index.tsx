@@ -163,7 +163,7 @@ export function ServiceOverview() {
                 <TransactionBreakdownChart
                   showAnnotations={false}
                   environment={environment}
-                  kuery={environment}
+                  kuery={kuery}
                 />
               </EuiFlexItem>
               {!isRumAgent && (

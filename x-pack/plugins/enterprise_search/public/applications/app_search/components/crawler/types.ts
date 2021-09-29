@@ -120,10 +120,14 @@ export interface CrawlerDomainFromServer {
 
 export interface CrawlerData {
   domains: CrawlerDomain[];
+  events: CrawlEvent[];
+  mostRecentCrawlRequest: CrawlRequest | null;
 }
 
 export interface CrawlerDataFromServer {
   domains: CrawlerDomainFromServer[];
+  events: CrawlEventFromServer[];
+  most_recent_crawl_request: CrawlRequestFromServer | null;
 }
 
 export interface CrawlerDomainValidationResultFromServer {
@@ -185,6 +189,26 @@ export interface CrawlRequestFromServer {
 
 export interface CrawlRequest {
   id: string;
+  status: CrawlerStatus;
+  createdAt: string;
+  beganAt: string | null;
+  completedAt: string | null;
+}
+
+export type CrawlEventStage = 'crawl' | 'process';
+
+export interface CrawlEventFromServer {
+  id: string;
+  stage: CrawlEventStage;
+  status: CrawlerStatus;
+  created_at: string;
+  began_at: string | null;
+  completed_at: string | null;
+}
+
+export interface CrawlEvent {
+  id: string;
+  stage: CrawlEventStage;
   status: CrawlerStatus;
   createdAt: string;
   beganAt: string | null;

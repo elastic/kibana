@@ -40,7 +40,6 @@ export interface UsageStats {
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
   'visualization:regionmap:showWarnings': boolean;
-  'visualization:dimmingOpacity': number;
   'visualization:tileMap:maxPrecision': number;
   'csv:separator': string;
   'visualization:tileMap:WMSdefaults': string;
@@ -92,6 +91,7 @@ export interface UsageStats {
   'savedObjects:listingLimit': number;
   'query:queryString:options': string;
   'metrics:max_buckets': number;
+  'metrics:allowStringIndices': boolean;
   'query:allowLeadingWildcards': boolean;
   metaFields: string[];
   'indexPattern:placeholder': string;

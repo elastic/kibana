@@ -16,6 +16,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  TIMESTAMP,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
@@ -60,7 +61,7 @@ export default {
       const { alertsResponse, latencyChartResponse } = args as Args;
       const serviceName = 'testService';
 
-      const apmPluginContextMock = ({
+      const apmPluginContextMock = {
         core: {
           notifications: {
             toasts: { addWarning: () => {}, addDanger: () => {} },
@@ -80,7 +81,7 @@ export default {
         },
         plugins: { observability: { isAlertingExperienceEnabled: () => true } },
         observabilityRuleTypeRegistry: { getFormatter: () => undefined },
-      } as unknown) as ApmPluginContextValue;
+      } as unknown as ApmPluginContextValue;
 
       createCallApmApi(apmPluginContextMock.core);
 
@@ -141,7 +142,7 @@ Example.args = {
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
         [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         [ALERT_EVALUATION_THRESHOLD]: [500000],
@@ -163,7 +164,7 @@ Example.args = {
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
         [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         [ALERT_EVALUATION_THRESHOLD]: [500000],
@@ -185,7 +186,7 @@ Example.args = {
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
         [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         [ALERT_EVALUATION_THRESHOLD]: [500000],

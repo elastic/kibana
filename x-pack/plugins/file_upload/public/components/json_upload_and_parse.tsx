@@ -100,9 +100,9 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     //
     // create index
     //
-    const settings = ({
+    const settings = {
       number_of_shards: 1,
-    } as unknown) as Settings;
+    } as unknown as Settings;
     const mappings = {
       properties: {
         coordinates: {

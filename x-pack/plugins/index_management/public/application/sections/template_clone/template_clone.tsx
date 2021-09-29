@@ -36,10 +36,11 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
-  const { error: templateToCloneError, data: templateToClone, isLoading } = useLoadIndexTemplate(
-    decodedTemplateName,
-    isLegacy
-  );
+  const {
+    error: templateToCloneError,
+    data: templateToClone,
+    isLoading,
+  } = useLoadIndexTemplate(decodedTemplateName, isLegacy);
 
   const onSave = async (template: TemplateDeserialized) => {
     setIsSaving(true);

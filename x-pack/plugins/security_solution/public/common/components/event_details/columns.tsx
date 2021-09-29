@@ -48,6 +48,7 @@ export const getColumns = ({
   timelineId,
   toggleColumn,
   getLinkValue,
+  isDraggable,
 }: {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
@@ -57,6 +58,7 @@ export const getColumns = ({
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   getLinkValue: (field: string) => string | null;
+  isDraggable?: boolean;
 }) => [
   {
     field: 'values',
@@ -138,6 +140,7 @@ export const getColumns = ({
           eventId={eventId}
           fieldFromBrowserField={fieldFromBrowserField}
           getLinkValue={getLinkValue}
+          isDraggable={isDraggable}
           values={values}
         />
       );

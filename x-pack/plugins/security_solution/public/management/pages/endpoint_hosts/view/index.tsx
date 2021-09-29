@@ -221,9 +221,8 @@ export const EndpointList = () => {
 
   const PAD_LEFT: React.CSSProperties = useMemo(() => ({ paddingLeft: '6px' }), []);
 
-  const handleDeployEndpointsClick = useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>(
-    'fleet',
-    {
+  const handleDeployEndpointsClick =
+    useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
       path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
         onDoneNavigateTo: [
@@ -231,8 +230,7 @@ export const EndpointList = () => {
           { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
       },
-    }
-  );
+    });
 
   const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
     return policyItems.map((item) => {

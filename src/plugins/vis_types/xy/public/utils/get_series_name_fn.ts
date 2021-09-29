@@ -29,23 +29,20 @@ function getSplitValues(
 }
 
 export const getSeriesNameFn = (aspects: VisConfig['aspects'], multipleY = false) =>
-  memoize(
-    ({ splitAccessors, yAccessor }: XYChartSeriesIdentifier): SeriesName => {
-      const splitValues = getSplitValues(splitAccessors, aspects.series);
-      const yAccessorTitle =
-        aspects.y.find(({ accessor }) => accessor === yAccessor)?.title ?? null;
+  memoize(({ splitAccessors, yAccessor }: XYChartSeriesIdentifier): SeriesName => {
+    const splitValues = getSplitValues(splitAccessors, aspects.series);
+    const yAccessorTitle = aspects.y.find(({ accessor }) => accessor === yAccessor)?.title ?? null;
 
-      if (!yAccessorTitle) {
-        return null;
-      }
-
-      if (multipleY) {
-        if (splitValues.length === 0) {
-          return yAccessorTitle;
-        }
-        return `${splitValues.join(' - ')}: ${yAccessorTitle}`;
-      }
-
-      return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
+    if (!yAccessorTitle) {
+      return null;
     }
-  );
+
+    if (multipleY) {
+      if (splitValues.length === 0) {
+        return yAccessorTitle;
+      }
+      return `${splitValues.join(' - ')}: ${yAccessorTitle}`;
+    }
+
+    return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
+  });

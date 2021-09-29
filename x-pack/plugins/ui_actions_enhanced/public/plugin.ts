@@ -61,7 +61,8 @@ export interface StartContract
 }
 
 export class AdvancedUiActionsPublicPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
+{
   readonly licenseInfo = new BehaviorSubject<ILicense | undefined>(undefined);
   private getLicenseInfo(): ILicense {
     if (!this.licenseInfo.getValue()) {

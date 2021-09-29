@@ -40,7 +40,7 @@ const getQueueTypes = (queueBuckets: Array<Bucket & { num_pipelines: { value: nu
 export function getLogstashForClusters(
   req: LegacyRequest,
   lsIndexPattern: string,
-  clusters: Cluster[]
+  clusters: Array<{ cluster_uuid: string } | Cluster>
 ) {
   checkParam(lsIndexPattern, 'lsIndexPattern in logstash/getLogstashForClusters');
 

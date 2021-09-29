@@ -84,33 +84,42 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
           <EuiSpacer size="s" />
         </>
       )}
-      {packages.map((pkg, idx) => {
-        return (
-          <EuiBadge
-            key={idx}
-            color="hollow"
-            isDisabled={excludeFleetServer && pkg.name === FLEET_SERVER_PACKAGE}
-          >
-            <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <PackageIcon
-                  packageName={pkg.name}
-                  version={pkg.version}
-                  tryApi={true}
-                  style={
-                    // when a custom SVG is used the logo is rendered with <img class="euiIcon euiIcon--small">
-                    // this collides with some EuiText (+img) CSS from the EuiIcon component
-                    // which  makes the button large, wide, and poorly layed out
-                    // override those styles until the bug is fixed or we find a better approach
-                    { margin: 'unset', width: '16px' }
-                  }
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{pkg.title}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiBadge>
-        );
-      })}
+      <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap>
+        {packages.map((pkg, idx) => {
+          return (
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                key={idx}
+                color="hollow"
+                isDisabled={excludeFleetServer && pkg.name === FLEET_SERVER_PACKAGE}
+              >
+                <EuiFlexGroup
+                  direction="row"
+                  gutterSize="xs"
+                  alignItems="center"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <PackageIcon
+                      packageName={pkg.name}
+                      version={pkg.version}
+                      tryApi={true}
+                      style={
+                        // when a custom SVG is used the logo is rendered with <img class="euiIcon euiIcon--small">
+                        // this collides with some EuiText (+img) CSS from the EuiIcon component
+                        // which  makes the button large, wide, and poorly layed out
+                        // override those styles until the bug is fixed or we find a better approach
+                        { margin: 'unset', width: '16px' }
+                      }
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{pkg.title}</EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiBadge>
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
       {showFleetServerWarning && (
         <>
           <EuiSpacer size="s" />

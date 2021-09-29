@@ -59,6 +59,7 @@ import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axe
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
+import { ThresholdAnnotations } from './expression_thresholds';
 
 declare global {
   interface Window {
@@ -251,6 +252,7 @@ export function XYChart({
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return <EmptyPlaceholder icon={icon} />;
   }
+  const thresholdLayers = layers.filter((layer) => layer.layerType === layerTypes.THRESHOLD);
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
@@ -516,6 +518,7 @@ export function XYChart({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
+        allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={interactive ? brushHandler : undefined}
@@ -831,6 +834,20 @@ export function XYChart({
           }
         })
       )}
+      {thresholdLayers.length ? (
+        <ThresholdAnnotations
+          thresholdLayers={thresholdLayers}
+          data={data}
+          colorAssignments={colorAssignments}
+          syncColors={syncColors}
+          paletteService={paletteService}
+          formatters={{
+            left: yAxesConfiguration.find(({ groupId }) => groupId === 'left')?.formatter,
+            right: yAxesConfiguration.find(({ groupId }) => groupId === 'right')?.formatter,
+            bottom: xAxisFormatter,
+          }}
+        />
+      ) : null}
     </Chart>
   );
 }

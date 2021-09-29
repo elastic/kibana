@@ -153,8 +153,10 @@ describe('EventFiltersNotification', () => {
     expect(notifications.toasts.addSuccess).not.toBeCalled();
     expect(notifications.toasts.addDanger).toBeCalledWith(
       getCreationErrorMessage(
-        (store.getState()!.management!.eventFilters!.form!
-          .submissionResourceState as FailedResourceState).error
+        (
+          store.getState()!.management!.eventFilters!.form!
+            .submissionResourceState as FailedResourceState
+        ).error
       )
     );
   });
@@ -188,8 +190,10 @@ describe('EventFiltersNotification', () => {
     expect(notifications.toasts.addSuccess).not.toBeCalled();
     expect(notifications.toasts.addDanger).toBeCalledWith(
       getUpdateErrorMessage(
-        (store.getState()!.management!.eventFilters!.form!
-          .submissionResourceState as FailedResourceState).error
+        (
+          store.getState()!.management!.eventFilters!.form!
+            .submissionResourceState as FailedResourceState
+        ).error
       )
     );
   });
@@ -216,8 +220,10 @@ describe('EventFiltersNotification', () => {
     expect(notifications.toasts.addSuccess).not.toBeCalled();
     expect(notifications.toasts.addWarning).toBeCalledWith(
       getGetErrorMessage(
-        (store.getState()!.management!.eventFilters!.form!
-          .submissionResourceState as FailedResourceState).error
+        (
+          store.getState()!.management!.eventFilters!.form!
+            .submissionResourceState as FailedResourceState
+        ).error
       )
     );
   });

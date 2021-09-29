@@ -26,13 +26,13 @@ import { TransactionActionMenu } from './TransactionActionMenu';
 import * as Transactions from './__fixtures__/mockData';
 
 function getMockAPMContext({ canSave }: { canSave: boolean }) {
-  return ({
+  return {
     ...mockApmPluginContextValue,
     core: {
       ...mockApmPluginContextValue.core,
       application: { capabilities: { apm: { save: canSave }, ml: {} } },
     },
-  } as unknown) as ApmPluginContextValue;
+  } as unknown as ApmPluginContextValue;
 }
 
 function Wrapper({ children }: { children?: React.ReactNode }) {
@@ -374,10 +374,9 @@ describe('TransactionActionMenu component', () => {
       expectTextsInDocument(component, ['Create link']);
       const getFilterKeyValue = (key: string) => {
         return {
-          [(component.getAllByText(key)[0] as HTMLOptionElement)
-            .text]: (component.getAllByTestId(
-            `${key}.value`
-          )[0] as HTMLInputElement).value,
+          [(component.getAllByText(key)[0] as HTMLOptionElement).text]: (
+            component.getAllByTestId(`${key}.value`)[0] as HTMLInputElement
+          ).value,
         };
       };
       expect(getFilterKeyValue('service.name')).toEqual({

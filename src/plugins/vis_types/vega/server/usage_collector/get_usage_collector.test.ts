@@ -40,8 +40,7 @@ const mockedSavedObjects = [
       visState: JSON.stringify({
         type: 'vega',
         params: {
-          spec:
-            '{"$schema": "https://vega.github.io/schema/vega/v3.json" \n "config": { "kibana" : { "type": "map" }} }',
+          spec: '{"$schema": "https://vega.github.io/schema/vega/v3.json" \n "config": { "kibana" : { "type": "map" }} }',
         },
       }),
     },
@@ -51,21 +50,21 @@ const mockedSavedObjects = [
 const getMockCollectorFetchContext = (savedObjects?: unknown[]) => {
   const fetchParamsMock = createCollectorFetchContextMock();
 
-  fetchParamsMock.soClient = ({
+  fetchParamsMock.soClient = {
     createPointInTimeFinder: jest.fn().mockResolvedValue({
       close: jest.fn(),
       find: function* asyncGenerator() {
         yield { saved_objects: savedObjects };
       },
     }),
-  } as unknown) as SavedObjectsClientContract;
+  } as unknown as SavedObjectsClientContract;
 
   return fetchParamsMock;
 };
 
 describe('Vega visualization usage collector', () => {
   const mockDeps = {
-    home: ({
+    home: {
       sampleData: {
         getSampleDatasets: jest.fn().mockReturnValue([
           {
@@ -86,7 +85,7 @@ describe('Vega visualization usage collector', () => {
           },
         ]),
       },
-    } as unknown) as HomeServerPluginSetup,
+    } as unknown as HomeServerPluginSetup,
   };
 
   test('Returns undefined when no results found (undefined)', async () => {
