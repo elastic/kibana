@@ -45,7 +45,7 @@ export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: numbe
                     <FormattedMessage
                       id="xpack.snapshotRestore.snapshotList.emptyPrompt.usePolicyDescription"
                       defaultMessage="Run a Snapshot Lifecycle Policy to create a snapshot.
-                          Snapshots can also be created by using {docLink}."
+                          You can also create a snapshot using {docLink}."
                       values={{
                         docLink: (
                           <EuiLink
