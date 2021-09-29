@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 export const ControlFrameStrings = {
   floatingActions: {
     getEditButtonTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.floatingActions.edit', {
+      i18n.translate('presentationUtil.inputControls.controlGroup.floatingActions.editTitle', {
         defaultMessage: 'Manage control',
       }),
     getRemoveButtonTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.floatingActions.remove', {
+      i18n.translate('presentationUtil.inputControls.controlGroup.floatingActions.removeTitle', {
         defaultMessage: 'Remove control',
       }),
   },

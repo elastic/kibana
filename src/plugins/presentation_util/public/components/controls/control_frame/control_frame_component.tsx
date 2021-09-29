@@ -100,7 +100,7 @@ export const ControlFrame = ({
           'controlFrame--twoLine': controlStyle === 'twoLine',
           'controlFrame--oneLine': controlStyle === 'oneLine',
         })}
-        id={embeddableId}
+        id={`controlFrame--${embeddableId}`}
         ref={embeddableRoot}
       />
     </EuiFormControlLayout>
