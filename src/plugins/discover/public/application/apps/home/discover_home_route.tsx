@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { DataView } from 'src/plugins/data/common';
 import moment from 'moment';
+import { i18n } from "@kbn/i18n";
 import { DiscoverServices } from '../../../build_services';
 import { SectionTitle } from './section_title';
 import { SavedSearch } from '../../../saved_searches';
@@ -26,6 +27,7 @@ import { LastRecentlyAccessedView } from './last_recently_view';
 import { IndexPatternView } from './index_pattern_view';
 import { SectionNavigation } from './section_navigation';
 import { HomeIndexPatternManagement } from './home_index_pattern_management';
+import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 
 export interface DiscoverMainProps {
   /**
@@ -42,12 +44,23 @@ const DISPLAY_NUMBER_OF_ITEMS = 3;
 const MAX_NUMBER_OF_SAVED_SEARCHES = 30;
 
 export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
-  const { core } = services;
+  const { core, chrome } = services;
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [recentlyAccessed, setRecentlyAccessed] = useState<SavedSearch[]>([]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [indexPatternEditorOpen, setIndexPatternEditorOpen] = useState<boolean>(false);
   const [reloadIndexPatterns, setReloadIndexPatterns] = useState<boolean>(true);
+
+  useEffect(() => {
+    chrome.setBreadcrumbs([
+      ...getRootBreadcrumbs(),
+      {
+        text: i18n.translate('discover.home.breadcrumb', {
+          defaultMessage: 'Home',
+        }),
+      },
+    ]);
+  }, [chrome]);
 
   useEffect(() => {
     async function loadSavedSearches() {
