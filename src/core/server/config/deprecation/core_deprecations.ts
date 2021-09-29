@@ -206,42 +206,55 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDe
 };
 
 const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
-  if (settings.logging?.events?.request || settings.logging?.events?.response) {
-    const removeConfigsSteps = [];
-
-    if (settings.logging?.events?.request) {
-      removeConfigsSteps.push(
-        i18n.translate('core.deprecations.loggingEvents.manualStepsRequest', {
-          defaultMessage: `Remove "logging.events.request" from your kibana configs.`,
-        })
-      );
-    }
-
-    if (settings.logging?.events?.response) {
-      removeConfigsSteps.push(
-        i18n.translate('core.deprecations.loggingEvents.manualStepsResponse', {
-          defaultMessage: `Remove "logging.events.response" from your kibana configs.`,
-        })
-      );
-    }
-
+  if (settings.logging?.events?.request) {
     addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
-      title: i18n.translate('core.deprecations.loggingEvents.deprecationTitle', {
-        defaultMessage: `Setting "logging.events" is deprecated`,
+      title: i18n.translate('core.deprecations.loggingEventsRequest.deprecationTitle', {
+        defaultMessage: `Setting "logging.events.request" is deprecated`,
       }),
-      message: i18n.translate('core.deprecations.loggingEvents.deprecationMessage', {
+      message: i18n.translate('core.deprecations.loggingEventsRequest.deprecationMessage', {
         defaultMessage:
-          '"logging.events.request" and "logging.events.response" have been deprecated and will be removed ' +
-          'in 8.0. To access request and/or response data moving forward, please enable debug logs for the ' +
+          '"logging.events.request" has been deprecated and will be removed ' +
+          'in 8.0. To access request data moving forward, please enable debug logs for the ' +
           '"http.server.response" context in your logging configuration. For more details, see ' +
           'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
       }),
       correctiveActions: {
         manualSteps: [
-          ...removeConfigsSteps,
-          i18n.translate('core.deprecations.loggingEvents.manualSteps1', {
+          i18n.translate('core.deprecations.loggingEventsRequest.manualSteps1', {
+            defaultMessage: `Remove "logging.events.request" from your kibana configs.`,
+          }),
+          i18n.translate('core.deprecations.loggingEventsRequest.manualSteps2', {
+            defaultMessage: `enable debug logs for the "http.server.response" context in your logging configuration.`,
+          }),
+        ],
+      },
+    });
+  }
+};
+
+const responseLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+  if (settings.logging?.events?.response) {
+    addDeprecation({
+      documentationUrl:
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
+      title: i18n.translate('core.deprecations.loggingEventsResponse.deprecationTitle', {
+        defaultMessage: `Setting "logging.events.response" is deprecated`,
+      }),
+      message: i18n.translate('core.deprecations.loggingEventsResponse.deprecationMessage', {
+        defaultMessage:
+          '"logging.events.response" has been deprecated and will be removed ' +
+          'in 8.0. To access response data moving forward, please enable debug logs for the ' +
+          '"http.server.response" context in your logging configuration. For more details, see ' +
+          'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('core.deprecations.loggingEventsResponse.manualSteps1', {
+            defaultMessage: `Remove "logging.events.response" from your kibana configs.`,
+          }),
+          i18n.translate('core.deprecations.loggingEventsResponse.manualSteps2', {
             defaultMessage: `enable debug logs for the "http.server.response" context in your logging configuration.`,
           }),
         ],
@@ -287,7 +300,7 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprec
       title: i18n.translate('core.deprecations.loggingDest.deprecationTitle', {
         defaultMessage: `Setting "logging.dest" is deprecated`,
       }),
-      title: i18n.translate('core.deprecations.loggingDest.deprecationMessage', {
+      message: i18n.translate('core.deprecations.loggingDest.deprecationMessage', {
         defaultMessage:
           '"logging.dest" has been deprecated and will be removed ' +
           'in 8.0. To set the destination moving forward, you can use the "console" appender ' +
@@ -343,7 +356,7 @@ const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDepr
       title: i18n.translate('core.deprecations.loggingSilent.deprecationTitle', {
         defaultMessage: `Setting "logging.silent" is deprecated`,
       }),
-      title: i18n.translate('core.deprecations.loggingSilent.deprecationMessage', {
+      message: i18n.translate('core.deprecations.loggingSilent.deprecationMessage', {
         defaultMessage:
           '"logging.silent" has been deprecated and will be removed ' +
           'in 8.0. Moving forward, you can use "logging.root.level:off" in your logging configuration. ',
@@ -577,6 +590,7 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   serverHostZeroDeprecation,
   opsLoggingEventDeprecation,
   requestLoggingEventDeprecation,
+  responseLoggingEventDeprecation,
   timezoneLoggingDeprecation,
   destLoggingDeprecation,
   quietLoggingDeprecation,
