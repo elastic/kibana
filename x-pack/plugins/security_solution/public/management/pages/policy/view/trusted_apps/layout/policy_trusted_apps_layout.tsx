@@ -15,6 +15,7 @@ import {
   EuiPageHeaderSection,
   EuiPageContent,
 } from '@elastic/eui';
+import { PolicyTrustedAppsEmptyUnassigned, PolicyTrustedAppsEmptyUnexisting } from '../empty';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const onClickAssignTrustedAppButton = useCallback(() => {
@@ -36,18 +37,20 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
 
   return (
     <div>
-      <EuiPageHeader alignItems="center">
-        <EuiPageHeaderSection>
-          <EuiTitle size="m">
-            <h2>
-              {i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.layout.title', {
-                defaultMessage: 'Assigned trusted applications',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>{assignTrustedAppButton}</EuiPageHeaderSection>
-      </EuiPageHeader>
+      {false ? (
+        <EuiPageHeader alignItems="center">
+          <EuiPageHeaderSection>
+            <EuiTitle size="m">
+              <h2>
+                {i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.layout.title', {
+                  defaultMessage: 'Assigned trusted applications',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiPageHeaderSection>
+          <EuiPageHeaderSection>{assignTrustedAppButton}</EuiPageHeaderSection>
+        </EuiPageHeader>
+      ) : null}
       <EuiPageContent
         hasBorder={false}
         hasShadow={false}
@@ -55,8 +58,17 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         color="transparent"
         borderRadius="none"
       >
-        {/* TODO: To be implemented */}
-        {'Policy trusted apps layout content'}
+        {true ? (
+          <PolicyTrustedAppsEmptyUnassigned
+            policyId={'bf16726e-f863-41db-ae8e-b5fd88aa1e5f'}
+            policyName={'With eventing'}
+          />
+        ) : (
+          <PolicyTrustedAppsEmptyUnexisting
+            policyId={'bf16726e-f863-41db-ae8e-b5fd88aa1e5f'}
+            policyName={'With eventing'}
+          />
+        )}
       </EuiPageContent>
     </div>
   );
