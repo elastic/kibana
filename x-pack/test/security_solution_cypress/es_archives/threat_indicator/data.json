@@ -68,7 +68,7 @@
         "module": "threatintel",
         "category": "threat",
         "type": "indicator",
-        "dataset": "threatintel.abusemalware"
+        "dataset": "threat.abusemalware"
       }
     }
   }
