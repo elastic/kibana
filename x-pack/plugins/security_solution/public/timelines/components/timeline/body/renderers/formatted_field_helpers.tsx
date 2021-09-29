@@ -241,7 +241,7 @@ export const renderUrl = ({
       </EuiLink>
     )
   ) : (
-    formattedValue
+    <>{formattedValue}</>
   );
 
   return isString(value) && urlName.length > 0 ? (
