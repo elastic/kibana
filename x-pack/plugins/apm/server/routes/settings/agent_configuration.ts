@@ -168,7 +168,7 @@ export const agentConfigurationSearchRoute = createRoute(() => ({
       context.logger.info(
         `Config was not found for ${service.name}/${service.environment}`
       );
-      throw Boom.notFound();
+      return null;
     }
 
     context.logger.info(
