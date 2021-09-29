@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CtiNoEvents } from './cti_no_events';
 import { ThemeProvider } from 'styled-components';
@@ -40,7 +40,7 @@ describe('CtiNoEvents', () => {
   });
 
   it('renders warning inner panel', () => {
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
@@ -50,15 +50,12 @@ describe('CtiNoEvents', () => {
       </Provider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="cti-dashboard-links"] [data-test-subj="cti-inner-panel-warning"]')
-        .hostNodes().length
-    ).toEqual(1);
+    expect(screen.getByTestId('cti-dashboard-links')).toBeInTheDocument();
+    expect(screen.getByTestId('cti-inner-panel-warning')).toBeInTheDocument();
   });
 
   it('renders event counts as 0', () => {
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
@@ -68,8 +65,6 @@ describe('CtiNoEvents', () => {
       </Provider>
     );
 
-    expect(wrapper.find('[data-test-subj="cti-total-event-count"]').text()).toEqual(
-      'Showing: 0 indicators'
-    );
+    expect(screen.getByText('Showing: 0 indicators')).toBeInTheDocument();
   });
 });
