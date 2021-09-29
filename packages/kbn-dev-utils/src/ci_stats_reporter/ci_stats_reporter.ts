@@ -123,6 +123,8 @@ export class CiStatsReporter {
       kibanaUuid,
     };
 
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
+
     return await this.req({
       auth: !!buildId,
       path: '/v1/timings',

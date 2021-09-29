@@ -21,8 +21,8 @@ export const CleanCommand: ICommand = {
   name: 'clean',
 
   reportTiming: {
-    group: 'kbn clean',
-    id: 'overall time',
+    group: 'scripts/kbn clean',
+    id: 'total',
   },
 
   async run(projects) {

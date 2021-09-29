@@ -14,8 +14,8 @@ export const BuildCommand: ICommand = {
   name: 'build',
 
   reportTiming: {
-    group: 'kbn build',
-    id: 'overall time',
+    group: 'scripts/kbn build',
+    id: 'total',
   },
 
   async run(projects, projectGraph, { options }) {
