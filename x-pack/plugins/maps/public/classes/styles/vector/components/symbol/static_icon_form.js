@@ -20,7 +20,7 @@ export function StaticIconForm({ onStaticStyleChange, onCustomIconsChange, custo
         {staticDynamicSelect}
       </EuiFlexItem>
       <EuiFlexItem>
-        <IconSelect customIcons={customIcons} onChange={onChange} onCustomIconsChange={onCustomIconsChange} label={styleProperty.getOptions().value} />
+        <IconSelect customIcons={customIcons} onChange={onChange} onCustomIconsChange={onCustomIconsChange} label={styleProperty.getOptions().label} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
