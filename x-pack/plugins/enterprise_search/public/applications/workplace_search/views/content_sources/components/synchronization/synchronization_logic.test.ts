@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { LogicMounter, mockKibanaValues } from '../../../../../__mocks__/kea_logic';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  mockKibanaValues,
+} from '../../../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { expectedAsyncError } from '../../../../../test_helpers';
+
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
-  SourceLogic: { values: { contentSource } },
+  SourceLogic: { values: { contentSource }, actions: { setContentSource: jest.fn() } },
 }));
+import { SourceLogic } from '../../source_logic';
 
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
@@ -21,6 +29,8 @@ jest.mock('../../../../app_logic', () => ({
 import { SynchronizationLogic, emptyBlockedWindow } from './synchronization_logic';
 
 describe('SynchronizationLogic', () => {
+  const { http } = mockHttpValues;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount } = new LogicMounter(SynchronizationLogic);
 
@@ -73,6 +83,63 @@ describe('SynchronizationLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith(
           '/sources/source123/synchronization/frequency/blocked_windows'
         );
+      });
+    });
+
+    describe('updateSyncEnabled', () => {
+      it('calls API and sets values for false value', async () => {
+        const setContentSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
+        const promise = Promise.resolve(contentSource);
+        http.patch.mockReturnValue(promise);
+        SynchronizationLogic.actions.updateSyncEnabled(false);
+
+        expect(http.patch).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/source123/settings',
+          {
+            body: JSON.stringify({
+              content_source: {
+                indexing: { enabled: false },
+              },
+            }),
+          }
+        );
+        await promise;
+        expect(setContentSourceSpy).toHaveBeenCalledWith(contentSource);
+        expect(flashSuccessToast).toHaveBeenCalledWith('Source synchronization disabled.');
+      });
+
+      it('calls API and sets values for true value', async () => {
+        const promise = Promise.resolve(contentSource);
+        http.patch.mockReturnValue(promise);
+        SynchronizationLogic.actions.updateSyncEnabled(true);
+
+        expect(http.patch).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/source123/settings',
+          {
+            body: JSON.stringify({
+              content_source: {
+                indexing: { enabled: true },
+              },
+            }),
+          }
+        );
+        await promise;
+        expect(flashSuccessToast).toHaveBeenCalledWith('Source synchronization enabled.');
+      });
+
+      it('handles error', async () => {
+        const error = {
+          response: {
+            error: 'this is an error',
+            status: 400,
+          },
+        };
+        const promise = Promise.reject(error);
+        http.patch.mockReturnValue(promise);
+        SynchronizationLogic.actions.updateSyncEnabled(false);
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
   });

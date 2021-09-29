@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiLink, EuiPanel, EuiSwitch, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -25,17 +25,24 @@ import {
 import { SourceLogic } from '../../source_logic';
 import { SourceLayout } from '../source_layout';
 
+import { SynchronizationLogic } from './synchronization_logic';
+
 export const Synchronization: React.FC = () => {
   const {
-    contentSource: { isSyncConfigEnabled },
+    contentSource: {
+      isSyncConfigEnabled,
+      indexing: { enabled },
+    },
   } = useValues(SourceLogic);
 
-  const onChange = (checked: boolean) => `#TODO: ${checked}`;
+  const { updateSyncEnabled } = useActions(SynchronizationLogic);
+
+  const onChange = (checked: boolean) => updateSyncEnabled(checked);
   const syncToggle = (
     <EuiPanel hasBorder>
       <EuiSwitch
         label={SOURCE_SYNCRONIZATION_TOGGLE_LABEL}
-        checked
+        checked={enabled}
         onChange={(e) => onChange(e.target.checked)}
       />
       <EuiSpacer size="m" />

@@ -711,3 +711,17 @@ export const BLOCKED_EMPTY_STATE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Add a blocked time window to only perform syncs at the right time.',
   }
 );
+
+export const SYNC_ENABLED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncEnabledMessage',
+  {
+    defaultMessage: 'Source synchronization enabled.',
+  }
+);
+
+export const SYNC_DISABLED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDisabledMessage',
+  {
+    defaultMessage: 'Source synchronization disabled.',
+  }
+);

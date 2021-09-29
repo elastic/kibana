@@ -10,6 +10,8 @@ import moment from 'moment';
 
 export type TabId = 'source_sync_frequency' | 'blocked_time_windows';
 
+import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
+import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
 import {
@@ -19,12 +21,14 @@ import {
 } from '../../../../routes';
 import { BlockedWindow } from '../../../../types';
 
+import { SYNC_ENABLED_MESSAGE, SYNC_DISABLED_MESSAGE } from '../../constants';
 import { SourceLogic } from '../../source_logic';
 
 interface SynchronizationActions {
   setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
   handleSelectedTabChanged(tabId: TabId): TabId;
   addBlockedWindow(): void;
+  updateSyncEnabled(enabled: boolean): boolean;
 }
 
 interface SynchronizationValues {
@@ -46,6 +50,7 @@ export const SynchronizationLogic = kea<
   actions: {
     setNavigatingBetweenTabs: (navigatingBetweenTabs: boolean) => navigatingBetweenTabs,
     handleSelectedTabChanged: (tabId: TabId) => tabId,
+    updateSyncEnabled: (enabled: boolean) => enabled,
     addBlockedWindow: true,
   },
   reducers: {
@@ -81,6 +86,22 @@ export const SynchronizationLogic = kea<
 
       KibanaLogic.values.navigateToUrl(path);
       actions.setNavigatingBetweenTabs(false);
+    },
+    updateSyncEnabled: async (enabled) => {
+      const { id: sourceId } = SourceLogic.values.contentSource;
+      const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
+      const successMessage = enabled ? SYNC_ENABLED_MESSAGE : SYNC_DISABLED_MESSAGE;
+
+      try {
+        const response = await HttpLogic.values.http.patch(route, {
+          body: JSON.stringify({ content_source: { indexing: { enabled } } }),
+        });
+
+        SourceLogic.actions.setContentSource(response);
+        flashSuccessToast(successMessage);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
   }),
 });
