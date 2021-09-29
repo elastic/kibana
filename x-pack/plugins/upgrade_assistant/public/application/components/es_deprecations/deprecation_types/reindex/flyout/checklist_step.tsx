@@ -93,32 +93,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   return (
     <Fragment>
       <EuiFlyoutBody>
-        {renderGlobalCallouts()}
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle"
-              defaultMessage="Index is unable to ingest, update, or delete documents while reindexing"
-            />
-          }
-          color="warning"
-          iconType="alert"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail"
-              defaultMessage="If you can’t stop document updates or need to reindex into a new cluster,
-                consider using a different upgrade strategy."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
-              defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will
-                need to return to this page to resume reindexing."
-            />
-          </p>
-        </EuiCallOut>
         {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
@@ -159,6 +133,32 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             </EuiCallOut>
           </>
         )}
+        {renderGlobalCallouts()}
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle"
+              defaultMessage="Index is unable to ingest, update, or delete documents while reindexing"
+            />
+          }
+          color="warning"
+          iconType="alert"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail"
+              defaultMessage="If you can’t stop document updates or need to reindex into a new cluster,
+                consider using a different upgrade strategy."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+              defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will
+                need to return to this page to resume reindexing."
+            />
+          </p>
+        </EuiCallOut>
         <EuiSpacer />
         <EuiTitle size="xs">
           <h3>
