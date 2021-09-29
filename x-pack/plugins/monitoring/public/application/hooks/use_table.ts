@@ -98,7 +98,7 @@ export function useTable(storageKey: string) {
 
   const [query, setQuery] = useState('');
 
-  const onTableChange = ({ page, sort }: { page: Page; sort: Sorting }) => {
+  const onTableChange = ({ page, sort }: { page: Page; sort: Sorting['sort'] }) => {
     setPagination({
       ...pagination,
       ...{
@@ -109,7 +109,7 @@ export function useTable(storageKey: string) {
         pageSizeOptions: PAGE_SIZE_OPTIONS,
       },
     });
-    setSorting(cleanSortingData(sort));
+    setSorting(cleanSortingData({ sort }));
     setLocalStorageData(storage, {
       page,
       sort,
