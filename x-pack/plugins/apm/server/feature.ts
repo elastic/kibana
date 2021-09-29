@@ -67,60 +67,6 @@ export const APM_FEATURE = {
       ui: ['show', 'alerting:show'],
     },
   },
-  subFeatures: [
-    {
-      name: i18n.translate('xpack.apm.featureRegistry.manageAlertsName', {
-        defaultMessage: 'Alerts',
-      }),
-      privilegeGroups: [
-        {
-          groupType: 'mutually_exclusive' as SubFeaturePrivilegeGroupType,
-          privileges: [
-            {
-              id: 'alerts_all',
-              name: i18n.translate(
-                'xpack.apm.featureRegistry.subfeature.alertsAllName',
-                {
-                  defaultMessage: 'All',
-                }
-              ),
-              includeIn: 'all' as 'all',
-              alerting: {
-                alert: {
-                  all: Object.values(AlertType),
-                },
-              },
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: [],
-            },
-            {
-              id: 'alerts_read',
-              name: i18n.translate(
-                'xpack.apm.featureRegistry.subfeature.alertsReadName',
-                {
-                  defaultMessage: 'Read',
-                }
-              ),
-              includeIn: 'read' as 'read',
-              alerting: {
-                alert: {
-                  read: Object.values(AlertType),
-                },
-              },
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: [],
-            },
-          ],
-        },
-      ],
-    },
-  ],
 };
 
 interface Feature {
