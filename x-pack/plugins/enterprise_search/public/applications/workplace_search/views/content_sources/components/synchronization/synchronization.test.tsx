@@ -6,6 +6,7 @@
  */
 
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
+import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
@@ -17,7 +18,7 @@ import { Synchronization } from './synchronization';
 
 describe('Synchronization', () => {
   const updateSyncEnabled = jest.fn();
-  const mockvalues = { contentSource: { isSyncConfigEnabled: true, indexing: { enabled: true } } };
+  const mockvalues = { contentSource: fullContentSources[0] };
 
   beforeEach(() => {
     setMockActions({ updateSyncEnabled });

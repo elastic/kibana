@@ -11,14 +11,14 @@ import {
   mockHttpValues,
   mockKibanaValues,
 } from '../../../../../__mocks__/kea_logic';
+import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
 import { expectedAsyncError } from '../../../../../test_helpers';
 
-const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
-  SourceLogic: { values: { contentSource }, actions: { setContentSource: jest.fn() } },
+  SourceLogic: { actions: { setContentSource: jest.fn() } },
 }));
 import { SourceLogic } from '../../source_logic';
 
@@ -33,6 +33,7 @@ describe('SynchronizationLogic', () => {
   const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount } = new LogicMounter(SynchronizationLogic);
+  const contentSource = fullContentSources[0];
 
   const defaultValues = {
     navigatingBetweenTabs: false,
@@ -41,7 +42,7 @@ describe('SynchronizationLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mount();
+    mount({}, { contentSource });
   });
 
   it('has expected default values', () => {
@@ -73,7 +74,7 @@ describe('SynchronizationLogic', () => {
         await nextTick();
 
         expect(setNavigatingBetweenTabsSpy).toHaveBeenCalledWith(true);
-        expect(navigateToUrl).toHaveBeenCalledWith('/sources/source123/synchronization/frequency');
+        expect(navigateToUrl).toHaveBeenCalledWith('/sources/123/synchronization/frequency');
       });
 
       it('calls calls correct route for "blocked_time_windows"', async () => {
@@ -81,7 +82,7 @@ describe('SynchronizationLogic', () => {
         await nextTick();
 
         expect(navigateToUrl).toHaveBeenCalledWith(
-          '/sources/source123/synchronization/frequency/blocked_windows'
+          '/sources/123/synchronization/frequency/blocked_windows'
         );
       });
     });
@@ -94,7 +95,7 @@ describe('SynchronizationLogic', () => {
         SynchronizationLogic.actions.updateSyncEnabled(false);
 
         expect(http.patch).toHaveBeenCalledWith(
-          '/internal/workplace_search/org/sources/source123/settings',
+          '/internal/workplace_search/org/sources/123/settings',
           {
             body: JSON.stringify({
               content_source: {
@@ -114,7 +115,7 @@ describe('SynchronizationLogic', () => {
         SynchronizationLogic.actions.updateSyncEnabled(true);
 
         expect(http.patch).toHaveBeenCalledWith(
-          '/internal/workplace_search/org/sources/source123/settings',
+          '/internal/workplace_search/org/sources/123/settings',
           {
             body: JSON.stringify({
               content_source: {

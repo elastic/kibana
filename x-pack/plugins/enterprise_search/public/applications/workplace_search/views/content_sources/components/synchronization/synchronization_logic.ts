@@ -67,10 +67,10 @@ export const SynchronizationLogic = kea<
       },
     ],
   },
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, values, props }) => ({
     handleSelectedTabChanged: async (tabId, breakpoint) => {
       const { isOrganization } = AppLogic.values;
-      const { id: sourceId } = SourceLogic.values.contentSource;
+      const { id: sourceId } = props.contentSource;
       const path =
         tabId === 'source_sync_frequency'
           ? getContentSourcePath(SYNC_FREQUENCY_PATH, sourceId, isOrganization)
@@ -88,7 +88,7 @@ export const SynchronizationLogic = kea<
       actions.setNavigatingBetweenTabs(false);
     },
     updateSyncEnabled: async (enabled) => {
-      const { id: sourceId } = SourceLogic.values.contentSource;
+      const { id: sourceId } = props.contentSource;
       const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
       const successMessage = enabled ? SYNC_ENABLED_MESSAGE : SYNC_DISABLED_MESSAGE;
 

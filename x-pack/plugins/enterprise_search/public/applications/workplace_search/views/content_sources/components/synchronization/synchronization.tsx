@@ -28,14 +28,13 @@ import { SourceLayout } from '../source_layout';
 import { SynchronizationLogic } from './synchronization_logic';
 
 export const Synchronization: React.FC = () => {
-  const {
-    contentSource: {
-      isSyncConfigEnabled,
-      indexing: { enabled },
-    },
-  } = useValues(SourceLogic);
+  const { contentSource } = useValues(SourceLogic);
+  const { updateSyncEnabled } = useActions(SynchronizationLogic({ contentSource }));
 
-  const { updateSyncEnabled } = useActions(SynchronizationLogic);
+  const {
+    isSyncConfigEnabled,
+    indexing: { enabled },
+  } = contentSource;
 
   const onChange = (checked: boolean) => updateSyncEnabled(checked);
   const syncToggle = (
