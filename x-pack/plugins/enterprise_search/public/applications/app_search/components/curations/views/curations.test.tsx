@@ -6,6 +6,7 @@
  */
 
 import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import '../../../../__mocks__/shallow_useeffect.mock';
 import '../../../../__mocks__/react_router';
 import '../../../__mocks__/engine_logic.mock';
 
@@ -15,7 +16,7 @@ import { shallow } from 'enzyme';
 
 import { EuiTab } from '@elastic/eui';
 
-import { mountWithIntl, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
+import { getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
 import { Curations } from './curations';
 import { CurationsOverview } from './curations_overview';
@@ -109,8 +110,7 @@ describe('Curations', () => {
   });
 
   it('calls loadCurations on page load', () => {
-    setMockValues({ ...values, myRole: {} }); // Required for AppSearchPageTemplate to load
-    mountWithIntl(<Curations />);
+    shallow(<Curations />);
 
     expect(actions.loadCurations).toHaveBeenCalledTimes(1);
   });

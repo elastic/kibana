@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mockKibanaValues, setMockValues } from '../../../../__mocks__/kea_logic';
+import '../../../../__mocks__/shallow_useeffect.mock';
+import { mockKibanaValues, setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -21,10 +22,31 @@ describe('SuggestionsTable', () => {
 
   const values = {
     engineName: 'some-engine',
+    dataLoading: false,
+    suggestions: [
+      {
+        query: 'foo',
+        updated_at: '2021-07-08T14:35:50Z',
+        promoted: ['1', '2'],
+      },
+    ],
+    meta: {
+      page: {
+        current: 1,
+        size: 10,
+        total_results: 2,
+      },
+    },
+  };
+
+  const mockActions = {
+    loadSuggestions: jest.fn(),
+    onPaginate: jest.fn(),
   };
 
   beforeAll(() => {
     setMockValues(values);
+    setMockActions(mockActions);
   });
 
   beforeEach(() => {
@@ -78,5 +100,18 @@ describe('SuggestionsTable', () => {
       query: 'foo',
     });
     expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/suggestions/foo');
+  });
+
+  it('fetches data on load', () => {
+    shallow(<SuggestionsTable />);
+
+    expect(mockActions.loadSuggestions).toHaveBeenCalled();
+  });
+
+  it('supports pagination', () => {
+    const wrapper = shallow(<SuggestionsTable />);
+    wrapper.find(EuiBasicTable).simulate('change', { page: { index: 0 } });
+
+    expect(mockActions.onPaginate).toHaveBeenCalledWith(1);
   });
 });
