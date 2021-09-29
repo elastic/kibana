@@ -20,7 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const security = getService('security');
 
-  describe('Ingest Pipelines', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/113439
+  describe.skip('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['ingest_pipelines_user']);
