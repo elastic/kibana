@@ -16,6 +16,7 @@ import { useKibana } from '../../lib/kibana';
 import {
   BrowserField,
   BrowserFields,
+  DELETED_SECURITY_SOLUTION_DATA_VIEW,
   DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
@@ -245,7 +246,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
             {
@@ -298,6 +298,10 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
               }
             },
             error: (msg) => {
+              if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
+                // reload app if security solution data view is deleted
+                return location.reload();
+              }
               setLoading(false);
               addError(msg, {
                 title: i18n.FAIL_BEAT_FIELDS,

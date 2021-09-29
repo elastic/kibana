@@ -153,7 +153,6 @@ export const useInitSourcerer = (
   );
   useEffect(() => {
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
-      // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted and signals index is ALWAYS string
       // update signal name also updates sourcerer
       // we hit this the first time signal index is created
       updateSourcererDataView(signalIndexName);

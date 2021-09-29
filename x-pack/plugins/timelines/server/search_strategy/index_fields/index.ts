@@ -24,6 +24,7 @@ import {
   BeatFields,
 } from '../../../common/search_strategy/index_fields';
 import { StartPlugins } from '../../types';
+import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
@@ -99,7 +100,18 @@ export const requestIndexFieldSearch = async (
 
   // if dataViewId is provided, get fields and indices from the Kibana Data View
   if ('dataViewId' in request) {
-    const dataView = await dataViewService.get(request.dataViewId);
+    const dataView = await dataViewService.get(request.dataViewId).catch((r) => {
+      if (
+        r.output.payload.statusCode === 404 &&
+        // this is the only place this id is hard coded as there are no security_solution dependencies in timeline
+        // needs to match value in DEFAULT_DATA_VIEW_ID security_solution/common/constants.ts
+        r.output.payload.message.indexOf('security-solution') > -1
+      ) {
+        throw new Error(DELETED_SECURITY_SOLUTION_DATA_VIEW);
+      } else {
+        throw r;
+      }
+    });
     const patternList = dataView.title.split(',');
     indicesExist = await findExistingIndices(patternList, esClient.asCurrentUser);
     existingIndices = patternList.filter((index, i) => indicesExist[i]);

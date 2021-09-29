@@ -46,7 +46,7 @@ export interface SelectedDataView {
   selectedPatterns: string[];
 }
 
-// TODO: Steph/sourcerer needs tests/refactor
+// TODO: Steph/sourcerer needs tests/cleanup
 export const getSelectedDataViewSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();

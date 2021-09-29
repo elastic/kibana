@@ -24,7 +24,6 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     ...state,
     signalIndexName,
   }))
-  // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted and signals index is ALWAYS string
   .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({
     ...state,
     defaultDataView,

@@ -20,7 +20,6 @@ export const setSource = actionCreator<{
 export const setSignalIndexName =
   actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
 
-// TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted and signals index is ALWAYS string
 export const setSourcererDataViews = actionCreator<{
   defaultDataView: KibanaDataView;
   kibanaDataViews: KibanaDataView[];
