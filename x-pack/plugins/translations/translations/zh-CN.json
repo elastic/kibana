@@ -371,7 +371,6 @@
     "xpack.lens.indexPattern.cardinality": "唯一计数",
     "xpack.lens.indexPattern.cardinality.signature": "field: string",
     "xpack.lens.indexPattern.cardinalityOf": "{name} 的唯一计数",
-    "xpack.lens.indexPattern.changeIndexPatternTitle": "索引模式",
     "xpack.lens.indexPattern.chooseField": "选择字段",
     "xpack.lens.indexPattern.chooseFieldLabel": "要使用此函数，请选择字段。",
     "xpack.lens.indexPattern.chooseSubFunction": "选择子函数",
