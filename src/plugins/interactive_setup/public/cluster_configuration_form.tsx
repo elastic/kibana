@@ -386,7 +386,7 @@ export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({
           {!compressed && (
             <EuiText size="xs">
               <FormattedMessage
-                id="interactiveSetup.certificatePanel.validFrom"
+                id="interactiveSetup.certificatePanel.fingerprint"
                 defaultMessage="Fingerprint (SHA-256): {fingerprint}"
                 values={{
                   fingerprint: certificate.fingerprint256.replace(/\:/g, ' '),
