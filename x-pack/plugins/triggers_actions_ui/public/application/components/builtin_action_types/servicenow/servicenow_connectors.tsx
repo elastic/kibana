@@ -15,7 +15,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
-import { isRESTApiError, useOldConnector } from './helpers';
+import { isRESTApiError, enableLegacyConnector } from './helpers';
 import { InstallationCallout } from './installation_callout';
 import { UpdateConnectorModal } from './update_connector_modal';
 import { updateActionConnector } from '../../../lib/action_connector_api';
@@ -38,7 +38,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     } = useKibana().services;
     const { apiUrl } = action.config;
     const { username, password } = action.secrets;
-    const isOldConnector = useOldConnector(action);
+    const isOldConnector = enableLegacyConnector(action);
 
     const [showModal, setShowModal] = useState(false);
 

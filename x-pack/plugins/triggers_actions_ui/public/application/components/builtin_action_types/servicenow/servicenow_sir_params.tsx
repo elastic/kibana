@@ -22,8 +22,8 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
-import { ServiceNowSIRActionParams, Fields, Choice } from './types';
-import { choicesToEuiOptions } from './helpers';
+import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
+import { choicesToEuiOptions, enableLegacyConnector } from './helpers';
 import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
@@ -48,6 +48,10 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     http,
     notifications: { toasts },
   } = useKibana().services;
+
+  const isOldConnector =
+    actionConnector != null &&
+    enableLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -301,15 +305,17 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         label={i18n.COMMENTS_LABEL}
       />
       <EuiSpacer size="m" />
-      <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
-        <EuiSwitch
-          label={updateIncident ? i18n.ON : i18n.OFF}
-          name="update-incident-switch"
-          checked={updateIncident}
-          onChange={onUpdateIncidentSwitchChange}
-          aria-describedby="update-incident-form-row"
-        />
-      </EuiFormRow>
+      {!isOldConnector && (
+        <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
+          <EuiSwitch
+            label={updateIncident ? i18n.ON : i18n.OFF}
+            name="update-incident-switch"
+            checked={updateIncident}
+            onChange={onUpdateIncidentSwitchChange}
+            aria-describedby="update-incident-form-row"
+          />
+        </EuiFormRow>
+      )}
     </>
   );
 };

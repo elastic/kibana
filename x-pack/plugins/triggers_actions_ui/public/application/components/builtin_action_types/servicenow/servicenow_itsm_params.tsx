@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowITSMActionParams, Choice, Fields } from './types';
+import { ServiceNowITSMActionParams, Choice, Fields, ServiceNowActionConnector } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
-import { choicesToEuiOptions } from './helpers';
+import { choicesToEuiOptions, enableLegacyConnector } from './helpers';
 
 import * as i18n from './translations';
 import { UPDATE_INCIDENT_VARIABLE, NOT_UPDATE_INCIDENT_VARIABLE } from './config';
@@ -43,6 +43,10 @@ const ServiceNowParamsFields: React.FunctionComponent<
     http,
     notifications: { toasts },
   } = useKibana().services;
+
+  const isOldConnector =
+    actionConnector != null &&
+    enableLegacyConnector(actionConnector as unknown as ServiceNowActionConnector);
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -273,17 +277,19 @@ const ServiceNowParamsFields: React.FunctionComponent<
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
-            <EuiSwitch
-              label={updateIncident ? i18n.ON : i18n.OFF}
-              name="update-incident-switch"
-              checked={updateIncident}
-              onChange={onUpdateIncidentSwitchChange}
-              aria-describedby="update-incident-form-row"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
+        {!isOldConnector && (
+          <EuiFlexItem>
+            <EuiFormRow id="update-incident-form-row" fullWidth label={i18n.UPDATE_INCIDENT_LABEL}>
+              <EuiSwitch
+                label={updateIncident ? i18n.ON : i18n.OFF}
+                name="update-incident-switch"
+                checked={updateIncident}
+                onChange={onUpdateIncidentSwitchChange}
+                aria-describedby="update-incident-form-row"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
