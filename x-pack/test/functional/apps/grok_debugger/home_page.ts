@@ -65,14 +65,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         customPatternInput
       );
       expect(response).to.eql(testData);
-      await PageObjects.common.sleep(5000);
+      // await PageObjects.common.sleep(5000);
     });
 
     it('applies the correct CSS classes', async () => {
       const grokPattern = '\\[(?:-|%{NUMBER:bytes:int})\\]';
 
-      await PageObjects.grokDebugger.setPatternInput(grokPattern);
-
+      await retry.try(async () => {
+        await PageObjects.grokDebugger.setPatternInput(grokPattern);
+      });
       const GROK_START = 'grokStart';
       const GROK_PATTERN_NAME = 'grokPatternName';
       const GROK_SEPARATOR = 'grokSeparator';
