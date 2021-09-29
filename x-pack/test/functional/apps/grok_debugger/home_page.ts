@@ -15,7 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('Grok Debugger', function () {
+  describe.only('Grok Debugger', function () {
     before(async () => {
       // Increase window height to ensure "Simulate" button is shown above the
       // fold. Otherwise it can't be clicked by the browser driver.
@@ -65,6 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         customPatternInput
       );
       expect(response).to.eql(testData);
+      await PageObjects.common.sleep(5000);
     });
 
     it('applies the correct CSS classes', async () => {
