@@ -7,24 +7,22 @@
 
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import getPort from 'get-port';
+import http from 'http';
 
 import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
-import {
-  getExternalServiceSimulatorPath,
-  ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getServiceNowServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function servicenowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
 
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
+      isLegacy: false,
     },
     secrets: {
       password: 'elastic',
@@ -53,13 +51,34 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     },
   };
 
-  let servicenowSimulatorURL: string = '<could not determine kibana url>';
-
   describe('ServiceNow', () => {
-    before(() => {
-      servicenowSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+    let simulatedActionId = '';
+    let serviceNowSimulatorURL: string = '';
+    let serviceNowServer: http.Server;
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
+
+    before(async () => {
+      serviceNowServer = await getServiceNowServer();
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      if (!serviceNowServer.listening) {
+        serviceNowServer.listen(availablePort);
+      }
+      serviceNowSimulatorURL = `http://localhost:${availablePort}`;
+      proxyServer = await getHttpProxyServer(
+        serviceNowSimulatorURL,
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
       );
+    });
+
+    after(() => {
+      serviceNowServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
     });
 
     describe('ServiceNow - Action Creation', () => {
@@ -71,7 +90,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             name: 'A servicenow action',
             connector_type_id: '.servicenow',
             config: {
-              apiUrl: servicenowSimulatorURL,
+              apiUrl: serviceNowSimulatorURL,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -84,7 +103,8 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           connector_type_id: '.servicenow',
           is_missing_secrets: false,
           config: {
-            apiUrl: servicenowSimulatorURL,
+            apiUrl: serviceNowSimulatorURL,
+            isLegacy: false,
           },
         });
 
@@ -99,9 +119,31 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           connector_type_id: '.servicenow',
           is_missing_secrets: false,
           config: {
-            apiUrl: servicenowSimulatorURL,
+            apiUrl: serviceNowSimulatorURL,
+            isLegacy: false,
           },
         });
+      });
+
+      it('should set the isLegacy to false when not provided', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            connector_type_id: '.servicenow',
+            config: {
+              apiUrl: serviceNowSimulatorURL,
+            },
+            secrets: mockServiceNow.secrets,
+          })
+          .expect(200);
+
+        const { body: fetchedAction } = await supertest
+          .get(`/api/actions/connector/${createdAction.id}`)
+          .expect(200);
+
+        expect(fetchedAction.config.isLegacy).to.be(false);
       });
 
       it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
@@ -155,7 +197,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             name: 'A servicenow action',
             connector_type_id: '.servicenow',
             config: {
-              apiUrl: servicenowSimulatorURL,
+              apiUrl: serviceNowSimulatorURL,
             },
           })
           .expect(400)
@@ -171,9 +213,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     });
 
     describe('ServiceNow - Executor', () => {
-      let simulatedActionId: string;
-      let proxyServer: httpProxy | undefined;
-      let proxyHaveBeenCalled = false;
       before(async () => {
         const { body } = await supertest
           .post('/api/actions/connector')
@@ -182,19 +221,12 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             name: 'A servicenow simulator',
             connector_type_id: '.servicenow',
             config: {
-              apiUrl: servicenowSimulatorURL,
+              apiUrl: serviceNowSimulatorURL,
+              isLegacy: false,
             },
             secrets: mockServiceNow.secrets,
           });
         simulatedActionId = body.id;
-
-        proxyServer = await getHttpProxyServer(
-          kibanaServer.resolveUrl('/'),
-          configService.get('kbnTestServer.serverArgs'),
-          () => {
-            proxyHaveBeenCalled = true;
-          }
-        );
       });
 
       describe('Validation', () => {
@@ -377,31 +409,81 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       });
 
       describe('Execution', () => {
-        it('should handle creating an incident without comments', async () => {
-          const { body: result } = await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockServiceNow.params,
-                subActionParams: {
-                  incident: mockServiceNow.params.subActionParams.incident,
-                  comments: [],
+        // New connectors
+        describe('Import set API', () => {
+          it('should handle creating an incident without comments', async () => {
+            const { body: result } = await supertest
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  ...mockServiceNow.params,
+                  subActionParams: {
+                    incident: mockServiceNow.params.subActionParams.incident,
+                    comments: [],
+                  },
                 },
-              },
-            })
-            .expect(200);
+              })
+              .expect(200);
 
-          expect(proxyHaveBeenCalled).to.equal(true);
-          expect(result).to.eql({
-            status: 'ok',
-            connector_id: simulatedActionId,
-            data: {
-              id: '123',
-              title: 'INC01',
-              pushedDate: '2020-03-10T12:24:20.000Z',
-              url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
-            },
+            expect(proxyHaveBeenCalled).to.equal(true);
+            expect(result).to.eql({
+              status: 'ok',
+              connector_id: simulatedActionId,
+              data: {
+                id: '123',
+                title: 'INC01',
+                pushedDate: '2020-03-10T12:24:20.000Z',
+                url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
+              },
+            });
+          });
+        });
+
+        // Legacy connectors
+        describe('Table API', () => {
+          before(async () => {
+            const { body } = await supertest
+              .post('/api/actions/connector')
+              .set('kbn-xsrf', 'foo')
+              .send({
+                name: 'A servicenow simulator',
+                connector_type_id: '.servicenow',
+                config: {
+                  apiUrl: serviceNowSimulatorURL,
+                  isLegacy: true,
+                },
+                secrets: mockServiceNow.secrets,
+              });
+            simulatedActionId = body.id;
+          });
+
+          it('should handle creating an incident without comments', async () => {
+            const { body: result } = await supertest
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  ...mockServiceNow.params,
+                  subActionParams: {
+                    incident: mockServiceNow.params.subActionParams.incident,
+                    comments: [],
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(proxyHaveBeenCalled).to.equal(true);
+            expect(result).to.eql({
+              status: 'ok',
+              connector_id: simulatedActionId,
+              data: {
+                id: '123',
+                title: 'INC01',
+                pushedDate: '2020-03-10T12:24:20.000Z',
+                url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
+              },
+            });
           });
         });
 
@@ -452,12 +534,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             });
           });
         });
-      });
-
-      after(() => {
-        if (proxyServer) {
-          proxyServer.close();
-        }
       });
     });
   });
