@@ -14,9 +14,7 @@ import {
   LogsEndpointActionResponse,
 } from '../data_generators/endpoint_action_generator';
 import { wrapErrorAndRejectPromise } from './utils';
-
-const ENDPOINT_ACTIONS_INDEX = '.logs-endpoint.actions-default';
-const ENDPOINT_ACTION_RESPONSES_INDEX = '.logs-endpoint.action.responses-default';
+import { ENDPOINT_ACTIONS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX } from '../constants';
 
 const defaultEndpointActionGenerator = new EndpointActionGenerator();
 
