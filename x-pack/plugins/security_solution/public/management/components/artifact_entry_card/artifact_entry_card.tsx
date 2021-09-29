@@ -28,7 +28,7 @@ export interface ArtifactEntryCardProps extends CommonProps {
 
   /**
    * Information about the policies that are assigned to the `item`'s `effectScope` and that will be
-   * use to create a navigation link
+   * used to create a navigation link. This is a `Record<policyId: string, ContextMenuItemNavByRouterProps>`
    */
   policies?: MenuItemPropsByPolicyId;
 }

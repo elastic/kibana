@@ -14,7 +14,11 @@ import {
   PolicyDetailsSelector,
   PolicyDetailsState,
 } from '../../../types';
-import { GetTrustedAppsListResponse } from '../../../../../../../common/endpoint/types';
+import {
+  GetTrustedAppsListResponse,
+  Immutable,
+  PolicyData,
+} from '../../../../../../../common/endpoint/types';
 import { getCurrentArtifactsLocation } from './policy_common_selectors';
 import {
   getLastLoadedResourceState,
@@ -88,3 +92,23 @@ export const getPolicyTrustedAppsListPagination: PolicyDetailsSelector<Paginatio
     };
   }
 );
+
+export const getTrustedAppsPolicyListState: PolicyDetailsSelector<
+  PolicyDetailsState['artifacts']['policies']
+> = (state) => state.artifacts.policies;
+
+export const getTrustedAppsListOfAllPolicies: PolicyDetailsSelector<PolicyData[]> = createSelector(
+  getTrustedAppsPolicyListState,
+  (policyListState) => {
+    return getLastLoadedResourceState(policyListState)?.data.items ?? [];
+  }
+);
+
+export const getTrustedAppsAllPoliciesById: PolicyDetailsSelector<
+  Record<string, Immutable<PolicyData>>
+> = createSelector(getTrustedAppsListOfAllPolicies, (allPolicies) => {
+  return allPolicies.reduce<Record<string, Immutable<PolicyData>>>((mapById, policy) => {
+    mapById[policy.id] = policy;
+    return mapById;
+  }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
+});

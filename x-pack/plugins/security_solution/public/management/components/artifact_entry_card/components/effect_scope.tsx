@@ -13,6 +13,12 @@ import { ContextMenuWithRouterSupport } from '../../context_menu_with_router_sup
 import { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
+// FIXME:PT support being able to show per policy label for Artifacst that have >0 policies, but no menu
+//          the intent in this component was to also support to be able to display only text for artifacts
+//          by policy (>0), but **NOT** show the menu.
+//          So something like: `<EffectScope perPolicyCount={3} />`
+//          This should dispaly it as "Applied t o 3 policies", but NOT as a menu with links
+
 export interface EffectScopeProps extends Pick<CommonProps, 'data-test-subj'> {
   /** If set (even if empty), then effect scope will be policy specific. Else, it shows as global */
   policies?: ContextMenuItemNavByRouterProps[];

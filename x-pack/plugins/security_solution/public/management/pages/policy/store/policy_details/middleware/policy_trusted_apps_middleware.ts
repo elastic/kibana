@@ -6,6 +6,7 @@
  */
 
 import {
+  GetPolicyListResponse,
   MiddlewareRunner,
   MiddlewareRunnerContext,
   PolicyAssignedTrustedApps,
@@ -17,6 +18,7 @@ import {
   getCurrentArtifactsLocation,
   getCurrentPolicyAssignedTrustedAppsState,
   getLatestLoadedPolicyAssignedTrustedAppsState,
+  getTrustedAppsPolicyListState,
   isPolicyTrustedAppListLoading,
   policyIdFromParams,
 } from '../selectors';
@@ -24,6 +26,8 @@ import {
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
+  isLoadingResourceState,
+  isUninitialisedResourceState,
 } from '../../../../../state';
 import { ServerApiError } from '../../../../../../common/types';
 import { Immutable } from '../../../../../../../common/endpoint/types';
@@ -43,6 +47,7 @@ export const policyTrustedAppsMiddlewareRunner: MiddlewareRunner = async (
   switch (action.type) {
     case 'userChangedUrl':
       fetchPolicyTrustedAppsIfNeeded(context, store);
+      fetchAllPoliciesIfNeeded(context, store);
       break;
   }
 };
@@ -91,5 +96,44 @@ const fetchPolicyTrustedAppsIfNeeded = async (
         ),
       });
     }
+  }
+};
+
+const fetchAllPoliciesIfNeeded = async (
+  { trustedAppsService }: MiddlewareRunnerContext,
+  { getState, dispatch }: PolicyDetailsStore
+) => {
+  const state = getState();
+  const currentPoliciesState = getTrustedAppsPolicyListState(state);
+  const isLoading = isLoadingResourceState(currentPoliciesState);
+  const hasBeenLoaded = !isUninitialisedResourceState(currentPoliciesState);
+
+  if (isLoading || hasBeenLoaded) {
+    return;
+  }
+
+  dispatch({
+    type: 'policyDetailsListOfAllPoliciesStateChanged',
+    // @ts-ignore will be fixed when AsyncResourceState is refactored (#830)
+    payload: createLoadingResourceState(currentPoliciesState),
+  });
+
+  try {
+    const policyList = await trustedAppsService.getPolicyList({
+      query: {
+        page: 1,
+        perPage: 1000,
+      },
+    });
+
+    dispatch({
+      type: 'policyDetailsListOfAllPoliciesStateChanged',
+      payload: createLoadedResourceState(policyList),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'policyDetailsListOfAllPoliciesStateChanged',
+      payload: createFailedResourceState<GetPolicyListResponse>(error.body || error),
+    });
   }
 };

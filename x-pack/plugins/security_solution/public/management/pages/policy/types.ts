@@ -88,6 +88,8 @@ export interface PolicyArtifactsState {
   availableList: AsyncResourceState<TrustedAppsListData>;
   /** List of artifacts currently assigned to the policy (body specific and global) */
   assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
+  /** A list of all available polices */
+  policies: AsyncResourceState<GetPolicyListResponse>;
 }
 
 export enum OS {

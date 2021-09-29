@@ -15,6 +15,8 @@ import { PaginatedContent as _PaginatedContent, PaginatedContentProps } from '..
 import { GridHeader } from './components/grid_header';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
 
+const PaginatedContent: ArtifactsPaginatedComponent = _PaginatedContent;
+
 type ArtifactsPaginatedContentProps = PaginatedContentProps<
   AnyArtifact,
   typeof ArtifactEntryCollapsableCard
@@ -27,10 +29,10 @@ interface CardExpandCollapseState {
   collapsed: MaybeImmutable<AnyArtifact[]>;
 }
 
-type CallerDefinedCardProps = Omit<ArtifactEntryCollapsableCardProps, 'onExpandCollapse' | 'item'>;
-
-const PaginatedContent: ArtifactsPaginatedComponent = _PaginatedContent;
-
+export type ArtifactCardGridCardComponentProps = Omit<
+  ArtifactEntryCollapsableCardProps,
+  'onExpandCollapse' | 'item'
+>;
 export type ArtifactCardGridProps = Omit<
   ArtifactsPaginatedContentProps,
   'ItemComponent' | 'itemComponentProps' | 'items' | 'onChange'
@@ -46,7 +48,7 @@ export type ArtifactCardGridProps = Omit<
    *
    * @param item
    */
-  cardComponentProps?: (item: MaybeImmutable<AnyArtifact>) => CallerDefinedCardProps;
+  cardComponentProps?: (item: MaybeImmutable<AnyArtifact>) => ArtifactCardGridCardComponentProps;
 };
 
 export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
@@ -60,7 +62,7 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
     const items = _items as AnyArtifact[];
 
     // The list of card props that the caller can define
-    type PartialCardProps = Map<AnyArtifact, CallerDefinedCardProps>;
+    type PartialCardProps = Map<AnyArtifact, ArtifactCardGridCardComponentProps>;
     const callerDefinedCardProps = useMemo<PartialCardProps>(() => {
       const cardProps: PartialCardProps = new Map();
 

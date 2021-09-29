@@ -11,6 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   ArtifactCardGrid,
+  ArtifactCardGridCardComponentProps,
   ArtifactCardGridProps,
 } from '../../../../../components/artifact_card_grid';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
@@ -19,16 +20,20 @@ import {
   getCurrentArtifactsLocation,
   getPolicyTrustedAppList,
   getPolicyTrustedAppsListPagination,
+  getTrustedAppsAllPoliciesById,
   isPolicyTrustedAppListLoading,
   policyIdFromParams,
 } from '../../../store/policy_details/selectors';
 import {
+  getPolicyDetailPath,
   getPolicyDetailsArtifactsListPath,
   getTrustedAppsListPath,
 } from '../../../../../common/routing';
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../../../common/constants';
+import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_rotuer';
+import { ArtifactEntryCollapsableCardProps } from '../../../../../components/artifact_entry_card';
 
 export const PolicyTrustedAppsList = memo(() => {
   const history = useHistory();
@@ -39,6 +44,7 @@ export const PolicyTrustedAppsList = memo(() => {
   const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
   const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+  const allPoliciesById = usePolicyDetailsSelector(getTrustedAppsAllPoliciesById);
 
   const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
 
@@ -75,15 +81,39 @@ export const PolicyTrustedAppsList = memo(() => {
     []
   );
 
-  const cardProps = useMemo<
-    Map<Immutable<TrustedApp>, ReturnType<Required<ArtifactCardGridProps>['cardComponentProps']>>
-  >(() => {
+  const cardProps = useMemo<Map<Immutable<TrustedApp>, ArtifactCardGridCardComponentProps>>(() => {
     const newCardProps = new Map();
 
     for (const trustedApp of trustedAppItems) {
       const viewUrlPath = getTrustedAppsListPath({ id: trustedApp.id, show: 'edit' });
+      const assignedPoliciesMenuItems: ArtifactEntryCollapsableCardProps['policies'] =
+        trustedApp.effectScope.type === 'global'
+          ? undefined
+          : trustedApp.effectScope.policies.reduce<
+              Required<ArtifactEntryCollapsableCardProps>['policies']
+            >((byIdPolicies, trustedAppAssignedPolicyId) => {
+              if (!allPoliciesById[trustedAppAssignedPolicyId]) {
+                byIdPolicies[trustedAppAssignedPolicyId] = { children: trustedAppAssignedPolicyId };
+                return byIdPolicies;
+              }
 
-      newCardProps.set(trustedApp, {
+              const policyDetailsPath = getPolicyDetailPath(trustedAppAssignedPolicyId);
+
+              const thisPolicyMenuProps: ContextMenuItemNavByRouterProps = {
+                navigateAppId: APP_ID,
+                navigateOptions: {
+                  path: policyDetailsPath,
+                },
+                href: getAppUrl({ path: policyDetailsPath }),
+                children: allPoliciesById[trustedAppAssignedPolicyId].name,
+              };
+
+              byIdPolicies[trustedAppAssignedPolicyId] = thisPolicyMenuProps;
+
+              return byIdPolicies;
+            }, {});
+
+      const thisTrustedAppCardProps: ArtifactCardGridCardComponentProps = {
         expanded: Boolean(isCardExpanded[trustedApp.id]),
         actions: [
           {
@@ -97,11 +127,14 @@ export const PolicyTrustedAppsList = memo(() => {
             navigateOptions: { path: viewUrlPath },
           },
         ],
-      });
+        policies: assignedPoliciesMenuItems,
+      };
+
+      newCardProps.set(trustedApp, thisTrustedAppCardProps);
     }
 
     return newCardProps;
-  }, [getAppUrl, isCardExpanded, trustedAppItems]);
+  }, [allPoliciesById, getAppUrl, isCardExpanded, trustedAppItems]);
 
   const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
     (item) => {

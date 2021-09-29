@@ -13,7 +13,14 @@ export interface AssignedTrustedAppsListStateChanged
   payload: PolicyArtifactsState['assignedList'];
 }
 
+export interface PolicyDetailsListOfAllPoliciesStateChanged
+  extends Action<'policyDetailsListOfAllPoliciesStateChanged'> {
+  payload: PolicyArtifactsState['policies'];
+}
+
 /**
  * All of the possible actions for Trusted Apps under the Policy Details store
  */
-export type PolicyTrustedAppsAction = AssignedTrustedAppsListStateChanged;
+export type PolicyTrustedAppsAction =
+  | AssignedTrustedAppsListStateChanged
+  | PolicyDetailsListOfAllPoliciesStateChanged;

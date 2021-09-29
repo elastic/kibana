@@ -10,8 +10,13 @@ import { PolicyDetailsState } from '../../../types';
 import { AppAction } from '../../../../../../common/store/actions';
 import { initialPolicyDetailsState } from './initial_policy_details_state';
 import { isOnPolicyTrustedAppsView } from '../selectors/policy_common_selectors';
-import { AssignedTrustedAppsListStateChanged } from '../action/policy_trusted_apps_action';
+import {
+  AssignedTrustedAppsListStateChanged,
+  PolicyDetailsListOfAllPoliciesStateChanged,
+} from '../action/policy_trusted_apps_action';
 import { Immutable } from '../../../../../../../common/endpoint/types';
+import { isUninitialisedResourceState } from '../../../../../state';
+import { getCurrentPolicyAssignedTrustedAppsState } from '../selectors';
 
 type ActionSpecificReducer<A extends AppAction = AppAction> = (
   state: Immutable<PolicyDetailsState>,
@@ -24,12 +29,22 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
 ) => {
   // If not on the Trusted Apps Policy view, then just return
   if (!isOnPolicyTrustedAppsView(state)) {
+    // If the artifacts state namespace needs resetting, then do it now
+    if (!isUninitialisedResourceState(getCurrentPolicyAssignedTrustedAppsState(state))) {
+      return {
+        ...state,
+        artifacts: initialPolicyDetailsState().artifacts,
+      };
+    }
+
     return state;
   }
 
   switch (action.type) {
     case 'assignedTrustedAppsListStateChanged':
       return handleAssignedTrustedAppsListStateChanged(state, action);
+    case 'policyDetailsListOfAllPoliciesStateChanged':
+      return handlePolicyDetailsListOfAllPoliciesStateChanged(state, action);
     default:
       return state;
   }
@@ -42,6 +57,17 @@ const handleAssignedTrustedAppsListStateChanged: ActionSpecificReducer<AssignedT
       artifacts: {
         ...state?.artifacts,
         assignedList: action.payload,
+      },
+    };
+  };
+
+const handlePolicyDetailsListOfAllPoliciesStateChanged: ActionSpecificReducer<PolicyDetailsListOfAllPoliciesStateChanged> =
+  (state, action) => {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        policies: action.payload,
       },
     };
   };
