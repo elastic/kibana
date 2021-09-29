@@ -23,4 +23,5 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload '.es/**/*.hprof'
 
   node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'
+  node .buildkite/scripts/lifecycle/annotate_test_failures.js
 fi
