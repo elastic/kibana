@@ -16,10 +16,9 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiBadge } from '@elastic/eui';
 
-import { getPageHeaderActions } from '../../../../test_helpers';
+import { getPageHeaderActions, getPageTitle, mountWithIntl } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
-import { getShallowPageTitle } from '../../../../test_helpers/get_page_header';
 
 import { AppSearchPageTemplate } from '../../layout';
 
@@ -50,6 +49,7 @@ describe('AutomatedCuration', () => {
     jest.clearAllMocks();
     setMockValues(values);
     setMockActions(actions);
+    mockUseParams.mockReturnValue({ curationId: 'test' });
   });
 
   it('renders', () => {
@@ -69,10 +69,10 @@ describe('AutomatedCuration', () => {
 
   it('displays the query in the title with a badge', () => {
     const wrapper = shallow(<AutomatedCuration />);
-    const shallowPageTitle = getShallowPageTitle(wrapper);
+    const pageTitle = shallow(<div>{getPageTitle(wrapper)}</div>);
 
-    expect(shallowPageTitle.text()).toContain('query A');
-    expect(shallowPageTitle.find(EuiBadge)).toHaveLength(1);
+    expect(pageTitle.text()).toContain('query A');
+    expect(pageTitle.find(EuiBadge)).toHaveLength(1);
   });
 
   describe('convert to manual button', () => {
