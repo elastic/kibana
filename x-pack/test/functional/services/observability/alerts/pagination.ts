@@ -7,68 +7,68 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const ALERTS_ROWS_PER_PAGE_SELECTOR = 'tablePaginationPopoverButton';
-const ALERTS_PAGINATION_BUTTON_PREVIOUS = 'pagination-button-previous';
-const ALERTS_PAGINATION_BUTTON_NEXT = 'pagination-button-next';
-const ALERTS_PAGINATION_TEN_ROWS = 'tablePagination-10-rows';
-const ALERTS_PAGINATION_TWENTY_FIVE_ROWS = 'tablePagination-25-rows';
-const ALERTS_PAGINATION_FIFTY_ROWS = 'tablePagination-50-rows';
-const ALERTS_PAGINATION_BUTTON_ONE = 'pagination-button-0';
-const ALERTS_PAGINATION_BUTTON_TWO = 'pagination-button-1';
+const ROWS_PER_PAGE_SELECTOR = 'tablePaginationPopoverButton';
+const PREV_BUTTON_SELECTOR = 'pagination-button-previous';
+const NEXT_BUTTON_SELECTOR = 'pagination-button-next';
+const TEN_ROWS_SELECTOR = 'tablePagination-10-rows';
+const TWENTY_FIVE_ROWS_SELECTOR = 'tablePagination-25-rows';
+const FIFTY_ROWS_SELECTOR = 'tablePagination-50-rows';
+const BUTTON_ONE_SELECTOR = 'pagination-button-0';
+const BUTTON_TWO_SELECTOR = 'pagination-button-1';
 
 export function ObservabilityAlertsPaginationProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   const getPageSizeSelector = async () => {
-    return await testSubjects.find(ALERTS_ROWS_PER_PAGE_SELECTOR);
+    return await testSubjects.find(ROWS_PER_PAGE_SELECTOR);
   };
 
   const getPageSizeSelectorOrFail = async () => {
-    return await testSubjects.existOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
+    return await testSubjects.existOrFail(ROWS_PER_PAGE_SELECTOR);
   };
 
   const missingPageSizeSelectorOrFail = async () => {
-    return await testSubjects.missingOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
+    return await testSubjects.missingOrFail(ROWS_PER_PAGE_SELECTOR);
   };
 
   const getTenRowsPageSelector = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_TEN_ROWS);
+    return await testSubjects.find(TEN_ROWS_SELECTOR);
   };
 
   const getTwentyFiveRowsPageSelector = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_TWENTY_FIVE_ROWS);
+    return await testSubjects.find(TWENTY_FIVE_ROWS_SELECTOR);
   };
 
   const getFiftyRowsPageSelector = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_FIFTY_ROWS);
+    return await testSubjects.find(FIFTY_ROWS_SELECTOR);
   };
 
   const getPrevPageButton = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_PREVIOUS);
+    return await testSubjects.find(PREV_BUTTON_SELECTOR);
   };
 
   const getPrevPageButtonOrFail = async () => {
-    return await testSubjects.existOrFail(ALERTS_PAGINATION_BUTTON_PREVIOUS);
+    return await testSubjects.existOrFail(PREV_BUTTON_SELECTOR);
   };
 
   const missingPrevPageButtonOrFail = async () => {
-    return await testSubjects.missingOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
+    return await testSubjects.missingOrFail(PREV_BUTTON_SELECTOR);
   };
 
   const getNextPageButton = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_NEXT, 20000);
+    return await testSubjects.find(NEXT_BUTTON_SELECTOR, 20000);
   };
 
   const getNextPageButtonOrFail = async () => {
-    return await testSubjects.existOrFail(ALERTS_PAGINATION_BUTTON_NEXT);
+    return await testSubjects.existOrFail(NEXT_BUTTON_SELECTOR);
   };
 
   const getPaginationButtonOne = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_ONE);
+    return await testSubjects.find(BUTTON_ONE_SELECTOR);
   };
 
   const getPaginationButtonTwo = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_TWO);
+    return await testSubjects.find(BUTTON_TWO_SELECTOR);
   };
 
   const goToNextPage = async () => {
@@ -85,6 +85,10 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
 
   const getPrevButtonDisabledValue = async () => {
     return await (await getPrevPageButton()).getAttribute('disabled');
+  };
+
+  const getNextButtonDisabledValue = async () => {
+    return await (await getNextPageButton()).getAttribute('disabled');
   };
 
   return {
@@ -105,5 +109,6 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     goToPrevPage,
     goToFirstPage,
     getPrevButtonDisabledValue,
+    getNextButtonDisabledValue,
   };
 }

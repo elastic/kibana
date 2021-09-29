@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('Next page button is disabled', async () => {
           await (await observability.alerts.pagination.getPaginationButtonTwo()).click();
           const nextButtonDisabledValue =
-            await observability.alerts.pagination.getPrevButtonDisabledValue();
+            await observability.alerts.pagination.getNextButtonDisabledValue();
           expect(nextButtonDisabledValue).to.be('true');
         });
       });
