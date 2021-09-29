@@ -6,6 +6,7 @@
  */
 
 import './index.scss';
+import { PluginInitializerContext } from 'src/core/public';
 import { WatcherUIPlugin } from './plugin';
 
-export const plugin = () => new WatcherUIPlugin();
+export const plugin = (ctx: PluginInitializerContext) => new WatcherUIPlugin(ctx);

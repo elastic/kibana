@@ -21,6 +21,7 @@ import moment from 'moment-timezone';
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SemVer } from 'semver';
 
 import { VisualizeOptions } from '../../../../models/visualize_options';
 import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
@@ -87,7 +88,7 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 };
 
 export const WatchVisualization = () => {
-  const { createTimeBuckets, theme, uiSettings } = useAppContext();
+  const { createTimeBuckets, theme, uiSettings, kibanaVersion } = useAppContext();
   const { watch } = useContext(WatchContext);
   const chartsTheme = theme.useChartsTheme();
   const {
@@ -112,12 +113,15 @@ export const WatchVisualization = () => {
   const timeBuckets = createTimeBuckets();
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
-  const visualizeOptions = new VisualizeOptions({
-    rangeFrom: domain.min,
-    rangeTo: domain.max,
-    interval,
-    timezone: getTimezone(uiSettings),
-  });
+  const visualizeOptions = new VisualizeOptions(
+    {
+      rangeFrom: domain.min,
+      rangeTo: domain.max,
+      interval,
+      timezone: getTimezone(uiSettings),
+    },
+    kibanaVersion
+  );
 
   // Fetching visualization data is independent of watch actions
   const watchWithoutActions = new ThresholdWatch({ ...watch, actions: [] });

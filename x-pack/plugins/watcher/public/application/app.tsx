@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
+import { SemVer } from 'semver';
 import {
   DocLinksStart,
   HttpSetup,
@@ -50,6 +51,7 @@ export interface AppDeps {
   setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];
   history: ManagementAppMountParams['history'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  kibanaVersion: SemVer;
 }
 
 export const App = (deps: AppDeps) => {

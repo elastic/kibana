@@ -22,17 +22,6 @@ function buildRange({ rangeFrom, rangeTo, timeField }) {
   };
 }
 
-function buildDateAgg({ field, interval, timeZone }) {
-  return {
-    date_histogram: {
-      field,
-      interval,
-      time_zone: timeZone,
-      min_doc_count: 1,
-    },
-  };
-}
-
 function buildAggsCount(body, dateAgg) {
   return {
     dateAgg,
@@ -117,11 +106,15 @@ export function buildVisualizeQuery(watch, visualizeOptions) {
     termOrder,
   });
   const body = watchInput.search.request.body;
-  const dateAgg = buildDateAgg({
-    field: watch.timeField,
-    interval: visualizeOptions.interval,
-    timeZone: visualizeOptions.timezone,
-  });
+  const dateAgg = {
+    date_histogram: {
+      field: watch.timeField,
+      interval: visualizeOptions.interval, // Only used in 7.x, it will be undefined in 8.x
+      fixed_interval: visualizeOptions.fixed_interval, // Used from 8.x
+      time_zone: visualizeOptions.timezone,
+      min_doc_count: 1,
+    },
+  };
 
   // override the query range
   body.query.bool.filter.range = buildRange({
