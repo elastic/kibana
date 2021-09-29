@@ -47,6 +47,15 @@ const messageMap = new Map([
     },
   ],
   [
+    'AUTHENTICATION_ERROR',
+    {
+      type: LoginFormMessageType.Info,
+      content: i18n.translate('xpack.security.login.authenticationErrorDescription', {
+        defaultMessage: 'An unexpected authentication error occured. Please log in again.',
+      }),
+    },
+  ],
+  [
     'LOGGED_OUT',
     {
       type: LoginFormMessageType.Info,
@@ -77,7 +86,7 @@ export class LoginPage extends Component<Props, State> {
     try {
       this.setState({ loginState: await this.props.http.get('/internal/security/login_state') });
     } catch (err) {
-      this.props.fatalErrors.add(err);
+      this.props.fatalErrors.add(err as Error);
     }
 
     loadingCount$.next(0);

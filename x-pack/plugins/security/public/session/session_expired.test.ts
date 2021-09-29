@@ -49,6 +49,16 @@ describe('#logout', () => {
     );
   });
 
+  it(`redirects user to the logout URL with custom reason 'msg'`, async () => {
+    const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
+    sessionExpired.logout('CUSTOM_REASON');
+
+    const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
+    await expect(window.location.assign).toHaveBeenCalledWith(
+      `${LOGOUT_URL}?msg=CUSTOM_REASON${next}`
+    );
+  });
+
   it(`adds 'provider' parameter when sessionStorage contains the provider name for this tenant`, async () => {
     const providerName = 'basic';
     mockGetItem.mockReturnValueOnce(providerName);

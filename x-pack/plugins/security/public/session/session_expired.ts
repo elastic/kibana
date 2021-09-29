@@ -32,11 +32,11 @@ const getProviderParameter = (tenant: string) => {
 export class SessionExpired {
   constructor(private logoutUrl: string, private tenant: string) {}
 
-  logout() {
+  logout(reason = 'SESSION_EXPIRED') {
     const next = getNextParameter();
     const provider = getProviderParameter(this.tenant);
     window.location.assign(
-      `${this.logoutUrl}?${LOGOUT_REASON_QUERY_STRING_PARAMETER}=SESSION_EXPIRED${next}${provider}`
+      `${this.logoutUrl}?${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${reason}${next}${provider}`
     );
   }
 }
