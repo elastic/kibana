@@ -15,7 +15,8 @@ import { OperationTypeSelect } from './columns/operation_type_select';
 import { parseCustomFieldName } from '../configurations/lens_attributes';
 import { SeriesFilter } from './columns/series_filter';
 import { DatePickerCol } from './columns/date_picker_col';
-import { Breakdowns } from './columns/breakdowns';
+import { Breakdowns } from './breakdown/breakdowns';
+import { LabelsBreakdown } from './breakdown/label_breakdown';
 
 function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string) {
   const { columnType } = parseCustomFieldName(seriesConfig, selectedMetricField);
@@ -58,9 +59,14 @@ export function ExpandedSeriesRow(seriesProps: Props) {
         <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
       </EuiFormRow>
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow label={BREAKDOWNS_LABEL}>
-            <Breakdowns {...seriesProps} />
+        <EuiFlexItem grow={false} style={{ minWidth: 300 }}>
+          <EuiFormRow label={BREAKDOWN_BY_LABEL}>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem>
+                <Breakdowns {...seriesProps} />
+              </EuiFlexItem>
+              <LabelsBreakdown {...seriesProps} />
+            </EuiFlexGroup>
           </EuiFormRow>
         </EuiFlexItem>
         {(hasOperationType || columnType === 'operation') && (
@@ -78,8 +84,8 @@ export function ExpandedSeriesRow(seriesProps: Props) {
   );
 }
 
-const BREAKDOWNS_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.breakdowns', {
-  defaultMessage: 'Breakdowns',
+const BREAKDOWN_BY_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.breakdownBy', {
+  defaultMessage: 'Breakdown by',
 });
 
 const FILTERS_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.selectFilters', {

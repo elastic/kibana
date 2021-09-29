@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
+import { LABEL_FIELDS_BREAKDOWN, USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
 import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
@@ -62,8 +62,12 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     dropdownDisplay: label,
   }));
 
-  const valueOfSelected =
+  let valueOfSelected =
     selectedBreakdown || (hasUseBreakdownColumn ? options[0].value : NO_BREAKDOWN);
+
+  if (selectedBreakdown?.startsWith('labels.')) {
+    valueOfSelected = LABEL_FIELDS_BREAKDOWN;
+  }
 
   return (
     <EuiSuperSelect
