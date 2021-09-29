@@ -52,9 +52,7 @@ async function lintFilesOnContent(files) {
     };
     const r = await stylelint.lint(options);
     report.errored = report.errored || r.errored;
-    report.output += r.output
-      .replace('<input css ' + (i + 1) + '>', files[i].getRelativePath())
-      .slice(0, -1);
+    report.output += r.output.replace(/<input css \d+>/, files[i].getRelativePath()).slice(0, -1);
     report.postcssResults.push(...(r.postcssResults || []));
     report.maxWarnings = r.maxWarnings;
     report.foundWarnings += r.foundWarnings;
