@@ -38,10 +38,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/spaces_integration',
         { space: spaceId }
       );
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/spaces_integration_space_1',
-        { space: spaceId }
-      );
     });
 
     after(async () => {

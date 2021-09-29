@@ -11,6 +11,34 @@
   },
   "references": [],
   "type": "index-pattern",
-  "updated_at": "2018-12-21T00:43:07.096Z",
-  "version": "WzEyLDFd"
+  "updated_at": "2021-09-29T14:44:14.268Z",
+  "version": "WzExLDFd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "A Pie",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"A Pie\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}},\"palette\":{\"type\":\"palette\",\"name\":\"kibana_palette\"},\"distinctColors\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"geo.src\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}"
+  },
+  "coreMigrationVersion": "7.16.0",
+  "id": "75c3e060-1e7c-11e9-8488-65449e65d0ed",
+  "migrationVersion": {
+    "visualization": "7.14.0"
+  },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2021-09-29T14:45:14.428Z",
+  "version": "WzEzLDFd"
 }
