@@ -136,6 +136,7 @@ describe('deprecateEndpointConfigs', () => {
             ],
           },
           "message": "\\"telemetry.url\\" has been deprecated. Set \\"telemetry.sendUsageTo: staging\\" to the Kibana configurations to send usage to the staging endpoint.",
+          "title": "Setting \\"telemetry.url\\" is deprecated",
         },
       ]
     `);
@@ -157,6 +158,7 @@ describe('deprecateEndpointConfigs', () => {
             ],
           },
           "message": "\\"telemetry.optInStatusUrl\\" has been deprecated. Set \\"telemetry.sendUsageTo: staging\\" to the Kibana configurations to send usage to the staging endpoint.",
+          "title": "Setting \\"telemetry.optInStatusUrl\\" is deprecated",
         },
       ]
     `);
