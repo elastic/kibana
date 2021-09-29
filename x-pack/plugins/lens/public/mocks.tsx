@@ -279,10 +279,13 @@ export const mockStoreDeps = (deps?: {
   };
 };
 
-export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
+export function mockDataPlugin(
+  sessionIdSubject = new Subject<string>(),
+  initialSessionId?: string
+) {
   function createMockSearchService() {
-    let sessionIdCounter = 0;
-    let currentSessionId: string | undefined;
+    let sessionIdCounter = initialSessionId ? 1 : 0;
+    let currentSessionId: string | undefined = initialSessionId;
     const start = () => {
       currentSessionId = `sessionId-${++sessionIdCounter}`;
       return currentSessionId;
@@ -329,7 +332,6 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
       },
     };
   }
-
   function createMockQueryString() {
     return {
       getQuery: jest.fn(() => ({ query: '', language: 'lucene' })),
@@ -361,6 +363,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
 
 export function makeDefaultServices(
   sessionIdSubject = new Subject<string>(),
+  sessionId: string | undefined = undefined,
   doc = defaultDoc
 ): jest.Mocked<LensAppServices> {
   const core = coreMock.createStart({ basePath: '/testbasepath' });
@@ -429,7 +432,7 @@ export function makeDefaultServices(
       },
       getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
     },
-    data: mockDataPlugin(sessionIdSubject),
+    data: mockDataPlugin(sessionIdSubject, sessionId),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     storage: {
       get: jest.fn(),
