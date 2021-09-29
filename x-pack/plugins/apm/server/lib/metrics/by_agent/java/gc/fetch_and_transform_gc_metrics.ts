@@ -8,7 +8,7 @@
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
 import { getMetricsProjection } from '../../../../../projections/metrics';
@@ -32,26 +32,31 @@ export async function fetchAndTransformGcMetrics({
   chartBase,
   fieldName,
   operationName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
   operationName: string;
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { apmEventClient, config } = setup;
 
   const { bucketSize } = getBucketSize({ start, end });
 
   const projection = getMetricsProjection({
     environment,
     kuery,
-    setup,
     serviceName,
     serviceNodeName,
+    start,
+    end,
   });
 
   // GC rate and time are reported by the agents as monotonically
