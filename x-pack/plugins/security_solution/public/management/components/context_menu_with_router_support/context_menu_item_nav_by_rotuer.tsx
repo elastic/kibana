@@ -15,6 +15,8 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
   navigateAppId?: string;
   /** Additional options for the navigation action via react-router */
   navigateOptions?: NavigateToAppOptions;
+  /** if `true`, the `children` will be wrapped in a `div` that contains CSS Classname `eui-textTruncate` */
+  textTruncate?: boolean;
   children: React.ReactNode;
 }
 
@@ -23,7 +25,7 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
  * allow navigation to a URL path via React Router
  */
 export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
-  ({ navigateAppId, navigateOptions, onClick, children, ...otherMenuItemProps }) => {
+  ({ navigateAppId, navigateOptions, onClick, textTruncate, children, ...otherMenuItemProps }) => {
     const handleOnClickViaNavigateToApp = useNavigateToAppEventHandler(navigateAppId ?? '', {
       ...navigateOptions,
       onClick,
@@ -34,7 +36,13 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
         {...otherMenuItemProps}
         onClick={navigateAppId ? handleOnClickViaNavigateToApp : onClick}
       >
-        {children}
+        {textTruncate ? (
+          <div className="eui-textTruncate" style={{ maxWidth: '200px;' }}>
+            {children}
+          </div>
+        ) : (
+          children
+        )}
       </EuiContextMenuItem>
     );
   }
