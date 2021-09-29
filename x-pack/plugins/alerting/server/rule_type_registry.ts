@@ -170,6 +170,7 @@ export class RuleTypeRegistry {
         })
       );
     }
+    // validate ruleTypeTimeout here
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
     const normalizedAlertType = augmentActionGroupsWithReserved<
@@ -190,6 +191,7 @@ export class RuleTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
+        timeout: alertType.ruleTaskTimeout,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,

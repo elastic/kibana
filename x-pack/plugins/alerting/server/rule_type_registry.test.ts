@@ -112,6 +112,30 @@ describe('register()', () => {
     );
   });
 
+  test('throws if AlertType ruleTaskTimeout is not a valid duration', () => {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+      id: 123 as unknown as string,
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      ruleTaskTimeout: '23 milisec',
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: jest.fn(),
+      producer: 'alerts',
+    };
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(`invalid value of type [duration], should be:`)
+    );
+  });
+
   test('throws if RuleType action groups contains reserved group id', () => {
     const alertType: AlertType<never, never, never, never, never, 'default' | 'NotReserved'> = {
       id: 'test',
@@ -160,6 +184,39 @@ describe('register()', () => {
         id: 'backToAwesome',
         name: 'Back To Awesome',
       },
+      executor: jest.fn(),
+      producer: 'alerts',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+    };
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+    registry.register(alertType);
+    expect(registry.get('test').actionGroups).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "default",
+          "name": "Default",
+        },
+        Object {
+          "id": "backToAwesome",
+          "name": "Back To Awesome",
+        },
+      ]
+    `);
+  });
+
+  test('allows an AlertType to specify a custom rule task timeout', () => {
+    const alertType: AlertType<never, never, never, never, never, 'default', 'backToAwesome'> = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      ruleTaskTimeout: '13m',
       executor: jest.fn(),
       producer: 'alerts',
       minimumLicenseRequired: 'basic',

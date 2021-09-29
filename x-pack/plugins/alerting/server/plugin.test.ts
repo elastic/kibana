@@ -38,6 +38,7 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 10,
+        defaultRuleTaskTimeout: '20m',
       });
       plugin = new AlertingPlugin(context);
 
@@ -71,6 +72,7 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 10,
+        defaultRuleTaskTimeout: '20m',
       });
       plugin = new AlertingPlugin(context);
 
@@ -157,6 +159,7 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
+          defaultRuleTaskTimeout: '20m',
         });
         const plugin = new AlertingPlugin(context);
 
@@ -197,6 +200,7 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
+          defaultRuleTaskTimeout: '20m',
         });
         const plugin = new AlertingPlugin(context);
 
@@ -251,6 +255,7 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       });
       const plugin = new AlertingPlugin(context);
 

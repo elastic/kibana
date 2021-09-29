@@ -12,6 +12,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "defaultRuleTaskTimeout": "10m",
         "healthCheck": Object {
           "interval": "60m",
         },
