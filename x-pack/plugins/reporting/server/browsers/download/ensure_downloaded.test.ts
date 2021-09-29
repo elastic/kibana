@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import mockFs from 'mock-fs';
 import { existsSync, readdirSync } from 'fs';
 import { chromium } from '../chromium';
