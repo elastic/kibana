@@ -14,7 +14,7 @@ import type { SavedSearchSavedObject } from '../../../../common';
 import type { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import type { Filter, FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '../../../../../../../src/plugins/data/common/data_views/data_view.stub';
-import { DataView } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { fieldFormatsMock } from '../../../../../../../src/plugins/field_formats/common/mocks';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';
 
@@ -26,7 +26,7 @@ function createMockDataView(id: string) {
     attributes: { timeFieldName, fields, title },
   } = stubbedSavedObjectIndexPattern(id);
 
-  return new DataView({
+  return new IndexPattern({
     spec: {
       id,
       type,

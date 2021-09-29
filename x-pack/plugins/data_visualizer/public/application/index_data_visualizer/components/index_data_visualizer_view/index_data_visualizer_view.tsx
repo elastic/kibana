@@ -69,7 +69,7 @@ import { createMergedEsQuery, getEsQueryFromSavedSearch } from '../../utils/save
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
-import { DataViewField, DataView } from '../../../../../../../../src/plugins/data/common';
+import { IndexPatternField, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import './_index.scss';
 
 interface DataVisualizerPageState {
@@ -126,7 +126,7 @@ export const getDefaultDataVisualizerListState = (
 });
 
 export interface IndexDataVisualizerViewProps {
-  currentIndexPattern: DataView;
+  currentIndexPattern: IndexPattern;
   currentSavedSearch: SavedSearchSavedObject | null;
   additionalLinks?: ResultLink[];
 }
@@ -222,7 +222,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     }
   }, [currentIndexPattern, toasts]);
 
-  const indexPatternFields: DataViewField[] = currentIndexPattern.fields;
+  const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
@@ -329,7 +329,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
   const onAddFilter = useCallback(
-    (field: DataViewField | string, values: string, operation: '+' | '-') => {
+    (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
       const newFilters = generateFilters(
         data.query.filterManager,
         field,

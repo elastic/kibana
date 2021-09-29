@@ -19,10 +19,10 @@ import {
 } from '../stats_table/components/field_data_expanded_row';
 import { NotInDocsContent } from '../not_in_docs_content';
 import { FieldVisConfig } from '../stats_table/types';
-import { DataView } from '../../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
 import { LoadingIndicator } from '../loading_indicator';
-import { DataViewField } from '../../../../../../../../src/plugins/data/common';
+import { IndexPatternField } from '../../../../../../../../src/plugins/data/common';
 
 export const IndexBasedDataVisualizerExpandedRow = ({
   item,
@@ -31,12 +31,12 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   onAddFilter,
 }: {
   item: FieldVisConfig;
-  indexPattern: DataView | undefined;
+  indexPattern: IndexPattern | undefined;
   combinedQuery: CombinedQuery;
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }) => {
   const config = item;
   const { loading, type, existsInDocs, fieldName } = config;

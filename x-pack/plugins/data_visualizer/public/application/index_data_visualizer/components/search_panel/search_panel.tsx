@@ -13,8 +13,8 @@ import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
 import {
-  DataView,
-  DataViewField,
+  IndexPattern,
+  IndexPatternField,
   TimeRange,
 } from '../../../../../../../../src/plugins/data/common';
 import { JobFieldType } from '../../../../../common/types';
@@ -23,7 +23,7 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_index.scss';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 interface Props {
-  indexPattern: DataView;
+  indexPattern: IndexPattern;
   searchString: Query['query'];
   searchQuery: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
@@ -47,7 +47,7 @@ interface Props {
     filters: Filter[];
   }): void;
   showEmptyFields: boolean;
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
 export const SearchPanel: FC<Props> = ({
