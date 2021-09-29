@@ -15,12 +15,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
-import { isRESTApiError } from './helpers';
+import { isRESTApiError, useOldConnector } from './helpers';
 import { InstallationCallout } from './installation_callout';
 import { UpdateConnectorModal } from './update_connector_modal';
 import { updateActionConnector } from '../../../lib/action_connector_api';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ENABLE_NEW_SN_ITSM_CONNECTOR } from '../../../../../../actions/server/constants/connectors';
 import { Credentials } from './credentials';
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowActionConnector>> =
@@ -38,8 +36,9 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       http,
       notifications: { toasts },
     } = useKibana().services;
-    const { apiUrl, isLegacy } = action.config;
+    const { apiUrl } = action.config;
     const { username, password } = action.secrets;
+    const isOldConnector = useOldConnector(action);
 
     const [showModal, setShowModal] = useState(false);
 
@@ -71,10 +70,10 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     }, [action, fetchAppInfo]);
 
     const beforeActionConnectorSave = useCallback(async () => {
-      if (ENABLE_NEW_SN_ITSM_CONNECTOR && !isLegacy) {
+      if (!isOldConnector) {
         await getApplicationInfo();
       }
-    }, [getApplicationInfo, isLegacy]);
+    }, [getApplicationInfo, isOldConnector]);
 
     const afterActionConnectorSave = useCallback(async () => {
       // TODO: Implement
@@ -134,10 +133,8 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
             onCancel={onModalCancel}
           />
         )}
-        {ENABLE_NEW_SN_ITSM_CONNECTOR && !isLegacy && <InstallationCallout />}
-        {ENABLE_NEW_SN_ITSM_CONNECTOR && isLegacy && (
-          <DeprecatedCallout onMigrate={onMigrateClick} />
-        )}
+        {!isOldConnector && <InstallationCallout />}
+        {isOldConnector && <DeprecatedCallout onMigrate={onMigrateClick} />}
         <Credentials
           action={action}
           errors={errors}
@@ -146,7 +143,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
           editActionSecrets={editActionSecrets}
           editActionConfig={editActionConfig}
         />
-        {applicationRequired && !isLegacy && (
+        {applicationRequired && !isOldConnector && (
           <ApplicationRequiredCallout message={applicationInfoErrorMsg} />
         )}
       </>

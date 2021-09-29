@@ -6,8 +6,13 @@
  */
 
 import { EuiSelectOption } from '@elastic/eui';
+import {
+  ENABLE_NEW_SN_ITSM_CONNECTOR,
+  ENABLE_NEW_SN_SIR_CONNECTOR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../actions/server/constants/connectors';
 import { IErrorObject } from '../../../../../public/types';
-import { AppInfo, Choice, RESTApiError } from './types';
+import { AppInfo, Choice, RESTApiError, ServiceNowActionConnector } from './types';
 
 export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
   choices.map((choice) => ({ value: choice.value, text: choice.label }));
@@ -19,3 +24,24 @@ export const isFieldInvalid = (
   field: string | undefined,
   error: string | IErrorObject | string[]
 ): boolean => error !== undefined && error.length > 0 && field !== undefined;
+
+// TODO: Remove when the application are certified
+export const useOldConnector = (connector: ServiceNowActionConnector) => {
+  if (
+    ENABLE_NEW_SN_ITSM_CONNECTOR &&
+    connector.actionTypeId === '.servicenow' &&
+    connector.config.isLegacy
+  ) {
+    return true;
+  }
+
+  if (
+    ENABLE_NEW_SN_SIR_CONNECTOR &&
+    connector.actionTypeId === '.servicenow-sir' &&
+    connector.config.isLegacy
+  ) {
+    return true;
+  }
+
+  return false;
+};
