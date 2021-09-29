@@ -1,6 +1,6 @@
 .dvSearchPanel__controls {
   flex-direction: row;
-  padding: 8px;
+  padding: $euiSizeS;
 }
 
 @include euiBreakpoint('xs', 's', 'm', 'l') {

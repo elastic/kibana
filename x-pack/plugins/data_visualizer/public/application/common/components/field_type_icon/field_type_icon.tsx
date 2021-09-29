@@ -41,13 +41,13 @@ export const typeToEuiIconMap: Record<string, { iconType: string; color?: string
   ip_range: { iconType: 'tokenIP' },
   // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
   murmur3: { iconType: 'tokenFile' },
-  number: { iconType: 'tokenNumber', color: 'euiColorVis0' },
-  number_range: { iconType: 'tokenNumber', color: 'euiColorVis0' },
-  histogram: { iconType: 'tokenHistogram', color: 'euiColorVis0' },
+  number: { iconType: 'tokenNumber' },
+  number_range: { iconType: 'tokenNumber' },
+  histogram: { iconType: 'tokenHistogram' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   string: { iconType: 'tokenString' },
-  text: { iconType: 'tokenString', color: 'euiColorVis1' },
-  keyword: { iconType: 'tokenText', color: 'euiColorVis1' },
+  text: { iconType: 'tokenString' },
+  keyword: { iconType: 'tokenKeyword' },
   nested: { iconType: 'tokenNested' },
 };
 
