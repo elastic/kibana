@@ -43,11 +43,6 @@ import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
  */
 const FIELDS_PER_PAGE = 50;
 
-/**
- * Local storage key for "Selected fields" collapse button state
- */
-const SELECTED_FIELDS_KEY = 'discover:selectedFieldsCollapsed';
-
 export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProps, 'documents$'> {
   /**
    * Current state of the field filter, filtering fields by name, type, ...
@@ -113,10 +108,6 @@ export function DiscoverSidebarComponent({
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
-  const initialSelectedFieldsCollapsed = Boolean(services.storage.get(SELECTED_FIELDS_KEY) ?? true);
-  const [selectedFieldsCollapsed, setSelectedFieldsCollapsed] = useState(
-    initialSelectedFieldsCollapsed
-  );
 
   useEffect(() => {
     if (documents) {
@@ -278,11 +269,6 @@ export function DiscoverSidebarComponent({
 
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
 
-  const toggleSelectedFieldsCollapsed = useCallback(() => {
-    services.storage.set(SELECTED_FIELDS_KEY, !selectedFieldsCollapsed);
-    setSelectedFieldsCollapsed(!selectedFieldsCollapsed);
-  }, [selectedFieldsCollapsed, services.storage]);
-
   if (!selectedIndexPattern) {
     return null;
   }
@@ -378,7 +364,7 @@ export function DiscoverSidebarComponent({
                   <>
                     <EuiAccordion
                       id="dscSelectedFields"
-                      initialIsOpen={initialSelectedFieldsCollapsed}
+                      initialIsOpen={true}
                       buttonContent={
                         <EuiText size="xs" id="selected_fields">
                           <strong>
@@ -389,7 +375,6 @@ export function DiscoverSidebarComponent({
                           </strong>
                         </EuiText>
                       }
-                      onClick={toggleSelectedFieldsCollapsed}
                       extraAction={
                         <EuiNotificationBadge color={filterChanged ? 'subdued' : 'accent'} size="m">
                           {selectedFields.length}
