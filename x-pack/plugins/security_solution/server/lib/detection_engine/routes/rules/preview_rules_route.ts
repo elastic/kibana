@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ISavedObjectsRepository, SavedObject } from 'kibana/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -21,11 +22,12 @@ import { previewRulesSchema } from '../../../../../common/detection_engine/schem
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertPreviewAPIToInternalSchema } from '../../schemas/rule_converters';
 import { PreviewRuleOptions } from '../../rule_types/types';
-import { AlertAttributes } from '../../signals/types';
+import { AlertAttributes, ThresholdAlertState } from '../../signals/types';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
   Alert,
   AlertInstanceContext,
+  AlertInstanceState,
   AlertTypeParams,
   AlertTypeState,
 } from '../../../../../../alerting/common';
@@ -45,9 +47,12 @@ import {
   createQueryAlertType,
   createThresholdAlertType,
 } from '../../rule_types';
-import { AlertTypeExecutor, PersistenceServices } from '../../../../../../rule_registry/server';
+import { PersistenceServices } from '../../../../../../rule_registry/server';
+import { ExecutorType } from '../../../../../../alerting/server/types';
+import { parseInterval } from '../../signals/utils';
+import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
 
-export const previewRulesRoute = (
+export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
   previewRuleOptions: PreviewRuleOptions
@@ -77,10 +82,11 @@ export const previewRulesRoute = (
         }
 
         const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
-        const runState = {};
+        const runState: Record<string, unknown> = {};
 
         const { maxSignals } = internalRule.params;
         const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
+        let invocationCount = internalRule.invocationCount;
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -114,38 +120,107 @@ export const previewRulesRoute = (
 
         const previewRuleParams = internalRule.params;
 
-        const runExecutors = <T extends RuleParams>(
-          executor: AlertTypeExecutor<{}, T, {}, {}>,
-          params: T
-        ) => {};
+        const runExecutors = async <
+          TParams extends RuleParams,
+          TState extends AlertTypeState,
+          TInstanceState extends AlertInstanceState,
+          TInstanceContext extends AlertInstanceContext,
+          TActionGroupIds extends string
+        >(
+          executor: ExecutorType<
+            TParams,
+            TState,
+            TInstanceState,
+            TInstanceContext,
+            TActionGroupIds
+          >,
+          params: TParams
+        ) => {
+          let statePreview = runState as TState;
+
+          const startedAt = moment();
+          for (let i = 0; i < invocationCount; i++) {
+            startedAt.subtract(parseInterval(internalRule.schedule.interval));
+          }
+
+          const alertInstanceFactory = (id: string) => ({
+            getState() {
+              return {} as unknown as TInstanceState;
+            },
+            replaceState(state: TInstanceState) {
+              return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
+                state: {} as TInstanceState,
+                meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+              });
+            },
+            scheduleActions(actionGroup: TActionGroupIds, alertcontext: TInstanceContext) {
+              return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
+                state: {} as TInstanceState,
+                meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+              });
+            },
+            scheduleActionsWithSubGroup(
+              actionGroup: TActionGroupIds,
+              subgroup: string,
+              alertcontext: TInstanceContext
+            ) {
+              return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
+                state: {} as TInstanceState,
+                meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+              });
+            },
+          });
+
+          let previousStartedAt = null;
+          while (invocationCount > 0) {
+            statePreview = (await executor({
+              previousStartedAt,
+              startedAt: startedAt.toDate(),
+              state: statePreview,
+              alertId: 'alertId',
+              services: {
+                alertInstanceFactory,
+                savedObjectsClient: {},
+                scopedClusterClient: {},
+              },
+              spaceId: 'asdf',
+              updatedBy: 'preview-fake-user',
+              params,
+              actionGroupIds: '',
+            })) as TState;
+            previousStartedAt = startedAt.toDate();
+            startedAt.add(parseInterval(internalRule.schedule.interval));
+            invocationCount--;
+          }
+        };
+
+        // TODO: pass the real savedObjectsClient but refactor the executor implementation not to use it for fetching rules, as we already have everything we need to execute the rule
+        // TODO: preview rule status client should keep the errors & warnings in memory and return with the preview POST response
 
         switch (previewRuleParams.type) {
           case 'threat_match':
-            runExecutors<ThreatRuleParams>(
+            await runExecutors(
               createIndicatorMatchAlertType(previewRuleOptions).executor,
               previewRuleParams
             );
             break;
           case 'eql':
-            runExecutors<EqlRuleParams>(
-              createEqlAlertType(previewRuleOptions).executor,
-              previewRuleParams
-            );
+            await runExecutors(createEqlAlertType(previewRuleOptions).executor, previewRuleParams);
             break;
           case 'query':
-            runExecutors<QueryRuleParams>(
+            await runExecutors<QueryRuleParams, {}>(
               createQueryAlertType(previewRuleOptions).executor,
               previewRuleParams
             );
             break;
           case 'threshold':
-            runExecutors<ThresholdRuleParams>(
+            await runExecutors<ThresholdRuleParams, ThresholdAlertState>(
               createThresholdAlertType(previewRuleOptions).executor,
               previewRuleParams
             );
             break;
           case 'machine_learning':
-            runExecutors<MachineLearningRuleParams>(
+            await runExecutors<MachineLearningRuleParams, {}>(
               createMlAlertType(previewRuleOptions).executor,
               previewRuleParams
             );

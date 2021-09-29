@@ -15,12 +15,14 @@ import {
   RuleParams,
   TypeSpecificRuleParams,
   BaseRuleParams,
+  InternalRulePreview,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
   CreateRulesSchema,
   CreateTypeSpecific,
   FullResponseSchema,
+  PreviewRulesSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
 import { AppClient } from '../../../types';
@@ -37,6 +39,7 @@ import {
   transformToNotifyWhen,
 } from '../rules/utils';
 import { ruleTypeMappings } from '../signals/utils';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -168,9 +171,9 @@ export const convertCreateAPIToInternalSchema = (
 };
 
 export const convertPreviewAPIToInternalSchema = (
-  input: CreateRulesSchema,
+  input: PreviewRulesSchema,
   siemClient: AppClient
-): InternalRuleCreate => {
+): InternalRulePreview => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
@@ -178,6 +181,7 @@ export const convertPreviewAPIToInternalSchema = (
     tags: addTags(input.tags ?? [], newRuleId, false),
     alertTypeId: SIGNALS_ID,
     consumer: SERVER_APP_ID,
+    invocationCount: input.invocationCount,
     params: {
       author: input.author ?? [],
       buildingBlockType: input.building_block_type,
