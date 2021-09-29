@@ -144,8 +144,7 @@ describe('MissingMonitoringDataRule', () => {
             ui: {
               isFiring: true,
               message: {
-                text:
-                  'For the past an hour, we have not detected any monitoring data from the Elasticsearch node: esName1, starting at #absolute',
+                text: 'For the past an hour, we have not detected any monitoring data from the Elasticsearch node: esName1, starting at #absolute',
                 nextSteps: [
                   {
                     text: '#start_linkView all Elasticsearch nodes#end_link',

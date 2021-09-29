@@ -218,7 +218,6 @@ export class Server {
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
       executionContext: executionContextSetup,
-      deprecations: deprecationsSetup,
     });
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
@@ -233,6 +232,7 @@ export class Server {
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
+      deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
     });
 
@@ -303,6 +303,7 @@ export class Server {
 
     const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();
+    const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -320,7 +321,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
-    const deprecationsStart = this.deprecations.start();
+
     this.status.start();
 
     this.coreStart = {

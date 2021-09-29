@@ -11,7 +11,7 @@ import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import { ConfigSchema } from '../../config';
 import { IFieldType } from '../../common';
-import { findIndexPatternById, getFieldByName } from '../index_patterns';
+import { findIndexPatternById, getFieldByName } from '../data_views';
 import { shimAbortSignal } from '../search';
 
 export async function termsAggSuggestions(

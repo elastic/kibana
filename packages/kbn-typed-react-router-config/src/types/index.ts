@@ -252,10 +252,9 @@ type AppendPath<
   TPath extends string
 > = NormalizePath<`${TPrefix}${NormalizePath<`/${TPath}`>}`>;
 
-type MaybeUnion<T extends Record<string, any>, U extends Record<string, any>> = Omit<T, keyof U> &
-  {
-    [key in keyof U]: key extends keyof T ? T[key] | U[key] : U[key];
-  };
+type MaybeUnion<T extends Record<string, any>, U extends Record<string, any>> = Omit<T, keyof U> & {
+  [key in keyof U]: key extends keyof T ? T[key] | U[key] : U[key];
+};
 
 type MapRoute<TRoute extends Route, TParents extends Route[] = []> = TRoute extends Route
   ? MaybeUnion<

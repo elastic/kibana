@@ -8,7 +8,7 @@
 
 import { run } from '@kbn/dev-utils';
 import { pipe } from 'fp-ts/function';
-import { payload, noop, areValid, print, expectedFlags } from './utils';
+import { payload, noop, areValid, print, expectedFlags, format } from './utils';
 import { types } from './saved_object_info';
 
 export { SavedObjectInfoService } from './saved_object_info';
@@ -16,12 +16,15 @@ export { SavedObjectInfoService } from './saved_object_info';
 export const runSavedObjInfoSvc = () =>
   run(
     async ({ flags, log }) => {
-      const printWith = print(log);
+      const justJson: boolean = !!flags.json;
 
-      const getAndFormatAndPrint = async () =>
-        pipe(await types(flags.esUrl as string)(), payload, printWith());
+      const resolveDotKibana = async () => await types(flags.esUrl as string)();
 
-      return areValid(flags) ? getAndFormatAndPrint() : noop();
+      return areValid(flags)
+        ? justJson
+          ? pipe(await resolveDotKibana(), JSON.stringify.bind(null), log.write.bind(log))
+          : pipe(await resolveDotKibana(), format, payload, print(log)())
+        : noop();
     },
     {
       description: `

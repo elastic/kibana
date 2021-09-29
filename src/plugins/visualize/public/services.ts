@@ -13,11 +13,8 @@ import type { UsageCollectionStart } from '../../usage_collection/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
-export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionStart>(
-  'UsageCollection'
-);
+export const [getUsageCollector, setUsageCollector] =
+  createGetterSetter<UsageCollectionStart>('UsageCollection');
 
-export const [
-  getVisEditorsRegistry,
-  setVisEditorsRegistry,
-] = createGetterSetter<VisEditorsRegistry>('VisEditorsRegistry');
+export const [getVisEditorsRegistry, setVisEditorsRegistry] =
+  createGetterSetter<VisEditorsRegistry>('VisEditorsRegistry');

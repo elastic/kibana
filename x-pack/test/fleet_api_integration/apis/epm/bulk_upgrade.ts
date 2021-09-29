@@ -13,6 +13,7 @@ import {
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
 } from '../../../../plugins/fleet/common';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -24,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('bulk package upgrade api', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
 
     describe('bulk package upgrade with a package already installed', async () => {
       beforeEach(async () => {

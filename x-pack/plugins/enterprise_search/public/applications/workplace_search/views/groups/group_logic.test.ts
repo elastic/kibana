@@ -24,12 +24,8 @@ describe('GroupLogic', () => {
   const { mount } = new LogicMounter(GroupLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    flashSuccessToast,
-    setQueuedErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setQueuedErrorMessage } =
+    mockFlashMessageHelpers;
 
   const group = groups[0];
   const sourceIds = ['123', '124'];
@@ -114,7 +110,7 @@ describe('GroupLogic', () => {
         GroupLogic.actions.onGroupSourcesSaved(group);
 
         expect(GroupLogic.values.group).toEqual(group);
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(false);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
         expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
         expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
@@ -130,11 +126,11 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('hideSharedSourcesModal', () => {
+    describe('hideOrgSourcesModal', () => {
       it('sets reducers', () => {
-        GroupLogic.actions.hideSharedSourcesModal(group);
+        GroupLogic.actions.hideOrgSourcesModal(group);
 
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(false);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
       });
     });
@@ -284,7 +280,7 @@ describe('GroupLogic', () => {
         await nextTick();
         expect(onGroupSourcesSavedSpy).toHaveBeenCalledWith(group);
         expect(flashSuccessToast).toHaveBeenCalledWith(
-          'Successfully updated shared content sources.'
+          'Successfully updated organizational content sources.'
         );
       });
 
@@ -321,7 +317,7 @@ describe('GroupLogic', () => {
 
         await nextTick();
         expect(flashSuccessToast).toHaveBeenCalledWith(
-          'Successfully updated shared source prioritization.'
+          'Successfully updated organizational source prioritization.'
         );
         expect(onGroupPrioritiesChangedSpy).toHaveBeenCalledWith(group);
       });
@@ -345,11 +341,11 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('showSharedSourcesModal', () => {
+    describe('showOrgSourcesModal', () => {
       it('sets reducer and clears flash messages', () => {
-        GroupLogic.actions.showSharedSourcesModal();
+        GroupLogic.actions.showOrgSourcesModal();
 
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(true);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(true);
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });

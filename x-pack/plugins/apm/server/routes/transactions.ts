@@ -52,12 +52,21 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const {
       path: { serviceName },
-      query: { environment, kuery, latencyAggregationType, transactionType },
+      query: {
+        environment,
+        kuery,
+        latencyAggregationType,
+        transactionType,
+        start,
+        end,
+      },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
 
     return getServiceTransactionGroups({
@@ -68,6 +77,8 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       searchAggregatedTransactions,
       transactionType,
       latencyAggregationType,
+      start,
+      end,
     });
   },
 });
@@ -108,12 +119,16 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
         transactionType,
         comparisonStart,
         comparisonEnd,
+        start,
+        end,
       },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
 
     return await getServiceTransactionGroupDetailedStatisticsPeriods({
@@ -128,6 +143,8 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       latencyAggregationType,
       comparisonStart,
       comparisonEnd,
+      start,
+      end,
     });
   },
 });
@@ -161,11 +178,15 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       latencyAggregationType,
       comparisonStart,
       comparisonEnd,
+      start,
+      end,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
 
     const options = {
@@ -177,24 +198,25 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       setup,
       searchAggregatedTransactions,
       logger,
+      start,
+      end,
     };
 
-    const [
-      { currentPeriod, previousPeriod },
-      anomalyTimeseries,
-    ] = await Promise.all([
-      getLatencyPeriods({
-        ...options,
-        latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-        comparisonStart,
-        comparisonEnd,
-      }),
-      getAnomalySeries(options).catch((error) => {
-        logger.warn(`Unable to retrieve anomalies for latency charts.`);
-        logger.error(error);
-        return undefined;
-      }),
-    ]);
+    const [{ currentPeriod, previousPeriod }, anomalyTimeseries] =
+      await Promise.all([
+        getLatencyPeriods({
+          ...options,
+          latencyAggregationType:
+            latencyAggregationType as LatencyAggregationType,
+          comparisonStart,
+          comparisonEnd,
+        }),
+        getAnomalySeries(options).catch((error) => {
+          logger.warn(`Unable to retrieve anomalies for latency charts.`);
+          logger.error(error);
+          return undefined;
+        }),
+      ]);
 
     return {
       currentPeriod,
@@ -240,6 +262,8 @@ const transactionTraceSamplesRoute = createApmServerRoute({
       traceId = '',
       sampleRangeFrom,
       sampleRangeTo,
+      start,
+      end,
     } = params.query;
 
     return getTransactionTraceSamples({
@@ -253,6 +277,8 @@ const transactionTraceSamplesRoute = createApmServerRoute({
       sampleRangeFrom,
       sampleRangeTo,
       setup,
+      start,
+      end,
     });
   },
 });
@@ -277,12 +303,8 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
     const { params } = resources;
 
     const { serviceName } = params.path;
-    const {
-      environment,
-      kuery,
-      transactionName,
-      transactionType,
-    } = params.query;
+    const { environment, kuery, transactionName, transactionType, start, end } =
+      params.query;
 
     return getTransactionBreakdown({
       environment,
@@ -291,6 +313,8 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
       transactionName,
       transactionType,
       setup,
+      start,
+      end,
     });
   },
 });
@@ -321,11 +345,15 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       transactionName,
       comparisonStart,
       comparisonEnd,
+      start,
+      end,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
 
     return getErrorRatePeriods({
@@ -338,6 +366,8 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       searchAggregatedTransactions,
       comparisonStart,
       comparisonEnd,
+      start,
+      end,
     });
   },
 });

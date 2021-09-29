@@ -15,7 +15,7 @@ import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aw
 
 describe('Fleet - validatePackagePolicy()', () => {
   describe('works for packages with single policy template (aka no integrations)', () => {
-    const mockPackage = ({
+    const mockPackage = {
       name: 'mock-package',
       title: 'Mock package',
       version: '0.0.0',
@@ -152,7 +152,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
-    } as unknown) as PackageInfo;
+    } as unknown as PackageInfo;
 
     const validPackagePolicy: NewPackagePolicy = {
       name: 'pkgPolicy1-1',
@@ -544,7 +544,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           validPackagePolicy,
           {
             ...mockPackage,
-            policy_templates: [({ inputs: [] } as unknown) as RegistryPolicyTemplate],
+            policy_templates: [{ inputs: [] } as unknown as RegistryPolicyTemplate],
           },
           safeLoad
         )
@@ -562,7 +562,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       expect(
         validatePackagePolicy(
           INVALID_AWS_POLICY as NewPackagePolicy,
-          (AWS_PACKAGE as unknown) as PackageInfo,
+          AWS_PACKAGE as unknown as PackageInfo,
           safeLoad
         )
       ).toMatchSnapshot();
@@ -573,7 +573,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         validationHasErrors(
           validatePackagePolicy(
             VALID_AWS_POLICY as NewPackagePolicy,
-            (AWS_PACKAGE as unknown) as PackageInfo,
+            AWS_PACKAGE as unknown as PackageInfo,
             safeLoad
           )
         )

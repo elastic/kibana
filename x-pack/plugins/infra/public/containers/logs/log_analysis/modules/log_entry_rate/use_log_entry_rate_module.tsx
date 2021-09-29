@@ -80,6 +80,5 @@ export const useLogEntryRateModule = ({
   };
 };
 
-export const [LogEntryRateModuleProvider, useLogEntryRateModuleContext] = createContainer(
-  useLogEntryRateModule
-);
+export const [LogEntryRateModuleProvider, useLogEntryRateModuleContext] =
+  createContainer(useLogEntryRateModule);

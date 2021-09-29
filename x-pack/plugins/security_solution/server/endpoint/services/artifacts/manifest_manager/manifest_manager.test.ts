@@ -183,11 +183,11 @@ describe('ManifestManager', () => {
           }
         });
 
-      (manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>).getArtifact.mockImplementation(
-        async (id) => {
-          return ARTIFACTS_BY_ID[id];
-        }
-      );
+      (
+        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+      ).getArtifact.mockImplementation(async (id) => {
+        return ARTIFACTS_BY_ID[id];
+      });
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -244,12 +244,12 @@ describe('ManifestManager', () => {
           }
         });
 
-      (manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>).getArtifact.mockImplementation(
-        async (id) => {
-          // report the MACOS Exceptions artifact as not found
-          return id === ARTIFACT_ID_EXCEPTIONS_MACOS ? undefined : ARTIFACTS_BY_ID[id];
-        }
-      );
+      (
+        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+      ).getArtifact.mockImplementation(async (id) => {
+        // report the MACOS Exceptions artifact as not found
+        return id === ARTIFACT_ID_EXCEPTIONS_MACOS ? undefined : ARTIFACTS_BY_ID[id];
+      });
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -1002,6 +1002,76 @@ describe('ManifestManager', () => {
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
 
       expect(context.packagePolicyService.update).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('cleanup artifacts', () => {
+    const mockPolicyListIdsResponse = (items: string[]) =>
+      jest.fn().mockResolvedValue({
+        items,
+        page: 1,
+        per_page: 100,
+        total: items.length,
+      });
+
+    test('Successfully removes orphan artifacts', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+      const manifest = await manifestManager.buildNewManifest();
+
+      await manifestManager.cleanup(manifest);
+      const artifactToBeRemoved = await context.artifactClient.getArtifact('');
+      expect(artifactToBeRemoved).not.toBeUndefined();
+
+      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledWith(
+        getArtifactId(artifactToBeRemoved!)
+      );
+    });
+
+    test('When there is no artifact to be removed', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+
+      context.artifactClient.listArtifacts = jest.fn().mockResolvedValue([
+        {
+          id: '123',
+          type: 'trustlist',
+          identifier: 'endpoint-trustlist-windows-v1',
+          packageName: 'endpoint',
+          encryptionAlgorithm: 'none',
+          relative_url: '/api/fleet/artifacts/trustlist-v1/d801aa1fb',
+          compressionAlgorithm: 'zlib',
+          decodedSha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+          decodedSize: 14,
+          encodedSha256: 'd29238d40',
+          encodedSize: 22,
+          body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
+          created: '2021-03-08T14:47:13.714Z',
+        },
+      ]);
+      const manifest = await manifestManager.buildNewManifest();
+
+      await manifestManager.cleanup(manifest);
+
+      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -149,7 +149,7 @@ const PolicyAdvanced = React.memo(
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
           setValue(
-            (newPayload as unknown) as Record<string, unknown>,
+            newPayload as unknown as Record<string, unknown>,
             event.target.value,
             configPath
           );
@@ -164,7 +164,7 @@ const PolicyAdvanced = React.memo(
 
     const value =
       policyDetailsConfig &&
-      getValue((policyDetailsConfig as unknown) as Record<string, unknown>, configPath);
+      getValue(policyDetailsConfig as unknown as Record<string, unknown>, configPath);
 
     return (
       <>

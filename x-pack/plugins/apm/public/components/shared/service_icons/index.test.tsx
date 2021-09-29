@@ -29,9 +29,9 @@ const addWarning = jest.fn();
 const httpGet = jest.fn();
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+  const mockPluginContext = merge({}, mockApmPluginContextValue, {
     core: { http: { get: httpGet }, notifications: { toasts: { addWarning } } },
-  }) as unknown) as ApmPluginContextValue;
+  }) as unknown as ApmPluginContextValue;
 
   return (
     <KibanaReactContext.Provider>
@@ -179,13 +179,11 @@ describe('ServiceIcons', () => {
   });
 
   describe('details', () => {
-    const callApmApi = (apisMockData: Record<string, object>) => ({
-      endpoint,
-    }: {
-      endpoint: string;
-    }) => {
-      return apisMockData[endpoint];
-    };
+    const callApmApi =
+      (apisMockData: Record<string, object>) =>
+      ({ endpoint }: { endpoint: string }) => {
+        return apisMockData[endpoint];
+      };
     it('Shows loading spinner while fetching data', () => {
       const apisMockData = {
         'GET /api/apm/services/{serviceName}/metadata/icons': {

@@ -59,9 +59,9 @@ export function mockDatasourceStates() {
   };
 }
 
-export function createMockVisualization(): jest.Mocked<Visualization> {
+export function createMockVisualization(id = 'vis1'): jest.Mocked<Visualization> {
   return {
-    id: 'TEST_VIS',
+    id,
     clearLayer: jest.fn((state, _layerId) => state),
     removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
@@ -70,9 +70,9 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     visualizationTypes: [
       {
         icon: 'empty',
-        id: 'TEST_VIS',
+        id,
         label: 'TEST',
-        groupLabel: 'TEST_VISGroup',
+        groupLabel: `${id}Group`,
       },
     ],
     getVisualizationTypeId: jest.fn((_state) => 'empty'),
@@ -122,7 +122,7 @@ export function createMockDatasource(id: string): DatasourceMock {
   return {
     id: 'mockindexpattern',
     clearLayer: jest.fn((state, _layerId) => state),
-    getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
+    getDatasourceSuggestionsForField: jest.fn((_state, _item, filterFn) => []),
     getDatasourceSuggestionsForVisualizeField: jest.fn((_state, _indexpatternId, _fieldName) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
     getPersistableState: jest.fn((x) => ({
@@ -205,7 +205,7 @@ export const lensPluginMock = {
   createStartContract,
 };
 
-export const defaultDoc = ({
+export const defaultDoc = {
   savedObjectId: '1234',
   title: 'An extremely cool default document!',
   expression: 'definitely a valid expression',
@@ -219,7 +219,7 @@ export const defaultDoc = ({
     visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-} as unknown) as Document;
+} as unknown as Document;
 
 export function createMockTimefilter() {
   const unsubscribe = jest.fn();
@@ -304,7 +304,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
       getDefaultQuery: jest.fn(() => ({ query: '', language: 'lucene' })),
     };
   }
-  return ({
+  return {
     query: {
       filterManager: createMockFilterManager(),
       timefilter: {
@@ -323,7 +323,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
     fieldFormats: {
       deserialize: jest.fn(),
     },
-  } as unknown) as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 }
 
 export function makeDefaultServices(
@@ -373,7 +373,7 @@ export function makeDefaultServices(
       },
     });
     attributeServiceMock.wrapAttributes = jest.fn().mockResolvedValue({
-      savedObjectId: ((doc as unknown) as LensByReferenceInput).savedObjectId,
+      savedObjectId: (doc as unknown as LensByReferenceInput).savedObjectId,
     });
 
     return attributeServiceMock;
@@ -505,10 +505,10 @@ export const mountWithProvider = async (
   let instance: ReactWrapper = {} as ReactWrapper;
 
   await act(async () => {
-    instance = mount(component, ({
+    instance = mount(component, {
       wrappingComponent,
       ...restOptions,
-    } as unknown) as ReactWrapper);
+    } as unknown as ReactWrapper);
   });
   return { instance, lensStore };
 };

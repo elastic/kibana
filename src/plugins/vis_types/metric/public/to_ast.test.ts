@@ -16,7 +16,7 @@ describe('metric vis toExpressionAst function', () => {
   let vis: Vis<VisParams>;
 
   beforeEach(() => {
-    vis = ({
+    vis = {
       isHierarchical: () => false,
       type: {},
       params: {
@@ -29,7 +29,7 @@ describe('metric vis toExpressionAst function', () => {
           aggs: [],
         } as any,
       },
-    } as unknown) as Vis<VisParams>;
+    } as unknown as Vis<VisParams>;
   });
 
   it('without params', () => {

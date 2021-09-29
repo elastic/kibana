@@ -9,6 +9,7 @@ import { ElasticsearchClient } from 'kibana/server';
 import { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
+import { fetchTransactionDurationRanges } from './query_ranges';
 import { getQueryWithParams, getTermsQuery } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
@@ -26,7 +27,12 @@ export const getFailureCorrelationRequest = (
       ...query.bool,
       filter: [
         ...query.bool.filter,
-        ...getTermsQuery(EVENT_OUTCOME, EventOutcome.failure),
+        ...[
+          getTermsQuery({
+            fieldName: EVENT_OUTCOME,
+            fieldValue: EventOutcome.failure,
+          }),
+        ],
       ],
     },
   };
@@ -60,6 +66,7 @@ export const getFailureCorrelationRequest = (
 export const fetchFailedTransactionsCorrelationPValues = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
+  histogramRangeSteps: number[],
   fieldName: string
 ) => {
   const resp = await esClient.search(
@@ -79,7 +86,10 @@ export const fetchFailedTransactionsCorrelationPValues = async (
     bg_count: number;
     score: number;
   }>;
-  const result = overallResult.buckets.map((bucket) => {
+
+  // Using for of to sequentially augment the results with histogram data.
+  const result = [];
+  for (const bucket of overallResult.buckets) {
     // Scale the score into a value from 0 - 1
     // using a concave piecewise linear function in -log(p-value)
     const normalizedScore =
@@ -87,7 +97,17 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
       0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
-    return {
+    const histogram = await fetchTransactionDurationRanges(
+      esClient,
+      params,
+      histogramRangeSteps,
+      [
+        { fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure },
+        { fieldName, fieldValue: bucket.key },
+      ]
+    );
+
+    result.push({
       fieldName,
       fieldValue: bucket.key,
       doc_count: bucket.doc_count,
@@ -101,8 +121,9 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       successPercentage:
         (bucket.bg_count - bucket.doc_count) /
         (overallResult.bg_count - overallResult.doc_count),
-    };
-  });
+      histogram,
+    });
+  }
 
   return result;
 };
