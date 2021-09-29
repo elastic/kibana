@@ -318,7 +318,7 @@
             "children": [
               {
                 "parentPluginId": "navigation",
-                "id": "def-public.anchorElement",
+                "id": "def-public.TopNavMenuData.run.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "anchorElement",
@@ -471,7 +471,7 @@
             "section": "def-public.SearchBarProps",
             "text": "SearchBarProps"
           },
-          ", \"filters\" | \"query\" | \"isClearable\" | \"placeholder\" | \"isLoading\" | \"indexPatterns\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"displayStyle\" | \"onFiltersUpdated\" | \"onRefreshChange\"> & { config?: ",
+          ", \"filters\" | \"query\" | \"savedQuery\" | \"isClearable\" | \"placeholder\" | \"isLoading\" | \"indexPatterns\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"displayStyle\" | \"onFiltersUpdated\" | \"onRefreshChange\"> & { config?: ",
           {
             "pluginId": "navigation",
             "scope": "public",
@@ -611,7 +611,7 @@
           "children": [
             {
               "parentPluginId": "navigation",
-              "id": "def-public.menuItem",
+              "id": "def-public.NavigationPublicPluginSetup.registerMenuItem.$1",
               "type": "Object",
               "tags": [],
               "label": "menuItem",

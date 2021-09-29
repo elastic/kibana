@@ -60,7 +60,7 @@
         "children": [
           {
             "parentPluginId": "bfetch",
-            "id": "def-public.payload",
+            "id": "def-public.BatchedFunc.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "payload",
@@ -73,7 +73,7 @@
           },
           {
             "parentPluginId": "bfetch",
-            "id": "def-public.signal",
+            "id": "def-public.BatchedFunc.$2",
             "type": "Object",
             "tags": [],
             "label": "signal",
@@ -277,7 +277,7 @@
         "children": [
           {
             "parentPluginId": "bfetch",
-            "id": "def-server.context",
+            "id": "def-server.StreamingRequestHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -296,7 +296,7 @@
           },
           {
             "parentPluginId": "bfetch",
-            "id": "def-server.request",
+            "id": "def-server.StreamingRequestHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "request",

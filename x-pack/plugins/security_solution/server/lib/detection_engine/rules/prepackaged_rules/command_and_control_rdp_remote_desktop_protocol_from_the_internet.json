@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "This rule detects network events that may indicate the use of RDP traffic from the Internet. RDP is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or back-door vector.",
+  "description": "This rule detects network events that may indicate the use of RDP traffic from the Internet. RDP is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or backdoor vector.",
   "false_positives": [
     "Some network security policies allow RDP directly from the Internet but usage that is unfamiliar to server or network owners can be unexpected and suspicious. RDP services may be exposed directly to the Internet in some networks such as cloud environments. In such cases, only RDP gateways, bastions or jump servers may be expected expose RDP directly to the Internet and can be exempted from this rule. RDP may be required by some work-flows such as remote access and support for specialized software products and servers. Such work-flows are usually known and not unexpected."
   ],
@@ -74,5 +74,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 10
+  "version": 11
 }

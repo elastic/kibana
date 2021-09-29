@@ -58,10 +58,8 @@ export const useHostsKpiUniqueIps = ({
   const [loading, setLoading] = useState(false);
   const { getTransformChangesIfTheyExist } = useTransforms();
 
-  const [
-    hostsKpiUniqueIpsRequest,
-    setHostsKpiUniqueIpsRequest,
-  ] = useState<HostsKpiUniqueIpsRequestOptions | null>(null);
+  const [hostsKpiUniqueIpsRequest, setHostsKpiUniqueIpsRequest] =
+    useState<HostsKpiUniqueIpsRequestOptions | null>(null);
 
   const [hostsKpiUniqueIpsResponse, setHostsKpiUniqueIpsResponse] = useState<HostsKpiUniqueIpsArgs>(
     {

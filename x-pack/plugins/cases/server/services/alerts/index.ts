@@ -5,28 +5,42 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import { isEmpty } from 'lodash';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { Logger } from 'kibana/server';
-import { CaseStatuses, MAX_ALERTS_PER_SUB_CASE } from '../../../common';
+import { ElasticsearchClient, Logger } from 'kibana/server';
+import { CaseStatuses, MAX_ALERTS_PER_SUB_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common';
 import { AlertInfo, createCaseError } from '../../common';
 import { UpdateAlertRequest } from '../../client/alerts/types';
-import { AlertsClient } from '../../../../rule_registry/server';
-import { Alert } from './types';
-import { STATUS_VALUES } from '../../../../rule_registry/common/technical_rule_data_field_names';
+import {
+  ALERT_WORKFLOW_STATUS,
+  STATUS_VALUES,
+} from '../../../../rule_registry/common/technical_rule_data_field_names';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface UpdateAlertsStatusArgs {
   alerts: UpdateAlertRequest[];
+  scopedClusterClient: ElasticsearchClient;
   logger: Logger;
 }
 
 interface GetAlertsArgs {
   alertsInfo: AlertInfo[];
+  scopedClusterClient: ElasticsearchClient;
   logger: Logger;
+}
+
+interface Alert {
+  _id: string;
+  _index: string;
+  _source: Record<string, unknown>;
+}
+
+interface AlertsResponse {
+  docs: Alert[];
 }
 
 function isEmptyAlert(alert: AlertInfo): boolean {
@@ -34,42 +48,19 @@ function isEmptyAlert(alert: AlertInfo): boolean {
 }
 
 export class AlertService {
-  constructor(private readonly alertsClient?: PublicMethodsOf<AlertsClient>) {}
+  constructor() {}
 
-  public async updateAlertsStatus({ alerts, logger }: UpdateAlertsStatusArgs) {
+  public async updateAlertsStatus({ alerts, scopedClusterClient, logger }: UpdateAlertsStatusArgs) {
     try {
-      if (!this.alertsClient) {
-        throw new Error(
-          'Alert client is undefined, the rule registry plugin must be enabled to updated the status of alerts'
-        );
-      }
+      const bucketedAlerts = bucketAlertsByIndexAndStatus(alerts, logger);
+      const indexBuckets = Array.from(bucketedAlerts.entries());
 
-      const alertsToUpdate = alerts.filter((alert) => !isEmptyAlert(alert));
-
-      if (alertsToUpdate.length <= 0) {
-        return;
-      }
-
-      const updatedAlerts = await Promise.allSettled(
-        alertsToUpdate.map((alert) =>
-          this.alertsClient?.update({
-            id: alert.id,
-            index: alert.index,
-            status: translateStatus({ alert, logger }),
-            _version: undefined,
-          })
-        )
+      await pMap(
+        indexBuckets,
+        async (indexBucket: [string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>]) =>
+          updateByQuery(indexBucket, scopedClusterClient),
+        { concurrency: MAX_CONCURRENT_SEARCHES }
       );
-
-      updatedAlerts.forEach((updatedAlert, index) => {
-        if (updatedAlert.status === 'rejected') {
-          logger.error(
-            `Failed to update status for alert: ${JSON.stringify(alertsToUpdate[index])}: ${
-              updatedAlert.reason
-            }`
-          );
-        }
-      });
     } catch (error) {
       throw createCaseError({
         message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
@@ -79,51 +70,25 @@ export class AlertService {
     }
   }
 
-  public async getAlerts({ alertsInfo, logger }: GetAlertsArgs): Promise<Alert[] | undefined> {
+  public async getAlerts({
+    scopedClusterClient,
+    alertsInfo,
+    logger,
+  }: GetAlertsArgs): Promise<AlertsResponse | undefined> {
     try {
-      if (!this.alertsClient) {
-        throw new Error(
-          'Alert client is undefined, the rule registry plugin must be enabled to retrieve alerts'
-        );
-      }
+      const docs = alertsInfo
+        .filter((alert) => !isEmptyAlert(alert))
+        .slice(0, MAX_ALERTS_PER_SUB_CASE)
+        .map((alert) => ({ _id: alert.id, _index: alert.index }));
 
-      const alertsToGet = alertsInfo
-        .filter((alert) => !isEmpty(alert))
-        .slice(0, MAX_ALERTS_PER_SUB_CASE);
-
-      if (alertsToGet.length <= 0) {
+      if (docs.length <= 0) {
         return;
       }
 
-      const retrievedAlerts = await Promise.allSettled(
-        alertsToGet.map(({ id, index }) => this.alertsClient?.get({ id, index }))
-      );
+      const results = await scopedClusterClient.mget<Alert>({ body: { docs } });
 
-      retrievedAlerts.forEach((alert, index) => {
-        if (alert.status === 'rejected') {
-          logger.error(
-            `Failed to retrieve alert: ${JSON.stringify(alertsToGet[index])}: ${alert.reason}`
-          );
-        }
-      });
-
-      return retrievedAlerts.map((alert, index) => {
-        let source: unknown | undefined;
-        let error: Error | undefined;
-
-        if (alert.status === 'fulfilled') {
-          source = alert.value;
-        } else {
-          error = alert.reason;
-        }
-
-        return {
-          id: alertsToGet[index].id,
-          index: alertsToGet[index].index,
-          source,
-          error,
-        };
-      });
+      // @ts-expect-error @elastic/elasticsearch _source is optional
+      return results.body;
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts ids: ${JSON.stringify(alertsInfo)}: ${error}`,
@@ -132,6 +97,44 @@ export class AlertService {
       });
     }
   }
+}
+
+interface TranslatedUpdateAlertRequest {
+  id: string;
+  index: string;
+  status: STATUS_VALUES;
+}
+
+function bucketAlertsByIndexAndStatus(
+  alerts: UpdateAlertRequest[],
+  logger: Logger
+): Map<string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>> {
+  return alerts.reduce<Map<string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>>>(
+    (acc, alert) => {
+      // skip any alerts that are empty
+      if (isEmptyAlert(alert)) {
+        return acc;
+      }
+
+      const translatedAlert = { ...alert, status: translateStatus({ alert, logger }) };
+      const statusToAlertId = acc.get(translatedAlert.index);
+
+      // if we haven't seen the index before
+      if (!statusToAlertId) {
+        // add a new index in the parent map, with an entry for the status the alert set to pointing
+        // to an initial array of only the current alert
+        acc.set(translatedAlert.index, createStatusToAlertMap(translatedAlert));
+      } else {
+        // We had the index in the map so check to see if we have a bucket for the
+        // status, if not add a new status entry with the alert, if so update the status entry
+        // with the alert
+        updateIndexEntryWithStatus(statusToAlertId, translatedAlert);
+      }
+
+      return acc;
+    },
+    new Map()
+  );
 }
 
 function translateStatus({
@@ -156,4 +159,54 @@ function translateStatus({
     );
   }
   return translatedStatus ?? 'open';
+}
+
+function createStatusToAlertMap(
+  alert: TranslatedUpdateAlertRequest
+): Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]> {
+  return new Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>([[alert.status, [alert]]]);
+}
+
+function updateIndexEntryWithStatus(
+  statusToAlerts: Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>,
+  alert: TranslatedUpdateAlertRequest
+) {
+  const statusBucket = statusToAlerts.get(alert.status);
+
+  if (!statusBucket) {
+    statusToAlerts.set(alert.status, [alert]);
+  } else {
+    statusBucket.push(alert);
+  }
+}
+
+async function updateByQuery(
+  [index, statusToAlertMap]: [string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>],
+  scopedClusterClient: ElasticsearchClient
+) {
+  const statusBuckets = Array.from(statusToAlertMap);
+  return Promise.all(
+    // this will create three update by query calls one for each of the three statuses
+    statusBuckets.map(([status, translatedAlerts]) =>
+      scopedClusterClient.updateByQuery({
+        index,
+        conflicts: 'abort',
+        body: {
+          script: {
+            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+              ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
+            }
+            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+              ctx._source.signal.status = '${status}'
+            }`,
+            lang: 'painless',
+          },
+          // the query here will contain all the ids that have the same status for the same index
+          // being updated
+          query: { ids: { values: translatedAlerts.map(({ id }) => id) } },
+        },
+        ignore_unavailable: true,
+      })
+    )
+  );
 }

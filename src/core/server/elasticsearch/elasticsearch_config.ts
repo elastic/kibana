@@ -153,6 +153,21 @@ export const configSchema = schema.object({
     }),
     schema.boolean({ defaultValue: false })
   ),
+  skipStartupConnectionCheck: schema.conditional(
+    // Using dist over dev because integration_tests run with dev: false,
+    // and this config is solely introduced to allow some of the integration tests to run without an ES server.
+    schema.contextRef('dist'),
+    true,
+    schema.boolean({
+      validate: (rawValue) => {
+        if (rawValue === true) {
+          return '"skipStartupConnectionCheck" can only be set to true when running from source to allow integration tests to run without an ES server';
+        }
+      },
+      defaultValue: false,
+    }),
+    schema.boolean({ defaultValue: false })
+  ),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -220,6 +235,17 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
  * @public
  */
 export class ElasticsearchConfig {
+  /**
+   * @internal
+   * Only valid in dev mode. Skip the valid connection check during startup. The connection check allows
+   * Kibana to ensure that the Elasticsearch connection is valid before allowing
+   * any other services to be set up.
+   *
+   * @remarks
+   * You should disable this check at your own risk: Other services in Kibana
+   * may fail if this step is not completed.
+   */
+  public readonly skipStartupConnectionCheck: boolean;
   /**
    * The interval between health check requests Kibana sends to the Elasticsearch.
    */
@@ -337,6 +363,7 @@ export class ElasticsearchConfig {
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
+    this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

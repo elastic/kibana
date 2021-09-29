@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiToolTip,
   EuiButton,
@@ -38,12 +38,17 @@ export function AddLayerButton({
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
-  const hasMultipleLayers = Boolean(visualization.appendLayer && visualizationState);
-  if (!hasMultipleLayers) {
+  const supportedLayers = useMemo(() => {
+    if (!visualization.appendLayer || !visualizationState) {
+      return null;
+    }
+    return visualization.getSupportedLayers?.(visualizationState, layersMeta);
+  }, [visualization, visualizationState, layersMeta]);
+
+  if (supportedLayers == null) {
     return null;
   }
-  const supportedLayers = visualization.getSupportedLayers?.(visualizationState, layersMeta);
-  if (supportedLayers?.length === 1) {
+  if (supportedLayers.length === 1) {
     return (
       <EuiToolTip
         display="block"

@@ -99,13 +99,6 @@ describe('DiscoverFieldSearch', () => {
     expect(badge.text()).toEqual('0');
   });
 
-  test('missing switch appears with new fields api', () => {
-    const component = mountComponent({ ...defaultProps, useNewFieldsApi: true });
-    const btn = findTestSubject(component, 'toggleFieldFilterButton');
-    btn.simulate('click');
-    expect(findTestSubject(component, 'missingSwitch').exists()).toBeTruthy();
-  });
-
   test('change in filters triggers onChange', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });

@@ -150,7 +150,7 @@
               },
               {
                 "parentPluginId": "taskManager",
-                "id": "def-server.TaskManagerPlugin.setup.$2.plugins",
+                "id": "def-server.TaskManagerPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "plugins",
@@ -160,7 +160,7 @@
                 "children": [
                   {
                     "parentPluginId": "taskManager",
-                    "id": "def-server.TaskManagerPlugin.setup.$2.plugins.usageCollection",
+                    "id": "def-server.TaskManagerPlugin.setup.$2.usageCollection",
                     "type": "Object",
                     "tags": [],
                     "label": "usageCollection",
@@ -887,7 +887,7 @@
         "children": [
           {
             "parentPluginId": "taskManager",
-            "id": "def-server.context",
+            "id": "def-server.TaskRunCreatorFunction.$1",
             "type": "Object",
             "tags": [],
             "label": "context",

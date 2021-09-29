@@ -44,7 +44,7 @@ describe('merge_all_fields_with_source', () => {
       test('when source is "undefined", merged doc is "undefined"', () => {
         const _source: SignalSourceHit['_source'] = {};
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -53,7 +53,7 @@ describe('merge_all_fields_with_source', () => {
           foo: [],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -62,7 +62,7 @@ describe('merge_all_fields_with_source', () => {
           foo: 'value',
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -71,7 +71,7 @@ describe('merge_all_fields_with_source', () => {
           foo: ['value'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -80,7 +80,7 @@ describe('merge_all_fields_with_source', () => {
           foo: ['value_1', 'value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -89,7 +89,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: 'some value' },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -98,7 +98,7 @@ describe('merge_all_fields_with_source', () => {
           foo: [{ bar: 'some value' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -107,7 +107,7 @@ describe('merge_all_fields_with_source', () => {
           foo: [{ bar: 'some value' }, { foo: 'some other value' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
     });
@@ -133,7 +133,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -142,7 +142,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': 'value',
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -151,7 +151,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['value'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -160,7 +160,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['value_1', 'value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -169,7 +169,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: 'some value' },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -178,7 +178,7 @@ describe('merge_all_fields_with_source', () => {
           foo: [{ bar: 'some value' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -187,7 +187,7 @@ describe('merge_all_fields_with_source', () => {
           foo: [{ bar: 'some value' }, { foo: 'some other value' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
     });
@@ -217,7 +217,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: [] },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -226,7 +226,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: 'value' },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -235,7 +235,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: ['value'] },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -244,7 +244,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: ['value_1', 'value_2'] },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -253,7 +253,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: { mars: 'some value' } },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -262,7 +262,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: [{ mars: 'some value' }] },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -271,7 +271,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: [{ mars: 'some value' }, { mars: 'some other value' }] },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
     });
@@ -299,7 +299,7 @@ describe('merge_all_fields_with_source', () => {
           'bar.foo': [],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -308,7 +308,7 @@ describe('merge_all_fields_with_source', () => {
           'bar.foo': 'value',
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -317,7 +317,7 @@ describe('merge_all_fields_with_source', () => {
           'bar.foo': ['value'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -326,7 +326,7 @@ describe('merge_all_fields_with_source', () => {
           'bar.foo': ['value_1', 'value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -335,7 +335,7 @@ describe('merge_all_fields_with_source', () => {
           foo: { bar: 'some value' },
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -344,7 +344,7 @@ describe('merge_all_fields_with_source', () => {
           foo: [{ bar: 'some value' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -353,7 +353,7 @@ describe('merge_all_fields_with_source', () => {
           foo: [{ bar: 'some value' }, { foo: 'some other value' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
     });
@@ -376,7 +376,7 @@ describe('merge_all_fields_with_source', () => {
         'foo.bar': ['other_value_1'],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: {
           bar: 'other_value_1',
@@ -389,7 +389,7 @@ describe('merge_all_fields_with_source', () => {
         'foo.bar': ['other_value_1', 'other_value_2'],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: {
           bar: ['other_value_1', 'other_value_2'],
@@ -402,7 +402,7 @@ describe('merge_all_fields_with_source', () => {
         'foo.bar': [{ zed: 'other_value_1' }],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: { bar: { zed: 'other_value_1' } },
       });
@@ -413,7 +413,7 @@ describe('merge_all_fields_with_source', () => {
         'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: { bar: [{ zed: 'other_value_1' }, { zed: 'other_value_2' }] },
       });
@@ -440,7 +440,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: {
             bar: 'other_value_1',
@@ -453,7 +453,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: ['other_value_1', 'other_value_2'] },
         });
@@ -464,7 +464,7 @@ describe('merge_all_fields_with_source', () => {
           foo: [{ bar: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: {
             bar: 'other_value_1',
@@ -477,7 +477,7 @@ describe('merge_all_fields_with_source', () => {
           foo: [{ bar: 'other_value_1' }, { bar: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: [{ bar: 'other_value_1' }, { bar: 'other_value_2' }],
         });
@@ -503,7 +503,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           'foo.bar': 'other_value_1',
         });
@@ -514,7 +514,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -523,7 +523,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           'foo.bar': { zed: 'other_value_1' },
         });
@@ -534,7 +534,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
     });
@@ -560,7 +560,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: ['other_value_1'] },
         });
@@ -571,7 +571,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: ['other_value_1', 'other_value_2'] },
         });
@@ -582,7 +582,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: [{ zed: 'other_value_1' }] },
         });
@@ -593,7 +593,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: [{ zed: 'other_value_1' }, { zed: 'other_value_2' }] },
         });
@@ -619,7 +619,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -628,7 +628,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -637,7 +637,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -646,7 +646,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
     });
@@ -670,7 +670,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: ['other_value_1'] },
         });
@@ -681,7 +681,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: ['other_value_1', 'other_value_2'] },
         });
@@ -692,7 +692,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: [{ zed: 'other_value_1' }] },
         });
@@ -703,7 +703,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: [{ zed: 'other_value_1' }, { zed: 'other_value_2' }] },
         });
@@ -729,7 +729,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -738,7 +738,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -747,7 +747,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -756,7 +756,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
     });
@@ -782,7 +782,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: {
             bar: ['other_value_1'],
@@ -795,7 +795,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: {
             bar: ['other_value_1', 'other_value_2'],
@@ -808,7 +808,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: {
             bar: [{ zed: 'other_value_1' }],
@@ -821,7 +821,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: {
             bar: [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
@@ -849,7 +849,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -858,7 +858,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -867,7 +867,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -876,7 +876,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
     });
@@ -902,7 +902,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -911,7 +911,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -920,7 +920,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: { zed: 'other_value_1' } },
         });
@@ -931,7 +931,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: [{ zed: 'other_value_1' }, { zed: 'other_value_2' }] },
         });
@@ -957,7 +957,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -966,7 +966,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -975,7 +975,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ mars: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           'foo.bar': { mars: 'other_value_1' },
         });
@@ -986,7 +986,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ mars: 'other_value_1' }, { mars: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           'foo.bar': [{ mars: 'other_value_1' }, { mars: 'other_value_2' }],
         });
@@ -1014,7 +1014,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -1023,7 +1023,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -1032,7 +1032,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: [{ zed: 'other_value_1' }] },
         });
@@ -1043,7 +1043,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: [{ zed: 'other_value_1' }, { zed: 'other_value_2' }] },
         });
@@ -1069,7 +1069,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -1078,7 +1078,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -1087,7 +1087,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: [{ zed: 'other_value_1' }] },
         });
@@ -1098,7 +1098,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ zed: 'other_value_1' }, { zed: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: { bar: [{ zed: 'other_value_1' }, { zed: 'other_value_2' }] },
         });
@@ -1124,7 +1124,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -1133,7 +1133,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -1142,7 +1142,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ mars: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -1151,7 +1151,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ mars: 'other_value_1' }, { mars: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
     });
@@ -1175,7 +1175,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -1184,7 +1184,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_1', 'other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
@@ -1193,7 +1193,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ mars: 'other_value_1' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
 
@@ -1202,7 +1202,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': [{ mars: 'other_value_1' }, { mars: 'other_value_2' }],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
       });
     });
@@ -1228,7 +1228,7 @@ describe('merge_all_fields_with_source', () => {
         'foo.bar': ['other_value_1'],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: { bar: 'value_1' },
         'foo.bar': 'other_value_1',
@@ -1243,7 +1243,7 @@ describe('merge_all_fields_with_source', () => {
         'foo.bar': ['value_1', 'value_2'],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: { bar: 'value_1' }, // <--- We have duplicated value_1 twice which is a bug
         'foo.bar': ['value_1', 'value_2'], // <-- We have merged the array value because we do not understand if we should or not
@@ -1270,7 +1270,7 @@ describe('merge_all_fields_with_source', () => {
           'bar.keyword': ['bar_other_value_keyword_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: 'foo_other_value_1',
           bar: 'bar_other_value_1',
@@ -1291,7 +1291,7 @@ describe('merge_all_fields_with_source', () => {
           'host.hostname.keyword': ['hostname_other_value_keyword_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           host: {
             hostname: 'hostname_other_value_1',
@@ -1316,7 +1316,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.host.hostname.keyword': ['hostname_other_value_keyword_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: {
             host: {
@@ -1334,7 +1334,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar': ['other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: 'other_value_1',
         });
@@ -1354,7 +1354,7 @@ describe('merge_all_fields_with_source', () => {
           'host.hostname.keyword': ['hostname_other_value_keyword_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           'host.name': 'host_name_other_value_1',
           'host.hostname': 'hostname_other_value_1',
@@ -1373,7 +1373,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.host.hostname.keyword': ['hostname_other_value_keyword_1'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           'foo.host.name': 'host_name_other_value_1',
           'foo.host.hostname': 'hostname_other_value_1',
@@ -1388,7 +1388,7 @@ describe('merge_all_fields_with_source', () => {
           'foo.bar.zed': ['zed_other_value_2'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-        const merged = mergeAllFieldsWithSource({ doc })._source;
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: 'other_value_1',
         });
@@ -1415,7 +1415,7 @@ describe('merge_all_fields_with_source', () => {
         'foo.mars': ['other_value_2'],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
     });
 
@@ -1435,7 +1435,7 @@ describe('merge_all_fields_with_source', () => {
         'foo.zed.mars': ['other_value_2'],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
     });
   });
@@ -1450,7 +1450,7 @@ describe('merge_all_fields_with_source', () => {
         foo: [{ bar: ['single_value'], zed: ['single_value'] }],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: { bar: 'single_value', zed: 'single_value' },
       });
@@ -1469,9 +1469,131 @@ describe('merge_all_fields_with_source', () => {
         foo: [{ bar: ['single_value'], zed: ['single_value'] }],
       };
       const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
-      const merged = mergeAllFieldsWithSource({ doc })._source;
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
       expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
         foo: [{ bar: ['single_value'], zed: ['single_value'] }],
+      });
+    });
+  });
+
+  /**
+   * Small set of tests to ensure that ignore fields are wired up at the strategy level
+   */
+  describe('ignore fields', () => {
+    test('Does not merge an ignored field if it does not exist already in the _source', () => {
+      const _source: SignalSourceHit['_source'] = {};
+      const fields: SignalSourceHit['fields'] = {
+        'foo.bar': ['other_value_1'],
+        'value.should.ignore': ['other_value_2'], // string value should ignore this
+        '_odd.value': ['other_value_2'], // Regex should ignore this value of: /[_]+/
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const merged = mergeAllFieldsWithSource({
+        doc,
+        ignoreFields: ['value.should.ignore', '/[_]+/'],
+      })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        foo: {
+          bar: 'other_value_1',
+        },
+      });
+    });
+
+    test('Does merge fields when no matching happens', () => {
+      const _source: SignalSourceHit['_source'] = {};
+      const fields: SignalSourceHit['fields'] = {
+        'foo.bar': ['other_value_1'],
+        'value.should.work': ['other_value_2'],
+        '_odd.value': ['other_value_2'],
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const merged = mergeAllFieldsWithSource({
+        doc,
+        ignoreFields: ['other.string', '/[z]+/'], // Neither of these two should match anything
+      })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        foo: {
+          bar: 'other_value_1',
+        },
+        _odd: {
+          value: 'other_value_2',
+        },
+        value: {
+          should: {
+            work: 'other_value_2',
+          },
+        },
+      });
+    });
+
+    test('Does not update an ignored field and keeps the original value if it matches in the ignoreFields', () => {
+      const _source: SignalSourceHit['_source'] = {
+        'value.should.ignore': ['value_1'],
+        '_odd.value': ['value_2'],
+      };
+      const fields: SignalSourceHit['fields'] = {
+        'foo.bar': ['other_value_1'],
+        'value.should.ignore': ['other_value_2'], // string value should ignore this
+        '_odd.value': ['other_value_2'], // Regex should ignore this value of: /[_]+/
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const merged = mergeAllFieldsWithSource({
+        doc,
+        ignoreFields: ['value.should.ignore', '/[_]+/'],
+      })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        foo: {
+          bar: 'other_value_1',
+        },
+        'value.should.ignore': ['value_1'],
+        '_odd.value': ['value_2'],
+      });
+    });
+
+    test('Does not ignore anything when no matching happens and overwrites the expected fields', () => {
+      const _source: SignalSourceHit['_source'] = {
+        'value.should.ignore': ['value_1'],
+        '_odd.value': ['value_2'],
+      };
+      const fields: SignalSourceHit['fields'] = {
+        'foo.bar': ['other_value_1'],
+        'value.should.ignore': ['other_value_2'],
+        '_odd.value': ['other_value_2'],
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const merged = mergeAllFieldsWithSource({
+        doc,
+        ignoreFields: ['nothing.to.match', '/[z]+/'], // these match nothing
+      })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        foo: {
+          bar: 'other_value_1',
+        },
+        'value.should.ignore': ['other_value_2'],
+        '_odd.value': ['other_value_2'],
+      });
+    });
+  });
+
+  /**
+   * Test that the EQL bug workaround is wired up. Remove this once the bug is fixed.
+   */
+  describe('Works around EQL bug 77152 (https://github.com/elastic/elasticsearch/issues/77152)', () => {
+    test('Does not merge field that contains _ignored', () => {
+      const _source: SignalSourceHit['_source'] = {};
+      const fields: SignalSourceHit['fields'] = {
+        'foo.bar': ['other_value_1'],
+        _ignored: ['other_value_1'],
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+      const merged = mergeAllFieldsWithSource({
+        doc,
+        ignoreFields: [],
+      })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        foo: {
+          bar: 'other_value_1',
+        },
       });
     });
   });

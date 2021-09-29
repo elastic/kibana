@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './time_scale';
-export * from './types';
+export { getTimeScale } from './time_scale';
+export type { TimeScaleUnit, TimeScaleArgs } from './types';

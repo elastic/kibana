@@ -25,7 +25,7 @@ import {
   TIMELINE_CONTEXT_MENU_BTN,
   SELECT_EVENT_CHECKBOX,
 } from '../screens/alerts';
-import { REFRESH_BUTTON } from '../screens/security_header';
+import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
@@ -63,7 +63,12 @@ export const closeAlerts = () => {
 };
 
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).should('exist').first().click({ force: true });
+  cy.get(EXPAND_ALERT_BTN).should('exist');
+
+  cy.get(EXPAND_ALERT_BTN)
+    .first()
+    .pipe(($el) => $el.trigger('click'))
+    .should('exist');
 };
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
@@ -75,7 +80,7 @@ export const viewThreatDetails = () => {
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
     if (from) {
-      cy.get(ENRICHMENT_QUERY_START_INPUT).type(`{selectall}${from}{enter}`);
+      cy.get(ENRICHMENT_QUERY_START_INPUT).first().type(`{selectall}${from}{enter}`);
     }
     if (to) {
       cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);
@@ -99,7 +104,8 @@ export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
   cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
+  cy.get(LOADING_INDICATOR).should('exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
 };
 
 export const openFirstAlert = () => {

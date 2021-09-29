@@ -87,7 +87,7 @@ export class Home extends Component<HomeProps, State> {
         if (this.state.isLoading) {
           this.setState({ isWelcomeEnabled: false });
         }
-      }, 500);
+      }, 10000);
 
       const hasUserIndexPattern = await this.props.hasUserIndexPattern();
 
@@ -117,7 +117,7 @@ export class Home extends Component<HomeProps, State> {
     return this.props.directories.find((directory) => directory.id === id);
   }
 
-  getFeaturesByCategory(category: FeatureCatalogueCategory) {
+  private getFeaturesByCategory(category: FeatureCatalogueCategory) {
     return this.props.directories
       .filter((directory) => directory.showOnHomePage && directory.category === category)
       .sort((directoryA, directoryB) => (directoryA.order ?? -1) - (directoryB.order ?? -1));
@@ -177,7 +177,7 @@ export class Home extends Component<HomeProps, State> {
   private renderWelcome() {
     return (
       <Welcome
-        onSkip={this.skipWelcome}
+        onSkip={() => this.skipWelcome()}
         urlBasePath={this.props.urlBasePath}
         telemetry={this.props.telemetry}
       />

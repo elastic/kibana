@@ -37,56 +37,58 @@ export interface ReadWithPitParams {
 /*
  * Requests documents from the index using PIT mechanism.
  * */
-export const readWithPit = ({
-  client,
-  pitId,
-  query,
-  batchSize,
-  searchAfter,
-  seqNoPrimaryTerm,
-}: ReadWithPitParams): TaskEither.TaskEither<RetryableEsClientError, ReadWithPit> => () => {
-  return client
-    .search<SavedObjectsRawDoc>({
-      seq_no_primary_term: seqNoPrimaryTerm,
-      body: {
-        // Sort fields are required to use searchAfter
-        sort: {
-          // the most efficient option as order is not important for the migration
-          _shard_doc: { order: 'asc' },
+export const readWithPit =
+  ({
+    client,
+    pitId,
+    query,
+    batchSize,
+    searchAfter,
+    seqNoPrimaryTerm,
+  }: ReadWithPitParams): TaskEither.TaskEither<RetryableEsClientError, ReadWithPit> =>
+  () => {
+    return client
+      .search<SavedObjectsRawDoc>({
+        seq_no_primary_term: seqNoPrimaryTerm,
+        body: {
+          // Sort fields are required to use searchAfter
+          sort: {
+            // the most efficient option as order is not important for the migration
+            _shard_doc: { order: 'asc' },
+          },
+          pit: { id: pitId, keep_alive: pitKeepAlive },
+          size: batchSize,
+          search_after: searchAfter,
+          /**
+           * We want to know how many documents we need to process so we can log the progress.
+           * But we also want to increase the performance of these requests,
+           * so we ask ES to report the total count only on the first request (when searchAfter does not exist)
+           */
+          track_total_hits: typeof searchAfter === 'undefined',
+          query,
         },
-        pit: { id: pitId, keep_alive: pitKeepAlive },
-        size: batchSize,
-        search_after: searchAfter,
-        /**
-         * We want to know how many documents we need to process so we can log the progress.
-         * But we also want to increase the performance of these requests,
-         * so we ask ES to report the total count only on the first request (when searchAfter does not exist)
-         */
-        track_total_hits: typeof searchAfter === 'undefined',
-        query,
-      },
-    })
-    .then((response) => {
-      const totalHits =
-        typeof response.body.hits.total === 'number'
-          ? response.body.hits.total // This format is to be removed in 8.0
-          : response.body.hits.total?.value;
-      const hits = response.body.hits.hits;
+      })
+      .then((response) => {
+        const totalHits =
+          typeof response.body.hits.total === 'number'
+            ? response.body.hits.total // This format is to be removed in 8.0
+            : response.body.hits.total?.value;
+        const hits = response.body.hits.hits;
 
-      if (hits.length > 0) {
+        if (hits.length > 0) {
+          return Either.right({
+            // @ts-expect-error @elastic/elasticsearch _source is optional
+            outdatedDocuments: hits as SavedObjectsRawDoc[],
+            lastHitSortValue: hits[hits.length - 1].sort as number[],
+            totalHits,
+          });
+        }
+
         return Either.right({
-          // @ts-expect-error @elastic/elasticsearch _source is optional
-          outdatedDocuments: hits as SavedObjectsRawDoc[],
-          lastHitSortValue: hits[hits.length - 1].sort as number[],
+          outdatedDocuments: [],
+          lastHitSortValue: undefined,
           totalHits,
         });
-      }
-
-      return Either.right({
-        outdatedDocuments: [],
-        lastHitSortValue: undefined,
-        totalHits,
-      });
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+      })
+      .catch(catchRetryableEsClientErrors);
+  };

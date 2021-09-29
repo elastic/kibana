@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 
@@ -60,39 +61,41 @@ const AppRoot = React.memo(
       <I18nProvider>
         <Router history={parameters.history}>
           <KibanaContextProvider services={coreStart}>
-            {(timelinesPluginSetup &&
-              timelinesPluginSetup.getTGrid &&
-              timelinesPluginSetup.getTGrid<'standalone'>({
-                appId: 'securitySolution',
-                type: 'standalone',
-                casePermissions: {
-                  read: true,
-                  crud: true,
-                },
-                columns: [],
-                indexNames: [],
-                deletedEventIds: [],
-                end: '',
-                footerText: 'Events',
-                filters: [],
-                hasAlertsCrudPermissions,
-                itemsPerPageOptions: [1, 2, 3],
-                loadingText: 'Loading events',
-                renderCellValue: () => <div data-test-subj="timeline-wrapper">test</div>,
-                sort: [],
-                leadingControlColumns: [],
-                trailingControlColumns: [],
-                query: {
-                  query: '',
-                  language: 'kuery',
-                },
-                setRefetch,
-                start: '',
-                rowRenderers: [],
-                filterStatus: 'open',
-                unit: (n: number) => `${n}`,
-              })) ??
-              null}
+            <EuiThemeProvider>
+              {(timelinesPluginSetup &&
+                timelinesPluginSetup.getTGrid &&
+                timelinesPluginSetup.getTGrid<'standalone'>({
+                  appId: 'securitySolution',
+                  type: 'standalone',
+                  casePermissions: {
+                    read: true,
+                    crud: true,
+                  },
+                  columns: [],
+                  indexNames: [],
+                  deletedEventIds: [],
+                  end: '',
+                  footerText: 'Events',
+                  filters: [],
+                  hasAlertsCrudPermissions,
+                  itemsPerPageOptions: [1, 2, 3],
+                  loadingText: 'Loading events',
+                  renderCellValue: () => <div data-test-subj="timeline-wrapper">test</div>,
+                  sort: [],
+                  leadingControlColumns: [],
+                  trailingControlColumns: [],
+                  query: {
+                    query: '',
+                    language: 'kuery',
+                  },
+                  setRefetch,
+                  start: '',
+                  rowRenderers: [],
+                  filterStatus: 'open',
+                  unit: (n: number) => `${n}`,
+                })) ??
+                null}
+            </EuiThemeProvider>
           </KibanaContextProvider>
         </Router>
       </I18nProvider>

@@ -221,9 +221,10 @@ const VisComponent = (props: VisComponentProps) => {
     config.xAxis.scale.type === ScaleType.Ordinal
       ? undefined
       : getAdjustedDomain(visData.rows, config.aspects.x, timeZone, xDomain, hasBars);
-  const legendPosition = useMemo(() => config.legend.position ?? Position.Right, [
-    config.legend.position,
-  ]);
+  const legendPosition = useMemo(
+    () => config.legend.position ?? Position.Right,
+    [config.legend.position]
+  );
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
@@ -231,11 +232,10 @@ const VisComponent = (props: VisComponentProps) => {
     return { accessor, formatter };
   });
 
-  const allSeries = useMemo(() => getAllSeries(visData.rows, splitAccessors, config.aspects.y), [
-    config.aspects.y,
-    splitAccessors,
-    visData.rows,
-  ]);
+  const allSeries = useMemo(
+    () => getAllSeries(visData.rows, splitAccessors, config.aspects.y),
+    [config.aspects.y, splitAccessors, visData.rows]
+  );
 
   const getSeriesColor = useCallback(
     (series: XYChartSeriesIdentifier) => {
@@ -331,6 +331,13 @@ const VisComponent = (props: VisComponentProps) => {
       ),
     [getSeriesName, legendPosition, props.uiState, setColor, visParams.palette.name]
   );
+
+  const splitChartDimension = visParams.dimensions.splitColumn
+    ? visData.columns[visParams.dimensions.splitColumn[0].accessor]
+    : visParams.dimensions.splitRow
+    ? visData.columns[visParams.dimensions.splitRow[0].accessor]
+    : undefined;
+
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
@@ -342,6 +349,7 @@ const VisComponent = (props: VisComponentProps) => {
         <ChartSplitter
           splitColumnAccessor={splitChartColumnAccessor}
           splitRowAccessor={splitChartRowAccessor}
+          splitDimension={splitChartDimension}
         />
         <XYSettings
           {...config}

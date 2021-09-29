@@ -20,7 +20,9 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
       deprecation,
       path: 'xpack.security',
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -49,7 +51,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.session.idleTimeout).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.sessionTimeout\\" is deprecated and has been replaced by \\"xpack.security.session.idleTimeout\\"",
+        "Setting \\"xpack.security.sessionTimeout\\" has been replaced by \\"xpack.security.session.idleTimeout\\"",
       ]
     `);
   });
@@ -71,7 +73,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.type).toEqual('console');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.type\\"",
+        "Setting \\"xpack.security.audit.appender.kind\\" has been replaced by \\"xpack.security.audit.appender.type\\"",
       ]
     `);
   });
@@ -93,7 +95,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.layout.type).toEqual('pattern');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.layout.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
+        "Setting \\"xpack.security.audit.appender.layout.kind\\" has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
       ]
     `);
   });
@@ -115,7 +117,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.policy.type).toEqual('time-interval');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.policy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
+        "Setting \\"xpack.security.audit.appender.policy.kind\\" has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
       ]
     `);
   });
@@ -137,7 +139,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.strategy.type).toEqual('numeric');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.strategy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
+        "Setting \\"xpack.security.audit.appender.strategy.kind\\" has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
       ]
     `);
   });
@@ -160,7 +162,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
       ]
     `);
   });
@@ -222,7 +224,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
       ]
     `);
   });
@@ -242,7 +244,7 @@ describe('Config Deprecations', () => {
     const { messages } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "xpack.security.authorization.legacyFallback.enabled is deprecated and is no longer used",
+        "You no longer need to configure \\"xpack.security.authorization.legacyFallback.enabled\\".",
       ]
     `);
   });
@@ -262,7 +264,7 @@ describe('Config Deprecations', () => {
     const { messages } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "xpack.security.authc.saml.maxRedirectURLSize is deprecated and is no longer used",
+        "You no longer need to configure \\"xpack.security.authc.saml.maxRedirectURLSize\\".",
       ]
     `);
   });
@@ -286,7 +288,7 @@ describe('Config Deprecations', () => {
     const { messages } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\` is deprecated and is no longer used",
+        "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is no longer used.",
       ]
     `);
   });
@@ -305,7 +307,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Defining \\"xpack.security.authc.providers\\" as an array of provider types is deprecated. Use extended \\"object\\" format instead.",
+        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
       ]
     `);
   });
@@ -324,8 +326,8 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Defining \\"xpack.security.authc.providers\\" as an array of provider types is deprecated. Use extended \\"object\\" format instead.",
-        "Enabling both \`basic\` and \`token\` authentication providers in \`xpack.security.authc.providers\` is deprecated. Login page will only use \`token\` provider.",
+        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
+        "Enabling both \\"basic\\" and \\"token\\" authentication providers in \\"xpack.security.authc.providers\\" is deprecated. Login page will only use \\"token\\" provider.",
       ]
     `);
   });
@@ -341,9 +343,9 @@ describe('Config Deprecations', () => {
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Disabling the security plugin (\`xpack.security.enabled\`) will not be supported in the next major version (8.0). To turn off security features, disable them in Elasticsearch instead.",
-        ]
+      Array [
+        "Disabling the security plugin \\"xpack.security.enabled\\" will only be supported by disable security in Elasticsearch.",
+      ]
     `);
   });
 

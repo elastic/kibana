@@ -19,7 +19,7 @@ import {
 import { PluginStartContract as AlertingStart } from '../../alerting/server';
 import { SecurityPluginSetup } from '../../security/server';
 
-import { INDEX_PREFIX, RuleRegistryPluginConfig } from './config';
+import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import { AlertsClient } from './alert_data_client/alerts_client';
@@ -50,10 +50,12 @@ export class RuleRegistryPlugin
       RuleRegistryPluginStartContract,
       RuleRegistryPluginSetupDependencies,
       RuleRegistryPluginStartDependencies
-    > {
+    >
+{
   private readonly config: RuleRegistryPluginConfig;
   private readonly legacyConfig: SharedGlobalConfig;
   private readonly logger: Logger;
+  private readonly kibanaVersion: string;
   private readonly alertsClientFactory: AlertsClientFactory;
   private ruleDataService: RuleDataPluginService | null;
   private security: SecurityPluginSetup | undefined;
@@ -63,6 +65,7 @@ export class RuleRegistryPlugin
     // TODO: Can be removed in 8.0.0. Exists to work around multi-tenancy users.
     this.legacyConfig = initContext.config.legacy.get();
     this.logger = initContext.logger.get();
+    this.kibanaVersion = initContext.env.packageInfo.version;
     this.ruleDataService = null;
     this.alertsClientFactory = new AlertsClientFactory();
   }
@@ -71,7 +74,7 @@ export class RuleRegistryPlugin
     core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>,
     plugins: RuleRegistryPluginSetupDependencies
   ): RuleRegistryPluginSetupContract {
-    const { logger } = this;
+    const { logger, kibanaVersion } = this;
 
     const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
       return {
@@ -99,8 +102,9 @@ export class RuleRegistryPlugin
 
     this.ruleDataService = new RuleDataPluginService({
       logger,
+      kibanaVersion,
       isWriteEnabled: isWriteEnabled(this.config, this.legacyConfig),
-      index: INDEX_PREFIX,
+      isIndexUpgradeEnabled: this.config.unsafe.indexUpgrade.enabled,
       getClusterClient: async () => {
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
@@ -125,7 +129,7 @@ export class RuleRegistryPlugin
     core: CoreStart,
     plugins: RuleRegistryPluginStartDependencies
   ): RuleRegistryPluginStartContract {
-    const { logger, alertsClientFactory, security } = this;
+    const { logger, alertsClientFactory, ruleDataService, security } = this;
 
     alertsClientFactory.initialize({
       logger,
@@ -135,6 +139,7 @@ export class RuleRegistryPlugin
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
       },
       securityPluginSetup: security,
+      ruleDataService,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {

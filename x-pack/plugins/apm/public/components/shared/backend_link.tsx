@@ -18,7 +18,7 @@ const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface BackendLinkProps {
   backendName: string;
-  query: TypeOf<ApmRoutes, '/backends/:backendName/overview'>['query'];
+  query: TypeOf<ApmRoutes, '/backends/{backendName}/overview'>['query'];
   subtype?: string;
   type?: string;
   onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
@@ -35,7 +35,7 @@ export function BackendLink({
 
   return (
     <StyledLink
-      href={link('/backends/:backendName/overview', {
+      href={link('/backends/{backendName}/overview', {
         path: { backendName },
         query,
       })}

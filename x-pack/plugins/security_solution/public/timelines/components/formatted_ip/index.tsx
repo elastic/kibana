@@ -31,11 +31,8 @@ import {
 } from '../../../../common/types/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { timelineActions } from '../../store/timeline';
-import { StatefulEventContext } from '../timeline/body/events/stateful_event_context';
-import { LinkAnchor } from '../../../common/components/links';
-import { SecurityPageName } from '../../../app/types';
-import { useFormatUrl, getNetworkDetailsUrl } from '../../../common/components/link_to';
-import { encodeIpv6 } from '../../../common/lib/helpers';
+import { NetworkDetailsLink } from '../../../common/components/links';
+import { StatefulEventContext } from '../../../../../timelines/public';
 
 const getUniqueId = ({
   contextId,
@@ -168,8 +165,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
 
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
-  const { formatUrl } = useFormatUrl(SecurityPageName.network);
-  const isInTimelineContext = address && eventContext?.tabType && eventContext?.timelineID;
+  const isInTimelineContext =
+    address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
     (e) => {
@@ -202,21 +199,19 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     [eventContext, isInTimelineContext, address, fieldName, dispatch]
   );
 
+  // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
+  // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the IP Overview page
   const content = useMemo(
     () => (
       <Content field={fieldName} tooltipContent={fieldName}>
-        <LinkAnchor
-          href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(address))))}
-          data-test-subj="network-details"
-          // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
-          // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the IP Overview page
+        <NetworkDetailsLink
+          ip={address}
+          isButton={false}
           onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
-        >
-          {address}
-        </LinkAnchor>
+        />
       </Content>
     ),
-    [address, fieldName, formatUrl, isInTimelineContext, openNetworkDetailsSidePanel]
+    [address, fieldName, isInTimelineContext, openNetworkDetailsSidePanel]
   );
 
   const render = useCallback(

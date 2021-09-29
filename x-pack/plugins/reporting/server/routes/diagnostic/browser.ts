@@ -19,8 +19,7 @@ const logsToHelpMap = {
     {
       defaultMessage: `The browser couldn't start properly due to missing system dependencies. Please see {url}`,
       values: {
-        url:
-          'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
+        url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
       },
     }
   ),
@@ -30,8 +29,7 @@ const logsToHelpMap = {
     {
       defaultMessage: `The browser couldn't locate a default font. Please see {url} to fix this issue.`,
       values: {
-        url:
-          'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
+        url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
       },
     }
   ),
@@ -39,8 +37,7 @@ const logsToHelpMap = {
   'No usable sandbox': i18n.translate('xpack.reporting.diagnostic.noUsableSandbox', {
     defaultMessage: `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.reporting.capture.browser.chromium.disableSandbox'. Please see {url}`,
     values: {
-      url:
-        'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency',
+      url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency',
     },
   }),
 };

@@ -71,8 +71,8 @@ const createIndexPatternManagmentContext = (): {
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
     fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
-    IndexPatternEditor: indexPatternEditorPluginMock.createStartContract()
-      .IndexPatternEditorComponent,
+    IndexPatternEditor:
+      indexPatternEditorPluginMock.createStartContract().IndexPatternEditorComponent,
   };
 };
 

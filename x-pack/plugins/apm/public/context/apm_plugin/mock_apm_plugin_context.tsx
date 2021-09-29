@@ -61,6 +61,9 @@ const mockCore = {
   docLinks: {
     DOC_LINK_VERSION: '0',
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    links: {
+      apm: {},
+    },
   },
   http: {
     basePath: {
@@ -96,6 +99,7 @@ const urlService = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
+  shortUrls: {} as any,
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
 

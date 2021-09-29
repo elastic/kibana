@@ -36,11 +36,11 @@ const { getThresholdAlertVisualizationData } = jest.requireMock('./index_thresho
 
 const dataMock = dataPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
-dataMock.fieldFormats = ({
+dataMock.fieldFormats = {
   getDefaultInstance: jest.fn(() => ({
     convert: jest.fn((s: unknown) => JSON.stringify(s)),
   })),
-} as unknown) as DataPublicPluginStart['fieldFormats'];
+} as unknown as DataPublicPluginStart['fieldFormats'];
 
 describe('ThresholdVisualization', () => {
   beforeAll(() => {

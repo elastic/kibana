@@ -10,24 +10,22 @@ import React, { useEffect, useState, useCallback } from 'react';
 
 import { VisEditorOptionsProps } from '../../../../../../visualizations/public';
 
-export interface ValidationVisOptionsProps<T, E = unknown> extends VisEditorOptionsProps<T> {
+export interface ValidationVisOptionsProps<T> extends VisEditorOptionsProps<T> {
   setMultipleValidity(paramName: string, isValid: boolean): void;
-  extraProps?: E;
 }
 
-interface ValidationWrapperProps<T, E> extends VisEditorOptionsProps<T> {
-  component: React.ComponentType<ValidationVisOptionsProps<T, E>>;
-  extraProps?: E;
+interface ValidationWrapperProps<T> extends VisEditorOptionsProps<T> {
+  component: React.ComponentType<ValidationVisOptionsProps<T>>;
 }
 
 interface Item {
   isValid: boolean;
 }
 
-function ValidationWrapper<T = unknown, E = unknown>({
+function ValidationWrapper<T = unknown>({
   component: Component,
   ...rest
-}: ValidationWrapperProps<T, E>) {
+}: ValidationWrapperProps<T>) {
   const [panelState, setPanelState] = useState({} as { [key: string]: Item });
   const isPanelValid = Object.values(panelState).every((item) => item.isValid);
   const { setValidity } = rest;

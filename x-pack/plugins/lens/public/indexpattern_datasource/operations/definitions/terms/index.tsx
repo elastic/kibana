@@ -348,27 +348,19 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     });
     return (
       <>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.size', {
-            defaultMessage: 'Number of values',
-          })}
-          display="columnCompressed"
-          fullWidth
-        >
-          <ValuesInput
-            value={currentColumn.params.size}
-            onChange={(value) => {
-              updateLayer(
-                updateColumnParam({
-                  layer,
-                  columnId,
-                  paramName: 'size',
-                  value,
-                })
-              );
-            }}
-          />
-        </EuiFormRow>
+        <ValuesInput
+          value={currentColumn.params.size}
+          onChange={(value) => {
+            updateLayer(
+              updateColumnParam({
+                layer,
+                columnId,
+                paramName: 'size',
+                value,
+              })
+            );
+          }}
+        />
         <EuiFormRow
           label={
             <>

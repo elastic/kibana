@@ -27,6 +27,7 @@ import {
   selectDatasourceStates,
   selectVisualization,
 } from '../../state_management';
+import type { LensInspector } from '../../lens_inspector_service';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -35,6 +36,7 @@ export interface EditorFrameProps {
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
   showNoDataPopover: () => void;
+  lensInspector: LensInspector;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -43,7 +45,8 @@ export function EditorFrame(props: EditorFrameProps) {
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const visualization = useLensSelector(selectVisualization);
-  const allLoaded = useLensSelector(selectAreDatasourcesLoaded);
+  const areDatasourcesLoaded = useLensSelector(selectAreDatasourcesLoaded);
+  const isVisualizationLoaded = !!visualization.state;
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
     selectFramePublicAPI(state, datasourceMap)
   );
@@ -93,7 +96,7 @@ export function EditorFrame(props: EditorFrameProps) {
           />
         }
         configPanel={
-          allLoaded && (
+          areDatasourcesLoaded && (
             <ConfigPanelWrapper
               core={props.core}
               datasourceMap={datasourceMap}
@@ -103,11 +106,13 @@ export function EditorFrame(props: EditorFrameProps) {
           )
         }
         workspacePanel={
-          allLoaded && (
+          areDatasourcesLoaded &&
+          isVisualizationLoaded && (
             <WorkspacePanel
               core={props.core}
               plugins={props.plugins}
               ExpressionRenderer={props.ExpressionRenderer}
+              lensInspector={props.lensInspector}
               datasourceMap={datasourceMap}
               visualizationMap={visualizationMap}
               framePublicAPI={framePublicAPI}
@@ -116,7 +121,7 @@ export function EditorFrame(props: EditorFrameProps) {
           )
         }
         suggestionsPanel={
-          allLoaded && (
+          areDatasourcesLoaded && (
             <SuggestionPanelWrapper
               ExpressionRenderer={props.ExpressionRenderer}
               datasourceMap={datasourceMap}

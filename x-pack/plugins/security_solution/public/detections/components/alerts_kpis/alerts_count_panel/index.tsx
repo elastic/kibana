@@ -14,8 +14,6 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 
-import { fetchQueryRuleRegistryAlerts } from '../../../containers/detection_engine/alerts/api';
-
 import { getAlertsCountQuery } from './helpers';
 import * as i18n from './translations';
 import { AlertsCount } from './alerts_count';
@@ -40,16 +38,16 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
-    const [selectedStackByOption, setSelectedStackByOption] = useState<AlertsStackByField>(
-      DEFAULT_STACK_BY_FIELD
-    );
+    const [selectedStackByOption, setSelectedStackByOption] =
+      useState<AlertsStackByField>(DEFAULT_STACK_BY_FIELD);
 
     // TODO: Once we are past experimental phase this code should be removed
     // const fetchMethod = useIsExperimentalFeatureEnabled('ruleRegistryEnabled')
     //   ? fetchQueryRuleRegistryAlerts
     //   : fetchQueryAlerts;
 
-    const fetchMethod = fetchQueryRuleRegistryAlerts;
+    // Disabling the fecth method in useQueryAlerts since it is defaulted to the old one
+    // const fetchMethod = fetchQueryRuleRegistryAlerts;
 
     const additionalFilters = useMemo(() => {
       try {
@@ -73,7 +71,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       request,
       refetch,
     } = useQueryAlerts<{}, AlertsCountAggregation>({
-      fetchMethod,
       query: getAlertsCountQuery(selectedStackByOption, from, to, additionalFilters),
       indexName: signalIndexName,
     });

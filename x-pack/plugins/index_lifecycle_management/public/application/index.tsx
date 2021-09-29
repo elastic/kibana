@@ -12,7 +12,7 @@ import { UnmountCallback } from 'src/core/public';
 import { CloudSetup } from '../../../cloud/public';
 import { ILicense } from '../../../licensing/public';
 
-import { KibanaContextProvider } from '../shared_imports';
+import { KibanaContextProvider, APP_WRAPPER_CLASS } from '../shared_imports';
 
 import { App } from './app';
 
@@ -30,7 +30,7 @@ export const renderApp = (
 ): UnmountCallback => {
   const { getUrlForApp } = application;
   render(
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <I18nContext>
         <KibanaContextProvider services={{ cloud, breadcrumbService, license, getUrlForApp }}>
           <App history={history} />

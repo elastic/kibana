@@ -59,10 +59,10 @@ export class PdfMaker {
     // inject a page break for every 2 groups on the page
     if (groupCount > 0 && groupCount % this._layout.groupCount === 0) {
       contents = [
-        ({
+        {
           text: '',
           pageBreak: 'after',
-        } as ContentText) as Content,
+        } as ContentText as Content,
       ].concat(contents);
     }
     this._content.push(contents);
@@ -101,7 +101,10 @@ export class PdfMaker {
     this._addContents(contents);
   }
 
-  addImage(image: Buffer, opts = { title: '', description: '' }) {
+  addImage(
+    image: Buffer,
+    opts: { title?: string; description?: string } = { title: '', description: '' }
+  ) {
     const size = this._layout.getPdfImageSize();
     const img = {
       image: `data:image/png;base64,${image.toString('base64')}`,

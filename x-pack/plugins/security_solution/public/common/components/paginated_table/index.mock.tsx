@@ -83,17 +83,13 @@ export const getHostsColumns = (): [
   },
 ];
 
-export const sortedHosts: [
-  Columns<string>,
-  Columns<string>,
-  Columns<string>,
-  Columns<string>
-] = getHostsColumns().map((h) => ({ ...h, sortable: true })) as [
-  Columns<string>,
-  Columns<string>,
-  Columns<string>,
-  Columns<string>
-];
+export const sortedHosts: [Columns<string>, Columns<string>, Columns<string>, Columns<string>] =
+  getHostsColumns().map((h) => ({ ...h, sortable: true })) as [
+    Columns<string>,
+    Columns<string>,
+    Columns<string>,
+    Columns<string>
+  ];
 
 export const rowItems: ItemsPerRow[] = [
   {

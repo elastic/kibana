@@ -29,28 +29,12 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
 
     // correlations
-    describe('correlations/latency_slow_transactions', function () {
-      loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
-    });
-
     describe('correlations/failed_transactions', function () {
       loadTestFile(require.resolve('./correlations/failed_transactions'));
     });
 
     describe('correlations/latency', function () {
       loadTestFile(require.resolve('./correlations/latency'));
-    });
-
-    describe('correlations/latency_overall', function () {
-      loadTestFile(require.resolve('./correlations/latency_overall'));
-    });
-
-    describe('correlations/errors_overall', function () {
-      loadTestFile(require.resolve('./correlations/errors_overall'));
-    });
-
-    describe('correlations/errors_failed_transactions', function () {
-      loadTestFile(require.resolve('./correlations/errors_failed_transactions'));
     });
 
     describe('metrics_charts/metrics_charts', function () {
@@ -157,6 +141,9 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     describe('traces/top_traces', function () {
       loadTestFile(require.resolve('./traces/top_traces'));
     });
+    describe('/api/apm/traces/{traceId}', function () {
+      loadTestFile(require.resolve('./traces/trace_by_id'));
+    });
 
     // transactions
     describe('transactions/breakdown', function () {
@@ -219,6 +206,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('csm/web_core_vitals', function () {
       loadTestFile(require.resolve('./csm/web_core_vitals'));
+    });
+
+    describe('historical_data/has_data', function () {
+      loadTestFile(require.resolve('./historical_data/has_data'));
     });
 
     registry.run(providerContext);

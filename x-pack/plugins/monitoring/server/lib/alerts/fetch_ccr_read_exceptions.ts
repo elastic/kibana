@@ -14,7 +14,8 @@ export async function fetchCCRReadExceptions(
   index: string,
   startMs: number,
   endMs: number,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<CCRReadExceptionsStats[]> {
   const params = {
     index,
@@ -92,6 +93,15 @@ export async function fetchCCRReadExceptions(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const { body: response } = await esClient.search(params);
   const stats: CCRReadExceptionsStats[] = [];

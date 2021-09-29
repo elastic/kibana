@@ -8,7 +8,7 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../data/common';
 import { fieldFormatsMock } from '../../../../../../../../field_formats/common/mocks';
 import { setServices } from '../../../../../../kibana_services';
 import { DiscoverServices } from '../../../../../../build_services';
@@ -45,6 +45,8 @@ describe('Row formatter', () => {
 
   const indexPattern = createIndexPattern();
 
+  const fieldsToShow = indexPattern.fields.getAll().map((fld) => fld.name);
+
   // Realistic response with alphabetical insertion order
   const formatHitReturnValue = {
     also: 'with \\&quot;quotes\\&quot; or &#39;single qoutes&#39;',
@@ -61,15 +63,15 @@ describe('Row formatter', () => {
   beforeEach(() => {
     // @ts-expect-error
     indexPattern.formatHit = formatHitMock;
-    setServices(({
+    setServices({
       uiSettings: {
         get: () => 100,
       },
-    } as unknown) as DiscoverServices);
+    } as unknown as DiscoverServices);
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, indexPattern)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, indexPattern, fieldsToShow)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -108,12 +110,12 @@ describe('Row formatter', () => {
   });
 
   it('limits number of rendered items', () => {
-    setServices(({
+    setServices({
       uiSettings: {
         get: () => 1,
       },
-    } as unknown) as DiscoverServices);
-    expect(formatRow(hit, indexPattern)).toMatchInlineSnapshot(`
+    } as unknown as DiscoverServices);
+    expect(formatRow(hit, indexPattern, [])).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -128,7 +130,8 @@ describe('Row formatter', () => {
   });
 
   it('formats document with highlighted fields first', () => {
-    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern)).toMatchInlineSnapshot(`
+    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern, fieldsToShow))
+      .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [

@@ -27,7 +27,7 @@ const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mock
     iconPaletteId: null,
     fieldMetaOptions: { isEnabled: false },
   };
-  const mockVectorLayer = (new MockLayer() as unknown) as IVectorLayer;
+  const mockVectorLayer = new MockLayer() as unknown as IVectorLayer;
   return new DynamicIconProperty(
     { ...defaultOptions, ...options },
     VECTOR_STYLES.ICON,
