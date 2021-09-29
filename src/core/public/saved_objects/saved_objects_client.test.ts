@@ -148,13 +148,15 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#resolve', () => {
-    beforeEach(() => {
+    function mockResolvedObjects(...objects: Array<Record<string, unknown>>) {
       http.fetch.mockResolvedValue({
-        resolved_objects: [
-          { saved_object: doc, outcome: 'conflict', alias_target_id: 'another-id' },
-        ],
+        resolved_objects: objects.map((obj) => ({
+          saved_object: obj,
+          outcome: 'conflict',
+          alias_target_id: 'another-id',
+        })),
       });
-    });
+    }
 
     test('rejects if `type` parameter is undefined', () => {
       return expect(
@@ -176,6 +178,7 @@ describe('SavedObjectsClient', () => {
     });
 
     test('makes HTTP call', async () => {
+      mockResolvedObjects(doc);
       await savedObjectsClient.resolve(doc.type, doc.id);
       expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -191,10 +194,12 @@ describe('SavedObjectsClient', () => {
 
     test('batches several #resolve calls into a single HTTP call', async () => {
       // Await #resolve call to ensure batchQueue is empty and throttle has reset
+      mockResolvedObjects({ ...doc, type: 'type2' });
       await savedObjectsClient.resolve('type2', doc.id);
       http.fetch.mockClear();
 
       // Make two #resolve calls right after one another
+      mockResolvedObjects({ ...doc, type: 'type1' }, { ...doc, type: 'type0' });
       savedObjectsClient.resolve('type1', doc.id);
       await savedObjectsClient.resolve('type0', doc.id);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
@@ -213,9 +218,11 @@ describe('SavedObjectsClient', () => {
 
     test('removes duplicates when calling `_bulk_resolve`', async () => {
       // Await #resolve call to ensure batchQueue is empty and throttle has reset
+      mockResolvedObjects({ ...doc, type: 'type2' });
       await savedObjectsClient.resolve('type2', doc.id);
       http.fetch.mockClear();
 
+      mockResolvedObjects(doc, { ...doc, type: 'some-type', id: 'some-id' }); // the client will only request two objects, so we only mock two results
       savedObjectsClient.resolve(doc.type, doc.id);
       savedObjectsClient.resolve('some-type', 'some-id');
       await savedObjectsClient.resolve(doc.type, doc.id);
@@ -235,9 +242,11 @@ describe('SavedObjectsClient', () => {
 
     test('resolves with correct object when there are duplicates present', async () => {
       // Await #resolve call to ensure batchQueue is empty and throttle has reset
+      mockResolvedObjects({ ...doc, type: 'type2' });
       await savedObjectsClient.resolve('type2', doc.id);
       http.fetch.mockClear();
 
+      mockResolvedObjects(doc);
       const call1 = savedObjectsClient.resolve(doc.type, doc.id);
       const objFromCall2 = await savedObjectsClient.resolve(doc.type, doc.id);
       const objFromCall1 = await call1;
@@ -252,8 +261,10 @@ describe('SavedObjectsClient', () => {
     test('do not share instances or references between duplicate callers', async () => {
       // Await #resolve call to ensure batchQueue is empty and throttle has reset
       await savedObjectsClient.resolve('type2', doc.id);
+      mockResolvedObjects({ ...doc, type: 'type2' });
       http.fetch.mockClear();
 
+      mockResolvedObjects(doc);
       const call1 = savedObjectsClient.resolve(doc.type, doc.id);
       const objFromCall2 = await savedObjectsClient.resolve(doc.type, doc.id);
       const objFromCall1 = await call1;
@@ -263,6 +274,7 @@ describe('SavedObjectsClient', () => {
     });
 
     test('resolves with ResolvedSimpleSavedObject instance', async () => {
+      mockResolvedObjects(doc);
       const result = await savedObjectsClient.resolve(doc.type, doc.id);
       expect(result.saved_object).toBeInstanceOf(SimpleSavedObject);
       expect(result.saved_object.type).toBe(doc.type);
