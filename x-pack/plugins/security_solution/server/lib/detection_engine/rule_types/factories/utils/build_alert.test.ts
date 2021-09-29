@@ -13,6 +13,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
@@ -38,7 +39,6 @@ import {
 } from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import { EVENT_DATASET } from '../../../../../../common/cti/constants';
-import { v4 } from 'uuid';
 
 type SignalDoc = SignalSourceHit & {
   _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };
@@ -79,7 +79,7 @@ describe('buildAlert', () => {
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
-        uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        docId: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
         updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',
@@ -159,7 +159,7 @@ describe('buildAlert', () => {
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
-        uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        docId: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
         updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',
@@ -219,12 +219,14 @@ describe('buildAlert', () => {
   });
 
   test('it builds a parent correctly if the parent does exist', () => {
-    const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    const docId = 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71';
+    const sampleDoc = sampleDocNoSortIdWithTimestamp(docId);
     const doc = {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
-        [ALERT_INSTANCE_ID]: v4(),
+        [ALERT_INSTANCE_ID]: '',
+        [ALERT_UUID]: docId,
         [EVENT_ACTION]: 'socket_opened',
         [EVENT_DATASET]: 'socket',
         [EVENT_KIND]: 'signal',
@@ -278,13 +280,14 @@ describe('buildAlert', () => {
   });
 
   test('it builds an ancestor correctly if the parent does exist', () => {
-    const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    const docId = 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71';
+    const sampleDoc = sampleDocNoSortIdWithTimestamp(docId);
     const doc = {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
         [TIMESTAMP]: new Date().toISOString(),
-        [ALERT_INSTANCE_ID]: v4(),
+        [ALERT_UUID]: docId,
         [EVENT_ACTION]: 'socket_opened',
         [EVENT_DATASET]: 'socket',
         [EVENT_KIND]: 'signal',

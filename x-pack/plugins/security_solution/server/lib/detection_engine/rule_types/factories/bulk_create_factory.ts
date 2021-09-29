@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
-
 import { performance } from 'perf_hooks';
 import { countBy, isEmpty } from 'lodash';
 
@@ -33,7 +31,9 @@ export const bulkCreateFactory =
     buildRuleMessage: BuildRuleMessage,
     refreshForBulkCreate: RefreshTypes
   ) =>
-  async <T>(wrappedDocs: Array<BaseHit<T>>): Promise<GenericBulkCreateResponse<T>> => {
+  async <T extends Record<string, unknown>>(
+    wrappedDocs: Array<BaseHit<T>>
+  ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {
         errors: [],
@@ -49,7 +49,7 @@ export const bulkCreateFactory =
     const response = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         id: doc._id,
-        fields: doc.fields ?? doc._source ?? {},
+        fields: doc._source,
       })),
       refreshForBulkCreate
     );
@@ -71,7 +71,6 @@ export const bulkCreateFactory =
         return {
           _id: responseIndex?._id ?? '',
           _index: responseIndex?._index ?? '',
-          [ALERT_INSTANCE_ID]: responseIndex?._id ?? '',
           ...doc._source,
         };
       })

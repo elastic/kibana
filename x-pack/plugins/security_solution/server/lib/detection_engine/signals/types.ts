@@ -281,7 +281,9 @@ export interface QueryFilter {
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
-export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
+export type BulkCreate = <T extends Record<string, unknown>>(
+  docs: Array<BaseHit<T>>
+) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 

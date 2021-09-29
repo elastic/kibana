@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { Logger } from 'kibana/server';
 
 import type { ConfigType } from '../../../../config';
@@ -30,23 +31,27 @@ export const wrapHitsFactory =
   (events, buildReasonMessage) => {
     try {
       const wrappedDocs = events.map((event) => {
+        const id = generateId(
+          event._index,
+          event._id,
+          String(event._version),
+          `${spaceId}:${ruleSO.id}`
+        );
         return {
+          _id: id,
           _index: '',
-          _id: generateId(
-            event._index,
-            event._id,
-            String(event._version),
-            ruleSO.attributes.params.ruleId ?? ''
-          ),
-          _source: buildBulkBody(
-            spaceId,
-            ruleSO,
-            event as SimpleHit,
-            mergeStrategy,
-            ignoreFields,
-            true,
-            buildReasonMessage
-          ),
+          _source: {
+            ...buildBulkBody(
+              spaceId,
+              ruleSO,
+              event as SimpleHit,
+              mergeStrategy,
+              ignoreFields,
+              true,
+              buildReasonMessage
+            ),
+            [ALERT_UUID]: id,
+          },
         };
       });
 

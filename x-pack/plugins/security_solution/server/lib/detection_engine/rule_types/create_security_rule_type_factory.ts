@@ -81,7 +81,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
           id: alertId,
           ruleId,
           name,
-          index: ruleDataClient.indexName,
+          index: spaceId,
         });
 
         logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));

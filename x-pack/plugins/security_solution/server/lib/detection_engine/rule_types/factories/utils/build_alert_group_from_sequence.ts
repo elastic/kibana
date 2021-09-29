@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { Logger } from 'kibana/server';
 
@@ -63,7 +63,7 @@ export const buildAlertGroupFromSequence = (
     _index: '',
     _source: {
       ...block,
-      [ALERT_INSTANCE_ID]: buildingBlockIds[i],
+      [ALERT_UUID]: buildingBlockIds[i],
     },
   }));
 
