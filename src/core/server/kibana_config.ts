@@ -29,7 +29,7 @@ const deprecations: ConfigDeprecationProvider = () => [
             i18n.translate('core.kibana.index.deprecationManualStep1', {
               defaultMessage: `If you rely on this setting to achieve multitenancy you should use Spaces, cross-cluster replication, or cross-cluster search instead.`,
             }),
-            i18n.translate('core.kibana.index.deprecationManualStep1', {
+            i18n.translate('core.kibana.index.deprecationManualStep2', {
               defaultMessage: `To migrate to Spaces, we encourage using saved object management to export your saved objects from a tenant into the default tenant in a space.`,
             }),
           ],
