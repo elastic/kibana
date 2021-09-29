@@ -217,22 +217,20 @@ export interface GetEndpointListResponse {
 
 export interface ExceptionListItem {
   id: string;
-  version: string;
+  version: number | null;
   name: string;
-  description: string;
   created_at: string;
   updated_at: string;
   entries: object;
-  os: string;
   os_types: object;
 }
 
 export interface ListTemplate {
   '@timestamp': number;
-  detection_rule: TelemetryEvent[];
-  endpoint_exception: TelemetryEvent[];
-  endpoint_event_filter: TelemetryEvent[];
-  trusted_application: TelemetryEvent[];
+  detection_rule?: TelemetryEvent;
+  endpoint_exception?: TelemetryEvent;
+  endpoint_event_filter?: TelemetryEvent;
+  trusted_application?: TelemetryEvent;
 }
 
 // Detection Rule types

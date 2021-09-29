@@ -7,7 +7,7 @@
 
 export const TELEMETRY_MAX_BUFFER_SIZE = 100;
 
-export const TELEMETRY_CHANNEL_LISTS = 'security-lists';
+export const TELEMETRY_CHANNEL_LISTS = 'security-lists-v2';
 
 export const TELEMETRY_CHANNEL_ENDPOINT_META = 'endpoint-metadata';
 

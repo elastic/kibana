@@ -259,7 +259,7 @@ export class TelemetryReceiver {
       expand_wildcards: 'open,hidden',
       index: '.kibana*',
       ignore_unavailable: true,
-      size: 10_000,
+      size: this.max_records,
       body: {
         query: {
           bool: {
@@ -275,7 +275,7 @@ export class TelemetryReceiver {
     return this.esClient.search<RuleSearchResult>(query);
   }
 
-  public async fetchDetectionExceptionList(listId: string, ruleId: string, ruleVersion: number) {
+  public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {
     if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
       throw Error('exception list client is unavailable: could not retrieve trusted applications');
     }
@@ -294,9 +294,7 @@ export class TelemetryReceiver {
     });
 
     return {
-      data:
-        results?.data.map((r) => ruleExceptionListItemToTelemetryEvent(r, ruleId, ruleVersion)) ??
-        [],
+      data: results?.data.map((r) => ruleExceptionListItemToTelemetryEvent(r, ruleVersion)) ?? [],
       total: results?.total ?? 0,
       page: results?.page ?? 1,
       per_page: results?.per_page ?? this.max_records,

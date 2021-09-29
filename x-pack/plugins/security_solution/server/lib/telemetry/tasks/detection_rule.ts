@@ -125,15 +125,10 @@ export class TelemetryDetectionRulesTask {
 
     const detectionRuleExceptions = [] as ExceptionListItem[];
     for (const item of cacheArray) {
-      const ruleId = item.alert.params.ruleId;
       const ruleVersion = item.alert.params.version;
 
       for (const ex of item.alert.params.exceptionsList) {
-        const listItem = await this.receiver.fetchDetectionExceptionList(
-          ex.list_id,
-          ruleId,
-          ruleVersion
-        );
+        const listItem = await this.receiver.fetchDetectionExceptionList(ex.list_id, ruleVersion);
         for (const exceptionItem of listItem.data) {
           detectionRuleExceptions.push(exceptionItem);
         }
@@ -144,6 +139,7 @@ export class TelemetryDetectionRulesTask {
       detectionRuleExceptions,
       LIST_DETECTION_RULE_EXCEPTION
     );
+
     batchTelemetryRecords(detectionRuleExceptionsJson, MAX_TELEMETRY_BATCH).forEach((batch) => {
       this.sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
     });

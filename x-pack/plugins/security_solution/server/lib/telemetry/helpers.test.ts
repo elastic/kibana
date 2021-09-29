@@ -139,84 +139,84 @@ describe('list telemetry schema', () => {
     const data = [{ id: 'test_1' }] as ExceptionListItem[];
     const templatedItems = templateExceptionList(data, LIST_DETECTION_RULE_EXCEPTION);
 
-    expect(templatedItems[0]?.detection_rule.length).toEqual(1);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 
   test('detection rules document is correctly formed with multiple entries', () => {
     const data = [{ id: 'test_2' }, { id: 'test_2' }] as ExceptionListItem[];
     const templatedItems = templateExceptionList(data, LIST_DETECTION_RULE_EXCEPTION);
 
-    expect(templatedItems[0]?.detection_rule.length).toEqual(1);
-    expect(templatedItems[1]?.detection_rule.length).toEqual(1);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).not.toBeUndefined();
+    expect(templatedItems[1]?.detection_rule).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 
   test('trusted apps document is correctly formed', () => {
     const data = [{ id: 'test_1' }] as ExceptionListItem[];
     const templatedItems = templateExceptionList(data, LIST_TRUSTED_APPLICATION);
 
-    expect(templatedItems[0]?.detection_rule.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
-    expect(templatedItems[0]?.trusted_application.length).toEqual(1);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).not.toBeUndefined();
   });
 
   test('trusted apps document is correctly formed with multiple entries', () => {
     const data = [{ id: 'test_2' }, { id: 'test_2' }] as ExceptionListItem[];
     const templatedItems = templateExceptionList(data, LIST_TRUSTED_APPLICATION);
 
-    expect(templatedItems[0]?.detection_rule.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
-    expect(templatedItems[0]?.trusted_application.length).toEqual(1);
-    expect(templatedItems[1]?.trusted_application.length).toEqual(1);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).not.toBeUndefined();
+    expect(templatedItems[1]?.trusted_application).not.toBeUndefined();
   });
 
   test('endpoint exception document is correctly formed', () => {
     const data = [{ id: 'test_3' }] as ExceptionListItem[];
     const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EXCEPTION);
 
-    expect(templatedItems[0]?.detection_rule.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(1);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 
   test('endpoint exception document is correctly formed with multiple entries', () => {
     const data = [{ id: 'test_4' }, { id: 'test_4' }, { id: 'test_4' }] as ExceptionListItem[];
     const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EXCEPTION);
 
-    expect(templatedItems[0]?.detection_rule.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(1);
-    expect(templatedItems[1]?.endpoint_exception.length).toEqual(1);
-    expect(templatedItems[2]?.endpoint_exception.length).toEqual(1);
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).not.toBeUndefined();
+    expect(templatedItems[1]?.endpoint_exception).not.toBeUndefined();
+    expect(templatedItems[2]?.endpoint_exception).not.toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 
   test('endpoint event filters document is correctly formed', () => {
     const data = [{ id: 'test_5' }] as ExceptionListItem[];
     const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EVENT_FILTER);
 
-    expect(templatedItems[0]?.detection_rule.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(1);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 
   test('endpoint event filters document is correctly formed with multiple entries', () => {
     const data = [{ id: 'test_6' }, { id: 'test_6' }] as ExceptionListItem[];
     const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EVENT_FILTER);
 
-    expect(templatedItems[0]?.detection_rule.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(1);
-    expect(templatedItems[1]?.endpoint_event_filter.length).toEqual(1);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).not.toBeUndefined();
+    expect(templatedItems[1]?.endpoint_event_filter).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 });
