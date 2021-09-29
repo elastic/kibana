@@ -11,7 +11,7 @@ import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
+import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
 import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
@@ -202,15 +202,18 @@ export const HoverActions: React.FC<Props> = React.memo(
       [ownFocus, toggleTopN]
     );
 
+    const isCaseView = timelineId === TimelineId.casePage;
+
     const { overflowActionItems, allActionItems } = useHoverActionItems({
       dataProvider,
       dataType,
       defaultFocusedButtonRef,
       draggableId,
-      enableOverflowButton,
+      enableOverflowButton: enableOverflowButton && !isCaseView,
       field,
       handleHoverActionClicked,
       hideTopN,
+      isCaseView,
       isObjectArray,
       isOverflowPopoverOpen,
       onFilterAdded,
@@ -245,7 +248,7 @@ export const HoverActions: React.FC<Props> = React.memo(
 
           {additionalContent != null && <AdditionalContent>{additionalContent}</AdditionalContent>}
 
-          {enableOverflowButton ? overflowActionItems : allActionItems}
+          {enableOverflowButton && !isCaseView ? overflowActionItems : allActionItems}
         </StyledHoverActionsContainer>
       </EuiFocusTrap>
     );

@@ -30,6 +30,9 @@ export const getDeprecationsInfo = async (
   if (migrationStatus !== 'ok') {
     return [
       {
+        title: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionTitle', {
+          defaultMessage: 'Found reporting indices managed by custom ILM policy.',
+        }),
         level: 'warning',
         message: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionMessage', {
           defaultMessage: `New reporting indices will be managed by the "{reportingIlmPolicy}" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets all indices prefixed with "{indexPattern}".`,

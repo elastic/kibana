@@ -6,24 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import unified from 'unified';
-import type { Node, Parent } from 'unist';
-// installed by @elastic/eui
-// eslint-disable-next-line import/no-extraneous-dependencies
-import markdown from 'remark-parse';
-import remarkStringify from 'remark-stringify';
-
 import {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObject,
   SavedObjectReference,
 } from 'kibana/server';
-import { filter, flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
-import { TimeRange } from 'src/plugins/data/server';
-import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import { flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
 import { AlertInfo } from '.';
-import { LensServerPluginSetup, LensDocShape715 } from '../../../lens/server';
+import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
   AssociationType,
@@ -48,8 +39,10 @@ import {
   User,
 } from '../../common';
 import { UpdateAlertRequest } from '../client/alerts/types';
-import { LENS_ID, LensParser, LensSerializer } from '../../common/utils/markdown_plugins/lens';
-import { TimelineSerializer, TimelineParser } from '../../common/utils/markdown_plugins/timeline';
+import {
+  parseCommentString,
+  getLensVisualizations,
+} from '../../common/utils/markdown_plugins/utils';
 
 /**
  * Default sort field for querying saved objects.
@@ -415,39 +408,6 @@ export const getNoneCaseConnector = () => ({
   type: ConnectorTypes.none,
   fields: null,
 });
-
-interface LensMarkdownNode extends EmbeddableStateWithType {
-  timeRange: TimeRange;
-  attributes: LensDocShape715 & { references: SavedObjectReference[] };
-}
-
-export const parseCommentString = (comment: string) => {
-  const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
-  return processor.parse(comment) as Parent;
-};
-
-export const stringifyComment = (comment: Parent) =>
-  unified()
-    .use([
-      [
-        remarkStringify,
-        {
-          allowDangerousHtml: true,
-          handlers: {
-            /*
-              because we're using rison in the timeline url we need
-              to make sure that markdown parser doesn't modify the url
-            */
-            timeline: TimelineSerializer,
-            lens: LensSerializer,
-          },
-        },
-      ],
-    ])
-    .stringify(comment);
-
-export const getLensVisualizations = (parsedComment: Array<LensMarkdownNode | Node>) =>
-  filter(parsedComment, { type: LENS_ID }) as LensMarkdownNode[];
 
 export const extractLensReferencesFromCommentString = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],

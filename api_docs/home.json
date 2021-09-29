@@ -434,7 +434,7 @@
         "children": [
           {
             "parentPluginId": "home",
-            "id": "def-public.props",
+            "id": "def-public.TutorialDirectoryHeaderLinkComponent.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -447,7 +447,7 @@
           },
           {
             "parentPluginId": "home",
-            "id": "def-public.context",
+            "id": "def-public.TutorialDirectoryHeaderLinkComponent.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -477,7 +477,7 @@
         "children": [
           {
             "parentPluginId": "home",
-            "id": "def-public.props",
+            "id": "def-public.TutorialDirectoryNoticeComponent.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -490,7 +490,7 @@
           },
           {
             "parentPluginId": "home",
-            "id": "def-public.context",
+            "id": "def-public.TutorialDirectoryNoticeComponent.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -520,7 +520,7 @@
         "children": [
           {
             "parentPluginId": "home",
-            "id": "def-public.props",
+            "id": "def-public.TutorialModuleNoticeComponent.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -533,7 +533,7 @@
           },
           {
             "parentPluginId": "home",
-            "id": "def-public.context",
+            "id": "def-public.TutorialModuleNoticeComponent.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -983,7 +983,7 @@
           },
           ") => void; getSampleDatasets: () => ",
           "Writable",
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; defaultIndex: string; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
           "SavedObject",
           "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
           "SampleDatasetDashboardPanel",
@@ -1003,7 +1003,7 @@
         "signature": [
           "() => ",
           "Writable",
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; defaultIndex: string; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
@@ -1029,7 +1029,7 @@
         "children": [
           {
             "parentPluginId": "home",
-            "id": "def-server.context",
+            "id": "def-server.TutorialProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -1312,7 +1312,7 @@
             },
             ") => void; getSampleDatasets: () => ",
             "Writable",
-            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; defaultIndex: string; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
             "SavedObject",
             "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
             "SampleDatasetDashboardPanel",

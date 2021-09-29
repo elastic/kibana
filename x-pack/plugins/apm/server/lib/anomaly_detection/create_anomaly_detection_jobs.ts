@@ -9,6 +9,7 @@ import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
 import { snakeCase } from 'lodash';
 import Boom from '@hapi/boom';
+import moment from 'moment';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -87,6 +88,7 @@ async function createAnomalyDetectionJob({
       groups: [APM_ML_JOB_GROUP],
       indexPatternName,
       applyToAllSpaces: true,
+      start: moment().subtract(4, 'weeks').valueOf(),
       query: {
         bool: {
           filter: [

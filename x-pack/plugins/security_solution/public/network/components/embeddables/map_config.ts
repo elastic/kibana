@@ -14,7 +14,7 @@ import {
   LayerMappingDetails,
 } from './types';
 import * as i18n from './translations';
-import { SOURCE_TYPES } from '../../../../../maps/common/constants';
+import { SOURCE_TYPES } from '../../../../../maps/common';
 const euiVisColorPalette = euiPaletteColorBlind();
 
 // Update field mappings to modify what fields will be returned to map tooltip

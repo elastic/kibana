@@ -16,6 +16,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,
   mlApi: MlApi
 ) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return {
@@ -50,12 +51,14 @@ export function MachineLearningDataFrameAnalyticsProvider(
     },
 
     async startAnalyticsCreation() {
-      if (await testSubjects.exists('mlNoDataFrameAnalyticsFound')) {
-        await testSubjects.click('mlAnalyticsCreateFirstButton');
-      } else {
-        await testSubjects.click('mlAnalyticsButtonCreate');
-      }
-      await testSubjects.existOrFail('analyticsCreateSourceIndexModal');
+      await retry.tryForTime(20 * 1000, async () => {
+        if (await testSubjects.exists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
+          await testSubjects.click('mlAnalyticsCreateFirstButton');
+        } else {
+          await testSubjects.click('mlAnalyticsButtonCreate');
+        }
+        await testSubjects.existOrFail('analyticsCreateSourceIndexModal');
+      });
     },
 
     async waitForAnalyticsCompletion(analyticsId: string) {

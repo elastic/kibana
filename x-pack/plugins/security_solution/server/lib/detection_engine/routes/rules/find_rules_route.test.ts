@@ -17,7 +17,10 @@ import {
 } from '../__mocks__/request_responses';
 import { findRulesRoute } from './find_rules_route';
 
-describe('find_rules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('find_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -25,12 +28,14 @@ describe('find_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    clients.rulesClient.get.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
     clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus());
 
-    findRulesRoute(server.router);
+    findRulesRoute(server.router, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {

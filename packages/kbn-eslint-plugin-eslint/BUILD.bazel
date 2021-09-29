@@ -6,6 +6,7 @@ PKG_REQUIRE_NAME = "@kbn/eslint-plugin-eslint"
 SOURCE_FILES = glob(
   [
     "rules/**/*.js",
+    "helpers/**/*.js",
     "index.js",
     "lib.js",
   ],

@@ -15,6 +15,7 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { DocumentMigrator } from '../core/document_migrator';
+import { ByteSizeValue } from '@kbn/config-schema';
 jest.mock('../core/document_migrator', () => {
   return {
     // Create a mock for spying on the constructor
@@ -396,6 +397,7 @@ const mockOptions = ({ enableV2 }: { enableV2: boolean } = { enableV2: false }) 
     } as KibanaMigratorOptions['kibanaConfig'],
     soMigrationsConfig: {
       batchSize: 20,
+      maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,

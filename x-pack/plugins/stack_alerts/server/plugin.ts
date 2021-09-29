@@ -12,7 +12,8 @@ import { registerBuiltInAlertTypes } from './alert_types';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 export class AlertingBuiltinsPlugin
-  implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps> {
+  implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps>
+{
   private readonly logger: Logger;
 
   constructor(ctx: PluginInitializerContext) {

@@ -15,9 +15,9 @@ interface Args {
 }
 
 function Wrapper({ hasFleetPoliciesWithApmIntegration }: Args) {
-  const http = ({
+  const http = {
     get: () => ({ hasData: hasFleetPoliciesWithApmIntegration }),
-  } as unknown) as HttpStart;
+  } as unknown as HttpStart;
   return (
     <TutorialFleetInstructions
       http={http}

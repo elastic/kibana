@@ -15,6 +15,11 @@ import { IndexPatternField } from '../../../../../../../data/public';
 import { stubIndexPattern } from '../../../../../../../data/common/stubs';
 
 jest.mock('../../../../../kibana_services', () => ({
+  getUiActions: jest.fn(() => {
+    return {
+      getTriggerCompatibleActions: jest.fn(() => []),
+    };
+  }),
   getServices: () => ({
     history: () => ({
       location: {
@@ -119,5 +124,14 @@ describe('discover sidebar field', function () {
     });
     const dscField = findTestSubject(comp, 'field-troubled_field-showDetails');
     expect(dscField.find('.kbnFieldButton__infoIcon').length).toEqual(1);
+  });
+  it('should not execute getDetails when rendered, since it can be expensive', function () {
+    const { props } = getComponent({});
+    expect(props.getDetails.mock.calls.length).toEqual(0);
+  });
+  it('should execute getDetails when show details is requested', function () {
+    const { props, comp } = getComponent({});
+    findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
+    expect(props.getDetails.mock.calls.length).toEqual(1);
   });
 });

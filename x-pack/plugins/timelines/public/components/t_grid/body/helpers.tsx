@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
@@ -42,16 +42,26 @@ export const getEventIdToDataMapping = (
   eventIds: string[],
   fieldsToKeep: string[],
   hasAlertsCrud: boolean,
-  hasAlertsCrudPermissionsByFeatureId?: (featureId: string) => boolean
+  hasAlertsCrudPermissionsByRule?: ({
+    ruleConsumer,
+    ruleProducer,
+  }: {
+    ruleConsumer: string;
+    ruleProducer?: string;
+  }) => boolean
 ): Record<string, TimelineNonEcsData[]> =>
   timelineData.reduce((acc, v) => {
     // FUTURE DEVELOPER
     // We only have one featureId for security solution therefore we can just use hasAlertsCrud
     // but for o11y we can multiple featureIds so we need to check every consumer
     // of the alert to see if they have the permission to update the alert
-    const alertConsumers = v.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
-    const hasPermissions = hasAlertsCrudPermissionsByFeatureId
-      ? alertConsumers.some((consumer) => hasAlertsCrudPermissionsByFeatureId(consumer))
+    const ruleConsumers = v.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
+    const ruleProducers = v.data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ?? [];
+    const hasPermissions = hasAlertsCrudPermissionsByRule
+      ? hasAlertsCrudPermissionsByRule({
+          ruleConsumer: ruleConsumers.length > 0 ? ruleConsumers[0] : '',
+          ruleProducer: ruleProducers.length > 0 ? ruleProducers[0] : undefined,
+        })
       : hasAlertsCrud;
 
     const fvm =

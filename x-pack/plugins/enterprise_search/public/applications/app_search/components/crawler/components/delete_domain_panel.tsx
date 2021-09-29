@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { CrawlerSingleDomainLogic } from '../crawler_single_domain_logic';
-import { getDeleteDomainSuccessMessage } from '../utils';
+import { getDeleteDomainConfirmationMessage } from '../utils';
 
 export const DeleteDomainPanel: React.FC = ({}) => {
   const { domain } = useValues(CrawlerSingleDomainLogic);
@@ -61,7 +61,7 @@ export const DeleteDomainPanel: React.FC = ({}) => {
         color="danger"
         iconType="trash"
         onClick={() => {
-          if (confirm(getDeleteDomainSuccessMessage(domain.url))) {
+          if (confirm(getDeleteDomainConfirmationMessage(domain.url))) {
             deleteDomain(domain);
           }
         }}

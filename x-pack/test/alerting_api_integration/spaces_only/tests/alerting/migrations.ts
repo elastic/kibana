@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import type { RawAlert } from '../../../../../plugins/alerting/server/types';
+import type { RawAlert, RawAlertAction } from '../../../../../plugins/alerting/server/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -217,6 +217,45 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect((hit!._source!.alert! as RawAlert).legacyId).to.equal(
         '74f3e6d7-b7bb-477d-ac28-92ee22728e6e'
       );
+    });
+
+    it('7.16.0 migrates existing rules so predefined connectors are not stored in references', async () => {
+      const searchResult: ApiResponse<estypes.SearchResponse<RawAlert>> = await es.search({
+        index: '.kibana',
+        body: {
+          query: {
+            term: {
+              _id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
+            },
+          },
+        },
+      });
+      expect(searchResult.statusCode).to.equal(200);
+      expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
+      const hit = searchResult.body.hits.hits[0];
+      expect((hit!._source!.alert! as RawAlert).actions! as RawAlertAction[]).to.eql([
+        {
+          actionRef: 'action_0',
+          actionTypeId: 'test.noop',
+          group: 'default',
+          params: {},
+        },
+        {
+          actionRef: 'preconfigured:my-slack1',
+          actionTypeId: '.slack',
+          group: 'default',
+          params: {
+            message: 'something happened!',
+          },
+        },
+      ]);
+      expect(hit!._source!.references!).to.eql([
+        {
+          id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
+          name: 'action_0',
+          type: 'action',
+        },
+      ]);
     });
   });
 }

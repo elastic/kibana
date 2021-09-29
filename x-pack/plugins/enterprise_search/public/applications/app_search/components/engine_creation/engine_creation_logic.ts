@@ -73,7 +73,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       const body = JSON.stringify({ name, language });
 
       try {
-        await http.post('/api/app_search/engines', { body });
+        await http.post('/internal/app_search/engines', { body });
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);

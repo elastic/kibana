@@ -387,3 +387,68 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:9c003b00-00ee-11ec-b067-2524946ba327",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [{
+          "actionRef": "action_0",
+          "actionTypeId": "test.noop",
+          "group": "default",
+          "params": {
+          }
+        },
+          {
+            "actionRef": "action_1",
+            "actionTypeId": ".slack",
+            "group": "default",
+            "params": {
+              "message": "something happened!"
+            }
+          }],
+        "alertTypeId": "test.noop",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-22T15:16:07.451Z",
+        "createdBy": null,
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "test migration of preconfigured connector",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.15.0"
+      },
+      "references": [
+        {
+          "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+          "name": "action_0",
+          "type": "action"
+        },
+        {
+          "id": "my-slack1",
+          "name": "action_1",
+          "type": "action"
+        }
+      ],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}

@@ -20,7 +20,7 @@ export function registerEnginesRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines',
+      path: '/internal/app_search/engines',
       validate: {
         query: schema.object({
           type: schema.oneOf([schema.literal('indexed'), schema.literal('meta')]),
@@ -40,7 +40,7 @@ export function registerEnginesRoutes({
 
   router.post(
     {
-      path: '/api/app_search/engines',
+      path: '/internal/app_search/engines',
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -58,7 +58,7 @@ export function registerEnginesRoutes({
   // Single engine endpoints
   router.get(
     {
-      path: '/api/app_search/engines/{name}',
+      path: '/internal/app_search/engines/{name}',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -71,7 +71,7 @@ export function registerEnginesRoutes({
   );
   router.delete(
     {
-      path: '/api/app_search/engines/{name}',
+      path: '/internal/app_search/engines/{name}',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -84,7 +84,7 @@ export function registerEnginesRoutes({
   );
   router.get(
     {
-      path: '/api/app_search/engines/{name}/overview',
+      path: '/internal/app_search/engines/{name}/overview',
       validate: {
         params: schema.object({
           name: schema.string(),

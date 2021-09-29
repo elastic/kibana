@@ -17,7 +17,7 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { ENGINE_CRAWLER_DOMAIN_PATH } from '../../../../routes';
 import { EngineLogic, generateEnginePath } from '../../../engine';
 
-import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
+import { CrawlerLogic } from '../../crawler_logic';
 import {
   CrawlerDataFromServer,
   CrawlerDomain,
@@ -57,9 +57,9 @@ export interface AddDomainLogicActions {
     checks: string[];
   };
   setAddDomainFormInputValue(newValue: string): string;
-  setDomainValidationResult(
-    change: CrawlerDomainValidationResultChange
-  ): { change: CrawlerDomainValidationResultChange };
+  setDomainValidationResult(change: CrawlerDomainValidationResultChange): {
+    change: CrawlerDomainValidationResultChange;
+  };
   startDomainValidation(): void;
   submitNewDomain(): void;
   validateDomainInitialVerification(
@@ -204,7 +204,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       const { http } = HttpLogic.values;
       const failureResultChange = domainValidationFailureResultChange(stepName);
 
-      const route = '/api/app_search/crawler/validate_url';
+      const route = '/internal/app_search/crawler/validate_url';
 
       try {
         const data = await http.post(route, {
@@ -254,15 +254,18 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       });
 
       try {
-        const response = await http.post(`/api/app_search/engines/${engineName}/crawler/domains`, {
-          query: {
-            respond_with: 'crawler_details',
-          },
-          body: requestBody,
-        });
+        const response = await http.post(
+          `/internal/app_search/engines/${engineName}/crawler/domains`,
+          {
+            query: {
+              respond_with: 'crawler_details',
+            },
+            body: requestBody,
+          }
+        );
 
         const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
-        CrawlerOverviewLogic.actions.onReceiveCrawlerData(crawlerData);
+        CrawlerLogic.actions.onReceiveCrawlerData(crawlerData);
         const newDomain = crawlerData.domains[crawlerData.domains.length - 1];
         if (newDomain) {
           actions.onSubmitNewDomainSuccess(newDomain);

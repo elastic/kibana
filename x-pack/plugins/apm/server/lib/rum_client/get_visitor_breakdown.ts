@@ -7,7 +7,7 @@
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
@@ -16,13 +16,19 @@ import {
 export async function getVisitorBreakdown({
   setup,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {

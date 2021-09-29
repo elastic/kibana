@@ -8,11 +8,6 @@
 declare namespace Cypress {
   interface Chainable<Subject> {
     promisify(): Promise<Subject>;
-    stubSearchStrategyApi(
-      stubObject: Record<string, unknown>,
-      factoryQueryType?: string,
-      searchStrategyName?: string
-    ): Chainable<Subject>;
     attachFile(fileName: string, fileType?: string): Chainable<JQuery>;
     waitUntil(
       fn: (subject: Subject) => boolean | Chainable<boolean>,

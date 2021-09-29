@@ -45,10 +45,8 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { lo
     ): Promise<IKibanaResponse<any>> => {
       const { id } = req.params;
 
-      const [
-        { savedObjects },
-        { encryptedSavedObjects, security, spaces },
-      ] = await core.getStartServices();
+      const [{ savedObjects }, { encryptedSavedObjects, security, spaces }] =
+        await core.getStartServices();
       if (!security) {
         return res.ok({
           body: {},

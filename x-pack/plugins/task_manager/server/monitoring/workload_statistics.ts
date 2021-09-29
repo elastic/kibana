@@ -415,9 +415,10 @@ export function estimateRecurringTaskScheduling(
   });
 }
 
-export function summarizeWorkloadStat(
-  workloadStats: WorkloadStat
-): { value: SummarizedWorkloadStat; status: HealthStatus } {
+export function summarizeWorkloadStat(workloadStats: WorkloadStat): {
+  value: SummarizedWorkloadStat;
+  status: HealthStatus;
+} {
   return {
     value: {
       ...workloadStats,

@@ -44,9 +44,8 @@ interface DisplaySettingsProps {
 }
 
 export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
-  const { initializeDisplaySettings, setServerData, handleSelectedTabChanged } = useActions(
-    DisplaySettingsLogic
-  );
+  const { initializeDisplaySettings, setServerData, handleSelectedTabChanged } =
+    useActions(DisplaySettingsLogic);
 
   const {
     dataLoading,

@@ -328,27 +328,44 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    return new Promise<void>(async (resolve) => {
-      workloadAggregator.pipe(first()).subscribe((result) => {
-        expect(result.key).toEqual('workload');
-        expect(result.value).toMatchObject({
-          count: 4,
-          task_types: {
-            actions_telemetry: { count: 2, status: { idle: 2 } },
-            alerting_telemetry: { count: 1, status: { idle: 1 } },
-            session_cleanup: { count: 1, status: { idle: 1 } },
-          },
+    return new Promise<void>(async (resolve, reject) => {
+      try {
+        workloadAggregator.pipe(first()).subscribe((result) => {
+          expect(result.key).toEqual('workload');
+          expect(result.value).toMatchObject({
+            count: 4,
+            task_types: {
+              actions_telemetry: {
+                count: 2,
+                status: {
+                  idle: 2,
+                },
+              },
+              alerting_telemetry: {
+                count: 1,
+                status: {
+                  idle: 1,
+                },
+              },
+              session_cleanup: {
+                count: 1,
+                status: {
+                  idle: 1,
+                },
+              },
+            },
+          });
+          resolve();
         });
-        resolve();
-      });
-
-      availability$.next(false);
-
-      await sleep(10);
-      expect(taskStore.aggregate).not.toHaveBeenCalled();
-      await sleep(10);
-      expect(taskStore.aggregate).not.toHaveBeenCalled();
-      availability$.next(true);
+        availability$.next(false);
+        await sleep(10);
+        expect(taskStore.aggregate).not.toHaveBeenCalled();
+        await sleep(10);
+        expect(taskStore.aggregate).not.toHaveBeenCalled();
+        availability$.next(true);
+      } catch (error) {
+        reject(error);
+      }
     });
   });
 
@@ -758,26 +775,7 @@ describe('estimateRecurringTaskScheduling', () => {
     schedule[6].nonRecurring = 3;
 
     expect(estimateRecurringTaskScheduling(schedule, 3000)).toEqual([
-      1,
-      1,
-      0,
-      1,
-      4,
-      2,
-      6,
-      3,
-      3,
-      2,
-      4,
-      2,
-      3,
-      3,
-      3,
-      2,
-      4,
-      2,
-      3,
-      3,
+      1, 1, 0, 1, 4, 2, 6, 3, 3, 2, 4, 2, 3, 3, 3, 2, 4, 2, 3, 3,
     ]);
   });
 });

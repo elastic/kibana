@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { IndexPatternField } from 'src/plugins/data/public';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { IFieldType } from '../../../../../../src/plugins/data/public';
 import { IField, AbstractField } from './field';
 import { IESSource } from '../sources/es_source';
 import { IVectorSource } from '../sources/vector_source';
@@ -42,7 +42,7 @@ export class ESDocField extends AbstractField implements IField {
     return this._source;
   }
 
-  async _getIndexPatternField(): Promise<IFieldType | undefined> {
+  async _getIndexPatternField(): Promise<IndexPatternField | undefined> {
     const indexPattern = await this._source.getIndexPattern();
     const indexPatternField = indexPattern.fields.getByName(this.getName());
     return indexPatternField && indexPatterns.isNestedField(indexPatternField)

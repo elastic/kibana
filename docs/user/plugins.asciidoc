@@ -149,6 +149,8 @@ NOTE: Removing a plugin will result in an "optimize" run which will delay the ne
 [[disable-plugin]]
 == Disable plugins
 
+deprecated:[7.16.0,"In 8.0 and later, this setting will only be supported for a subset of plugins that have opted in to the behavior."]
+
 Use the following command to disable a plugin:
 
 [source,shell]
@@ -158,7 +160,7 @@ Use the following command to disable a plugin:
 
 NOTE: Disabling or enabling a plugin will result in an "optimize" run which will delay the start of {kib}.
 
-<1> You can find a plugin's plugin ID as the value of the `name` property in the plugin's `package.json` file.
+<1> You can find a plugin's plugin ID as the value of the `name` property in the plugin's `kibana.json` file.
 
 [float]
 [[configure-plugin-manager]]

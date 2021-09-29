@@ -8,7 +8,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { isPlainObject } from 'lodash';
-import { IndexPattern } from '../../index_patterns/index_patterns';
+import { IndexPattern } from '../..';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
 export interface TabifyDocsOptions {

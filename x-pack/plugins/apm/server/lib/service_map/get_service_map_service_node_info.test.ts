@@ -6,14 +6,14 @@
  */
 
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import * as getErrorRateModule from '../transaction_groups/get_error_rate';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('getServiceMapServiceNodeInfo', () => {
   describe('with no results', () => {
     it('returns null data', async () => {
-      const setup = ({
+      const setup = {
         apmEventClient: {
           search: () =>
             Promise.resolve({
@@ -22,13 +22,15 @@ describe('getServiceMapServiceNodeInfo', () => {
         },
         indices: {},
         uiFilters: {},
-      } as unknown) as Setup & SetupTimeRange;
+      } as unknown as Setup;
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
         environment: 'test environment',
         setup,
         serviceName,
         searchAggregatedTransactions: false,
+        start: 1528113600000,
+        end: 1528977600000,
       });
 
       expect(result).toEqual({
@@ -51,7 +53,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         noHits: false,
       });
 
-      const setup = ({
+      const setup = {
         apmEventClient: {
           search: () =>
             Promise.resolve({
@@ -72,13 +74,15 @@ describe('getServiceMapServiceNodeInfo', () => {
           'xpack.apm.metricsInterval': 30,
         },
         uiFilters: { environment: 'test environment' },
-      } as unknown) as Setup & SetupTimeRange;
+      } as unknown as Setup;
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
         setup,
         serviceName,
         searchAggregatedTransactions: false,
         environment: ENVIRONMENT_ALL.value,
+        start: 1593460053026000,
+        end: 1593497863217000,
       });
 
       expect(result).toEqual({

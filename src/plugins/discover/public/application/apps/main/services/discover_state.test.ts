@@ -22,8 +22,7 @@ let state: GetStateReturn;
 const getCurrentUrl = () => history.createHref(history.location);
 
 const uiSettingsMock = {
-  get: <T>(key: string) =>
-    ((key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown) as T,
+  get: <T>(key: string) => (key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown as T,
 } as IUiSettingsClient;
 
 describe('Test discover state', () => {
@@ -151,7 +150,7 @@ describe('Test discover state with legacy migration', () => {
 });
 
 describe('createSearchSessionRestorationDataProvider', () => {
-  let mockSavedSearch: SavedSearch = ({} as unknown) as SavedSearch;
+  let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
   const mockDataPlugin = dataPluginMock.createStartContract();
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,
@@ -168,12 +167,12 @@ describe('createSearchSessionRestorationDataProvider', () => {
     });
 
     test('Saved Search with a title returns saved search title', async () => {
-      mockSavedSearch = ({ id: 'id', title: 'Name' } as unknown) as SavedSearch;
+      mockSavedSearch = { id: 'id', title: 'Name' } as unknown as SavedSearch;
       expect(await searchSessionInfoProvider.getName()).toBe('Name');
     });
 
     test('Saved Search without a title returns default name', async () => {
-      mockSavedSearch = ({ id: 'id', title: undefined } as unknown) as SavedSearch;
+      mockSavedSearch = { id: 'id', title: undefined } as unknown as SavedSearch;
       expect(await searchSessionInfoProvider.getName()).toBe('Discover');
     });
   });

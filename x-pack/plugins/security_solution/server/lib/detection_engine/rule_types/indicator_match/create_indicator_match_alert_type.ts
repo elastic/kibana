@@ -7,7 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { INDICATOR_ALERT_TYPE_ID } from '../../../../../common/constants';
+import { INDICATOR_RULE_TYPE_ID } from '../../../../../common/constants';
 import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
@@ -19,6 +19,7 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
     lists,
     logger,
     mergeStrategy,
+    ignoreFields,
     ruleDataClient,
     version,
     ruleDataService,
@@ -27,11 +28,12 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
     lists,
     logger,
     mergeStrategy,
+    ignoreFields,
     ruleDataClient,
     ruleDataService,
   });
   return createSecurityRuleType<ThreatRuleParams, {}, PersistenceServices, {}>({
-    id: INDICATOR_ALERT_TYPE_ID,
+    id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
     validate: {
       params: {

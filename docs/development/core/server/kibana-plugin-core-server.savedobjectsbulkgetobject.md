@@ -17,5 +17,6 @@ export interface SavedObjectsBulkGetObject
 |  --- | --- | --- |
 |  [fields](./kibana-plugin-core-server.savedobjectsbulkgetobject.fields.md) | <code>string[]</code> | SavedObject fields to include in the response |
 |  [id](./kibana-plugin-core-server.savedobjectsbulkgetobject.id.md) | <code>string</code> |  |
+|  [namespaces](./kibana-plugin-core-server.savedobjectsbulkgetobject.namespaces.md) | <code>string[]</code> | Optional namespace(s) for the object to be retrieved in. If this is defined, it will supersede the namespace ID that is in the top-level options.<!-- -->\* For shareable object types (registered with <code>namespaceType: 'multiple'</code>): this option can be used to specify one or more spaces, including the "All spaces" identifier (<code>'*'</code>). \* For isolated object types (registered with <code>namespaceType: 'single'</code> or <code>namespaceType: 'multiple-isolated'</code>): this option can only be used to specify a single space, and the "All spaces" identifier (<code>'*'</code>) is not allowed. \* For global object types (registered with <code>namespaceType: 'agnostic'</code>): this option cannot be used. |
 |  [type](./kibana-plugin-core-server.savedobjectsbulkgetobject.type.md) | <code>string</code> |  |
 

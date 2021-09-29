@@ -44,7 +44,7 @@ The API returns the following:
     "connector_type_id": ".email",
     "name": "email: preconfigured-mail-connector",
     "is_preconfigured": true,
-    "referenced_by_count": 1
+    "referenced_by_count": 0 <1>
   },
   {
     "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
@@ -61,3 +61,5 @@ The API returns the following:
   }
 ]
 --------------------------------------------------
+
+<1> `referenced_by_count` - The number of saved-objects referencing this connector. This value is not calculated if `is_preconfigured: true`.

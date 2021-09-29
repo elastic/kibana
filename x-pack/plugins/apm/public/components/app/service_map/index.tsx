@@ -83,7 +83,7 @@ export function ServiceMapHome() {
 export function ServiceMapServiceDetail() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/service-map');
+  } = useApmParams('/services/{serviceName}/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   return (
     <ServiceMap
@@ -111,7 +111,11 @@ export function ServiceMap({
 
   const serviceName = useServiceName();
 
-  const { data = { elements: [] }, status, error } = useFetcher(
+  const {
+    data = { elements: [] },
+    status,
+    error,
+  } = useFetcher(
     (callApmApi) => {
       // When we don't have a license or a valid license, don't make the request.
       if (!license || !isActivePlatinumLicense(license)) {

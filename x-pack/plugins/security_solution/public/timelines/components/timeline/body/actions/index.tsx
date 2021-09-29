@@ -15,8 +15,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
-import { AddEventNoteAction } from '../actions/add_note_icon_item';
-import { PinEventAction } from '../actions/pin_event_action';
+import { AddEventNoteAction } from './add_note_icon_item';
+import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
@@ -32,21 +32,20 @@ const ActionsContainer = styled.div`
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
-  width,
   checked,
   columnValues,
-  eventId,
   data,
   ecsData,
+  eventId,
   eventIdToNoteIds,
   isEventPinned = false,
   isEventViewer = false,
   loadingEventIds,
   onEventDetailsPanelOpened,
   onRowSelected,
+  onRuleChange,
   refetch,
   showCheckboxes,
-  onRuleChange,
   showNotes,
   timelineId,
   toggleShowNotes,
@@ -91,9 +90,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
   const eventType = getEventType(ecsData);
 
-  const isEventContextMenuEnabledForEndpoint = useMemo(
-    () => ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'),
-    [ecsData.event?.kind, ecsData.agent?.type]
+  const isContextMenuDisabled = useMemo(
+    () =>
+      eventType !== 'signal' &&
+      !(
+        (ecsData.event?.kind?.includes('event') || ecsData.event?.kind?.includes('alert')) &&
+        ecsData.agent?.type?.includes('endpoint')
+      ),
+    [eventType, ecsData.event?.kind, ecsData.agent?.type]
   );
 
   return (
@@ -163,7 +167,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal' && !isEventContextMenuEnabledForEndpoint}
+          disabled={isContextMenuDisabled}
           refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />

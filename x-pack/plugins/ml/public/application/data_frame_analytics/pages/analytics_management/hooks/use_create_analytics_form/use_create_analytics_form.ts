@@ -13,7 +13,7 @@ import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
-import { DuplicateIndexPatternError } from '../../../../../../../../../../src/plugins/data/public';
+import { DuplicateDataViewError } from '../../../../../../../../../../src/plugins/data/public';
 
 import { useRefreshAnalyticsList, DataFrameAnalyticsConfig } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
@@ -84,9 +84,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const createAnalyticsJob = async () => {
     resetRequestMessages();
 
-    const analyticsJobConfig = (isAdvancedEditorEnabled
-      ? jobConfig
-      : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
+    const analyticsJobConfig = (
+      isAdvancedEditorEnabled ? jobConfig : getJobConfigFromFormState(form)
+    ) as DataFrameAnalyticsConfig;
 
     if (isAdvancedEditorEnabled) {
       destinationIndex = analyticsJobConfig.dest.index;
@@ -145,7 +145,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
     } catch (e) {
-      if (e instanceof DuplicateIndexPatternError) {
+      if (e instanceof DuplicateDataViewError) {
         addRequestMessage({
           error: i18n.translate(
             'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError',
