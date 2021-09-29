@@ -167,7 +167,9 @@ async function main() {
     },
     logsEndpoint: {
       alias: 'le',
-      describe: 'add endpoint actions and responses',
+      describe:
+        'By default .logs-endpoint.action and .logs-endpoint.action.responses are not indexed. \
+        Add endpoint actions and responses using this option. Starting with v7.16.0.',
       type: 'boolean',
       default: false,
     },
