@@ -120,6 +120,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       setEventsDeleted,
       onUpdateSuccess,
       onUpdateFailure,
+      timelineId: id,
     });
 
     return (

@@ -12,7 +12,6 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '..';
 import { ReportSource } from '../../common/types';
-import { ExportTypesRegistry } from './export_types_registry';
 import { LevelLogger } from './level_logger';
 
 /**
@@ -42,6 +41,15 @@ interface ChunkSource {
   output: ChunkOutput;
 }
 
+type ContentStreamEncoding = 'base64' | 'raw';
+
+interface ContentStreamParameters {
+  /**
+   * Content encoding. By default, it is Base64.
+   */
+  encoding?: ContentStreamEncoding;
+}
+
 export class ContentStream extends Duplex {
   /**
    * @see https://en.wikipedia.org/wiki/Base64#Output_padding
@@ -62,10 +70,9 @@ export class ContentStream extends Duplex {
   private bytesRead = 0;
   private chunksRead = 0;
   private chunksWritten = 0;
-  private jobContentEncoding?: string;
   private jobSize?: number;
-  private jobType?: string;
   private maxChunkSize?: number;
+  private parameters: Required<ContentStreamParameters>;
   private puid = new Puid();
   private primaryTerm?: number;
   private seqNo?: number;
@@ -78,60 +85,20 @@ export class ContentStream extends Duplex {
 
   constructor(
     private client: ElasticsearchClient,
-    private exportTypesRegistry: ExportTypesRegistry,
     private logger: LevelLogger,
-    private document: ContentStreamDocument
+    private document: ContentStreamDocument,
+    { encoding = 'base64' }: ContentStreamParameters = {}
   ) {
     super();
+    this.parameters = { encoding };
   }
 
-  private async getJobType() {
-    if (!this.jobType) {
-      const { id, index } = this.document;
-      const body: SearchRequest['body'] = {
-        _source: { includes: ['jobtype'] },
-        query: {
-          constant_score: {
-            filter: {
-              bool: {
-                must: [{ term: { _id: id } }],
-              },
-            },
-          },
-        },
-        size: 1,
-      };
-
-      const response = await this.client.search<ReportSource>({ body, index });
-      const hits = response?.body.hits?.hits?.[0];
-      this.jobType = hits?._source?.jobtype;
-    }
-
-    return this.jobType;
+  private decode(content: string) {
+    return Buffer.from(content, this.parameters.encoding === 'base64' ? 'base64' : undefined);
   }
 
-  private async getJobContentEncoding() {
-    if (!this.jobContentEncoding) {
-      const jobType = await this.getJobType();
-
-      ({ jobContentEncoding: this.jobContentEncoding } = this.exportTypesRegistry.get(
-        ({ jobType: item }) => item === jobType
-      ));
-    }
-
-    return this.jobContentEncoding;
-  }
-
-  private async decode(content: string) {
-    const contentEncoding = await this.getJobContentEncoding();
-
-    return Buffer.from(content, contentEncoding === 'base64' ? 'base64' : undefined);
-  }
-
-  private async encode(buffer: Buffer) {
-    const contentEncoding = await this.getJobContentEncoding();
-
-    return buffer.toString(contentEncoding === 'base64' ? 'base64' : undefined);
+  private encode(buffer: Buffer) {
+    return buffer.toString(this.parameters.encoding === 'base64' ? 'base64' : undefined);
   }
 
   private async getMaxContentSize() {
@@ -146,10 +113,9 @@ export class ContentStream extends Duplex {
   private async getMaxChunkSize() {
     if (!this.maxChunkSize) {
       const maxContentSize = (await this.getMaxContentSize()) - REQUEST_SPAN_SIZE_IN_BYTES;
-      const jobContentEncoding = await this.getJobContentEncoding();
 
       this.maxChunkSize =
-        jobContentEncoding === 'base64'
+        this.parameters.encoding === 'base64'
           ? ContentStream.getMaxBase64EncodedSize(maxContentSize)
           : ContentStream.getMaxJsonEscapedSize(maxContentSize);
 
@@ -180,7 +146,6 @@ export class ContentStream extends Duplex {
     const response = await this.client.search<ReportSource>({ body, index });
     const hits = response?.body.hits?.hits?.[0];
 
-    this.jobType = hits?._source?.jobtype;
     this.jobSize = hits?._source?.output?.size;
 
     return hits?._source?.output?.content;
@@ -223,7 +188,7 @@ export class ContentStream extends Duplex {
         return;
       }
 
-      const buffer = await this.decode(content);
+      const buffer = this.decode(content);
 
       this.push(buffer);
       this.chunksRead++;
@@ -287,7 +252,7 @@ export class ContentStream extends Duplex {
 
   private async flush(size = this.buffer.byteLength) {
     const chunk = this.buffer.slice(0, size);
-    const content = await this.encode(chunk);
+    const content = this.encode(chunk);
 
     if (!this.chunksWritten) {
       await this.removeChunks();
@@ -304,32 +269,29 @@ export class ContentStream extends Duplex {
     this.buffer = this.buffer.slice(size);
   }
 
-  async _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
+  private async flushAllFullChunks() {
+    const maxChunkSize = await this.getMaxChunkSize();
+
+    while (this.buffer.byteLength >= maxChunkSize) {
+      await this.flush(maxChunkSize);
+    }
+  }
+
+  _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
     this.buffer = Buffer.concat([
       this.buffer,
       Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
     ]);
 
-    try {
-      const maxChunkSize = await this.getMaxChunkSize();
-
-      while (this.buffer.byteLength >= maxChunkSize) {
-        await this.flush(maxChunkSize);
-      }
-
-      callback();
-    } catch (error) {
-      callback(error);
-    }
+    this.flushAllFullChunks()
+      .then(() => callback())
+      .catch(callback);
   }
 
-  async _final(callback: Callback) {
-    try {
-      await this.flush();
-      callback();
-    } catch (error) {
-      callback(error);
-    }
+  _final(callback: Callback) {
+    this.flush()
+      .then(() => callback())
+      .catch(callback);
   }
 
   getSeqNo(): number | undefined {
@@ -341,15 +303,18 @@ export class ContentStream extends Duplex {
   }
 }
 
-export async function getContentStream(reporting: ReportingCore, document: ContentStreamDocument) {
+export async function getContentStream(
+  reporting: ReportingCore,
+  document: ContentStreamDocument,
+  parameters?: ContentStreamParameters
+) {
   const { asInternalUser: client } = await reporting.getEsClient();
-  const exportTypesRegistry = reporting.getExportTypesRegistry();
   const { logger } = reporting.getPluginSetupDeps();
 
   return new ContentStream(
     client,
-    exportTypesRegistry,
     logger.clone(['content_stream', document.id]),
-    document
+    document,
+    parameters
   );
 }

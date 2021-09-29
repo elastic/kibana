@@ -8,12 +8,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import type { SavedObjectsUpdateOptions } from '../service/saved_objects_client';
 import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 export const registerUpdateRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {

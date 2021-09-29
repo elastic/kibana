@@ -188,7 +188,7 @@ describe('EventLogger', () => {
     service.registerProviderActions('provider', ['action-a']);
     eventLogger = service.getLogger({});
 
-    eventLogger.logEvent(({ event: { PROVIDER: 'provider' } } as unknown) as IEvent);
+    eventLogger.logEvent({ event: { PROVIDER: 'provider' } } as unknown as IEvent);
     let message = await waitForLogMessage(systemLogger);
     expect(message).toMatch(/invalid event logged.*provider.*undefined.*/);
 

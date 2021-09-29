@@ -29,13 +29,13 @@ class ImageUpload extends React.Component {
     onValueChange: PropTypes.func.isRequired,
     typeInstance: PropTypes.object.isRequired,
     resolvedArgValue: PropTypes.string,
+    argValue: PropTypes.string,
     assets: PropTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
-
-    const url = props.resolvedArgValue || null;
+    const url = props.resolvedArgValue || props.argValue || null;
 
     let urlType = Object.keys(props.assets).length ? 'asset' : 'file';
     // if not a valid base64 string, will show as missing asset icon
@@ -143,7 +143,7 @@ class ImageUpload extends React.Component {
       file: <FileForm loading={loading} onChange={this.handleUpload} />,
       link: (
         <LinkForm
-          url={url}
+          url={selectedAsset.id ? '' : url}
           inputRef={(ref) => (this.inputRefs.srcUrlText = ref)}
           onSubmit={this.setSrcUrl}
         />

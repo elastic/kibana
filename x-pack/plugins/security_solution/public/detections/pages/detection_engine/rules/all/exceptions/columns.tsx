@@ -15,8 +15,9 @@ import { FormatUrl } from '../../../../../../common/components/link_to';
 import * as i18n from './translations';
 import { ExceptionListInfo } from './use_all_exception_lists';
 import { ExceptionOverflowDisplay } from './exceptions_overflow_display';
+import { ExceptionsTableItem } from './types';
 
-export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionListInfo>;
+export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionsTableItem>;
 
 export const getAllExceptionListsColumns = (
   onExport: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,

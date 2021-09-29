@@ -16,8 +16,9 @@ const fieldType = 'histogram';
 const format = {
   getConverterFor: jest
     .fn()
-    .mockImplementation(() => (input: number | Record<string, number[]>) =>
-      typeof input === 'number' ? input.toFixed(2) : JSON.stringify(input)
+    .mockImplementation(
+      () => (input: number | Record<string, number[]>) =>
+        typeof input === 'number' ? input.toFixed(2) : JSON.stringify(input)
     ),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { id: 'number', params: {} };
@@ -40,7 +41,7 @@ describe('HistogramFormatEditor', () => {
     const component = shallow(
       <HistogramFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

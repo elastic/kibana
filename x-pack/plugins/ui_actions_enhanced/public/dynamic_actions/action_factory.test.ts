@@ -12,17 +12,17 @@ import { PublicLicense } from '../../../licensing/public';
 
 const def: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
-  CollectConfig: {} as any,
+  CollectConfig: {},
   createConfig: () => ({}),
-  isConfigValid: (() => true) as any,
-  create: ({ name }) => ({
+  isConfigValid: () => true,
+  create: ({ name }: { name: string }) => ({
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
     enhancements: {},
   }),
   supportedTriggers: () => [],
-};
+} as unknown as ActionFactoryDefinition;
 
 const featureUsage = licensingMock.createStart().featureUsage;
 

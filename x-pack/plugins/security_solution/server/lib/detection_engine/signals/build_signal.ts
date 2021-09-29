@@ -9,7 +9,7 @@ import { SearchTypes } from '../../../../common/detection_engine/types';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 import { isEventTypeSignal } from './build_event_type_signal';
-import { Signal, Ancestor, BaseSignalHit, ThresholdResult } from './types';
+import { Signal, Ancestor, BaseSignalHit, ThresholdResult, SimpleHit } from './types';
 import { getValidDateFromDoc } from './utils';
 
 /**
@@ -62,7 +62,7 @@ export const buildAncestors = (doc: BaseSignalHit): Ancestor[] => {
 export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
   // @ts-expect-error @elastic/elasticsearch _source is optional
   const { signal, ...noSignal } = doc._source;
-  if (signal == null || isEventTypeSignal(doc)) {
+  if (signal == null || isEventTypeSignal(doc as SimpleHit)) {
     return doc;
   } else {
     return {
@@ -123,6 +123,8 @@ export const additionalSignalFields = (doc: BaseSignalHit) => {
     original_event: doc._source?.event ?? undefined,
     threshold_result: thresholdResult,
     original_signal:
-      doc._source?.signal != null && !isEventTypeSignal(doc) ? doc._source?.signal : undefined,
+      doc._source?.signal != null && !isEventTypeSignal(doc as SimpleHit)
+        ? doc._source?.signal
+        : undefined,
   };
 };

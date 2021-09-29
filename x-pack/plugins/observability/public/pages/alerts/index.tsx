@@ -8,7 +8,6 @@
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
@@ -43,12 +42,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const history = useHistory();
   const refetch = useRef<() => void>();
   const {
-    query: {
-      rangeFrom = 'now-15m',
-      rangeTo = 'now',
-      kuery = `${ALERT_STATUS}: "${ALERT_STATUS_ACTIVE}"`,
-      workflowStatus = 'open',
-    },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', workflowStatus = 'open' },
   } = routeParams;
 
   useBreadcrumbs([
@@ -177,13 +171,11 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             <p>
               {i18n.translate('xpack.observability.alertsDisclaimerText', {
                 defaultMessage:
-                  'This page shows an experimental alerting view. The data shown here will probably not be an accurate representation of alerts. A non-experimental list of alerts is available in the Alerts and Actions settings in Stack Management.',
+                  'This page shows an experimental list of alerts. The data might not be accurate. All alerts are available in the ',
               })}
-            </p>
-            <p>
               <EuiLink href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}>
                 {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'Alerts and Actions',
+                  defaultMessage: 'Rules and Connectors settings.',
                 })}
               </EuiLink>
             </p>

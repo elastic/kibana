@@ -35,9 +35,10 @@ export const InfluencerFilter = ({
   onChangeFieldValue,
   derivedIndexPattern,
 }: Props) => {
-  const fieldNameOptions = useMemo(() => (nodeType === 'k8s' ? k8sFieldNames : hostFieldNames), [
-    nodeType,
-  ]);
+  const fieldNameOptions = useMemo(
+    () => (nodeType === 'k8s' ? k8sFieldNames : hostFieldNames),
+    [nodeType]
+  );
 
   // If initial props contain a fieldValue, assume it was passed in from loaded alertParams,
   // and enable the UI element
@@ -52,9 +53,10 @@ export const InfluencerFilter = ({
     [nodeType, onChangeFieldName]
   );
 
-  const onSelectFieldName = useCallback((e) => onChangeFieldName(e.target.value), [
-    onChangeFieldName,
-  ]);
+  const onSelectFieldName = useCallback(
+    (e) => onChangeFieldName(e.target.value),
+    [onChangeFieldName]
+  );
   const onUpdateFieldValue = useCallback(
     (value) => {
       updateStoredFieldValue(value);
@@ -79,32 +81,29 @@ export const InfluencerFilter = ({
     [onUpdateFieldValue]
   );
 
-  const affixFieldNameToQuery: CurryLoadSuggestionsType = (fn) => (
-    expression,
-    cursorPosition,
-    maxSuggestions
-  ) => {
-    // Add the field name to the front of the passed-in query
-    const prefix = `${fieldName}:`;
-    // Trim whitespace to prevent AND/OR suggestions
-    const modifiedExpression = `${prefix}${expression}`.trim();
-    // Move the cursor position forward by the length of the field name
-    const modifiedPosition = cursorPosition + prefix.length;
-    return fn(modifiedExpression, modifiedPosition, maxSuggestions, (suggestions) =>
-      suggestions
-        .map((s) => ({
-          ...s,
-          // Remove quotes from suggestions
-          text: s.text.replace(/\"/g, '').trim(),
-          // Offset the returned suggestions' cursor positions so that they can be autocompleted accurately
-          start: s.start - prefix.length,
-          end: s.end - prefix.length,
-        }))
-        // Removing quotes can lead to an already-selected suggestion still coming up in the autocomplete list,
-        // so filter these out
-        .filter((s) => !expression.startsWith(s.text))
-    );
-  };
+  const affixFieldNameToQuery: CurryLoadSuggestionsType =
+    (fn) => (expression, cursorPosition, maxSuggestions) => {
+      // Add the field name to the front of the passed-in query
+      const prefix = `${fieldName}:`;
+      // Trim whitespace to prevent AND/OR suggestions
+      const modifiedExpression = `${prefix}${expression}`.trim();
+      // Move the cursor position forward by the length of the field name
+      const modifiedPosition = cursorPosition + prefix.length;
+      return fn(modifiedExpression, modifiedPosition, maxSuggestions, (suggestions) =>
+        suggestions
+          .map((s) => ({
+            ...s,
+            // Remove quotes from suggestions
+            text: s.text.replace(/\"/g, '').trim(),
+            // Offset the returned suggestions' cursor positions so that they can be autocompleted accurately
+            start: s.start - prefix.length,
+            end: s.end - prefix.length,
+          }))
+          // Removing quotes can lead to an already-selected suggestion still coming up in the autocomplete list,
+          // so filter these out
+          .filter((s) => !expression.startsWith(s.text))
+      );
+    };
 
   return (
     <EuiFormRow

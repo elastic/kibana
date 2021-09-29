@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { WriteSettings } from '../../common';
+import { WriteSettings } from '../../common/types';
 
 export async function writeDataToIndex(
   index: string,

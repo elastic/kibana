@@ -19,7 +19,7 @@ const httpService = httpServiceMock.createSetupContract();
 const mockedIndexDataEnricher = new IndexDataEnricher();
 
 const mockRouteContext = ({ hasPrivileges }: { hasPrivileges: unknown }): RequestHandlerContext => {
-  const routeContextMock = ({
+  const routeContextMock = {
     core: {
       elasticsearch: {
         client: {
@@ -31,7 +31,7 @@ const mockRouteContext = ({ hasPrivileges }: { hasPrivileges: unknown }): Reques
         },
       },
     },
-  } as unknown) as RequestHandlerContext;
+  } as unknown as RequestHandlerContext;
 
   return routeContextMock;
 };

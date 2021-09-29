@@ -62,10 +62,10 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
     },
   ];
 
-  const entryPointsRoute = `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}/entry_points`;
+  const entryPointsRoute = `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}/entry_points`;
 
   const getEntryPointRoute = (entryPoint: EntryPoint) =>
-    `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}/entry_points/${entryPoint.id}`;
+    `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}/entry_points/${entryPoint.id}`;
 
   return (
     <GenericEndpointInlineEditableTable

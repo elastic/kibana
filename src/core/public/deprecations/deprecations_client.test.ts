@@ -82,6 +82,7 @@ describe('DeprecationsClient', () => {
     it('returns true if deprecation has correctiveActions.api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
@@ -102,6 +103,7 @@ describe('DeprecationsClient', () => {
     it('returns false if deprecation is missing correctiveActions.api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
@@ -120,6 +122,7 @@ describe('DeprecationsClient', () => {
     it('fails if deprecation is not resolvable', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
@@ -129,15 +132,18 @@ describe('DeprecationsClient', () => {
       };
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
-      expect(result).toEqual({
-        status: 'fail',
-        reason: 'deprecation has no correctiveAction via api.',
-      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "reason": "This deprecation cannot be resolved automatically.",
+          "status": "fail",
+        }
+      `);
     });
 
     it('fetches the deprecation api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
@@ -171,6 +177,7 @@ describe('DeprecationsClient', () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockResponse = 'Failed to fetch';
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',

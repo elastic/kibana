@@ -16,7 +16,7 @@ import { AppLogic } from '../../app_logic';
 import {
   ADD_SOURCE_PATH,
   SOURCE_DETAILS_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   SOURCES_PATH,
   getSourcesPath,
 } from '../../routes';
@@ -35,7 +35,7 @@ export const SourcesRouter: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { resetSourcesState } = useActions(SourcesLogic);
   const {
-    account: { canCreatePersonalSources },
+    account: { canCreatePrivateSources },
     isOrganization,
   } = useValues(AppLogic);
 
@@ -49,18 +49,18 @@ export const SourcesRouter: React.FC = () => {
 
   /**
    * When opening `workplace_search/p/sources/add` as a bookmark or reloading this page,
-   * Sources router first get rendered *before* it receives the canCreatePersonalSources value.
-   * This results in canCreatePersonalSources always being undefined on the first render,
+   * Sources router first get rendered *before* it receives the canCreatePrivateSources value.
+   * This results in canCreatePrivateSources always being undefined on the first render,
    * and user always getting redirected to `workplace_search/p/sources`.
    * Here we check for this value being present before we render any routes.
    */
-  if (canCreatePersonalSources === undefined) {
+  if (canCreatePrivateSources === undefined) {
     return null;
   }
 
   return (
     <Switch>
-      <Route exact path={PERSONAL_SOURCES_PATH}>
+      <Route exact path={PRIVATE_SOURCES_PATH}>
         <PrivateSources />
       </Route>
       <Route exact path={SOURCES_PATH}>
@@ -93,12 +93,12 @@ export const SourcesRouter: React.FC = () => {
             </Route>
           );
       })}
-      {canCreatePersonalSources ? (
+      {canCreatePrivateSources ? (
         <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
           <AddSourceList />
         </Route>
       ) : (
-        <Redirect exact from={getSourcesPath(ADD_SOURCE_PATH, false)} to={PERSONAL_SOURCES_PATH} />
+        <Redirect exact from={getSourcesPath(ADD_SOURCE_PATH, false)} to={PRIVATE_SOURCES_PATH} />
       )}
       <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)}>
         <AddSourceList />

@@ -59,7 +59,7 @@ describe('Service Overview', () => {
   });
 
   it('hides dependency tab when RUM service', () => {
-    cy.intercept('GET', '/api/apm/services/opbeans-rum/agent').as(
+    cy.intercept('GET', '/api/apm/services/opbeans-rum/agent?*').as(
       'agentRequest'
     );
     cy.visit(
@@ -74,6 +74,10 @@ describe('Service Overview', () => {
     cy.contains('Service Map');
     // Waits until the agent request is finished to check the tab.
     cy.wait('@agentRequest');
-    cy.contains('Dependencies').should('not.exist');
+    cy.get('.euiTabs .euiTab__content').then((elements) => {
+      elements.map((index, element) => {
+        expect(element.innerText).to.not.equal('Dependencies');
+      });
+    });
   });
 });

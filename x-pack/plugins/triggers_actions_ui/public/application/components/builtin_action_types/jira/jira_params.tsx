@@ -43,10 +43,10 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as JiraActionParams['subActionParams']),
+      } as unknown as JiraActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
   const actionConnectorRef = useRef(actionConnector?.id ?? '');

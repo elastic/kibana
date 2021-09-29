@@ -23,6 +23,7 @@ import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
 import { KibanaContextProvider } from '../../../kibana_react/public';
+import { SharePluginStart } from '../../../share/public';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   return (
@@ -44,6 +45,7 @@ interface InspectorPanelProps {
     application: ApplicationStart;
     http: HttpStart;
     uiSettings: IUiSettingsClient;
+    share: SharePluginStart;
   };
 }
 

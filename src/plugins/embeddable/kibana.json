@@ -7,7 +7,8 @@
     "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
+  "description": "Adds embeddables service to Kibana",
   "requiredPlugins": ["inspector", "uiActions"],
-  "extraPublicDirs": ["public/lib/test_samples"],
+  "extraPublicDirs": ["common"],
   "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"]
 }

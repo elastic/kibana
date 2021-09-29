@@ -52,7 +52,7 @@ const appServices = {
 
 export const setupEnvironment = () => {
   uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
-  apiService.setup((mockHttpClient as unknown) as HttpSetup, uiMetricService);
+  apiService.setup(mockHttpClient as unknown as HttpSetup, uiMetricService);
   documentationService.setup(docLinksServiceMock.createStartContract());
   breadcrumbService.setup(() => {});
 
@@ -64,8 +64,9 @@ export const setupEnvironment = () => {
   };
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <KibanaContextProvider services={appServices}>
-    <Comp {...props} />
-  </KibanaContextProvider>
-);
+export const WithAppDependencies = (Comp: any) => (props: any) =>
+  (
+    <KibanaContextProvider services={appServices}>
+      <Comp {...props} />
+    </KibanaContextProvider>
+  );

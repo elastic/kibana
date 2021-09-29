@@ -54,7 +54,7 @@ interface OwnProps {
   type: DataProviderType;
 }
 
-const MyEuiPopover = styled((EuiPopover as unknown) as FunctionComponent)<
+const MyEuiPopover = styled(EuiPopover as unknown as FunctionComponent)<
   EuiPopoverProps & {
     id?: string;
   }

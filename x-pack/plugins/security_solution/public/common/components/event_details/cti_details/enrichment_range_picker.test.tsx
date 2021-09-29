@@ -40,6 +40,7 @@ describe('EnrichmentRangePicker', () => {
 
     wrapper
       .find('input.start-picker')
+      .first()
       .simulate('change', { target: { value: '08/10/2019 06:29 PM' } });
     wrapper.find('[data-test-subj="enrichment-button"]').hostNodes().simulate('click');
 

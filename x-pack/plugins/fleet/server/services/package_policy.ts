@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { omit, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLte from 'semver/functions/lte';
 import { getFlattenedObject } from '@kbn/std';
@@ -16,6 +16,7 @@ import type {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import uuid from 'uuid';
+import { safeLoad } from 'js-yaml';
 
 import type { AuthenticatedUser } from '../../../security/server';
 import {
@@ -37,6 +38,7 @@ import type {
   ListWithKuery,
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
+  RegistryDataStream,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -63,12 +65,22 @@ import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
+import { removeOldAssets } from './epm/packages/cleanup';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
 };
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
+
+export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
+  'auto_configure',
+  'create_doc',
+  'maintenance',
+  'monitor',
+  'read',
+  'read_cross_cluster',
+]);
 
 class PackagePolicyService {
   public async create(
@@ -564,6 +576,11 @@ class PackagePolicyService {
           name: packagePolicy.name,
           success: true,
         });
+        await removeOldAssets({
+          soClient,
+          pkgName: packageInfo.name,
+          currentVersion: packageInfo.version,
+        });
       } catch (error) {
         result.push({
           id,
@@ -793,13 +810,51 @@ async function _compilePackageStreams(
   return await Promise.all(streamsPromises);
 }
 
+// temporary export to enable testing pending refactor https://github.com/elastic/kibana/issues/112386
+export function _applyIndexPrivileges(
+  packageDataStream: RegistryDataStream,
+  stream: PackagePolicyInputStream
+): PackagePolicyInputStream {
+  const streamOut = { ...stream };
+
+  const indexPrivileges = packageDataStream?.elasticsearch?.privileges?.indices;
+
+  if (!indexPrivileges?.length) {
+    return streamOut;
+  }
+
+  const [valid, invalid] = partition(indexPrivileges, (permission) =>
+    DATA_STREAM_ALLOWED_INDEX_PRIVILEGES.has(permission)
+  );
+
+  if (invalid.length) {
+    appContextService
+      .getLogger()
+      .warn(
+        `Ignoring invalid or forbidden index privilege(s) in "${stream.id}" data stream: ${invalid}`
+      );
+  }
+
+  if (valid.length) {
+    stream.data_stream.elasticsearch = {
+      privileges: {
+        indices: valid,
+      },
+    };
+  }
+
+  return streamOut;
+}
+
 async function _compilePackageStream(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  stream: PackagePolicyInputStream
+  streamIn: PackagePolicyInputStream
 ) {
+  let stream = streamIn;
+
   if (!stream.enabled) {
     return { ...stream, compiled_stream: undefined };
   }
@@ -818,6 +873,8 @@ async function _compilePackageStream(
       `Stream template not found, unable to find dataset ${stream.data_stream.dataset}`
     );
   }
+
+  stream = _applyIndexPrivileges(packageDataStream, streamIn);
 
   const streamFromPkg = (packageDataStream.streams || []).find(
     (pkgStream) => pkgStream.input === input.type
@@ -944,7 +1001,7 @@ export function overridePackageInputs(
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policies are added/removed between versions.
-    if (!originalInput) {
+    if (originalInput === undefined) {
       inputs.push(override as NewPackagePolicyInput);
       continue;
     }
@@ -958,7 +1015,7 @@ export function overridePackageInputs(
     }
 
     if (override.vars) {
-      originalInput = deepMergeVars(originalInput, override);
+      originalInput = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
     }
 
     if (override.streams) {
@@ -966,6 +1023,11 @@ export function overridePackageInputs(
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
+
+        if (originalStream === undefined) {
+          originalInput.streams.push(stream);
+          continue;
+        }
 
         if (typeof stream.enabled !== 'undefined' && originalStream) {
           originalStream.enabled = stream.enabled;
@@ -983,7 +1045,7 @@ export function overridePackageInputs(
     inputs,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, safeLoad);
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
@@ -1015,11 +1077,11 @@ export function overridePackageInputs(
 }
 
 function deepMergeVars(original: any, override: any): any {
-  const result = { ...original };
-
-  if (!result.vars || !override.vars) {
-    return;
+  if (!original.vars) {
+    original.vars = { ...override.vars };
   }
+
+  const result = { ...original };
 
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
@@ -1030,12 +1092,7 @@ function deepMergeVars(original: any, override: any): any {
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
-
-    if (!result.vars) {
-      result.vars = {};
-    }
-
-    result.vars[name] = { ...overrideVal, ...originalVar };
+    result.vars[name] = { ...originalVar, ...overrideVal };
   }
 
   return result;

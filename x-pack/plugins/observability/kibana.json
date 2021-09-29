@@ -11,9 +11,11 @@
     "observability"
   ],
   "optionalPlugins": [
+    "embeddable",
     "home",
     "lens",
     "licensing",
+    "spaces",
     "usageCollection"
   ],
   "requiredPlugins": [

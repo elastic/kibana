@@ -42,10 +42,13 @@ export function EnvironmentField({
   const title = i18n.translate('xpack.apm.alerting.fields.environment', {
     defaultMessage: 'Environment',
   });
-
-  // "1" means "All" is the only option and we should not show a select.
   if (options.length === 1) {
-    return <EuiExpression description={title} value={ENVIRONMENT_ALL.text} />;
+    return (
+      <EuiExpression
+        description={title}
+        value={currentValue || ENVIRONMENT_ALL.text}
+      />
+    );
   }
 
   return (

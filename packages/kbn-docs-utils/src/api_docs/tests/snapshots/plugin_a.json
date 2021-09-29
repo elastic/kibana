@@ -367,14 +367,14 @@
           "\nWho would write such a complicated function?? Ewwww.\n\nAccording to https://jsdoc.app/tags-param.html#parameters-with-properties,\nthis is how destructured arguements should be commented.\n"
         ],
         "signature": [
-          "(obj: { hi: string; }, { fn }: { fn: (foo: { param: string; }) => number; }, { str }: { str: string; }) => () => () => number"
+          "(obj: { hi: string; }, { fn1, fn2 }: { fn1: (foo: { param: string; }) => number; fn2: () => void; }, { str }: { str: string; }) => () => () => number"
         ],
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.crazyFunction.$1.obj",
+            "id": "def-public.crazyFunction.$1",
             "type": "Object",
             "tags": [],
             "label": "obj",
@@ -384,7 +384,7 @@
             "children": [
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.crazyFunction.$1.obj.hi",
+                "id": "def-public.crazyFunction.$1.hi",
                 "type": "string",
                 "tags": [],
                 "label": "hi",
@@ -396,20 +396,20 @@
           },
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.crazyFunction.$2.fn",
+            "id": "def-public.crazyFunction.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ fn }",
+            "label": "{ fn1, fn2 }",
             "description": [],
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.crazyFunction.$2.fn.fn",
+                "id": "def-public.crazyFunction.$2.fn1",
                 "type": "Function",
                 "tags": [],
-                "label": "fn",
+                "label": "fn1",
                 "description": [],
                 "signature": [
                   "(foo: { param: string; }) => number"
@@ -419,7 +419,7 @@
                 "children": [
                   {
                     "parentPluginId": "pluginA",
-                    "id": "def-public.crazyFunction.$2.fn.fn.$1.foo",
+                    "id": "def-public.crazyFunction.$2.fn1.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "foo",
@@ -429,7 +429,7 @@
                     "children": [
                       {
                         "parentPluginId": "pluginA",
-                        "id": "def-public.crazyFunction.$2.fn.fn.$1.foo.param",
+                        "id": "def-public.crazyFunction.$2.fn1.$1.param",
                         "type": "string",
                         "tags": [],
                         "label": "param",
@@ -441,12 +441,27 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.crazyFunction.$2.fn2",
+                "type": "Function",
+                "tags": [],
+                "label": "fn2",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "deprecated": false,
+                "children": [],
+                "returnComment": []
               }
             ]
           },
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.crazyFunction.$3.str",
+            "id": "def-public.crazyFunction.$3",
             "type": "Object",
             "tags": [],
             "label": "{ str }",
@@ -456,7 +471,7 @@
             "children": [
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.crazyFunction.$3.str.str",
+                "id": "def-public.crazyFunction.$3.str",
                 "type": "string",
                 "tags": [],
                 "label": "str",
@@ -863,7 +878,7 @@
             "children": [
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.t",
+                "id": "def-public.ExampleInterface.fnTypeWithGeneric.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "t",
@@ -876,7 +891,7 @@
               },
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.p",
+                "id": "def-public.ExampleInterface.fnTypeWithGeneric.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "p",
@@ -954,7 +969,7 @@
             "children": [
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.t",
+                "id": "def-public.ImAnObject.foo.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "t",
@@ -1042,7 +1057,7 @@
             "children": [
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.t",
+                "id": "def-public.MyProps.bar.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "t",
@@ -1299,7 +1314,7 @@
         "children": [
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.t",
+            "id": "def-public.FnTypeWithGeneric.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "t",
@@ -1314,7 +1329,7 @@
           },
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.p",
+            "id": "def-public.FnTypeWithGeneric.$2",
             "type": "Object",
             "tags": [],
             "label": "p",
@@ -1360,7 +1375,7 @@
         "children": [
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.t",
+            "id": "def-public.FnWithGeneric.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "t",
@@ -1536,7 +1551,7 @@
         "children": [
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.a",
+            "id": "def-public.NotAnArrowFnType.$1",
             "type": "string",
             "tags": [],
             "label": "a",
@@ -1546,7 +1561,7 @@
           },
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.b",
+            "id": "def-public.NotAnArrowFnType.$2",
             "type": "number",
             "tags": [],
             "label": "b",
@@ -1559,7 +1574,7 @@
           },
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.c",
+            "id": "def-public.NotAnArrowFnType.$3",
             "type": "Array",
             "tags": [],
             "label": "c",
@@ -1572,7 +1587,7 @@
           },
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.d",
+            "id": "def-public.NotAnArrowFnType.$4",
             "type": "CompoundType",
             "tags": [],
             "label": "d",
@@ -1608,7 +1623,7 @@
           },
           {
             "parentPluginId": "pluginA",
-            "id": "def-public.e",
+            "id": "def-public.NotAnArrowFnType.$5",
             "type": "string",
             "tags": [],
             "label": "e",
@@ -1708,7 +1723,7 @@
             "children": [
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.a",
+                "id": "def-public.aPretendNamespaceObj.notAnArrowFn.$1",
                 "type": "string",
                 "tags": [],
                 "label": "a",
@@ -1718,7 +1733,7 @@
               },
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.b",
+                "id": "def-public.aPretendNamespaceObj.notAnArrowFn.$2",
                 "type": "number",
                 "tags": [],
                 "label": "b",
@@ -1731,7 +1746,7 @@
               },
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.c",
+                "id": "def-public.aPretendNamespaceObj.notAnArrowFn.$3",
                 "type": "Array",
                 "tags": [],
                 "label": "c",
@@ -1744,7 +1759,7 @@
               },
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.d",
+                "id": "def-public.aPretendNamespaceObj.notAnArrowFn.$4",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "d",
@@ -1780,7 +1795,7 @@
               },
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.e",
+                "id": "def-public.aPretendNamespaceObj.notAnArrowFn.$5",
                 "type": "string",
                 "tags": [],
                 "label": "e",
@@ -1835,7 +1850,7 @@
             "children": [
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.a",
+                "id": "def-public.aPretendNamespaceObj.aPropertyMisdirection.$1",
                 "type": "string",
                 "tags": [],
                 "label": "a",
@@ -1845,7 +1860,7 @@
               },
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.b",
+                "id": "def-public.aPretendNamespaceObj.aPropertyMisdirection.$2",
                 "type": "number",
                 "tags": [],
                 "label": "b",
@@ -1858,7 +1873,7 @@
               },
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.c",
+                "id": "def-public.aPretendNamespaceObj.aPropertyMisdirection.$3",
                 "type": "Array",
                 "tags": [],
                 "label": "c",
@@ -1871,7 +1886,7 @@
               },
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.d",
+                "id": "def-public.aPretendNamespaceObj.aPropertyMisdirection.$4",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "d",
@@ -1907,7 +1922,7 @@
               },
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.e",
+                "id": "def-public.aPretendNamespaceObj.aPropertyMisdirection.$5",
                 "type": "string",
                 "tags": [],
                 "label": "e",
@@ -2094,7 +2109,7 @@
           "children": [
             {
               "parentPluginId": "pluginA",
-              "id": "def-public.Setup.getSearchService2.$1.searchSpec",
+              "id": "def-public.Setup.getSearchService2.$1",
               "type": "Object",
               "tags": [],
               "label": "searchSpec",
@@ -2104,7 +2119,7 @@
               "children": [
                 {
                   "parentPluginId": "pluginA",
-                  "id": "def-public.Setup.getSearchService2.$1.searchSpec.username",
+                  "id": "def-public.Setup.getSearchService2.$1.username",
                   "type": "string",
                   "tags": [],
                   "label": "username",
@@ -2114,7 +2129,7 @@
                 },
                 {
                   "parentPluginId": "pluginA",
-                  "id": "def-public.Setup.getSearchService2.$1.searchSpec.password",
+                  "id": "def-public.Setup.getSearchService2.$1.password",
                   "type": "string",
                   "tags": [],
                   "label": "password",
@@ -2179,7 +2194,7 @@
             },
             {
               "parentPluginId": "pluginA",
-              "id": "def-public.Setup.doTheThing.$3.thingThree",
+              "id": "def-public.Setup.doTheThing.$3",
               "type": "Object",
               "tags": [],
               "label": "thingThree",
@@ -2189,7 +2204,7 @@
               "children": [
                 {
                   "parentPluginId": "pluginA",
-                  "id": "def-public.Setup.doTheThing.$3.thingThree.nestedVar",
+                  "id": "def-public.Setup.doTheThing.$3.nestedVar",
                   "type": "number",
                   "tags": [],
                   "label": "nestedVar",
@@ -2219,7 +2234,7 @@
           "children": [
             {
               "parentPluginId": "pluginA",
-              "id": "def-public.Setup.fnWithInlineParams.$1.obj",
+              "id": "def-public.Setup.fnWithInlineParams.$1",
               "type": "Object",
               "tags": [],
               "label": "obj",
@@ -2229,7 +2244,7 @@
               "children": [
                 {
                   "parentPluginId": "pluginA",
-                  "id": "def-public.Setup.fnWithInlineParams.$1.obj.fn",
+                  "id": "def-public.Setup.fnWithInlineParams.$1.fn",
                   "type": "Function",
                   "tags": [],
                   "label": "fn",
@@ -2242,7 +2257,7 @@
                   "children": [
                     {
                       "parentPluginId": "pluginA",
-                      "id": "def-public.Setup.fnWithInlineParams.$1.obj.fn.$1.foo",
+                      "id": "def-public.Setup.fnWithInlineParams.$1.fn.$1",
                       "type": "Object",
                       "tags": [],
                       "label": "foo",
@@ -2252,7 +2267,7 @@
                       "children": [
                         {
                           "parentPluginId": "pluginA",
-                          "id": "def-public.Setup.fnWithInlineParams.$1.obj.fn.$1.foo.param",
+                          "id": "def-public.Setup.fnWithInlineParams.$1.fn.$1.param",
                           "type": "string",
                           "tags": [],
                           "label": "param",

@@ -105,7 +105,7 @@ export const staticSourceData = [
       hasOauthRedirect: true,
       needsBaseUrl: true,
       documentationUrl: CONFLUENCE_DOCS_URL,
-      applicationPortalUrl: 'https://developer.atlassian.com/apps/',
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
     objTypes: [
       SOURCE_OBJ_TYPES.PAGES,
@@ -320,11 +320,11 @@ export const staticSourceData = [
     addPath: ADD_JIRA_PATH,
     editPath: EDIT_JIRA_PATH,
     configuration: {
-      isPublicKey: true,
+      isPublicKey: false,
       hasOauthRedirect: true,
-      needsBaseUrl: false,
+      needsBaseUrl: true,
       documentationUrl: JIRA_DOCS_URL,
-      applicationPortalUrl: '',
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
     objTypes: [
       SOURCE_OBJ_TYPES.EPICS,

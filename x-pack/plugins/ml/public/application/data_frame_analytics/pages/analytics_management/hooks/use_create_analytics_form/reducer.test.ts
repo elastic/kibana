@@ -124,7 +124,7 @@ describe('useCreateAnalyticsForm', () => {
     // invalid formats ("fake" TS casting to get valid TS and be able to run the tests)
     expect(validateAdvancedEditor(getMockState({ index: {} as SourceIndex })).isValid).toBe(false);
     expect(
-      validateAdvancedEditor(getMockState({ index: (undefined as unknown) as SourceIndex })).isValid
+      validateAdvancedEditor(getMockState({ index: undefined as unknown as SourceIndex })).isValid
     ).toBe(false);
   });
 
@@ -209,7 +209,7 @@ describe('validateMinMML', () => {
   });
 
   test('should ignore empty parameters', () => {
-    expect(validateMinMML((undefined as unknown) as string)('')).toEqual(null);
+    expect(validateMinMML(undefined as unknown as string)('')).toEqual(null);
   });
 });
 

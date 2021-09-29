@@ -4,6 +4,7 @@ exports[`FieldTypeIcon render component when type matches a field type 1`] = `
 <EuiToolTip
   content="keyword type"
   delay="regular"
+  display="inlineBlock"
   position="left"
 >
   <FieldTypeIconContainer

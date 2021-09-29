@@ -81,24 +81,26 @@ describe('#toExpression', () => {
 
   it('should default the fitting function to None', () => {
     expect(
-      (xyVisualization.toExpression(
-        {
-          legend: { position: Position.Bottom, isVisible: true },
-          valueLabels: 'hide',
-          preferredSeriesType: 'bar',
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              splitAccessor: 'd',
-              xAccessor: 'a',
-              accessors: ['b', 'c'],
-            },
-          ],
-        },
-        frame.datasourceLayers
-      ) as Ast).chain[0].arguments.fittingFunction[0]
+      (
+        xyVisualization.toExpression(
+          {
+            legend: { position: Position.Bottom, isVisible: true },
+            valueLabels: 'hide',
+            preferredSeriesType: 'bar',
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b', 'c'],
+              },
+            ],
+          },
+          frame.datasourceLayers
+        ) as Ast
+      ).chain[0].arguments.fittingFunction[0]
     ).toEqual('None');
   });
 

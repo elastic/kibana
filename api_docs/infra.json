@@ -145,7 +145,7 @@
             "children": [
               {
                 "parentPluginId": "infra",
-                "id": "def-public.val",
+                "id": "def-public.FORMATTERS.number.$1",
                 "type": "number",
                 "tags": [],
                 "label": "val",
@@ -173,7 +173,7 @@
             "children": [
               {
                 "parentPluginId": "infra",
-                "id": "def-public.bytes",
+                "id": "def-public.FORMATTERS.abbreviatedNumber.$1",
                 "type": "number",
                 "tags": [],
                 "label": "bytes",
@@ -201,7 +201,7 @@
             "children": [
               {
                 "parentPluginId": "infra",
-                "id": "def-public.bytes",
+                "id": "def-public.FORMATTERS.bytes.$1",
                 "type": "number",
                 "tags": [],
                 "label": "bytes",
@@ -229,7 +229,7 @@
             "children": [
               {
                 "parentPluginId": "infra",
-                "id": "def-public.bytes",
+                "id": "def-public.FORMATTERS.bits.$1",
                 "type": "number",
                 "tags": [],
                 "label": "bytes",
@@ -255,7 +255,7 @@
             "children": [
               {
                 "parentPluginId": "infra",
-                "id": "def-public.val",
+                "id": "def-public.FORMATTERS.percent.$1",
                 "type": "number",
                 "tags": [],
                 "label": "val",
@@ -281,7 +281,7 @@
             "children": [
               {
                 "parentPluginId": "infra",
-                "id": "def-public.val",
+                "id": "def-public.FORMATTERS.highPercision.$1",
                 "type": "number",
                 "tags": [],
                 "label": "val",
@@ -310,7 +310,7 @@
         "label": "InfraConfig",
         "description": [],
         "signature": [
-          "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; container?: string | undefined; timestamp?: string | undefined; tiebreaker?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly inventory: Readonly<{} & { compositeSize: number; }>; }"
+          "any"
         ],
         "path": "x-pack/plugins/infra/server/plugin.ts",
         "deprecated": false,

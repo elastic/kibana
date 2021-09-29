@@ -8,8 +8,8 @@
   "requiredBundles": ["kibanaUtils"],
   "optionalPlugins": [],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   },
   "description": "Expression Tagcloud plugin adds a `tagcloud` renderer and function to the expression plugin. The renderer will display the `Wordcloud` chart."
 }

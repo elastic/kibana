@@ -43,6 +43,7 @@ describe('useUserInfo', () => {
       expect(result.all).toHaveLength(1);
       expect(result.current).toEqual({
         canUserCRUD: null,
+        canUserREAD: null,
         hasEncryptionKey: null,
         hasIndexManage: null,
         hasIndexMaintenance: null,
@@ -69,7 +70,7 @@ describe('useUserInfo', () => {
       <TestProviders>
         <UserPrivilegesProvider
           kibanaCapabilities={
-            ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
+            { siem: { crud_alerts: true, read_alerts: true } } as unknown as Capabilities
           }
         >
           <ManageUserInfo>{children}</ManageUserInfo>

@@ -9,6 +9,7 @@ import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { merge } from 'lodash';
+import { SemVer } from 'semver';
 
 import {
   notificationServiceMock,
@@ -31,9 +32,12 @@ import {
 } from '../../../public/application/components';
 import { componentTemplatesMockDependencies } from '../../../public/application/components/component_templates/__jest__';
 import { init as initHttpRequests } from './http_requests';
+import { MAJOR_VERSION } from './constants';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const { GlobalFlyoutProvider } = GlobalFlyout;
+
+export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 export const services = {
   extensionsService: new ExtensionsService(),
@@ -66,19 +70,19 @@ export const setupEnvironment = () => {
   };
 };
 
-export const WithAppDependencies = (Comp: any, overridingDependencies: any = {}) => (
-  props: any
-) => {
-  const mergedDependencies = merge({}, appDependencies, overridingDependencies);
-  return (
-    <AppContextProvider value={mergedDependencies}>
-      <MappingsEditorProvider>
-        <ComponentTemplatesProvider value={componentTemplatesMockDependencies}>
-          <GlobalFlyoutProvider>
-            <Comp {...props} />
-          </GlobalFlyoutProvider>
-        </ComponentTemplatesProvider>
-      </MappingsEditorProvider>
-    </AppContextProvider>
-  );
-};
+export const WithAppDependencies =
+  (Comp: any, overridingDependencies: any = {}) =>
+  (props: any) => {
+    const mergedDependencies = merge({}, appDependencies, overridingDependencies);
+    return (
+      <AppContextProvider value={mergedDependencies}>
+        <MappingsEditorProvider>
+          <ComponentTemplatesProvider value={componentTemplatesMockDependencies}>
+            <GlobalFlyoutProvider>
+              <Comp {...props} />
+            </GlobalFlyoutProvider>
+          </ComponentTemplatesProvider>
+        </MappingsEditorProvider>
+      </AppContextProvider>
+    );
+  };

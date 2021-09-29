@@ -287,7 +287,8 @@ export default ({ getService }: FtrProviderContext) => {
                 depth: 0,
               },
             ],
-            reason: `Alert Query with a rule id created with a high severity and risk score of 55 by root on zeek-sensor-amsterdam.`,
+            reason:
+              'user-login event by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
             rule: fullSignal.signal.rule,
             status: 'open',
           },

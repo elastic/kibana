@@ -26,6 +26,9 @@ const alertParamsRt = t.intersection([
   }),
   environmentRt,
   rangeRt,
+  t.type({
+    interval: t.string,
+  }),
 ]);
 
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
@@ -87,8 +90,9 @@ const transactionDurationChartPreview = createApmServerRoute({
   },
 });
 
-export const alertsChartPreviewRouteRepository = createApmServerRouteRepository()
-  .add(transactionErrorRateChartPreview)
-  .add(transactionDurationChartPreview)
-  .add(transactionErrorCountChartPreview)
-  .add(transactionDurationChartPreview);
+export const alertsChartPreviewRouteRepository =
+  createApmServerRouteRepository()
+    .add(transactionErrorRateChartPreview)
+    .add(transactionDurationChartPreview)
+    .add(transactionErrorCountChartPreview)
+    .add(transactionDurationChartPreview);

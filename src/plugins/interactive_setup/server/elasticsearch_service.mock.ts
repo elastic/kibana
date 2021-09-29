@@ -16,5 +16,7 @@ export const elasticsearchServiceMock = {
       ElasticsearchConnectionStatus.Configured
     ),
     enroll: jest.fn(),
+    authenticate: jest.fn(),
+    ping: jest.fn(),
   }),
 };

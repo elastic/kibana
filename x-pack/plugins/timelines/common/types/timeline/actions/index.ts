@@ -61,6 +61,7 @@ export interface StatusBulkActionsProps {
   setEventsDeleted: SetEventsDeleted;
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
+  timelineId?: string;
 }
 export interface HeaderActionProps {
   width: number;

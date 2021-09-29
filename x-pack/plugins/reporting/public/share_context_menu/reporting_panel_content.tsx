@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import { ToastsSetup, IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -41,7 +41,7 @@ export interface ReportingPanelProps {
   layoutId?: string;
   objectId?: string;
   getJobParams: () => Omit<BaseParams, 'browserTimezone' | 'version'>;
-  options?: ReactElement<any> | null;
+  options?: ReactElement | null;
   isDirty?: boolean;
   onClose?: () => void;
 }
@@ -277,7 +277,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           this.props.onClose();
         }
       })
-      .catch((error: any) => {
+      .catch((error) => {
         this.props.toasts.addError(error, {
           title: intl.formatMessage({
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',

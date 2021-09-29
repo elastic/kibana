@@ -168,6 +168,11 @@ export interface ChromeStart {
    * @remarks Using `undefined` when invoking this API will remove the banner.
    */
   setHeaderBanner(headerBanner?: ChromeUserBanner): void;
+
+  /**
+   * Get an observable of the current header banner presence state.
+   */
+  hasHeaderBanner$(): Observable<boolean>;
 }
 
 /** @internal */
