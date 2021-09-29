@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './artifact_entry_card';
-export * from './artifact_entry_card_minified';
+export { PolicyArtifactsAssignableList } from './policy_artifacts_assignable_list';

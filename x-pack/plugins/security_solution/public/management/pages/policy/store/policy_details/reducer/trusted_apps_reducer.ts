@@ -14,6 +14,35 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
   state = initialPolicyDetailsState(),
   action
 ) => {
-  // FIXME: implement trusted apps reducer
+  if (action.type === 'policyArtifactsAssignableListPageDataChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        assignableList: action.payload,
+      },
+    };
+  }
+
+  if (action.type === 'policyArtifactsUpdateTrustedAppsChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        trustedAppsToUpdate: action.payload,
+      },
+    };
+  }
+
+  if (action.type === 'policyArtifactsAssignableListExistDataChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        assignableListEntriesExist: action.payload,
+      },
+    };
+  }
+
   return state;
 };
