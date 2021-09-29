@@ -14,7 +14,7 @@
   "optionalPlugins": [],
   "requiredBundles": [],
   "owner": {
-    "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "name": "`Synthetics team`",
+    "githubTeam": "uptime"
   }
 }
