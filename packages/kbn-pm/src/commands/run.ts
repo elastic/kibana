@@ -18,6 +18,11 @@ export const RunCommand: ICommand = {
     'Run script defined in package.json in each package that contains that script (only works on packages not using Bazel yet)',
   name: 'run',
 
+  reportTiming: {
+    group: 'scripts/kbn run',
+    id: 'total',
+  },
+
   async run(projects, projectGraph, { extraArgs, options }) {
     log.warning(dedent`
       We are migrating packages into the Bazel build system and we will no longer support running npm scripts on
