@@ -38,9 +38,8 @@ const topBackendsRoute = createApmServerRoute({
   },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-
-    const { start, end } = setup;
-    const { environment, offset, numBuckets, kuery } = resources.params.query;
+    const { environment, offset, numBuckets, kuery, start, end } =
+      resources.params.query;
 
     const opts = { setup, start, end, numBuckets, environment, kuery };
 
@@ -83,11 +82,9 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
   },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-
-    const { start, end } = setup;
     const {
       path: { backendName },
-      query: { environment, offset, numBuckets, kuery },
+      query: { environment, offset, numBuckets, kuery, start, end },
     } = resources.params;
 
     const opts = {
@@ -139,7 +136,7 @@ const backendMetadataRoute = createApmServerRoute({
     const { params } = resources;
     const { backendName } = params.path;
 
-    const { start, end } = setup;
+    const { start, end } = params.query;
 
     const metadata = await getMetadataForBackend({
       backendName,
@@ -167,9 +164,7 @@ const backendLatencyChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { backendName } = params.path;
-    const { kuery, environment, offset } = params.query;
-
-    const { start, end } = setup;
+    const { kuery, environment, offset, start, end } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getLatencyChartsForBackend({
@@ -212,9 +207,7 @@ const backendThroughputChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { backendName } = params.path;
-    const { kuery, environment, offset } = params.query;
-
-    const { start, end } = setup;
+    const { kuery, environment, offset, start, end } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getThroughputChartsForBackend({
@@ -257,9 +250,7 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { backendName } = params.path;
-    const { kuery, environment, offset } = params.query;
-
-    const { start, end } = setup;
+    const { kuery, environment, offset, start, end } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getErrorRateChartsForBackend({
