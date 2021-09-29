@@ -11,7 +11,8 @@ import { default as MarkdownIt } from 'markdown-it';
 
 import {
   Logger,
-  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+  KibanaRequest,
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
@@ -22,6 +23,7 @@ import { requestOAuthClientCredentialsToken } from './request_oauth_client_crede
 import { ProxySettings, RawOAuthAction } from '../../types';
 import { AdditionalEmailServices } from '../../../common';
 import { ACTION_OAUTH_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
+import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -35,6 +37,7 @@ export interface SendEmailOptions {
   content: Content;
   hasAuth: boolean;
   configurationUtilities: ActionsConfigurationUtilities;
+  request?: KibanaRequest;
 }
 
 // config validation ensures either service is set or host/port are set
@@ -67,14 +70,21 @@ export interface Content {
 export async function sendEmail(
   logger: Logger,
   options: SendEmailOptions,
-  getSavedObjectsClient: () => Promise<ISavedObjectsRepository>
+  getSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>,
+  getEncryptedSavedObjectsClient: () => Promise<EncryptedSavedObjectsClient>
 ): Promise<unknown> {
   const { transport, content } = options;
   const { message } = content;
   const messageHTML = htmlFromMarkdown(logger, message);
 
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
-    return await sendEmailWithExchange(logger, options, messageHTML, getSavedObjectsClient);
+    return await sendEmailWithExchange(
+      logger,
+      options,
+      messageHTML,
+      getSavedObjectsClient,
+      getEncryptedSavedObjectsClient
+    );
   } else {
     return await sendEmailWithNodemailer(logger, options, messageHTML);
   }
@@ -85,17 +95,22 @@ async function sendEmailWithExchange(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  getSavedObjectsClient: () => Promise<ISavedObjectsRepository>
+  getSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>,
+  getEncryptedSavedObjectsClient: () => Promise<EncryptedSavedObjectsClient>
 ): Promise<unknown> {
   const { transport, configurationUtilities } = options;
 
   // request access token for microsoft exchange online server with Graph API scope
-  const savedObjects = await getSavedObjectsClient();
+  const savedObjects = await getSavedObjectsClient(options.request as KibanaRequest);
   const clientId = transport.clientId as string;
 
-  const headers = await getGraphApiHeaders(savedObjects, clientId, options, logger);
-  // break it
-  headers.Authorization = headers.Authorization.slice(0, headers.Authorization.length - 2) + '2';
+  const headers = await getGraphApiHeaders(
+    savedObjects,
+    getEncryptedSavedObjectsClient,
+    clientId,
+    options,
+    logger
+  );
 
   const result: { isAccessTokenInvalidError: boolean; response?: unknown } =
     await sendEmailGraphApi(
@@ -113,7 +128,14 @@ async function sendEmailWithExchange(
     return await sendEmailGraphApi(
       {
         options,
-        headers: await getGraphApiHeaders(savedObjects, clientId, options, logger),
+        headers: await getGraphApiHeaders(
+          savedObjects,
+          getEncryptedSavedObjectsClient,
+          clientId,
+          options,
+          logger,
+          true
+        ),
         messageHTML,
         graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
       },
@@ -126,33 +148,48 @@ async function sendEmailWithExchange(
 }
 
 async function getGraphApiHeaders(
-  savedObjects: ISavedObjectsRepository,
+  savedObjects: SavedObjectsClientContract,
+  getEncryptedSavedObjectsClient: () => Promise<EncryptedSavedObjectsClient>,
   clientId: string,
   options: SendEmailOptions,
-  logger: Logger
+  logger: Logger,
+  force: boolean = false
 ) {
   const {
     configurationUtilities,
     transport: { clientSecret, tenantId, oauthTokenUrl },
   } = options;
-  let savedObjectTokenResult;
+
+  let version: string | undefined;
+  let tokenType: string | undefined;
+  let accessToken: string | undefined;
   try {
-    savedObjectTokenResult = await savedObjects.get<RawOAuthAction>(
+    const savedObjectTokenResult = await savedObjects.get<RawOAuthAction>(
       ACTION_OAUTH_SAVED_OBJECT_TYPE,
       clientId
     );
+    tokenType = savedObjectTokenResult.attributes.tokenType;
+    version = savedObjectTokenResult.version;
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err as Error)) {
       throw err;
     }
   }
 
-  let tokenType: string;
-  let accessToken: string;
-  if (savedObjectTokenResult) {
-    tokenType = savedObjectTokenResult.attributes.tokenType;
+  try {
+    const eso = await getEncryptedSavedObjectsClient();
+    const savedObjectTokenResult = await eso.getDecryptedAsInternalUser<RawOAuthAction>(
+      ACTION_OAUTH_SAVED_OBJECT_TYPE,
+      clientId
+    );
     accessToken = savedObjectTokenResult.attributes.accessToken;
-  } else {
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err as Error)) {
+      throw err;
+    }
+  }
+
+  if (!accessToken || force) {
     const tokenResult = await requestOAuthClientCredentialsToken(
       oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
       logger,
@@ -171,21 +208,14 @@ async function getGraphApiHeaders(
     Authorization: `${tokenType} ${accessToken}`,
   };
 
-  if (!savedObjectTokenResult) {
-    await savedObjects.create(
-      ACTION_OAUTH_SAVED_OBJECT_TYPE,
-      {
-        tokenType,
-        accessToken,
-      },
-      { id: clientId }
-    );
-  } else {
-    await savedObjects.update(ACTION_OAUTH_SAVED_OBJECT_TYPE, clientId, {
+  await savedObjects.create(
+    ACTION_OAUTH_SAVED_OBJECT_TYPE,
+    {
       tokenType,
       accessToken,
-    });
-  }
+    },
+    { id: clientId, overwrite: true, version }
+  );
 
   return headers;
 }

@@ -123,6 +123,6 @@ export function setupSavedObjects(
   });
   encryptedSavedObjects.registerType({
     type: ACTION_OAUTH_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['accessToken', 'refreshToken']),
+    attributesToEncrypt: new Set(['accessToken']),
   });
 }

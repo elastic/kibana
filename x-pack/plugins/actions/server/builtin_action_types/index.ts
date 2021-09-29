@@ -7,7 +7,7 @@
 
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { Logger, ISavedObjectsRepository } from '../../../../../src/core/server';
+import { Logger, KibanaRequest, SavedObjectsClientContract } from '../../../../../src/core/server';
 
 import { getActionType as getEmailActionType } from './email';
 import { getActionType as getIndexActionType } from './es_index';
@@ -20,6 +20,8 @@ import { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servi
 import { getActionType as getJiraActionType } from './jira';
 import { getActionType as getResilientActionType } from './resilient';
 import { getActionType as getTeamsActionType } from './teams';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
+
 export { ActionParamsType as EmailActionParams, ActionTypeId as EmailActionTypeId } from './email';
 export {
   ActionParamsType as IndexActionParams,
@@ -55,16 +57,24 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry,
   logger,
   getSavedObjectsClient,
+  getEncryptedSavedObjectsClient,
   publicBaseUrl,
 }: {
   actionsConfigUtils: ActionsConfigurationUtilities;
   actionTypeRegistry: ActionTypeRegistry;
   logger: Logger;
-  getSavedObjectsClient: () => Promise<ISavedObjectsRepository>;
+  getSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+  getEncryptedSavedObjectsClient: () => Promise<EncryptedSavedObjectsClient>;
   publicBaseUrl?: string;
 }) {
   actionTypeRegistry.register(
-    getEmailActionType({ logger, configurationUtilities, getSavedObjectsClient, publicBaseUrl })
+    getEmailActionType({
+      logger,
+      configurationUtilities,
+      getSavedObjectsClient,
+      getEncryptedSavedObjectsClient,
+      publicBaseUrl,
+    })
   );
   actionTypeRegistry.register(getIndexActionType({ logger }));
   actionTypeRegistry.register(getPagerDutyActionType({ logger, configurationUtilities }));

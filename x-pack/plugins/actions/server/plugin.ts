@@ -139,6 +139,7 @@ const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
+  ACTION_OAUTH_SAVED_OBJECT_TYPE,
 ];
 
 export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
@@ -236,16 +237,24 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       this.preconfiguredActions
     );
 
-    async function getSavedObjectsClient() {
-      const [startCore] = await core.getStartServices();
-      return startCore.savedObjects.createInternalRepository([ACTION_OAUTH_SAVED_OBJECT_TYPE]);
-    }
+    const getSavedObjectsClient = async (request: KibanaRequest) => {
+      const [coreStart] = await core.getStartServices();
+      return this.getUnsecuredSavedObjectsClient(coreStart.savedObjects, request);
+    };
+
+    const getEncryptedSavedObjectsClient = async () => {
+      const [_, startPlugins] = await core.getStartServices();
+      return startPlugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes,
+      });
+    };
 
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
       actionsConfigUtils,
       getSavedObjectsClient,
+      getEncryptedSavedObjectsClient,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
     });
 

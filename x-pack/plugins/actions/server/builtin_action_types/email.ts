@@ -11,9 +11,10 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
-import { Logger, ISavedObjectsRepository } from '../../../../../src/core/server';
+import { Logger, SavedObjectsClientContract, KibanaRequest } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
@@ -165,13 +166,20 @@ interface GetActionTypeParams {
   logger: Logger;
   publicBaseUrl?: string;
   configurationUtilities: ActionsConfigurationUtilities;
-  getSavedObjectsClient: () => Promise<ISavedObjectsRepository>;
+  getSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+  getEncryptedSavedObjectsClient: () => Promise<EncryptedSavedObjectsClient>;
 }
 
 // action type definition
 export const ActionTypeId = '.email';
 export function getActionType(params: GetActionTypeParams): EmailActionType {
-  const { logger, publicBaseUrl, configurationUtilities, getSavedObjectsClient } = params;
+  const {
+    logger,
+    publicBaseUrl,
+    configurationUtilities,
+    getSavedObjectsClient,
+    getEncryptedSavedObjectsClient,
+  } = params;
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
@@ -191,6 +199,7 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       publicBaseUrl,
       configurationUtilities,
       getSavedObjectsClient,
+      getEncryptedSavedObjectsClient,
     }),
   };
 }
@@ -215,11 +224,13 @@ async function executor(
     publicBaseUrl,
     configurationUtilities,
     getSavedObjectsClient,
+    getEncryptedSavedObjectsClient,
   }: {
     logger: GetActionTypeParams['logger'];
     publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
     configurationUtilities: ActionsConfigurationUtilities;
-    getSavedObjectsClient: () => Promise<ISavedObjectsRepository>;
+    getSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+    getEncryptedSavedObjectsClient: () => Promise<EncryptedSavedObjectsClient>;
   },
   execOptions: EmailActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
@@ -227,6 +238,7 @@ async function executor(
   const config = execOptions.config;
   const secrets = execOptions.secrets;
   const params = execOptions.params;
+  const request = execOptions.request;
 
   const transport: Transport = {};
 
@@ -282,12 +294,18 @@ async function executor(
     },
     hasAuth: config.hasAuth,
     configurationUtilities,
+    request,
   };
 
   let result;
 
   try {
-    result = await sendEmail(logger, sendEmailOptions, getSavedObjectsClient);
+    result = await sendEmail(
+      logger,
+      sendEmailOptions,
+      getSavedObjectsClient,
+      getEncryptedSavedObjectsClient
+    );
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',

@@ -212,6 +212,7 @@ export class ActionExecutor {
             secrets: validatedSecrets,
             isEphemeral,
             taskInfo,
+            request,
           });
         } catch (err) {
           rawResult = {

@@ -61,6 +61,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   params: Params;
   isEphemeral?: boolean;
   taskInfo?: TaskInfo;
+  request?: KibanaRequest;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
