@@ -32,12 +32,14 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | Sa
     : // @ts-expect-error kibanaSavedObjectMeta does exist
       savedSearch?.kibanaSavedObjectMeta;
 
-  return typeof search?.searchSourceJSON === 'string'
-    ? (JSON.parse(search.searchSourceJSON) as {
-        query: Query;
-        filter: any[];
-      })
-    : undefined;
+  const parsed =
+    typeof search?.searchSourceJSON === 'string'
+      ? (JSON.parse(search.searchSourceJSON) as {
+          query: Query;
+          filter: any[];
+        })
+      : undefined;
+  return parsed;
 }
 
 /**

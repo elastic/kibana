@@ -848,6 +848,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const extendedColumns = useMemo(() => {
     const actions = getActions(
       currentIndexPattern,
+      currentSavedSearch,
       services,
       {
         searchQueryLanguage,
@@ -869,7 +870,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     };
 
     return [actionColumn];
-  }, [currentIndexPattern, services, searchQueryLanguage, searchString]);
+  }, [currentIndexPattern, services, searchQueryLanguage, searchString, currentSavedSearch]);
 
   const helpLink = docLinks.links.ml.guide;
 
