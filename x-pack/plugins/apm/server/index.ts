@@ -140,12 +140,6 @@ export function mergeConfigs(apmConfig: APMXPackConfig) {
     'xpack.apm.agent.migrations.enabled': apmConfig.agent.migrations.enabled,
   };
 
-  // TODO make these default
-  // mergedConfig['apm_oss.transactionIndices'] = `traces-apm*,${mergedConfig['apm_oss.transactionIndices']}`;
-  // mergedConfig['apm_oss.spanIndices'] = `traces-apm*,${mergedConfig['apm_oss.spanIndices']}`;
-  // mergedConfig['apm_oss.errorIndices'] = `logs-apm*,${mergedConfig['apm_oss.errorIndices']}`;
-  // mergedConfig['apm_oss.metricsIndices'] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
-
   return mergedConfig;
 }
 
