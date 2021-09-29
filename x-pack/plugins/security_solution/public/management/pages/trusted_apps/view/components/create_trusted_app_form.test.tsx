@@ -24,9 +24,22 @@ import { defaultNewTrustedApp } from '../../store/builders';
 import { forceHTMLElementOffsetWidth } from './effected_policy_select/test_utils';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { licenseService } from '../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+
+jest.mock('../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('When using the Trusted App Form', () => {
   const dataTestSubjForForm = 'createForm';
@@ -112,6 +125,7 @@ describe('When using the Trusted App Form', () => {
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
 
     mockedContext = createAppRootMockRenderer();
 

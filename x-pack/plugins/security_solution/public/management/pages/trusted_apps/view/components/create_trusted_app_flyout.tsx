@@ -185,7 +185,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
           <EuiCallOut
             title={i18n.translate(
               'xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseTitle',
-              { defaultMessage: 'Expire License' }
+              { defaultMessage: 'Expired License' }
             )}
             color="warning"
             iconType="help"

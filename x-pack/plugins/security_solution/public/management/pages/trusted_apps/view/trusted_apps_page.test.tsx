@@ -34,6 +34,7 @@ import { forceHTMLElementOffsetWidth } from './components/effected_policy_select
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import { licenseService } from '../../../../common/hooks/use_license';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -42,6 +43,18 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 // TODO: remove this mock when feature flag is removed
 jest.mock('../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+
+jest.mock('../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
@@ -140,6 +153,7 @@ describe('When on the Trusted Apps Page', () => {
 
     history = mockedContext.history;
     coreStart = mockedContext.coreStart;
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     render = () => mockedContext.render(<TrustedAppsPage />);
     reactTestingLibrary.act(() => {
