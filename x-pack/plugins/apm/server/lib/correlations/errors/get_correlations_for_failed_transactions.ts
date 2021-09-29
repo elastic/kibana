@@ -25,6 +25,7 @@ import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
 
 interface Options extends CorrelationsOptions {
   fieldNames: string[];
+  setup: Setup;
 }
 export async function getCorrelationsForFailedTransactions(options: Options) {
   const { fieldNames, setup, start, end } = options;
