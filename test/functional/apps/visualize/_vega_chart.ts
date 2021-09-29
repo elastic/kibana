@@ -133,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should set the default query name if not given in the schema', async () => {
           const requests = await inspector.getRequestNames();
 
-          expect(requests).to.be('Unnamed request #0');
+          expect(requests).to.be("You've selected all available options");
         });
 
         it('should log the request statistic', async () => {
