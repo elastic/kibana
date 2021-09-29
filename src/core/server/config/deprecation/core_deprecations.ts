@@ -176,6 +176,15 @@ const serverHostZeroDeprecation: ConfigDeprecation = (settings, fromPath, addDep
   return settings;
 };
 
+const removeFromConfigStep = (setting: string) => {
+  return i18n.translate('core.deprecations.common.removeFromConfig', {
+    defaultMessage: `Remove "{setting}" from your kibana configs.`,
+    values: {
+      setting,
+    },
+  });
+};
+
 const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.logging?.events?.ops) {
     addDeprecation({
@@ -193,9 +202,7 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDe
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingEventsOps.manualSteps1', {
-            defaultMessage: `Remove "logging.events.ops" from your kibana settings.`,
-          }),
+          removeFromConfigStep('logging.events.ops'),
           i18n.translate('core.deprecations.loggingEventsOps.manualSteps2', {
             defaultMessage: `Enable debug logs for the "metrics.ops" context in your logging configuration`,
           }),
@@ -222,9 +229,7 @@ const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, a
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingEventsRequest.manualSteps1', {
-            defaultMessage: `Remove "logging.events.request" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.events.request'),
           i18n.translate('core.deprecations.loggingEventsRequest.manualSteps2', {
             defaultMessage: `enable debug logs for the "http.server.response" context in your logging configuration.`,
           }),
@@ -251,9 +256,7 @@ const responseLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, 
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingEventsResponse.manualSteps1', {
-            defaultMessage: `Remove "logging.events.response" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.events.response'),
           i18n.translate('core.deprecations.loggingEventsResponse.manualSteps2', {
             defaultMessage: `enable debug logs for the "http.server.response" context in your logging configuration.`,
           }),
@@ -280,9 +283,7 @@ const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDe
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingTimezone.manualSteps1', {
-            defaultMessage: `Remove "logging.timezone" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.timezone'),
           i18n.translate('core.deprecations.loggingTimezone.manualSteps2', {
             defaultMessage: `To set the timezone add a timezone date modifier to the log pattern in your logging configuration.`,
           }),
@@ -309,9 +310,7 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprec
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingDest.manualSteps1', {
-            defaultMessage: `Remove "logging.dest" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.dest'),
           i18n.translate('core.deprecations.loggingDest.manualSteps2', {
             defaultMessage: `To set the destination use the "console" appender in your logging configuration or define a custom one.`,
           }),
@@ -336,9 +335,7 @@ const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDepre
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingQuiet.manualSteps1', {
-            defaultMessage: `Remove "logging.quiet" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.quiet'),
           i18n.translate('core.deprecations.loggingQuiet.manualSteps2', {
             defaultMessage: `Use "logging.root.level:error" in your logging configuration.`,
           }),
@@ -363,9 +360,7 @@ const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDepr
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingSilent.manualSteps1', {
-            defaultMessage: `Remove "logging.silent" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.silent'),
           i18n.translate('core.deprecations.loggingSilent.manualSteps2', {
             defaultMessage: `Use "logging.root.level:off" in your logging configuration.`,
           }),
@@ -390,9 +385,7 @@ const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDep
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingVerbose.manualSteps1', {
-            defaultMessage: `Remove "logging.verbose" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.verbose'),
           i18n.translate('core.deprecations.loggingVerbose.manualSteps2', {
             defaultMessage: `Use "logging.root.level:all" in your logging configuration.`,
           }),
@@ -425,9 +418,7 @@ const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprec
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingJson.manualSteps1', {
-            defaultMessage: `Remove "logging.json" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.json'),
           i18n.translate('core.deprecations.loggingJson.manualSteps2', {
             defaultMessage: `Configure the "appender.layout" property for every custom appender in your logging configuration.`,
           }),
@@ -454,9 +445,7 @@ const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecat
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingRotate.manualSteps1', {
-            defaultMessage: `Remove "logging.rotate" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.rotate'),
           i18n.translate('core.deprecations.loggingRotate.manualSteps2', {
             defaultMessage: `Enable log rotation using the "rolling-file" appender for a logger in your logging configuration.`,
           }),
@@ -481,9 +470,7 @@ const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, addDepre
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingEventsLog.manualSteps1', {
-            defaultMessage: `Remove "logging.events.log" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.events.log'),
           i18n.translate('core.deprecations.loggingEventsLog.manualSteps2', {
             defaultMessage: `Customize log levels can be per-logger using the new logging configuration.`,
           }),
@@ -508,9 +495,7 @@ const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, addDep
       }),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('core.deprecations.loggingEventsError.manualSteps1', {
-            defaultMessage: `Remove "logging.events.error" from your kibana configs.`,
-          }),
+          removeFromConfigStep('logging.events.error'),
           i18n.translate('core.deprecations.loggingEventsError.manualSteps2', {
             defaultMessage: `Use "logging.root.level: error" in your logging configuration.`,
           }),
@@ -532,11 +517,7 @@ const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecat
         defaultMessage: '"logging.filter" has been deprecated and will be removed in 8.0.',
       }),
       correctiveActions: {
-        manualSteps: [
-          i18n.translate('core.deprecations.loggingFilter.manualSteps1', {
-            defaultMessage: `Remove "logging.filter" from your kibana configs.`,
-          }),
-        ],
+        manualSteps: [removeFromConfigStep('logging.filter')],
       },
     });
   }
