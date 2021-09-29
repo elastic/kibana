@@ -12,6 +12,10 @@
   font-size: $euiFontSizeXS;
   font-family: $euiCodeFontFamily;
 
+  .euiTableRowCell {
+    min-width: 108px;
+  }
+
   .kbnDocViewer__buttons {
     // Show all icons if one is focused,
     &:focus-within {
