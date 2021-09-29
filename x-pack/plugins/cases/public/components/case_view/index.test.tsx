@@ -46,6 +46,7 @@ const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const onCaseDataSuccessMock = jest.fn();
 
 const alertsHit = [
   {
@@ -119,6 +120,7 @@ export const caseProps: CaseComponentProps = {
   },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
+  onCaseDataSuccess: onCaseDataSuccessMock,
 };
 
 export const caseClosedProps: CaseComponentProps = {
@@ -361,6 +363,15 @@ describe('CaseView ', () => {
     await waitFor(() => {
       expect(updateObject.updateKey).toEqual('title');
       expect(updateObject.updateValue).toEqual(newTitle);
+      expect(updateObject.onSuccess).toBeDefined();
+    });
+
+    updateObject.onSuccess(); // simulate the request has succeed
+    await waitFor(() => {
+      expect(onCaseDataSuccessMock).toHaveBeenCalledWith({
+        ...caseProps.caseData,
+        title: newTitle,
+      });
     });
   });
 
