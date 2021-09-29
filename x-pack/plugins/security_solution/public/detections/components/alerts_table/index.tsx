@@ -22,7 +22,10 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
+import {
+  defaultCellActions,
+  getDefaultCellActions,
+} from '../../../common/lib/cell_actions/default_cell_actions';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -375,21 +378,22 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   return (
     <StatefulEventsViewer
-      pageFilters={defaultFiltersMemo}
+      additionalFilters={additionalFiltersComponent}
+      currentFilter={filterGroup}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
-      entityType="events"
       end={to}
-      currentFilter={filterGroup}
+      entityType="events"
+      getDefaultCellActions={getDefaultCellActions}
+      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
       id={timelineId}
       onRuleChange={onRuleChange}
+      pageFilters={defaultFiltersMemo}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
-      additionalFilters={additionalFiltersComponent}
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
     />
   );
 };

@@ -32,6 +32,7 @@ import { defaultControlColumn } from '../../../timelines/components/timeline/bod
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { BrowserFields } from '../../../../common';
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
@@ -53,6 +54,11 @@ export interface OwnProps {
   defaultModel: SubsetTimelineModel;
   end: string;
   entityType: EntityType;
+  getDefaultCellActions?: (args: {
+    browserFields?: BrowserFields;
+    columnId?: string;
+    fieldType?: string;
+  }) => TGridCellAction[];
   id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
@@ -87,6 +93,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   entityType,
   excludedRowRendererIds,
   filters,
+  getDefaultCellActions,
   globalQuery,
   id,
   isLive,
@@ -189,6 +196,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               entityType,
               filters: globalFilters,
               filterStatus: currentFilter,
+              getDefaultCellActions,
               globalFullScreen,
               graphEventId,
               graphOverlay,

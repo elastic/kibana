@@ -40,7 +40,7 @@ import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_
 import { getAllFieldsByName } from '../../containers/source';
 import { useKibana } from '../kibana';
 
-const COLUMNS_WITH_LINKS = [
+export const COLUMNS_WITH_LINKS = [
   {
     columnId: HOST_NAME_FIELD_NAME,
     label: 'View host summary',
@@ -75,7 +75,7 @@ const COLUMNS_WITH_LINKS = [
   },
 ];
 
-const getLink = (cId?: string, fieldType?: string) => {
+export const getLink = (cId?: string, fieldType?: string) => {
   return (
     cId &&
     COLUMNS_WITH_LINKS.find((c) => c.columnId === cId || (fieldType && c.fieldType === fieldType))
@@ -97,7 +97,7 @@ const useKibanaServices = () => {
   return { timelines, filterManager };
 };
 
-export const cellActionTopN = [
+const cellActionTopN = [
   ({
       browserFields,
       data,
@@ -154,7 +154,7 @@ export const cellActionTopN = [
     },
 ];
 
-export const cellActionLink = [
+const cellActionLink = [
   ({
       browserFields,
       data,
@@ -211,8 +211,7 @@ export const cellActionLink = [
     },
 ];
 
-/** the default actions shown in `EuiDataGrid` cells */
-export const defaultCellActions: TGridCellAction[] = [
+export const cellActions: TGridCellAction[] = [
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
     ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
       const { timelines, filterManager } = useKibanaServices();
@@ -340,7 +339,28 @@ export const defaultCellActions: TGridCellAction[] = [
         </>
       );
     },
-
-  ...cellActionTopN,
-  ...cellActionLink,
 ];
+
+/** the default actions shown in `EuiDataGrid` cells */
+export const defaultCellActions = [...cellActions, ...cellActionTopN, ...cellActionLink];
+
+export const getDefaultCellActions = ({
+  browserFields,
+  columnId,
+  fieldType,
+}: {
+  browserFields?: BrowserFields;
+  columnId?: string;
+  fieldType?: string;
+}) => {
+  const hasTopN =
+    browserFields && columnId
+      ? allowTopN({
+          browserField: getAllFieldsByName(browserFields)[columnId],
+          fieldName: columnId,
+          hideTopN: false,
+        })
+      : false;
+  const hasLink = getLink(columnId, fieldType);
+  return [...cellActions, ...(hasTopN ? cellActionTopN : []), ...(hasLink ? cellActionLink : [])];
+};

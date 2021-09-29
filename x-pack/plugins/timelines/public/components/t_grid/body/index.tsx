@@ -90,6 +90,11 @@ interface OwnProps {
   filters?: Filter[];
   filterQuery: string;
   filterStatus?: AlertStatus;
+  getDefaultCellActions?: (args: {
+    browserFields?: BrowserFields;
+    columnId?: string;
+    fieldType?: string;
+  }) => TGridCellAction[];
   id: string;
   indexNames: string[];
   isEventViewer?: boolean;
@@ -308,6 +313,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     filterQuery,
     filters,
     filterStatus,
+    getDefaultCellActions,
     hasAlertsCrud,
     hasAlertsCrudPermissions,
     id,
@@ -659,11 +665,29 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           return {
             ...header,
             cellActions: hasCellActions(header.id)
-              ? header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction)
+              ? header.tGridCellActions?.map(buildAction) ??
+                (
+                  (getDefaultCellActions &&
+                    getDefaultCellActions({
+                      browserFields,
+                      columnId: header.id,
+                      fieldType: header.type,
+                    })) ??
+                  defaultCellActions
+                )?.map(buildAction)
               : undefined,
           };
         }),
-      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize, filters]
+      [
+        columnHeaders,
+        getDefaultCellActions,
+        defaultCellActions,
+        browserFields,
+        data,
+        filters,
+        pageSize,
+        id,
+      ]
     );
 
     const renderTGridCellValue = useMemo(() => {
@@ -695,22 +719,22 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         }
 
         return renderCellValue({
-          asPlainText: true,
+          browserFields,
+          className: isDetails ? 'data-grid-expanded-plain-text' : undefined,
           columnId: header.id,
-          eventId,
           data: rowData,
+          ecsData: ecs,
+          eventId,
           header,
+          isDetails,
           isDraggable: false,
           isExpandable: true,
           isExpanded: false,
-          isDetails,
           linkValues: getOr([], header.linkField ?? '', ecs),
           rowIndex,
+          rowRenderers,
           setCellProps,
           timelineId: tabType != null ? `${id}-${tabType}` : id,
-          ecsData: ecs,
-          browserFields,
-          rowRenderers,
         }) as React.ReactElement;
       };
       return Cell;

@@ -45,6 +45,7 @@ const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
 const FormattedFieldValueComponent: React.FC<{
   asPlainText?: boolean;
+  className?: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
@@ -61,6 +62,7 @@ const FormattedFieldValueComponent: React.FC<{
   linkValue?: string | null | undefined;
 }> = ({
   asPlainText,
+  className,
   Component,
   contextId,
   eventId,
@@ -77,7 +79,7 @@ const FormattedFieldValueComponent: React.FC<{
   linkValue,
 }) => {
   if (isObjectArray || asPlainText) {
-    return <>{value}</>;
+    return <span className={className ?? ''}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp

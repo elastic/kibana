@@ -18,7 +18,7 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
  */
 export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> =
   ({
-    asPlainText,
+    className,
     columnId,
     data,
     eventId,
@@ -36,7 +36,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     browserFields,
   }) => (
     <DefaultCellRenderer
-      asPlainText={asPlainText}
+      className={className}
       columnId={columnId}
       data={data}
       eventId={eventId}

@@ -12,25 +12,26 @@ import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 
 import { CellValueElementProps } from '.';
+import { getLink } from '../../../../common/lib/cell_actions/default_cell_actions';
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
-  asPlainText,
-  columnId,
+  browserFields,
+  className,
   data,
+  ecsData,
   eventId,
   header,
+  isDetails,
   isDraggable,
   linkValues,
+  rowRenderers,
   setCellProps,
   timelineId,
-  rowRenderers,
-  browserFields,
-  ecsData,
-  isDetails,
 }) => (
   <>
     {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-      asPlainText,
+      asPlainText: !!getLink(header.id, header.type),
+      className,
       columnName: header.id,
       eventId,
       field: header,

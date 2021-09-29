@@ -14,6 +14,7 @@ import { TimelineNonEcsData } from '../../../../../../common/search_strategy/tim
 export interface ColumnRenderer {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) => boolean;
   renderColumn: ({
+    className,
     columnName,
     eventId,
     field,
@@ -25,6 +26,7 @@ export interface ColumnRenderer {
     linkValues,
   }: {
     asPlainText?: boolean;
+    className?: string;
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;

@@ -24,6 +24,7 @@ export const plainColumnRenderer: ColumnRenderer = {
 
   renderColumn: ({
     asPlainText,
+    className,
     columnName,
     eventId,
     field,
@@ -35,6 +36,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     linkValues,
   }: {
     asPlainText?: boolean;
+    className?: string;
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
@@ -49,16 +51,17 @@ export const plainColumnRenderer: ColumnRenderer = {
       ? values.map((value, i) => (
           <FormattedFieldValue
             asPlainText={asPlainText}
-            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+            className={className}
             contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
             eventId={eventId}
             fieldFormat={field.format || ''}
             fieldName={columnName}
             fieldType={field.type || ''}
             isDraggable={isDraggable}
-            value={parseValue(value)}
-            truncate={truncate}
+            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
             linkValue={head(linkValues)}
+            truncate={truncate}
+            value={parseValue(value)}
           />
         ))
       : getEmptyTagValue();

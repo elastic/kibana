@@ -54,13 +54,18 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
       padding: 8px;
     }
 
+    .data-grid-expanded-plain-text {
+      width: 234px;
+      display: inline-block;
+    }
+
     &.euiPopover__panel.euiPopover__panel-isOpen {
       padding: 0;
     }
 
     &.euiPopover__panel.euiPanel--paddingSmall .euiPopoverFooter:not([class*='euiPopoverFooter--padding']) {
-      padding: 0 8px;
-      margin-top: 0;
+      padding: 0;
+      margin: 0;
     }
 
     .euiPopoverFooter .euiFlexGroup {
