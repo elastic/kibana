@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import { defaultConfigWebFinal } from '@kbn/storybook';
+import { canvasStorybookConfig } from './canvas.webpack';
 
-module.exports = {
-  ...defaultConfigWebFinal,
-  addons: ['@storybook/addon-essentials'],
-  babel: () => ({
-    presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-  }),
-};
+module.exports = canvasStorybookConfig;

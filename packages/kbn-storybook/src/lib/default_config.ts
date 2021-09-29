@@ -8,7 +8,10 @@
 
 import * as path from 'path';
 import { StorybookConfig } from '@storybook/core/types';
+import { Configuration } from 'webpack';
+import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './constants';
+import { default as WebpackConfig } from '../webpack.config';
 
 const toPath = (_path: string) => path.join(REPO_ROOT, _path);
 export const defaultConfig: StorybookConfig = {
@@ -42,4 +45,15 @@ export const defaultConfig: StorybookConfig = {
 
     return emotion11CompatibleConfig;
   },
+};
+
+export const defaultConfigWebFinal = {
+  ...defaultConfig,
+  webpackFinal: (config: Configuration) => {
+    return WebpackConfig({ config });
+  },
+};
+
+export const mergeWebpackFinal = (extraConfig: Configuration) => {
+  return { webpackFinal: (config: Configuration) => webpackMerge(config, extraConfig) };
 };
