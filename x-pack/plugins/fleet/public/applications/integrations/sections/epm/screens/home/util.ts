@@ -84,7 +84,14 @@ export function mergeEprPackagesWithReplacements(
       eprPackage.release
     );
     if (hits.length) {
-      merged.push(...hits);
+      hits.forEach((hit) => {
+        const match = merged.find(({ id }) => {
+          return id === hit.id;
+        });
+        if (!match) {
+          merged.push(hit);
+        }
+      });
     } else {
       merged.push(eprPackage);
     }
