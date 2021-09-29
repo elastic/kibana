@@ -17,12 +17,21 @@ export type AlertWorkflowStatus = t.TypeOf<typeof alertWorkflowStatusRt>;
 
 export interface ApmIndicesConfig {
   /* eslint-disable @typescript-eslint/naming-convention */
+  'xpack.apm.sourcemapIndices': string;
+  'xpack.apm.errorIndices': string;
+  'xpack.apm.onboardingIndices': string;
+  'xpack.apm.spanIndices': string;
+  'xpack.apm.transactionIndices': string;
+  'xpack.apm.metricsIndices': string;
+
+  // includes deprecated indices from apm_oss path
   'apm_oss.sourcemapIndices': string;
   'apm_oss.errorIndices': string;
   'apm_oss.onboardingIndices': string;
   'apm_oss.spanIndices': string;
   'apm_oss.transactionIndices': string;
   'apm_oss.metricsIndices': string;
+
   /* eslint-enable @typescript-eslint/naming-convention */
   apmAgentConfigurationIndex: string;
   apmCustomLinkIndex: string;

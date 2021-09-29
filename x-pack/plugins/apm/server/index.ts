@@ -10,7 +10,6 @@ import {
   PluginInitializerContext,
   PluginConfigDescriptor,
 } from 'src/core/server';
-import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { APMPlugin } from './plugin';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 
@@ -48,11 +47,44 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
+  transactionIndices: schema.string({
+    defaultValue: 'traces-apm*,apm-*-transaction-*',
+  }),
+  spanIndices: schema.string({ defaultValue: 'traces-apm*,apm-*-span-*' }),
+  errorIndices: schema.string({ defaultValue: 'logs-apm*,apm-*-error-*' }),
+  metricsIndices: schema.string({
+    defaultValue: 'metrics-apm*,apm-*-metric-*',
+  }),
+  sourcemapIndices: schema.string({ defaultValue: 'apm-*-sourcemap-*' }),
+  onboardingIndices: schema.string({ defaultValue: 'apm-*-onboarding-*' }),
+  indexPattern: schema.string({ defaultValue: 'apm-*' }),
+  fleetMode: schema.boolean({ defaultValue: true }),
 });
 
 // plugin config
 export const config: PluginConfigDescriptor<APMXPackConfig> = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
+  deprecations: ({
+    deprecate,
+    renameFromRoot,
+    deprecateFromRoot,
+    unusedFromRoot,
+  }) => [
+    deprecate('enabled', '8.0.0'),
+    renameFromRoot(
+      'apm_oss.transactionIndices',
+      'xpack.apm.transactionIndices'
+    ),
+    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.spanIndices'),
+    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.errorIndices'),
+    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.metricsIndices'),
+    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.sourcemapIndices'),
+    renameFromRoot('apm_oss.onboardingIndices', 'xpack.apm.onboardingIndices'),
+    renameFromRoot('apm_oss.indexPattern', 'xpack.apm.indexPattern'),
+    renameFromRoot('apm_oss.fleetMode', 'xpack.apm.fleetMode'),
+    deprecateFromRoot('apm_oss.enabled', '8.0.0'),
+    unusedFromRoot('apm_oss.fleetMode'),
+    unusedFromRoot('apm_oss.indexPattern'),
+  ],
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
@@ -65,19 +97,22 @@ export type APMXPackConfig = TypeOf<typeof configSchema>;
 export type APMConfig = ReturnType<typeof mergeConfigs>;
 
 // plugin config and ui indices settings
-export function mergeConfigs(
-  apmOssConfig: APMOSSConfig,
-  apmConfig: APMXPackConfig
-) {
+export function mergeConfigs(apmConfig: APMXPackConfig) {
   const mergedConfig = {
     /* eslint-disable @typescript-eslint/naming-convention */
+    'xpack.apm.transactionIndices': apmConfig.transactionIndices,
+    'xpack.apm.spanIndices': apmConfig.spanIndices,
+    'xpack.apm.errorIndices': apmConfig.errorIndices,
+    'xpack.apm.metricsIndices': apmConfig.metricsIndices,
+    'xpack.apm.sourcemapIndices': apmConfig.sourcemapIndices,
+    'xpack.apm.onboardingIndices': apmConfig.onboardingIndices,
     // TODO: Remove all apm_oss options by 8.0
-    'apm_oss.transactionIndices': apmOssConfig.transactionIndices,
-    'apm_oss.spanIndices': apmOssConfig.spanIndices,
-    'apm_oss.errorIndices': apmOssConfig.errorIndices,
-    'apm_oss.metricsIndices': apmOssConfig.metricsIndices,
-    'apm_oss.sourcemapIndices': apmOssConfig.sourcemapIndices,
-    'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
+    'apm_oss.transactionIndices': apmConfig.transactionIndices,
+    'apm_oss.spanIndices': apmConfig.spanIndices,
+    'apm_oss.errorIndices': apmConfig.errorIndices,
+    'apm_oss.metricsIndices': apmConfig.metricsIndices,
+    'apm_oss.sourcemapIndices': apmConfig.sourcemapIndices,
+    'apm_oss.onboardingIndices': apmConfig.onboardingIndices,
     /* eslint-enable @typescript-eslint/naming-convention */
     'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
     'xpack.apm.serviceMapFingerprintBucketSize':
@@ -105,22 +140,11 @@ export function mergeConfigs(
     'xpack.apm.agent.migrations.enabled': apmConfig.agent.migrations.enabled,
   };
 
-  // Add data stream indices to list of configured values
-  mergedConfig[
-    'apm_oss.transactionIndices'
-  ] = `traces-apm*,${mergedConfig['apm_oss.transactionIndices']}`;
-
-  mergedConfig[
-    'apm_oss.spanIndices'
-  ] = `traces-apm*,${mergedConfig['apm_oss.spanIndices']}`;
-
-  mergedConfig[
-    'apm_oss.errorIndices'
-  ] = `logs-apm*,${mergedConfig['apm_oss.errorIndices']}`;
-
-  mergedConfig[
-    'apm_oss.metricsIndices'
-  ] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
+  // TODO make these default
+  // mergedConfig['apm_oss.transactionIndices'] = `traces-apm*,${mergedConfig['apm_oss.transactionIndices']}`;
+  // mergedConfig['apm_oss.spanIndices'] = `traces-apm*,${mergedConfig['apm_oss.spanIndices']}`;
+  // mergedConfig['apm_oss.errorIndices'] = `logs-apm*,${mergedConfig['apm_oss.errorIndices']}`;
+  // mergedConfig['apm_oss.metricsIndices'] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
 
   return mergedConfig;
 }

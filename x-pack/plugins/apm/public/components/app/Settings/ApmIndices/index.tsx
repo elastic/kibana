@@ -30,40 +30,40 @@ import {
 
 const APM_INDEX_LABELS = [
   {
-    configurationName: 'apm_oss.sourcemapIndices',
+    configurationName: 'xpack.apm.sourcemapIndices',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.sourcemapIndicesLabel',
       { defaultMessage: 'Sourcemap Indices' }
     ),
   },
   {
-    configurationName: 'apm_oss.errorIndices',
+    configurationName: 'xpack.apm.errorIndices',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
       defaultMessage: 'Error Indices',
     }),
   },
   {
-    configurationName: 'apm_oss.onboardingIndices',
+    configurationName: 'xpack.apm.onboardingIndices',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.onboardingIndicesLabel',
       { defaultMessage: 'Onboarding Indices' }
     ),
   },
   {
-    configurationName: 'apm_oss.spanIndices',
+    configurationName: 'xpack.apm.spanIndices',
     label: i18n.translate('xpack.apm.settings.apmIndices.spanIndicesLabel', {
       defaultMessage: 'Span Indices',
     }),
   },
   {
-    configurationName: 'apm_oss.transactionIndices',
+    configurationName: 'xpack.apm.transactionIndices',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.transactionIndicesLabel',
       { defaultMessage: 'Transaction Indices' }
     ),
   },
   {
-    configurationName: 'apm_oss.metricsIndices',
+    configurationName: 'xpack.apm.metricsIndices',
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
       defaultMessage: 'Metrics Indices',
     }),
@@ -144,7 +144,7 @@ export function ApmIndices() {
           }
         ),
       });
-    } catch (error) {
+    } catch (error: any) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.failed.title',

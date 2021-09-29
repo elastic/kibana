@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import {
   CoreSetup,
@@ -73,8 +72,8 @@ export class APMPlugin
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMXPackConfig>();
-    const mergedConfig$ = combineLatest(plugins.apmOss.config$, config$).pipe(
-      map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
+    const mergedConfig$ = config$.pipe(
+      map((apmConfig) => mergeConfigs(apmConfig))
     );
 
     core.savedObjects.registerType(apmIndices);
@@ -82,7 +81,6 @@ export class APMPlugin
     core.savedObjects.registerType(apmServerSettings);
 
     const currentConfig = mergeConfigs(
-      plugins.apmOss.config,
       this.initContext.config.get<APMXPackConfig>()
     );
     this.currentConfig = currentConfig;

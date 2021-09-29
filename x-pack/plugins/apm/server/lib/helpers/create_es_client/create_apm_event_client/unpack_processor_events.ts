@@ -19,12 +19,12 @@ import {
 } from '../../../settings/apm_indices/get_apm_indices';
 
 const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
-  [ProcessorEvent.transaction]: 'apm_oss.transactionIndices',
-  [ProcessorEvent.span]: 'apm_oss.spanIndices',
-  [ProcessorEvent.metric]: 'apm_oss.metricsIndices',
-  [ProcessorEvent.error]: 'apm_oss.errorIndices',
+  [ProcessorEvent.transaction]: 'xpack.apm.transactionIndices',
+  [ProcessorEvent.span]: 'xpack.apm.spanIndices',
+  [ProcessorEvent.metric]: 'xpack.apm.metricsIndices',
+  [ProcessorEvent.error]: 'xpack.apm.errorIndices',
   // TODO: should have its own config setting
-  [ProcessorEvent.profile]: 'apm_oss.transactionIndices',
+  [ProcessorEvent.profile]: 'xpack.apm.transactionIndices',
 };
 
 export function unpackProcessorEvents(

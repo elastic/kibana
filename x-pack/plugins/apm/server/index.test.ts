@@ -7,27 +7,23 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { APMXPackConfig } from '.';
 import { mergeConfigs } from './index';
 
 describe('mergeConfigs', () => {
   it('merges the configs', () => {
-    const apmOssConfig = {
+    const apmConfig = {
       transactionIndices: 'apm-*-transaction-*',
       spanIndices: 'apm-*-span-*',
       errorIndices: 'apm-*-error-*',
       metricsIndices: 'apm-*-metric-*',
-    } as APMOSSConfig;
-
-    const apmConfig = {
       ui: { enabled: false },
       enabled: true,
       metricsInterval: 2000,
       agent: { migrations: { enabled: true } },
     } as APMXPackConfig;
 
-    expect(mergeConfigs(apmOssConfig, apmConfig)).toEqual({
+    expect(mergeConfigs(apmConfig)).toEqual({
       'apm_oss.errorIndices': 'logs-apm*,apm-*-error-*',
       'apm_oss.metricsIndices': 'metrics-apm*,apm-*-metric-*',
       'apm_oss.spanIndices': 'traces-apm*,apm-*-span-*',
