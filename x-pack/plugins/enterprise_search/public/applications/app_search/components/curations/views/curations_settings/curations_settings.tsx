@@ -43,8 +43,12 @@ export const CurationsSettings: React.FC = () => {
     curationsSettings: { enabled, mode },
     dataLoading,
   } = useValues(CurationsSettingsLogic);
-  const { loadCurationsSettings, toggleCurationsEnabled, toggleCurationsMode } =
-    useActions(CurationsSettingsLogic);
+  const {
+    loadCurationsSettings,
+    onSkipLoadingCurationsSettings,
+    toggleCurationsEnabled,
+    toggleCurationsMode,
+  } = useActions(CurationsSettingsLogic);
 
   const { isLogRetentionUpdating, logRetention } = useValues(LogRetentionLogic);
   const { fetchLogRetention } = useActions(LogRetentionLogic);
@@ -53,10 +57,19 @@ export const CurationsSettings: React.FC = () => {
 
   useEffect(() => {
     if (hasPlatinumLicense) {
-      loadCurationsSettings();
       fetchLogRetention();
     }
   }, [hasPlatinumLicense]);
+
+  useEffect(() => {
+    if (logRetention) {
+      if (!analyticsDisabled) {
+        loadCurationsSettings();
+      } else {
+        onSkipLoadingCurationsSettings();
+      }
+    }
+  }, [logRetention]);
 
   if (!hasPlatinumLicense)
     return (

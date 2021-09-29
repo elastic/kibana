@@ -55,6 +55,16 @@ describe('CurationsSettingsLogic', () => {
         });
       });
     });
+
+    describe('onSkipCurationsSettingsLoad', () => {
+      it('saves that data has loaded', () => {
+        mount();
+
+        CurationsSettingsLogic.actions.onSkipLoadingCurationsSettings();
+
+        expect(CurationsSettingsLogic.values.dataLoading).toEqual(false);
+      });
+    });
   });
 
   describe('listeners', () => {

@@ -26,6 +26,7 @@ interface CurationsSettingsActions {
   onCurationsSettingsLoad(curationsSettings: CurationsSettings): {
     curationsSettings: CurationsSettings;
   };
+  onSkipLoadingCurationsSettings(): void;
   toggleCurationsEnabled(): void;
   toggleCurationsMode(): void;
   updateCurationsSetting(currationsSetting: Partial<CurationsSettings>): {
@@ -40,6 +41,7 @@ export const CurationsSettingsLogic = kea<
   actions: () => ({
     loadCurationsSettings: true,
     onCurationsSettingsLoad: (curationsSettings) => ({ curationsSettings }),
+    onSkipLoadingCurationsSettings: true,
     toggleCurationsEnabled: true,
     toggleCurationsMode: true,
     updateCurationsSetting: (currationsSetting) => ({ currationsSetting }),
@@ -49,6 +51,7 @@ export const CurationsSettingsLogic = kea<
       true,
       {
         onCurationsSettingsLoad: () => false,
+        onSkipLoadingCurationsSettings: () => false,
       },
     ],
     curationsSettings: [

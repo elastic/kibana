@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '../../../../../__mocks__/shallow_useeffect.mock';
 import '../../../../../__mocks__/react_router';
 import '../../../../__mocks__/engine_logic.mock';
 
@@ -46,6 +47,7 @@ const MOCK_VALUES = {
 const MOCK_ACTIONS = {
   // CurationsSettingsLogic
   loadCurationsSettings: jest.fn(),
+  onSkipLoadingCurationsSettings: jest.fn(),
   toggleCurationsEnabled: jest.fn(),
   toggleCurationsMode: jest.fn(),
   // LogRetentionLogic
@@ -164,23 +166,65 @@ describe('CurationsSettings', () => {
     expect(wrapper.is(Loading)).toBe(true);
   });
 
-  describe('when the user has no platinum license', () => {
-    let wrapper: ShallowWrapper;
+  describe('loading curation settings based on log retention', () => {
+    it('loads curation settings when log retention is enabled', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        logRetention: {
+          [LogRetentionOptions.Analytics]: {
+            enabled: true,
+          },
+        },
+      });
 
+      shallow(<CurationsSettings />);
+
+      expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips loading curation settings when log retention is enabled', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        logRetention: {
+          [LogRetentionOptions.Analytics]: {
+            enabled: false,
+          },
+        },
+      });
+
+      shallow(<CurationsSettings />);
+
+      expect(MOCK_ACTIONS.onSkipLoadingCurationsSettings).toHaveBeenCalledTimes(1);
+    });
+
+    it('takes no action if log retention has not yet been loaded', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        logRetention: null,
+      });
+
+      shallow(<CurationsSettings />);
+
+      expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(0);
+      expect(MOCK_ACTIONS.onSkipLoadingCurationsSettings).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('when the user has no platinum license', () => {
     beforeEach(() => {
       setMockValues({
         ...MOCK_VALUES,
         hasPlatinumLicense: false,
       });
-      wrapper = shallow(<CurationsSettings />);
     });
 
-    it('it does not load any daata', () => {
-      expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(0);
+    it('it does not fetch log retention', () => {
+      shallow(<CurationsSettings />);
       expect(MOCK_ACTIONS.fetchLogRetention).toHaveBeenCalledTimes(0);
     });
 
-    it('shows a CTA to upgrade your license when the user', () => {
+    it('shows a CTA to upgrade your license when the user when the user', () => {
+      const wrapper = shallow(<CurationsSettings />);
       expect(wrapper.is(DataPanel)).toBe(true);
       expect(wrapper.prop('action').props.to).toEqual('/app/management/stack/license_management');
       expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual('/license-management.html');
