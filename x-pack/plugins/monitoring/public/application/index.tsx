@@ -18,8 +18,12 @@ import { GlobalStateProvider } from './global_state_context';
 import { ExternalConfigContext, ExternalConfig } from './external_config_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
+import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
-import { CODE_PATH_ELASTICSEARCH } from '../../common/constants';
+import { BeatsOverviewPage } from './pages/beats/overview';
+import { BeatsInstancesPage } from './pages/beats/instances';
+import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
+import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
@@ -54,7 +58,7 @@ const MonitoringApp: React.FC<{
             <BreadcrumbContainer.Provider history={history}>
               <Router history={history}>
                 <Switch>
-                  <Route path="/no-data" component={NoData} />
+                  <Route path="/no-data" component={NoDataPage} />
                   <Route path="/loading" component={LoadingPage} />
                   <RouteInit
                     path="/license"
@@ -77,11 +81,34 @@ const MonitoringApp: React.FC<{
 
                   {/* ElasticSearch Views */}
                   <RouteInit
+                    path="/elasticsearch/nodes"
+                    component={ElasticsearchNodesPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
                     path="/elasticsearch"
                     component={ElasticsearchOverviewPage}
                     codePaths={[CODE_PATH_ELASTICSEARCH]}
                     fetchAllClusters={false}
                   />
+
+                  {/* Beats Views */}
+                  <RouteInit
+                    path="/beats/beats"
+                    component={BeatsInstancesPage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/beats"
+                    component={BeatsOverviewPage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
                   <Redirect
                     to={{
                       pathname: '/loading',
@@ -96,10 +123,6 @@ const MonitoringApp: React.FC<{
       </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
-};
-
-const NoData: React.FC<{}> = () => {
-  return <div>No data page</div>;
 };
 
 const Home: React.FC<{}> = () => {

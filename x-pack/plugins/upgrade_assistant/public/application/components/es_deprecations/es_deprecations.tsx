@@ -8,15 +8,19 @@
 import React, { useEffect, useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageHeader, EuiSpacer, EuiPageContent } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { DocLinksStart } from 'kibana/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
+import { uiMetricService, UIM_ES_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
+import { getEsDeprecationError } from '../../lib/get_es_deprecation_error';
+import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { EsDeprecationsTable } from './es_deprecations_table';
-import { EsDeprecationErrors } from './es_deprecation_errors';
-import { NoDeprecationsPrompt, DeprecationCount } from '../shared';
 
 const getDeprecationCountByLevel = (deprecations: EnrichedDeprecationInfo[]) => {
   const criticalDeprecations: EnrichedDeprecationInfo[] = [];
@@ -42,25 +46,45 @@ const i18nTexts = {
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'You must resolve all critical issues before upgrading. Back up recommended. Make sure you have a current snapshot before modifying your configuration or reindexing.',
+      'Resolve all critical issues before upgrading. Before making changes, ensure you have a current snapshot of your cluster. Some issues may require reindexing to resolve. ',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecation issues…',
   }),
 };
 
+const getBatchReindexLink = (docLinks: DocLinksStart) => {
+  return (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.esDeprecations.batchReindexingDocsDescription"
+      defaultMessage="To start multiple reindexing tasks in a single request, use the Kibana {docsLink}."
+      values={{
+        docsLink: (
+          <EuiLink
+            href={docLinks.links.upgradeAssistant.batchReindex}
+            target="_blank"
+            external={true}
+          >
+            {i18n.translate('xpack.upgradeAssistant.esDeprecations.batchReindexingDocsLink', {
+              defaultMessage: 'batch reindexing API',
+            })}
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+};
+
 export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   const {
-    services: { api, breadcrumbs },
+    services: {
+      api,
+      breadcrumbs,
+      core: { docLinks },
+    },
   } = useAppContext();
 
-  const {
-    data: esDeprecations,
-    isLoading,
-    error,
-    resendRequest,
-    isInitialRequest,
-  } = api.useLoadEsDeprecations();
+  const { data: esDeprecations, isLoading, error, resendRequest } = api.useLoadEsDeprecations();
 
   const deprecationsCountByLevel: {
     warningDeprecations: number;
@@ -75,19 +99,16 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   }, [breadcrumbs]);
 
   useEffect(() => {
-    if (isLoading === false && isInitialRequest) {
-      async function sendTelemetryData() {
-        await api.sendPageTelemetryData({
-          elasticsearch: true,
-        });
-      }
-
-      sendTelemetryData();
-    }
-  }, [api, isLoading, isInitialRequest]);
+    uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_ES_DEPRECATIONS_PAGE_LOAD);
+  }, []);
 
   if (error) {
-    return <EsDeprecationErrors error={error} />;
+    return (
+      <DeprecationsPageLoadingError
+        deprecationSource="Elasticsearch"
+        message={getEsDeprecationError(error).message}
+      />
+    );
   }
 
   if (isLoading) {
@@ -111,7 +132,15 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
 
   return (
     <div data-test-subj="esDeprecationsContent">
-      <EuiPageHeader pageTitle={i18nTexts.pageTitle} description={i18nTexts.pageDescription}>
+      <EuiPageHeader
+        pageTitle={i18nTexts.pageTitle}
+        description={
+          <>
+            {i18nTexts.pageDescription}
+            {getBatchReindexLink(docLinks)}
+          </>
+        }
+      >
         <DeprecationCount
           totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
           totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}

@@ -149,15 +149,15 @@ function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
 }
 
-function ecsVersion() {
-  return schema.maybe(schema.string({ validate: validateVersion }));
-}
-
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 function validateDate(isoDate: string) {
   if (ISO_DATE_PATTERN.test(isoDate)) return;
   return 'string is not a valid ISO date: ' + isoDate;
+}
+
+function ecsVersion() {
+  return schema.maybe(schema.string({ validate: validateVersion }));
 }
 
 function validateVersion(version: string) {

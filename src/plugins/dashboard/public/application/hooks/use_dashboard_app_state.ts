@@ -38,6 +38,7 @@ import {
   syncDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
+  areRefreshIntervalsEqual,
 } from '../lib';
 
 export interface UseDashboardStateProps {
@@ -237,27 +238,29 @@ export const useDashboardAppState = ({
         .pipe(debounceTime(DashboardConstants.CHANGE_CHECK_DEBOUNCE))
         .subscribe((states) => {
           const [lastSaved, current] = states;
-          const unsavedChanges =
-            current.viewMode === ViewMode.EDIT ? diffDashboardState(lastSaved, current) : {};
+          const unsavedChanges = diffDashboardState(lastSaved, current);
 
-          let savedTimeChanged = false;
+          const savedTimeChanged =
+            lastSaved.timeRestore &&
+            (!areTimeRangesEqual(
+              {
+                from: savedDashboard?.timeFrom,
+                to: savedDashboard?.timeTo,
+              },
+              timefilter.getTime()
+            ) ||
+              !areRefreshIntervalsEqual(
+                savedDashboard?.refreshInterval,
+                timefilter.getRefreshInterval()
+              ));
 
           /**
-           * changes to the time filter should only be considered 'unsaved changes' when
+           * changes to the dashboard should only be considered 'unsaved changes' when
            * editing the dashboard
            */
-          if (current.viewMode === ViewMode.EDIT) {
-            savedTimeChanged =
-              lastSaved.timeRestore &&
-              !areTimeRangesEqual(
-                {
-                  from: savedDashboard?.timeFrom,
-                  to: savedDashboard?.timeTo,
-                },
-                timefilter.getTime()
-              );
-          }
-          const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
+          const hasUnsavedChanges =
+            current.viewMode === ViewMode.EDIT &&
+            (Object.keys(unsavedChanges).length > 0 || savedTimeChanged);
           setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
           unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.

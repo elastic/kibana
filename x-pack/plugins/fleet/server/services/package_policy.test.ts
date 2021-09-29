@@ -14,19 +14,34 @@ import {
 import type { SavedObjectsClient, SavedObjectsUpdateResponse } from 'src/core/server';
 import type { KibanaRequest } from 'kibana/server';
 
-import type { PackageInfo, PackagePolicySOAttributes, AgentPolicySOAttributes } from '../types';
+import type {
+  PackageInfo,
+  PackagePolicySOAttributes,
+  AgentPolicySOAttributes,
+  PostPackagePolicyDeleteCallback,
+  RegistryDataStream,
+  PackagePolicyInputStream,
+} from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
+
 import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } from '..';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
-import type { PostPackagePolicyDeleteCallback } from '../types';
-
-import type { DeletePackagePoliciesResponse } from '../../common';
+import type {
+  DeletePackagePoliciesResponse,
+  InputsOverride,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+} from '../../common';
 
 import { IngestManagerError } from '../errors';
 
-import { packagePolicyService } from './package_policy';
+import {
+  overridePackageInputs,
+  packagePolicyService,
+  _applyIndexPrivileges,
+} from './package_policy';
 import { appContextService } from './app_context';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
@@ -1067,5 +1082,210 @@ describe('Package policy service', () => {
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
     });
+  });
+
+  describe('overridePackageInputs', () => {
+    it('should override variable in base package policy', () => {
+      const basePackagePolicy: NewPackagePolicy = {
+        name: 'base-package-policy',
+        description: 'Base Package Policy',
+        namespace: 'default',
+        enabled: true,
+        policy_id: 'xxxx',
+        output_id: 'xxxx',
+        package: {
+          name: 'test-package',
+          title: 'Test Package',
+          version: '0.0.1',
+        },
+        inputs: [
+          {
+            type: 'logs',
+            policy_template: 'template_1',
+            enabled: true,
+            vars: {
+              path: {
+                type: 'text',
+                value: ['/var/log/logfile.log'],
+              },
+            },
+            streams: [],
+          },
+        ],
+      };
+
+      const packageInfo: PackageInfo = {
+        name: 'test-package',
+        description: 'Test Package',
+        title: 'Test Package',
+        version: '0.0.1',
+        latestVersion: '0.0.1',
+        release: 'experimental',
+        format_version: '1.0.0',
+        owner: { github: 'elastic/fleet' },
+        policy_templates: [
+          {
+            name: 'template_1',
+            title: 'Template 1',
+            description: 'Template 1',
+            inputs: [
+              {
+                type: 'logs',
+                title: 'Log',
+                description: 'Log Input',
+                vars: [
+                  {
+                    name: 'path',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        // @ts-ignore
+        assets: {},
+      };
+
+      const inputsOverride: NewPackagePolicyInput[] = [
+        {
+          type: 'logs',
+          enabled: true,
+          streams: [],
+          vars: {
+            path: {
+              type: 'text',
+              value: '/var/log/new-logfile.log',
+            },
+          },
+        },
+      ];
+
+      const result = overridePackageInputs(
+        basePackagePolicy,
+        packageInfo,
+        // TODO: Update this type assertion when the `InputsOverride` type is updated such
+        // that it no longer causes unresolvable type errors when used directly
+        inputsOverride as InputsOverride[],
+        false
+      );
+      expect(result.inputs[0]?.vars?.path.value).toBe('/var/log/new-logfile.log');
+    });
+  });
+});
+
+describe('_applyIndexPrivileges()', () => {
+  function createPackageStream(indexPrivileges?: string[]): RegistryDataStream {
+    const stream: RegistryDataStream = {
+      type: '',
+      dataset: '',
+      title: '',
+      release: '',
+      package: '',
+      path: '',
+    };
+
+    if (indexPrivileges) {
+      stream.elasticsearch = {
+        privileges: {
+          indices: indexPrivileges,
+        },
+      };
+    }
+
+    return stream;
+  }
+
+  function createInputStream(
+    opts: Partial<PackagePolicyInputStream> = {}
+  ): PackagePolicyInputStream {
+    return {
+      id: '',
+      enabled: true,
+      data_stream: {
+        dataset: '',
+        type: '',
+      },
+      ...opts,
+    };
+  }
+
+  beforeAll(async () => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  it('should do nothing if packageStream has no privileges', () => {
+    const packageStream = createPackageStream();
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should not apply privileges if all privileges are forbidden', () => {
+    const forbiddenPrivileges = ['write', 'delete', 'delete_index', 'all'];
+    const packageStream = createPackageStream(forbiddenPrivileges);
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should not apply privileges if all privileges are unrecognized', () => {
+    const unrecognizedPrivileges = ['idnotexist', 'invalidperm'];
+    const packageStream = createPackageStream(unrecognizedPrivileges);
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should apply privileges if all privileges are valid', () => {
+    const validPrivileges = [
+      'auto_configure',
+      'create_doc',
+      'maintenance',
+      'monitor',
+      'read',
+      'read_cross_cluster',
+    ];
+
+    const packageStream = createPackageStream(validPrivileges);
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          privileges: {
+            indices: validPrivileges,
+          },
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
+  });
+
+  it('should only apply valid privileges when there is a  mix of valid and invalid', () => {
+    const mixedPrivileges = ['auto_configure', 'read_cross_cluster', 'idontexist', 'delete'];
+
+    const packageStream = createPackageStream(mixedPrivileges);
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          privileges: {
+            indices: ['auto_configure', 'read_cross_cluster'],
+          },
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
   });
 });

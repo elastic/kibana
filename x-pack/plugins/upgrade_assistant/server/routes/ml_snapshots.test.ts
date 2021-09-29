@@ -175,6 +175,28 @@ describe('ML snapshots APIs', () => {
     });
   });
 
+  describe('GET /api/upgrade_assistant/ml_upgrade_mode', () => {
+    it('Retrieves ml upgrade mode', async () => {
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.info as jest.Mock
+      ).mockResolvedValue({
+        body: {
+          upgrade_mode: true,
+        },
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/ml_upgrade_mode',
+      })(routeHandlerContextMock, createRequestMock({}), kibanaResponseFactory);
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        mlUpgradeModeEnabled: true,
+      });
+    });
+  });
+
   describe('GET /api/upgrade_assistant/ml_snapshots/:jobId/:snapshotId', () => {
     it('returns "idle" status if saved object does not exist', async () => {
       (

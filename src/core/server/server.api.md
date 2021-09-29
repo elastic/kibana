@@ -2716,6 +2716,7 @@ export interface SavedObjectsType<Attributes = any> {
 // @public
 export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
     defaultSearchField?: string;
+    displayName?: string;
     getEditUrl?: (savedObject: SavedObject<Attributes>) => string;
     getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
         path: string;
@@ -2728,6 +2729,7 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
     isExportable?: SavedObjectsExportablePredicate<Attributes>;
     onExport?: SavedObjectsExportTransform<Attributes>;
     onImport?: SavedObjectsImportHook<Attributes>;
+    visibleInManagement?: boolean;
 }
 
 // @public
