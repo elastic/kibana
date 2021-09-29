@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const ROWS_COUNT_TO_HIDE_PAGE_SELECTOR = 10;
+const ROWS_NEEDED_FOR_PAGINATION = 10;
 const DEFAULT_ROWS_PER_PAGE = 50;
 
 export default ({ getService }: FtrProviderContext) => {
@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe(`When less than ${ROWS_COUNT_TO_HIDE_PAGE_SELECTOR} alerts are visible in the screen`, () => {
+    describe(`When less than ${ROWS_NEEDED_FOR_PAGINATION} alerts are found`, () => {
       before(async () => {
         // current archiver has 3 closed alerts
         await observability.alerts.common.setWorkflowStatusFilter('closed');
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe(`When more than ${ROWS_COUNT_TO_HIDE_PAGE_SELECTOR} alerts are visible in the screen`, () => {
+    describe(`When ${ROWS_NEEDED_FOR_PAGINATION} alerts are found`, () => {
       before(async () => {
         // current archiver has 12 open alerts
         await observability.alerts.common.setWorkflowStatusFilter('open');
