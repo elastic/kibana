@@ -17,7 +17,6 @@ import { RequestAdapter } from '../../../../../../inspector/public';
 import { AutoRefreshDoneFn } from '../../../../../../data/public';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { Chart } from '../components/chart/point_series';
-import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 import { useSingleton } from '../utils/use_singleton';
 import { FetchStatus } from '../../../types';
 
@@ -30,6 +29,12 @@ export interface SavedSearchData {
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
   charts$: DataCharts$;
+}
+
+export interface TimechartBucketInterval {
+  scaled?: boolean;
+  description?: string;
+  scale?: number;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
