@@ -2935,7 +2935,7 @@
             "label": "actionField",
             "description": [],
             "signature": [
-              "(\"status\" | \"description\" | \"title\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]"
+              "(\"status\" | \"title\" | \"description\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
@@ -4143,7 +4143,7 @@
             "label": "updateKey",
             "description": [],
             "signature": [
-              "\"status\" | \"description\" | \"title\" | \"tags\" | \"settings\" | \"connector\""
+              "\"status\" | \"title\" | \"description\" | \"tags\" | \"settings\" | \"connector\""
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
@@ -5112,7 +5112,7 @@
         "label": "CaseField",
         "description": [],
         "signature": [
-          "\"description\" | \"title\" | \"comments\""
+          "\"title\" | \"description\" | \"comments\""
         ],
         "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
@@ -5848,7 +5848,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; })[]"
+          ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"title\" | \"description\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; })[]"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
@@ -6158,7 +6158,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; }"
+          ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"title\" | \"description\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; }"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
@@ -6776,7 +6776,7 @@
         "label": "CaseUserActionAttributes",
         "description": [],
         "signature": [
-          "{ action_field: (\"status\" | \"description\" | \"title\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; owner: string; }"
+          "{ action_field: (\"status\" | \"title\" | \"description\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; owner: string; }"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
@@ -6852,7 +6852,7 @@
         "label": "CaseUserActionResponse",
         "description": [],
         "signature": [
-          "{ action_field: (\"status\" | \"description\" | \"title\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; owner: string; } & { action_id: string; case_id: string; comment_id: string | null; new_val_connector_id: string | null; old_val_connector_id: string | null; } & { sub_case_id?: string | undefined; }"
+          "{ action_field: (\"status\" | \"title\" | \"description\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; owner: string; } & { action_id: string; case_id: string; comment_id: string | null; new_val_connector_id: string | null; old_val_connector_id: string | null; } & { sub_case_id?: string | undefined; }"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
@@ -6866,7 +6866,7 @@
         "label": "CaseUserActionsResponse",
         "description": [],
         "signature": [
-          "({ action_field: (\"status\" | \"description\" | \"title\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; owner: string; } & { action_id: string; case_id: string; comment_id: string | null; new_val_connector_id: string | null; old_val_connector_id: string | null; } & { sub_case_id?: string | undefined; })[]"
+          "({ action_field: (\"status\" | \"title\" | \"description\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; owner: string; } & { action_id: string; case_id: string; comment_id: string | null; new_val_connector_id: string | null; old_val_connector_id: string | null; } & { sub_case_id?: string | undefined; })[]"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
@@ -7568,7 +7568,7 @@
         "label": "ConnectorMappings",
         "description": [],
         "signature": [
-          "{ mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; }"
+          "{ mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"title\" | \"description\" | \"comments\"; target: string; }[]; owner: string; }"
         ],
         "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
@@ -7582,7 +7582,7 @@
         "label": "ConnectorMappingsAttributes",
         "description": [],
         "signature": [
-          "{ action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }"
+          "{ action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"title\" | \"description\" | \"comments\"; target: string; }"
         ],
         "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
@@ -7878,7 +7878,7 @@
         "label": "GetDefaultMappingsResponse",
         "description": [],
         "signature": [
-          "{ action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]"
+          "{ action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"title\" | \"description\" | \"comments\"; target: string; }[]"
         ],
         "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
@@ -8545,7 +8545,7 @@
         "label": "UpdateKey",
         "description": [],
         "signature": [
-          "\"status\" | \"description\" | \"title\" | \"tags\" | \"settings\" | \"connector\""
+          "\"status\" | \"title\" | \"description\" | \"tags\" | \"settings\" | \"connector\""
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
@@ -8587,7 +8587,7 @@
         "label": "UserActionField",
         "description": [],
         "signature": [
-          "(\"status\" | \"description\" | \"title\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]"
+          "(\"status\" | \"title\" | \"description\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
@@ -8601,7 +8601,7 @@
         "label": "UserActionFieldType",
         "description": [],
         "signature": [
-          "\"status\" | \"description\" | \"title\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\""
+          "\"status\" | \"title\" | \"description\" | \"tags\" | \"comment\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\""
         ],
         "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
