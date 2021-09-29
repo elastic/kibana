@@ -116,6 +116,7 @@ export function getSuggestions({
     } else {
       dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
         datasourceState,
+        (layerId) => isLayerSupportedByVisualization(layerId, [layerTypes.DATA]),
         activeData
       );
     }
