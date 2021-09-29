@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { MouseEvent, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
@@ -139,7 +139,7 @@ describe('IndexPattern Field Item', () => {
       mountWithIntl(popoverContent as ReactElement)
         .find('[data-test-subj="lnsFieldListPanelEdit"]')
         .first()
-        .prop('onClick')!({} as MouseEvent);
+        .simulate('click');
     });
     expect(editFieldSpy).toHaveBeenCalledWith('bytes');
   });

@@ -12,11 +12,11 @@ Object {
       "distribution": Object {
         "histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "interval": 57600000,
+          "interval": 3333,
           "min_doc_count": 0,
         },
       },
@@ -33,8 +33,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -58,11 +58,11 @@ Object {
       "distribution": Object {
         "histogram": Object {
           "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
+            "max": 50000,
+            "min": 0,
           },
           "field": "@timestamp",
-          "interval": 57600000,
+          "interval": 3333,
           "min_doc_count": 0,
         },
       },
@@ -79,8 +79,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },

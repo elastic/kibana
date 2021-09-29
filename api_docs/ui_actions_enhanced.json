@@ -1989,64 +1989,13 @@
     "functions": [
       {
         "parentPluginId": "uiActionsEnhanced",
-        "id": "def-public.ActionWizard",
-        "type": "Function",
-        "tags": [],
-        "label": "ActionWizard",
-        "description": [],
-        "signature": [
-          "({ currentActionFactory, actionFactories, onActionFactoryChange, onConfigChange, config, context, onSelectedTriggersChange, getTriggerInfo, triggers, triggerPickerDocsLink, }: React.PropsWithChildren<",
-          "ActionWizardProps",
-          "<",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "public",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-public.BaseActionFactoryContext",
-            "text": "BaseActionFactoryContext"
-          },
-          ">>) => JSX.Element | null"
-        ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.ActionWizard.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  currentActionFactory,\n  actionFactories,\n  onActionFactoryChange,\n  onConfigChange,\n  config,\n  context,\n  onSelectedTriggersChange,\n  getTriggerInfo,\n  triggers,\n  triggerPickerDocsLink,\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "ActionWizardProps",
-              "<",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.BaseActionFactoryContext",
-                "text": "BaseActionFactoryContext"
-              },
-              ">>"
-            ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActionsEnhanced",
         "id": "def-public.compile",
         "type": "Function",
         "tags": [],
         "label": "compile",
         "description": [],
         "signature": [
-          "(urlTemplate: string, context: object, doEncode: boolean) => string"
+          "(urlTemplate: string, context: object, doEncode: boolean) => Promise<string>"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
         "deprecated": false,
@@ -2217,7 +2166,7 @@
             "section": "def-public.UrlDrilldownScope",
             "text": "UrlDrilldownScope"
           },
-          "<object, object>) => { isValid: boolean; error?: string | undefined; }"
+          "<object, object>) => Promise<{ isValid: boolean; error?: string | undefined; }>"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,

@@ -26,6 +26,8 @@ describe('transaction group queries', () => {
           searchAggregatedTransactions: false,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
+          start: 0,
+          end: 50000,
         },
         setup
       )
@@ -42,6 +44,8 @@ describe('transaction group queries', () => {
           searchAggregatedTransactions: true,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
+          start: 0,
+          end: 50000,
         },
         setup
       )

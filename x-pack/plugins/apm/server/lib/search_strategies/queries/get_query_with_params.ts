@@ -16,7 +16,6 @@ import type {
 } from '../../../../common/search_strategies/types';
 import { rangeRt } from '../../../routes/default_api_types';
 import { getCorrelationsFilters } from '../../correlations/get_filters';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
   return { term: { [fieldName]: fieldValue } };
@@ -38,20 +37,21 @@ export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
   } = params;
 
   // converts string based start/end to epochmillis
-  const setup = pipe(
+  const decodedRange = pipe(
     rangeRt.decode({ start, end }),
     getOrElse<t.Errors, { start: number; end: number }>((errors) => {
       throw new Error(failure(errors).join('\n'));
     })
-  ) as Setup & SetupTimeRange;
+  );
 
   const correlationFilters = getCorrelationsFilters({
-    setup,
     environment,
     kuery,
     serviceName,
     transactionType,
     transactionName,
+    start: decodedRange.start,
+    end: decodedRange.end,
   });
 
   return {
