@@ -20,7 +20,7 @@ import { getQueryFromListParams, SnapshotListParams, getListParams } from '../..
 const moreThanOneSearchClauseError = i18n.translate(
   'xpack.snapshotRestore.snapshotList.table.moreThanOneSearchClauseError',
   {
-    defaultMessage: 'More than 1 clause in the search bar',
+    defaultMessage: 'You can only use one clause in the search bar',
   }
 );
 // for now limit the search bar to snapshot, repository and policyName queries
