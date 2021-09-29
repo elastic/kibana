@@ -117,7 +117,6 @@ describe('Create a timeline from a template', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
     waitForTimelinesPanelToBeLoaded();
   });
-
   it('Should have the same query and open the timeline modal', () => {
     createTimelineTemplate(getTimeline()).then(() => {
       expandEventAction();
@@ -135,6 +134,7 @@ describe('Create a timeline from a template', () => {
             getTimeline().query
           );
           cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+          closeTimeline();
         }
       });
     });

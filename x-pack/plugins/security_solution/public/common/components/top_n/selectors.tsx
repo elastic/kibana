@@ -14,12 +14,12 @@ export interface IndicesSelector {
 }
 
 export const getIndicesSelector = () => {
-  const getkibanaDataViewsSelector = sourcererSelectors.kibanaDataViewsSelector();
+  const getKibanaDataViewsSelector = sourcererSelectors.kibanaDataViewsSelector();
   const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
 
   const mapStateToProps = (state: State): IndicesSelector => {
     const rawIndices = new Set<string>();
-    const kibanaDataViews = getkibanaDataViewsSelector(state);
+    const kibanaDataViews = getKibanaDataViewsSelector(state);
     const alertIndexName = getSignalIndexNameSelector(state);
     kibanaDataViews.forEach(({ title }) => {
       if (title !== alertIndexName) {

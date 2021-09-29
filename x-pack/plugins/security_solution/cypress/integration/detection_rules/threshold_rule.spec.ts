@@ -151,7 +151,6 @@ describe('Detection rules, threshold', () => {
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      cy.log('THRESHOLD_DETAILS', getDetails(THRESHOLD_DETAILS).debug());
       getDetails(THRESHOLD_DETAILS).should(
         'have.text',
         `Results aggregated by ${rule.thresholdField} >= ${rule.threshold}`
@@ -168,14 +167,10 @@ describe('Detection rules, threshold', () => {
       );
     });
 
-    cy.log('BOO 4');
     waitForTheRuleToBeExecuted();
-    cy.log('BOO 5');
     waitForAlertsToPopulate();
-    cy.log('BOO 6');
 
     cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
-    cy.log('BOO 7');
     cy.get(ALERT_GRID_CELL).eq(3).contains(rule.name);
     cy.get(ALERT_GRID_CELL).eq(4).contains(rule.severity.toLowerCase());
     cy.get(ALERT_GRID_CELL).eq(5).contains(rule.riskScore);

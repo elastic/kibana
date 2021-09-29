@@ -100,7 +100,10 @@ export const requestIndexFieldSearch = async (
 
   // if dataViewId is provided, get fields and indices from the Kibana Data View
   if ('dataViewId' in request) {
-    const dataView = await dataViewService.get(request.dataViewId).catch((r) => {
+    let dataView;
+    try {
+      dataView = await dataViewService.get(request.dataViewId);
+    } catch (r) {
       if (
         r.output.payload.statusCode === 404 &&
         // this is the only place this id is hard coded as there are no security_solution dependencies in timeline
@@ -111,7 +114,8 @@ export const requestIndexFieldSearch = async (
       } else {
         throw r;
       }
-    });
+    }
+
     const patternList = dataView.title.split(',');
     indicesExist = await findExistingIndices(patternList, esClient.asCurrentUser);
     existingIndices = patternList.filter((index, i) => indicesExist[i]);

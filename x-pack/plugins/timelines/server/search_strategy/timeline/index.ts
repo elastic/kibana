@@ -15,7 +15,6 @@ import {
   PluginStartContract as AlertingPluginStartContract,
 } from '../../../../alerting/server';
 import {
-  IndexPattern,
   ISearchStrategy,
   PluginStart,
   SearchStrategyDependencies,
@@ -75,7 +74,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
 const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   es,
   request,
-  options: optionsd,
+  options,
   deps,
   queryFactory,
 }: {
@@ -86,7 +85,6 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   queryFactory: TimelineFactory<T>;
 }) => {
   const dsl = queryFactory.buildDsl(request);
-  const options = { ...optionsd, indexPattern: { id: 'security-solution' } as IndexPattern };
   return es.search({ ...request, params: dsl }, options, deps).pipe(
     map((response) => {
       return {

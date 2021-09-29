@@ -5,28 +5,6 @@
  * 2.0.
  */
 
-// import { Args } from './helpers';
-// import { initialSourcererState, SourcererScopeName } from './model';
-
-// const defaultArgs: Args = {
-//   eventType: 'all',
-//   id: SourcererScopeName.default,
-//   selectedPatterns: ['journalbeat-*'],
-//   state: {
-//     ...initialSourcererState,
-//     kibanaDataViews: [
-//       initialSourcererState.defaultDataView,
-//       { id: '123', title: 'journalbeat-*', patternList: ['journalbeat-*'] },
-//     ],
-//     signalIndexName: 'signals-*',
-//   },
-// };
-// const eventTypes: Array<Args['eventType']> = ['all', 'raw', 'alert', 'signal', 'custom'];
-// const ids: Array<Args['id']> = [
-//   SourcererScopeName.default,
-//   SourcererScopeName.detections,
-//   SourcererScopeName.timeline,
-// ];
 import { mockGlobalState } from '../../mock';
 import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { SourcererScopeName } from './model';

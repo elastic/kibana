@@ -13,7 +13,6 @@ import { Provider } from 'react-redux';
 
 import { getScopeFromPath, useInitSourcerer } from '.';
 import { mockPatterns } from './mocks';
-// import { SourcererScopeName } from '../../store/sourcerer/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { DEFAULT_SIGNALS_INDEX, SecurityPageName } from '../../../../common/constants';
 import { createStore, State } from '../../store';
