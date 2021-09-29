@@ -8,7 +8,7 @@
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import './discover_view.scss';
-import moment from "moment";
+import moment from 'moment';
 
 interface LastRecentlyAccessedViewProps {
   id: string;
@@ -34,7 +34,7 @@ export function LastRecentlyAccessedView(props: LastRecentlyAccessedViewProps) {
       titleSize="s"
       title={title}
       onClick={onClick}
-      style={{ backgroundColor: '#d6ede4' }}
+      className="discoverHome__lastRecently__card"
     >
       <EuiFlexGrid>
         <EuiFlexItem grow={false}>

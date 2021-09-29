@@ -4,6 +4,7 @@
 
 .editIndexPattern__icon {
   margin-top: 8px !important;
+  cursor: pointer;
 }
 
 .discoverHome__sectionNavigation__button {
@@ -13,4 +14,10 @@
   .euiCard__titleButton {
     color: #0061A6;
   }
+}
+.discoverHome__lastRecently__card {
+  background-color: #D6EDE4 !important;
+}
+.discoverHome__lastRecently__item {
+  min-height: 118px !important;
 }

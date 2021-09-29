@@ -51,7 +51,6 @@ export function IndexPatternView(props: IndexPatternViewProps) {
       <EuiFlexItem grow={false}>
         <EuiIcon
           type={'pencil'}
-          style={{ cursor: 'pointer' }}
           onClick={() => goToIndexPattern()}
           className="editIndexPattern__icon"
         />

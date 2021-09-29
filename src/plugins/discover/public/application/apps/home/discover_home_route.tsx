@@ -129,7 +129,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
       const { title, searchSource, id } = savedSearch;
       const indexPattern = searchSource.getField('index');
       recentlyAccessedItems.push(
-        <EuiFlexItem>
+        <EuiFlexItem className="discoverHome__lastRecently__item">
           <LastRecentlyAccessedView
             id={id}
             title={title}
@@ -173,9 +173,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     ));
     return (
       <EuiFlexGrid>
-        <EuiFlexItem grow={1}>
-          {addNewIndexPattern}
-        </EuiFlexItem>
+        <EuiFlexItem grow={1}>{addNewIndexPattern}</EuiFlexItem>
         <EuiFlexItem grow={9}>
           <SectionNavigation items={displayElements} itemsPerPage={DISPLAY_NUMBER_OF_ITEMS} />
         </EuiFlexItem>
