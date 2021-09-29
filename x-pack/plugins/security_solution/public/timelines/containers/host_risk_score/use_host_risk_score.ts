@@ -78,7 +78,11 @@ export interface HostRiskScore {
   fields: Array<{ field: string; value: string }>;
 }
 
-export const useHostRiskScore = ({ hostName }: { hostName?: string }): HostRiskScore => {
+export const useHostRiskScore = ({
+  hostName,
+}: {
+  hostName?: string;
+}): HostRiskScore | undefined => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
   const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(
     riskyHostsFeatureEnabled ? undefined : false
@@ -140,6 +144,11 @@ export const useHostRiskScore = ({ hostName }: { hostName?: string }): HostRiskS
   }, [start, data, hostName, riskyHostsFeatureEnabled]);
 
   const source = result?.rawResponse?.hits?.hits?.[0]?._source;
+
+  if (!riskyHostsFeatureEnabled || !hostName) {
+    return undefined;
+  }
+
   return {
     fields: source
       ? [
@@ -148,6 +157,6 @@ export const useHostRiskScore = ({ hostName }: { hostName?: string }): HostRiskS
         ]
       : [],
     isModuleEnabled,
-    loading,
+    loading: isModuleEnabled === undefined ? true : loading,
   };
 };

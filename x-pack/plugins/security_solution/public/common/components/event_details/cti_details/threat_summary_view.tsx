@@ -299,7 +299,7 @@ const HostRiskDataBlock: React.FC<{
 
         {hostRisk.loading && <EuiLoadingSpinner />}
 
-        {!hostRisk.loading && !hostRisk.isModuleEnabled && (
+        {!hostRisk.loading && (!hostRisk.isModuleEnabled || hostRisk.fields.length === 0) && (
           <EnrichmentFieldValue>
             <EuiText color="subdued" size="xs">
               {i18n.NO_HOST_RISK_DATA_DESCRIPTION}
@@ -323,25 +323,31 @@ const ThreatSummaryViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   eventId: string;
   timelineId: string;
-  hostRisk: HostRiskScore;
-}> = ({ browserFields, data, enrichments, eventId, timelineId, hostRisk }) => (
-  <>
-    <EuiHorizontalRule />
+  hostRisk?: HostRiskScore;
+}> = ({ browserFields, data, enrichments, eventId, timelineId, hostRisk }) => {
+  if (!hostRisk && enrichments.length === 0) {
+    return null;
+  }
 
-    <EuiTitle size="xxxs">
-      <h5>{i18n.ENRICHED_DATA}</h5>
-    </EuiTitle>
-    <EuiSpacer size="s" />
+  return (
+    <>
+      <EuiHorizontalRule />
 
-    <HostRiskDataBlock hostRisk={hostRisk} />
-    <ThreatSummaryEnrichmentData
-      browserFields={browserFields}
-      data={data}
-      enrichments={enrichments}
-      timelineId={timelineId}
-      eventId={eventId}
-    />
-  </>
-);
+      <EuiTitle size="xxxs">
+        <h5>{i18n.ENRICHED_DATA}</h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+
+      {hostRisk && <HostRiskDataBlock hostRisk={hostRisk} />}
+      <ThreatSummaryEnrichmentData
+        browserFields={browserFields}
+        data={data}
+        enrichments={enrichments}
+        timelineId={timelineId}
+        eventId={eventId}
+      />
+    </>
+  );
+};
 
 export const ThreatSummaryView = React.memo(ThreatSummaryViewComponent);

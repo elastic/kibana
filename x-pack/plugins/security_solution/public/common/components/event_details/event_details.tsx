@@ -62,7 +62,7 @@ interface Props {
   isDraggable?: boolean;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
-  hostRisk: HostRiskScore;
+  hostRisk?: HostRiskScore;
 }
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
