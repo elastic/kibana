@@ -54,18 +54,13 @@ export function mergeAndReplaceCategoryCounts(
 export function findReplacementsForEprPackage(
   replacements: CustomIntegration[],
   packageName: string,
-  category: Category,
   release: 'beta' | 'experimental' | 'ga'
 ): CustomIntegration[] {
   if (release === 'ga') {
     return [];
   }
-
   const filtered = replacements.filter((customIntegration: CustomIntegration) => {
-    return (
-      customIntegration.eprOverlap === packageName &&
-      (!category || customIntegration.categories.includes(category))
-    );
+    return customIntegration.eprOverlap === packageName;
   });
   return filtered;
 }
@@ -76,11 +71,16 @@ export function mergeEprPackagesWithReplacements(
   category: Category
 ): Array<PackageListItem | CustomIntegration> {
   const merged: Array<PackageListItem | CustomIntegration> = [];
+
+  const filteredReplacements = replacements.filter((customIntegration) => {
+    return !category || customIntegration.categories.includes(category);
+  });
+
+  // select replacements
   eprPackages.forEach((eprPackage) => {
     const hits = findReplacementsForEprPackage(
-      replacements,
+      filteredReplacements,
       eprPackage.name,
-      category,
       eprPackage.release
     );
     if (hits.length) {
@@ -96,6 +96,16 @@ export function mergeEprPackagesWithReplacements(
       merged.push(eprPackage);
     }
   });
+
+  // Add unused replacements
+  // This is an edge-case. E.g. the Oracle-beat did not have an Epr-equivalent at the time of writing
+  const unusedReplacements = filteredReplacements.filter((integration) => {
+    return !eprPackages.find((eprPackage) => {
+      return eprPackage.name === integration.eprOverlap;
+    });
+  });
+
+  merged.push(...unusedReplacements);
 
   return merged;
 }
