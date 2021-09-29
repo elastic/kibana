@@ -8,6 +8,7 @@
     "data",
     "embeddable",
     "inspector",
+    "kibanaLegacy",
     "urlForwarding",
     "navigation",
     "uiActions",
