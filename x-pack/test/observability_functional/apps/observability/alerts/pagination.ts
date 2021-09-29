@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
           await observability.alerts.pagination.getPageSizeSelectorOrFail();
         });
 
-        it('Default rows per page selector is 50', async () => {
+        it('Default rows per page is 50', async () => {
           await retry.try(async () => {
             const defaultAlertsPerPage = await (
               await observability.alerts.pagination.getPageSizeSelector()
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('10 rows per page selector works', async () => {
+        it('Shows up to 10 rows per page', async () => {
           await retry.try(async () => {
             await (await observability.alerts.pagination.getPageSizeSelector()).click();
             await (await observability.alerts.pagination.getTenRowsPageSelector()).click();
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('25 rows per page selector works', async () => {
+        it('Shows up to 25 rows per page', async () => {
           await retry.try(async () => {
             await (await observability.alerts.pagination.getPageSizeSelector()).click();
             await (await observability.alerts.pagination.getTwentyFiveRowsPageSelector()).click();
@@ -110,13 +110,13 @@ export default ({ getService }: FtrProviderContext) => {
           expect(prevButtonDisabledValue).to.be('true');
         });
 
-        it('Next page button works', async () => {
+        it('Goes to next page', async () => {
           await observability.alerts.pagination.goToNextPage();
           const tableRows = await observability.alerts.common.getTableCellsInRows();
           expect(tableRows.length).to.be(2);
         });
 
-        it('Previous page button works', async () => {
+        it('Goes to previous page', async () => {
           await (await observability.alerts.pagination.getPaginationButtonTwo()).click();
           await observability.alerts.pagination.goToPrevPage();
           const tableRows = await observability.alerts.common.getTableCellsInRows();
