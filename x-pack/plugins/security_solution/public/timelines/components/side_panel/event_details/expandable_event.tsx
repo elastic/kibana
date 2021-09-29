@@ -36,7 +36,7 @@ interface Props {
   messageHeight?: number;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
-  hostRisk: HostRiskScore;
+  hostRisk?: HostRiskScore;
 }
 
 interface ExpandableEventTitleProps {
