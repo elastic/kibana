@@ -25,6 +25,7 @@ import { ActionConnectorFieldsProps } from '../../../../../public/types';
 import { ServiceNowActionConnector } from './types';
 import { Credentials } from './credentials';
 import { isFieldInvalid } from './helpers';
+import { ApplicationRequiredCallout } from './application_required_callout';
 
 const title = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.confirmationModalTitle',
@@ -64,9 +65,10 @@ const warningMessage = i18n.translate(
 
 interface Props {
   action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
+  applicationInfoErrorMsg: string | null;
   errors: ActionConnectorFieldsProps<ServiceNowActionConnector>['errors'];
-  readOnly: boolean;
   isLoading: boolean;
+  readOnly: boolean;
   editActionSecrets: ActionConnectorFieldsProps<ServiceNowActionConnector>['editActionSecrets'];
   editActionConfig: ActionConnectorFieldsProps<ServiceNowActionConnector>['editActionConfig'];
   onCancel: () => void;
@@ -75,9 +77,10 @@ interface Props {
 
 const UpdateConnectorModalComponent: React.FC<Props> = ({
   action,
+  applicationInfoErrorMsg,
   errors,
-  readOnly,
   isLoading,
+  readOnly,
   editActionSecrets,
   editActionConfig,
   onCancel,
@@ -124,6 +127,13 @@ const UpdateConnectorModalComponent: React.FC<Props> = ({
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTextColor color="danger">{warningMessage}</EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            {applicationInfoErrorMsg && (
+              <ApplicationRequiredCallout message={applicationInfoErrorMsg} />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>

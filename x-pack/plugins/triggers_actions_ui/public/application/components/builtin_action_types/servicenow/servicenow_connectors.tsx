@@ -17,7 +17,7 @@ import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
-import { UpdateConnectorModalComponent } from './update_connector_modal';
+import { UpdateConnectorModal } from './update_connector_modal';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ENABLE_NEW_SN_ITSM_CONNECTOR } from '../../../../../../actions/server/constants/connectors';
@@ -52,6 +52,9 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     const [applicationInfoErrorMsg, setApplicationInfoErrorMsg] = useState<string | null>(null);
 
     const getApplicationInfo = useCallback(async () => {
+      setApplicationRequired(false);
+      setApplicationInfoErrorMsg(null);
+
       try {
         const res = await fetchAppInfo(action);
         if (isRESTApiError(res)) {
@@ -119,8 +122,9 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     return (
       <>
         {showModal && (
-          <UpdateConnectorModalComponent
+          <UpdateConnectorModal
             action={action}
+            applicationInfoErrorMsg={applicationInfoErrorMsg}
             errors={errors}
             readOnly={readOnly}
             isLoading={isLoading}
@@ -142,7 +146,9 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
           editActionSecrets={editActionSecrets}
           editActionConfig={editActionConfig}
         />
-        {applicationRequired && <ApplicationRequiredCallout message={applicationInfoErrorMsg} />}
+        {applicationRequired && !isLegacy && (
+          <ApplicationRequiredCallout message={applicationInfoErrorMsg} />
+        )}
       </>
     );
   };
