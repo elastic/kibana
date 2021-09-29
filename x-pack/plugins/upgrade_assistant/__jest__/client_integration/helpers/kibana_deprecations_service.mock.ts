@@ -10,7 +10,8 @@ import type { DeprecationsServiceStart, DomainDeprecationDetails } from 'kibana/
 const kibanaDeprecations: DomainDeprecationDetails[] = [
   {
     correctiveActions: {
-      manualSteps: ['Step 1', 'Step 2', 'Step 3'],
+      // Only has one manual step.
+      manualSteps: ['Step 1'],
       api: {
         method: 'POST',
         path: '/test',
@@ -24,6 +25,7 @@ const kibanaDeprecations: DomainDeprecationDetails[] = [
   },
   {
     correctiveActions: {
+      // Has multiple manual steps.
       manualSteps: ['Step 1', 'Step 2', 'Step 3'],
     },
     domainId: 'test_domain_2',

@@ -203,16 +203,26 @@ export const DeprecationDetailsFlyout = ({
               <h3>{i18nTexts.manualFixTitle}</h3>
             </EuiTitle>
 
-            <EuiSpacer />
+            <EuiSpacer size="s" />
 
             <EuiText>
-              <ol data-test-subj="manualStepsList">
-                {correctiveActions.manualSteps.map((step, stepIndex) => (
-                  <li key={`step-${stepIndex}`} className="upgResolveStep eui-textBreakWord">
-                    {step}
-                  </li>
-                ))}
-              </ol>
+              {correctiveActions.manualSteps.length === 1 ? (
+                <p data-test-subj="manualStep" className="eui-textBreakWord">
+                  {correctiveActions.manualSteps[0]}
+                </p>
+              ) : (
+                <ol data-test-subj="manualStepsList">
+                  {correctiveActions.manualSteps.map((step, stepIndex) => (
+                    <li
+                      data-test-subj="manualStepsListItem"
+                      key={`step-${stepIndex}`}
+                      className="upgResolveStep eui-textBreakWord"
+                    >
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              )}
             </EuiText>
           </div>
         )}
