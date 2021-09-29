@@ -619,16 +619,6 @@
         "children": [
           {
             "parentPluginId": "share",
-            "id": "def-public.LocatorPublic.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "share",
             "id": "def-public.LocatorPublic.getLocation",
             "type": "Function",
             "tags": [],
@@ -1896,7 +1886,7 @@
         "UrlGeneratorsSetup",
         "; url: ",
         "UrlService",
-        "<unknown>; navigate(options: ",
+        "; navigate(options: ",
         "RedirectOptions",
         "<",
         "SerializableRecord",
@@ -1927,7 +1917,7 @@
         "UrlGeneratorsStart",
         "; url: ",
         "UrlService",
-        "<unknown>; navigate(options: ",
+        "; navigate(options: ",
         "RedirectOptions",
         "<",
         "SerializableRecord",
@@ -1993,10 +1983,7 @@
           "label": "url",
           "description": [],
           "signature": [
-            "UrlService",
-            "<",
-            "ServerShortUrlClientFactoryCreateParams",
-            ">"
+            "UrlService"
           ],
           "path": "src/plugins/share/server/plugin.ts",
           "deprecated": false
@@ -2023,10 +2010,7 @@
           "label": "url",
           "description": [],
           "signature": [
-            "UrlService",
-            "<",
-            "ServerShortUrlClientFactoryCreateParams",
-            ">"
+            "UrlService"
           ],
           "path": "src/plugins/share/server/plugin.ts",
           "deprecated": false
@@ -2299,16 +2283,6 @@
         "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-common.LocatorPublic.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "share",
             "id": "def-common.LocatorPublic.getLocation",

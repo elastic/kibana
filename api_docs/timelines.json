@@ -1658,9 +1658,9 @@
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
+          " | undefined; type?: string | undefined; })[]; filters?: ",
           "Filter",
-          "[] | undefined; sort: ",
+          "[] | undefined; title: string; id: string; sort: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -9683,7 +9683,7 @@
             "label": "currentStatus",
             "description": [],
             "signature": [
-              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\" | undefined"
+              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\" | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -12367,7 +12367,7 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
+          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -12381,7 +12381,7 @@
         "label": "AlertWorkflowStatus",
         "description": [],
         "signature": [
-          "\"open\" | \"acknowledged\" | \"closed\""
+          "\"open\" | \"closed\" | \"acknowledged\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -13563,7 +13563,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
+              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -13628,7 +13628,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
+              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false

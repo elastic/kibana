@@ -36326,15 +36326,15 @@
               },
               ") => ",
               "Observable",
-              "<{ columns: ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
+                "section": "def-common.Datatable",
+                "text": "Datatable"
               },
-              "[]; rows: Record<string, any>[]; type: \"datatable\"; }>"
+              ">"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
             "deprecated": false,

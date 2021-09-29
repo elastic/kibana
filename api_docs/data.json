@@ -3520,14 +3520,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/embeddable/view_saved_search_action.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/embeddable/view_saved_search_action.test.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/public/application/helpers/get_fields_to_show.test.ts"
           },
           {
@@ -8200,6 +8192,14 @@
           {
             "plugin": "indexPatternFieldEditor",
             "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
           }
         ],
         "returnComment": [],
@@ -9222,7 +9222,7 @@
                 "section": "def-common.QueryFilter",
                 "text": "QueryFilter"
               },
-              ">[] | undefined; }, never>, \"enabled\" | \"id\" | \"filters\" | \"schema\" | \"json\" | \"timeShift\">, ",
+              ">[] | undefined; }, never>, \"enabled\" | \"filters\" | \"id\" | \"schema\" | \"json\" | \"timeShift\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -9910,7 +9910,7 @@
                 "section": "def-common.ExtendedBounds",
                 "text": "ExtendedBounds"
               },
-              "> | undefined; }, never>, \"enabled\" | \"interval\" | \"id\" | \"timeRange\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"extended_bounds\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\">, ",
+              "> | undefined; }, never>, \"enabled\" | \"interval\" | \"timeRange\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"extended_bounds\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -16072,6 +16072,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/url_state/helpers.ts"
           },
           {
             "plugin": "securitySolution",
@@ -27530,14 +27534,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/embeddable/view_saved_search_action.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/embeddable/view_saved_search_action.test.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/public/application/helpers/get_fields_to_show.test.ts"
           },
           {
@@ -31413,6 +31409,14 @@
           {
             "plugin": "indexPatternFieldEditor",
             "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
           }
         ],
         "returnComment": [],
@@ -33309,6 +33313,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/url_state/helpers.ts"
           },
           {
             "plugin": "securitySolution",
@@ -37298,6 +37306,14 @@
           {
             "plugin": "indexPatternFieldEditor",
             "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
           }
         ],
         "returnComment": [],
@@ -40099,6 +40115,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/url_state/helpers.ts"
           },
           {
             "plugin": "securitySolution",
