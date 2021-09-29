@@ -174,6 +174,7 @@ export class ManifestTask {
       if (deleteErrors.length) {
         reportErrors(this.logger, deleteErrors);
       }
+      await manifestManager.cleanup(newManifest);
     } catch (err) {
       this.logger.error(wrapErrorIfNeeded(err));
     }
