@@ -8,6 +8,7 @@
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import './discover_view.scss';
+import moment from "moment";
 
 interface LastRecentlyAccessedViewProps {
   id: string;
@@ -24,7 +25,7 @@ export function LastRecentlyAccessedView(props: LastRecentlyAccessedViewProps) {
     if (!lastAccessedAt) {
       return 'unknown';
     }
-    return lastAccessedAt;
+    return moment(lastAccessedAt).format('LLLL');
   };
   return (
     <EuiCard
@@ -37,7 +38,7 @@ export function LastRecentlyAccessedView(props: LastRecentlyAccessedViewProps) {
     >
       <EuiFlexGrid>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={'timeslider'} size="s" />
+          <EuiIcon type={'timeslider'} size="m" />
         </EuiFlexItem>
         <EuiFlexItem>{`accessed at: ${getLastAccessedAt()}`}</EuiFlexItem>
       </EuiFlexGrid>

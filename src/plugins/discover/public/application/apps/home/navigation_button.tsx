@@ -7,6 +7,7 @@
  */
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import React from 'react';
+import './discover_view.scss';
 
 export type NavigationType = 'more' | 'less';
 
@@ -26,10 +27,7 @@ export function NavigationButton(props: Props) {
       title={title}
       onClick={onClick}
       description=""
-      style={{
-        backgroundColor: 'rgba(0, 119, 204, 0.1)',
-        color: '#0061a6',
-      }}
+      className={'discoverHome__sectionNavigation__button'}
     />
   );
 }

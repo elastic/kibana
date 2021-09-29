@@ -173,7 +173,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     ));
     return (
       <EuiFlexGrid>
-        <EuiFlexItem grow={1} style={{ height: '121px' }}>
+        <EuiFlexItem grow={1}>
           {addNewIndexPattern}
         </EuiFlexItem>
         <EuiFlexItem grow={9}>
@@ -205,7 +205,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     >
       <EuiFlexGrid columns={1}>
         <EuiFlexItem>
-          <SectionTitle text="Last Recently" />
+          <SectionTitle text="Last Recently Accessed" />
           {lastRecentlyAccessedSection()}
         </EuiFlexItem>
         <EuiFlexItem>
@@ -213,7 +213,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
           {savedSearchesSection()}
         </EuiFlexItem>
         <EuiFlexItem>
-          <SectionTitle text={'DataViews'} />
+          <SectionTitle text="Data View" />
           {indexPatternsSection()}
         </EuiFlexItem>
       </EuiFlexGrid>

@@ -5,3 +5,12 @@
 .editIndexPattern__icon {
   margin-top: 8px !important;
 }
+
+.discoverHome__sectionNavigation__button {
+  background-color: rgba(0, 119, 204, .1) !important;
+  color: #0061A6;
+
+  .euiCard__titleButton {
+    color: #0061A6;
+  }
+}
