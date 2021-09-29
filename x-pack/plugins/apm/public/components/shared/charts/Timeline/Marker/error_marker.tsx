@@ -108,6 +108,7 @@ export function ErrorMarker({ mark }: Props) {
           key={mark.serviceColor}
           color={mark.serviceColor}
           text={error.service.name}
+          indicator={() => <span />}
         />
         <EuiText size="s">
           <ErrorLink
