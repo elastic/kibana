@@ -13,6 +13,11 @@ export const WatchCommand: ICommand = {
   description: 'Runs a build in the Bazel built packages and keeps watching them for changes',
   name: 'watch',
 
+  reportTiming: {
+    group: 'scripts/kbn watch',
+    id: 'total',
+  },
+
   async run(projects, projectGraph, { options }) {
     const runOffline = options?.offline === true;
 

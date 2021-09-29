@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { NodeStatusIcon } from './status_icon';
-export { Node } from './node';
-export { NodeReact } from './node_react';
+export const nodesByIndices: () => (shards, nodes) => any;
