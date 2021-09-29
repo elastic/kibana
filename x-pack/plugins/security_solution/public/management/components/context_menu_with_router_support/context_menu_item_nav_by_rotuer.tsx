@@ -37,7 +37,14 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
         onClick={navigateAppId ? handleOnClickViaNavigateToApp : onClick}
       >
         {textTruncate ? (
-          <div className="eui-textTruncate" style={{ maxWidth: '200px;' }}>
+          <div
+            className="eui-textTruncate"
+            style={{ maxWidth: '200px;' }}
+            {
+              /* Add the html `title` prop if children is a string */
+              ...('string' === typeof children ? { title: children } : {})
+            }
+          >
             {children}
           </div>
         ) : (
