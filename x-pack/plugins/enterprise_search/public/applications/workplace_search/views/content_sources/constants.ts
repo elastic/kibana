@@ -306,20 +306,6 @@ export const SOURCE_CONFIG_TITLE = i18n.translate(
   }
 );
 
-export const SYNC_MANAGEMENT_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementTitle',
-  {
-    defaultMessage: 'Sync management',
-  }
-);
-
-export const SYNC_MANAGEMENT_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementDescription',
-  {
-    defaultMessage: 'Enable and disable extraction of specific content for this source.',
-  }
-);
-
 export const SYNC_MANAGEMENT_SYNCHRONIZE_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementSynchronizeLabel',
   {
