@@ -210,7 +210,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
       template="empty"
       pageHeader={{
         iconType: 'inspect',
-        pageTitle: 'Select Your Data',
+        pageTitle: 'Explore Your Data',
         rightSideItems: [discoverButton],
       }}
       direction="column"
