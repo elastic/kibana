@@ -26,7 +26,6 @@ import {
   saveWithConfirmation,
   isErrorNonFatal,
 } from '../../../../plugins/saved_objects/public';
-import { tagDecoratorConfig } from '../../../../plugins/saved_objects_tagging_oss/public';
 import { getTypes, getSpaces } from '../services';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type { VisSavedObject, SerializedVis, ISavedVis } from '../types';
@@ -205,9 +204,6 @@ export async function getSavedVisualization(
   const config = { injectReferences };
 
   const defaultsProps = getDefaults(opts);
-  const tagDecorator = tagDecoratorConfig.factory();
-  tagDecorator.decorateObject(savedObject);
-  tagDecorator.decorateConfig(config);
 
   if (!id) {
     _.assign(savedObject, defaultsProps);
@@ -273,6 +269,8 @@ export async function getSavedVisualization(
     config.injectReferences(savedObject, resp.references);
   }
 
+  savedObject.references = resp.references;
+
   savedObject.visState = await updateOldState(savedObject.visState);
   if (savedObject.searchSourceFields?.index) {
     await services.dataViews.get(savedObject.searchSourceFields.index as any);
@@ -310,11 +308,6 @@ export async function saveVisualization(
     delete savedObject.id;
   }
 
-  const config = { extractReferences };
-
-  const tagDecorator = tagDecoratorConfig.factory();
-  tagDecorator.decorateConfig(config);
-
   const attributes: any = {
     visState: JSON.stringify(savedObject.visState),
     title: savedObject.title,
@@ -322,9 +315,8 @@ export async function saveVisualization(
     description: savedObject.description,
     savedSearchId: savedObject.savedSearchId,
     version: savedObject.version,
-    __tags: savedObject.__tags,
   };
-  const references: any = [];
+  const references: any = savedObject.references || [];
 
   if (savedObject.searchSource) {
     const { searchSourceJSON, references: searchSourceReferences } =
@@ -342,7 +334,7 @@ export async function saveVisualization(
     references.push(...searchSourceReferences);
   }
 
-  const extractedRefs = config.extractReferences({ attributes, references });
+  const extractedRefs = extractReferences({ attributes, references });
 
   if (!extractedRefs.references) {
     throw new Error('References not returned from extractReferences');

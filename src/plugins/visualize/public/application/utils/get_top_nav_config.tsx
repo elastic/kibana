@@ -405,8 +405,11 @@ export const getTopNavConfig = (
                 savedVis.copyOnSave = newCopyOnSave;
                 savedVis.description = newDescription;
 
-                if (savedObjectsTagging && savedObjectsTagging.ui.hasTagDecoration(savedVis)) {
-                  savedVis.setTags(selectedTags);
+                if (savedObjectsTagging) {
+                  savedVis.references = savedObjectsTagging.ui.updateTagsReferences(
+                    [],
+                    selectedTags
+                  );
                 }
 
                 const saveOptions = {
@@ -467,8 +470,10 @@ export const getTopNavConfig = (
               let tagOptions: React.ReactNode | undefined;
 
               if (savedObjectsTagging) {
-                if (savedVis && savedObjectsTagging.ui.hasTagDecoration(savedVis)) {
-                  selectedTags = savedVis.getTags();
+                if (savedVis && savedVis.references) {
+                  selectedTags = savedObjectsTagging
+                    ? savedObjectsTagging.ui.getTagIdsFromReferences(savedVis.references)
+                    : [];
                 }
                 tagOptions = (
                   <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector

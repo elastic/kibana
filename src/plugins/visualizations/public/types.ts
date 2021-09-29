@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion } from 'kibana/public';
+import type { SavedObjectsMigrationVersion, SavedObjectReference } from 'kibana/public';
 import {
   IAggConfigs,
   SearchSourceFields,
@@ -53,7 +53,7 @@ export interface VisSavedObject extends ISavedVis {
   searchSource?: any;
   version?: string;
   isSaving?: boolean;
-  __tags?: string[];
+  references?: SavedObjectReference[];
 }
 
 export interface VisToExpressionAstParams {
