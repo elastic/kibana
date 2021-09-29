@@ -38,7 +38,7 @@ describe('SampleDataRegistry', () => {
       );
 
       const ids: string[] =
-        // @ts-expect-error
+        // @ts-expect-error registerCustomIntegration is jest-mock function
         mockCustomIntegrationsPluginSetup.registerCustomIntegration.mock.calls.map((args) => {
           return args[0].id;
         });

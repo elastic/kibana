@@ -22,11 +22,11 @@ export function registerSampleDatasetWithIntegration(
     description: sampleDataset.description,
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial_directory/sampleData`,
     isBeta: false,
-    icons: sampleDataset.icon
+    icons: sampleDataset.iconPath
       ? [
           {
             type: 'svg',
-            src: core.http.basePath.prepend(sampleDataset.icon),
+            src: core.http.basePath.prepend(sampleDataset.iconPath),
           },
         ]
       : [],

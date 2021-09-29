@@ -42,6 +42,6 @@ export const ecommerceSpecProvider = function (): SampleDatasetSchema {
       },
     ],
     status: 'not_installed',
-    icon: '/plugins/home/assets/sample_data_resources/ecommerce/icon.svg',
+    iconPath: '/plugins/home/assets/sample_data_resources/ecommerce/icon.svg',
   };
 };
