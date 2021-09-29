@@ -23,27 +23,32 @@ export const plainColumnRenderer: ColumnRenderer = {
     dataExistsAtColumn(columnName, data),
 
   renderColumn: ({
+    asPlainText,
     columnName,
     eventId,
     field,
+    isDetails,
     isDraggable = true,
     timelineId,
     truncate,
     values,
     linkValues,
   }: {
+    asPlainText?: boolean;
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
+    isDetails: boolean;
     isDraggable?: boolean;
     timelineId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
     linkValues?: string[] | null | undefined;
-  }) =>
-    values != null
+  }) => {
+    return values != null
       ? values.map((value, i) => (
           <FormattedFieldValue
+            asPlainText={asPlainText}
             key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
             contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
             eventId={eventId}
@@ -56,5 +61,6 @@ export const plainColumnRenderer: ColumnRenderer = {
             linkValue={head(linkValues)}
           />
         ))
-      : getEmptyTagValue(),
+      : getEmptyTagValue();
+  },
 };

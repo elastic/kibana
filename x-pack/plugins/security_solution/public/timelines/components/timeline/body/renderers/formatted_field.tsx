@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
@@ -44,38 +44,52 @@ import { AgentStatuses } from './agent_statuses';
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
 const FormattedFieldValueComponent: React.FC<{
+  asPlainText?: boolean;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
   isObjectArray?: boolean;
   fieldFormat?: string;
   fieldName: string;
   fieldType?: string;
+  isButton?: boolean;
   isDraggable?: boolean;
+  onClick?: () => void;
+  title?: string;
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
 }> = ({
+  asPlainText,
+  Component,
   contextId,
   eventId,
   fieldFormat,
   fieldName,
   fieldType,
+  isButton,
   isObjectArray = false,
   isDraggable = true,
+  onClick,
+  title,
   truncate,
   value,
   linkValue,
 }) => {
-  if (isObjectArray) {
+  if (isObjectArray || asPlainText) {
     return <>{value}</>;
   } else if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
+        Component={Component}
         eventId={eventId}
         contextId={contextId}
         fieldName={fieldName}
+        isButton={isButton}
         isDraggable={isDraggable}
         value={!isNumber(value) ? value : String(value)}
+        onClick={onClick}
+        title={title}
         truncate={truncate}
       />
     );
@@ -98,10 +112,12 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (PORT_NAMES.some((portName) => fieldName === portName)) {
     return (
       <Port
+        Component={Component}
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
         isDraggable={isDraggable}
+        title={title}
         value={`${value}`}
       />
     );
@@ -118,10 +134,14 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === HOST_NAME_FIELD_NAME) {
     return (
       <HostName
+        Component={Component}
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
         isDraggable={isDraggable}
+        isButton={isButton}
+        onClick={onClick}
+        title={title}
         value={value}
       />
     );
@@ -138,11 +158,13 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
     return (
       <RenderRuleName
+        Component={Component}
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
         isDraggable={isDraggable}
         linkValue={linkValue}
+        title={title}
         truncate={truncate}
         value={value}
       />
@@ -185,7 +207,17 @@ const FormattedFieldValueComponent: React.FC<{
       INDICATOR_REFERENCE,
     ].includes(fieldName)
   ) {
-    return renderUrl({ contextId, eventId, fieldName, linkValue, isDraggable, truncate, value });
+    return renderUrl({
+      contextId,
+      Component,
+      eventId,
+      fieldName,
+      linkValue,
+      isDraggable,
+      truncate,
+      title,
+      value,
+    });
   } else if (columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">

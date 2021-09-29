@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiSpacer, EuiPanel } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
-import styled from 'styled-components';
 import { BrowserFields, ColumnHeaderOptions, RowRenderer } from '../../../../../../common';
 import { Ecs } from '../../../../../../common/ecs';
 import { eventRendererNames } from '../../../row_renderers_browser/catalog/constants';
@@ -34,6 +33,7 @@ export const reasonColumnRenderer: ColumnRenderer = {
     ecsData,
     rowRenderers = [],
     browserFields,
+    isDetails,
   }: {
     columnName: string;
     eventId: string;
@@ -47,33 +47,34 @@ export const reasonColumnRenderer: ColumnRenderer = {
     ecsData?: Ecs;
     rowRenderers?: RowRenderer[];
     browserFields?: BrowserFields;
-  }) =>
-    values != null && ecsData && rowRenderers?.length > 0 && browserFields
-      ? values.map((value, i) => (
-          <ReasonCell
-            key={`reason-column-renderer-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
-            timelineId={timelineId}
-            value={value}
-            ecsData={ecsData}
-            rowRenderers={rowRenderers}
-            browserFields={browserFields}
-          />
-        ))
-      : plainColumnRenderer.renderColumn({
-          columnName,
-          eventId,
-          field,
-          isDraggable,
-          timelineId,
-          truncate,
-          values,
-          linkValues,
-        }),
+    isDetails: boolean;
+  }) => {
+    if (isDetails && values && ecsData && rowRenderers && browserFields) {
+      return values.map((value, i) => (
+        <ReasonCell
+          key={`reason-column-renderer-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+          timelineId={timelineId}
+          value={value}
+          ecsData={ecsData}
+          rowRenderers={rowRenderers}
+          browserFields={browserFields}
+        />
+      ));
+    } else {
+      return plainColumnRenderer.renderColumn({
+        columnName,
+        eventId,
+        field,
+        isDraggable,
+        timelineId,
+        truncate,
+        values,
+        linkValues,
+        isDetails,
+      });
+    }
+  },
 };
-
-const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
-  font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
-`;
 
 const ReasonCell: React.FC<{
   value: string | number | undefined | null;
@@ -82,8 +83,6 @@ const ReasonCell: React.FC<{
   rowRenderers: RowRenderer[];
   browserFields: BrowserFields;
 }> = ({ ecsData, rowRenderers, browserFields, timelineId, value }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   const rowRenderer = useMemo(() => getRowRenderer(ecsData, rowRenderers), [ecsData, rowRenderers]);
 
   const rowRender = useMemo(() => {
@@ -98,38 +97,17 @@ const ReasonCell: React.FC<{
     );
   }, [rowRenderer, browserFields, ecsData, timelineId]);
 
-  const handleTogglePopOver = useCallback(() => setIsOpen(!isOpen), [setIsOpen, isOpen]);
-  const handleClosePopOver = useCallback(() => setIsOpen(false), [setIsOpen]);
-
-  const button = useMemo(
-    () => (
-      <StyledEuiButtonEmpty
-        data-test-subj="reason-cell-button"
-        size="xs"
-        flush="left"
-        onClick={handleTogglePopOver}
-      >
-        {value}
-      </StyledEuiButtonEmpty>
-    ),
-    [value, handleTogglePopOver]
-  );
-
   return (
     <>
       {rowRenderer && rowRender ? (
-        <EuiPopover
-          isOpen={isOpen}
-          anchorPosition="rightCenter"
-          closePopover={handleClosePopOver}
-          panelClassName="withHoverActions__popover"
-          button={button}
-        >
-          <EuiPopoverTitle paddingSize="s">
-            {i18n.EVENT_RENDERER_POPOVER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}
-          </EuiPopoverTitle>
-          {rowRender}
-        </EuiPopover>
+        <>
+          {value}
+          <h4>{i18n.EVENT_RENDERER_POPOVER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>
+          <EuiSpacer size="xs" />
+          <EuiPanel color="subdued" data-test-subj="tGridEmptyState">
+            {rowRender}
+          </EuiPanel>
+        </>
       ) : (
         value
       )}

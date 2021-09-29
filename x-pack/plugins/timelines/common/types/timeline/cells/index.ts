@@ -13,6 +13,7 @@ import { ColumnHeaderOptions } from '../columns';
 
 /** The following props are provided to the function called by `renderCellValue` */
 export type CellValueElementProps = EuiDataGridCellValueElementProps & {
+  asPlainText?: boolean;
   data: TimelineNonEcsData[];
   eventId: string; // _id
   header: ColumnHeaderOptions;

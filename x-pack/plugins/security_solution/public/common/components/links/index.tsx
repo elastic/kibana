@@ -15,6 +15,8 @@ import {
   EuiFlexItem,
   PropsForAnchor,
   PropsForButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useMemo, useCallback, SyntheticEvent } from 'react';
 import { isNil } from 'lodash/fp';
@@ -102,10 +104,12 @@ export const UebaDetailsLink = React.memo(UebaDetailsLinkComponent);
 
 const HostDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   hostName: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-}> = ({ children, hostName, isButton, onClick }) => {
+  title?: string;
+}> = ({ children, Component, hostName, isButton, onClick, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
   const goToHostDetails = useCallback(
@@ -120,13 +124,25 @@ const HostDetailsLinkComponent: React.FC<{
   );
 
   return isButton ? (
-    <LinkButton
-      onClick={onClick ?? goToHostDetails}
-      href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
-      data-test-subj="host-details-button"
-    >
-      {children ? children : hostName}
-    </LinkButton>
+    Component ? (
+      <Component
+        href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+        onClick={onClick ?? goToHostDetails}
+        data-test-subj="data-grid-host-details"
+        title={title}
+        iconType="expand"
+      >
+        {title ?? children ?? hostName}
+      </Component>
+    ) : (
+      <LinkButton
+        onClick={onClick ?? goToHostDetails}
+        href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+        data-test-subj="host-details-button"
+      >
+        {children ? children : hostName}
+      </LinkButton>
+    )
   ) : (
     <LinkAnchor
       onClick={onClick ?? goToHostDetails}
@@ -176,11 +192,13 @@ ExternalLink.displayName = 'ExternalLink';
 
 const NetworkDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   ip: string;
   flowTarget?: FlowTarget | FlowTargetSourceDest;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void | undefined;
-}> = ({ children, ip, flowTarget = FlowTarget.source, isButton, onClick }) => {
+  title?: string;
+}> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const goToNetworkDetails = useCallback(
@@ -195,13 +213,25 @@ const NetworkDetailsLinkComponent: React.FC<{
   );
 
   return isButton ? (
-    <LinkButton
-      href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
-      onClick={onClick ?? goToNetworkDetails}
-      data-test-subj="network-details"
-    >
-      {children ? children : ip}
-    </LinkButton>
+    Component ? (
+      <Component
+        href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+        onClick={onClick ?? goToNetworkDetails}
+        data-test-subj="data-grid-network-details"
+        title={title}
+        iconType="expand"
+      >
+        {title ?? children ?? ip}
+      </Component>
+    ) : (
+      <LinkButton
+        href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+        onClick={onClick ?? goToNetworkDetails}
+        data-test-subj="network-details"
+      >
+        {children ? children : ip}
+      </LinkButton>
+    )
   ) : (
     <LinkAnchor
       onClick={onClick ?? goToNetworkDetails}
@@ -283,20 +313,31 @@ GoogleLink.displayName = 'GoogleLink';
 
 export const PortOrServiceNameLink = React.memo<{
   children?: React.ReactNode;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   portOrServiceName: number | string;
-}>(({ children, portOrServiceName }) => (
-  <PortContainer>
-    <EuiLink
-      data-test-subj="port-or-service-name-link"
-      href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
-        String(portOrServiceName)
-      )}`}
-      target="_blank"
+  onClick?: (e: SyntheticEvent) => void | undefined;
+  title?: string;
+}>(({ Component, title, children, portOrServiceName }) => {
+  const href = `https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
+    String(portOrServiceName)
+  )}`;
+  return Component ? (
+    <Component
+      href={href}
+      data-test-subj="data-grid-port-or-service-name-link"
+      title={title}
+      iconType="link"
     >
-      {children ? children : portOrServiceName}
-    </EuiLink>
-  </PortContainer>
-));
+      {title ?? children ?? portOrServiceName}
+    </Component>
+  ) : (
+    <PortContainer>
+      <EuiLink data-test-subj="port-or-service-name-link" href={href} target="_blank">
+        {children ? children : portOrServiceName}
+      </EuiLink>
+    </PortContainer>
+  );
+});
 
 PortOrServiceNameLink.displayName = 'PortOrServiceNameLink';
 

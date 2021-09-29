@@ -14,6 +14,7 @@ import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 import { CellValueElementProps } from '.';
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
+  asPlainText,
   columnId,
   data,
   eventId,
@@ -25,9 +26,11 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   rowRenderers,
   browserFields,
   ecsData,
+  isDetails,
 }) => (
   <>
     {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+      asPlainText,
       columnName: header.id,
       eventId,
       field: header,
@@ -42,6 +45,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
       rowRenderers,
       browserFields,
       ecsData,
+      isDetails,
     })}
   </>
 );

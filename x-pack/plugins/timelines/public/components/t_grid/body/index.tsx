@@ -145,6 +145,10 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
+const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
+const hasCellActions = (columnId?: string) => {
+  return columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
+};
 const transformControlColumns = ({
   actionColumnsWidth,
   columnHeaders,
@@ -638,7 +642,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       setEventsDeleted,
       hasAlertsCrudPermissions,
     ]);
-
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header) => {
@@ -646,15 +649,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             tGridCellAction({
               browserFields,
               data: data.map((row) => row.data),
+              ecsData: data.map((row) => row.ecs),
               globalFilters: filters,
+              header: columnHeaders.find((h) => h.id === header.id),
               pageSize,
               timelineId: id,
             });
 
           return {
             ...header,
-            cellActions:
-              header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
+            cellActions: hasCellActions(header.id)
+              ? header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction)
+              : undefined,
           };
         }),
       [browserFields, columnHeaders, data, defaultCellActions, id, pageSize, filters]
@@ -665,9 +671,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         columnId,
         rowIndex,
         setCellProps,
+        isDetails,
       }): React.ReactElement | null => {
         const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-
         const rowData = pageRowIndex < data.length ? data[pageRowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
         const eventId = pageRowIndex < data.length ? data[pageRowIndex]._id : null;
@@ -689,6 +695,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         }
 
         return renderCellValue({
+          asPlainText: true,
           columnId: header.id,
           eventId,
           data: rowData,
@@ -696,7 +703,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           isDraggable: false,
           isExpandable: true,
           isExpanded: false,
-          isDetails: false,
+          isDetails,
           linkValues: getOr([], header.linkField ?? '', ecs),
           rowIndex,
           setCellProps,

@@ -17,15 +17,18 @@ export interface ColumnRenderer {
     columnName,
     eventId,
     field,
+    isDetails,
     isDraggable,
     timelineId,
     truncate,
     values,
     linkValues,
   }: {
+    asPlainText?: boolean;
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
+    isDetails: boolean;
     isDraggable?: boolean;
     timelineId: string;
     truncate?: boolean;

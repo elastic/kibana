@@ -18,6 +18,7 @@ export interface FilterValueFnArgs {
 }
 
 export interface HoverActionComponentProps {
+  className?: string;
   defaultFocusedButtonRef?: EuiButtonIconPropsForButton['buttonRef'];
   field: string;
   keyboardEvent?: React.KeyboardEvent;

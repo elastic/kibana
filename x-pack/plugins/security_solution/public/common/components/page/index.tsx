@@ -31,13 +31,67 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     z-index: 9950 !important;
   }
 
+  .euiDataGridRowCell__expandButton .euiDataGridRowCell__actionButtonIcon {
+    display: none;
+
+    &:first-child,
+    &:nth-child(2) {
+      display: inline-flex;
+    }
+
+  }
+
   /*
     overrides the default styling of EuiDataGrid expand popover footer to
     make it a column of actions instead of the default actions row
   */
-  .euiDataGridRowCell__popover .euiPopoverFooter .euiFlexGroup {
-    flex-direction: column;
-    align-items: flex-start;
+  .euiDataGridRowCell__popover {
+
+    max-width: 815px !important;
+    overflow: hidden;
+
+    .euiText {
+      padding: 8px;
+    }
+
+    &.euiPopover__panel.euiPopover__panel-isOpen {
+      padding: 0;
+    }
+
+    &.euiPopover__panel.euiPanel--paddingSmall .euiPopoverFooter:not([class*='euiPopoverFooter--padding']) {
+      padding: 0 8px;
+      margin-top: 0;
+    }
+
+    .euiPopoverFooter .euiFlexGroup {
+      flex-wrap: wrap;
+      margin: 0;
+      width: 260px;
+
+      .euiButtonEmpty .euiButtonContent {
+        justify-content: left;
+
+
+      }
+
+      &.euiFlexGroup--gutterSmall > .euiFlexItem {
+        margin: 2px 0;
+
+        &:first-child,
+        &:nth-child(2) {
+          padding-top: 2px;
+        }
+
+        &:nth-child(3) {
+          border-top: 1px solid #D3DAE6;
+          padding-top: 4px;
+        }
+
+        &:last-child {
+          padding-bottom: 8px;
+        }
+      }
+    }
   }
 
   /*

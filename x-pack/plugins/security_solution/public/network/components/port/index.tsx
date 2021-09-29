@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../common/components/draggables';
@@ -27,11 +28,13 @@ export const PORT_NAMES = [
 
 export const Port = React.memo<{
   contextId: string;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
   isDraggable?: boolean;
+  title?: string;
   value: string | undefined | null;
-}>(({ contextId, eventId, fieldName, isDraggable, value }) =>
+}>(({ Component, contextId, eventId, fieldName, isDraggable, title, value }) =>
   isDraggable ? (
     <DefaultDraggable
       data-test-subj="port"
@@ -41,10 +44,18 @@ export const Port = React.memo<{
       tooltipContent={fieldName}
       value={value}
     >
-      <PortOrServiceNameLink portOrServiceName={value || getEmptyValue()} />
+      <PortOrServiceNameLink
+        portOrServiceName={value || getEmptyValue()}
+        Component={Component}
+        title={title}
+      />
     </DefaultDraggable>
   ) : (
-    <PortOrServiceNameLink portOrServiceName={value || getEmptyValue()} />
+    <PortOrServiceNameLink
+      portOrServiceName={value || getEmptyValue()}
+      Component={Component}
+      title={title}
+    />
   )
 );
 

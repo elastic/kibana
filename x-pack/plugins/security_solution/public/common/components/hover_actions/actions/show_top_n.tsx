@@ -30,6 +30,7 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 interface Props {
+  className?: string;
   /** When `Component` is used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality.
    * When `Component` is used with `EuiContextMenu`, we pass EuiContextMenuItem to render the right style.
    */
@@ -48,6 +49,7 @@ interface Props {
 
 export const ShowTopNButton: React.FC<Props> = React.memo(
   ({
+    className,
     Component,
     enablePopOver,
     field,
@@ -76,6 +78,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         Component ? (
           <Component
             aria-label={SHOW_TOP(field)}
+            className={className}
             data-test-subj="show-top-field"
             icon="visBarVertical"
             iconType="visBarVertical"
@@ -94,7 +97,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
             onClick={onClick}
           />
         ),
-      [Component, field, onClick]
+      [Component, className, field, onClick]
     );
 
     const button = useMemo(

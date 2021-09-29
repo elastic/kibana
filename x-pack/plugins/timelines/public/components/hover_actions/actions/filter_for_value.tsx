@@ -14,8 +14,8 @@ import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcu
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
 import { HoverActionComponentProps, FilterValueFnArgs } from './types';
 
-export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterForValue', {
-  defaultMessage: 'Filter for value',
+export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterIn', {
+  defaultMessage: 'Filter In',
 });
 export const FILTER_FOR_VALUE_KEYBOARD_SHORTCUT = 'f';
 

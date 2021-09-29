@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
@@ -30,22 +38,26 @@ const EventModuleFlexItem = styled(EuiFlexItem)`
 `;
 
 interface RenderRuleNameProps {
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
   fieldName: string;
   isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
+  title?: string;
   value: string | number | null | undefined;
 }
 
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
+  Component,
   contextId,
   eventId,
   fieldName,
   isDraggable,
   linkValue,
   truncate,
+  title,
   value,
 }) => {
   const ruleName = `${value}`;
@@ -70,7 +82,11 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   );
 
   if (isString(value) && ruleName.length > 0 && ruleId != null) {
-    const link = (
+    const link = Component ? (
+      <Component onClick={goToRuleDetails} iconType="link" aria-label={title} title={title}>
+        {title ?? value}
+      </Component>
+    ) : (
       <LinkAnchor
         onClick={goToRuleDetails}
         href={getUrlForApp(APP_ID, {
@@ -191,33 +207,41 @@ export const renderEventModule = ({
 
 export const renderUrl = ({
   contextId,
+  Component,
   eventId,
   fieldName,
   isDraggable,
   linkValue,
   truncate,
+  title,
   value,
 }: {
   contextId: string;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
   isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
+  title?: string;
   value: string | number | null | undefined;
 }) => {
   const urlName = `${value}`;
+  const isUrlValid = !isUrlInvalid(urlName);
 
   const formattedValue = truncate ? <TruncatableText>{value}</TruncatableText> : value;
-  const content = (
-    <>
-      {!isUrlInvalid(urlName) && (
-        <EuiLink target="_blank" href={urlName}>
-          {formattedValue}
-        </EuiLink>
-      )}
-      {isUrlInvalid(urlName) && <>{formattedValue}</>}
-    </>
+  const content = isUrlValid ? (
+    Component ? (
+      <Component href={urlName} data-test-subj="data-grid-url" title={title} iconType="link">
+        {title ?? formattedValue}
+      </Component>
+    ) : (
+      <EuiLink target="_blank" href={urlName}>
+        {formattedValue}
+      </EuiLink>
+    )
+  ) : (
+    formattedValue
   );
 
   return isString(value) && urlName.length > 0 ? (
