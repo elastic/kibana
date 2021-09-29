@@ -20,7 +20,7 @@ import { SymbolIcon } from '../legend/symbol_icon';
 import { getCustomIconId, SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
-import { buildSrcUrl } from '../../symbol_utils'
+import { buildSrcUrl } from '../../symbol_utils';
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
@@ -34,14 +34,17 @@ export class IconSelect extends Component {
 
   _handleSave = (name, description, image) => {
     const symbolId = getCustomIconId();
-    const icons = [...this.props.customIcons, {
-      symbolId,
-      icon: image,
-      name,
-    }];
+    const icons = [
+      ...this.props.customIcons,
+      {
+        symbolId,
+        icon: image,
+        name,
+      },
+    ];
     this.props.onCustomIconsChange(icons);
     this._hideModal();
-  }
+  };
 
   _closePopover = () => {
     this.setState({ isPopoverOpen: false });
@@ -88,7 +91,7 @@ export class IconSelect extends Component {
     });
 
     if (selectedOption) {
-      const { key, icon, label } = selectedOption
+      const { key, icon, label } = selectedOption;
       this.props.onChange({ selectedIconId: key, icon, label });
     }
     this._closePopover();
@@ -125,19 +128,25 @@ export class IconSelect extends Component {
   }
 
   _renderIconSelectable() {
-    const makiOptions = SYMBOL_OPTIONS.map(({ key, label }) => {
-      return {
-        key,
-        label,
-        prepend: (
-          <SymbolIcon
-            key={key}
-            symbolId={key}
-            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-          />
-        ),
-      };
-    });
+    const makiOptions = [
+      {
+        label: 'Maki icons',
+        isGroupLabel: true,
+      },
+      ...SYMBOL_OPTIONS.map(({ key, label }) => {
+        return {
+          key,
+          label,
+          prepend: (
+            <SymbolIcon
+              key={key}
+              symbolId={key}
+              fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            />
+          ),
+        };
+      }),
+    ];
 
     const customOptions = this.props.customIcons.map(({ symbolId, icon, name }) => {
       return {
@@ -155,12 +164,13 @@ export class IconSelect extends Component {
       };
     });
 
-    if (customOptions.length) customOptions.splice(0, 0, {
-      label: 'Custom Icons',
-      isGroupLabel: true,
-    });
+    if (customOptions.length)
+      customOptions.splice(0, 0, {
+        label: 'Custom icons',
+        isGroupLabel: true,
+      });
 
-    const options = [...makiOptions, ...customOptions];
+    const options = [...customOptions, ...makiOptions];
 
     return (
       <EuiSelectable searchable options={options} onChange={this._onIconSelect}>
@@ -194,7 +204,11 @@ export class IconSelect extends Component {
           </EuiFocusTrap>
         </EuiPopover>
         {this.state.isModalVisible ? (
-          <CustomIconModal title="Custom Icon" onSave={this._handleSave} onCancel={this._hideModal} />
+          <CustomIconModal
+            title="Custom Icon"
+            onSave={this._handleSave}
+            onCancel={this._hideModal}
+          />
         ) : null}
       </Fragment>
     );
