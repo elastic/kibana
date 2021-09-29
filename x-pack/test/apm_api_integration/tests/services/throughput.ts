@@ -116,7 +116,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   end: metadata.end,
                   transactionType: 'request',
                   environment: 'ENVIRONMENT_ALL',
-                  _inspect: true,
                 },
               },
             });
