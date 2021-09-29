@@ -145,7 +145,11 @@ export const BootstrapCommand: ICommand = {
       upstreamBranch: kbn.kibanaProject.json.branch,
       // prevent loading @kbn/utils by passing null
       kibanaUuid: kbn.getUuid() || null,
-      timings: timings.map((t) => ({ group: 'scripts/kbn bootstrap', ...t })),
+      timings: timings.map((t) => ({
+        group: 'scripts/kbn bootstrap',
+        ...t,
+        meta: { nestedTiming: process.env.CI_STATS_NESTED_TIMING },
+      })),
     });
   },
 };

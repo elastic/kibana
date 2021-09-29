@@ -90,6 +90,8 @@ export class CiStatsReporter {
       this.log.debug(e.message);
     }
 
+    const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
+
     const defaultMetadata = {
       osPlatform: Os.platform(),
       osRelease: Os.release(),
@@ -99,10 +101,11 @@ export class CiStatsReporter {
       cpuSpeed: Os.cpus()[0]?.speed,
       freeMem: Os.freemem(),
       totalMem: Os.totalmem(),
+      email: isElasticCommitter ? email : undefined,
       committerHash: email
         ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
         : undefined,
-      isElasticCommitter: email ? email.endsWith('@elastic.co') : undefined,
+      isElasticCommitter,
       kibanaUuid,
     };
 

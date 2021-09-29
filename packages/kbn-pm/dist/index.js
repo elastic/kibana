@@ -9013,9 +9013,13 @@ const BootstrapCommand = {
       upstreamBranch: kbn.kibanaProject.json.branch,
       // prevent loading @kbn/utils by passing null
       kibanaUuid: kbn.getUuid() || null,
-      timings: timings.map(t => _objectSpread({
+      timings: timings.map(t => _objectSpread(_objectSpread({
         group: 'scripts/kbn bootstrap'
-      }, t))
+      }, t), {}, {
+        meta: {
+          nestedTiming: process.env.CI_STATS_NESTED_TIMING
+        }
+      }))
     });
   }
 
@@ -9108,6 +9112,7 @@ class CiStatsReporter {
       this.log.debug(e.message);
     }
 
+    const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
     const defaultMetadata = {
       osPlatform: _os.default.platform(),
       osRelease: _os.default.release(),
@@ -9117,8 +9122,9 @@ class CiStatsReporter {
       cpuSpeed: (_Os$cpus$2 = _os.default.cpus()[0]) === null || _Os$cpus$2 === void 0 ? void 0 : _Os$cpus$2.speed,
       freeMem: _os.default.freemem(),
       totalMem: _os.default.totalmem(),
+      email: isElasticCommitter ? email : undefined,
       committerHash: email ? _crypto.default.createHash('sha256').update(email).digest('hex').substring(0, 20) : undefined,
-      isElasticCommitter: email ? email.endsWith('@elastic.co') : undefined,
+      isElasticCommitter,
       kibanaUuid
     };
     this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
@@ -60705,6 +60711,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+process.env.CI_STATS_NESTED_TIMING = 'true';
 async function runCommand(command, config) {
   const runStartTime = Date.now();
   let kbn;
