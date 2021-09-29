@@ -138,7 +138,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     }
   }
 
-  set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   merge(extraCliOptions);
@@ -168,13 +167,6 @@ export default function (program) {
     .option(
       '-l, --log-file <path>',
       'Deprecated, set logging file destination in your configuration'
-    )
-    .option(
-      '--plugin-dir <path>',
-      'A path to scan for plugins, this can be specified multiple ' +
-        'times to specify multiple directories',
-      pluginDirCollector,
-      [fromRoot('plugins')]
     )
     .option(
       '--plugin-path <path>',
