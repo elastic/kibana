@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
+import { BulkRequest } from '@elastic/elasticsearch/api/types';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
 import { ElasticsearchClient } from 'kibana/server';
+import { Logger } from 'kibana/server';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 
 import { RuleDataWriteDisabledError } from '../rule_data_plugin_service/errors';
@@ -22,12 +25,21 @@ interface ConstructorOptions {
   isWriteEnabled: boolean;
   waitUntilReadyForReading: Promise<WaitResult>;
   waitUntilReadyForWriting: Promise<WaitResult>;
+  logger: Logger;
 }
 
 export type WaitResult = Either<Error, ElasticsearchClient>;
 
 export class RuleDataClient implements IRuleDataClient {
-  constructor(private readonly options: ConstructorOptions) {}
+  private _isWriteEnabled: boolean = false;
+
+  // Writers cached by namespace
+  private writerCache: Map<string, IRuleDataWriter>;
+
+  constructor(private readonly options: ConstructorOptions) {
+    this.writeEnabled = this.options.isWriteEnabled;
+    this.writerCache = new Map();
+  }
 
   public get indexName(): string {
     return this.options.indexInfo.baseName;
@@ -37,8 +49,16 @@ export class RuleDataClient implements IRuleDataClient {
     return this.options.indexInfo.kibanaVersion;
   }
 
+  private get writeEnabled(): boolean {
+    return this._isWriteEnabled;
+  }
+
+  private set writeEnabled(isEnabled: boolean) {
+    this._isWriteEnabled = isEnabled;
+  }
+
   public isWriteEnabled(): boolean {
-    return this.options.isWriteEnabled;
+    return this.writeEnabled;
   }
 
   public getReader(options: { namespace?: string } = {}): IRuleDataReader {
@@ -95,62 +115,87 @@ export class RuleDataClient implements IRuleDataClient {
   }
 
   public getWriter(options: { namespace?: string } = {}): IRuleDataWriter {
-    const { indexInfo, resourceInstaller } = this.options;
-
     const namespace = options.namespace || 'default';
-    const alias = indexInfo.getPrimaryAlias(namespace);
-    const isWriteEnabled = this.isWriteEnabled();
+    const cachedWriter = this.writerCache.get(namespace);
 
+    // There is no cached writer, so we'll install / update the namespace specific resources now.
+    if (!cachedWriter) {
+      const writerForNamespace = this.initializeWriter(namespace);
+      this.writerCache.set(namespace, writerForNamespace);
+      return writerForNamespace;
+    } else {
+      return cachedWriter;
+    }
+  }
+
+  private initializeWriter(namespace: string): IRuleDataWriter {
+    const isWriteEnabled = () => this.writeEnabled;
+
+    const { indexInfo, resourceInstaller } = this.options;
+    const alias = indexInfo.getPrimaryAlias(namespace);
+
+    // Wait until both index and namespace level resources have been installed / updated.
     const waitUntilReady = async () => {
-      const result = await this.options.waitUntilReadyForWriting;
-      if (isLeft(result)) {
-        throw result.left;
+      const failAndTurnOffWrite = (context: string, error: Error) => {
+        this.options.logger.error(
+          `There has been a catastrophic error trying to install ${context} level resources. Writing can no longer continue, and has been disabled for the following registration context: ${indexInfo.indexOptions.registrationContext}. 
+          This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: ${error}`
+        );
+        this.writeEnabled = false;
+      };
+
+      const indexLevelResourcesResult = await this.options.waitUntilReadyForWriting;
+
+      if (isLeft(indexLevelResourcesResult)) {
+        failAndTurnOffWrite('index', indexLevelResourcesResult.left);
+        throw indexLevelResourcesResult.left;
       } else {
-        return result.right;
+        try {
+          await pRetry(
+            async () => {
+              await resourceInstaller.installAndUpdateNamespaceLevelResources(indexInfo, namespace);
+            },
+            { retries: 2 }
+          );
+          return indexLevelResourcesResult.right;
+        } catch (e) {
+          failAndTurnOffWrite('namespace', e);
+          throw e;
+        }
       }
     };
 
+    const waitUntilReadyResult = waitUntilReady();
+
     return {
-      bulk: async (request) => {
-        if (!isWriteEnabled) {
+      bulk: async (request: BulkRequest) => {
+        if (!isWriteEnabled()) {
           throw new RuleDataWriteDisabledError();
         }
 
-        const clusterClient = await waitUntilReady();
+        return waitUntilReadyResult
+          .then((clusterClient) => {
+            const requestWithDefaultParameters = {
+              ...request,
+              require_alias: true,
+              index: alias,
+            };
 
-        const requestWithDefaultParameters = {
-          ...request,
-          require_alias: true,
-          index: alias,
-        };
-
-        return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
-          if (response.body.errors) {
-            if (
-              response.body.items.length > 0 &&
-              (response.body.items.every(
-                (item) => item.index?.error?.type === 'index_not_found_exception'
-              ) ||
-                response.body.items.every(
-                  (item) => item.index?.error?.type === 'illegal_argument_exception'
-                ))
-            ) {
-              return resourceInstaller
-                .installNamespaceLevelResources(indexInfo, namespace)
-                .then(() => {
-                  return clusterClient.bulk(requestWithDefaultParameters).then((retryResponse) => {
-                    if (retryResponse.body.errors) {
-                      throw new ResponseError(retryResponse);
-                    }
-                    return retryResponse;
-                  });
-                });
-            }
-            const error = new ResponseError(response);
-            throw error;
-          }
-          return response;
-        });
+            return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
+              if (response.body.errors) {
+                const error = new ResponseError(response);
+                throw error;
+              }
+              return response;
+            });
+          })
+          .catch((error) => {
+            this.options.logger.error(
+              `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue. 
+              Full error: ${error}`
+            );
+            return undefined;
+          });
       },
     };
   }

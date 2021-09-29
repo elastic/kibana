@@ -35,5 +35,5 @@ export interface IRuleDataReader {
 }
 
 export interface IRuleDataWriter {
-  bulk(request: BulkRequest): Promise<ApiResponse<BulkResponse>>;
+  bulk(request: BulkRequest): Promise<ApiResponse<BulkResponse> | undefined>;
 }
