@@ -78,7 +78,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         },
         error: undefined,
         user: {
-          id: 'elastic',
+          id: this.randomUser(),
         },
       },
       overrides
