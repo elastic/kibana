@@ -165,6 +165,12 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    logsEndpoint: {
+      alias: 'le',
+      describe: 'add endpoint actions and responses',
+      type: 'boolean',
+      default: false,
+    },
     ssl: {
       alias: 'ssl',
       describe: 'Use https for elasticsearch and kbn clients',
@@ -226,6 +232,7 @@ async function main() {
     argv.alertIndex,
     argv.alertsPerHost,
     argv.fleet,
+    argv.logsEndpoint,
     {
       ancestors: argv.ancestors,
       generations: argv.generations,
