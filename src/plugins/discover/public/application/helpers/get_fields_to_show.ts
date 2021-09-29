@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IFieldSubTypeMulti } from '@kbn/es-query';
+import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { IndexPattern } from '../../../../data/common';
 
 export const getFieldsToShow = (
@@ -17,16 +17,14 @@ export const getFieldsToShow = (
   const mapping = (name: string) => indexPattern.fields.getByName(name);
   fields.forEach((key) => {
     const mapped = mapping(key);
-    const subTypeMulti: IFieldSubTypeMulti | undefined = mapped?.spec
-      ?.subType as IFieldSubTypeMulti;
+    const subTypeMulti = mapped && getDataViewFieldSubtypeMulti(mapped.spec);
     if (mapped && subTypeMulti?.multi?.parent) {
       childParentFieldsMap[mapped.name] = subTypeMulti.multi.parent;
     }
   });
   return fields.filter((key: string) => {
     const fieldMapping = mapping(key);
-    const subTypeMulti: IFieldSubTypeMulti | undefined = fieldMapping?.spec
-      ?.subType as IFieldSubTypeMulti;
+    const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
     const isMultiField = !!subTypeMulti?.multi;
     if (!isMultiField) {
       return true;
