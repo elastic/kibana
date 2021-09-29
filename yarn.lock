@@ -1397,10 +1397,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.20":
-  version "8.0.0-canary.20"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.20.tgz#7e9826f693be409b83b3827d9eb14cb8326a5916"
-  integrity sha512-bma25umW+Wio6r10Ixhz/V2F10ZdMdBqNGjKRoOL9E5sU8CfyVSDL/A0j8Rt+FaY+JdagtF1EYT5ikVC4iRfLg==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.21":
+  version "8.0.0-canary.21"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.21.tgz#6572a547071a17cf511a42fd93738780266a9f89"
+  integrity sha512-J/qRGYkTj+YeEJh5xci9eLlVPrfwSEURK/P+ZZ6ZKymFLz7VQvK1vvha2YJJBjpM3ERnLNDL0y/HTEjYkR3VtQ==
   dependencies:
     debug "^4.3.1"
     hpagent "^0.1.1"
@@ -1430,10 +1430,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@37.6.0":
-  version "37.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-37.6.0.tgz#dc4fb2431e223047fa52b9035627c05a22197887"
-  integrity sha512-CeaKhwZCbTaq2h0cn3s9t0kGr+P+khVtYNa72zAVsH1Vhb6Ox0Z7cnvmn49qyjb3GnOHSYtQlbyrAcxqstfwbw==
+"@elastic/eui@38.0.1":
+  version "38.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-38.0.1.tgz#de03c4436cd1b58327f54f57e4248183d681c0f8"
+  integrity sha512-yzV56rGVwhALnLVXsw2LGsFksh7c27BwIQOl2memDfm15VprzX5Fd+u6TpX8TkpFbTTgnYfyhI11W3eKVUYt1g==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
