@@ -45,11 +45,35 @@ describe('ChecklistFlyout', () => {
     expect((wrapper.find('EuiButton').props() as any).isLoading).toBe(true);
   });
 
-  it('disables button if hasRequiredPrivileges is false', () => {
+  it('hides button if hasRequiredPrivileges is false', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.hasRequiredPrivileges = false;
     const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
-    expect(wrapper.find('EuiButton').props().disabled).toBe(true);
+    expect(wrapper.exists('EuiButton')).toBe(false);
+  });
+
+  it('hides button if has error', () => {
+    const props = cloneDeep(defaultProps);
+    props.reindexState.status = ReindexStatus.fetchFailed;
+    props.reindexState.errorMessage = 'Index not found';
+    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    expect(wrapper.exists('EuiButton')).toBe(false);
+  });
+
+  it('shows get status error callout', () => {
+    const props = cloneDeep(defaultProps);
+    props.reindexState.status = ReindexStatus.fetchFailed;
+    props.reindexState.errorMessage = 'Index not found';
+    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    expect(wrapper.exists('[data-test-subj="fetchFailedCallout"]')).toBe(true);
+  });
+
+  it('shows reindexing callout', () => {
+    const props = cloneDeep(defaultProps);
+    props.reindexState.status = ReindexStatus.failed;
+    props.reindexState.errorMessage = 'Index not found';
+    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    expect(wrapper.exists('[data-test-subj="reindexingFailedCallout"]')).toBe(true);
   });
 
   it('calls startReindex when button is clicked', () => {

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
   ElasticsearchServiceStart,
@@ -82,11 +83,19 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
       // nothing matched
     }
   }
+
   throw e;
 };
 
 export function registerReindexIndicesRoutes(
-  { credentialStore, router, licensing, log, getSecurityPlugin }: RouteDependencies,
+  {
+    credentialStore,
+    router,
+    licensing,
+    log,
+    getSecurityPlugin,
+    lib: { handleEsError },
+  }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
   const BASE_PATH = `${API_BASE_PATH}/reindex`;
@@ -131,8 +140,11 @@ export function registerReindexIndicesRoutes(
           return response.ok({
             body: result,
           });
-        } catch (e) {
-          return mapAnyErrorToKibanaHttpResponse(e);
+        } catch (error) {
+          if (error instanceof ResponseError) {
+            return handleEsError({ error, response });
+          }
+          return mapAnyErrorToKibanaHttpResponse(error);
         }
       }
     )
@@ -166,8 +178,11 @@ export function registerReindexIndicesRoutes(
         return response.ok({
           body: result,
         });
-      } catch (e) {
-        return mapAnyErrorToKibanaHttpResponse(e);
+      } catch (error) {
+        if (error instanceof ResponseError) {
+          return handleEsError({ error, response });
+        }
+        return mapAnyErrorToKibanaHttpResponse(error);
       }
     }
   );
@@ -276,8 +291,11 @@ export function registerReindexIndicesRoutes(
               hasRequiredPrivileges,
             },
           });
-        } catch (e) {
-          return mapAnyErrorToKibanaHttpResponse(e);
+        } catch (error) {
+          if (error instanceof ResponseError) {
+            return handleEsError({ error, response });
+          }
+          return mapAnyErrorToKibanaHttpResponse(error);
         }
       }
     )
@@ -319,8 +337,12 @@ export function registerReindexIndicesRoutes(
           await reindexService.cancelReindexing(indexName);
 
           return response.ok({ body: { acknowledged: true } });
-        } catch (e) {
-          return mapAnyErrorToKibanaHttpResponse(e);
+        } catch (error) {
+          if (error instanceof ResponseError) {
+            return handleEsError({ error, response });
+          }
+
+          return mapAnyErrorToKibanaHttpResponse(error);
         }
       }
     )

@@ -47,4 +47,51 @@ describe('Reindex deprecation flyout', () => {
       `Reindex ${reindexDeprecation.index}`
     );
   });
+
+  it('renders error callout when reindex fails', async () => {
+    httpRequestsMockHelpers.setReindexStatusResponse({
+      reindexOp: null,
+      warnings: [],
+      indexGroup: null,
+      hasRequiredPrivileges: true,
+    });
+
+    await act(async () => {
+      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+    });
+
+    testBed.component.update();
+
+    const { actions, exists } = testBed;
+
+    await actions.table.clickDeprecationRowAt('reindex', 0);
+
+    httpRequestsMockHelpers.setStartReindexingResponse(undefined, {
+      statusCode: 404,
+      message: 'no such index [test]',
+    });
+
+    await actions.reindexDeprecationFlyout.clickReindexButton();
+
+    expect(exists('reindexDetails.reindexingFailedCallout')).toBe(true);
+  });
+
+  it('renders error callout when fetch status fails', async () => {
+    httpRequestsMockHelpers.setReindexStatusResponse(undefined, {
+      statusCode: 404,
+      message: 'no such index [test]',
+    });
+
+    await act(async () => {
+      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+    });
+
+    testBed.component.update();
+
+    const { actions, exists } = testBed;
+
+    await actions.table.clickDeprecationRowAt('reindex', 0);
+
+    expect(exists('reindexDetails.fetchFailedCallout')).toBe(true);
+  });
 });
