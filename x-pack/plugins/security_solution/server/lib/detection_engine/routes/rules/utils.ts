@@ -18,21 +18,15 @@ import {
   RuleAlertType,
   isAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
-  isRuleStatusFindType,
   isRuleStatusSavedObjectType,
   IRuleStatusSOAttributes,
 } from '../../rules/types';
-import {
-  createBulkErrorObject,
-  BulkError,
-  createSuccessObject,
-  ImportSuccessError,
-  createImportErrorObject,
-  OutputError,
-} from '../utils';
+import { createBulkErrorObject, BulkError, OutputError } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert } from '../../../../../../alerting/common';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -103,9 +97,10 @@ export const transformTags = (tags: string[]): string[] => {
 // those on the export
 export const transformAlertToRule = (
   alert: SanitizedAlert<RuleParams>,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(alert, ruleStatus?.attributes);
+  return internalRuleToAPIResponse(alert, ruleStatus?.attributes, legacyRuleActions);
 };
 
 export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
@@ -114,7 +109,8 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
 
 export const transformFindAlerts = (
   findResults: FindResult<RuleParams>,
-  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined }
+  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined },
+  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
 ): {
   page: number;
   perPage: number;
@@ -128,7 +124,7 @@ export const transformFindAlerts = (
     data: findResults.data.map((alert) => {
       const statuses = ruleStatuses[alert.id];
       const status = statuses ? statuses[0] : undefined;
-      return internalRuleToAPIResponse(alert, status);
+      return internalRuleToAPIResponse(alert, status, legacyRuleActions[alert.id]);
     }),
   };
 };
@@ -136,55 +132,18 @@ export const transformFindAlerts = (
 export const transform = (
   alert: PartialAlert<RuleParams>,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
-  isRuleRegistryEnabled?: boolean
+  isRuleRegistryEnabled?: boolean,
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
   if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     return transformAlertToRule(
       alert,
-      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined
+      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined,
+      legacyRuleActions
     );
   }
 
   return null;
-};
-
-export const transformOrBulkError = (
-  ruleId: string,
-  alert: PartialAlert<RuleParams>,
-  ruleStatus?: unknown,
-  isRuleRegistryEnabled?: boolean
-): Partial<RulesSchema> | BulkError => {
-  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
-    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
-      return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
-    } else {
-      return transformAlertToRule(alert);
-    }
-  } else {
-    return createBulkErrorObject({
-      ruleId,
-      statusCode: 500,
-      message: 'Internal error transforming',
-    });
-  }
-};
-
-export const transformOrImportError = (
-  ruleId: string,
-  alert: PartialAlert<RuleParams>,
-  existingImportSuccessError: ImportSuccessError,
-  isRuleRegistryEnabled: boolean
-): ImportSuccessError => {
-  if (isAlertType(isRuleRegistryEnabled, alert)) {
-    return createSuccessObject(existingImportSuccessError);
-  } else {
-    return createImportErrorObject({
-      ruleId,
-      statusCode: 500,
-      message: 'Internal error transforming',
-      existingImportSuccessError,
-    });
-  }
 };
 
 export const getDuplicates = (ruleDefinitions: CreateRulesBulkSchema, by: 'rule_id'): string[] => {
