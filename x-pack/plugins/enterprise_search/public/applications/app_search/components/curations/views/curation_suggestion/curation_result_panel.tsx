@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -23,7 +22,7 @@ import './curation_result_panel.scss';
 
 interface Props {
   variant: 'current' | 'promoted' | 'suggested' | 'hidden';
-  results: ResultType[] | [];
+  results: ResultType[];
 }
 
 export const CurationResultPanel: React.FC<Props> = ({ variant = 'current', results }) => {

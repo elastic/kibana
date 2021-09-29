@@ -32,12 +32,8 @@ import { DATA } from './temp_data';
 export const CurationSuggestion: React.FC = () => {
   const { query } = useDecodedParams();
   const [showOrganicResults, setShowOrganicResults] = useState(false);
-  const [currentOrganicResults, setCurrentOrganicResults] = useState<ResultType[]>(
-    [...DATA].splice(5, 4)
-  );
-  const [proposedOrganicResults, setProposedOrganicResults] = useState<ResultType[]>(
-    [...DATA].splice(2, 4)
-  );
+  const currentOrganicResults = [...DATA].splice(5, 4);
+  const proposedOrganicResults = [...DATA].splice(2, 4);
 
   const queryTitle = query === '""' ? query : `${query}`;
 
