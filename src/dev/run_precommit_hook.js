@@ -26,8 +26,6 @@ run(
     const virtualFilesCount = files.filter((file) => file.isVirtual()).length;
     if (virtualFilesCount > 0 && virtualFilesCount < files.length) {
       throw createFailError('Mixing of virtual and on-filesystem files is unsupported');
-    } else if (virtualFilesCount > 0 && flags.fix) {
-      throw createFailError('Fixing of virtual files is unsupported');
     }
 
     if (maxFilesCount && files.length > maxFilesCount) {

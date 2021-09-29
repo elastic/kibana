@@ -56,9 +56,8 @@ export async function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?:
   });
 
   const virtualFilesCount = files.filter((file) => file.isVirtual()).length;
-  const report = virtualFilesCount
-    ? await lintFilesOnContent(cli, files)
-    : lintFilesOnFS(cli, files);
+  const report =
+    virtualFilesCount && !fix ? await lintFilesOnContent(cli, files) : lintFilesOnFS(cli, files);
 
   if (fix) {
     CLIEngine.outputFixes(report);
