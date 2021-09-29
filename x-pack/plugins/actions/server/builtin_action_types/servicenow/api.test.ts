@@ -25,6 +25,7 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -57,6 +58,7 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -78,6 +80,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: { username: 'elastic', password: 'elastic' },
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -106,6 +109,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -149,6 +153,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
@@ -193,6 +198,7 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params: apiParams,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -221,6 +227,7 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -239,6 +246,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -266,6 +274,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -308,6 +317,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
