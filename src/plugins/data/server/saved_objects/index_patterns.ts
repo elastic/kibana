@@ -8,13 +8,14 @@
 
 import type { SavedObjectsType } from 'kibana/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 
 export const indexPatternSavedObjectType: SavedObjectsType = {
-  name: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  name: DATA_VIEW_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: 'single',
   management: {
+    displayName: 'Data view',
     icon: 'indexPatternApp',
     defaultSearchField: 'title',
     importableAndExportable: true,
