@@ -36,6 +36,11 @@ async function lintFilesOnContent(cli: CLIEngine, files: File[]) {
 
   for (let i = 0; i < files.length; i++) {
     const r = cli.executeOnText(await files[i].getContent(), files[i].getRelativePath());
+    // Despite a relative path was given, the result would contain an absolute one. Work around it.
+    r.results[0].filePath = r.results[0].filePath.replace(
+      files[i].getAbsolutePath(),
+      files[i].getRelativePath()
+    );
     report.results.push(...r.results);
     report.errorCount += r.errorCount;
     report.warningCount += r.warningCount;
