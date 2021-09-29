@@ -14,6 +14,7 @@ import {
 import { PaginatedContent as _PaginatedContent, PaginatedContentProps } from '../paginated_content';
 import { GridHeader } from './components/grid_header';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 const PaginatedContent: ArtifactsPaginatedComponent = _PaginatedContent;
 
@@ -57,8 +58,11 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
     cardComponentProps,
     onPageChange,
     onExpandCollapse,
+    'data-test-subj': dataTestSubj,
     ...paginatedContentProps
   }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
     const items = _items as AnyArtifact[];
 
     // The list of card props that the caller can define
@@ -106,11 +110,12 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
           ...cardProps,
           item: artifact,
           onExpandCollapse: () => handleCardExpandCollapse(artifact),
+          'data-test-subj': cardProps['data-test-subj'] ?? getTestId('card'),
         });
       }
 
       return newFullCardProps;
-    }, [callerDefinedCardProps, handleCardExpandCollapse]);
+    }, [callerDefinedCardProps, getTestId, handleCardExpandCollapse]);
 
     const handleItemComponentProps = useCallback(
       (item: AnyArtifact): ArtifactEntryCollapsableCardProps => {
@@ -121,10 +126,11 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
 
     return (
       <>
-        <GridHeader />
+        <GridHeader data-test-subj={getTestId('header')} />
 
         <PaginatedContent
           {...paginatedContentProps}
+          data-test-subj={dataTestSubj}
           items={items}
           ItemComponent={ArtifactEntryCollapsableCard}
           itemComponentProps={handleItemComponentProps}

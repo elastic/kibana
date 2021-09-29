@@ -170,6 +170,7 @@ export const PolicyTrustedAppsList = memo(() => {
         cardComponentProps={provideCardProps}
         loading={isLoading}
         pagination={pagination as Pagination}
+        data-test-subj="policyTrustedAppsGrid"
       />
     </>
   );
