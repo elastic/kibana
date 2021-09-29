@@ -369,4 +369,11 @@ Configuration management tools and automation will need to be updated to use the
 *Details:* Specifying a default language to retrieve newsfeed items is no longer supported.
 
 *Impact:* Newsfeed items will be retrieved based on the browser locale and fallback to 'en' if an item does not have a translation for the locale. Configure {kibana-ref}/i18n-settings-kb.html#general-i18n-settings-kb[`i18n.locale`] to override the default behavior. 
+
+[float]
+=== `xpack.banners.placement` has changed value
+*Details:* `xpack.banners.placement: 'header'` setting in `kibana.yml` has changed value.
+
+*Impact:* Use {kibana-ref}/banners-settings-kb.html#banners-settings-kb[`xpack.banners.placement: 'top'`] instead.
+
 // end::notable-breaking-changes[]
