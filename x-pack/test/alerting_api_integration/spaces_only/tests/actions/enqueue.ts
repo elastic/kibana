@@ -20,7 +20,6 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
-  const log = getService('log');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -160,8 +159,6 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(204);
 
-      let previousTotal: number = 0;
-      let previousStatus: string | undefined;
       await retry.try(async () => {
         const runningSearchResult = await es.search({
           index: '.kibana_task_manager',
@@ -179,27 +176,12 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-
         const total = (runningSearchResult.body.hits.total as estypes.SearchTotalHits).value;
-        log.warning(`Total: ${total}, previousTotal: ${previousTotal}`);
-        if (previousTotal > 0 && total === 0) {
-          return;
-        }
-        previousTotal = total;
-        log.warning(`Total: ${total}, Previous status: ${previousStatus}`);
         expect(total).to.eql(1);
-        const hitsMetadata = runningSearchResult.body.hits as estypes.SearchHitsMetadata<{
-          task?: { status: string };
-        }>;
-        const hits = hitsMetadata.hits;
-        const firstHitStatus = hits[0]._source?.task?.status;
-        previousStatus = firstHitStatus;
-        log.warning(`firstHitStatus: ${firstHitStatus}`);
-        expect(firstHitStatus).to.eql('running');
       });
 
       await retry.try(async () => {
-        const searchResult = await es.search({
+        const runningSearchResult = await es.search({
           index: '.kibana_task_manager',
           body: {
             query: {
@@ -215,7 +197,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(0);
+        const total = (runningSearchResult.body.hits.total as estypes.SearchTotalHits).value;
+        expect(total).to.eql(0);
       });
     });
   });
