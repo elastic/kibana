@@ -22,3 +22,10 @@ export class EndpointAppContentServicesNotStartedError extends EndpointError {
     super('EndpointAppContextService has not been started (EndpointAppContextService.start())');
   }
 }
+export class EndpointLicenseError extends EndpointError {
+  public readonly name = 'EndpointLicenseError';
+
+  constructor() {
+    super('Your license level does not allow for this action.');
+  }
+}

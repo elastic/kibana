@@ -40,13 +40,17 @@ import {
   TrustedAppNotFoundError,
   TrustedAppVersionConflictError,
   TrustedAppPolicyNotExistsError,
-  TrustedAppPolicyPermissionsError,
 } from './errors';
 import { updateExceptionListItemImplementationMock } from './test_utils';
 import { Logger } from '@kbn/logging';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
-import { getPackagePoliciesResponse, getTrustedAppByPolicy } from './mocks';
+import {
+  getPackagePoliciesResponse,
+  getPutTrustedAppByPolicy,
+  getTrustedAppByPolicy,
+} from './mocks';
+import { EndpointLicenseError } from '../../errors';
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   _version: 'abc123',
@@ -288,11 +292,11 @@ describe('handlers', () => {
         mockResponse
       );
 
-      const error = new TrustedAppPolicyPermissionsError();
+      const error = new EndpointLicenseError();
 
       expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: { message: error.message, attributes: { type: error.type } },
+        body: { message: error.message, attributes: { type: error.name } },
       });
     });
   });
@@ -612,15 +616,26 @@ describe('handlers', () => {
       packagePolicyClient.getByIDs.mockReset();
       packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
 
-      const trustedAppByPolicy = getTrustedAppByPolicy();
+      const exceptionByPolicy = getPutTrustedAppByPolicy();
+      const customExceptionListClient = {
+        ...exceptionsListClient,
+        getExceptionListItem: () => exceptionByPolicy,
+      };
+      const handlerContextMock = {
+        ...xpackMocks.createRequestHandlerContext(),
+        lists: {
+          getListClient: jest.fn(),
+          getExceptionListClient: jest.fn().mockReturnValue(customExceptionListClient),
+        },
+      } as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;
       await updateHandler(
-        createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ body: trustedAppByPolicy }),
+        handlerContextMock,
+        httpServerMock.createKibanaRequest({ body: getTrustedAppByPolicy() }),
         mockResponse
       );
 
       expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(
-        new TrustedAppPolicyNotExistsError(trustedAppByPolicy.name, [
+        new TrustedAppPolicyNotExistsError(exceptionByPolicy.name, [
           '9da95be9-9bee-4761-a8c4-28d6d9bd8c71',
         ])
       );
@@ -631,15 +646,26 @@ describe('handlers', () => {
       packagePolicyClient.getByIDs.mockReset();
       packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
 
-      const trustedAppByPolicy = getTrustedAppByPolicy();
+      const exceptionByPolicy = getPutTrustedAppByPolicy();
+      const customExceptionListClient = {
+        ...exceptionsListClient,
+        getExceptionListItem: () => exceptionByPolicy,
+      };
+      const handlerContextMock = {
+        ...xpackMocks.createRequestHandlerContext(),
+        lists: {
+          getListClient: jest.fn(),
+          getExceptionListClient: jest.fn().mockReturnValue(customExceptionListClient),
+        },
+      } as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;
       await updateHandler(
-        createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ body: trustedAppByPolicy }),
+        handlerContextMock,
+        httpServerMock.createKibanaRequest({ body: getTrustedAppByPolicy() }),
         mockResponse
       );
 
       expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(
-        new TrustedAppPolicyPermissionsError()
+        new EndpointLicenseError()
       );
     });
   });

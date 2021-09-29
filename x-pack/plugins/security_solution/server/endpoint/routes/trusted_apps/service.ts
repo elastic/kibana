@@ -22,6 +22,7 @@ import {
   PutTrustedAppUpdateRequest,
   PutTrustedAppUpdateResponse,
   GetTrustedAppsSummaryRequest,
+  TrustedApp,
 } from '../../../../common/endpoint/types';
 
 import {
@@ -34,10 +35,10 @@ import {
   TrustedAppNotFoundError,
   TrustedAppVersionConflictError,
   TrustedAppPolicyNotExistsError,
-  TrustedAppPolicyPermissionsError,
 } from './errors';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../fleet/common';
+import { EndpointLicenseError } from '../../errors';
 
 const getNonExistingPoliciesFromTrustedApp = async (
   savedObjectClient: SavedObjectsClientContract,
@@ -65,7 +66,7 @@ const getNonExistingPoliciesFromTrustedApp = async (
 };
 
 const isUserTryingToModifyEffectScopeWithoutPermissions = (
-  currentTrustedApp: ExceptionListItemSchema,
+  currentTrustedApp: TrustedApp,
   updatedTrustedApp: PutTrustedAppUpdateRequest,
   isAtLeastPlatinum: boolean
 ): boolean => {
@@ -75,7 +76,8 @@ const isUserTryingToModifyEffectScopeWithoutPermissions = (
     return false;
   } else if (
     isEqual(
-      currentTrustedApp.tags.map((policy) => policy.replace('policy:', '')).sort(),
+      currentTrustedApp.effectScope.type === 'policy' &&
+        currentTrustedApp.effectScope.policies.sort(),
       updatedTrustedApp.effectScope.policies.sort()
     )
   ) {
@@ -155,7 +157,7 @@ export const createTrustedApp = async (
   await exceptionsListClient.createTrustedAppsList();
 
   if (newTrustedApp.effectScope.type === 'policy' && !isAtLeastPlatinum) {
-    throw new TrustedAppPolicyPermissionsError();
+    throw new EndpointLicenseError();
   }
 
   const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
@@ -198,12 +200,12 @@ export const updateTrustedApp = async (
 
   if (
     isUserTryingToModifyEffectScopeWithoutPermissions(
-      currentTrustedApp,
+      exceptionListItemToTrustedApp(currentTrustedApp),
       updatedTrustedApp,
       isAtLeastPlatinum
     )
   ) {
-    throw new TrustedAppPolicyPermissionsError();
+    throw new EndpointLicenseError();
   }
 
   const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(

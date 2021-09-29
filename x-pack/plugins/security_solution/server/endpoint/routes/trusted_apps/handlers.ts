@@ -33,9 +33,9 @@ import {
   TrustedAppNotFoundError,
   TrustedAppVersionConflictError,
   TrustedAppPolicyNotExistsError,
-  TrustedAppPolicyPermissionsError,
 } from './errors';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { EndpointLicenseError } from '../../errors';
 
 const getBodyAfterFeatureFlagCheck = (
   body: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest,
@@ -88,9 +88,9 @@ const errorHandler = <E extends Error>(
     return res.badRequest({ body: { message: error.message, attributes: { type: error.type } } });
   }
 
-  if (error instanceof TrustedAppPolicyPermissionsError) {
+  if (error instanceof EndpointLicenseError) {
     logger.error(error);
-    return res.badRequest({ body: { message: error.message, attributes: { type: error.type } } });
+    return res.badRequest({ body: { message: error.message, attributes: { type: error.name } } });
   }
 
   if (error instanceof TrustedAppVersionConflictError) {

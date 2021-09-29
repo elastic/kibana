@@ -25,16 +25,6 @@ export class TrustedAppPolicyNotExistsError extends Error {
     );
   }
 }
-export class TrustedAppPolicyPermissionsError extends Error {
-  public readonly type = 'TrustedApps/PolicyPermissionError';
-
-  constructor() {
-    super(
-      'Your Kibana license has been downgraded. As such, individual policy configuration is no longer supported.'
-    );
-  }
-}
-
 export class TrustedAppVersionConflictError extends Error {
   constructor(id: string, public sourceError: Error) {
     super(`Trusted Application (${id}) has been updated since last retrieved`);

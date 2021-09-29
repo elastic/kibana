@@ -31,12 +31,12 @@ import {
   TrustedAppNotFoundError,
   TrustedAppVersionConflictError,
   TrustedAppPolicyNotExistsError,
-  TrustedAppPolicyPermissionsError,
 } from './errors';
 import { toUpdateTrustedApp } from '../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { updateExceptionListItemImplementationMock } from './test_utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { getPackagePoliciesResponse, getTrustedAppByPolicy } from './mocks';
+import { EndpointLicenseError } from '../../errors';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 const packagePolicyClient =
@@ -207,7 +207,7 @@ describe('service', () => {
       ).rejects.toBeInstanceOf(TrustedAppPolicyNotExistsError);
     });
 
-    it('should throw wwhen license under platinum and by policy', async () => {
+    it('should throw when license under platinum and by policy', async () => {
       packagePolicyClient.getByIDs.mockReset();
       packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
       await expect(
@@ -237,7 +237,7 @@ describe('service', () => {
           },
           false
         )
-      ).rejects.toBeInstanceOf(TrustedAppPolicyPermissionsError);
+      ).rejects.toBeInstanceOf(EndpointLicenseError);
     });
   });
 
@@ -473,7 +473,7 @@ describe('service', () => {
           toUpdateTrustedApp(trustedAppByPolicy as MaybeImmutable<TrustedApp>),
           false
         )
-      ).rejects.toBeInstanceOf(TrustedAppPolicyPermissionsError);
+      ).rejects.toBeInstanceOf(EndpointLicenseError);
     });
   });
 
