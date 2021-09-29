@@ -8,7 +8,7 @@
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getDurationForPercentile({
   durationPercentile,
@@ -17,7 +17,7 @@ export async function getDurationForPercentile({
 }: {
   durationPercentile: number;
   filters: ESFilter[];
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
 }) {
   const { apmEventClient } = setup;
   const res = await apmEventClient.search('get_duration_for_percentiles', {
