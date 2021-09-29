@@ -40,7 +40,9 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
 
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
-      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
+      sampleData: {
+        ...this.sampleDataRegistry.setup(core, plugins.usageCollection, plugins.customIntegrations),
+      },
     };
   }
 

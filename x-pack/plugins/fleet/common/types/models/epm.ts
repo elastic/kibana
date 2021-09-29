@@ -19,6 +19,8 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
+import type { CustomIntegrationIcon } from '../../../../../../src/plugins/custom_integrations/common';
+
 import type {
   PackageSpecManifest,
   PackageSpecIcon,
@@ -368,7 +370,7 @@ export interface IntegrationCardItem {
   name: string;
   title: string;
   version: string;
-  icons: PackageSpecIcon[];
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   integration: string;
   id: string;
 }
