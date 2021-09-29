@@ -274,6 +274,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             onClick={
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
+            data-test-subj="updatePackageBtn"
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"

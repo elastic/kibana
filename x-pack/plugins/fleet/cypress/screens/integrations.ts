@@ -9,6 +9,12 @@ export const ADD_POLICY_BTN = '[data-test-subj="addIntegrationPolicyButton"]';
 export const CREATE_PACKAGE_POLICY_SAVE_BTN = '[data-test-subj="createPackagePolicySaveButton"]';
 export const INTEGRATIONS_CARD = '.euiCard__titleAnchor';
 
-export const INTEGRATION_LINK = '[data-test-subj="integrationNameLink"]';
+export const INTEGRATION_NAME_LINK = '[data-test-subj="integrationNameLink"]';
 
-export const CONFIRM_SAVE_AND_DEPLOY_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+export const CONFIRM_MODAL_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+
+export const SETTINGS_TAB = '[data-test-subj="tab-settings"]';
+export const POLICIES_TAB = '[data-test-subj="tab-policies"]';
+
+export const UPDATE_PACKAGE_BTN = '[data-test-subj="updatePackageBtn"]';
+export const LATEST_VERSION = '[data-test-subj="latestVersion"]';
