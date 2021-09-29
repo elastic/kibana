@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
@@ -13,6 +13,7 @@ import { useValues, useActions } from 'kea';
 import { EuiSpacer, EuiButton, EuiBadge } from '@elastic/eui';
 
 import { AppSearchPageTemplate } from '../../layout';
+import { AutomatedIcon } from '../components/automated_icon';
 import {
   AUTOMATED_LABEL,
   COVERT_TO_MANUAL_BUTTON_LABEL,
@@ -20,7 +21,6 @@ import {
 } from '../constants';
 import { getCurationsBreadcrumbs } from '../utils';
 
-import { AutomatedIcon } from './automated_icon';
 import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments } from './documents';
 

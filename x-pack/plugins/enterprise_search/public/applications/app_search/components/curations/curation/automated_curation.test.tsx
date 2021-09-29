@@ -27,7 +27,6 @@ import { AutomatedCuration } from './automated_curation';
 import { CurationLogic } from './curation_logic';
 
 import { PromotedDocuments, OrganicDocuments } from './documents';
-import { AddResultFlyout } from './results';
 
 describe('AutomatedCuration', () => {
   const values = {
