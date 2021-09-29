@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Setup } from '../../helpers/setup_request';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -18,7 +17,6 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 
 export interface CorrelationsOptions {
-  setup: Setup;
   environment: string;
   kuery: string;
   serviceName: string | undefined;
@@ -29,7 +27,6 @@ export interface CorrelationsOptions {
 }
 
 export function getCorrelationsFilters({
-  setup,
   environment,
   kuery,
   serviceName,
