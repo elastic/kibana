@@ -39,14 +39,14 @@ export type ArtifactCardGridProps = Omit<
 > & {
   items: MaybeImmutable<AnyArtifact[]>;
 
+  /** Callback to handle pagination changes */
   onPageChange: ArtifactsPaginatedContentProps['onChange'];
 
+  /** callback for handling changes to the card's expand/collapse state */
   onExpandCollapse: (state: CardExpandCollapseState) => void;
 
   /**
    * Callback to provide additional props for the `ArtifactEntryCollapsableCard`
-   *
-   * @param item
    */
   cardComponentProps?: (item: MaybeImmutable<AnyArtifact>) => ArtifactCardGridCardComponentProps;
 };
