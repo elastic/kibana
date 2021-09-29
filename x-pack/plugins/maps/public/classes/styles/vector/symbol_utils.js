@@ -76,24 +76,25 @@ export function getCustomIconId() {
 }
 
 export async function createSdfIcon(svgString) {
-  const w = 16;
-  const h = 16;
+  const w = 256;
+  const h = 256;
   const size = Math.max(w, h);
   const buffer = size / 8;
   const radius = size / 3;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 200;
-  const ctx = canvas.getContext('2d');
+
   const imgUrl = buildSrcUrl(svgString);
   const image = await loadImage(imgUrl);
 
-  ctx.clearRect(0, 0, w, h);
   const sdf = new Image2SDF({ buffer, radius, size });
-  const { data: alphaChannel, bufferWidth, bufferHeight } = sdf.draw(
-    image,
-    w,
-    h,
-  );
+  const { data: alphaChannel, bufferWidth, bufferHeight } = sdf.draw(image, w, h);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = bufferWidth;
+  canvas.height = bufferHeight;
+  const ctx = canvas.getContext('2d');
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   const imageData = ctx.createImageData(bufferWidth, bufferHeight);
   for (let i = 0; i < alphaChannel.length; i++) {
     imageData.data[4 * i + 0] = 0;
@@ -102,25 +103,34 @@ export async function createSdfIcon(svgString) {
     imageData.data[4 * i + 3] = alphaChannel[i];
   }
 
-  /** Debugging section (uncomment to download SDF image)
+  // Scale image
+  const ratioX = 60 / bufferWidth;
+  const ratioY = 60 / bufferHeight;
+  const ratio = Math.min(ratioX, ratioY);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.putImageData(imageData, 0, 0);
+  ctx.drawImage(ctx.canvas, 0, 0, bufferWidth, bufferHeight, 0, 0, bufferWidth * ratio, bufferHeight * ratio);
+  const scaledImageData = ctx.getImageData(0, 0, bufferWidth * ratio, bufferHeight * ratio);
+
+  // Debugging section (uncomment to download SDF image)
   // TODO Remove this for production
 
   // const a = document.createElement('a');
   // const canvas2 = document.createElement('canvas');
-  // canvas2.width = bufferWidth;
-  // canvas2.height = bufferHeight;
+  // canvas2.width = 60;
+  // canvas2.height = 60;
   // const ctx2 = canvas2.getContext('2d');
-  // ctx2.putImageData(imageData, 0, 0);
-  // const blob = await new Promise(resolve => ctx2.canvas.toBlob(resolve));
+  // ctx2.putImageData(scaledImageData, 0, 0);
+  // const blob = await new Promise((resolve) => ctx2.canvas.toBlob(resolve));
   // const domUrl = window.URL || window.webkitURL || window;
   // a.href = domUrl.createObjectURL(blob);
   // a.download = 'blob.png';
   // a.click();
   // URL.revokeObjectURL(a.href);
 
-  */
+  // End debugging section
 
-  return imageData;
+  return scaledImageData;
 }
 
 // Style descriptor stores symbolId, for example 'aircraft'

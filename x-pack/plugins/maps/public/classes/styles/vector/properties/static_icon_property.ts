@@ -30,7 +30,7 @@ export class StaticIconProperty extends StaticStyleProperty<IconStaticOptions> {
       return new Promise<void>(async (resolve) => {
         if (!mbMap.hasImage(symbolId)) {
           const imageData = await createSdfIcon(icon);
-          mbMap.addImage(symbolId, imageData, { sdf: true });
+          mbMap.addImage(symbolId, imageData, { pixelRatio: 4, sdf: true });
         }
         resolve();
       });
