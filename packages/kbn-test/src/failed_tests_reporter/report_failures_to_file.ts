@@ -20,7 +20,9 @@ export function reportFailuresToFile(failures: TestFailure[]) {
     return;
   }
 
-  for (const failure of failures) {
+  // Jest could, in theory, fail 1000s of tests and write 1000s of failures
+  // So let's just write files for the first 20
+  for (const failure of failures.slice(0, 20)) {
     const hash = createHash('md5').update(failure.name).digest('hex');
     const filenameBase = `${
       process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '-' : ''
