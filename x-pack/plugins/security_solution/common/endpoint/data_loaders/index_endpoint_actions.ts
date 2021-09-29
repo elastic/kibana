@@ -58,7 +58,7 @@ export const indexEndpointActionsForHost = async (
 
     action.agent.id = [agentId];
 
-    esClient
+    await esClient
       .index({
         index: ENDPOINT_ACTIONS_INDEX,
         body: action,
@@ -74,7 +74,7 @@ export const indexEndpointActionsForHost = async (
       },
     });
 
-    esClient
+    await esClient
       .index({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         body: actionResponse,
