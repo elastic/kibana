@@ -20,15 +20,17 @@ import { Setup } from '../helpers/setup_request';
  * filtered by range.
  */
 export async function getEnvironments({
-  setup,
-  serviceName,
   searchAggregatedTransactions,
+  serviceName,
+  setup,
+  size,
   start,
   end,
 }: {
   setup: Setup;
   serviceName?: string;
   searchAggregatedTransactions: boolean;
+  size: number;
   start: number;
   end: number;
 }) {
@@ -36,7 +38,7 @@ export async function getEnvironments({
     ? 'get_environments_for_service'
     : 'get_environments';
 
-  const { apmEventClient, config } = setup;
+  const { apmEventClient } = setup;
 
   const filter = rangeQuery(start, end);
 
@@ -45,8 +47,6 @@ export async function getEnvironments({
       term: { [SERVICE_NAME]: serviceName },
     });
   }
-
-  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   const params = {
     apm: {
@@ -70,7 +70,7 @@ export async function getEnvironments({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ENVIRONMENT_NOT_DEFINED.value,
-            size: maxServiceEnvironments,
+            size,
           },
         },
       },

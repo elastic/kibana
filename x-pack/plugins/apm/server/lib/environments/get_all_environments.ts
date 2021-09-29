@@ -19,22 +19,23 @@ import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregate
  * It's used in places where we get the list of all possible environments.
  */
 export async function getAllEnvironments({
+  includeMissing = false,
+  searchAggregatedTransactions,
   serviceName,
   setup,
-  searchAggregatedTransactions,
-  includeMissing = false,
+  size,
 }: {
+  includeMissing?: boolean;
+  searchAggregatedTransactions: boolean;
   serviceName?: string;
   setup: Setup;
-  searchAggregatedTransactions: boolean;
-  includeMissing?: boolean;
+  size: number;
 }) {
   const operationName = serviceName
     ? 'get_all_environments_for_service'
     : 'get_all_environments_for_all_services';
 
-  const { apmEventClient, config } = setup;
-  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
+  const { apmEventClient } = setup;
 
   // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName
@@ -65,7 +66,7 @@ export async function getAllEnvironments({
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            size: maxServiceEnvironments,
+            size,
             ...(!serviceName ? { min_doc_count: 0 } : {}),
             missing: includeMissing ? ENVIRONMENT_NOT_DEFINED.value : undefined,
           },

@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import { maxSuggestions } from '../../../../observability/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { createApmServerRoute } from '../create_apm_server_route';
@@ -92,11 +93,14 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
       config: setup.config,
       kuery: '',
     });
-
+    const size = await resources.context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const environments = await getAllEnvironments({
-      setup,
-      searchAggregatedTransactions,
       includeMissing: true,
+      searchAggregatedTransactions,
+      setup,
+      size,
     });
 
     return { environments };

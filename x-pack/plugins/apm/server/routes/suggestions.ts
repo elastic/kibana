@@ -7,50 +7,41 @@
 
 import * as t from 'io-ts';
 import { maxSuggestions } from '../../../observability/common';
+import { getSuggestions } from '../lib/suggestions/get_suggestions';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getEnvironments } from '../lib/environments/get_environments';
-import { rangeRt } from './default_api_types';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
-const environmentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/environments',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-      }),
-      rangeRt,
-    ]),
+const suggestionsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/suggestions',
+  params: t.partial({
+    query: t.type({ field: t.string, string: t.string }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
-    const { serviceName, start, end } = params.query;
+    const { field, string } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start,
-      end,
       kuery: '',
     });
     const size = await context.core.uiSettings.client.get<number>(
       maxSuggestions
     );
-    const environments = await getEnvironments({
-      setup,
-      serviceName,
+    const suggestions = await getSuggestions({
+      field,
       searchAggregatedTransactions,
+      setup,
       size,
-      start,
-      end,
+      string,
     });
 
-    return { environments };
+    return suggestions;
   },
 });
 
-export const environmentsRouteRepository =
-  createApmServerRouteRepository().add(environmentsRoute);
+export const suggestionsRouteRepository =
+  createApmServerRouteRepository().add(suggestionsRoute);
