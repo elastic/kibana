@@ -28,8 +28,10 @@ export class TrustedAppPolicyNotExistsError extends Error {
 export class TrustedAppPolicyPermissionsError extends Error {
   public readonly type = 'TrustedApps/PolicyPermissionError';
 
-  constructor(name: string) {
-    super(`Your license don't allow you to modify the policies for ${name} exception`);
+  constructor() {
+    super(
+      'Your Kibana license has been downgraded. As such, individual policy configuration is no longer supported.'
+    );
   }
 }
 

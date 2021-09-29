@@ -67,24 +67,20 @@ const getNonExistingPoliciesFromTrustedApp = async (
 const isUserTryingToModifyEffectScopeWithoutPermissions = (
   currentTrustedApp: ExceptionListItemSchema,
   updatedTrustedApp: PutTrustedAppUpdateRequest,
-  license?: string
+  isAtLeastPlatinum: boolean
 ): boolean => {
   if (updatedTrustedApp.effectScope.type === 'global') {
     return false;
-  } else if (license === 'platinium') {
+  } else if (isAtLeastPlatinum) {
     return false;
   } else if (
     isEqual(
-      currentTrustedApp.tags.map((policy) => policy.replace('policy:', '')),
-      updatedTrustedApp.effectScope.policies
+      currentTrustedApp.tags.map((policy) => policy.replace('policy:', '')).sort(),
+      updatedTrustedApp.effectScope.policies.sort()
     )
   ) {
     return false;
   } else {
-    console.log(
-      currentTrustedApp.tags.map((policy) => policy.replace('policy:', '')),
-      updatedTrustedApp.effectScope.policies
-    );
     return true;
   }
 };
@@ -152,10 +148,15 @@ export const createTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
   savedObjectClient: SavedObjectsClientContract,
   packagePolicyClient: PackagePolicyServiceInterface,
-  newTrustedApp: PostTrustedAppCreateRequest
+  newTrustedApp: PostTrustedAppCreateRequest,
+  isAtLeastPlatinum: boolean
 ): Promise<PostTrustedAppCreateResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
+
+  if (newTrustedApp.effectScope.type === 'policy' && !isAtLeastPlatinum) {
+    throw new TrustedAppPolicyPermissionsError();
+  }
 
   const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
     savedObjectClient,
@@ -182,7 +183,8 @@ export const updateTrustedApp = async (
   savedObjectClient: SavedObjectsClientContract,
   packagePolicyClient: PackagePolicyServiceInterface,
   id: string,
-  updatedTrustedApp: PutTrustedAppUpdateRequest
+  updatedTrustedApp: PutTrustedAppUpdateRequest,
+  isAtLeastPlatinum: boolean
 ): Promise<PutTrustedAppUpdateResponse> => {
   const currentTrustedApp = await exceptionsListClient.getExceptionListItem({
     itemId: '',
@@ -198,10 +200,10 @@ export const updateTrustedApp = async (
     isUserTryingToModifyEffectScopeWithoutPermissions(
       currentTrustedApp,
       updatedTrustedApp,
-      'platiniumNO'
+      isAtLeastPlatinum
     )
   ) {
-    throw new TrustedAppPolicyPermissionsError(updatedTrustedApp.name);
+    throw new TrustedAppPolicyPermissionsError();
   }
 
   const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(

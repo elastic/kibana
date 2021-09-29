@@ -183,7 +183,8 @@ export const getTrustedAppsCreateRouteHandler = (
           exceptionListClientFromContext(context),
           context.core.savedObjects.client,
           packagePolicyClientFromEndpointContext(endpointAppContext),
-          body
+          body,
+          endpointAppContext.service.getLicenseService().isAtLeast('platinum')
         ),
       });
     } catch (error) {
@@ -212,7 +213,8 @@ export const getTrustedAppsUpdateRouteHandler = (
           context.core.savedObjects.client,
           packagePolicyClientFromEndpointContext(endpointAppContext),
           req.params.id,
-          body
+          body,
+          endpointAppContext.service.getLicenseService().isAtLeast('platinum')
         ),
       });
     } catch (error) {
