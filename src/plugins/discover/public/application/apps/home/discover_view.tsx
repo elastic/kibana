@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiCard, EuiFlexGrid, EuiIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiCard, EuiFlexGrid, EuiIcon, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import './discover_view.scss';
 import { ApplicationStart, SavedObjectsClientContract } from 'kibana/public';
@@ -13,13 +13,14 @@ import { ApplicationStart, SavedObjectsClientContract } from 'kibana/public';
 interface DiscoverViewProps {
   id: string;
   title: string;
+  description: string | undefined;
   isTimeBased: boolean;
   application?: ApplicationStart;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
 export function DiscoverView(props: DiscoverViewProps) {
-  const { title, isTimeBased, id, application, savedObjectsClient } = props;
+  const { title, isTimeBased, id, application, savedObjectsClient, description } = props;
 
   const [dashboardCount, setDashboardCount] = useState<number>(0);
 
@@ -64,6 +65,13 @@ export function DiscoverView(props: DiscoverViewProps) {
     );
   };
 
+  const descriptionView = () => {
+    if (!description) {
+      return <div className="discoverView__noDescription">{'[No Description]'}</div>;
+    }
+    return <div>{description}</div>;
+  };
+
   return (
     <EuiCard
       layout="horizontal"
@@ -72,10 +80,15 @@ export function DiscoverView(props: DiscoverViewProps) {
       title={title}
       onClick={navigateToDiscover}
     >
-      <EuiFlexGrid>
-        <EuiFlexItem>{timeBasedView()}</EuiFlexItem>
-        <EuiFlexItem>{dashboardView()}</EuiFlexItem>
-      </EuiFlexGrid>
+      <React.Fragment>
+        <EuiFlexGrid>
+          <EuiFlexItem>{timeBasedView()}</EuiFlexItem>
+          <EuiFlexItem>{dashboardView()}</EuiFlexItem>
+        </EuiFlexGrid>
+        <EuiFlexGrid>
+          <EuiFlexItem>{descriptionView()}</EuiFlexItem>
+        </EuiFlexGrid>
+      </React.Fragment>
     </EuiCard>
   );
 }

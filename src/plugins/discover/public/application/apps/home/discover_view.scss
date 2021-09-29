@@ -21,3 +21,7 @@
 .discoverHome__lastRecently__item {
   min-height: 118px !important;
 }
+
+.discoverView__noDescription, .indexPatternView__noDescription {
+  color: $euiColorMediumShade;
+}

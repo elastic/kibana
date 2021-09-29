@@ -65,12 +65,13 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
 
   const savedSearchesSection = () => {
     const savedSearchesToDisplay: JSX.Element[] = savedSearches.map((savedSearch) => {
-      const { title, searchSource, id } = savedSearch;
+      const { title, searchSource, id, description } = savedSearch;
       const indexPattern = searchSource.getField('index');
       return (
         <DiscoverView
           id={id}
           title={title}
+          description={description}
           isTimeBased={!!indexPattern?.isTimeBased()}
           application={core.application}
           savedObjectsClient={core.savedObjects.client}

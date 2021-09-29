@@ -32,7 +32,12 @@ export function IndexPatternView(props: IndexPatternViewProps) {
     return <LoadingIndicator />;
   }
   const { description } = indexPattern;
-  const descriptionText = description && description.length > 0 ? description : '[No Description]';
+  const descriptionText =
+    description && description.length > 0 ? (
+      description
+    ) : (
+      <span className="indexPatternView__noDescription">[No Description]</span>
+    );
 
   const goToIndexPattern = () => {
     const { application } = services.core;
