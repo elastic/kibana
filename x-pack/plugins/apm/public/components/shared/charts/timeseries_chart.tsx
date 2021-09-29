@@ -16,6 +16,8 @@ import {
   LineSeries,
   niceTimeFormatter,
   Position,
+  ProjectionClickListener,
+  RectAnnotation,
   ScaleType,
   Settings,
   XYBrushEvent,
@@ -40,6 +42,12 @@ import { getChartAnomalyTimeseries } from './helper/get_chart_anomaly_timeseries
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
 import { getTimeZone } from './helper/timezone';
 
+interface WindowParameters {
+  baselineMin: number;
+  baselineMax: number;
+  deviationMin: number;
+  deviationMax: number;
+}
 interface Props {
   id: string;
   fetchStatus: FETCH_STATUS;
@@ -102,6 +110,65 @@ export function TimeseriesChart({
   ];
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
+  const [windowParameters, setWindowParameters] = useState<
+    WindowParameters | undefined
+  >();
+
+  /*
+   * Given a point in time (e.g. where a user clicks), use simple heuristics to compute:
+   *
+   * 1. The time window around the click to evaluate for changes
+   * 2. The historical time window prior to the click to use as a baseline.
+   *
+   * The philosophy here is that charts are displayed with different granularities according to their
+   * overall time window. We select the change point and historical time windows inline with the
+   * overall time window.
+   *
+   * The algorithm for doing this is based on the typical granularities that exist in machine data.
+   *
+   * :param clickTime
+   * :param minTime
+   * :param maxTime
+   * :return: { baseline_min, baseline_max, deviation_min, deviation_max }
+   */
+  const getWindowParameters = (
+    clickTime: number,
+    minTime: number,
+    maxTime: number
+  ): WindowParameters => {
+    const totalWindow = maxTime - minTime;
+
+    // min deviation window
+    const minDeviationWindow = 10 * 60 * 1000; // 10min
+    const minBaselineWindow = 30 * 60 * 1000; // 30min
+    const minWindowGap = 5 * 60 * 1000; // 5min
+
+    // work out bounds
+    const deviationWindow = Math.max(totalWindow / 10, minDeviationWindow);
+    const baselineWindow = Math.max(totalWindow / 3.5, minBaselineWindow);
+    const windowGap = Math.max(totalWindow / 10, minWindowGap);
+
+    const deviationMin = clickTime - deviationWindow / 2;
+    const deviationMax = clickTime + deviationWindow / 2;
+
+    const baselineMax = deviationMin - windowGap;
+    const baselineMin = baselineMax - baselineWindow;
+
+    return {
+      baselineMin,
+      baselineMax,
+      deviationMin,
+      deviationMax,
+    };
+  };
+
+  const changePoint: ProjectionClickListener = ({ x }) => {
+    if (typeof x === 'number') {
+      const wp = getWindowParameters(x, min, max);
+      setWindowParameters(wp);
+    }
+  };
+
   return (
     <ChartContainer
       hasData={!isEmpty}
@@ -136,6 +203,7 @@ export function TimeseriesChart({
               onToggleLegend(legend);
             }
           }}
+          onProjectionClick={changePoint}
         />
         <Axis
           id="x-axis"
@@ -170,6 +238,53 @@ export function TimeseriesChart({
             marker={<EuiIcon type="dot" color={annotationColor} />}
             markerPosition={Position.Top}
           />
+        )}
+
+        {windowParameters && (
+          <>
+            <RectAnnotation
+              dataValues={[
+                {
+                  coordinates: {
+                    x0: windowParameters.baselineMin,
+                    x1: windowParameters.baselineMax,
+                    y0: 0,
+                    y1: 1000000000,
+                  },
+                  details: 'baseline',
+                },
+              ]}
+              id="rect_annotation_1"
+              style={{
+                strokeWidth: 1,
+                stroke: theme.eui.euiColorLightShade,
+                fill: theme.eui.euiColorLightShade,
+                opacity: 0.9,
+              }}
+              hideTooltips={true}
+            />
+            <RectAnnotation
+              dataValues={[
+                {
+                  coordinates: {
+                    x0: windowParameters.deviationMin,
+                    x1: windowParameters.deviationMax,
+                    y0: 0,
+                    y1: 1000000000,
+                  },
+                  details: 'deviation',
+                },
+              ]}
+              id="rect_annotation_w"
+              style={{
+                strokeWidth: 1,
+                stroke: theme.eui.euiColorVis4,
+                fill: theme.eui.euiColorLightShade,
+                opacity: 0.9,
+              }}
+              hideTooltips={true}
+            />
+          </>
         )}
 
         {allSeries.map((serie) => {
