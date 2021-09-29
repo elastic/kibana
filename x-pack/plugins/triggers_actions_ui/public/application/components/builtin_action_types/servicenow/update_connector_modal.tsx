@@ -73,7 +73,7 @@ interface Props {
   onConfirm: () => void;
 }
 
-const MigrationConfirmationModalComponent: React.FC<Props> = ({
+const UpdateConnectorModalComponent: React.FC<Props> = ({
   action,
   errors,
   readOnly,
@@ -143,4 +143,4 @@ const MigrationConfirmationModalComponent: React.FC<Props> = ({
   );
 };
 
-export const MigrationConfirmationModal = memo(MigrationConfirmationModalComponent);
+export const UpdateConnectorModal = memo(UpdateConnectorModalComponent);

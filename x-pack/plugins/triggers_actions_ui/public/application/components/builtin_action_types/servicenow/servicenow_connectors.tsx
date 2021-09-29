@@ -17,7 +17,7 @@ import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
-import { MigrationConfirmationModal } from './migration_confirmation_modal';
+import { UpdateConnectorModalComponent } from './update_connector_modal';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ENABLE_NEW_SN_ITSM_CONNECTOR } from '../../../../../../actions/server/constants/connectors';
@@ -119,7 +119,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     return (
       <>
         {showModal && (
-          <MigrationConfirmationModal
+          <UpdateConnectorModalComponent
             action={action}
             errors={errors}
             readOnly={readOnly}
