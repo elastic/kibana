@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Range } from '../../../../expressions/public';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { ColorMode, Labels, Style, ColorSchemas } from '../../../../charts/public';
+import { Range } from '../../../../expressions/common';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { ColorMode, Labels, Style, ColorSchemas } from '../../../../charts/common';
 
 export const visType = 'metric';
 

@@ -6,20 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const COLOR_MAPPING_SETTING = 'visualization:colorMapping';
-
-export {
-  CustomPaletteArguments,
-  CustomPaletteState,
-  SystemPaletteArguments,
-  PaletteOutput,
-  defaultCustomColors,
-  palette,
-  systemPalette,
-} from './palette';
-
-export { paletteIds } from './constants';
-
 export {
   ColorSchemas,
   ColorSchema,
@@ -30,9 +16,6 @@ export {
   getHeatmapColors,
   truncatedColorMaps,
   truncatedColorSchemas,
-  ColorMode,
-  LabelRotation,
-  defaultCountLabel,
-} from './static';
+} from './color_maps';
 
-export { ColorSchemaParams, Labels, Style } from './types';
+export { ColorMode, LabelRotation, defaultCountLabel } from './components';

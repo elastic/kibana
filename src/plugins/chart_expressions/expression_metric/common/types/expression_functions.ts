@@ -14,7 +14,7 @@ import {
   Style,
 } from '../../../../expressions';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { ColorSchemas, ColorMode } from '../../../../charts/public';
+import { ColorSchemas, ColorMode } from '../../../../charts/common';
 import { VisParams, visType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 

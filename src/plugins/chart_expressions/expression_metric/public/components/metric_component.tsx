@@ -9,16 +9,16 @@
 import { last, findIndex, isNaN } from 'lodash';
 import React, { Component } from 'react';
 import { isColorDark } from '@elastic/eui';
-import { MetricVisValue } from './metric_vis_value';
+import { MetricVisValue } from './metric_value';
 import { MetricInput, VisParams, Metric } from '../../common';
 import type { FieldFormatsContentType, IFieldFormat } from '../../../../field_formats/common';
 import { Datatable } from '../../../../expressions/public';
 import { getHeatmapColors } from '../../../../charts/public';
-import { getFormatService } from '../services';
+import { getFormatService } from '../format_service';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { Range } from '../../../../expressions/public';
 
-import './metric_vis.scss';
+import './metric.scss';
 
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;

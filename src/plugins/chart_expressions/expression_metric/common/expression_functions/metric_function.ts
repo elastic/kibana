@@ -9,8 +9,8 @@
 import { i18n } from '@kbn/i18n';
 
 import { visType } from '../types';
-import { prepareLogTable, Dimension } from '../../../../visualizations/public';
-import { vislibColorMaps, ColorMode } from '../../../../charts/public';
+import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
+import { vislibColorMaps, ColorMode } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
@@ -144,7 +144,7 @@ export const metricFunction = (): MetricVisExpressionFunctionDefinition => ({
 
     return {
       type: 'render',
-      as: 'metric_vis',
+      as: EXPRESSION_METRIC_NAME,
       value: {
         visData: input,
         visType,

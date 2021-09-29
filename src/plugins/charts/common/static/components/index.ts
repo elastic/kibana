@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './colors';
-export * from './components';
-export * from './utils';
+export { ColorMode, LabelRotation, defaultCountLabel } from './collections';

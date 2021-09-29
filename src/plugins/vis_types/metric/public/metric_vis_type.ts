@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MetricVisOptions } from './components/metric_vis_options';
+import { MetricVisOptions } from './components';
 import { ColorSchemas, ColorMode } from '../../../charts/public';
 import { VisTypeDefinition } from '../../../visualizations/public';
 import { AggGroupNames } from '../../../data/public';
