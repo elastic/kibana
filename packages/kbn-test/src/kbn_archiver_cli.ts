@@ -50,7 +50,7 @@ export function runKbnArchiverCli() {
         --kibana-url       set the url that kibana can be reached at, uses the "servers.kibana" setting from --config by default
       `,
     },
-    async extendContext({ log, flags }) {
+    async extendContext({ log, flags, statsMeta }) {
       let config;
       if (flags.config) {
         if (typeof flags.config !== 'string') {
@@ -58,6 +58,7 @@ export function runKbnArchiverCli() {
         }
 
         config = await readConfigFile(log, Path.resolve(flags.config));
+        statsMeta.set('ftrConfigPath', flags.config);
       }
 
       let kibanaUrl;
@@ -81,6 +82,8 @@ export function runKbnArchiverCli() {
       if (!(space === undefined || typeof space === 'string')) {
         throw createFlagError('--space must be a string');
       }
+
+      statsMeta.set('kbnArchiverArg', getSinglePositionalArg(flags));
 
       return {
         space,
