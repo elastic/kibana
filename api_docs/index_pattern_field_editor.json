@@ -329,7 +329,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -406,7 +406,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -427,7 +427,7 @@
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataDataViewsPluginApi",
                 "section": "def-common.IndexPatternField",
                 "text": "IndexPatternField"
               },
@@ -447,7 +447,7 @@
                   {
                     "pluginId": "data",
                     "scope": "common",
-                    "docId": "kibDataIndexPatternsPluginApi",
+                    "docId": "kibDataDataViewsPluginApi",
                     "section": "def-common.IndexPatternField",
                     "text": "IndexPatternField"
                   }
