@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -14,7 +14,6 @@ import {
   SERVICE_NAME,
   CONTAINER_ID,
   HOSTNAME,
-  POD_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 
 export const getServiceInfrastructure = async ({
@@ -22,13 +21,17 @@ export const getServiceInfrastructure = async ({
   serviceName,
   environment,
   setup,
+  start,
+  end,
 }: {
   kuery: string;
   serviceName: string;
   environment: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) => {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -61,12 +64,6 @@ export const getServiceInfrastructure = async ({
             size: 500,
           },
         },
-        podNames: {
-          terms: {
-            field: POD_NAME,
-            size: 500,
-          },
-        },
       },
     },
   });
@@ -74,13 +71,11 @@ export const getServiceInfrastructure = async ({
   return {
     containerIds:
       response.aggregations?.containerIds?.buckets.map(
-        (bucket) => bucket.key
+        (bucket) => bucket.key as string
       ) ?? [],
     hostNames:
-      response.aggregations?.hostNames?.buckets.map((bucket) => bucket.key) ??
-      [],
-    podNames:
-      response.aggregations?.podNames?.buckets.map((bucket) => bucket.key) ??
-      [],
+      response.aggregations?.hostNames?.buckets.map(
+        (bucket) => bucket.key as string
+      ) ?? [],
   };
 };

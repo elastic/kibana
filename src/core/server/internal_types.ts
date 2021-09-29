@@ -36,7 +36,7 @@ import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
 import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
-import { CoreUsageDataStart } from './core_usage_data';
+import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
 import type {
@@ -73,6 +73,7 @@ export interface InternalCoreSetup {
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
   deprecations: InternalDeprecationsServiceSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 /**

@@ -6,44 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { ClassDeclaration } from 'ts-morph';
-import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
+import { ApiDeclaration, TypeKind } from '../types';
 import { buildApiDeclaration } from './build_api_declaration';
-import { isPrivate } from './utils';
+import { getOptsForChild, isPrivate } from './utils';
 import { isInternal } from '../utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
+import { BuildApiDecOpts } from './types';
 
-export function buildClassDec(
-  node: ClassDeclaration,
-  plugins: KibanaPlatformPlugin[],
-  anchorLink: AnchorLink,
-  currentPluginId: string,
-  log: ToolingLog,
-  captureReferences: boolean
-): ApiDeclaration {
+export function buildClassDec(node: ClassDeclaration, opts: BuildApiDecOpts): ApiDeclaration {
   return {
-    ...buildBasicApiDeclaration({
-      currentPluginId,
-      anchorLink,
-      node,
-      plugins,
-      log,
-      captureReferences,
-      apiName: node.getName() || 'Missing label',
-    }),
+    ...buildBasicApiDeclaration(node, opts),
     type: TypeKind.ClassKind,
     children: node.getMembers().reduce((acc, m) => {
       if (!isPrivate(m)) {
-        const child = buildApiDeclaration({
-          node: m,
-          plugins,
-          log,
-          currentPluginId: anchorLink.pluginName,
-          scope: anchorLink.scope,
-          captureReferences,
-          parentApiId: anchorLink.apiName,
-        });
+        const child = buildApiDeclaration(m, getOptsForChild(m, opts));
         if (!isInternal(child)) {
           acc.push(child);
         }

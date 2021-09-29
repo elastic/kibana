@@ -30,8 +30,6 @@ describe('get buckets', () => {
       bucketSize: 10,
       kuery: '',
       setup: {
-        start: 1528113600000,
-        end: 1528977600000,
         apmEventClient: {
           search: clientSpy,
         } as any,
@@ -44,7 +42,6 @@ describe('get buckets', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFilters: {},
         indices: {
           /* eslint-disable @typescript-eslint/naming-convention */
           'apm_oss.sourcemapIndices': 'apm-*',
@@ -58,6 +55,8 @@ describe('get buckets', () => {
           apmCustomLinkIndex: '.apm-custom-link',
         },
       },
+      start: 1528113600000,
+      end: 1528977600000,
     });
   });
 

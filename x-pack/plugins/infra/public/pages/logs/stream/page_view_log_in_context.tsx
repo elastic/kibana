@@ -25,10 +25,8 @@ import { LogStream } from '../../../components/log_stream';
 const MODAL_MARGIN = 25;
 
 export const PageViewLogInContext: React.FC = () => {
-  const [
-    { contextEntry, startTimestamp, endTimestamp, sourceId },
-    { setContextEntry },
-  ] = useContext(ViewLogInContext.Context);
+  const [{ contextEntry, startTimestamp, endTimestamp, sourceId }, { setContextEntry }] =
+    useContext(ViewLogInContext.Context);
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
   const { width: vw, height: vh } = useViewportDimensions();
 

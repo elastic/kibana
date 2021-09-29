@@ -38,6 +38,7 @@ import {
   runSaveLensVisualization,
 } from './save_modal_container';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
+import { getEditPath } from '../../common';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -70,6 +71,8 @@ export function App({
     notifications,
     savedObjectsTagging,
     getOriginatingAppName,
+    spaces,
+    http,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
   } = lensAppServices;
@@ -82,6 +85,7 @@ export function App({
 
   const {
     persistedDoc,
+    sharingSavedObjectProps,
     isLinkedToOriginatingApp,
     searchSessionId,
     isLoading,
@@ -165,6 +169,28 @@ export function App({
       }
     });
   }, [onAppLeave, lastKnownDoc, isSaveable, persistedDoc, application.capabilities.visualize.save]);
+
+  const getLegacyUrlConflictCallout = useCallback(() => {
+    // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
+    if (spaces && sharingSavedObjectProps?.outcome === 'conflict' && persistedDoc?.savedObjectId) {
+      // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+      // callout with a warning for the user, and provide a way for them to navigate to the other object.
+      const currentObjectId = persistedDoc.savedObjectId;
+      const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
+      const otherObjectPath = http.basePath.prepend(
+        `${getEditPath(otherObjectId)}${history.location.search}`
+      );
+      return spaces.ui.components.getLegacyUrlConflict({
+        objectNoun: i18n.translate('xpack.lens.appName', {
+          defaultMessage: 'Lens visualization',
+        }),
+        currentObjectId,
+        otherObjectId,
+        otherObjectPath,
+      });
+    }
+    return null;
+  }, [persistedDoc, sharingSavedObjectProps, spaces, http, history]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
@@ -273,6 +299,8 @@ export function App({
           title={persistedDoc?.title}
           lensInspector={lensInspector}
         />
+
+        {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}

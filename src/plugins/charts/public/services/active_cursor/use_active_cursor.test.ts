@@ -15,7 +15,8 @@ import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
 import type { Chart, PointerEvent } from '@elastic/charts';
 import type { Datatable } from '../../../../expressions/public';
 
-describe('useActiveCursor', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/110038
+describe.skip('useActiveCursor', () => {
   let cursor: ActiveCursorPayload['cursor'];
   let dispatchExternalPointerEvent: jest.Mock;
 
@@ -24,42 +25,47 @@ describe('useActiveCursor', () => {
     events: Array<Partial<ActiveCursorPayload>>,
     eventsTimeout = 1
   ) =>
-    new Promise(async (resolve) => {
-      const activeCursor = new ActiveCursor();
-      let allEventsExecuted = false;
-
-      activeCursor.setup();
-
-      dispatchExternalPointerEvent.mockImplementation((pointerEvent) => {
-        if (allEventsExecuted) {
-          resolve(pointerEvent);
-        }
-      });
-
-      renderHook(() =>
-        useActiveCursor(
-          activeCursor,
-          {
-            current: {
-              dispatchExternalPointerEvent: dispatchExternalPointerEvent as (
-                pointerEvent: PointerEvent
-              ) => void,
-            },
-          } as RefObject<Chart>,
-          { ...syncOption, debounce: syncOption.debounce ?? 1 }
-        )
-      );
-
-      for (const e of events) {
-        await new Promise((eventResolve) =>
-          setTimeout(() => {
-            if (e === events[events.length - 1]) {
-              allEventsExecuted = true;
-            }
-            activeCursor.activeCursor$!.next({ cursor, ...e });
-            eventResolve(null);
-          }, eventsTimeout)
+    new Promise(async (resolve, reject) => {
+      try {
+        const activeCursor = new ActiveCursor();
+        let allEventsExecuted = false;
+        activeCursor.setup();
+        dispatchExternalPointerEvent.mockImplementation((pointerEvent) => {
+          if (allEventsExecuted) {
+            resolve(pointerEvent);
+          }
+        });
+        renderHook(() =>
+          useActiveCursor(
+            activeCursor,
+            {
+              current: {
+                dispatchExternalPointerEvent: dispatchExternalPointerEvent as (
+                  pointerEvent: PointerEvent
+                ) => void,
+              },
+            } as RefObject<Chart>,
+            { ...syncOption, debounce: syncOption.debounce ?? 1 }
+          )
         );
+
+        for (const e of events) {
+          await new Promise((eventResolve) =>
+            setTimeout(() => {
+              if (e === events[events.length - 1]) {
+                allEventsExecuted = true;
+              }
+
+              activeCursor.activeCursor$!.next({
+                cursor,
+                ...e,
+              });
+              eventResolve(null);
+            }, eventsTimeout)
+          );
+        }
+      } catch (error) {
+        reject(error);
       }
     });
 
@@ -105,7 +111,7 @@ describe('useActiveCursor', () => {
   test('should trigger cursor pointer update (chart type: datatable - time based, event type: time)', async () => {
     await act(
       {
-        datatables: ([
+        datatables: [
           {
             columns: [
               {
@@ -119,7 +125,7 @@ describe('useActiveCursor', () => {
               },
             ],
           },
-        ] as unknown) as Datatable[],
+        ] as unknown as Datatable[],
       },
       [{ isDateHistogram: true }, { accessors: ['foo_index:foo_field'] }]
     );

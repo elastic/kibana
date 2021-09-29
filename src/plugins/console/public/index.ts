@@ -10,6 +10,8 @@ import './index.scss';
 
 import { ConsoleUIPlugin } from './plugin';
 
+export type { ConsoleUILocatorParams } from './plugin';
+
 export { ConsoleUIPlugin as Plugin };
 
 export function plugin() {

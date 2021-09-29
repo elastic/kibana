@@ -22,23 +22,19 @@ export const mapSelectionToIndicesOptions = ({
   indices: string[];
 }): EuiSelectableOption[] => {
   return orderDataStreamsAndIndices<EuiSelectableOption>({
-    dataStreams: dataStreams.map(
-      (dataStream): EuiSelectableOption => {
-        return {
-          label: dataStream,
-          append: <DataStreamBadge />,
-          checked: allSelected || selection.includes(dataStream) ? 'on' : undefined,
-        };
-      }
-    ),
-    indices: indices.map(
-      (index): EuiSelectableOption => {
-        return {
-          label: index,
-          checked: allSelected || selection.includes(index) ? 'on' : undefined,
-        };
-      }
-    ),
+    dataStreams: dataStreams.map((dataStream): EuiSelectableOption => {
+      return {
+        label: dataStream,
+        append: <DataStreamBadge />,
+        checked: allSelected || selection.includes(dataStream) ? 'on' : undefined,
+      };
+    }),
+    indices: indices.map((index): EuiSelectableOption => {
+      return {
+        label: index,
+        checked: allSelected || selection.includes(index) ? 'on' : undefined,
+      };
+    }),
   });
 };
 

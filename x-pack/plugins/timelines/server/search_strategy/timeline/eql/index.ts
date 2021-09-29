@@ -41,7 +41,7 @@ export const timelineEqlSearchStrategyProvider = (
         mergeMap(async (esSearchRes) =>
           parseEqlResponse(
             request,
-            (esSearchRes as unknown) as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>
+            esSearchRes as unknown as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>
           )
         )
       );

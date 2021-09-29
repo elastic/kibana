@@ -10,7 +10,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_CONSUMER,
   ALERT_SEVERITY,
@@ -35,9 +35,9 @@ type Alert = ValuesType<
 
 const euiColorDanger = 'red';
 const euiColorWarning = 'yellow';
-const theme = ({
+const theme = {
   eui: { euiColorDanger, euiColorWarning },
-} as unknown) as EuiTheme;
+} as unknown as EuiTheme;
 const alert: Alert = {
   [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
   [ALERT_EVALUATION_VALUE]: [2057657.39],
@@ -54,7 +54,7 @@ const alert: Alert = {
   [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
   'event.action': ['active'],
   '@timestamp': ['2021-06-01T16:16:05.183Z'],
-  [ALERT_ID]: ['apm.transaction_duration_All'],
+  [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
   'processor.event': ['transaction'],
   [ALERT_EVALUATION_THRESHOLD]: [500000],
   [ALERT_START]: ['2021-06-01T16:15:02.304Z'],
@@ -62,10 +62,11 @@ const alert: Alert = {
   [ALERT_RULE_CATEGORY]: ['Latency threshold'],
 };
 const chartStartTime = new Date(alert[ALERT_START]![0] as string).getTime();
-const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => ({
-  link: '/',
-  reason: 'a good reason',
-});
+const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] =
+  () => () => ({
+    link: '/',
+    reason: 'a good reason',
+  });
 const selectedAlertId = undefined;
 const setSelectedAlertId = jest.fn();
 
@@ -127,8 +128,8 @@ describe('getAlertAnnotations', () => {
 
     describe('with no formatter', () => {
       it('uses the rule type', () => {
-        const getNoFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () =>
-          undefined;
+        const getNoFormatter: ObservabilityRuleTypeRegistry['getFormatter'] =
+          () => undefined;
 
         expect(
           getAlertAnnotations({

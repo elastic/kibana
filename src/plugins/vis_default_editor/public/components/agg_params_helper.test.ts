@@ -85,12 +85,12 @@ describe('DefaultEditorAggParams helpers', () => {
     });
 
     it('should skip customLabel param if it is hidden', () => {
-      agg = ({
+      agg = {
         type: {
           params: [{ name: 'customLabel' }],
         },
         schema: 'metric2',
-      } as any) as IAggConfig;
+      } as any as IAggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
@@ -98,7 +98,7 @@ describe('DefaultEditorAggParams helpers', () => {
 
     it('should create a basic params field and orderBy', () => {
       const filterFieldTypes = ['number', 'boolean', 'date'];
-      agg = ({
+      agg = {
         type: {
           type: AggGroupNames.Buckets,
           name: BUCKET_TYPES.TERMS,
@@ -130,7 +130,7 @@ describe('DefaultEditorAggParams helpers', () => {
           orderBy: 'orderBy',
           field: 'field',
         },
-      } as any) as IAggConfig;
+      } as any as IAggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual({

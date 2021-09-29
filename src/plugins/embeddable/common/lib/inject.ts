@@ -19,7 +19,7 @@ export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) =>
     let updatedInput = injectBaseEmbeddableInput(state, references);
 
     if (factory) {
-      updatedInput = factory.inject(updatedInput, references);
+      updatedInput = factory.inject(updatedInput, references) as EmbeddableStateWithType;
     }
 
     updatedInput.enhancements = {};

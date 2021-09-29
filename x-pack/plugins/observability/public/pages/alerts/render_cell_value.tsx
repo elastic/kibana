@@ -93,7 +93,7 @@ export const getRenderCellValue = ({
           case ALERT_STATUS_RECOVERED:
             return (
               <EuiHealth color={theme.eui.euiColorLightShade} textSize="xs">
-                <EuiText color={theme.eui.euiColorLightShade} size="relative">
+                <EuiText color="subdued" size="relative">
                   {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
                     defaultMessage: 'Recovered',
                   })}

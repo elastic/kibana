@@ -19,11 +19,13 @@ export function TransactionCharts({
   environment,
   start,
   end,
+  transactionName,
 }: {
   kuery: string;
   environment: string;
   start: string;
   end: string;
+  transactionName?: string;
 }) {
   return (
     <>
@@ -44,6 +46,7 @@ export function TransactionCharts({
               <ServiceOverviewThroughputChart
                 environment={environment}
                 kuery={kuery}
+                transactionName={transactionName}
               />
             </EuiFlexItem>
           </EuiFlexGrid>

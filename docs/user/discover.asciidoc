@@ -78,7 +78,7 @@ If you are using the sample data, this value was set when you added the data.
 If you  are using your own data, and it does not have a time field, the range selection is not available.
 
 . To view the count of documents for a given time in the specified range,
-click and drag the mouse over the histogram.
+click and drag the mouse over the chart.
 
 [float]
 [[explore-fields-in-your-data]]
@@ -108,7 +108,7 @@ them to your document table. Your table should look similar to this:
 image:images/document-table.png[Document table with fields for manufacturer, customer_first_name, and customer_last_name]
 
 . To rearrange the table columns, hover the mouse over a
-column header, and then use the move controls.
+column header, and then use the move control.
 
 . To view more of the document table, click *Hide chart*.
 
@@ -275,7 +275,7 @@ image:images/discover-maps.png[Map containing documents]
 [[share-your-findings]]
 === Share your findings
 
-To share your findings with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
+To share your findings with a larger audience, click *Share* in the *Discover* toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
 
 [float]
@@ -284,8 +284,6 @@ To share your findings with a larger audience, click *Share* in the toolbar. For
 * <<kuery-query, Learn more about the structure of a KQL query>>.
 
 * <<discover-search-for-relevance, Search for relevance>>.
-
-* <<reporting-getting-started, Present your findings in a report>>.
 
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
 Go to **Advanced Settings** to configure the number of documents to show,

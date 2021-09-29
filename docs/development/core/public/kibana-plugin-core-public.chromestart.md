@@ -57,6 +57,7 @@ core.chrome.setHelpExtension(elem => {
 |  [getHelpExtension$()](./kibana-plugin-core-public.chromestart.gethelpextension_.md) | Get an observable of the current custom help conttent |
 |  [getIsNavDrawerLocked$()](./kibana-plugin-core-public.chromestart.getisnavdrawerlocked_.md) | Get an observable of the current locked state of the nav drawer. |
 |  [getIsVisible$()](./kibana-plugin-core-public.chromestart.getisvisible_.md) | Get an observable of the current visibility state of the chrome. |
+|  [hasHeaderBanner$()](./kibana-plugin-core-public.chromestart.hasheaderbanner_.md) | Get an observable of the current header banner presence state. |
 |  [setBadge(badge)](./kibana-plugin-core-public.chromestart.setbadge.md) | Override the current badge |
 |  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-core-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |
 |  [setBreadcrumbsAppendExtension(breadcrumbsAppendExtension)](./kibana-plugin-core-public.chromestart.setbreadcrumbsappendextension.md) | Mount an element next to the last breadcrumb |

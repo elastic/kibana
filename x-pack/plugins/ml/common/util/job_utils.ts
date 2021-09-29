@@ -368,7 +368,7 @@ export function mlFunctionToESAggregation(
   }
 
   if (functionName === ML_JOB_AGGREGATION.MIN || functionName === ML_JOB_AGGREGATION.MAX) {
-    return (functionName as unknown) as ES_AGGREGATION;
+    return functionName as unknown as ES_AGGREGATION;
   }
 
   if (functionName === ML_JOB_AGGREGATION.RARE) {

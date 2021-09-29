@@ -74,18 +74,16 @@ export const usePackagePoliciesWithAgentPolicy = (
       .join(' or ')}) `;
   }, [packagePoliciesData]);
 
-  const {
-    data: agentPoliciesData,
-    isLoading: isLoadingAgentPolicies,
-  } = useConditionalRequest<GetAgentPoliciesResponse>({
-    path: agentPolicyRouteService.getListPath(),
-    method: 'get',
-    query: {
-      perPage: 100,
-      kuery: agentPoliciesFilter,
-    },
-    shouldSendRequest: !!packagePoliciesData?.items.length,
-  } as SendConditionalRequestConfig);
+  const { data: agentPoliciesData, isLoading: isLoadingAgentPolicies } =
+    useConditionalRequest<GetAgentPoliciesResponse>({
+      path: agentPolicyRouteService.getListPath(),
+      method: 'get',
+      query: {
+        perPage: 100,
+        kuery: agentPoliciesFilter,
+      },
+      shouldSendRequest: !!packagePoliciesData?.items.length,
+    } as SendConditionalRequestConfig);
 
   const [enrichedData, setEnrichedData] = useState<GetPackagePoliciesWithAgentPolicy | undefined>();
 

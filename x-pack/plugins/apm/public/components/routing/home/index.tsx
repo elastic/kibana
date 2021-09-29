@@ -45,10 +45,10 @@ export const ServiceInventoryTitle = i18n.translate(
   }
 );
 
-export const BackendInventoryTitle = i18n.translate(
-  'xpack.apm.views.backendInventory.title',
+export const DependenciesInventoryTitle = i18n.translate(
+  'xpack.apm.views.dependenciesInventory.title',
   {
-    defaultMessage: 'Backends',
+    defaultMessage: 'Dependencies',
   }
 );
 
@@ -104,7 +104,7 @@ export const home = {
       }),
       children: [
         {
-          path: '/:backendName/overview',
+          path: '/backends/{backendName}/overview',
           element: <BackendDetailOverview />,
           params: t.type({
             path: t.type({
@@ -113,8 +113,8 @@ export const home = {
           }),
         },
         page({
-          path: '/',
-          title: BackendInventoryTitle,
+          path: '/backends',
+          title: DependenciesInventoryTitle,
           element: <BackendInventory />,
         }),
       ],

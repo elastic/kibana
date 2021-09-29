@@ -10,7 +10,6 @@
   "id":"cases",
   "kibanaVersion":"kibana",
   "optionalPlugins":[
-    "ruleRegistry",
      "security",
      "spaces"
   ],

@@ -972,9 +972,6 @@
         "graph_workspace": {
           "total": 0
         },
-        "timelion_sheet": {
-          "total": 0
-        },
         "indices": 1,
         "plugins": {}
       },

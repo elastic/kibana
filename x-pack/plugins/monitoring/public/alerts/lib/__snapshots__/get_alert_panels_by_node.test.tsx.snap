@@ -44,6 +44,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -71,6 +72,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -247,6 +249,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -268,6 +271,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -289,6 +293,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -316,6 +321,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -337,6 +343,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -358,6 +365,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            display="inlineBlock"
             position="top"
           >
             <EuiText

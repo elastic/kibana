@@ -12,6 +12,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
 } from '../../../../plugins/fleet/common';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -24,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('installing and updating scenarios', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     after(async () => {
       await deletePackage('multiple_versions-0.3.0');
     });

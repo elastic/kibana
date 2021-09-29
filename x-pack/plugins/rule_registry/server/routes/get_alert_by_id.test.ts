@@ -6,7 +6,7 @@
  */
 
 import {
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
@@ -30,7 +30,7 @@ import { getReadRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
 
 const getMockAlert = (): ParsedTechnicalFields => ({
-  [ALERT_ID]: 'fake-alert-id',
+  [ALERT_INSTANCE_ID]: 'fake-alert-id',
   [ALERT_RULE_CATEGORY]: 'apm.error_rate',
   [ALERT_RULE_CONSUMER]: 'apm',
   [ALERT_RULE_NAME]: 'Check error rate',

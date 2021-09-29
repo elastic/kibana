@@ -50,7 +50,6 @@ export const useAgentPolicyAgentIds = ({
             defaultMessage: 'Error while fetching agents',
           }),
         }),
-      refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }

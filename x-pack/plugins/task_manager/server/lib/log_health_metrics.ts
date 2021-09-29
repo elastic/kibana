@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { kibanaPackageJson } from '@kbn/utils';
+
 import { isEmpty } from 'lodash';
 import { Logger } from '../../../../../src/core/server';
 import { HealthStatus } from '../monitoring';
@@ -36,7 +38,7 @@ export function logHealthMetrics(
       capacity_estimation: undefined,
     },
   };
-  const statusWithoutCapacity = calculateHealthStatus(healthWithoutCapacity, config);
+  const statusWithoutCapacity = calculateHealthStatus(healthWithoutCapacity, config, logger);
   if (statusWithoutCapacity === HealthStatus.Warning) {
     logLevel = LogLevel.Warn;
   } else if (statusWithoutCapacity === HealthStatus.Error && !isEmpty(monitoredHealth.stats)) {
@@ -44,6 +46,8 @@ export function logHealthMetrics(
   }
 
   const message = `Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`;
+  const docLink = `https://www.elastic.co/guide/en/kibana/${kibanaPackageJson.branch}/task-manager-health-monitoring.html`;
+  const detectedProblemMessage = `Task Manager detected a degradation in performance. This is usually temporary, and Kibana can recover automatically. If the problem persists, check the docs for troubleshooting information: ${docLink} .`;
   if (enabled) {
     const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
     if (
@@ -80,9 +84,7 @@ export function logHealthMetrics(
     // This is legacy support - we used to always show this
     logger.debug(message);
     if (logLevel !== LogLevel.Debug && lastLogLevel === LogLevel.Debug) {
-      logger.warn(
-        `Detected potential performance issue with Task Manager. Set 'xpack.task_manager.monitored_stats_health_verbose_log.enabled: true' in your Kibana.yml to enable debug logging`
-      );
+      logger.debug(detectedProblemMessage);
     }
   }
 

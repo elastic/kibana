@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
 import type { Subscription } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
@@ -16,14 +17,21 @@ import type { ConfigSchema, ConfigType } from './config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { KibanaConfigWriter } from './kibana_config_writer';
 import { defineRoutes } from './routes';
+import { VerificationService } from './verification_service';
 
-export class UserSetupPlugin implements PrebootPlugin {
+// List of the Elasticsearch hosts Kibana uses by default.
+const DEFAULT_ELASTICSEARCH_HOSTS = [
+  'http://localhost:9200',
+  // It's a default host we use in the official Kibana Docker image (see `kibana_yml.template.ts`).
+  ...(process.env.ELASTIC_CONTAINER ? ['http://elasticsearch:9200'] : []),
+];
+
+export class InteractiveSetupPlugin implements PrebootPlugin {
   readonly #logger: Logger;
+  readonly #elasticsearch: ElasticsearchService;
+  readonly #verification: VerificationService;
 
   #elasticsearchConnectionStatusSubscription?: Subscription;
-  readonly #elasticsearch = new ElasticsearchService(
-    this.initializerContext.logger.get('elasticsearch')
-  );
 
   #configSubscription?: Subscription;
   #config?: ConfigType;
@@ -36,6 +44,12 @@ export class UserSetupPlugin implements PrebootPlugin {
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.#logger = this.initializerContext.logger.get();
+    this.#elasticsearch = new ElasticsearchService(
+      this.initializerContext.logger.get('elasticsearch')
+    );
+    this.#verification = new VerificationService(
+      this.initializerContext.logger.get('verification')
+    );
   }
 
   public setup(core: CorePreboot) {
@@ -51,10 +65,18 @@ export class UserSetupPlugin implements PrebootPlugin {
     const shouldActiveSetupMode =
       !core.elasticsearch.config.credentialsSpecified &&
       core.elasticsearch.config.hosts.length === 1 &&
-      core.elasticsearch.config.hosts[0] === 'http://localhost:9200';
+      DEFAULT_ELASTICSEARCH_HOSTS.includes(core.elasticsearch.config.hosts[0]);
     if (!shouldActiveSetupMode) {
       this.#logger.debug(
         'Interactive setup mode will not be activated since Elasticsearch connection is already configured.'
+      );
+      return;
+    }
+
+    const verificationCode = this.#verification.setup();
+    if (!verificationCode) {
+      this.#logger.error(
+        'Interactive setup mode could not be activated. Ensure Kibana has permission to write to its config folder.'
       );
       return;
     }
@@ -79,6 +101,7 @@ export class UserSetupPlugin implements PrebootPlugin {
       elasticsearch: core.elasticsearch,
       connectionCheckInterval: this.#getConfig().connectionCheck.interval,
     });
+
     this.#elasticsearchConnectionStatusSubscription = elasticsearch.connectionStatus$.subscribe(
       (status) => {
         if (status === ElasticsearchConnectionStatus.Configured) {
@@ -90,6 +113,18 @@ export class UserSetupPlugin implements PrebootPlugin {
           this.#logger.debug(
             'Starting interactive setup mode since Kibana cannot to connect to Elasticsearch at http://localhost:9200.'
           );
+          const pathname = core.http.basePath.prepend('/');
+          const { protocol, hostname, port } = core.http.getServerInfo();
+          const url = `${protocol}://${hostname}:${port}${pathname}?code=${verificationCode.code}`;
+
+          // eslint-disable-next-line no-console
+          console.log(`
+
+${chalk.whiteBright.bold(`${chalk.cyanBright('i')} Kibana has not been configured.`)}
+
+Go to ${chalk.cyanBright.underline(url)} to get started.
+
+`);
         }
       }
     );
@@ -108,6 +143,7 @@ export class UserSetupPlugin implements PrebootPlugin {
         preboot: { ...core.preboot, completeSetup },
         kibanaConfigWriter: new KibanaConfigWriter(configPath, this.#logger.get('kibana-config')),
         elasticsearch,
+        verificationCode,
         getConfig: this.#getConfig.bind(this),
       });
     });
@@ -127,5 +163,6 @@ export class UserSetupPlugin implements PrebootPlugin {
     }
 
     this.#elasticsearch.stop();
+    this.#verification.stop();
   }
 }

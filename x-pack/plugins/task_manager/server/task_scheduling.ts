@@ -113,11 +113,18 @@ export class TaskScheduling {
    */
   public async runNow(taskId: string): Promise<RunNowResult> {
     return new Promise(async (resolve, reject) => {
-      this.awaitTaskRunResult(taskId)
-        // don't expose state on runNow
-        .then(({ id }) => resolve({ id }))
-        .catch(reject);
-      this.taskPollingLifecycle.attemptToRun(taskId);
+      try {
+        this.awaitTaskRunResult(taskId) // don't expose state on runNow
+          .then(({ id }) =>
+            resolve({
+              id,
+            })
+          )
+          .catch(reject);
+        this.taskPollingLifecycle.attemptToRun(taskId);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
@@ -137,39 +144,42 @@ export class TaskScheduling {
       taskInstance: task,
     });
     return new Promise(async (resolve, reject) => {
-      // The actual promise returned from this function is resolved after the awaitTaskRunResult promise resolves.
-      // However, we do not wait to await this promise, as we want later execution to happen in parallel.
-      // The awaitTaskRunResult promise is resolved once the ephemeral task is successfully executed (technically, when a TaskEventType.TASK_RUN is emitted with the same id).
-      // However, the ephemeral task won't even get into the queue until the subsequent this.ephemeralTaskLifecycle.attemptToRun is called (which puts it in the queue).
-
-      // The reason for all this confusion? Timing.
-
-      // In the this.ephemeralTaskLifecycle.attemptToRun, it's possible that the ephemeral task is put into the queue and processed before this function call returns anything.
-      // If that happens, putting the awaitTaskRunResult after would just hang because the task already completed. We need to listen for the completion before we add it to the queue to avoid this possibility.
-      const { cancel, resolveOnCancel } = cancellablePromise();
-      this.awaitTaskRunResult(id, resolveOnCancel)
-        .then((arg: RunNowResult) => {
-          resolve(arg);
-        })
-        .catch((err: Error) => {
-          reject(err);
+      try {
+        // The actual promise returned from this function is resolved after the awaitTaskRunResult promise resolves.
+        // However, we do not wait to await this promise, as we want later execution to happen in parallel.
+        // The awaitTaskRunResult promise is resolved once the ephemeral task is successfully executed (technically, when a TaskEventType.TASK_RUN is emitted with the same id).
+        // However, the ephemeral task won't even get into the queue until the subsequent this.ephemeralTaskLifecycle.attemptToRun is called (which puts it in the queue).
+        // The reason for all this confusion? Timing.
+        // In the this.ephemeralTaskLifecycle.attemptToRun, it's possible that the ephemeral task is put into the queue and processed before this function call returns anything.
+        // If that happens, putting the awaitTaskRunResult after would just hang because the task already completed. We need to listen for the completion before we add it to the queue to avoid this possibility.
+        const { cancel, resolveOnCancel } = cancellablePromise();
+        this.awaitTaskRunResult(id, resolveOnCancel)
+          .then((arg: RunNowResult) => {
+            resolve(arg);
+          })
+          .catch((err: Error) => {
+            reject(err);
+          });
+        const attemptToRunResult = this.ephemeralTaskLifecycle.attemptToRun({
+          id,
+          scheduledAt: new Date(),
+          runAt: new Date(),
+          status: TaskStatus.Idle,
+          ownerId: this.taskManagerId,
+          ...modifiedTask,
         });
-      const attemptToRunResult = this.ephemeralTaskLifecycle.attemptToRun({
-        id,
-        scheduledAt: new Date(),
-        runAt: new Date(),
-        status: TaskStatus.Idle,
-        ownerId: this.taskManagerId,
-        ...modifiedTask,
-      });
-      if (isErr(attemptToRunResult)) {
-        cancel();
-        reject(
-          new EphemeralTaskRejectedDueToCapacityError(
-            `Ephemeral Task of type ${task.taskType} was rejected`,
-            task
-          )
-        );
+
+        if (isErr(attemptToRunResult)) {
+          cancel();
+          reject(
+            new EphemeralTaskRejectedDueToCapacityError(
+              `Ephemeral Task of type ${task.taskType} was rejected`,
+              task
+            )
+          );
+        }
+      } catch (error) {
+        reject(error);
       }
     });
   }

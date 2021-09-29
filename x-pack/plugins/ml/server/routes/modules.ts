@@ -533,7 +533,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Modules
    *
-   * @api {post} /api/ml/modules/jobs_exist/:moduleId Check if module jobs exist
+   * @api {get} /api/ml/modules/jobs_exist/:moduleId Check if module jobs exist
    * @apiName CheckExistingModuleJobs
    * @apiDescription Check whether the jobs in the module with the specified ID exist in the
    *      current list of jobs. The check runs a test to see if any of the jobs in existence

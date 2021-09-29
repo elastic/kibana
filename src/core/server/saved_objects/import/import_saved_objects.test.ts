@@ -69,7 +69,7 @@ describe('#importSavedObjectsFromStream', () => {
 
   let readStream: Readable;
   const objectLimit = 10;
-  const overwrite = (Symbol() as unknown) as boolean;
+  const overwrite = Symbol() as unknown as boolean;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';

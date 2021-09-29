@@ -10,6 +10,7 @@ import { v4 } from 'uuid';
 
 import { Logger, SavedObject } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
 
 import type { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
@@ -32,12 +33,12 @@ export const createRuleTypeMocks = (
 
   const mockedConfig$ = of({} as ConfigType);
 
-  const loggerMock = ({
+  const loggerMock = {
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   const alerting = {
     registerType: ({ executor }) => {
@@ -84,6 +85,7 @@ export const createRuleTypeMocks = (
       config$: mockedConfig$,
       lists: listMock.createSetup(),
       logger: loggerMock,
+      ml: mlPluginServerMock.createSetupContract(),
       ruleDataClient: ruleRegistryMocks.createRuleDataClient(
         '.alerts-security.alerts'
       ) as IRuleDataClient,

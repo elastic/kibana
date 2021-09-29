@@ -15,10 +15,11 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { removeEmptyCoordinates, roundNumber } from '../../utils';
 
-type TransactionsGroupsDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
+type TransactionsGroupsDetailedStatistics =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -74,10 +75,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const {
-          currentPeriod,
-          previousPeriod,
-        } = response.body as TransactionsGroupsDetailedStatistics;
+        const { currentPeriod, previousPeriod } =
+          response.body as TransactionsGroupsDetailedStatistics;
 
         expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
 
@@ -130,10 +129,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const {
-          currentPeriod,
-          previousPeriod,
-        } = response.body as TransactionsGroupsDetailedStatistics;
+        const { currentPeriod, previousPeriod } =
+          response.body as TransactionsGroupsDetailedStatistics;
 
         expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
 
