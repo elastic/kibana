@@ -26,13 +26,17 @@ import { IconStaticOptions } from '../../../../../common/descriptor_types';
 export class StaticIconProperty extends StaticStyleProperty<IconStaticOptions> {
   syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
     const { value: symbolId, icon } = this._options;
-    if (symbolId.startsWith(CUSTOM_ICON_PREFIX) && icon) {
-      if (!mbMap.hasImage(symbolId)) {
-        createSdfIcon(icon).then((imageData: ImageData) => {
+    const customIconCheck = () => {
+      return new Promise<void>(async (resolve) => {
+        if (!mbMap.hasImage(symbolId)) {
+          const imageData = await createSdfIcon(icon);
           mbMap.addImage(symbolId, imageData, { sdf: true });
-          mbMap.setLayoutProperty(symbolLayerId, 'icon-image', symbolId);
-        });
-      }
+        }
+        resolve();
+      });
+    };
+    if (symbolId.startsWith(CUSTOM_ICON_PREFIX) && icon) {
+      customIconCheck().then(() => mbMap.setLayoutProperty(symbolLayerId, 'icon-image', symbolId));
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', getMakiIconId(symbolId, iconPixelSize));
