@@ -20,23 +20,23 @@ jest.mock('../../../../kibana_react/public', () => ({
         ui: {
           redirectLegacyUrl: mockRedirectLegacyUrl,
           components: {
-            getLegacyUrlConflict: mockGetLegacyUrlConflict
-          }
-        }
+            getLegacyUrlConflict: mockGetLegacyUrlConflict,
+          },
+        },
       },
       history: {
         location: {
-          search: '?_g=test'
-        }
+          search: '?_g=test',
+        },
       },
       http: {
         basePath: {
-          prepend: (url: string) => url
-        }
-      }
+          prepend: (url: string) => url,
+        },
+      },
     },
   })),
-  withKibana: jest.fn((comp) => comp)
+  withKibana: jest.fn((comp) => comp),
 }));
 
 describe('VisualizeEditorCommon', () => {
@@ -94,7 +94,7 @@ describe('VisualizeEditorCommon', () => {
                 outcome: 'aliasMatch',
                 aliasTargetId: 'alias_id',
               },
-            },  
+            },
             vis: {
               type: {
                 title: 'TSVB',
@@ -104,6 +104,9 @@ describe('VisualizeEditorCommon', () => {
         }
       />
     );
-    expect(mockRedirectLegacyUrl).toHaveBeenCalledWith('/app/visualize#/edit/alias_id?_g=test','TSVB visualization');
+    expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
+      '/app/visualize#/edit/alias_id?_g=test',
+      'TSVB visualization'
+    );
   });
 });

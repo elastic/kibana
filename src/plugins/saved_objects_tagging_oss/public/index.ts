@@ -25,7 +25,7 @@ export {
   SavedObjectTagDecoratorTypeGuard,
 } from './api';
 
-export { TagDecoratedSavedObject, tagDecoratorConfig } from './decorator';
+export { TagDecoratedSavedObject } from './decorator';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SavedObjectTaggingOssPlugin(initializerContext);

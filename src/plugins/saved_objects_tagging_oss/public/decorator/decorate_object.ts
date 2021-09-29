@@ -11,11 +11,11 @@ import { InternalTagDecoratedSavedObject } from './types';
 /**
  * Enhance the object with tag accessors
  */
-export const decorateObject = (object: InternalTagDecoratedSavedObject | any) => {
+export const decorateObject = (object: InternalTagDecoratedSavedObject) => {
   object.getTags = () => {
     return object.__tags ?? [];
   };
-  object.setTags = (tagIds: string[]) => {
+  object.setTags = (tagIds) => {
     object.__tags = tagIds;
   };
 };
