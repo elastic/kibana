@@ -18,3 +18,5 @@ export const POLICIES_TAB = '[data-test-subj="tab-policies"]';
 
 export const UPDATE_PACKAGE_BTN = '[data-test-subj="updatePackageBtn"]';
 export const LATEST_VERSION = '[data-test-subj="latestVersion"]';
+
+export const PACKAGE_VERSION = '[data-test-subj="packageVersionText"]';

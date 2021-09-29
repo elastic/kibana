@@ -219,7 +219,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiText size="s" className="eui-textNoWrap">
+                <EuiText size="s" className="eui-textNoWrap" data-test-subj="packageVersionText">
                   <FormattedMessage
                     id="xpack.fleet.epm.packageDetails.integrationList.packageVersion"
                     defaultMessage="v{version}"

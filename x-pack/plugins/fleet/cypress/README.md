@@ -55,6 +55,16 @@ cd x-pack/plugins/fleet
 yarn cypress:open-as-ci
 ```
 
+Alternatively, kibana test server can be started separately, to pick up changes in UI (e.g. change in data-test-subj selector)
+
+```
+# launch kibana test server
+node scripts/functional_tests_server --config x-pack/test/fleet_cypress/config.ts
+
+# launch cypress runner
+node scripts/functional_test_runner --config x-pack/test/fleet_cypress/visual_config.ts
+```
+
 Note that you can select the browser you want to use on the top right side of the interactive runner.
 
 ## Folder Structure

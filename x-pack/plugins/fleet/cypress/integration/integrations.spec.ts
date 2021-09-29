@@ -16,6 +16,7 @@ import {
   INTEGRATIONS_CARD,
   INTEGRATION_NAME_LINK,
   LATEST_VERSION,
+  PACKAGE_VERSION,
   POLICIES_TAB,
   SETTINGS_TAB,
   UPDATE_PACKAGE_BTN,
@@ -45,7 +46,7 @@ describe('Add Integration', () => {
     addIntegration();
 
     cy.get(INTEGRATION_NAME_LINK).contains('apache-');
-    cy.get('.euiText').contains(oldVersion);
+    cy.get(PACKAGE_VERSION).contains(oldVersion);
 
     cy.get(SETTINGS_TAB).click();
     cy.get(UPDATE_PACKAGE_BTN).click();
@@ -53,7 +54,8 @@ describe('Add Integration', () => {
     cy.get(LATEST_VERSION).then(($title) => {
       const newVersion = $title.text();
       cy.get(POLICIES_TAB).click();
-      cy.get('.euiText').contains(`v${oldVersion}`).should('not.exist');
+      cy.get(PACKAGE_VERSION).contains(oldVersion).should('not.exist');
+      cy.get(PACKAGE_VERSION).contains(newVersion);
     });
   });
 });
