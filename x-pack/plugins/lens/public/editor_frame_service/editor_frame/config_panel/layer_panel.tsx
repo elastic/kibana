@@ -178,9 +178,9 @@ export function LayerPanel(
         setNextFocusedButtonId(columnId);
       }
 
-      const filterOperations =
-        groups.find(({ groupId: gId }) => gId === targetItem.groupId)?.filterOperations ||
-        (() => false);
+      const group = groups.find(({ groupId: gId }) => gId === groupId);
+
+      const filterOperations = group?.filterOperations || (() => false);
 
       const dropResult = layerDatasourceOnDrop({
         ...layerDatasourceDropProps,
@@ -193,12 +193,28 @@ export function LayerPanel(
         dropType,
       });
       if (dropResult) {
+        let previousColumn =
+          typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
+
+        // make it inherit only for moving and duplicate
+        if (!previousColumn) {
+          // when duplicating check if the previous column is required
+          if (
+            dropType === 'duplicate_compatible' &&
+            typeof droppedItem.columnId === 'string' &&
+            group?.requiresPreviousColumnOnDuplicate
+          ) {
+            previousColumn = droppedItem.columnId;
+          } else {
+            previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
+          }
+        }
         const newVisState = setDimension({
           columnId,
           groupId,
           layerId: targetLayerId,
           prevState: props.visualizationState,
-          previousColumn: typeof droppedItem.column === 'string' ? droppedItem.column : undefined,
+          previousColumn,
           frame: framePublicAPI,
         });
 
