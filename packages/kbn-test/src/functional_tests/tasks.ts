@@ -149,7 +149,11 @@ interface StartServerOptions {
   runStartTime?: number;
 }
 
-export async function startServers({ reportTime = async () => {}, runStartTime = 0, ...options }: StartServerOptions) {
+export async function startServers({
+  reportTime = async () => {},
+  runStartTime = 0,
+  ...options
+}: StartServerOptions) {
   const log = options.createLogger();
   const opts = {
     ...options,
@@ -176,7 +180,7 @@ export async function startServers({ reportTime = async () => {}, runStartTime =
       success: true,
       ...options,
     });
-  
+
     // wait for 5 seconds of silence before logging the
     // success message so that it doesn't get buried
     await silence(log, 5000);
