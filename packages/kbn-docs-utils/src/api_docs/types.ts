@@ -6,6 +6,28 @@
  * Side Public License, v 1.
  */
 
+export interface PluginOrPackage {
+  manifest: {
+    id: string;
+    description?: string;
+    owner: { name: string; githubTeam?: string };
+    serviceFolders: readonly string[];
+  };
+  isPlugin: boolean;
+  directory: string;
+  manifestPath: string;
+  /**
+   * If this is a package, the import path will be equal to the name, like '@kbn/es-query'. If it's a
+   * plugin, it will be the same as directory, as imports are relative.
+   */
+  importPath: string;
+  /**
+   * Only relevant if `isPlugin` is false. Plugins define functionality for each scope using folder structure,
+   * while a package defines it's intended usage via package.json fields.
+   */
+  scope?: ApiScope;
+}
+
 /**
  * The kinds of typescript types we want to show in the docs. `Unknown` is used if
  * we aren't accounting for a particular type. See {@link getPropertyTypeKind}
@@ -230,4 +252,5 @@ export interface ApiStats {
 export type PluginMetaInfo = ApiStats & {
   owner: { name: string; githubTeam?: string };
   description?: string;
+  isPlugin: boolean; // True if plugin, false if a package;
 };
