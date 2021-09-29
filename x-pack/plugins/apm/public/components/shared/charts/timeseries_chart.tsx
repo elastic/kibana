@@ -35,6 +35,8 @@ import { useAnnotationsContext } from '../../../context/annotations/use_annotati
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+
+import { useChangePointDetection } from '../../../components/app/correlations/use_change_point_detection';
 import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
@@ -168,6 +170,9 @@ export function TimeseriesChart({
       setWindowParameters(wp);
     }
   };
+
+  const { progress, response, startFetch, cancelFetch } =
+    useChangePointDetection();
 
   return (
     <ChartContainer
