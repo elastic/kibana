@@ -17,14 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const browser = getService('browser');
-
-  const defaultSettings = {
-    defaultIndex: 'logstash-*',
-  };
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
+  const defaultSettings = {
+    defaultIndex: 'logstash-*',
+  };
 
   const setUpQueriesWithFilters = async () => {
     // set up a query with filters and a time filter
@@ -40,11 +39,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
 
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/unmapped_fields');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
+      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
@@ -52,9 +51,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/unmapped_fields');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     describe('saved query selection', () => {
@@ -78,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
+        await PageObjects.discover.selectIndexPattern('date-nested');
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
