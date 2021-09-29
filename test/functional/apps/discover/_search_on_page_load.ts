@@ -42,16 +42,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // and load a set of data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/unmapped_fields');
+      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/unmapped_fields');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     describe(`when it's false`, () => {
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('refreshDataButton')).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
-        await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
+        await PageObjects.discover.selectIndexPattern('date-nested');
 
         expect(await testSubjects.exists('refreshDataButton')).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
@@ -93,6 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should fetch data from ES after choosing commonly used time range', async function () {
+        await PageObjects.discover.selectIndexPattern('logstash-*');
         expect(await testSubjects.exists('refreshDataButton')).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
