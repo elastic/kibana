@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { SearchHit } from '@elastic/elasticsearch/api/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -28,6 +31,7 @@ import {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
+  ThresholdAlertState,
   WrapHits,
 } from '../types';
 import {
@@ -37,6 +41,7 @@ import {
 } from '../utils';
 import { BuildRuleMessage } from '../rule_messages';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 
 export const thresholdExecutor = async ({
   rule,
@@ -48,6 +53,7 @@ export const thresholdExecutor = async ({
   logger,
   buildRuleMessage,
   startedAt,
+  state,
   bulkCreate,
   wrapHits,
 }: {
@@ -60,17 +66,48 @@ export const thresholdExecutor = async ({
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
   startedAt: Date;
+  state: ThresholdAlertState;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
-}): Promise<SearchAfterAndBulkCreateReturnType> => {
+}): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   let result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
+
+  // Get state or build initial state (on upgrade)
+  const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
+    ? { signalHistory: state.signalHistory, searchErrors: [] }
+    : await getThresholdSignalHistory({
+        indexPattern: ['*'], // TODO: get outputIndex?
+        from: tuple.from.toISOString(),
+        to: tuple.to.toISOString(),
+        services,
+        logger,
+        ruleId: ruleParams.ruleId,
+        bucketByFields: ruleParams.threshold.field,
+        timestampOverride: ruleParams.timestampOverride,
+        buildRuleMessage,
+      });
+
+  if (!state.initialized) {
+    // Clean up any signal history that has fallen outside the window
+    const toDelete: string[] = [];
+    for (const [hash, entry] of Object.entries(signalHistory)) {
+      if (entry.lastSignalTimestamp < tuple.from.valueOf()) {
+        toDelete.push(hash);
+      }
+    }
+    for (const hash of toDelete) {
+      delete signalHistory[hash];
+    }
+  }
+
   if (hasLargeValueItem(exceptionItems)) {
     result.warningMessages.push(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
     );
     result.warning = true;
   }
+
   const inputIndex = await getInputIndex({
     experimentalFeatures,
     services,
@@ -78,23 +115,8 @@ export const thresholdExecutor = async ({
     index: ruleParams.index,
   });
 
-  const {
-    thresholdSignalHistory,
-    searchErrors: previousSearchErrors,
-  } = await getThresholdSignalHistory({
-    indexPattern: [ruleParams.outputIndex],
-    from: tuple.from.toISOString(),
-    to: tuple.to.toISOString(),
-    services,
-    logger,
-    ruleId: ruleParams.ruleId,
-    bucketByFields: ruleParams.threshold.field,
-    timestampOverride: ruleParams.timestampOverride,
-    buildRuleMessage,
-  });
-
   const bucketFilters = await getThresholdBucketFilters({
-    thresholdSignalHistory,
+    signalHistory,
     timestampOverride: ruleParams.timestampOverride,
   });
 
@@ -125,26 +147,21 @@ export const thresholdExecutor = async ({
     buildRuleMessage,
   });
 
-  const {
-    success,
-    bulkCreateDuration,
-    createdItemsCount,
-    createdItems,
-    errors,
-  } = await bulkCreateThresholdSignals({
-    someResult: thresholdResults,
-    ruleSO: rule,
-    filter: esFilter,
-    services,
-    logger,
-    inputIndexPattern: inputIndex,
-    signalsIndex: ruleParams.outputIndex,
-    startedAt,
-    from: tuple.from.toDate(),
-    thresholdSignalHistory,
-    bulkCreate,
-    wrapHits,
-  });
+  const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
+    await bulkCreateThresholdSignals({
+      someResult: thresholdResults,
+      ruleSO: rule,
+      filter: esFilter,
+      services,
+      logger,
+      inputIndexPattern: inputIndex,
+      signalsIndex: ruleParams.outputIndex,
+      startedAt,
+      from: tuple.from.toDate(),
+      signalHistory,
+      bulkCreate,
+      wrapHits,
+    });
 
   result = mergeReturns([
     result,
@@ -161,5 +178,31 @@ export const thresholdExecutor = async ({
       searchAfterTimes: [thresholdSearchDuration],
     }),
   ]);
-  return result;
+
+  const createdAlerts = createdItems.map((alert) => {
+    const { _id, _index, ...source } = alert as { _id: string; _index: string };
+    return {
+      _id,
+      _index,
+      _source: {
+        ...source,
+      },
+    } as SearchHit<unknown>;
+  });
+
+  const newSignalHistory = buildThresholdSignalHistory({
+    alerts: createdAlerts,
+  });
+
+  return {
+    ...result,
+    state: {
+      ...state,
+      initialized: true,
+      signalHistory: {
+        ...signalHistory,
+        ...newSignalHistory,
+      },
+    },
+  };
 };

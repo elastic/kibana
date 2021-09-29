@@ -24,8 +24,10 @@ export const removeExternalLinkText = (str: string) =>
 describe('LinkPreview', () => {
   const getElementValue = (container: HTMLElement, id: string) =>
     getNodeText(
-      ((getByTestId(container, id) as HTMLDivElement)
-        .children as HTMLCollection)[0] as HTMLDivElement
+      (
+        (getByTestId(container, id) as HTMLDivElement)
+          .children as HTMLCollection
+      )[0] as HTMLDivElement
     );
 
   it('shows label and url default values', () => {

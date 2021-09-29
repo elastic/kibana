@@ -48,9 +48,10 @@ export const useScheduledQueryGroupQueryForm = ({
       new Set<string>(xor(uniqueQueryIds, defaultValue?.id.value ? [defaultValue.id.value] : [])),
     [uniqueQueryIds, defaultValue]
   );
-  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(() => createFormSchema(idSet), [
-    idSet,
-  ]);
+  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
+    () => createFormSchema(idSet),
+    [idSet]
+  );
 
   return useForm<OsqueryManagerPackagePolicyConfigRecord, ScheduledQueryGroupFormData>({
     id: FORM_ID + uuid.v4(),
@@ -63,7 +64,23 @@ export const useScheduledQueryGroupQueryForm = ({
     options: {
       stripEmptyFields: false,
     },
-    defaultValue,
+    defaultValue: defaultValue || {
+      id: {
+        type: 'text',
+        value: '',
+      },
+      query: {
+        type: 'text',
+        value: '',
+      },
+      interval: {
+        type: 'integer',
+        value: '3600',
+      },
+      ecs_mapping: {
+        value: {},
+      },
+    },
     // @ts-expect-error update types
     serializer: (payload) =>
       produce(payload, (draft) => {

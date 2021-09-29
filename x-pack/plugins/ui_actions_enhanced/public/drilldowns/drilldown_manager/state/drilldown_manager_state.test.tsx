@@ -9,6 +9,7 @@ import { ActionFactory, MemoryActionStorage } from '../../../dynamic_actions';
 import { DrilldownManagerState, DrilldownManagerStateDeps } from './drilldown_manager_state';
 import { DynamicActionManager } from '../../../dynamic_actions/dynamic_action_manager';
 import { uiActionsEnhancedPluginMock } from '../../../mocks';
+import { AdvancedUiActionsStart } from '../../..';
 import { Trigger } from 'src/plugins/ui_actions/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { notificationServiceMock } from 'src/core/public/mocks';
@@ -34,6 +35,9 @@ class StorageWrapperMock implements IStorageWrapper {
 }
 
 const createDrilldownManagerState = () => {
+  type Mutable<Type> = {
+    -readonly [Property in keyof Type]: Type[Property];
+  };
   const factory1 = new ActionFactory(
     {
       id: 'FACTORY1',
@@ -87,9 +91,10 @@ const createDrilldownManagerState = () => {
   };
   const uiActions = uiActionsEnhancedPluginMock.createPlugin();
   const uiActionsStart = uiActions.doStart();
-  (uiActionsStart as any).attachAction = () => {};
-  (uiActionsStart as any).detachAction = () => {};
-  (uiActionsStart as any).hasActionFactory = (actionFactoryId: string): boolean => {
+  const uiActionsStartMutable = uiActionsStart as Mutable<AdvancedUiActionsStart>;
+  uiActionsStartMutable.attachAction = () => {};
+  uiActionsStartMutable.detachAction = () => {};
+  uiActionsStartMutable.hasActionFactory = (actionFactoryId: string): boolean => {
     switch (actionFactoryId) {
       case 'FACTORY1':
       case 'FACTORY2':
@@ -98,7 +103,7 @@ const createDrilldownManagerState = () => {
     }
     return false;
   };
-  (uiActionsStart as any).getActionFactory = (actionFactoryId: string): ActionFactory => {
+  uiActionsStartMutable.getActionFactory = (actionFactoryId: string): ActionFactory => {
     switch (actionFactoryId) {
       case 'FACTORY1':
         return factory1;

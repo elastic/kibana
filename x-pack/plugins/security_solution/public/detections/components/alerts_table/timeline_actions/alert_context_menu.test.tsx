@@ -13,14 +13,6 @@ import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 
-jest.mock('@kbn/alerts', () => ({
-  useGetUserAlertsPermissions: () => ({
-    loading: false,
-    crud: true,
-    read: true,
-  }),
-}));
-
 const ecsRowData: Ecs = { _id: '1', agent: { type: ['blah'] } };
 
 const props = {

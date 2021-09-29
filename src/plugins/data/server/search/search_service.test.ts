@@ -12,7 +12,7 @@ import { coreMock } from '../../../../core/server/mocks';
 
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { createFieldFormatsStartMock } from '../../../field_formats/server/mocks';
-import { createIndexPatternsStartMock } from '../index_patterns/mocks';
+import { createIndexPatternsStartMock } from '../data_views/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { bfetchPluginMock } from '../../../bfetch/server/mocks';
@@ -38,10 +38,8 @@ describe('Search service', () => {
   let mockCoreStart: MockedKeys<CoreStart>;
 
   beforeEach(() => {
-    const mockLogger: any = {
-      debug: () => {},
-    };
     const context = coreMock.createPluginInitializerContext({});
+    const mockLogger = context.logger.get();
     context.config.create = jest.fn().mockImplementation(() => {
       return of({
         search: {
@@ -61,14 +59,14 @@ describe('Search service', () => {
   describe('setup()', () => {
     it('exposes proper contract', async () => {
       const bfetch = bfetchPluginMock.createSetupContract();
-      const setup = plugin.setup(mockCoreSetup, ({
+      const setup = plugin.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
         bfetch,
         expressions: {
           registerFunction: jest.fn(),
           registerType: jest.fn(),
         },
-      } as unknown) as SearchServiceSetupDependencies);
+      } as unknown as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('registerSearchStrategy');
     });

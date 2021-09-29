@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -13,13 +14,18 @@ import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { renameKeys } from './../lib/rename_keys';
 import { MuteOptions } from '../../rules_client';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
   alert_id: schema.string(),
   alert_instance_id: schema.string(),
 });
 
-export const muteAlertInstanceRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const muteAlertInstanceRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute`,
@@ -32,6 +38,9 @@ export const muteAlertInstanceRoute = (router: AlertingRouter, licenseState: ILi
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
+
+      trackLegacyRouteUsage('muteInstance', usageCounter);
+
       const rulesClient = context.alerting.getRulesClient();
 
       const renameMap = {

@@ -18,7 +18,7 @@ export const mockNavigateToApp = jest.fn();
 
 export const createStartServicesMock = (): CoreStart => {
   const coreServices = coreMock.createStart();
-  return ({
+  return {
     ...coreServices,
     cases: {
       getAllCases: jest.fn(),
@@ -32,7 +32,7 @@ export const createStartServicesMock = (): CoreStart => {
       ...coreServices.application,
       navigateToApp: mockNavigateToApp,
     },
-  } as unknown) as CoreStart;
+  } as unknown as CoreStart;
 };
 
 export const createWithKibanaMock = () => {

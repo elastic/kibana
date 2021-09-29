@@ -22,5 +22,7 @@ export const useOsqueryIntegrationStatus = () => {
           defaultMessage: 'Error while fetching osquery integration',
         }),
       }),
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
   });
 };

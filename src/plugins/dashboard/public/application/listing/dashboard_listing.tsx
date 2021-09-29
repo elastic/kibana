@@ -7,7 +7,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiEmptyPrompt, EuiBasicTableColumn } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
@@ -163,12 +163,8 @@ export const DashboardListing = ({
       : [];
   }, [savedObjectsTagging]);
 
-  const {
-    getEntityName,
-    getTableCaption,
-    getTableListTitle,
-    getEntityNamePlural,
-  } = dashboardListingTable;
+  const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
+    dashboardListingTable;
   return (
     <TableListView
       createItem={!showWriteControls ? undefined : createItem}
@@ -235,7 +231,7 @@ const getTableColumns = (
       sortable: true,
     },
     ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
-  ];
+  ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };
 
 const getNoItemsMessage = (

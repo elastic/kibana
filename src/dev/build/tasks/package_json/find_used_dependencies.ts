@@ -29,9 +29,9 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
   ];
 
   const discoveredPluginEntries = await globby([
-    normalize(Path.resolve(baseDir, `src/plugins/*/server/index.js`)),
+    normalize(Path.resolve(baseDir, `src/plugins/**/server/index.js`)),
     `!${normalize(Path.resolve(baseDir, `/src/plugins/**/public`))}`,
-    normalize(Path.resolve(baseDir, `x-pack/plugins/*/server/index.js`)),
+    normalize(Path.resolve(baseDir, `x-pack/plugins/**/server/index.js`)),
     `!${normalize(Path.resolve(baseDir, `/x-pack/plugins/**/public`))}`,
   ]);
 
@@ -42,7 +42,7 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
   // Another way would be to include an index file and import all the functions
   // using named imports
   const dynamicRequiredEntries = await globby([
-    normalize(Path.resolve(baseDir, 'src/plugins/vis_type_timelion/server/**/*.js')),
+    normalize(Path.resolve(baseDir, 'src/plugins/vis_types/timelion/server/**/*.js')),
   ]);
 
   // Compose all the needed entries

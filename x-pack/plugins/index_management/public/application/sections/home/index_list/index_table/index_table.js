@@ -428,15 +428,8 @@ export class IndexTable extends Component {
   }
 
   render() {
-    const {
-      filter,
-      indices,
-      loadIndices,
-      indicesLoading,
-      indicesError,
-      allIndices,
-      pager,
-    } = this.props;
+    const { filter, indices, loadIndices, indicesLoading, indicesError, allIndices, pager } =
+      this.props;
 
     const { includeHiddenIndices } = this.readURLParams();
     const hasContent = !indicesLoading && !indicesError;

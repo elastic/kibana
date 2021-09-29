@@ -27,18 +27,18 @@ describe('public search functions', () => {
 
   it('returns case links for basic license with only read_cases capabilities', () => {
     const basicLicense = 'basic';
-    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       siem: { read_cases: true, crud_cases: false },
-    } as unknown) as Capabilities);
+    } as unknown as Capabilities);
 
     expect(basicLinks.some((l) => l.id === SecurityPageName.case)).toBeTruthy();
   });
 
   it('returns case links with NO deepLinks for basic license with only read_cases capabilities', () => {
     const basicLicense = 'basic';
-    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       siem: { read_cases: true, crud_cases: false },
-    } as unknown) as Capabilities);
+    } as unknown as Capabilities);
 
     expect(
       basicLinks.find((l) => l.id === SecurityPageName.case)?.deepLinks?.length === 0
@@ -47,9 +47,9 @@ describe('public search functions', () => {
 
   it('returns case links with deepLinks for basic license with crud_cases capabilities', () => {
     const basicLicense = 'basic';
-    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       siem: { read_cases: true, crud_cases: true },
-    } as unknown) as Capabilities);
+    } as unknown as Capabilities);
 
     expect(
       (basicLinks.find((l) => l.id === SecurityPageName.case)?.deepLinks?.length ?? 0) > 0
@@ -58,9 +58,9 @@ describe('public search functions', () => {
 
   it('returns NO case links for basic license with NO read_cases capabilities', () => {
     const basicLicense = 'basic';
-    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       siem: { read_cases: false, crud_cases: false },
-    } as unknown) as Capabilities);
+    } as unknown as Capabilities);
 
     expect(basicLinks.some((l) => l.id === SecurityPageName.case)).toBeFalsy();
   });
@@ -100,69 +100,5 @@ describe('public search functions', () => {
       uebaEnabled: true,
     });
     expect(deepLinks.some((l) => l.id === SecurityPageName.ueba)).toBeTruthy();
-  });
-
-  describe('Detections Alerts deep links', () => {
-    it('should return alerts link for basic license with only read_alerts capabilities', () => {
-      const basicLicense = 'basic';
-      const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
-        siem: { read_alerts: true, crud_alerts: false },
-      } as unknown) as Capabilities);
-
-      const detectionsDeepLinks =
-        basicLinks.find((l) => l.id === SecurityPageName.detections)?.deepLinks ?? [];
-
-      expect(
-        detectionsDeepLinks.length &&
-          detectionsDeepLinks.some((l) => l.id === SecurityPageName.alerts)
-      ).toBeTruthy();
-    });
-
-    it('should return alerts link with for basic license with crud_alerts capabilities', () => {
-      const basicLicense = 'basic';
-      const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
-        siem: { read_alerts: true, crud_alerts: true },
-      } as unknown) as Capabilities);
-
-      const detectionsDeepLinks =
-        basicLinks.find((l) => l.id === SecurityPageName.detections)?.deepLinks ?? [];
-
-      expect(
-        detectionsDeepLinks.length &&
-          detectionsDeepLinks.some((l) => l.id === SecurityPageName.alerts)
-      ).toBeTruthy();
-    });
-
-    it('should NOT return alerts link for basic license with NO read_alerts capabilities', () => {
-      const basicLicense = 'basic';
-      const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
-        siem: { read_alerts: false, crud_alerts: false },
-      } as unknown) as Capabilities);
-
-      const detectionsDeepLinks =
-        basicLinks.find((l) => l.id === SecurityPageName.detections)?.deepLinks ?? [];
-
-      expect(
-        detectionsDeepLinks.length &&
-          detectionsDeepLinks.some((l) => l.id === SecurityPageName.alerts)
-      ).toBeFalsy();
-    });
-
-    it('should return alerts link for basic license with undefined capabilities', () => {
-      const basicLicense = 'basic';
-      const basicLinks = getDeepLinks(
-        mockGlobalState.app.enableExperimental,
-        basicLicense,
-        undefined
-      );
-
-      const detectionsDeepLinks =
-        basicLinks.find((l) => l.id === SecurityPageName.detections)?.deepLinks ?? [];
-
-      expect(
-        detectionsDeepLinks.length &&
-          detectionsDeepLinks.some((l) => l.id === SecurityPageName.alerts)
-      ).toBeTruthy();
-    });
   });
 });

@@ -211,7 +211,7 @@ export function mapToList<T>(map: Map<string, number>, keyName: string): T[] {
   const list: T[] = [];
 
   for (const [key, count] of map) {
-    list.push(({ [keyName]: key, count } as unknown) as T);
+    list.push({ [keyName]: key, count } as unknown as T);
   }
 
   return list;

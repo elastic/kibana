@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110905
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
 import { lazy } from 'react';
 import {
@@ -57,6 +60,7 @@ export {
 
 export const LazyAlertsFlyout = lazy(() => import('./pages/alerts/alerts_flyout'));
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
+export { useEsSearch, createEsParams } from './hooks/use_es_search';
 
 export * from './typings';
 

@@ -18,7 +18,8 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 :data-source:     data view
 :Data-sources:    Data views
 :data-sources:    data views
-
+:A-data-source:   A data view
+:a-data-source:   a data view
 
 include::{docs-root}/shared/attributes.asciidoc[]
 

@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 
 import { ElasticsearchConnectionStatus } from '../../common';
 import type { EnrollResult } from '../elasticsearch_service';
+import type { WriteConfigParameters } from '../kibana_config_writer';
 import type { RouteDefinitionParams } from './';
 
 /**
@@ -22,6 +23,7 @@ export function defineEnrollRoutes({
   logger,
   kibanaConfigWriter,
   elasticsearch,
+  verificationCode,
   preboot,
 }: RouteDefinitionParams) {
   router.post(
@@ -34,11 +36,16 @@ export function defineEnrollRoutes({
           }),
           apiKey: schema.string({ minLength: 1 }),
           caFingerprint: schema.string({ maxLength: 64, minLength: 64 }),
+          code: schema.maybe(schema.string()),
         }),
       },
       options: { authRequired: false },
     },
     async (context, request, response) => {
+      if (!verificationCode.verify(request.body.code)) {
+        return response.forbidden();
+      }
+
       if (!preboot.isSetupOnHold()) {
         logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot stage`);
         return response.badRequest({ body: 'Cannot process request outside of preboot stage.' });
@@ -81,9 +88,9 @@ export function defineEnrollRoutes({
           .match(/.{1,2}/g)
           ?.join(':') ?? '';
 
-      let enrollResult: EnrollResult;
+      let configToWrite: WriteConfigParameters & EnrollResult;
       try {
-        enrollResult = await elasticsearch.enroll({
+        configToWrite = await elasticsearch.enroll({
           apiKey: request.body.apiKey,
           hosts: request.body.hosts,
           caFingerprint: colonFormattedCaFingerprint,
@@ -98,7 +105,7 @@ export function defineEnrollRoutes({
       }
 
       try {
-        await kibanaConfigWriter.writeConfig(enrollResult);
+        await kibanaConfigWriter.writeConfig(configToWrite);
       } catch {
         // For security reasons, we shouldn't leak any filesystem related errors.
         return response.customError({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { SetupUX } from '../routes/rum_client';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
@@ -20,12 +20,16 @@ export function getRumPageLoadTransactionsProjection({
   setup,
   urlQuery,
   checkFetchStartFieldExists = true,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   urlQuery?: string;
   checkFetchStartFieldExists?: boolean;
+  start: number;
+  end: number;
 }) {
-  const { start, end, uiFilters } = setup;
+  const { uiFilters } = setup;
 
   const bool = {
     filter: [
@@ -71,11 +75,15 @@ export function getRumPageLoadTransactionsProjection({
 export function getRumErrorsProjection({
   setup,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end, uiFilters } = setup;
+  const { uiFilters } = setup;
 
   const bool = {
     filter: [

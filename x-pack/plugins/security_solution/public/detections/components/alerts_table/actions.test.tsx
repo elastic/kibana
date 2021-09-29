@@ -148,6 +148,7 @@ describe('alert actions', () => {
             },
             deletedEventIds: [],
             description: 'This is a sample rule description',
+            documentType: '',
             eqlOptions: {
               eventCategoryField: 'event.category',
               query: '',
@@ -204,7 +205,9 @@ describe('alert actions', () => {
             noteIds: [],
             pinnedEventIds: {},
             pinnedEventsSaveObject: {},
+            queryFields: [],
             savedObjectId: null,
+            selectAll: false,
             selectedEventIds: {},
             show: true,
             showCheckboxes: false,
@@ -369,8 +372,7 @@ describe('alert actions', () => {
                 and: [],
                 enabled: true,
                 excluded: false,
-                id:
-                  'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
+                id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
                 kqlQuery: '',
                 name: '1',
                 queryMatch: { field: 'signal.group.id', operator: ':', value: 'my-group-id' },

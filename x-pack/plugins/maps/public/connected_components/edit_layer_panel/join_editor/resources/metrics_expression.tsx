@@ -15,7 +15,7 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 
-import { IFieldType } from 'src/plugins/data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MetricsEditor } from '../../../../components/metrics_editor';
 import { AGG_TYPE } from '../../../../../common/constants';
@@ -23,7 +23,7 @@ import { AggDescriptor, FieldedAggDescriptor } from '../../../../../common/descr
 
 interface Props {
   metrics: AggDescriptor[];
-  rightFields: IFieldType[];
+  rightFields: IndexPatternField[];
   onChange: (metrics: AggDescriptor[]) => void;
 }
 

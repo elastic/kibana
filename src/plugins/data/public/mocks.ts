@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataPlugin, IndexPatternsContract } from '.';
+import { DataPlugin, DataViewsContract } from '.';
 import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
@@ -32,13 +32,26 @@ const createSetupContract = (): Setup => {
   return {
     autocomplete: autocompleteSetupMock,
     search: searchServiceMock.createSetupContract(),
-    fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
   };
 };
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
+  const dataViews = {
+    find: jest.fn((search) => [{ id: search, title: search }]),
+    createField: jest.fn(() => {}),
+    createFieldList: jest.fn(() => []),
+    ensureDefaultIndexPattern: jest.fn(),
+    make: () => ({
+      fieldsFetcher: {
+        fetchForWildcard: jest.fn(),
+      },
+    }),
+    get: jest.fn().mockReturnValue(Promise.resolve({})),
+    clearCache: jest.fn(),
+  } as unknown as DataViewsContract;
+
   return {
     actions: {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
@@ -52,19 +65,11 @@ const createStartContract = (): Start => {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn().mockReturnValue(null),
     },
-    indexPatterns: ({
-      find: jest.fn((search) => [{ id: search, title: search }]),
-      createField: jest.fn(() => {}),
-      createFieldList: jest.fn(() => []),
-      ensureDefaultIndexPattern: jest.fn(),
-      make: () => ({
-        fieldsFetcher: {
-          fetchForWildcard: jest.fn(),
-        },
-      }),
-      get: jest.fn().mockReturnValue(Promise.resolve({})),
-      clearCache: jest.fn(),
-    } as unknown) as IndexPatternsContract,
+    dataViews,
+    /**
+     * @deprecated Use dataViews service instead. All index pattern interfaces were renamed.
+     */
+    indexPatterns: dataViews,
     nowProvider: createNowProviderMock(),
   };
 };

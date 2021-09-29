@@ -58,20 +58,21 @@ const ALL_SPACE_RESULTS = [
 ];
 
 export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectResults = (...spaceIds: string[]) => (resp: { [key: string]: any }) => {
-    const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id));
-    expect(resp.body).to.eql(expectedBody);
-  };
+  const createExpectResults =
+    (...spaceIds: string[]) =>
+    (resp: { [key: string]: any }) => {
+      const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id));
+      expect(resp.body).to.eql(expectedBody);
+    };
 
-  const createExpectAllPurposesResults = (
-    authorizedPurposes: AuthorizedPurposes,
-    ...spaceIds: string[]
-  ) => (resp: { [key: string]: any }) => {
-    const expectedBody = ALL_SPACE_RESULTS.filter((entry) =>
-      spaceIds.includes(entry.id)
-    ).map((x) => ({ ...x, authorizedPurposes }));
-    expect(resp.body).to.eql(expectedBody);
-  };
+  const createExpectAllPurposesResults =
+    (authorizedPurposes: AuthorizedPurposes, ...spaceIds: string[]) =>
+    (resp: { [key: string]: any }) => {
+      const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id)).map(
+        (x) => ({ ...x, authorizedPurposes })
+      );
+      expect(resp.body).to.eql(expectedBody);
+    };
 
   const expectEmptyResult = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
@@ -85,68 +86,67 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const makeGetAllTest = (describeFn: DescribeFn) => (
-    description: string,
-    { user = {}, spaceId, tests }: GetAllTestDefinition
-  ) => {
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+  const makeGetAllTest =
+    (describeFn: DescribeFn) =>
+    (description: string, { user = {}, spaceId, tests }: GetAllTestDefinition) => {
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      getTestScenariosForSpace(spaceId).forEach(({ scenario, urlPrefix }) => {
-        describe('undefined purpose', () => {
-          it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
-            return supertest
-              .get(`${urlPrefix}/api/spaces/space`)
-              .auth(user.username, user.password)
-              .expect(tests.exists.statusCode)
-              .then(tests.exists.response);
+        getTestScenariosForSpace(spaceId).forEach(({ scenario, urlPrefix }) => {
+          describe('undefined purpose', () => {
+            it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
+              return supertest
+                .get(`${urlPrefix}/api/spaces/space`)
+                .auth(user.username, user.password)
+                .expect(tests.exists.statusCode)
+                .then(tests.exists.response);
+            });
           });
-        });
 
-        describe('copySavedObjectsIntoSpace purpose', () => {
-          it(`should return ${tests.copySavedObjectsPurpose.statusCode} ${scenario}`, async () => {
-            return supertest
-              .get(`${urlPrefix}/api/spaces/space`)
-              .query({ purpose: 'copySavedObjectsIntoSpace' })
-              .auth(user.username, user.password)
-              .expect(tests.copySavedObjectsPurpose.statusCode)
-              .then(tests.copySavedObjectsPurpose.response);
+          describe('copySavedObjectsIntoSpace purpose', () => {
+            it(`should return ${tests.copySavedObjectsPurpose.statusCode} ${scenario}`, async () => {
+              return supertest
+                .get(`${urlPrefix}/api/spaces/space`)
+                .query({ purpose: 'copySavedObjectsIntoSpace' })
+                .auth(user.username, user.password)
+                .expect(tests.copySavedObjectsPurpose.statusCode)
+                .then(tests.copySavedObjectsPurpose.response);
+            });
           });
-        });
 
-        describe('shareSavedObjectsIntoSpace purpose', () => {
-          it(`should return ${tests.shareSavedObjectsPurpose.statusCode} ${scenario}`, async () => {
-            return supertest
-              .get(`${urlPrefix}/api/spaces/space`)
-              .query({ purpose: 'shareSavedObjectsIntoSpace' })
-              .auth(user.username, user.password)
-              .expect(tests.copySavedObjectsPurpose.statusCode)
-              .then(tests.copySavedObjectsPurpose.response);
+          describe('shareSavedObjectsIntoSpace purpose', () => {
+            it(`should return ${tests.shareSavedObjectsPurpose.statusCode} ${scenario}`, async () => {
+              return supertest
+                .get(`${urlPrefix}/api/spaces/space`)
+                .query({ purpose: 'shareSavedObjectsIntoSpace' })
+                .auth(user.username, user.password)
+                .expect(tests.copySavedObjectsPurpose.statusCode)
+                .then(tests.copySavedObjectsPurpose.response);
+            });
           });
-        });
 
-        describe('include_authorized_purposes=true', () => {
-          it(`should return ${tests.includeAuthorizedPurposes.statusCode} ${scenario}`, async () => {
-            return supertest
-              .get(`${urlPrefix}/api/spaces/space`)
-              .query({ include_authorized_purposes: true })
-              .auth(user.username, user.password)
-              .expect(tests.includeAuthorizedPurposes.statusCode)
-              .then(tests.includeAuthorizedPurposes.response);
+          describe('include_authorized_purposes=true', () => {
+            it(`should return ${tests.includeAuthorizedPurposes.statusCode} ${scenario}`, async () => {
+              return supertest
+                .get(`${urlPrefix}/api/spaces/space`)
+                .query({ include_authorized_purposes: true })
+                .auth(user.username, user.password)
+                .expect(tests.includeAuthorizedPurposes.statusCode)
+                .then(tests.includeAuthorizedPurposes.response);
+            });
           });
         });
       });
-    });
-  };
+    };
 
   const getAllTest = makeGetAllTest(describe);
   // @ts-ignore

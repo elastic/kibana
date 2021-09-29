@@ -9,7 +9,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -76,69 +75,67 @@ export function CreateEditCustomLinkFlyout({
   };
 
   return (
-    <EuiPortal>
-      <form onSubmit={onSubmit}>
-        <EuiFlyout ownFocus onClose={onClose} size="m">
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="s">
-              <h2>
-                {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.flyout.title',
+    <form onSubmit={onSubmit} id="customLink_form">
+      <EuiFlyout ownFocus onClose={onClose} size="m">
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate(
+                'xpack.apm.settings.customizeUI.customLink.flyout.title',
+                {
+                  defaultMessage: 'Create link',
+                }
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiText>
+            <p>
+              {i18n.translate(
+                'xpack.apm.settings.customizeUI.customLink.flyout.label',
+                {
+                  defaultMessage:
+                    'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the',
+                }
+              )}{' '}
+              <Documentation
+                label={i18n.translate(
+                  'xpack.apm.settings.customizeUI.customLink.flyout.label.doc',
                   {
-                    defaultMessage: 'Create link',
+                    defaultMessage: 'documentation.',
                   }
                 )}
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiText>
-              <p>
-                {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.flyout.label',
-                  {
-                    defaultMessage:
-                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the',
-                  }
-                )}{' '}
-                <Documentation
-                  label={i18n.translate(
-                    'xpack.apm.settings.customizeUI.customLink.flyout.label.doc',
-                    {
-                      defaultMessage: 'documentation.',
-                    }
-                  )}
-                />
-              </p>
-            </EuiText>
+              />
+            </p>
+          </EuiText>
 
-            <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
 
-            <LinkSection
-              label={label}
-              onChangeLabel={setLabel}
-              url={url}
-              onChangeUrl={setUrl}
-            />
-
-            <EuiSpacer size="l" />
-
-            <FiltersSection filters={filters} onChangeFilters={setFilters} />
-
-            <EuiSpacer size="l" />
-
-            <LinkPreview label={label} url={url} filters={filters} />
-          </EuiFlyoutBody>
-
-          <FlyoutFooter
-            isSaveButtonEnabled={isFormValid}
-            onClose={onClose}
-            isSaving={isSaving}
-            onDelete={onDelete}
-            customLinkId={customLinkId}
+          <LinkSection
+            label={label}
+            onChangeLabel={setLabel}
+            url={url}
+            onChangeUrl={setUrl}
           />
-        </EuiFlyout>
-      </form>
-    </EuiPortal>
+
+          <EuiSpacer size="l" />
+
+          <FiltersSection filters={filters} onChangeFilters={setFilters} />
+
+          <EuiSpacer size="l" />
+
+          <LinkPreview label={label} url={url} filters={filters} />
+        </EuiFlyoutBody>
+
+        <FlyoutFooter
+          isSaveButtonEnabled={isFormValid}
+          onClose={onClose}
+          isSaving={isSaving}
+          onDelete={onDelete}
+          customLinkId={customLinkId}
+        />
+      </EuiFlyout>
+    </form>
   );
 }

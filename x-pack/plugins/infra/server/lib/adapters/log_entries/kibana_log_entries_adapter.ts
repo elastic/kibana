@@ -268,9 +268,7 @@ const createFilterClauses = (
 const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
   filterQuery ? [filterQuery] : [];
 
-function processCursor(
-  cursor: LogEntriesParams['cursor']
-): {
+function processCursor(cursor: LogEntriesParams['cursor']): {
   sortDirection: 'asc' | 'desc';
   searchAfterClause: { search_after?: readonly [number, number] };
 } {

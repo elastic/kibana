@@ -17,18 +17,12 @@ export interface MetricVisualizationPluginSetupPlugins {
 }
 
 export class MetricVisualization {
-  constructor() {}
-
   setup(
     _core: CoreSetup | null,
     { expressions, formatFactory, editorFrame }: MetricVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { metricVisualization, metricChart, getMetricChartRenderer } = await import(
-        '../async_services'
-      );
-
-      expressions.registerFunction(() => metricChart);
+      const { metricVisualization, getMetricChartRenderer } = await import('../async_services');
 
       expressions.registerRenderer(() => getMetricChartRenderer(formatFactory));
       return metricVisualization;

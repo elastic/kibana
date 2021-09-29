@@ -11,8 +11,8 @@ Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
 });
 
-Cypress.Commands.add('loginAsSuperUser', () => {
-  cy.loginAs({ username: 'elastic', password: 'changeme' });
+Cypress.Commands.add('loginAsPowerUser', () => {
+  cy.loginAs({ username: 'apm_power_user', password: 'changeme' });
 });
 
 Cypress.Commands.add(

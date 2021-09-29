@@ -15,20 +15,15 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  /* ALERT_REASON, ALERT_RULE_ID, */ ALERT_RULE_NAME,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 
 import type { BrowserFields, RowRenderer, TimelineItem } from '../../../../common';
-import { tGridActions } from '../../../store/t_grid';
 import { RuleName } from '../../rule_name';
 import { isEventBuildingBlockType } from '../body/helpers';
 
@@ -63,23 +58,25 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
   }
 `;
 
-interface EventRenderedViewProps {
+export interface EventRenderedViewProps {
   alertToolbar: React.ReactNode;
   browserFields: BrowserFields;
   events: TimelineItem[];
   leadingControlColumns: EuiDataGridControlColumn[];
   onChangePage: (newActivePage: number) => void;
+  onChangeItemsPerPage: (newItemsPerPage: number) => void;
   pageIndex: number;
   pageSize: number;
   pageSizeOptions: number[];
   rowRenderers: RowRenderer[];
-  timelineId: string;
   totalItemCount: number;
 }
 const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
   const tz = useUiSetting<string>('dateFormat:tz');
   const dateFormat = useUiSetting<string>('dateFormat');
-  return <>{moment.tz(value, tz).format(dateFormat)}</>;
+  const zone: string = moment.tz.zone(tz)?.name ?? moment.tz.guess();
+
+  return <span data-test-subj="moment-date">{moment.tz(value, zone).format(dateFormat)}</span>;
 };
 export const PreferenceFormattedDate = React.memo(PreferenceFormattedDateComponent);
 
@@ -89,15 +86,13 @@ const EventRenderedViewComponent = ({
   events,
   leadingControlColumns,
   onChangePage,
+  onChangeItemsPerPage,
   pageIndex,
   pageSize,
   pageSizeOptions,
   rowRenderers,
-  timelineId,
   totalItemCount,
 }: EventRenderedViewProps) => {
-  const dispatch = useDispatch();
-
   const ActionTitle = useMemo(
     () => (
       <EuiFlexGroup gutterSize="m">
@@ -148,7 +143,7 @@ const EventRenderedViewComponent = ({
         width: '120px',
       },
       {
-        field: 'ecs.@timestamp',
+        field: 'ecs.timestamp',
         name: i18n.translate('xpack.timelines.alerts.EventRenderedView.timestamp.column', {
           defaultMessage: 'Timestamp',
         }),
@@ -156,7 +151,7 @@ const EventRenderedViewComponent = ({
         hideForMobile: false,
         // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
-          const timestamp = get(item, `ecs.${TIMESTAMP}`);
+          const timestamp = get(item, `ecs.timestamp`);
           return <PreferenceFormattedDate value={timestamp} />;
         },
       },
@@ -220,12 +215,10 @@ const EventRenderedViewComponent = ({
         onChangePage(pageChange.page.index);
       }
       if (pageChange.page.size !== pageSize) {
-        dispatch(
-          tGridActions.updateItemsPerPage({ id: timelineId, itemsPerPage: pageChange.page.size })
-        );
+        onChangeItemsPerPage(pageChange.page.size);
       }
     },
-    [dispatch, onChangePage, pageIndex, pageSize, timelineId]
+    [onChangePage, pageIndex, pageSize, onChangeItemsPerPage]
   );
 
   const pagination = useMemo(
@@ -246,6 +239,7 @@ const EventRenderedViewComponent = ({
         compressed
         items={events}
         columns={columns}
+        data-test-subj="event-rendered-view"
         pagination={pagination}
         onChange={handleTableChange}
         rowProps={({ ecs }: TimelineItem) =>

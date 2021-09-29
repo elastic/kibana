@@ -26,17 +26,9 @@ export const AlertConsumers = {
 export type AlertConsumers = typeof AlertConsumers[keyof typeof AlertConsumers];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'
 
-export const mapConsumerToIndexName: Record<AlertConsumers, string | string[]> = {
-  apm: '.alerts-observability-apm',
-  logs: '.alerts-observability.logs',
-  infrastructure: '.alerts-observability.metrics',
-  observability: '.alerts-observability',
-  siem: '.alerts-security.alerts',
-  uptime: '.alerts-observability.uptime',
-};
-export type ValidFeatureId = keyof typeof mapConsumerToIndexName;
+export type ValidFeatureId = AlertConsumers;
 
-export const validFeatureIds = Object.keys(mapConsumerToIndexName);
+export const validFeatureIds = Object.values(AlertConsumers).map((v) => v as string);
 export const isValidFeatureId = (a: unknown): a is ValidFeatureId =>
   typeof a === 'string' && validFeatureIds.includes(a);
 

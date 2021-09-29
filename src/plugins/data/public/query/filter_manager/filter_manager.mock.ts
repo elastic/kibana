@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import { FilterManager } from './filter_manager';
 
 export const createFilterManagerMock = () => {
-  const filterManager = ({
+  const filterManager = {
     mergeIncomingFilters: jest.fn(),
     handleStateUpdate: jest.fn(),
     getFilters: jest.fn(),
@@ -25,7 +25,7 @@ export const createFilterManagerMock = () => {
     setAppFilters: jest.fn(),
     removeFilter: jest.fn(),
     removeAll: jest.fn(),
-  } as unknown) as jest.Mocked<FilterManager>;
+  } as unknown as jest.Mocked<FilterManager>;
 
   return filterManager;
 };

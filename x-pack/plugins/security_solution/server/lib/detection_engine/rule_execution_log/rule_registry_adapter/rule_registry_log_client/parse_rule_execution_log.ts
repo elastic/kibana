@@ -33,5 +33,8 @@ export const parseRuleExecutionLog = (input: unknown) => {
 
 /**
  * @deprecated RuleExecutionEvent is kept here only as a reference. It will be superseded with EventLog implementation
+ *
+ * It's marked as `Partial` because the field map is not yet appropriate for
+ * execution log events.
  */
-export type RuleExecutionEvent = ReturnType<typeof parseRuleExecutionLog>;
+export type RuleExecutionEvent = Partial<ReturnType<typeof parseRuleExecutionLog>>;

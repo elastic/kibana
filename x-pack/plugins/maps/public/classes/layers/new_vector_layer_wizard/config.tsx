@@ -11,7 +11,7 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 import { NewVectorLayerEditor } from './wizard';
 import { DrawLayerIcon } from '../../layers/icons/draw_layer_icon';
 import { getFileUpload } from '../../../kibana_services';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 

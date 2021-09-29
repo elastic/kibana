@@ -60,7 +60,7 @@ import { addBasePath } from '../index';
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { registerTransformNodesRoutes } from './transforms_nodes';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { isLatestTransform } from '../../../common/types/transform';
 import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 
@@ -136,12 +136,11 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<TransformGetTransformStats, undefined, undefined>(
       async (ctx, req, res) => {
         try {
-          const {
-            body,
-          } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
-            size: 1000,
-            transform_id: '_all',
-          });
+          const { body } =
+            await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
+              size: 1000,
+              transform_id: '_all',
+            });
           return res.ok({ body });
         } catch (e) {
           return res.customError(wrapError(wrapEsError(e)));
@@ -167,11 +166,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
       try {
-        const {
-          body,
-        } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
-          transform_id: transformId,
-        });
+        const { body } =
+          await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
+            transform_id: transformId,
+          });
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -250,13 +248,12 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         const { transformId } = req.params;
 
         try {
-          const {
-            body,
-          } = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
-            // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
-            body: req.body,
-            transform_id: transformId,
-          });
+          const { body } =
+            await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
+              // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+              body: req.body,
+              transform_id: transformId,
+            });
           return res.ok({
             body,
           });
@@ -582,22 +579,22 @@ const previewTransformHandler: RequestHandler<
   }
 };
 
-const startTransformsHandler: RequestHandler<
-  undefined,
-  undefined,
-  StartTransformsRequestSchema
-> = async (ctx, req, res) => {
-  const transformsInfo = req.body;
+const startTransformsHandler: RequestHandler<undefined, undefined, StartTransformsRequestSchema> =
+  async (ctx, req, res) => {
+    const transformsInfo = req.body;
 
-  try {
-    const body = await startTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser);
-    return res.ok({
-      body,
-    });
-  } catch (e) {
-    return res.customError(wrapError(wrapEsError(e)));
-  }
-};
+    try {
+      const body = await startTransforms(
+        transformsInfo,
+        ctx.core.elasticsearch.client.asCurrentUser
+      );
+      return res.ok({
+        body,
+      });
+    } catch (e) {
+      return res.customError(wrapError(wrapEsError(e)));
+    }
+  };
 
 async function startTransforms(
   transformsInfo: StartTransformsRequestSchema,
@@ -627,21 +624,18 @@ async function startTransforms(
   return results;
 }
 
-const stopTransformsHandler: RequestHandler<
-  undefined,
-  undefined,
-  StopTransformsRequestSchema
-> = async (ctx, req, res) => {
-  const transformsInfo = req.body;
+const stopTransformsHandler: RequestHandler<undefined, undefined, StopTransformsRequestSchema> =
+  async (ctx, req, res) => {
+    const transformsInfo = req.body;
 
-  try {
-    return res.ok({
-      body: await stopTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser),
-    });
-  } catch (e) {
-    return res.customError(wrapError(wrapEsError(e)));
-  }
-};
+    try {
+      return res.ok({
+        body: await stopTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser),
+      });
+    } catch (e) {
+      return res.customError(wrapError(wrapEsError(e)));
+    }
+  };
 
 async function stopTransforms(
   transformsInfo: StopTransformsRequestSchema,

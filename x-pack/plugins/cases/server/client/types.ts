@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
 import { User } from '../../common';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -24,6 +24,7 @@ import { LensServerPluginSetup } from '../../../lens/server';
  * Parameters for initializing a cases client
  */
 export interface CasesClientArgs {
+  readonly scopedClusterClient: ElasticsearchClient;
   readonly caseConfigureService: CaseConfigureService;
   readonly caseService: CasesService;
   readonly connectorMappingsService: ConnectorMappingsService;

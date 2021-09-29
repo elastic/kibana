@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, FC } from 'react';
+import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import { useKibana } from '../../shared_imports';
@@ -21,7 +21,7 @@ import { PromptFooter } from './prompt_footer';
 import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const removeAliases = (item: MatchedItem) =>
-  !((item as unknown) as ResolveIndexResponseItemAlias).indices;
+  !(item as unknown as ResolveIndexResponseItemAlias).indices;
 
 interface Props {
   onCancel: () => void;
@@ -38,6 +38,9 @@ export function isUserDataIndex(source: MatchedItem) {
   if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
   if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
 
+  // filter out empty sources created by apm server
+  if (source.name.startsWith('apm-')) return false;
+
   return true;
 }
 
@@ -47,16 +50,19 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
   } = useKibana<IndexPatternEditorContext>();
 
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
+  const [hasCheckedRemoteClusters, setHasCheckedRemoteClusters] = useState<boolean>(false);
+
   const [goToForm, setGoToForm] = useState<boolean>(false);
 
   const hasDataIndices = allSources.some(isUserDataIndex);
   const hasUserIndexPattern = useAsync(() =>
-    indexPatternService.hasUserIndexPattern().catch(() => true)
+    indexPatternService.hasUserDataView().catch(() => true)
   );
 
-  useCallback(() => {
-    let isMounted = true;
-    if (!hasDataIndices)
+  useEffect(() => {
+    if (!hasDataIndices && !hasCheckedRemoteClusters) {
+      setHasCheckedRemoteClusters(true);
+
       getIndices({
         http,
         isRollupIndex: () => false,
@@ -64,14 +70,10 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
         showAllIndices: false,
         searchClient,
       }).then((dataSources) => {
-        if (isMounted) {
-          setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
-        }
+        setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
       });
-    return () => {
-      isMounted = false;
-    };
-  }, [http, hasDataIndices, searchClient]);
+    }
+  }, [http, hasDataIndices, searchClient, hasCheckedRemoteClusters]);
 
   if (hasUserIndexPattern.loading) return null; // return null to prevent UI flickering while loading
 

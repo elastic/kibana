@@ -111,7 +111,8 @@ export class LensAttributes {
       if (operationType) {
         seriesConfig.yAxisColumns.forEach((yAxisColumn) => {
           if (typeof yAxisColumn.operationType !== undefined) {
-            yAxisColumn.operationType = operationType as FieldBasedIndexPatternColumn['operationType'];
+            yAxisColumn.operationType =
+              operationType as FieldBasedIndexPatternColumn['operationType'];
           }
         });
       }
@@ -330,14 +331,8 @@ export class LensAttributes {
     layerConfig: LayerConfig;
     colIndex?: number;
   }) {
-    const {
-      fieldMeta,
-      columnType,
-      fieldName,
-      columnLabel,
-      timeScale,
-      columnFilters,
-    } = this.getFieldMeta(sourceField, layerConfig);
+    const { fieldMeta, columnType, fieldName, columnLabel, timeScale, columnFilters } =
+      this.getFieldMeta(sourceField, layerConfig);
 
     const { type: fieldType } = fieldMeta ?? {};
 

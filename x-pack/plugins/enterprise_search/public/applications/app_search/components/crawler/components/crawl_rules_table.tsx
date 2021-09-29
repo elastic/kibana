@@ -149,10 +149,10 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
     },
   ];
 
-  const crawlRulesRoute = `/api/app_search/engines/${engineName}/crawler/domains/${domainId}/crawl_rules`;
-  const domainRoute = `/api/app_search/engines/${engineName}/crawler/domains/${domainId}`;
+  const crawlRulesRoute = `/internal/app_search/engines/${engineName}/crawler/domains/${domainId}/crawl_rules`;
+  const domainRoute = `/internal/app_search/engines/${engineName}/crawler/domains/${domainId}`;
   const getCrawlRuleRoute = (crawlRule: CrawlRule) =>
-    `/api/app_search/engines/${engineName}/crawler/domains/${domainId}/crawl_rules/${crawlRule.id}`;
+    `/internal/app_search/engines/${engineName}/crawler/domains/${domainId}/crawl_rules/${crawlRule.id}`;
 
   return (
     <GenericEndpointInlineEditableTable

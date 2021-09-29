@@ -34,8 +34,10 @@ const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
 
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
 const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 
 const format = ({
@@ -78,7 +80,7 @@ export function registerApmAlerts(
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(() => import('./error_count_alert_trigger')),
     validate: () => ({
@@ -126,7 +128,7 @@ export function registerApmAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_duration_alert_trigger')
@@ -177,7 +179,7 @@ export function registerApmAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_error_rate_alert_trigger')
@@ -226,7 +228,7 @@ export function registerApmAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_duration_anomaly_alert_trigger')

@@ -6,6 +6,7 @@
 * <<development-basepath>>
 * <<upgrading-nodejs>>
 * <<sharing-saved-objects>>
+* <<legacy-url-aliases>>
 
 include::development-es-snapshots.asciidoc[leveloffset=+1]
 
@@ -16,3 +17,5 @@ include::development-basepath.asciidoc[leveloffset=+1]
 include::upgrading-nodejs.asciidoc[leveloffset=+1]
 
 include::sharing-saved-objects.asciidoc[leveloffset=+1]
+
+include::legacy-url-aliases.asciidoc[leveloffset=+1]

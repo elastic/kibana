@@ -11,6 +11,7 @@ import { coreMock, httpServiceMock, loggingSystemMock } from 'src/core/server/mo
 import { ConfigSchema } from '../config';
 import { elasticsearchServiceMock } from '../elasticsearch_service.mock';
 import { kibanaConfigWriterMock } from '../kibana_config_writer.mock';
+import { verificationCodeMock } from '../verification_code.mock';
 
 export const routeDefinitionParamsMock = {
   create: (config: Record<string, unknown> = {}) => ({
@@ -21,6 +22,7 @@ export const routeDefinitionParamsMock = {
     preboot: { ...coreMock.createPreboot().preboot, completeSetup: jest.fn() },
     getConfig: jest.fn().mockReturnValue(ConfigSchema.validate(config)),
     elasticsearch: elasticsearchServiceMock.createSetup(),
+    verificationCode: verificationCodeMock.create(),
     kibanaConfigWriter: kibanaConfigWriterMock.create(),
   }),
 };

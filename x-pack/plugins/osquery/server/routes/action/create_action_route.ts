@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';

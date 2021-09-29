@@ -21,7 +21,7 @@ const MOCK_DATE_NOW = 1487076708000;
 function getDefaultExecutorOptions(
   overrides: DeepPartial<JobsHealthExecutorOptions> = {}
 ): JobsHealthExecutorOptions {
-  return ({
+  return {
     state: {},
     startedAt: new Date('2021-08-12T13:13:39.396Z'),
     previousStartedAt: new Date('2021-08-12T13:13:27.396Z'),
@@ -42,37 +42,37 @@ function getDefaultExecutorOptions(
       schedule: { interval: '10s' },
     },
     ...overrides,
-  } as unknown) as JobsHealthExecutorOptions;
+  } as unknown as JobsHealthExecutorOptions;
 }
 
 describe('JobsHealthService', () => {
-  const mlClient = ({
+  const mlClient = {
     getJobs: jest.fn().mockImplementation(({ job_id: jobIds = [] }) => {
       let jobs: MlJob[] = [];
 
       if (jobIds.some((v: string) => v === 'test_group')) {
         jobs = [
-          ({
+          {
             job_id: 'test_job_01',
             analysis_config: { bucket_span: '1h' },
-          } as unknown) as MlJob,
-          ({
+          } as unknown as MlJob,
+          {
             job_id: 'test_job_02',
             analysis_config: { bucket_span: '15m' },
-          } as unknown) as MlJob,
-          ({
+          } as unknown as MlJob,
+          {
             job_id: 'test_job_03',
             analysis_config: { bucket_span: '8m' },
-          } as unknown) as MlJob,
+          } as unknown as MlJob,
         ];
       }
 
       if (jobIds[0]?.startsWith('test_job_')) {
         jobs = [
-          ({
+          {
             job_id: jobIds[0],
             analysis_config: { bucket_span: '1h' },
-          } as unknown) as MlJob,
+          } as unknown as MlJob,
         ];
       }
 
@@ -93,6 +93,10 @@ describe('JobsHealthService', () => {
               model_size_stats: {
                 memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
                 log_time: 1626935914540,
+                model_bytes: 1000000,
+                model_bytes_memory_limit: 800000,
+                peak_model_bytes: 1000000,
+                model_bytes_exceeded: 200000,
               },
             };
           }) as MlJobStats,
@@ -115,9 +119,9 @@ describe('JobsHealthService', () => {
         },
       });
     }),
-  } as unknown) as jest.Mocked<MlClient>;
+  } as unknown as jest.Mocked<MlClient>;
 
-  const datafeedsService = ({
+  const datafeedsService = {
     getDatafeedByJobId: jest.fn().mockImplementation((jobIds: string[]) => {
       return Promise.resolve(
         jobIds.map((j) => {
@@ -129,9 +133,9 @@ describe('JobsHealthService', () => {
         })
       );
     }),
-  } as unknown) as jest.Mocked<DatafeedsService>;
+  } as unknown as jest.Mocked<DatafeedsService>;
 
-  const annotationService = ({
+  const annotationService = {
     getDelayedDataAnnotations: jest.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
       return Promise.resolve(
         jobIds.map((jobId) => {
@@ -146,28 +150,37 @@ describe('JobsHealthService', () => {
         })
       );
     }),
-  } as unknown) as jest.Mocked<AnnotationService>;
+  } as unknown as jest.Mocked<AnnotationService>;
 
-  const jobAuditMessagesService = ({
+  const jobAuditMessagesService = {
     getJobsErrorMessages: jest.fn().mockImplementation((jobIds: string) => {
       return Promise.resolve([]);
     }),
-  } as unknown) as jest.Mocked<JobAuditMessagesService>;
+  } as unknown as jest.Mocked<JobAuditMessagesService>;
 
-  const logger = ({
+  const logger = {
     warn: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown) as jest.Mocked<Logger>;
+  } as unknown as jest.Mocked<Logger>;
 
   const getFieldsFormatRegistry = jest.fn().mockImplementation(() => {
     return Promise.resolve({
-      deserialize: jest.fn().mockImplementation(() => {
-        return {
-          convert: jest.fn().mockImplementation((v) => {
-            return new Date(v).toUTCString();
-          }),
-        };
+      deserialize: jest.fn().mockImplementation(({ id }: { id: string }) => {
+        if (id === 'date') {
+          return {
+            convert: jest.fn().mockImplementation((v) => {
+              return new Date(v).toUTCString();
+            }),
+          };
+        }
+        if (id === 'bytes') {
+          return {
+            convert: jest.fn().mockImplementation((v) => {
+              return `${Math.round(v / 1000)}KB`;
+            }),
+          };
+        }
       }),
     });
   }) as jest.Mocked<FieldFormatsRegistryProvider>;
@@ -358,6 +371,10 @@ describe('JobsHealthService', () => {
               job_id: 'test_job_01',
               log_time: 'Thu, 22 Jul 2021 06:38:34 GMT',
               memory_status: 'hard_limit',
+              model_bytes: '1000KB',
+              model_bytes_exceeded: '200KB',
+              model_bytes_memory_limit: '800KB',
+              peak_model_bytes: '1000KB',
             },
           ],
           message:

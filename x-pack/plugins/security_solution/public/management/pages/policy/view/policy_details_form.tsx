@@ -29,14 +29,14 @@ const LOCKED_CARD_RAMSOMWARE_TITLE = i18n.translate(
 const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.memory',
   {
-    defaultMessage: 'Memory',
+    defaultMessage: 'Memory Threat',
   }
 );
 
 const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.behavior',
   {
-    defaultMessage: 'Behavior',
+    defaultMessage: 'Malicious Behavior',
   }
 );
 
@@ -58,17 +58,17 @@ export const PolicyDetailsForm = memo(() => {
         </h4>
       </EuiText>
 
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <MalwareProtections />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {isPlatinumPlus ? <Ransomware /> : <LockedPolicyCard title={LOCKED_CARD_RAMSOMWARE_TITLE} />}
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {isPlatinumPlus ? (
         <MemoryProtection />
       ) : (
         <LockedPolicyCard title={LOCKED_CARD_MEMORY_TITLE} />
       )}
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {isPlatinumPlus ? (
         <BehaviorProtection />
       ) : (
@@ -85,13 +85,13 @@ export const PolicyDetailsForm = memo(() => {
         </h4>
       </EuiText>
 
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <WindowsEvents />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <MacEvents />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <LinuxEvents />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <AntivirusRegistrationForm />
 
       <EuiSpacer size="m" />

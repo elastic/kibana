@@ -28,6 +28,7 @@ function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
 
   const handlePopoverClick = () => setPopoverOpen(!isPopoverOpen);
+
   const closePopover = () => setPopoverOpen(false);
 
   const updateErrorView = useCallback(() => {
@@ -56,7 +57,7 @@ function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
         }
         isOpen={isPopoverOpen}
       >
-        <Error payload={{ error }} />
+        <Error payload={{ error }} onClose={closePopover} />
       </EuiPopover>
     </div>
   );

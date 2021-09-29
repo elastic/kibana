@@ -27,12 +27,8 @@ export const AgentStatuses = React.memo(
     isDraggable: boolean;
     value: string;
   }) => {
-    const {
-      isIsolated,
-      agentStatus,
-      pendingIsolation,
-      pendingUnisolation,
-    } = useHostIsolationStatus({ agentId: value });
+    const { isIsolated, agentStatus, pendingIsolation, pendingUnisolation } =
+      useHostIsolationStatus({ agentId: value });
     const isolationFieldName = 'host.isolation';
     return (
       <EuiFlexGroup gutterSize="none">

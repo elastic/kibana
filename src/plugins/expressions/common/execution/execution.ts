@@ -25,7 +25,7 @@ import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { abortSignalToPromise, now } from '../../../kibana_utils/common';
-import { RequestAdapter, Adapters } from '../../../inspector/common';
+import { Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstArgument,
@@ -42,8 +42,7 @@ import { ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
-import { TablesAdapter } from '../util/tables_adapter';
-import { ExpressionsInspectorAdapter } from '../util/expressions_inspector_adapter';
+import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 
 /**
  * The result returned after an expression function execution.
@@ -89,12 +88,6 @@ export interface ExecutionParams {
   expression?: string;
   params: ExpressionExecutionParams;
 }
-
-const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
-  requests: new RequestAdapter(),
-  tables: new TablesAdapter(),
-  expression: new ExpressionsInspectorAdapter(),
-});
 
 export class Execution<
   Input = unknown,
@@ -165,11 +158,8 @@ export class Execution<
    * Contract is a public representation of `Execution` instances. Contract we
    * can return to other plugins for their consumption.
    */
-  public readonly contract: ExecutionContract<
-    Input,
-    Output,
-    InspectorAdapters
-  > = new ExecutionContract<Input, Output, InspectorAdapters>(this);
+  public readonly contract: ExecutionContract<Input, Output, InspectorAdapters> =
+    new ExecutionContract<Input, Output, InspectorAdapters>(this);
 
   public readonly expression: string;
 
@@ -190,7 +180,7 @@ export class Execution<
     const ast = execution.ast || parseExpression(this.expression);
 
     this.state = createExecutionContainer({
-      ...executor.state.get(),
+      ...executor.state,
       state: 'not-started',
       ast,
     });
@@ -481,17 +471,19 @@ export class Execution<
       // Create the functions to resolve the argument ASTs into values
       // These are what are passed to the actual functions if you opt out of resolving
       const resolveArgFns = mapValues(dealiasedArgAsts, (asts, argName) =>
-        asts.map((item) => (subInput = input) =>
-          this.interpret(item, subInput).pipe(
-            pluck('result'),
-            map((output) => {
-              if (isExpressionValueError(output)) {
-                throw output.error;
-              }
+        asts.map(
+          (item) =>
+            (subInput = input) =>
+              this.interpret(item, subInput).pipe(
+                pluck('result'),
+                map((output) => {
+                  if (isExpressionValueError(output)) {
+                    throw output.error;
+                  }
 
-              return this.cast(output, argDefs[argName].types);
-            })
-          )
+                  return this.cast(output, argDefs[argName].types);
+                })
+              )
         )
       );
 
