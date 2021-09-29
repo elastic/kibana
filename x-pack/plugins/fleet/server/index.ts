@@ -26,6 +26,7 @@ export {
   AgentPolicyServiceInterface,
   ArtifactsClientInterface,
   Artifact,
+  ListArtifactsProps,
 } from './services';
 
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
