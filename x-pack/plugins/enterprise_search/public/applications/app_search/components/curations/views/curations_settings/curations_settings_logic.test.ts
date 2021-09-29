@@ -45,13 +45,13 @@ describe('CurationsSettingsLogic', () => {
 
         CurationsSettingsLogic.actions.onCurationsSettingsLoad({
           enabled: true,
-          mode: 'automated',
+          mode: 'automatic',
         });
 
         expect(CurationsSettingsLogic.values.dataLoading).toEqual(false);
         expect(CurationsSettingsLogic.values.curationsSettings).toEqual({
           enabled: true,
-          mode: 'automated',
+          mode: 'automatic',
         });
       });
     });
@@ -64,7 +64,7 @@ describe('CurationsSettingsLogic', () => {
           Promise.resolve({
             curation: {
               enabled: true,
-              mode: 'automated',
+              mode: 'automatic',
             },
           })
         );
@@ -79,7 +79,7 @@ describe('CurationsSettingsLogic', () => {
         );
         expect(CurationsSettingsLogic.actions.onCurationsSettingsLoad).toHaveBeenCalledWith({
           enabled: true,
-          mode: 'automated',
+          mode: 'automatic',
         });
       });
 
@@ -124,16 +124,17 @@ describe('CurationsSettingsLogic', () => {
 
         expect(CurationsSettingsLogic.actions.updateCurationsSetting).toHaveBeenCalledWith({
           enabled: false,
+          mode: 'manual',
         });
       });
     });
 
     describe('toggleCurationsMode', () => {
-      it('sets to manual mode when it is currently automated', () => {
+      it('sets to manual mode when it is currently automatic', () => {
         mount({
           curationsSettings: {
             ...DEFAULT_VALUES.curationsSettings,
-            mode: 'automated',
+            mode: 'automatic',
           },
         });
         jest.spyOn(CurationsSettingsLogic.actions, 'updateCurationsSetting');
@@ -145,7 +146,7 @@ describe('CurationsSettingsLogic', () => {
         });
       });
 
-      it('sets to automated mode when it is currently manual', () => {
+      it('sets to automatic mode when it is currently manual', () => {
         mount({
           curationsSettings: {
             ...DEFAULT_VALUES.curationsSettings,
@@ -157,7 +158,7 @@ describe('CurationsSettingsLogic', () => {
         CurationsSettingsLogic.actions.toggleCurationsMode();
 
         expect(CurationsSettingsLogic.actions.updateCurationsSetting).toHaveBeenCalledWith({
-          mode: 'automated',
+          mode: 'automatic',
         });
       });
     });
@@ -168,7 +169,7 @@ describe('CurationsSettingsLogic', () => {
           Promise.resolve({
             curation: {
               enabled: true,
-              mode: 'automated',
+              mode: 'automatic',
             },
           })
         );
@@ -192,7 +193,7 @@ describe('CurationsSettingsLogic', () => {
         );
         expect(CurationsSettingsLogic.actions.onCurationsSettingsLoad).toHaveBeenCalledWith({
           enabled: true,
-          mode: 'automated',
+          mode: 'automatic',
         });
       });
 

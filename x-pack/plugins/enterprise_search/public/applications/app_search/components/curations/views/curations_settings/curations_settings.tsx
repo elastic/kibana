@@ -9,7 +9,17 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButtonEmpty, EuiCallOut, EuiSpacer, EuiSwitch, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,6 +31,8 @@ import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { SETTINGS_PATH } from '../../../../routes';
 import { DataPanel } from '../../../data_panel';
 import { LogRetentionLogic, LogRetentionOptions } from '../../../log_retention';
+
+import { AutomatedIcon } from '../../components/automated_icon';
 
 import { CurationsSettingsLogic } from './curations_settings_logic';
 
@@ -40,9 +52,11 @@ export const CurationsSettings: React.FC = () => {
   const analyticsDisabled = !logRetention?.[LogRetentionOptions.Analytics].enabled;
 
   useEffect(() => {
-    loadCurationsSettings();
-    fetchLogRetention();
-  }, []);
+    if (hasPlatinumLicense) {
+      loadCurationsSettings();
+      fetchLogRetention();
+    }
+  }, [hasPlatinumLicense]);
 
   if (!hasPlatinumLicense)
     return (
@@ -98,17 +112,24 @@ export const CurationsSettings: React.FC = () => {
 
   return (
     <>
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.curations.settings.automatedCurationsTitle',
-            {
-              defaultMessage: 'Curations',
-            }
-          )}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer />
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={AutomatedIcon} size="l" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.curations.settings.automaticCurationsTitle',
+                {
+                  defaultMessage: 'Automated Curations',
+                }
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       {analyticsDisabled && (
         <>
           <EuiCallOut
@@ -136,40 +157,47 @@ export const CurationsSettings: React.FC = () => {
               )}
             </EuiButtonTo>
           </EuiCallOut>
-          <EuiSpacer />
+          <EuiSpacer size="m" />
         </>
       )}
-      <EuiText>
+      <EuiText color="subdued" size="s">
         {i18n.translate(
-          'xpack.enterpriseSearch.appSearch.curations.settings.automatedCurationsDescription',
+          'xpack.enterpriseSearch.appSearch.curations.settings.automaticCurationsDescription',
           {
             defaultMessage:
               "Suggested curations will monitor your engine's analytics and make automatic suggestions to help you deliver the most relevant results. Each suggested curation can be accepted, rejected, or modified.",
           }
         )}
       </EuiText>
-      <EuiSwitch
-        label={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.curations.settings.enableAutomatedCurationsSwitchLabel',
-          {
-            defaultMessage: 'Enable automation suggestions',
-          }
-        )}
-        checked={enabled}
-        disabled={analyticsDisabled}
-        onChange={toggleCurationsEnabled}
-      />
-      <EuiSwitch
-        label={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.curations.settings.acceptNewSuggesstionsSwitchLabel',
-          {
-            defaultMessage: 'Automatically accept new suggestions',
-          }
-        )}
-        checked={mode === 'automated'}
-        disabled={analyticsDisabled}
-        onChange={toggleCurationsMode}
-      />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiSwitch
+            label={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.curations.settings.enableautomaticCurationsSwitchLabel',
+              {
+                defaultMessage: 'Enable automation suggestions',
+              }
+            )}
+            checked={enabled}
+            disabled={analyticsDisabled}
+            onChange={toggleCurationsEnabled}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSwitch
+            label={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.curations.settings.acceptNewSuggesstionsSwitchLabel',
+              {
+                defaultMessage: 'Automatically accept new suggestions',
+              }
+            )}
+            checked={mode === 'automatic'}
+            disabled={analyticsDisabled}
+            onChange={toggleCurationsMode}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

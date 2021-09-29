@@ -94,7 +94,7 @@ describe('CurationsSettings', () => {
 
     setMockValues({
       ...MOCK_VALUES,
-      curationsSettings: { ...MOCK_VALUES.curationsSettings, mode: 'automated' },
+      curationsSettings: { ...MOCK_VALUES.curationsSettings, mode: 'automatic' },
     });
     wrapper = shallow(<CurationsSettings />);
 
@@ -164,15 +164,26 @@ describe('CurationsSettings', () => {
     expect(wrapper.is(Loading)).toBe(true);
   });
 
-  it('shows a CTA to upgrade your license when the user does not have a platinum license', () => {
-    setMockValues({
-      ...MOCK_VALUES,
-      hasPlatinumLicense: false,
-    });
-    const wrapper = shallow(<CurationsSettings />);
+  describe('when the user has no platinum license', () => {
+    let wrapper: ShallowWrapper;
 
-    expect(wrapper.is(DataPanel)).toBe(true);
-    expect(wrapper.prop('action').props.to).toEqual('/app/management/stack/license_management');
-    expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual('/license-management.html');
+    beforeEach(() => {
+      setMockValues({
+        ...MOCK_VALUES,
+        hasPlatinumLicense: false,
+      });
+      wrapper = shallow(<CurationsSettings />);
+    });
+
+    it('it does not load any daata', () => {
+      expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(0);
+      expect(MOCK_ACTIONS.fetchLogRetention).toHaveBeenCalledTimes(0);
+    });
+
+    it('shows a CTA to upgrade your license when the user', () => {
+      expect(wrapper.is(DataPanel)).toBe(true);
+      expect(wrapper.prop('action').props.to).toEqual('/app/management/stack/license_management');
+      expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual('/license-management.html');
+    });
   });
 });

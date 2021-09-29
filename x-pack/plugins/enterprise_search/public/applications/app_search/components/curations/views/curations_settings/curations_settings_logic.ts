@@ -13,7 +13,7 @@ import { EngineLogic } from '../../../engine';
 
 export interface CurationsSettings {
   enabled: boolean;
-  mode: 'automated' | 'manual';
+  mode: 'automatic' | 'manual';
 }
 
 interface CurationsSettingsValues {
@@ -76,11 +76,15 @@ export const CurationsSettingsLogic = kea<
       }
     },
     toggleCurationsEnabled: async () => {
-      actions.updateCurationsSetting({ enabled: !values.curationsSettings.enabled });
+      if (values.curationsSettings.enabled) {
+        actions.updateCurationsSetting({ enabled: false, mode: 'manual' });
+      } else {
+        actions.updateCurationsSetting({ enabled: true });
+      }
     },
     toggleCurationsMode: async () => {
       actions.updateCurationsSetting({
-        mode: values.curationsSettings.mode === 'automated' ? 'manual' : 'automated',
+        mode: values.curationsSettings.mode === 'automatic' ? 'manual' : 'automatic',
       });
     },
     updateCurationsSetting: async ({ currationsSetting }) => {
