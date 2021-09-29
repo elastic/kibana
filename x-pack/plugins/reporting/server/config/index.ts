@@ -56,7 +56,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           }),
           message: i18n.translate('xpack.reporting.deprecations.reportingRoles.description', {
             defaultMessage:
-              `Granting reporting privilege through a "reporting_user" role will not be supported ` +
+              `Granting reporting privilege through a "reporting_user" role will not be supported` +
               ` starting in 8.0. Please set "xpack.reporting.roles.enabled" to "false" and grant reporting privileges to users` +
               ` using Kibana application privileges **Management > Security > Roles**.`,
           }),
