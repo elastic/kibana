@@ -24,6 +24,18 @@ import { createMockGraphStore } from '../../state_management/mocks';
 import { Provider } from 'react-redux';
 import { UrlTemplate } from '../../types';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => String(counter++);
+    },
+  };
+});
+
 describe('settings', () => {
   let store: GraphStore;
   let dispatchSpy: jest.Mock;
