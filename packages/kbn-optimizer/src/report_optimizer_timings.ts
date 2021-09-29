@@ -47,7 +47,7 @@ export function reportOptimizerTimings(log: ToolingLog, config: OptimizerConfig)
           timings: [
             {
               group: '@kbn/optimizer',
-              id: 'overall time',
+              id: 'total',
               ms: time,
               meta: {
                 optimizerBundleCount: config.filteredBundles.length,
