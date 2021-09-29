@@ -7,8 +7,8 @@
 
 import querystring from 'querystring';
 import { chunk } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
@@ -19,12 +19,14 @@ const DATE_WITH_DATA = {
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const COPY_TO_CLIPBOARD_BUTTON_SELECTOR = 'copy-to-clipboard';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
-
 const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
-export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrProviderContext) {
+export function ObservabilityAlertsCommonProvider({
+  getPageObjects,
+  getService,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
   const pageObjects = getPageObjects(['common']);
@@ -156,6 +158,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     await actionsOverflowButton.click();
   };
 
+  // Workflow status
   const setWorkflowStatusForRow = async (rowIndex: number, workflowStatus: WorkflowStatus) => {
     await openActionsMenuForRow(rowIndex);
 
