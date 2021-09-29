@@ -11,6 +11,7 @@ import { useValues, useActions } from 'kea';
 
 import { EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DataPanel } from '../../../data_panel';
 import { Result } from '../../../result/types';
@@ -25,7 +26,7 @@ import { CurationResult } from '../results';
 
 export const OrganicDocuments: React.FC = () => {
   const { addPromotedId, addHiddenId } = useActions(CurationLogic);
-  const { curation, activeQuery, organicDocumentsLoading } = useValues(CurationLogic);
+  const { curation, activeQuery, isAutomated, organicDocumentsLoading } = useValues(CurationLogic);
 
   const documents = curation.organic;
   const hasDocuments = documents.length > 0 && !organicDocumentsLoading;
@@ -57,10 +58,12 @@ export const OrganicDocuments: React.FC = () => {
               {
                 ...HIDE_DOCUMENT_ACTION,
                 onClick: () => addHiddenId(document.id.raw),
+                disabled: isAutomated,
               },
               {
                 ...PROMOTE_DOCUMENT_ACTION,
                 onClick: () => addPromotedId(document.id.raw),
+                disabled: isAutomated,
               },
             ]}
           />
@@ -69,13 +72,23 @@ export const OrganicDocuments: React.FC = () => {
         <EuiLoadingContent lines={5} />
       ) : (
         <EuiEmptyPrompt
-          body={i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.emptyDescription',
-            {
-              defaultMessage:
-                'No organic results to display. Add or change the active query above.',
-            }
-          )}
+          body={
+            <FormattedMessage
+              id="xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.description"
+              defaultMessage="No organic results to display.{manualDescription}"
+              values={{
+                manualDescription: !isAutomated && (
+                  <>
+                    {' '}
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.manualDescription"
+                      defaultMessage="Add or change the active query above."
+                    />
+                  </>
+                ),
+              }}
+            />
+          }
         />
       )}
     </DataPanel>
