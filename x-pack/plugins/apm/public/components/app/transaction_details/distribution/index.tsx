@@ -30,6 +30,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../hooks/use_theme';
 
 import {
   TransactionDistributionChart,
@@ -73,6 +74,9 @@ export function TransactionDistribution({
   selection,
   traceSamples,
 }: TransactionDistributionProps) {
+  const euiTheme = useTheme();
+  const chartPalette = [euiTheme.eui.euiColorVis1, euiTheme.eui.euiColorVis7];
+
   const {
     core: { notifications },
   } = useApmPluginContext();
@@ -99,10 +103,10 @@ export function TransactionDistribution({
   );
 
   const { progress, response } = useSearchStrategy(
-    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
+    APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
     {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-      analyzeCorrelations: false,
+      // analyzeCorrelations: false,
     }
   );
   const { overallHistogram, hasData, status } = getOverallHistogram(
@@ -146,6 +150,16 @@ export function TransactionDistribution({
         { defaultMessage: 'All transactions' }
       ),
       histogram: overallHistogram,
+    });
+  }
+
+  if (Array.isArray(response.errorHistogram)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allFailedTransactionsLabel',
+        { defaultMessage: 'All failed transactions' }
+      ),
+      histogram: response.errorHistogram,
     });
   }
 
@@ -207,6 +221,12 @@ export function TransactionDistribution({
         )}
       </EuiFlexGroup>
 
+      <EuiText color="subdued" size="xs">
+        Log-log plot for latency (x) by transactions (y) with overlapping bands
+        for <span style={{ color: chartPalette[0] }}>all transactions</span> and{' '}
+        <span style={{ color: chartPalette[1] }}>all failed transactions</span>.
+      </EuiText>
+
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
@@ -216,6 +236,7 @@ export function TransactionDistribution({
         markerValue={response.percentileThresholdValue ?? 0}
         onChartSelection={onTrackedChartSelection as BrushEndListener}
         hasData={hasData}
+        palette={chartPalette}
         selection={selection}
         status={status}
       />

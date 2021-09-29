@@ -495,7 +495,8 @@ export function FailedTransactionsCorrelations({
 
       {selectedTerm && (
         <EuiText color="subdued" size="xs">
-          Log log transaction distribution by latency with overlapping bands for
+          Log-log plot for latency (x) by transactions (y) with overlapping
+          bands for
           <br />
           <span style={{ color: chartPalette[0] }}>all transactions</span>,{' '}
           <span style={{ color: chartPalette[1] }}>

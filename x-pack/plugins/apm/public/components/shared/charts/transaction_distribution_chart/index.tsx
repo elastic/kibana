@@ -187,8 +187,8 @@ export function TransactionDistributionChart({
                 },
               },
             }}
-            showLegend={false}
-            // legendPosition={Position.Bottom}
+            showLegend={true}
+            legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}
           />
           {selectionAnnotation !== undefined && (
