@@ -14,8 +14,21 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export const CurationActionsPopover: React.FC = () => {
+interface Props {
+  onAccept: () => void;
+  onAutomate: () => void;
+  onReject: () => void;
+  onTurnOff: () => void;
+}
+
+export const CurationActionsPopover: React.FC<Props> = ({
+  onAccept,
+  onAutomate,
+  onReject,
+  onTurnOff,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
@@ -24,26 +37,64 @@ export const CurationActionsPopover: React.FC = () => {
   const button = (
     <EuiButtonIcon
       iconType="boxesVertical"
-      aria-label="More suggestion actions"
+      aria-label={i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.curations.actionsPopoverAriaLabel',
+        { defaultMessage: 'More suggestion actions' }
+      )}
       color="text"
       onClick={onButtonClick}
     />
   );
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <EuiPopoverTitle>Manage suggestion</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        {i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.actionsPopoverTitle',
+          {
+            defaultMessage: 'Manage suggestion',
+          }
+        )}
+      </EuiPopoverTitle>
       <EuiListGroup flush>
-        <EuiListGroupItem size="xs" iconType="check" label="Accept this suggestion" />
         <EuiListGroupItem
           size="xs"
           iconType="check"
-          label="Automate - always accept new suggestions for this query"
+          label={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.actionsAcceptButtonLabel',
+            { defaultMessage: 'Accept this suggestion' }
+          )}
+          onClick={onAccept}
+          data-test-subj="acceptButton"
         />
-        <EuiListGroupItem size="xs" iconType="cross" label="Reject this suggestion" />
+        <EuiListGroupItem
+          size="xs"
+          iconType="check"
+          label={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.actionsAutomateButtonLabel',
+            { defaultMessage: 'Automate - always accept new suggestions for this query' }
+          )}
+          onClick={onAutomate}
+          data-test-subj="automateButton"
+        />
+        <EuiListGroupItem
+          size="xs"
+          iconType="cross"
+          label={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.actionsRejectButtonLabel',
+            { defaultMessage: 'Reject this suggestion' }
+          )}
+          onClick={onReject}
+          data-test-subj="rejectButton"
+        />
         <EuiListGroupItem
           size="xs"
           iconType="bellSlash"
-          label="Reject and turn off suggestions for this query"
+          label={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.actionsTurnOffButtonLabel',
+            { defaultMessage: 'Reject and turn off suggestions for this query' }
+          )}
+          onClick={onTurnOff}
+          data-test-subj="turnoffButton"
         />
       </EuiListGroup>
     </EuiPopover>

@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { Result } from '../../../result';
 import { Result as ResultType } from '../../../result/types';
@@ -25,22 +26,35 @@ interface Props {
   results: ResultType[];
 }
 
-export const CurationResultPanel: React.FC<Props> = ({ variant = 'current', results }) => {
+export const CurationResultPanel: React.FC<Props> = ({ variant, results }) => {
+  // TODO wire up
+  const count = 3;
+
   return (
     <>
       <EuiFlexGroup className="curationResultPanel__header" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge>3</EuiNotificationBadge>
+          <EuiNotificationBadge>{count}</EuiNotificationBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
-            <h5>Promoted results</h5>
+            <h5>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.resultPanelTitle',
+                { defaultMessage: 'Promoted results' }
+              )}
+            </h5>
           </EuiTitle>
         </EuiFlexItem>
         {variant === 'suggested' && (
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="suggestedText">
             <EuiText color="subdued" textAlign="right" size="xs">
-              <p>This curation can be automated by App Search</p>
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.resultPanelDescription',
+                  { defaultMessage: 'This curation can be automated by App Search' }
+                )}
+              </p>
             </EuiText>
           </EuiFlexItem>
         )}
@@ -55,14 +69,19 @@ export const CurationResultPanel: React.FC<Props> = ({ variant = 'current', resu
       >
         {results.length > 0 ? (
           results.map((result) => (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} key={result.id.raw}>
               <Result result={result} isMetaEngine={false} />
             </EuiFlexItem>
           ))
         ) : (
-          <EuiText size="s">
+          <EuiText size="s" data-test-subj="noResults">
             <p>
-              <b>There are currently no promoted documents for this query</b>
+              <b>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.noResultsMessage',
+                  { defaultMessage: 'There are currently no promoted documents for this query' }
+                )}
+              </b>
             </p>
           </EuiText>
         )}

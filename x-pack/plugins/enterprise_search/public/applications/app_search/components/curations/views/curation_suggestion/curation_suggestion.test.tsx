@@ -31,14 +31,25 @@ describe('CurationSuggestion', () => {
   it('displays the decoded query in the title', () => {
     const wrapper = shallow(<CurationSuggestion />);
 
-    expect(wrapper.prop('pageHeader').pageTitle).toEqual('"some query"');
+    expect(wrapper.prop('pageHeader').pageTitle).toEqual('some query');
   });
 
+  // TODO This will need to come from somewhere else when wired up
   it('displays an empty query if "" is encoded in as the qery', () => {
     mockUseParams.mockReturnValue({ query: '%22%22' });
 
     const wrapper = shallow(<CurationSuggestion />);
 
     expect(wrapper.prop('pageHeader').pageTitle).toEqual('""');
+  });
+
+  it('displays has a button to display organic results', () => {
+    const wrapper = shallow(<CurationSuggestion />);
+
+    expect(wrapper.find('[data-test-subj="organicResults"]').exists()).toBe(false);
+    wrapper.find('[data-test-subj="showOrganicResults"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="organicResults"]').exists()).toBe(true);
+    wrapper.find('[data-test-subj="showOrganicResults"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="organicResults"]').exists()).toBe(false);
   });
 });

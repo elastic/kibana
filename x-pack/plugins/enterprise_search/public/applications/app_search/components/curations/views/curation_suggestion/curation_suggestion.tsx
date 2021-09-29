@@ -79,19 +79,20 @@ export const CurationSuggestion: React.FC = () => {
           iconType={showOrganicResults ? 'fold' : 'unfold'}
           iconSide="right"
           onClick={() => setShowOrganicResults(!showOrganicResults)}
+          data-test-subj="showOrganicResults"
         >
           {showOrganicResults ? 'Collapse' : 'Expand'} organic search results
         </EuiButtonEmpty>
         {showOrganicResults && (
           <>
             <EuiHorizontalRule margin="none" />
-            <EuiPanel hasShadow={false}>
+            <EuiPanel hasShadow={false} data-test-subj="organicResults">
               <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   {currentOrganicResults.length > 0 && (
                     <EuiFlexGroup direction="column" gutterSize="s">
                       {currentOrganicResults.map((result: ResultType) => (
-                        <EuiFlexItem grow={false}>
+                        <EuiFlexItem grow={false} key={result.id.raw}>
                           <Result result={result} isMetaEngine={false} />
                         </EuiFlexItem>
                       ))}
@@ -102,7 +103,7 @@ export const CurationSuggestion: React.FC = () => {
                   {proposedOrganicResults.length > 0 && (
                     <EuiFlexGroup direction="column" gutterSize="s">
                       {proposedOrganicResults.map((result: ResultType) => (
-                        <EuiFlexItem grow={false}>
+                        <EuiFlexItem grow={false} key={result.id.raw}>
                           <Result result={result} isMetaEngine={false} />
                         </EuiFlexItem>
                       ))}

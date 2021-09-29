@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { CurationActionsPopover } from './curation_actions_popover';
 
@@ -24,7 +25,12 @@ export const CurationActionBar: React.FC<Props> = ({ onAcceptClick, onRejectClic
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
               <EuiTitle size="xs">
-                <h4>Manage suggestion</h4>
+                <h4>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.title',
+                    { defaultMessage: 'Manage suggestion' }
+                  )}
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -34,9 +40,13 @@ export const CurationActionBar: React.FC<Props> = ({ onAcceptClick, onRejectClic
                     size="s"
                     color="danger"
                     iconType="crossInACircleFilled"
+                    data-test-subj="rejectButton"
                     onClick={onRejectClick}
                   >
-                    Reject
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.rejectButtonLabel',
+                      { defaultMessage: 'Reject' }
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -44,9 +54,13 @@ export const CurationActionBar: React.FC<Props> = ({ onAcceptClick, onRejectClic
                     size="s"
                     color="success"
                     iconType="checkInCircleFilled"
+                    data-test-subj="acceptButton"
                     onClick={onAcceptClick}
                   >
-                    Accept
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.acceptButtonLabel',
+                      { defaultMessage: 'Accept' }
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem>
