@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('classic table in window 900x700', async function () {
       before(async () => {
-        await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+        await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': false });
         await browser.setWindowSize(900, 700);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('classic table in window 600x700', async function () {
       before(async () => {
-        await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+        await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': true });
         await browser.setWindowSize(600, 700);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('legacy', async function () {
       before(async () => {
-        await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+        await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': true });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });

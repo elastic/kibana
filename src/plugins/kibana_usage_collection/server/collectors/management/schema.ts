@@ -392,10 +392,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'doc_table:legacy': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'discover:modifyColumnsOnSwitch': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -445,6 +441,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:discover:enableNewTable': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

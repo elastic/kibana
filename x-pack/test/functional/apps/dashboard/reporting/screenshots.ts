@@ -221,7 +221,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
-        await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
+        await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': true });
         this.timeout(300000);
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');

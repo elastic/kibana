@@ -10,12 +10,12 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '../../../../src/core/types';
 import { projects, projectIDs, ProjectID } from '../common';
 
-export const SETTING_CATEGORY = 'Presentation Labs';
+export const SETTING_CATEGORY = 'Labs';
 
 const labsProjectSettings: Record<ProjectID, UiSettingsParams<boolean>> = projectIDs.reduce(
   (acc, id) => {
     const project = projects[id];
-    const { name, description, isActive: value } = project;
+    const { name, description, isActive: value, metric, category } = project;
     acc[id] = {
       name,
       value,
@@ -23,7 +23,8 @@ const labsProjectSettings: Record<ProjectID, UiSettingsParams<boolean>> = projec
       description,
       schema: schema.boolean(),
       requiresPageReload: true,
-      category: [SETTING_CATEGORY],
+      category: [category ?? SETTING_CATEGORY],
+      metric,
     };
     return acc;
   },

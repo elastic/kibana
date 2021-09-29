@@ -23,12 +23,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before('initialize tests', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load(ecommerceSOPath);
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
+      await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': false });
     });
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.unload(ecommerceSOPath);
-      await kibanaServer.uiSettings.unset('doc_table:legacy');
+      await kibanaServer.uiSettings.unset('labs:discover:enableNewTable');
     });
 
     describe('Customize time range', () => {

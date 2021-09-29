@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover - context - back navigation', function contextSize() {
     before(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+      await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': false });
       await PageObjects.common.navigateToApp('discover');
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);

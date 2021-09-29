@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
-        'doc_table:legacy': true,
+        'labs:discover:enableNewTable': false,
         'discover:searchFieldsFromSource': true,
       });
     });

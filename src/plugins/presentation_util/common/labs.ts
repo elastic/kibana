@@ -7,6 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 
 export const LABS_PROJECT_PREFIX = 'labs:';
 export const DEFER_BELOW_FOLD = `${LABS_PROJECT_PREFIX}dashboard:deferBelowFold` as const;
@@ -42,12 +44,17 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     }),
     isActive: false,
     isDisplayed: true,
-    environments: ['kibana', 'browser', 'session'],
+    category: 'Discover',
+    environments: ['kibana', 'browser'],
     description: i18n.translate('presentationUtil.labs.enableNewTableDescription', {
       defaultMessage:
         'Use a new table layout in Discover that includes better data sorting, drag-and-drop columns, and a full screen view.',
     }),
     solutions: ['discover'],
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:useNewTable',
+    },
   },
 };
 
@@ -68,11 +75,16 @@ export type ProjectStatus = {
 export interface ProjectConfig {
   id: ProjectID;
   name: string;
+  category?: string;
   isActive: boolean;
   isDisplayed: boolean;
   environments: EnvironmentName[];
   description: string;
   solutions: SolutionName[];
+  metric?: {
+    type: UiCounterMetricType;
+    name: string;
+  };
 }
 
 export type Project = ProjectConfig & { status: ProjectStatus };

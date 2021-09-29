@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
-        'doc_table:legacy': true,
+        'labs:discover:enableNewTable': false,
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');

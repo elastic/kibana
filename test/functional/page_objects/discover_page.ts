@@ -214,7 +214,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async useLegacyTable() {
-    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) !== false;
+    return (await this.kibanaServer.uiSettings.get('labs:discover:enableNewTable')) !== true;
   }
 
   public async getDocTableIndex(index: number) {

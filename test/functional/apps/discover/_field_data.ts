@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('legacy table tests', async function () {
         before(async function () {
-          await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+          await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': false });
           await PageObjects.common.navigateToApp('discover');
         });
 

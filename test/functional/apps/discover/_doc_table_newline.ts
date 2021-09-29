@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/message_with_newline');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'newline-test',
-        'doc_table:legacy': true,
+        'labs:discover:enableNewTable': false,
       });
       await PageObjects.common.navigateToApp('discover');
     });
@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
       esArchiver.unload('test/functional/fixtures/es_archiver/message_with_newline');
       await kibanaServer.uiSettings.unset('defaultIndex');
-      await kibanaServer.uiSettings.unset('doc_table:legacy');
+      await kibanaServer.uiSettings.unset('labs:discover:enableNewTable');
     });
 
     it('should break text on newlines', async function () {

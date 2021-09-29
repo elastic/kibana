@@ -1242,20 +1242,6 @@
       },
       {
         "parentPluginId": "discover",
-        "id": "def-common.DOC_TABLE_LEGACY",
-        "type": "string",
-        "tags": [],
-        "label": "DOC_TABLE_LEGACY",
-        "description": [],
-        "signature": [
-          "\"doc_table:legacy\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
         "id": "def-common.FIELDS_LIMIT_SETTING",
         "type": "string",
         "tags": [],

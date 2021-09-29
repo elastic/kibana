@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'doc_table:legacy': false,
+    'labs:discover:enableNewTable': true,
   };
   const testSubjects = getService('testSubjects');
 

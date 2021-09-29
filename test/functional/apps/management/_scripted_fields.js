@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+      await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': false });
     });
 
     after(async function afterAll() {
