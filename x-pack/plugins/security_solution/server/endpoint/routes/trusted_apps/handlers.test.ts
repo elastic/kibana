@@ -47,7 +47,7 @@ import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
 import {
   getPackagePoliciesResponse,
-  getPutTrustedAppByPolicy,
+  getPutTrustedAppByPolicyMock,
   getTrustedAppByPolicy,
 } from './mocks';
 import { EndpointLicenseError } from '../../errors';
@@ -616,7 +616,7 @@ describe('handlers', () => {
       packagePolicyClient.getByIDs.mockReset();
       packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
 
-      const exceptionByPolicy = getPutTrustedAppByPolicy();
+      const exceptionByPolicy = getPutTrustedAppByPolicyMock();
       const customExceptionListClient = {
         ...exceptionsListClient,
         getExceptionListItem: () => exceptionByPolicy,
@@ -646,7 +646,7 @@ describe('handlers', () => {
       packagePolicyClient.getByIDs.mockReset();
       packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
 
-      const exceptionByPolicy = getPutTrustedAppByPolicy();
+      const exceptionByPolicy = getPutTrustedAppByPolicyMock();
       const customExceptionListClient = {
         ...exceptionsListClient,
         getExceptionListItem: () => exceptionByPolicy,

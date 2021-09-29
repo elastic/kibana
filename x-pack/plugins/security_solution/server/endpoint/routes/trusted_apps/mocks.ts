@@ -37,7 +37,7 @@ export const getTrustedAppByPolicy = function (): TrustedApp {
   };
 };
 
-export const getPutTrustedAppByPolicy = function (): ExceptionListItemSchema {
+export const getPutTrustedAppByPolicyMock = function (): ExceptionListItemSchema {
   return {
     id: '123',
     _version: '1',

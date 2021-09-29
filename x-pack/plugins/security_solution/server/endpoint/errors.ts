@@ -23,8 +23,6 @@ export class EndpointAppContentServicesNotStartedError extends EndpointError {
   }
 }
 export class EndpointLicenseError extends EndpointError {
-  public readonly name = 'EndpointLicenseError';
-
   constructor() {
     super('Your license level does not allow for this action.');
   }
