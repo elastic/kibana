@@ -6,11 +6,8 @@
  */
 
 import React from 'react';
-import { isEmpty } from 'lodash';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SeriesConfig, SeriesUrl } from '../../types';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { SeriesColorPicker } from '../../components/series_color_picker';
 import { SeriesChartTypes } from './chart_type_select';
 
@@ -21,64 +18,20 @@ interface Props {
 }
 
 export function SeriesInfo({ seriesId, series, seriesConfig }: Props) {
-  const { dataType, reportDefinitions, selectedMetricField } = series;
-
-  const { loading } = useAppIndexPatternContext();
-
-  const isIncomplete =
-    (!dataType || isEmpty(reportDefinitions) || !selectedMetricField) && !loading;
-
   if (!seriesConfig) {
     return null;
   }
 
-  const { definitionFields, labels } = seriesConfig;
-
-  const incompleteDefinition = isEmpty(reportDefinitions)
-    ? i18n.translate('xpack.observability.overview.exploratoryView.missingReportDefinition', {
-        defaultMessage: 'Missing {reportDefinition}',
-        values: { reportDefinition: labels?.[definitionFields[0]] },
-      })
-    : '';
-
-  let incompleteMessage = !selectedMetricField ? MISSING_REPORT_METRIC_LABEL : incompleteDefinition;
-
-  if (!dataType) {
-    incompleteMessage = MISSING_DATA_TYPE_LABEL;
-  }
-
-  if (!isIncomplete && seriesConfig) {
-    return (
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <SeriesChartTypes seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SeriesColorPicker seriesId={seriesId} series={series} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        {isIncomplete && <EuiBadge color="warning">{incompleteMessage}</EuiBadge>}
+        <SeriesChartTypes seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SeriesColorPicker seriesId={seriesId} series={series} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+
+  return null;
 }
-
-const MISSING_REPORT_METRIC_LABEL = i18n.translate(
-  'xpack.observability.overview.exploratoryView.missingReportMetric',
-  {
-    defaultMessage: 'Missing report metric',
-  }
-);
-
-const MISSING_DATA_TYPE_LABEL = i18n.translate(
-  'xpack.observability.overview.exploratoryView.missingDataType',
-  {
-    defaultMessage: 'Missing data type',
-  }
-);

@@ -65,7 +65,12 @@ export function AddSeriesButton() {
           : ''
       }
     >
-      <EuiButton color="secondary" onClick={() => addSeries()} isDisabled={isAddDisabled}>
+      <EuiButton
+        onClick={() => addSeries()}
+        isDisabled={isAddDisabled}
+        iconType="plusInCircle"
+        size="s"
+      >
         {i18n.translate('xpack.observability.expView.seriesBuilder.addSeries', {
           defaultMessage: 'Add series',
         })}

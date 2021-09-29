@@ -12,11 +12,10 @@ import { BuilderItem } from '../types';
 import { SeriesActions } from './columns/series_actions';
 import { SeriesInfo } from './columns/series_info';
 import { DataTypesSelect } from './columns/data_type_select';
-import { DatePickerCol } from './columns/date_picker_col';
+import { IncompleteBadge } from './columns/incomplete_badge';
 import { ExpandedSeriesRow } from './expanded_series_row';
 import { SeriesName } from './columns/series_name';
 import { ReportMetricOptions } from './report_metric_options';
-import { Breakdowns } from './columns/breakdowns';
 
 const StyledAccordion = styled(EuiAccordion)`
   .euiAccordion__button {
@@ -49,39 +48,45 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
         id={`exploratoryViewSeriesAccordion${id}`}
         forceState={isExpanded ? 'open' : 'closed'}
         onToggle={toggleExpanded}
-        arrowDisplay={
-          !seriesProps.series.dataType || !seriesProps.series.selectedMetricField
-            ? 'none'
-            : undefined
-        }
+        arrowDisplay={!seriesProps.series.dataType ? 'none' : undefined}
         extraAction={
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
             <EuiFlexItem grow={false}>
-              <SeriesInfo {...seriesProps} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <SeriesName {...seriesProps} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <DataTypesSelect {...seriesProps} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ReportMetricOptions {...seriesProps} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <DatePickerCol {...seriesProps} />
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <SeriesInfo {...seriesProps} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SeriesName {...seriesProps} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <Breakdowns {...seriesProps} />
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <DataTypesSelect {...seriesProps} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ReportMetricOptions {...seriesProps} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <IncompleteBadge {...seriesProps} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SeriesActions {...seriesProps} />
+            <EuiFlexItem>
+              <SeriesActions
+                {...seriesProps}
+                onEditClick={!isExpanded ? toggleExpanded : undefined}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
       >
         <EuiSpacer size="s" />
-        <ExpandedSeriesRow {...seriesProps} />
+        <EuiPanel color="subdued">
+          <ExpandedSeriesRow {...seriesProps} />
+        </EuiPanel>
       </StyledAccordion>
     </EuiPanel>
   );

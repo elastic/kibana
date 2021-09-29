@@ -6,11 +6,17 @@
  */
 
 import React, { useState } from 'react';
-import { EuiColorPicker, EuiFormRow, EuiIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
+import {
+  EuiColorPicker,
+  EuiFormRow,
+  EuiIcon,
+  EuiPopover,
+  EuiToolTip,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { ToolbarButton } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SeriesUrl } from '../types';
 
 export function SeriesColorPicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
@@ -29,9 +35,9 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: number; seri
 
   const button = (
     <EuiToolTip content={EDIT_SERIES_COLOR_LABEL}>
-      <ToolbarButton size="s" onClick={() => setIsOpen((prevState) => !prevState)} hasArrow={false}>
-        <EuiIcon type="dot" size="l" color={color} />
-      </ToolbarButton>
+      <EuiButtonEmpty size="s" onClick={() => setIsOpen((prevState) => !prevState)} flush="both">
+        <EuiIcon type="stopFilled" size="l" color={color} />
+      </EuiButtonEmpty>
     </EuiToolTip>
   );
 

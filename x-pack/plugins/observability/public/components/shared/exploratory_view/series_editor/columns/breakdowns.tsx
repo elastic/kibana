@@ -66,15 +66,12 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     selectedBreakdown || (hasUseBreakdownColumn ? options[0].value : NO_BREAKDOWN);
 
   return (
-    <div style={{ width: 200 }}>
-      <EuiSuperSelect
-        fullWidth
-        options={options}
-        valueOfSelected={valueOfSelected}
-        onChange={(value) => onOptionChange(value)}
-        data-test-subj={'seriesBreakdown'}
-      />
-    </div>
+    <EuiSuperSelect
+      options={options}
+      valueOfSelected={valueOfSelected}
+      onChange={(value) => onOptionChange(value)}
+      data-test-subj={'seriesBreakdown'}
+    />
   );
 }
 

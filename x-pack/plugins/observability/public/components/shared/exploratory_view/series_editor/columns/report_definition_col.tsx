@@ -42,7 +42,7 @@ export function ReportDefinitionCol({
   };
 
   return (
-    <EuiFlexGroup gutterSize="l">
+    <EuiFlexGroup gutterSize="s">
       {definitionFields.map((field) => (
         <EuiFlexItem key={field} grow={1}>
           <ReportDefinitionField

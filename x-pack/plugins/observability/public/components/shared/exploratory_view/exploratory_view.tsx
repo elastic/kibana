@@ -133,6 +133,7 @@ export function ExploratoryView({
                       minSize="10%"
                       mode={'main'}
                       id="seriesPanel"
+                      color="subdued"
                     >
                       {hiddenPanel === 'chartPanel' ? (
                         <ShowChart onClick={() => onChange('chartPanel')} iconType="arrowDown">

@@ -6,12 +6,9 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiPopover, EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  useKibana,
-  ToolbarButton,
-} from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
 import { SeriesUrl, useFetcher } from '../../../../../index';
 import { SeriesConfig } from '../../types';
@@ -32,6 +29,8 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
 
   const { data = [] } = useFetcher(() => lens.getXyVisTypes(), [lens]);
 
+  const icon = (data ?? []).find(({ id }) => id === seriesType)?.icon;
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
@@ -40,12 +39,16 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
       closePopover={() => setIsPopoverOpen(false)}
       button={
         <EuiToolTip content={EDIT_CHART_TYPE_LABEL}>
-          <ToolbarButton
+          <EuiButtonEmpty
             size="s"
-            iconType={(data ?? []).find(({ id }) => id === seriesType)?.icon!}
             aria-label={CHART_TYPE_LABEL}
             onClick={() => setIsPopoverOpen((prevState) => !prevState)}
-          />
+            flush="both"
+          >
+            {icon && (
+              <EuiIcon type={(data ?? []).find(({ id }) => id === seriesType)?.icon!} size="l" />
+            )}
+          </EuiButtonEmpty>
         </EuiToolTip>
       }
     >

@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiToolTip,
+  EuiPopover,
+  EuiButton,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiBadge,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useSeriesStorage } from '../hooks/use_series_storage';
@@ -21,15 +28,14 @@ interface Props {
   seriesConfig?: SeriesConfig;
 }
 
-const SELECT_REPORT_METRIC = 'SELECT_REPORT_METRIC';
-
 export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   const { setSeries } = useSeriesStorage();
+  const [showOptions, setShowOptions] = useState(false);
   const metricOptions = seriesConfig?.metricOptions;
 
   const { indexPatterns } = useAppIndexPatternContext();
 
-  const onChange = (value: string) => {
+  const onChange = (value?: string) => {
     setSeries(seriesId, {
       ...series,
       selectedMetricField: value,
@@ -73,24 +79,48 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   });
 
   return (
-    <EuiSuperSelect
-      fullWidth
-      options={
-        series.selectedMetricField
-          ? options
-          : [
-              {
-                value: SELECT_REPORT_METRIC,
-                inputDisplay: SELECT_REPORT_METRIC_LABEL,
-                disabled: false,
-              },
-              ...options,
-            ]
-      }
-      valueOfSelected={series.selectedMetricField || SELECT_REPORT_METRIC}
-      onChange={(value) => onChange(value)}
-      style={{ minWidth: 220 }}
-    />
+    <>
+      {!series.selectedMetricField && (
+        <EuiPopover
+          button={
+            <EuiButton
+              iconType="plusInCircle"
+              onClick={() => setShowOptions((prevState) => !prevState)}
+              fill
+              size="s"
+            >
+              {SELECT_REPORT_METRIC_LABEL}
+            </EuiButton>
+          }
+          isOpen={showOptions}
+          closePopover={() => setShowOptions((prevState) => !prevState)}
+        >
+          <EuiListGroup>
+            {options.map((option) => (
+              <EuiListGroupItem
+                key={option.value}
+                onClick={() => onChange(option.value)}
+                label={option.dropdownDisplay}
+                isDisabled={option.disabled}
+              />
+            ))}
+          </EuiListGroup>
+        </EuiPopover>
+      )}
+      {series.selectedMetricField && (
+        <EuiBadge
+          iconType="cross"
+          iconSide="right"
+          iconOnClick={() => onChange(undefined)}
+          iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+        >
+          {
+            seriesConfig?.metricOptions?.find((option) => option.id === series.selectedMetricField)
+              ?.label
+          }
+        </EuiBadge>
+      )}
+    </>
   );
 }
 
@@ -98,5 +128,12 @@ const SELECT_REPORT_METRIC_LABEL = i18n.translate(
   'xpack.observability.expView.seriesEditor.selectReportMetric',
   {
     defaultMessage: 'Select report metric',
+  }
+);
+
+const REMOVE_REPORT_METRIC_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesEditor.removeReportMetric',
+  {
+    defaultMessage: 'Remove report metric',
   }
 );
