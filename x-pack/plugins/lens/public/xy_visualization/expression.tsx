@@ -59,7 +59,11 @@ import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axe
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
-import { getThresholdRequiredPaddings, ThresholdAnnotations } from './expression_thresholds';
+import {
+  computeChartMargins,
+  getThresholdRequiredPaddings,
+  ThresholdAnnotations,
+} from './expression_thresholds';
 
 declare global {
   interface Window {
@@ -536,13 +540,12 @@ export function XYChart({
           // if not title or labels are shown for axes, add some padding if required by threshold markers
           chartMargins: {
             ...chartTheme.chartPaddings,
-            ...(!tickLabelsVisibilitySettings?.x &&
-              !axisTitlesVisibilitySettings.x && { bottom: thresholdPaddings.bottom }),
-            ...(!tickLabelsVisibilitySettings?.yLeft &&
-              !axisTitlesVisibilitySettings.yLeft && { left: thresholdPaddings.left }),
-            ...(!tickLabelsVisibilitySettings?.yRight &&
-              !axisTitlesVisibilitySettings.yRight && { right: thresholdPaddings.right }),
-            ...(thresholdPaddings.top && { top: thresholdPaddings.top }),
+            ...computeChartMargins(
+              thresholdPaddings,
+              tickLabelsVisibilitySettings,
+              axisTitlesVisibilitySettings,
+              shouldRotate
+            ),
           },
         }}
         baseTheme={chartBaseTheme}
@@ -888,6 +891,7 @@ export function XYChart({
             left: Boolean(yAxesMap.left),
             right: Boolean(yAxesMap.right),
           }}
+          isHorizontal={shouldRotate}
         />
       ) : null}
     </Chart>

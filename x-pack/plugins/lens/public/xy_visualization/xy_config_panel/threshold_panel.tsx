@@ -126,16 +126,15 @@ function getIconPositionOptions({
     },
   ];
   if (axisMode === 'bottom') {
-    return [
-      ...options,
+    const bottomOptions = [
       {
         id: `${idPrefix}above`,
         label: !isHorizontal
           ? i18n.translate('xpack.lens.xyChart.markerPosition.above', {
               defaultMessage: 'Above',
             })
-          : i18n.translate('xpack.lens.xyChart.markerPosition.left', {
-              defaultMessage: 'Left',
+          : i18n.translate('xpack.lens.xyChart.markerPosition.right', {
+              defaultMessage: 'Right',
             }),
         'data-test-subj': 'lnsXY_markerPosition_above',
       },
@@ -145,20 +144,25 @@ function getIconPositionOptions({
           ? i18n.translate('xpack.lens.xyChart.markerPosition.below', {
               defaultMessage: 'Below',
             })
-          : i18n.translate('xpack.lens.xyChart.markerPosition.right', {
-              defaultMessage: 'Right',
+          : i18n.translate('xpack.lens.xyChart.markerPosition.left', {
+              defaultMessage: 'Left',
             }),
         'data-test-subj': 'lnsXY_markerPosition_below',
       },
     ];
+    if (isHorizontal) {
+      // above -> below
+      // left -> right
+      bottomOptions.reverse();
+    }
+    return [...options, ...bottomOptions];
   }
-  return [
-    ...options,
+  const yOptions = [
     {
       id: `${idPrefix}left`,
       label: isHorizontal
-        ? i18n.translate('xpack.lens.xyChart.markerPosition.above', {
-            defaultMessage: 'Above',
+        ? i18n.translate('xpack.lens.xyChart.markerPosition.below', {
+            defaultMessage: 'Below',
           })
         : i18n.translate('xpack.lens.xyChart.markerPosition.left', {
             defaultMessage: 'Left',
@@ -168,8 +172,8 @@ function getIconPositionOptions({
     {
       id: `${idPrefix}right`,
       label: isHorizontal
-        ? i18n.translate('xpack.lens.xyChart.markerPosition.below', {
-            defaultMessage: 'Below',
+        ? i18n.translate('xpack.lens.xyChart.markerPosition.above', {
+            defaultMessage: 'Above',
           })
         : i18n.translate('xpack.lens.xyChart.markerPosition.right', {
             defaultMessage: 'Right',
@@ -177,6 +181,12 @@ function getIconPositionOptions({
       'data-test-subj': 'lnsXY_markerPosition_right',
     },
   ];
+  if (isHorizontal) {
+    // left -> right
+    // above -> below
+    yOptions.reverse();
+  }
+  return [...options, ...yOptions];
 }
 
 export const ThresholdPanel = (
