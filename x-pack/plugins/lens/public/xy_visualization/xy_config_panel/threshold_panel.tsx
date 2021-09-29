@@ -6,7 +6,7 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon, EuiRange } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
@@ -297,18 +297,28 @@ const LineThicknessSlider = ({
   value: number;
   onChange: (value: number) => void;
 }) => {
+  const [unsafeValue, setUnsafeValue] = useState<string>(String(value));
+
   return (
     <EuiRange
       fullWidth
       data-test-subj="lnsXY_lineThickness"
-      value={value}
+      value={unsafeValue}
       showInput
       min={minRange}
       max={maxRange}
       step={1}
       compressed
-      onChange={(e) => {
-        const newValue = e.currentTarget.value;
+      onChange={({ currentTarget: { value: newValue } }) => {
+        setUnsafeValue(newValue);
+        const convertedValue = newValue === '' ? '' : Number(newValue);
+        const safeValue = getSafeValue(Number(newValue), Number(newValue), minRange, maxRange);
+        // only update onChange is the value is valid and in range
+        if (convertedValue === safeValue) {
+          onChange(safeValue);
+        }
+      }}
+      onBlur={({ currentTarget: { value: newValue } }) => {
         const convertedValue = newValue === '' ? '' : Number(newValue);
         if (Number.isInteger(convertedValue)) {
           onChange(getSafeValue(convertedValue, Number(convertedValue), minRange, maxRange));
