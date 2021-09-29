@@ -7,7 +7,6 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 import http from 'http';
-
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';

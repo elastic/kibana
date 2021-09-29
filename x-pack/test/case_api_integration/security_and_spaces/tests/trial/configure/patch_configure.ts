@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import http from 'http';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
-import {
-  ExternalServiceSimulator,
-  getExternalServiceSimulatorPath,
-} from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 import {
   getConfigurationRequest,
@@ -22,6 +19,7 @@ import {
   updateConfiguration,
   getServiceNowConnector,
   createConnector,
+  getServiceNowSimulationServer,
 } from '../../../../common/lib/utils';
 import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
 
@@ -29,16 +27,16 @@ import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const kibanaServer = getService('kibanaServer');
 
   describe('patch_configure', () => {
     const actionsRemover = new ActionsRemover(supertest);
-    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+    let serviceNowSimulatorURL: string = '';
+    let serviceNowServer: http.Server;
 
-    before(() => {
-      servicenowSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
-      );
+    before(async () => {
+      const { server, url } = await getServiceNowSimulationServer();
+      serviceNowServer = server;
+      serviceNowSimulatorURL = url;
     });
 
     afterEach(async () => {
@@ -46,12 +44,16 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
+    after(async () => {
+      serviceNowServer.close();
+    });
+
     it('should patch a configuration connector and create mappings', async () => {
       const connector = await createConnector({
         supertest,
         req: {
           ...getServiceNowConnector(),
-          config: { apiUrl: servicenowSimulatorURL },
+          config: { apiUrl: serviceNowSimulatorURL },
         },
       });
 
@@ -107,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         req: {
           ...getServiceNowConnector(),
-          config: { apiUrl: servicenowSimulatorURL },
+          config: { apiUrl: serviceNowSimulatorURL },
         },
       });
 
