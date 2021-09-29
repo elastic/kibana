@@ -376,4 +376,16 @@ Configuration management tools and automation will need to be updated to use the
 
 *Impact:* Use {kibana-ref}/banners-settings-kb.html#banners-settings-kb[`xpack.banners.placement: 'top'`] instead.
 
+[float]
+=== `cpu.cgroup.path.override` is no longer valid
+*Details:* The deprecated `cpu.cgroup.path.override` setting is no longer supported.
+
+*Impact:* Configure {kibana-ref}/settings.html#ops-cGroupOverrides-cpuPath[`ops.cGroupOverrides.cpuPath`] instead
+
+[float]
+=== `cpuacct.cgroup.path.override` is no longer valid
+*Details:* The deprecated `cpuacct.cgroup.path.override` setting is no longer supported.
+
+*Impact:* Configure {kibana-ref}/settings.html#ops-cGroupOverrides-cpuAcctPath[`ops.cGroupOverrides.cpuAcctPath`] instead
+
 // end::notable-breaking-changes[]
