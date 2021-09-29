@@ -330,7 +330,7 @@ export const SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL = i18n.translate(
 export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementContentExtractionLabel',
   {
-    defaultMessage: 'Sync all text and content',
+    defaultMessage: 'Sync full-text from files',
   }
 );
 
@@ -548,6 +548,13 @@ export const SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'DO NOT TRANSLATE, temporary placeholder: Objects chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+  }
+);
+
+export const SOURCE_OBJECTS_AND_ASSETS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsLabel',
+  {
+    defaultMessage: 'Object and details to include in search results',
   }
 );
 
