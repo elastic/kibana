@@ -8,12 +8,7 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-} from 'kibana/server';
+import { SavedObject, SavedObjectAttributes, SavedObjectsFindResult } from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -214,12 +209,6 @@ export const isRuleStatusSavedObjectType = (
   obj: unknown
 ): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {
   return get('attributes', obj) != null;
-};
-
-export const isRuleStatusFindType = (
-  obj: unknown
-): obj is SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => {
-  return get('saved_objects', obj) != null;
 };
 
 export interface CreateRulesOptions {
