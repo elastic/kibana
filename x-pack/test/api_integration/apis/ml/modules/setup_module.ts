@@ -187,9 +187,11 @@ export default ({ getService }: FtrProviderContext) => {
         dashboards: [] as string[],
       },
     },
+    // Set startDatafeed and estimateModelMemory to false for the APM transaction test
+    // until there is a new data set available with metric data.
     {
       testTitleSuffix:
-        'for apm_transaction with prefix, startDatafeed true and estimateModelMemory true',
+        'for apm_transaction with prefix, startDatafeed false and estimateModelMemory false',
       sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm',
       indexPattern: { name: 'ft_module_apm', timeField: '@timestamp' },
       module: 'apm_transaction',
@@ -197,14 +199,14 @@ export default ({ getService }: FtrProviderContext) => {
       requestBody: {
         prefix: 'pf5_',
         indexPatternName: 'ft_module_apm',
-        startDatafeed: true,
-        end: Date.now(),
+        startDatafeed: false,
+        estimateModelMemory: false,
       },
       expected: {
         responseCode: 200,
         jobs: [
           {
-            jobId: 'pf5_high_mean_transaction_duration',
+            jobId: 'pf5_apm_metrics',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
