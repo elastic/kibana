@@ -114,8 +114,6 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
-  start: number;
-  end: number;
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
@@ -162,8 +160,6 @@ export async function inspectSearchParams(
   let error;
 
   const mockSetup = {
-    start: 1528113600000,
-    end: 1528977600000,
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
     config: new Proxy(
