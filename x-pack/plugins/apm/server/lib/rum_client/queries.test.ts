@@ -30,6 +30,8 @@ describe('rum client dashboard queries', () => {
       (setup) =>
         getClientMetrics({
           setup,
+          start: 0,
+          end: 50000,
         }),
       { uiFilters: { environment: 'staging' } }
     );
@@ -42,6 +44,8 @@ describe('rum client dashboard queries', () => {
       (setup) =>
         getPageViewTrends({
           setup,
+          start: 0,
+          end: 50000,
         }),
       { uiFilters: { environment: 'staging' } }
     );
@@ -56,6 +60,8 @@ describe('rum client dashboard queries', () => {
           setup,
           minPercentile: '0',
           maxPercentile: '99',
+          start: 0,
+          end: 50000,
         }),
       { uiFilters: { environment: 'staging' } }
     );
@@ -66,6 +72,8 @@ describe('rum client dashboard queries', () => {
     mock = await inspectSearchParams((setup) =>
       getRumServices({
         setup,
+        start: 0,
+        end: 50000,
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -76,6 +84,8 @@ describe('rum client dashboard queries', () => {
       (setup) =>
         getWebCoreVitals({
           setup,
+          start: 0,
+          end: 50000,
         }),
       { uiFilters: { environment: ENVIRONMENT_ALL.value } }
     );
@@ -86,6 +96,8 @@ describe('rum client dashboard queries', () => {
     mock = await inspectSearchParams((setup) =>
       getLongTaskMetrics({
         setup,
+        start: 0,
+        end: 50000,
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -97,6 +109,8 @@ describe('rum client dashboard queries', () => {
         setup,
         pageSize: 5,
         pageIndex: 0,
+        start: 0,
+        end: 50000,
       })
     );
     expect(mock.params).toMatchSnapshot();

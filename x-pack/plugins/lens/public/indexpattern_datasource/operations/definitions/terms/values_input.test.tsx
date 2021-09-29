@@ -32,9 +32,7 @@ describe('Values', () => {
     const onChangeSpy = jest.fn();
     const instance = shallow(<ValuesInput value={5} onChange={onChangeSpy} />);
     act(() => {
-      instance.find(EuiFieldNumber).prop('onChange')!({
-        currentTarget: { value: '7' },
-      } as React.ChangeEvent<HTMLInputElement>);
+      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '7' } });
     });
     expect(instance.find(EuiFieldNumber).prop('value')).toEqual('7');
     expect(onChangeSpy.mock.calls.length).toBe(1);
@@ -45,9 +43,7 @@ describe('Values', () => {
     const onChangeSpy = jest.fn();
     const instance = shallow(<ValuesInput value={5} onChange={onChangeSpy} />);
     act(() => {
-      instance.find(EuiFieldNumber).prop('onChange')!({
-        currentTarget: { value: '1007' },
-      } as React.ChangeEvent<HTMLInputElement>);
+      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '1007' } });
     });
     instance.update();
     expect(instance.find(EuiFieldNumber).prop('value')).toEqual('1007');
@@ -64,9 +60,7 @@ describe('Values', () => {
     );
 
     act(() => {
-      instance.find(EuiFieldNumber).prop('onChange')!({
-        currentTarget: { value: '1007' },
-      } as React.ChangeEvent<HTMLInputElement>);
+      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '1007' } });
     });
     instance.update();
 
@@ -81,13 +75,13 @@ describe('Values', () => {
 
     function changeAndBlur(newValue: string) {
       act(() => {
-        instance.find(EuiFieldNumber).prop('onChange')!({
+        instance.find(EuiFieldNumber).simulate('change', {
           currentTarget: { value: newValue },
-        } as React.ChangeEvent<HTMLInputElement>);
+        });
       });
       instance.update();
       act(() => {
-        instance.find(EuiFieldNumber).prop('onBlur')!({} as React.FocusEvent<HTMLInputElement>);
+        instance.find(EuiFieldNumber).simulate('blur');
       });
       instance.update();
     }
