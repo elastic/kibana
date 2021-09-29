@@ -9,7 +9,7 @@
 import { useEffect } from 'react';
 import { filter } from 'rxjs/operators';
 import { TimeRange } from 'src/plugins/data/public';
-import { DataView } from 'src/plugins/data/common';
+import { DataView, DEFAULT_QUERY_LANGUAGE } from 'src/plugins/data/common';
 import { DiscoverServices } from '../../build_services';
 import { IndexPattern, isCompleteResponse, SearchSource } from '../../../../data/common';
 
@@ -33,6 +33,7 @@ export const useIndexPatternData = (
       const ip = indexPattern as unknown as IndexPattern;
       searchSource.setField('index', ip);
       searchSource.setField('trackTotalHits', true);
+      searchSource.setField('query', { query: '', language: DEFAULT_QUERY_LANGUAGE });
       searchSource.setField(
         'filter',
         data.query.timefilter.timefilter.createFilter(ip!, timeRange)
