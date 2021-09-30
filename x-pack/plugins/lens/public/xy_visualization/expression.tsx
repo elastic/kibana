@@ -544,6 +544,7 @@ export function XYChart({
               thresholdPaddings,
               tickLabelsVisibilitySettings,
               axisTitlesVisibilitySettings,
+              yAxesMap,
               shouldRotate
             ),
           },
