@@ -3,7 +3,7 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["fieldFormats"],
+  "requiredPlugins": ["fieldFormats","expressions"],
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],
   "requiredBundles": ["kibanaUtils","kibanaReact"],

@@ -31,7 +31,7 @@ import {
   TypeMeta,
 } from '../types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../field_formats/common/';
-import { UI_SETTINGS, SavedObject } from '../../common';
+import { META_FIELDS, SavedObject } from '../../common';
 import { SavedObjectNotFound } from '../../../kibana_utils/common';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
@@ -244,7 +244,7 @@ export class DataViewsService {
    * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
-    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    const metaFields = await this.config.get(META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
@@ -445,7 +445,7 @@ export class DataViewsService {
         spec.title as string,
         {
           pattern: title as string,
-          metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+          metaFields: await this.config.get(META_FIELDS),
           type,
           rollupIndex: typeMeta?.params?.rollup_index,
           allowNoIndex: spec.allowNoIndex,
@@ -520,7 +520,7 @@ export class DataViewsService {
    */
   async create(spec: DataViewSpec, skipFetchFields = false): Promise<DataView> {
     const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    const metaFields = await this.config.get(META_FIELDS);
 
     const indexPattern = new DataView({
       spec,
