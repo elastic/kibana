@@ -7,18 +7,21 @@
  */
 
 import { EcsCodeSignature } from './code_signature';
+import { EcsElf } from './elf';
 import { EcsHash } from './hash';
 import { EcsPe } from './pe';
 
 interface NestedFields {
   code_signature?: EcsCodeSignature;
+  elf?: EcsElf;
   hash?: EcsHash;
   parent?: EcsProcess;
   pe?: EcsPe;
+  target?: EcsProcess;
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.10/ecs-process.html
+ * https://www.elastic.co/guide/en/ecs/1.11/ecs-process.html
  *
  * @internal
  */
@@ -34,7 +37,6 @@ export interface EcsProcess extends NestedFields {
   pid?: number;
   ppid?: number;
   start?: string;
-  thread?: { id?: number; name?: string };
   title?: string;
   uptime?: number;
   working_directory?: string;

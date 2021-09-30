@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.10/ecs-vlan.html
+ * https://www.elastic.co/guide/en/ecs/1.11/ecs-vlan.html
  *
  * @internal
  */

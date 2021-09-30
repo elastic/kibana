@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.10/ecs-error.html
+ * https://www.elastic.co/guide/en/ecs/1.11/ecs-error.html
  *
  * @internal
  */

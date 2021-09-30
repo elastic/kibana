@@ -7,12 +7,13 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.10/ecs-event.html
+ * https://www.elastic.co/guide/en/ecs/1.11/ecs-event.html
  *
  * @internal
  */
 export interface EcsEvent {
   action?: string;
+  agent_id_status?: 'verified' | 'mismatch' | 'missing' | 'auth_metadata_missing';
   category?: EcsEventCategory[];
   code?: string;
   created?: string;

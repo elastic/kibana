@@ -47,13 +47,13 @@ export { EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from '.
 
 interface EcsField {
   /**
-   * These typings were written as of ECS 1.10.0.
+   * These typings were written as of ECS 1.11.0.
    * Don't change this value without checking the rest
    * of the types to conform to that ECS version.
    *
-   * https://www.elastic.co/guide/en/ecs/1.10/index.html
+   * https://www.elastic.co/guide/en/ecs/1.11/index.html
    */
-  version: '1.10.0';
+  version: '1.11.0';
 }
 
 /**

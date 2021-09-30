@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.10/ecs-log.html
+ * https://www.elastic.co/guide/en/ecs/1.11/ecs-log.html
  *
  * @internal
  */
@@ -16,6 +16,7 @@ export interface EcsLog {
   level?: string;
   logger?: string;
   origin?: Origin;
+  /** @deprecated - use `event.original` instead */
   original?: string;
   syslog?: Syslog;
 }
