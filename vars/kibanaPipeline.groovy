@@ -2,44 +2,8 @@ def withPostBuildReporting(Map params, Closure closure) {
   try {
     closure()
   } finally {
-    def parallelWorkspaces = []
-    try {
-      parallelWorkspaces = getParallelWorkspaces()
-    } catch(ex) {
-      print ex
-    }
-
-    if (params.runErrorReporter) {
-      catchErrors {
-        runErrorReporter([pwd()] + parallelWorkspaces)
-      }
-    }
-
     catchErrors {
       publishJunit()
-    }
-
-    catchErrors {
-      def parallelWorkspace = "${env.WORKSPACE}/parallel"
-      if (fileExists(parallelWorkspace)) {
-        dir(parallelWorkspace) {
-          def workspaceTasks = [:]
-
-          parallelWorkspaces.each { workspaceDir ->
-            workspaceTasks[workspaceDir] = {
-              dir(workspaceDir) {
-                catchErrors {
-                  runbld.junit()
-                }
-              }
-            }
-          }
-
-          if (workspaceTasks) {
-            parallel(workspaceTasks)
-          }
-        }
-      }
     }
   }
 }
