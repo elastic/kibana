@@ -40,22 +40,26 @@ describe('Kibana deprecation details flyout', () => {
   });
 
   describe('Deprecation with manual steps', () => {
-    test('renders flyout with manual steps only', async () => {
+    test('renders flyout with single manual step as a standalone paragraph', async () => {
+      const { find, exists, actions } = testBed;
+      const manualDeprecation = mockedKibanaDeprecations[1];
+
+      await actions.table.clickDeprecationAt(0);
+
+      expect(exists('kibanaDeprecationDetails')).toBe(true);
+      expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
+      expect(find('manualStep').length).toBe(1);
+    });
+
+    test('renders flyout with multiple manual steps as a list', async () => {
       const { find, exists, actions } = testBed;
       const manualDeprecation = mockedKibanaDeprecations[1];
 
       await actions.table.clickDeprecationAt(1);
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
-      expect(exists('kibanaDeprecationDetails.warningDeprecationBadge')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
-      expect(find('manualStepsList').find('li').length).toEqual(
-        manualDeprecation.correctiveActions.manualSteps.length
-      );
-
-      // Quick resolve callout and button should not display
-      expect(exists('quickResolveCallout')).toBe(false);
-      expect(exists('resolveButton')).toBe(false);
+      expect(find('manualStepsListItem').length).toBe(3);
     });
   });
 
@@ -70,9 +74,6 @@ describe('Kibana deprecation details flyout', () => {
       expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
         quickResolveDeprecation.title
-      );
-      expect(find('manualStepsList').find('li').length).toEqual(
-        quickResolveDeprecation.correctiveActions.manualSteps.length
       );
 
       // Quick resolve callout and button should display

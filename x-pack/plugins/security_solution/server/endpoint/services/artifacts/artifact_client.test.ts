@@ -28,6 +28,12 @@ describe('artifact_client', () => {
       expect(fleetArtifactClient.listArtifacts).toHaveBeenCalled();
     });
 
+    test('can list artifact', async () => {
+      const response = await artifactClient.listArtifacts();
+      expect(fleetArtifactClient.listArtifacts).toHaveBeenCalled();
+      expect(response.items[0].id).toEqual('123');
+    });
+
     test('can create artifact', async () => {
       const artifact = await getInternalArtifactMock('linux', 'v1');
       await artifactClient.createArtifact(artifact);
