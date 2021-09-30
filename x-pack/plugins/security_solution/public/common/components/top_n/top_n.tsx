@@ -23,6 +23,7 @@ import * as i18n from './translations';
 import { getIndicesSelector, IndicesSelector } from './selectors';
 import { State } from '../../store';
 import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const TopNContainer = styled.div`
   min-width: 600px;
@@ -86,7 +87,15 @@ const TopNComponent: React.FC<Props> = ({
   );
   const indicesSelector = useMemo(getIndicesSelector, []);
   const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
-    (state) => indicesSelector(state),
+    (state) =>
+      indicesSelector(
+        state,
+        timelineId != null
+          ? defaultView === 'alert'
+            ? SourcererScopeName.detections
+            : SourcererScopeName.timeline
+          : SourcererScopeName.default
+      ),
     deepEqual
   );
 
