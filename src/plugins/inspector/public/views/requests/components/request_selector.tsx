@@ -49,11 +49,12 @@ export class RequestSelector extends Component<RequestSelectorProps> {
 
   renderRequestCombobox() {
     const options = this.props.requests.map((item) => {
-      const testLabel = item.name.replace(/\s+/, '');
+      const hasFailed = item.status === RequestStatus.ERROR;
+      const testLabel = item.name.replace(/\s+/, '_');
 
       return {
         'data-test-subj': `inspectorRequestChooser${testLabel}`,
-        label: item.name,
+        label: hasFailed ? `${item.name} (failed)` : item.name,
         value: item.id,
       };
     });

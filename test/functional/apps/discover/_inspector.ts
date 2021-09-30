@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.open();
       await testSubjects.click('inspectorRequestChooser');
       let foundZero = false;
-      for (const subj of ['Documents', 'Chartdata']) {
+      for (const subj of ['Documents', 'Chart_data']) {
         await testSubjects.click(`inspectorRequestChooser${subj}`);
         if (await testSubjects.exists('inspectorRequestDetailStatistics', { timeout: 500 })) {
           await testSubjects.click(`inspectorRequestDetailStatistics`);
