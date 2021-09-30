@@ -8,7 +8,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Filter } from '@kbn/es-query';
-import { DataView, Query } from '../../../../../data/common';
+import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import {
   EmbeddableInput,
@@ -21,12 +21,16 @@ import { SavedSearch } from '../../../saved_searches';
 import { GetStateReturn } from '../../apps/main/services/discover_state';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
-  indexPattern: DataView;
+  indexPattern: IndexPattern;
   savedSearch?: SavedSearch;
   query?: Query;
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -38,9 +42,17 @@ export interface DiscoverDataVisualizerGridProps {
    */
   columns: string[];
   /**
-   * The used data view
+   * The used index pattern
    */
   indexPattern: DataView;
+  /**
+   * Saved search description
+   */
+  searchDescription?: string;
+  /**
+   * Saved search title
+   */
+  searchTitle?: string;
   /**
    * Discover plugin services
    */
@@ -57,14 +69,24 @@ export interface DiscoverDataVisualizerGridProps {
    * Filters query to update the table content
    */
   filters?: Filter[];
-  /**
-   * stateContainer to access and update app state preferences like to show preview or not
-   */
   stateContainer?: GetStateReturn;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
 export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
-  const { services, indexPattern, savedSearch, query, columns, filters, stateContainer } = props;
+  const {
+    services,
+    indexPattern,
+    savedSearch,
+    query,
+    columns,
+    filters,
+    stateContainer,
+    onAddFilter,
+  } = props;
   const { uiSettings } = services;
 
   const [embeddable, setEmbeddable] = useState<
@@ -101,10 +123,11 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
         query,
         filters,
         visibleFieldNames: columns,
+        onAddFilter,
       });
       embeddable.reload();
     }
-  }, [embeddable, indexPattern, savedSearch, query, columns, filters]);
+  }, [embeddable, indexPattern, savedSearch, query, columns, filters, onAddFilter]);
 
   useEffect(() => {
     if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
@@ -139,6 +162,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
             savedSearch,
             query,
             showPreviewByDefault,
+            onAddFilter,
           });
           if (!unmounted) {
             setEmbeddable(initializedEmbeddable);
@@ -162,7 +186,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
 
   return (
     <div
-      data-test-subj="dataVisualizerEmbeddedContent"
+      data-test-subj="dscFieldStatsEmbeddedContent"
       ref={embeddableRoot}
       style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
       // Match the scroll bar of the Discover doc table

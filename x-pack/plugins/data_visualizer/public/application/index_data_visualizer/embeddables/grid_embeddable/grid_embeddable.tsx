@@ -24,7 +24,11 @@ import { KibanaContextProvider } from '../../../../../../../../src/plugins/kiban
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
-import { IndexPattern, Query } from '../../../../../../../../src/plugins/data/common';
+import {
+  IndexPattern,
+  IndexPatternField,
+  Query,
+} from '../../../../../../../../src/plugins/data/common';
 import { SavedSearch } from '../../../../../../../../src/plugins/discover/public';
 import {
   DataVisualizerTable,
@@ -45,6 +49,10 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
@@ -85,6 +93,7 @@ export const EmbeddableWrapper = ({
               item={item}
               indexPattern={input.indexPattern}
               combinedQuery={{ searchQueryLanguage, searchString }}
+              onAddFilter={input.onAddFilter}
             />
           );
         }

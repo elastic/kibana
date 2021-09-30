@@ -289,6 +289,7 @@ export function DiscoverLayout({
                       filters={state.filters}
                       columns={columns}
                       stateContainer={stateContainer}
+                      onAddFilter={onAddFilter}
                     />
                   )}
                 </EuiFlexGroup>
