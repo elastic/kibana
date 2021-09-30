@@ -60,13 +60,12 @@ export const ColorPicker = ({
   const overwriteColor = getSeriesColor(layer, accessor);
   const currentColor = useMemo(() => {
     if (overwriteColor || !frame.activeData) return overwriteColor;
-
-    const datasource = frame.datasourceLayers[layer.layerId];
-    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
-
     if (layer.layerType === layerTypes.THRESHOLD) {
       return defaultThresholdColor;
     }
+
+    const datasource = frame.datasourceLayers[layer.layerId];
+    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
 
     const colorAssignments = getColorAssignments(
       state.layers,
