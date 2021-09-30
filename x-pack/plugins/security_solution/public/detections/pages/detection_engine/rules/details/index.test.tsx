@@ -20,22 +20,51 @@ import {
 import { RuleDetailsPage } from './index';
 import { createStore, State } from '../../../../../common/store';
 import { useUserData } from '../../../../components/user_info';
+import { useRuleStatus } from '../../../../containers/detection_engine/rules';
+import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
+
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+// import { useKibana } from '../../../../../common/lib/kibana';
+
+import { fillEmptySeverityMappings } from '../helpers';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../../../common/components/search_bar', () => ({
   SiemSearchBar: () => null,
 }));
+jest.mock('../helpers', () => {
+  const original = jest.requireActual('../helpers');
+  return {
+    ...original,
+    fillEmptySeverityMappings: jest.fn().mockReturnValue([]),
+  };
+});
 jest.mock('../../../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 jest.mock('../../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../components/user_info');
+jest.mock('../../../../containers/detection_engine/rules', () => {
+  const original = jest.requireActual('../../../../containers/detection_engine/rules');
+  return {
+    ...original,
+    useRuleStatus: jest.fn(),
+  };
+});
+jest.mock('../../../../containers/detection_engine/rules/use_rule_with_fallback', () => {
+  const original = jest.requireActual(
+    '../../../../containers/detection_engine/rules/use_rule_with_fallback'
+  );
+  return {
+    ...original,
+    useRuleWithFallback: jest.fn(),
+  };
+});
 jest.mock('../../../../../common/containers/sourcerer');
 jest.mock('../../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -63,6 +92,11 @@ jest.mock('../../../../../common/lib/kibana', () => {
     useUiSetting$: jest.fn().mockReturnValue([]),
     useKibana: () => ({
       services: {
+        spaces: {
+          ui: {
+            redirectLegacyUrl: jest.fn(),
+          },
+        },
         application: {
           ...original.useKibana().services.application,
           navigateToUrl: jest.fn(),
@@ -73,10 +107,17 @@ jest.mock('../../../../../common/lib/kibana', () => {
         },
         timelines: { ...mockTimelines },
         http: original.useKibana().services.http,
+        // http: {
+        //   ...original.useKibana().services.http,
+        //   basePath: {
+        //     prepend: jest.fn(),
+        //   },
+        // },
         data: {
           query: {
             filterManager: jest.fn().mockReturnValue({}),
           },
+          search: original.useKibana().services.data.search,
         },
       },
     }),
@@ -102,6 +143,66 @@ describe('RuleDetailsPageComponent', () => {
       indicesExist: true,
       indexPattern: {},
     });
+    (useRuleStatus as jest.Mock).mockReturnValue([
+      false,
+      {
+        status: 'succeeded',
+        last_failure_at: new Date().toISOString(),
+        last_failure_message: 'my fake failure message',
+        failures: [],
+      },
+    ]);
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      error: null,
+      loading: false,
+      isExistingRule: true,
+      refresh: jest.fn(),
+      rule: {
+        id: 'myfakeruleid',
+        outcome: 'aliasMatch',
+        // risk_score_mapping: [
+        //   {
+        //     field: 'fake field',
+        //     value: 'fake value',
+        //     operator: 'equals',
+        //     risk_score: 12,
+        //   },
+        // ],
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        index: ['index-1'],
+        interval: '5m',
+        references: [],
+        actions: [],
+        enabled: false,
+        false_positives: [],
+        max_signals: 100,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+        // severity_mapping: [
+        //   {
+        //     field: 'fake field',
+        //     operator: 'equals',
+        //     value: 'fake value',
+        //     severity: 'low',
+        //   },
+        // ],
+      },
+    });
+    (fillEmptySeverityMappings as jest.Mock).mockReturnValue([]);
   });
 
   it('renders correctly', async () => {
@@ -114,6 +215,9 @@ describe('RuleDetailsPageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+      // expect((useKibana as jest.Mock)().services.http.basePath.prepend).toHaveBeenCalledWith(
+      //   'rules/id/myfakeruleid'
+      // );
     });
   });
 });
