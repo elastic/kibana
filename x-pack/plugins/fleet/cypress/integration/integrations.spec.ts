@@ -30,12 +30,36 @@ describe('Add Integration', () => {
   after(() => {
     deleteIntegrations(integration);
   });
-
   it('should display Apache integration in the Policies list once installed ', () => {
+    addAndVerifyIntegration();
+  });
+
+  function addAndVerifyIntegration() {
     navigateTo(INTEGRATIONS);
     cy.get(INTEGRATIONS_CARD).contains(integration).click();
     addIntegration();
     cy.get(INTEGRATION_NAME_LINK).contains('apache-');
+  }
+
+  it('[Mocked requests] should display Apache integration in the Policies list once installed ', () => {
+    cy.intercept('POST', '/api/fleet/package_policies', {
+      fixture: 'integrations/create_integration_response.json',
+    });
+    cy.intercept(
+      'GET',
+      '/api/fleet/package_policies?page=1&perPage=20&kuery=ingest-package-policies.package.name%3A%20apache',
+      { fixture: 'integrations/list.json' }
+    );
+    cy.intercept('GET', '/api/fleet/agent_policies?*', {
+      fixture: 'integrations/agent_policies.json',
+    });
+    cy.intercept('GET', '/api/fleet/agent_policies/30e16140-2106-11ec-a289-25321523992d', {
+      fixture: 'integrations/agent_policy.json',
+    });
+    cy.intercept('GET', '/api/fleet/epm/packages/apache-1.1.0', {
+      fixture: 'integrations/apache.json',
+    });
+    addAndVerifyIntegration();
   });
 
   it('should upgrade policies with integration update', () => {

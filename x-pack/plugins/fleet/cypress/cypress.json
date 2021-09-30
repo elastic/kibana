@@ -9,7 +9,7 @@
   },
   "screenshotsFolder": "../../../target/kibana-fleet/cypress/screenshots",
   "trashAssetsBeforeRuns": false,
-  "video": true,
+  "video": false,
   "videosFolder": "../../../target/kibana-fleet/cypress/videos",
   "viewportHeight": 900,
   "viewportWidth": 1440,
