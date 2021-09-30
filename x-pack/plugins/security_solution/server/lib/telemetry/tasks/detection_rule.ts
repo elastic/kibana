@@ -44,7 +44,7 @@ export class TelemetryDetectionRulesTask {
 
     taskManager.registerTaskDefinitions({
       [TelemetryDetectionRuleListsTaskConstants.TYPE]: {
-        title: 'Security Solution Lists Telemetry',
+        title: 'Security Solution Detection Rule Lists Telemetry',
         timeout: TelemetryDetectionRuleListsTaskConstants.TIMEOUT,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           const { state } = taskInstance;
