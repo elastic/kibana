@@ -40,6 +40,7 @@ Please note: `metricset.name: transaction` was only recently introduced. To reta
 ### Latency
 
 Latency is the duration of transactions. This can be calculated using transaction events or metric events (aggregated transactions).
+
 Note-worthy fields: `transaction.duration.us`, `transaction.duration.histogram`
 
 #### Transaction-based latency
@@ -81,7 +82,7 @@ Note-worthy fields: `transaction.duration.us`, `transaction.duration.histogram`
 
 Throughput is the rate of transactions for a given time period. This can be calculated using transaction events or metric events.
 
-Note-worthy: None (based on doc count)
+Note-worthy fields: None (based on doc count)
 
 ```json
 {
@@ -119,6 +120,8 @@ System metrics are captured periodically (every 60 seconds by default).
 
 ### CPU
 
+Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
+
 #### Document
 ```json
 {
@@ -129,8 +132,6 @@ System metrics are captured periodically (every 60 seconds by default).
   "system.cpu.total.norm.pct": 0.28,
 }
 ```
-
-Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
 
 #### Query
 ```json
@@ -155,6 +156,8 @@ Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.
 
 ### Memory
 
+Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
+
 #### Document
 ```json
 {
@@ -165,8 +168,6 @@ Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.
   "system.memory.total": 15735697408
 }
 ```
-
-Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
 
 #### Query
 ```js
