@@ -53,10 +53,6 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     max-height: none !important;
     overflow: hidden;
 
-    .euiText {
-      padding: 8px;
-      &:only-child
-    }
 
     .expandable-top-value-button {
       &.euiButtonEmpty--primary:enabled:focus,
@@ -77,32 +73,20 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     }
 
     .euiPopoverFooter .euiFlexGroup {
-      flex-wrap: wrap;
+      flex-direction: column;
       margin: 0;
-      width: 260px;
 
       .euiButtonEmpty .euiButtonContent {
         justify-content: left;
       }
 
       &.euiFlexGroup--gutterSmall > .euiFlexItem {
-        margin: 2px 0;
-        flex: 100%;
+
 
         &:first-child,
         &:nth-child(2) {
-          padding-top: 2px;
-          flex: 50%;
+          display: none;
 
-          .euiButtonEmpty .euiButtonContent {
-            justify-content: center;
-          }
-        }
-
-        &:nth-child(3) {
-          border-top: 1px solid #D3DAE6;
-          padding-top: 4px;
-        }
 
         &:last-child {
           padding-bottom: 8px;

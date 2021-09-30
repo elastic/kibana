@@ -31,6 +31,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
     onFilterAdded,
     ownFocus,
     onClick,
+    size,
     showTooltip = false,
     value,
   }) => {
@@ -74,6 +75,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
             data-test-subj="filter-for-value"
             iconType="plusInCircle"
             onClick={filterForValueFn}
+            size={size}
             title={FILTER_FOR_VALUE}
           >
             {FILTER_FOR_VALUE}
@@ -87,9 +89,10 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
             iconSize="s"
             iconType="plusInCircle"
             onClick={filterForValueFn}
+            size={size}
           />
         ),
-      [Component, defaultFocusedButtonRef, filterForValueFn]
+      [Component, defaultFocusedButtonRef, filterForValueFn, size]
     );
 
     return showTooltip ? (

@@ -24,6 +24,7 @@ export interface HoverActionComponentProps {
   keyboardEvent?: React.KeyboardEvent;
   ownFocus: boolean;
   onClick?: () => void;
+  size?: 'xs' | 's' | 'm';
   showTooltip?: boolean;
   value?: string[] | string | null;
 }

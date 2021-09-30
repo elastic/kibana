@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useMemo, useState, useCallback } from 'react';
+import styled from 'styled-components';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../../../timelines/common/search_strategy';
 import { allowTopN } from '../../components/drag_and_drop/helpers';
 import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
 import { getAllFieldsByName } from '../../containers/source';
+import { useKibana } from '../kibana';
 
 interface Props {
   browserFields: BrowserFields;
@@ -23,6 +25,11 @@ interface Props {
   onFilterAdded?: () => void;
 }
 
+const StyledFlexGroup = styled(EuiFlexGroup)`
+  border-top: 1px solid #d3dae6;
+  border-bottom: 1px solid #d3dae6;
+`;
+
 const ExpandTopValueComponent: React.FC<Props> = ({
   browserFields,
   field,
@@ -31,6 +38,12 @@ const ExpandTopValueComponent: React.FC<Props> = ({
   timelineId,
   value,
 }) => {
+  const {
+    timelines,
+    data: {
+      query: { filterManager },
+    },
+  } = useKibana().services;
   const showButton = useMemo(
     () =>
       allowTopN({
@@ -44,26 +57,56 @@ const ExpandTopValueComponent: React.FC<Props> = ({
   const [showTopN, setShowTopN] = useState(false);
   const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
 
-  return showButton ? (
-    <ShowTopNButton
-      className="eui-displayBlock expandable-top-value-button"
-      Component={EuiButtonEmpty}
-      data-test-subj="data-grid-expanded-show-top-n"
-      field={field}
-      flush="both"
-      globalFilters={globalFilters}
-      iconSide="right"
-      iconType="arrowDown"
-      isExpandable
-      onClick={onClick}
-      onFilterAdded={onFilterAdded ?? noop}
-      ownFocus={false}
-      showTopN={showTopN}
-      showTooltip={false}
-      timelineId={timelineId}
-      value={value}
-    />
-  ) : null;
+  return (
+    <>
+      {showButton ? (
+        <ShowTopNButton
+          className="eui-displayBlock expandable-top-value-button"
+          Component={EuiButtonEmpty}
+          data-test-subj="data-grid-expanded-show-top-n"
+          field={field}
+          flush="both"
+          globalFilters={globalFilters}
+          iconSide="right"
+          iconType="arrowDown"
+          isExpandable
+          onClick={onClick}
+          onFilterAdded={onFilterAdded ?? noop}
+          ownFocus={false}
+          showTopN={showTopN}
+          showTooltip={false}
+          timelineId={timelineId}
+          value={value}
+        />
+      ) : null}
+      <StyledFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          {timelines.getHoverActions().getFilterForValueButton({
+            Component: EuiButtonEmpty,
+            field,
+            filterManager,
+            onFilterAdded,
+            ownFocus: false,
+            size: 's',
+            showTooltip: false,
+            value,
+          })}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {timelines.getHoverActions().getFilterOutValueButton({
+            Component: EuiButtonEmpty,
+            field,
+            filterManager,
+            onFilterAdded,
+            ownFocus: false,
+            size: 's',
+            showTooltip: false,
+            value,
+          })}
+        </EuiFlexItem>
+      </StyledFlexGroup>
+    </>
+  );
 };
 
 ExpandTopValueComponent.displayName = 'ExpandTopValueComponent';
