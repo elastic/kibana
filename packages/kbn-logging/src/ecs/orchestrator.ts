@@ -7,13 +7,26 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.10/ecs-base.html
+ * https://www.elastic.co/guide/en/ecs/1.10/ecs-orchestrator.html
  *
  * @internal
  */
-export interface EcsBase {
-  ['@timestamp']: string;
-  labels?: Record<string, unknown>;
-  message?: string;
-  tags?: string[];
+export interface EcsOrchestrator {
+  api_version?: string;
+  cluster?: Cluster;
+  namespace?: string;
+  organization?: string;
+  resource?: Resource;
+  type?: string;
+}
+
+interface Cluster {
+  name?: string;
+  url?: string;
+  version?: string;
+}
+
+interface Resource {
+  name?: string;
+  type?: string;
 }

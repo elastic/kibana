@@ -13,6 +13,7 @@ import { EcsAutonomousSystem } from './autonomous_system';
 import { EcsClient } from './client';
 import { EcsCloud } from './cloud';
 import { EcsContainer } from './container';
+import { EcsDataStream } from './data_stream';
 import { EcsDestination } from './destination';
 import { EcsDns } from './dns';
 import { EcsError } from './error';
@@ -24,6 +25,7 @@ import { EcsHttp } from './http';
 import { EcsLog } from './log';
 import { EcsNetwork } from './network';
 import { EcsObserver } from './observer';
+import { EcsOrchestrator } from './orchestrator';
 import { EcsOrganization } from './organization';
 import { EcsPackage } from './package';
 import { EcsProcess } from './process';
@@ -45,13 +47,13 @@ export { EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from '.
 
 interface EcsField {
   /**
-   * These typings were written as of ECS 1.9.0.
+   * These typings were written as of ECS 1.10.0.
    * Don't change this value without checking the rest
    * of the types to conform to that ECS version.
    *
-   * https://www.elastic.co/guide/en/ecs/1.9/index.html
+   * https://www.elastic.co/guide/en/ecs/1.10/index.html
    */
-  version: '1.9.0';
+  version: '1.10.0';
 }
 
 /**
@@ -68,6 +70,7 @@ export type Ecs = EcsBase &
     client?: EcsClient;
     cloud?: EcsCloud;
     container?: EcsContainer;
+    data_stream?: EcsDataStream;
     destination?: EcsDestination;
     dns?: EcsDns;
     error?: EcsError;
@@ -79,6 +82,7 @@ export type Ecs = EcsBase &
     log?: EcsLog;
     network?: EcsNetwork;
     observer?: EcsObserver;
+    orchestrator?: EcsOrchestrator;
     organization?: EcsOrganization;
     package?: EcsPackage;
     process?: EcsProcess;

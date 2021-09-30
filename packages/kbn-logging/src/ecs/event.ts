@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-event.html
+ * https://www.elastic.co/guide/en/ecs/1.10/ecs-event.html
  *
  * @internal
  */

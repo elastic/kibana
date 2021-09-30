@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-interface.html
+ * https://www.elastic.co/guide/en/ecs/1.10/ecs-interface.html
  *
  * @internal
  */

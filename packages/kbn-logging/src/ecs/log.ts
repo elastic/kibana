@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-log.html
+ * https://www.elastic.co/guide/en/ecs/1.10/ecs-log.html
  *
  * @internal
  */

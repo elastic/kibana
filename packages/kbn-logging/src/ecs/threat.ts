@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-threat.html
+ * https://www.elastic.co/guide/en/ecs/1.10/ecs-threat.html
  *
  * @internal
  */

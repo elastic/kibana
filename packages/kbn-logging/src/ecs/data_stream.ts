@@ -7,13 +7,12 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.10/ecs-base.html
+ * https://www.elastic.co/guide/en/ecs/1.10/ecs-data_stream.html
  *
  * @internal
  */
-export interface EcsBase {
-  ['@timestamp']: string;
-  labels?: Record<string, unknown>;
-  message?: string;
-  tags?: string[];
+export interface EcsDataStream {
+  dataset?: string;
+  namespace?: string;
+  type?: 'logs' | 'metrics';
 }
