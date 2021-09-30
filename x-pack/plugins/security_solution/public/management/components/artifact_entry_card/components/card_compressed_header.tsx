@@ -17,6 +17,7 @@ import { ArtifactEntryCollapsableCardProps } from '../artifact_entry_collapsable
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useCollapsedCssClassNames } from '../hooks/use_collapsed_css_class_names';
 import { usePolicyNavLinks } from '../hooks/use_policy_nav_links';
+import { getEmptyValue } from '../../../../common/components/empty_value';
 
 export interface CardCompressedHeaderProps
   extends Pick<CommonProps, 'data-test-subj'>,
@@ -65,7 +66,9 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
               className={cssClassNames}
               data-test-subj={getTestId('description')}
             >
-              <TextValueDisplay truncate={!expanded}>{artifact.description}</TextValueDisplay>
+              <TextValueDisplay truncate={!expanded}>
+                {artifact.description || getEmptyValue()}
+              </TextValueDisplay>
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EffectScope policies={policyNavLinks} data-test-subj={getTestId('effectScope')} />
