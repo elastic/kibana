@@ -25,6 +25,7 @@ import {
   isPolicyTrustedAppListLoading,
   getCurrentArtifactsLocation,
   isOnPolicyTrustedAppsView,
+  getCurrentUrlLocationPaginationParams,
 } from '../selectors';
 import {
   ImmutableArray,
@@ -260,7 +261,7 @@ const fetchPolicyTrustedAppsIfNeeded = async (
     });
 
     try {
-      const urlLocationData = getCurrentArtifactsLocation(state);
+      const urlLocationData = getCurrentUrlLocationPaginationParams(state);
       const policyId = policyIdFromParams(state);
       const fetchResponse = await trustedAppsService.getTrustedAppsList({
         page: urlLocationData.page_index + 1,

@@ -74,7 +74,7 @@ export interface PolicyDetailsState {
 }
 
 export interface PolicyAssignedTrustedApps {
-  location: PolicyDetailsArtifactsPageLocation;
+  location: PolicyDetailsArtifactsPageListLocationParams;
   artifacts: GetTrustedAppsListResponse;
 }
 
@@ -102,11 +102,15 @@ export enum OS {
   linux = 'linux',
 }
 
-export interface PolicyDetailsArtifactsPageLocation {
+export interface PolicyDetailsArtifactsPageListLocationParams {
   page_index: number;
   page_size: number;
-  show?: 'list';
   filter: string;
+}
+
+export interface PolicyDetailsArtifactsPageLocation
+  extends PolicyDetailsArtifactsPageListLocationParams {
+  show?: 'list';
 }
 
 /**

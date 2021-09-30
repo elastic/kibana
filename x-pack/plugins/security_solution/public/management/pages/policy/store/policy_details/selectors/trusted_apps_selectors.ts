@@ -11,7 +11,7 @@ import { Pagination } from '@elastic/eui';
 import {
   PolicyArtifactsState,
   PolicyAssignedTrustedApps,
-  PolicyDetailsArtifactsPageLocation,
+  PolicyDetailsArtifactsPageListLocationParams,
   PolicyDetailsSelector,
   PolicyDetailsState,
 } from '../../../types';
@@ -131,16 +131,22 @@ export const getLatestLoadedPolicyAssignedTrustedAppsState: PolicyDetailsSelecto
   return getLastLoadedResourceState(currentAssignedTrustedAppsState);
 });
 
+export const getCurrentUrlLocationPaginationParams: PolicyDetailsSelector<PolicyDetailsArtifactsPageListLocationParams> =
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  createSelector(getCurrentArtifactsLocation, ({ filter, page_index, page_size }) => {
+    return { filter, page_index, page_size };
+  });
+
 export const doesPolicyTrustedAppsListNeedUpdate: PolicyDetailsSelector<boolean> = createSelector(
   getCurrentPolicyAssignedTrustedAppsState,
-  getCurrentArtifactsLocation,
+  getCurrentUrlLocationPaginationParams,
   (assignedListState, locationData) => {
     return (
       !isLoadedResourceState(assignedListState) ||
       (isLoadedResourceState(assignedListState) &&
-        (Object.keys(locationData) as Array<keyof PolicyDetailsArtifactsPageLocation>).some(
-          (key) => assignedListState.data.location[key] !== locationData[key]
-        ))
+        (
+          Object.keys(locationData) as Array<keyof PolicyDetailsArtifactsPageListLocationParams>
+        ).some((key) => assignedListState.data.location[key] !== locationData[key]))
     );
   }
 );
