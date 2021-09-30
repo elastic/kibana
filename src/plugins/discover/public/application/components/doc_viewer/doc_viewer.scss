@@ -13,7 +13,7 @@
   font-family: $euiCodeFontFamily;
 
   .euiTableRowCell {
-    min-width: 108px;
+    min-width: $euiSizeM * 9;
   }
 
   .kbnDocViewer__buttons {
