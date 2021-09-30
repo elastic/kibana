@@ -82,38 +82,3 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
 
   return timeline;
 };
-
-export const convertResolvedSavedObjectToSavedTimeline = (
-  savedObject: unknown,
-  resolveAttributes: { outcome: 'exactMatch' | 'aliasMatch' | 'conflict'; alias_target_id?: string }
-): ResolvedTimelineSavedObject => {
-  const timeline = pipe(
-    TimelineSavedObjectWithDraftRuntime.decode(savedObject),
-    map((savedTimeline) => {
-      const attributes = {
-        ...savedTimeline.attributes,
-        ...getTimelineTypeAndStatus(
-          savedTimeline.attributes.timelineType,
-          savedTimeline.attributes.status
-        ),
-        sort:
-          savedTimeline.attributes.sort != null
-            ? Array.isArray(savedTimeline.attributes.sort)
-              ? savedTimeline.attributes.sort
-              : [savedTimeline.attributes.sort]
-            : [],
-      };
-      return {
-        savedObjectId: savedTimeline.id,
-        version: savedTimeline.version,
-        ...resolveAttributes,
-        ...attributes,
-      };
-    }),
-    fold((errors) => {
-      throw new Error(failure(errors).join('\n'));
-    }, identity)
-  );
-
-  return timeline;
-};

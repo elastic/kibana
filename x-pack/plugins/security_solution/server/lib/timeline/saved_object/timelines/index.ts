@@ -35,10 +35,7 @@ import {
 import { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
-import {
-  convertSavedObjectToSavedTimeline,
-  convertResolvedSavedObjectToSavedTimeline,
-} from './convert_saved_object_to_savedtimeline';
+import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings/';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
@@ -123,12 +120,12 @@ export const resolveTimelineOrNull = async (
   frameworkRequest: FrameworkRequest,
   savedObjectId: string
 ): Promise<ResolvedTimelineSavedObject | null> => {
-  let timeline = null;
+  let resolvedTimeline = null;
   try {
-    timeline = await resolveTimeline(frameworkRequest, savedObjectId);
+    resolvedTimeline = await resolveTimeline(frameworkRequest, savedObjectId);
     // eslint-disable-next-line no-empty
   } catch (e) {}
-  return timeline;
+  return resolvedTimeline;
 };
 
 export const getTimelineByTemplateTimelineId = async (
@@ -593,23 +590,32 @@ const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: 
 
   const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
 
-  return convertResolvedSavedObjectToSavedTimeline(populatedTimeline, resolveAttributes);
+  return {
+    resolvedTimelineSO: convertSavedObjectToSavedTimeline(populatedTimeline),
+    ...resolveAttributes,
+  };
 };
 
 const resolveSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
 
-  const resolvedTimelineSaveObject = await resolveBasicSavedTimeline(request, timelineId);
+  const { resolvedTimelineSO, ...resolveAttributes } = await resolveBasicSavedTimeline(
+    request,
+    timelineId
+  );
 
   const timelineWithNotesAndPinnedEvents = await Promise.all([
-    note.getNotesByTimelineId(request, resolvedTimelineSaveObject.savedObjectId),
-    pinnedEvent.getAllPinnedEventsByTimelineId(request, resolvedTimelineSaveObject.savedObjectId),
-    Promise.resolve(resolvedTimelineSaveObject),
+    note.getNotesByTimelineId(request, resolvedTimelineSO.savedObjectId),
+    pinnedEvent.getAllPinnedEventsByTimelineId(request, resolvedTimelineSO.savedObjectId),
+    Promise.resolve(resolvedTimelineSO),
   ]);
 
   const [notes, pinnedEvents, timeline] = timelineWithNotesAndPinnedEvents;
 
-  return resolvedTimelineWithReduxProperties(notes, pinnedEvents, timeline, userName);
+  return {
+    timeline: timelineWithReduxProperties(notes, pinnedEvents, timeline, userName),
+    ...resolveAttributes,
+  };
 };
 
 const getBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {

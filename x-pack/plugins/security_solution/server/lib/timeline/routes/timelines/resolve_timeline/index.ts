@@ -53,7 +53,7 @@ export const resolveTimelineRoute = (
           throw new Error('please provide id or template_timeline_id');
         }
 
-        return response.ok({ body: res ? { data: { getOneTimeline: res } } : {} });
+        return response.ok({ body: res ? { data: res } : {} });
       } catch (err) {
         const error = transformError(err);
         const siemResponse = buildSiemResponse(response);

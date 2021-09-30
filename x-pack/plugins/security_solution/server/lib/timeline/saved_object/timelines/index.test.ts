@@ -9,13 +9,17 @@ import { FrameworkRequest } from '../../../framework';
 import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 
 import { convertStringToBase64, getExistingPrepackagedTimelines, getAllTimeline } from '.';
-import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
+import {
+  convertSavedObjectToSavedTimeline,
+  convertResolvedSavedObjectToSavedTimeline,
+} from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
 import { AllTimelinesResponse } from '../../../../../common/types/timeline';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),
+  convertResolvedSavedObjectToSavedTimeline: jest.fn(),
 }));
 
 jest.mock('../notes/saved_object', () => ({
@@ -120,6 +124,147 @@ describe('saved_object', () => {
     let result = null as unknown as AllTimelinesResponse;
     beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockGetTimelineValue);
+      mockFindSavedObject = jest
+        .fn()
+        .mockResolvedValueOnce({ saved_objects: [mockSavedObject], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 })
+        .mockResolvedValueOnce({ saved_objects: [mockSavedObject], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [mockSavedObject], total: 1 })
+        .mockResolvedValue({ saved_objects: [], total: 0 });
+      mockRequest = {
+        user: {
+          username: 'username',
+        },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                find: mockFindSavedObject,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+
+      result = await getAllTimeline(mockRequest, false, pageInfo, null, null, null, null);
+    });
+
+    afterEach(() => {
+      mockFindSavedObject.mockClear();
+      (getNotesByTimelineId as jest.Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+    });
+
+    test('should send correct options if no filters applys', async () => {
+      expect(mockFindSavedObject.mock.calls[0][0]).toEqual({
+        filter: 'not siem-ui-timeline.attributes.status: draft',
+        page: pageInfo.pageIndex,
+        perPage: pageInfo.pageSize,
+        type: 'siem-ui-timeline',
+        sortField: undefined,
+        sortOrder: undefined,
+        search: undefined,
+        searchFields: ['title', 'description'],
+      });
+    });
+
+    test('should send correct options for counts of default timelines', async () => {
+      expect(mockFindSavedObject.mock.calls[1][0]).toEqual({
+        filter:
+          'not siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
+        page: 1,
+        perPage: 1,
+        type: 'siem-ui-timeline',
+      });
+    });
+
+    test('should send correct options for counts of timeline templates', async () => {
+      expect(mockFindSavedObject.mock.calls[2][0]).toEqual({
+        filter:
+          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft',
+        page: 1,
+        perPage: 1,
+        type: 'siem-ui-timeline',
+      });
+    });
+
+    test('should send correct options for counts of Elastic prebuilt templates', async () => {
+      expect(mockFindSavedObject.mock.calls[3][0]).toEqual({
+        filter:
+          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
+        page: 1,
+        perPage: 1,
+        type: 'siem-ui-timeline',
+      });
+    });
+
+    test('should send correct options for counts of custom templates', async () => {
+      expect(mockFindSavedObject.mock.calls[4][0]).toEqual({
+        filter:
+          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
+        page: 1,
+        perPage: 1,
+        type: 'siem-ui-timeline',
+      });
+    });
+
+    test('should send correct options for counts of favorite timeline', async () => {
+      expect(mockFindSavedObject.mock.calls[5][0]).toEqual({
+        filter:
+          'not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
+        page: 1,
+        perPage: 1,
+        search: ' dXNlcm5hbWU=',
+        searchFields: ['title', 'description', 'favorite.keySearch'],
+        type: 'siem-ui-timeline',
+      });
+    });
+
+    test('should call getNotesByTimelineId', async () => {
+      expect((getNotesByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(mockSavedObject.id);
+    });
+
+    test('should call getAllPinnedEventsByTimelineId', async () => {
+      expect((getAllPinnedEventsByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(
+        mockSavedObject.id
+      );
+    });
+
+    test('should retuen correct result', async () => {
+      expect(result).toEqual({
+        totalCount: 1,
+        customTemplateTimelineCount: 0,
+        defaultTimelineCount: 0,
+        elasticTemplateTimelineCount: 1,
+        favoriteCount: 0,
+        templateTimelineCount: 1,
+        timeline: [
+          {
+            ...mockGetTimelineValue,
+            noteIds: [],
+            pinnedEventIds: [],
+            eventIdToNoteIds: [],
+            favorite: [],
+            notes: [],
+            pinnedEventsSaveObject: [],
+          },
+        ],
+      });
+    });
+  });
+
+  describe('resolveTimelineOrNull', () => {
+    let mockFindSavedObject: jest.Mock;
+    let mockRequest: FrameworkRequest;
+    const pageInfo = {
+      pageSize: 10,
+      pageIndex: 1,
+    };
+    let result = null as unknown as AllTimelinesResponse;
+    beforeEach(async () => {
+      (convertResolvedSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(
+        mockGetTimelineValue
+      );
       mockFindSavedObject = jest
         .fn()
         .mockResolvedValueOnce({ saved_objects: [mockSavedObject], total: 1 })
