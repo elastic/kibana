@@ -71,6 +71,7 @@ describe('Handle request to generate', () => {
             (report) => new Report({ ...report, _index: '.reporting-foo-index-234' })
           ),
       } as unknown as ReportingStore);
+
     mockRequest = getMockRequest();
 
     mockResponseFactory = getMockResponseFactory();
@@ -80,6 +81,9 @@ describe('Handle request to generate', () => {
 
     mockContext = getMockContext();
     mockContext.reporting = {} as ReportingSetup;
+    (mockContext.core.savedObjects.client.resolve as jest.Mock).mockResolvedValue({
+      saved_object: {},
+    });
     requestHandler = new RequestHandler(
       reportingCore,
       { username: 'testymcgee' },

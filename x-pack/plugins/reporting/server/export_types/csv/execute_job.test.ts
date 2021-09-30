@@ -932,13 +932,9 @@ describe('CSV Execute Job', function () {
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
         indexPatternSavedObject: {
-          id: 'logstash-*',
-          type: 'index-pattern',
-          attributes: {
-            title: 'logstash-*',
-            fields: '[{"name":"one","type":"string"}, {"name":"two","type":"string"}]',
-            fieldFormatMap: '{"one":{"id":"string","params":{"transform": "upper"}}}',
-          },
+          title: 'logstash-*',
+          fields: '[{"name":"one","type":"string"}, {"name":"two","type":"string"}]',
+          fieldFormatMap: '{"one":{"id":"string","params":{"transform": "upper"}}}',
         },
       });
       await runTask('job123', jobParams, cancellationToken, stream);

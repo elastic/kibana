@@ -21,10 +21,12 @@ export const createJobFnFactory: CreateJobFnFactory<
     );
 
     const savedObjectsClient = context.core.savedObjects.client;
-    const indexPatternSavedObject = (await savedObjectsClient.get(
+    const {
+      saved_object: { attributes: indexPatternSavedObject },
+    } = await savedObjectsClient.resolve<IndexPatternSavedObjectDeprecatedCSV>(
       'index-pattern',
       jobParams.indexPatternId
-    )) as unknown as IndexPatternSavedObjectDeprecatedCSV;
+    );
 
     return {
       isDeprecated: true,

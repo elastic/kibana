@@ -12,11 +12,8 @@ export type RawValue = string | object | null | undefined;
 export interface IndexPatternSavedObjectDeprecatedCSV {
   title: string;
   timeFieldName: string;
-  fields?: any[];
-  attributes: {
-    fields: string;
-    fieldFormatMap: string;
-  };
+  fields?: string;
+  fieldFormatMap: string;
 }
 
 interface BaseParamsDeprecatedCSV {
