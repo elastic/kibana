@@ -48,7 +48,7 @@ const createRequestContextMock = (
   clients: ReturnType<typeof createMockClients> = createMockClients()
 ): SecuritySolutionRequestHandlerContextMock => {
   const coreContext = coreMock.createRequestHandlerContext();
-  return ({
+  return {
     alerting: { getRulesClient: jest.fn(() => clients.rulesClient) },
     core: {
       ...coreContext,
@@ -64,7 +64,7 @@ const createRequestContextMock = (
       getExecutionLogClient: jest.fn(() => clients.ruleExecutionLogClient),
       getSpaceId: jest.fn(() => 'default'),
     },
-  } as unknown) as SecuritySolutionRequestHandlerContextMock;
+  } as unknown as SecuritySolutionRequestHandlerContextMock;
 };
 
 const createTools = () => {

@@ -66,11 +66,11 @@ export const createTickFormat = (
 export const MAIN_GROUP_ID = 1;
 
 export const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
-  (({
+  ({
     ...domain,
     padding: 50,
     paddingUnit: 'pixel',
-  } as unknown) as AxisSpec['domain']);
+  } as unknown as AxisSpec['domain']);
 
 const adaptYaxisParams = (yaxis: IAxis) => {
   const y = { ...yaxis };

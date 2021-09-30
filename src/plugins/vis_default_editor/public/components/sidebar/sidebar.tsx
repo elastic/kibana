@@ -62,17 +62,19 @@ function DefaultEditorSideBarComponent({
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
   const [optionTabs, setSelectedTab] = useOptionTabs(vis);
 
-  const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
-    state.data.aggs,
-  ]);
+  const responseAggs = useMemo(
+    () => (state.data.aggs ? state.data.aggs.getResponseAggs() : []),
+    [state.data.aggs]
+  );
   const metricSchemas = (vis.type.schemas.metrics || []).map((s: Schema) => s.name);
   const metricAggs = useMemo(
     () => responseAggs.filter((agg) => agg.schema && metricSchemas.includes(agg.schema)),
     [responseAggs, metricSchemas]
   );
-  const hasHistogramAgg = useMemo(() => responseAggs.some((agg) => agg.type.name === 'histogram'), [
-    responseAggs,
-  ]);
+  const hasHistogramAgg = useMemo(
+    () => responseAggs.some((agg) => agg.type.name === 'histogram'),
+    [responseAggs]
+  );
 
   const setStateValidity = useCallback(
     (value: boolean) => {

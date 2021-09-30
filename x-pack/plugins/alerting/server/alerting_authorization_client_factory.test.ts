@@ -26,14 +26,15 @@ const features = featuresPluginMock.createStart();
 const securityPluginSetup = securityMock.createSetup();
 const securityPluginStart = securityMock.createStart();
 
-const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> = {
-  ruleTypeRegistry: ruleTypeRegistryMock.create(),
-  getSpace: jest.fn(),
-  getSpaceId: jest.fn(),
-  features,
-};
+const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> =
+  {
+    ruleTypeRegistry: ruleTypeRegistryMock.create(),
+    getSpace: jest.fn(),
+    getSpaceId: jest.fn(),
+    features,
+  };
 
-const fakeRequest = ({
+const fakeRequest = {
   app: {},
   headers: {},
   getBasePath: () => '',
@@ -48,7 +49,7 @@ const fakeRequest = ({
     },
   },
   getSavedObjectsClient: () => savedObjectsClient,
-} as unknown) as Request;
+} as unknown as Request;
 
 beforeEach(() => {
   jest.resetAllMocks();

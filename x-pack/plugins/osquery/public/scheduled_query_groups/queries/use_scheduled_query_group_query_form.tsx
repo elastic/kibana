@@ -48,9 +48,10 @@ export const useScheduledQueryGroupQueryForm = ({
       new Set<string>(xor(uniqueQueryIds, defaultValue?.id.value ? [defaultValue.id.value] : [])),
     [uniqueQueryIds, defaultValue]
   );
-  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(() => createFormSchema(idSet), [
-    idSet,
-  ]);
+  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
+    () => createFormSchema(idSet),
+    [idSet]
+  );
 
   return useForm<OsqueryManagerPackagePolicyConfigRecord, ScheduledQueryGroupFormData>({
     id: FORM_ID + uuid.v4(),

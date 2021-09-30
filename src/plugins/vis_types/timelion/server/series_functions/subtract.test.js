@@ -32,10 +32,7 @@ describe('subtract.js', () => {
     const outputSeries = await invoke(fn, [seriesList]);
     expect(outputSeries.output.list.length).to.eql(1);
     expect(_.map(outputSeries.output.list[0].data, 1)).to.eql([
-      -165.1415926535,
-      -136,
-      19.561,
-      -2.3424234999999998,
+      -165.1415926535, -136, 19.561, -2.3424234999999998,
     ]);
   });
 

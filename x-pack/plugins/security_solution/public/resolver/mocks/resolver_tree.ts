@@ -16,11 +16,7 @@ import * as eventModel from '../../../common/endpoint/models/event';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { mockResolverNode } from './resolver_node';
 
-export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
-  originID,
-}: {
-  originID: string;
-}): {
+export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({ originID }: { originID: string }): {
   nodes: ResolverNode[];
   events: SafeResolverEvent[];
 } {
@@ -186,8 +182,7 @@ export function mockTreeWithNoAncestorsAnd2Children({
 
   const secondChildNode: ResolverNode = mockResolverNode({
     id: secondChildID,
-    name:
-      'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
+    name: 'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
     parentID: originID,
     timestamp: 1600863932318,
   });

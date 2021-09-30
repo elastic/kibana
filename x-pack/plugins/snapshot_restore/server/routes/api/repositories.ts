@@ -46,11 +46,10 @@ export function registerRepositoriesRoutes({
       let managedRepository: ManagedRepository;
 
       try {
-        const {
-          body: repositoriesByName,
-        } = await clusterClient.asCurrentUser.snapshot.getRepository({
-          repository: '_all',
-        });
+        const { body: repositoriesByName } =
+          await clusterClient.asCurrentUser.snapshot.getRepository({
+            repository: '_all',
+          });
         repositoryNames = Object.keys(repositoriesByName);
         repositories = repositoryNames.map((name) => {
           const { type = '', settings = {} } = repositoriesByName[name];

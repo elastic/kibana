@@ -11,10 +11,7 @@ import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { DashboardStart } from '../../dashboard/public';
-import { DiscoverStart } from '../../discover/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
-import { VisualizationsStart } from '../../visualizations/public';
 import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import {
   SavedObjectsManagementActionService,
@@ -23,15 +20,11 @@ import {
   SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
 } from './services';
-import { registerServices } from './register_services';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
   columns: SavedObjectsManagementColumnServiceSetup;
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
 }
 
 export interface SavedObjectsManagementPluginStart {
@@ -46,9 +39,6 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
-  dashboard?: DashboardStart;
-  visualizations?: VisualizationsStart;
-  discover?: DiscoverStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spaces?: SpacesPluginStart;
 }
@@ -60,10 +50,10 @@ export class SavedObjectsManagementPlugin
       SavedObjectsManagementPluginStart,
       SetupDependencies,
       StartDependencies
-    > {
+    >
+{
   private actionService = new SavedObjectsManagementActionService();
   private columnService = new SavedObjectsManagementColumnService();
-  private serviceRegistry = new SavedObjectsManagementServiceRegistry();
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
@@ -79,8 +69,7 @@ export class SavedObjectsManagementPlugin
           defaultMessage: 'Saved Objects',
         }),
         description: i18n.translate('savedObjectsManagement.objects.savedObjectsDescription', {
-          defaultMessage:
-            'Import, export, and manage your saved searches, visualizations, and dashboards.',
+          defaultMessage: 'Import, export, and manage your saved objects.',
         }),
         icon: 'savedObjectsApp',
         path: '/app/management/kibana/objects',
@@ -100,19 +89,14 @@ export class SavedObjectsManagementPlugin
         const { mountManagementSection } = await import('./management_section');
         return mountManagementSection({
           core,
-          serviceRegistry: this.serviceRegistry,
           mountParams,
         });
       },
     });
 
-    // depends on `getStartServices`, should not be awaited
-    registerServices(this.serviceRegistry, core.getStartServices);
-
     return {
       actions: actionSetup,
       columns: columnSetup,
-      serviceRegistry: this.serviceRegistry,
     };
   }
 

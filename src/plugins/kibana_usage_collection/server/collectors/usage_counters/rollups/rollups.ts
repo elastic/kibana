@@ -48,12 +48,11 @@ export async function rollUsageCountersIndices(
   const now = moment();
 
   try {
-    const {
-      saved_objects: rawUiCounterDocs,
-    } = await savedObjectsClient.find<UsageCountersSavedObject>({
-      type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-      perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
-    });
+    const { saved_objects: rawUiCounterDocs } =
+      await savedObjectsClient.find<UsageCountersSavedObject>({
+        type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+        perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
+      });
 
     const docsToDelete = rawUiCounterDocs.filter((doc) =>
       isSavedObjectOlderThan({

@@ -121,9 +121,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('_bulk_get', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorizedAtSpace, authorizedEverywhere, superuser } = createTests(
-        spaceId
-      );
+      const { unauthorized, authorizedAtSpace, authorizedEverywhere, superuser } =
+        createTests(spaceId);
       const _addTests = (user: TestUser, tests: BulkGetTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };

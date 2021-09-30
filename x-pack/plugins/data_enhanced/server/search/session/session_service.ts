@@ -90,7 +90,8 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 export class SearchSessionService
-  implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
+  implements ISearchSessionService<SearchSessionSavedObjectAttributes>
+{
   private sessionConfig: SearchSessionsConfig;
   private readonly updateOrCreateBatchQueue: UpdateOrCreateQueueEntry[] = [];
 

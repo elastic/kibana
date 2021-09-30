@@ -84,27 +84,26 @@ export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptions
   }
 };
 
-const mapMetricToSeries = (chartOptions: MetricsExplorerChartOptions) => (
-  metric: MetricsExplorerOptionsMetric
-) => {
-  const format = metricToFormat(metric);
-  return {
-    label: createMetricLabel(metric),
-    axis_position: 'right',
-    chart_type: 'line',
-    color: (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0),
-    fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
-    formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
-    value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
-    id: uuid.v1(),
-    line_width: 2,
-    metrics: metricsExplorerMetricToTSVBMetric(metric),
-    point_size: 0,
-    separate_axis: 0,
-    split_mode: 'everything',
-    stacked: chartOptions.stack ? 'stacked' : 'none',
+const mapMetricToSeries =
+  (chartOptions: MetricsExplorerChartOptions) => (metric: MetricsExplorerOptionsMetric) => {
+    const format = metricToFormat(metric);
+    return {
+      label: createMetricLabel(metric),
+      axis_position: 'right',
+      chart_type: 'line',
+      color: (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0),
+      fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
+      formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
+      value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
+      id: uuid.v1(),
+      line_width: 2,
+      metrics: metricsExplorerMetricToTSVBMetric(metric),
+      point_size: 0,
+      separate_axis: 0,
+      split_mode: 'everything',
+      stacked: chartOptions.stack ? 'stacked' : 'none',
+    };
   };
-};
 
 export const createFilterFromOptions = (
   options: MetricsExplorerOptions,

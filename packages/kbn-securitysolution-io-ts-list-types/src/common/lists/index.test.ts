@@ -81,7 +81,7 @@ describe('Lists', () => {
     });
 
     test('it should not validate when unexpected type found in array', () => {
-      const payload = ([1] as unknown) as ListArray;
+      const payload = [1] as unknown as ListArray;
       const decoded = listArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -112,7 +112,7 @@ describe('Lists', () => {
     });
 
     test('it should not allow an item that is not of type "list" in array', () => {
-      const payload = ([1] as unknown) as ListArrayOrUndefined;
+      const payload = [1] as unknown as ListArrayOrUndefined;
       const decoded = listArrayOrUndefined.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 

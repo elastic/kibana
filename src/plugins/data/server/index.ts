@@ -42,7 +42,7 @@ export {
   FieldDescriptor,
   getCapabilitiesForRollupIndices,
   IndexPatternsServiceStart,
-} from './index_patterns';
+} from './data_views';
 
 export {
   IndexPatternField,
@@ -54,6 +54,7 @@ export {
   IndexPattern,
   IndexPatternsService,
   IndexPatternsService as IndexPatternsCommonService,
+  DataView,
 } from '../common';
 
 /**

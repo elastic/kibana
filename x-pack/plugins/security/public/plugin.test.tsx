@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import BroadcastChannel from 'broadcast-channel';
+import { enforceOptions } from 'broadcast-channel';
 import { Observable } from 'rxjs';
 
 import type { CoreSetup } from 'src/core/public';
@@ -22,10 +22,10 @@ import { SecurityPlugin } from './plugin';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
-    BroadcastChannel.enforceOptions({ type: 'simulate' });
+    enforceOptions({ type: 'simulate' });
   });
   afterAll(() => {
-    BroadcastChannel.enforceOptions(null);
+    enforceOptions(null);
   });
 
   describe('#setup', () => {

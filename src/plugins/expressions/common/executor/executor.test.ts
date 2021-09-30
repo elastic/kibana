@@ -173,12 +173,12 @@ describe('Executor', () => {
         return injectFn(state);
       },
       migrations: {
-        '7.10.0': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+        '7.10.0': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
           return migrateFn(state, version);
-        }) as any) as MigrateFunction,
-        '7.10.1': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+        }) as any as MigrateFunction,
+        '7.10.1': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
           return migrateFn(state, version);
-        }) as any) as MigrateFunction,
+        }) as any as MigrateFunction,
       },
       fn: jest.fn(),
     };

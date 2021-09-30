@@ -958,7 +958,7 @@ describe('helpers', () => {
 
       beforeAll(async () => {
         (getTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
-        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {
@@ -1012,7 +1012,7 @@ describe('helpers', () => {
 
       beforeAll(async () => {
         (getTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
-        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {
@@ -1080,7 +1080,7 @@ describe('helpers', () => {
 
       beforeAll(async () => {
         (getTimeline as jest.Mock).mockResolvedValue(template);
-        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {

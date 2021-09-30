@@ -14,9 +14,9 @@ describe('DeprecationsRegistry', () => {
   describe('registerDeprecations', () => {
     it('throws if getDeprecations is not a function', async () => {
       const deprecationsRegistry = new DeprecationsRegistry();
-      const deprecationsConfig = ({
+      const deprecationsConfig = {
         getDeprecations: null,
-      } as unknown) as RegisterDeprecationsConfig;
+      } as unknown as RegisterDeprecationsConfig;
       expect(() => deprecationsRegistry.registerDeprecations(deprecationsConfig)).toThrowError(
         /getDeprecations must be a function/
       );
@@ -46,7 +46,7 @@ describe('DeprecationsRegistry', () => {
   describe('getDeprecations', () => {
     it('returns all settled deprecations', async () => {
       const deprecationsRegistry = new DeprecationsRegistry();
-      const mockContext = ({} as unknown) as GetDeprecationsContext;
+      const mockContext = {} as unknown as GetDeprecationsContext;
       const mockError = new Error();
       const deprecationsConfigA = { getDeprecations: jest.fn().mockResolvedValue('hi') };
       const deprecationsConfigB = { getDeprecations: jest.fn().mockRejectedValue(mockError) };
@@ -67,7 +67,7 @@ describe('DeprecationsRegistry', () => {
 
     it('passes dependencies to registered getDeprecations function', async () => {
       const deprecationsRegistry = new DeprecationsRegistry();
-      const mockContext = ({} as unknown) as GetDeprecationsContext;
+      const mockContext = {} as unknown as GetDeprecationsContext;
       const deprecationsConfig = { getDeprecations: jest.fn().mockResolvedValue('hi') };
       deprecationsRegistry.registerDeprecations(deprecationsConfig);
       const deprecations = await deprecationsRegistry.getDeprecations(mockContext);

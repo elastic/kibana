@@ -6,3 +6,4 @@
  */
 
 export * from './artifact_entry_card';
+export * from './artifact_entry_card_minified';

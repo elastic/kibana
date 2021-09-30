@@ -75,6 +75,6 @@ export const toElasticsearchQuery = (
   }
 
   // TODO: the return type of this function might be incorrect and it works only because of this casting
-  const nodeType = (nodeTypes[node.type] as unknown) as any;
+  const nodeType = nodeTypes[node.type] as unknown as any;
   return nodeType.toElasticsearchQuery(node, indexPattern, config, context);
 };

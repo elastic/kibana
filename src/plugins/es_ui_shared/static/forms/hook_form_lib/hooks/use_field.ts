@@ -40,7 +40,7 @@ export const useField = <T, FormType = FormData, I = T>(
   const {
     type = FIELD_TYPES.TEXT,
     defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
-    initialValue = config.defaultValue ?? (('' as unknown) as I), // The value explicitly passed
+    initialValue = config.defaultValue ?? ('' as unknown as I), // The value explicitly passed
     isIncludedInOutput = true,
     label = '',
     labelAppend = '',
@@ -364,7 +364,7 @@ export const useField = <T, FormType = FormData, I = T>(
   // ----------------------------------
   const serializeValue: FieldHook<T, I>['__serializeValue'] = useCallback(
     (internalValue: I = value) => {
-      return serializer ? serializer(internalValue) : ((internalValue as unknown) as T);
+      return serializer ? serializer(internalValue) : (internalValue as unknown as T);
     },
     [serializer, value]
   );
@@ -463,7 +463,7 @@ export const useField = <T, FormType = FormData, I = T>(
         ? event.target.checked
         : event.target.value;
 
-      setValue((newValue as unknown) as I);
+      setValue(newValue as unknown as I);
     },
     [setValue]
   );
@@ -504,18 +504,21 @@ export const useField = <T, FormType = FormData, I = T>(
       const { resetValue = true, defaultValue: updatedDefaultValue } = resetOptions;
 
       setPristine(true);
-      setIsModified(false);
-      setValidating(false);
-      setIsChangingValue(false);
-      setIsValidated(false);
-      setStateErrors([]);
 
-      if (resetValue) {
-        hasBeenReset.current = true;
-        const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
-        // updateStateIfMounted('value', newValue);
-        setValue(newValue);
-        return newValue;
+      if (isMounted.current) {
+        setIsModified(false);
+        setValidating(false);
+        setIsChangingValue(false);
+        setIsValidated(false);
+        setStateErrors([]);
+
+        if (resetValue) {
+          hasBeenReset.current = true;
+          const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
+          // updateStateIfMounted('value', newValue);
+          setValue(newValue);
+          return newValue;
+        }
       }
     },
     [deserializeValue, defaultValue, setValue, setStateErrors]

@@ -36,8 +36,7 @@ export function registerCrawlerEntryPointRoutes({
 
   router.put(
     {
-      path:
-        '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -59,8 +58,7 @@ export function registerCrawlerEntryPointRoutes({
 
   router.delete(
     {
-      path:
-        '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

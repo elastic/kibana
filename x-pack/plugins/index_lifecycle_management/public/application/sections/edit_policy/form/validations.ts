@@ -164,110 +164,108 @@ export const createPolicyNameValidations = ({
  * For example, the user can't define '5 days' for cold phase if the
  * warm phase is set to '10 days'.
  */
-export const minAgeGreaterThanPreviousPhase = (phase: PhaseWithTiming) => ({
-  formData,
-}: {
-  formData: Record<string, number>;
-}) => {
-  if (phase === 'warm') {
-    return;
-  }
+export const minAgeGreaterThanPreviousPhase =
+  (phase: PhaseWithTiming) =>
+  ({ formData }: { formData: Record<string, number> }) => {
+    if (phase === 'warm') {
+      return;
+    }
 
-  const getValueFor = (_phase: PhaseWithTiming) => {
-    const milli = formData[`_meta.${_phase}.minAgeToMilliSeconds`];
+    const getValueFor = (_phase: PhaseWithTiming) => {
+      const milli = formData[`_meta.${_phase}.minAgeToMilliSeconds`];
 
-    const esFormat =
-      milli >= 0
-        ? formData[`phases.${_phase}.min_age`] + formData[`_meta.${_phase}.minAgeUnit`]
-        : undefined;
+      const esFormat =
+        milli >= 0
+          ? formData[`phases.${_phase}.min_age`] + formData[`_meta.${_phase}.minAgeUnit`]
+          : undefined;
 
-    return {
-      milli,
-      esFormat,
+      return {
+        milli,
+        esFormat,
+      };
     };
-  };
 
-  const minAgeValues = {
-    warm: getValueFor('warm'),
-    cold: getValueFor('cold'),
-    frozen: getValueFor('frozen'),
-    delete: getValueFor('delete'),
-  };
+    const minAgeValues = {
+      warm: getValueFor('warm'),
+      cold: getValueFor('cold'),
+      frozen: getValueFor('frozen'),
+      delete: getValueFor('delete'),
+    };
 
-  const i18nErrors = {
-    greaterThanWarmPhase: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanWarmPhaseError',
-      {
-        defaultMessage: 'Must be greater or equal than the warm phase value ({value})',
-        values: {
-          value: minAgeValues.warm.esFormat,
-        },
+    const i18nErrors = {
+      greaterThanWarmPhase: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanWarmPhaseError',
+        {
+          defaultMessage: 'Must be greater or equal than the warm phase value ({value})',
+          values: {
+            value: minAgeValues.warm.esFormat,
+          },
+        }
+      ),
+      greaterThanColdPhase: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanColdPhaseError',
+        {
+          defaultMessage: 'Must be greater or equal than the cold phase value ({value})',
+          values: {
+            value: minAgeValues.cold.esFormat,
+          },
+        }
+      ),
+      greaterThanFrozenPhase: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanFrozenPhaseError',
+        {
+          defaultMessage: 'Must be greater or equal than the frozen phase value ({value})',
+          values: {
+            value: minAgeValues.frozen.esFormat,
+          },
+        }
+      ),
+    };
+
+    if (phase === 'cold') {
+      if (minAgeValues.warm.milli >= 0 && minAgeValues.cold.milli < minAgeValues.warm.milli) {
+        return {
+          message: i18nErrors.greaterThanWarmPhase,
+        };
       }
-    ),
-    greaterThanColdPhase: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanColdPhaseError',
-      {
-        defaultMessage: 'Must be greater or equal than the cold phase value ({value})',
-        values: {
-          value: minAgeValues.cold.esFormat,
-        },
+      return;
+    }
+
+    if (phase === 'frozen') {
+      if (minAgeValues.cold.milli >= 0 && minAgeValues.frozen.milli < minAgeValues.cold.milli) {
+        return {
+          message: i18nErrors.greaterThanColdPhase,
+        };
+      } else if (
+        minAgeValues.warm.milli >= 0 &&
+        minAgeValues.frozen.milli < minAgeValues.warm.milli
+      ) {
+        return {
+          message: i18nErrors.greaterThanWarmPhase,
+        };
       }
-    ),
-    greaterThanFrozenPhase: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanFrozenPhaseError',
-      {
-        defaultMessage: 'Must be greater or equal than the frozen phase value ({value})',
-        values: {
-          value: minAgeValues.frozen.esFormat,
-        },
+      return;
+    }
+
+    if (phase === 'delete') {
+      if (minAgeValues.frozen.milli >= 0 && minAgeValues.delete.milli < minAgeValues.frozen.milli) {
+        return {
+          message: i18nErrors.greaterThanFrozenPhase,
+        };
+      } else if (
+        minAgeValues.cold.milli >= 0 &&
+        minAgeValues.delete.milli < minAgeValues.cold.milli
+      ) {
+        return {
+          message: i18nErrors.greaterThanColdPhase,
+        };
+      } else if (
+        minAgeValues.warm.milli >= 0 &&
+        minAgeValues.delete.milli < minAgeValues.warm.milli
+      ) {
+        return {
+          message: i18nErrors.greaterThanWarmPhase,
+        };
       }
-    ),
+    }
   };
-
-  if (phase === 'cold') {
-    if (minAgeValues.warm.milli >= 0 && minAgeValues.cold.milli < minAgeValues.warm.milli) {
-      return {
-        message: i18nErrors.greaterThanWarmPhase,
-      };
-    }
-    return;
-  }
-
-  if (phase === 'frozen') {
-    if (minAgeValues.cold.milli >= 0 && minAgeValues.frozen.milli < minAgeValues.cold.milli) {
-      return {
-        message: i18nErrors.greaterThanColdPhase,
-      };
-    } else if (
-      minAgeValues.warm.milli >= 0 &&
-      minAgeValues.frozen.milli < minAgeValues.warm.milli
-    ) {
-      return {
-        message: i18nErrors.greaterThanWarmPhase,
-      };
-    }
-    return;
-  }
-
-  if (phase === 'delete') {
-    if (minAgeValues.frozen.milli >= 0 && minAgeValues.delete.milli < minAgeValues.frozen.milli) {
-      return {
-        message: i18nErrors.greaterThanFrozenPhase,
-      };
-    } else if (
-      minAgeValues.cold.milli >= 0 &&
-      minAgeValues.delete.milli < minAgeValues.cold.milli
-    ) {
-      return {
-        message: i18nErrors.greaterThanColdPhase,
-      };
-    } else if (
-      minAgeValues.warm.milli >= 0 &&
-      minAgeValues.delete.milli < minAgeValues.warm.milli
-    ) {
-      return {
-        message: i18nErrors.greaterThanWarmPhase,
-      };
-    }
-  }
-};

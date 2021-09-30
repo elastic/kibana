@@ -57,11 +57,11 @@ describe('Transform: useIndexData()', () => {
     const { result, waitForNextUpdate } = renderHook(
       () =>
         useIndexData(
-          ({
+          {
             id: 'the-id',
             title: 'the-title',
             fields: [],
-          } as unknown) as SearchItems['indexPattern'],
+          } as unknown as SearchItems['indexPattern'],
           query,
           runtimeMappings
         ),

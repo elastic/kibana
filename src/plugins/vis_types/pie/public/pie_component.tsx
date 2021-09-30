@@ -129,17 +129,18 @@ const PieComponent = (props: PieComponentProps) => {
 
   // handles legend action event data
   const getLegendActionEventData = useCallback(
-    (visData: Datatable) => (series: SeriesIdentifier): ClickTriggerEvent | null => {
-      const data = getFilterEventData(visData, series);
+    (visData: Datatable) =>
+      (series: SeriesIdentifier): ClickTriggerEvent | null => {
+        const data = getFilterEventData(visData, series);
 
-      return {
-        name: 'filterBucket',
-        data: {
-          negate: false,
-          data,
-        },
-      };
-    },
+        return {
+          name: 'filterBucket',
+          data: {
+            negate: false,
+            data,
+          },
+        };
+      },
     []
   );
 
@@ -207,10 +208,10 @@ const PieComponent = (props: PieComponentProps) => {
     },
   });
 
-  const { bucketColumns, metricColumn } = useMemo(() => getColumns(visParams, visData), [
-    visData,
-    visParams,
-  ]);
+  const { bucketColumns, metricColumn } = useMemo(
+    () => getColumns(visParams, visData),
+    [visData, visParams]
+  );
 
   const layers = useMemo(
     () =>
@@ -233,11 +234,10 @@ const PieComponent = (props: PieComponentProps) => {
       syncColors,
     ]
   );
-  const config = useMemo(() => getConfig(visParams, chartTheme, dimensions), [
-    chartTheme,
-    visParams,
-    dimensions,
-  ]);
+  const config = useMemo(
+    () => getConfig(visParams, chartTheme, dimensions),
+    [chartTheme, visParams, dimensions]
+  );
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   };
@@ -288,10 +288,10 @@ const PieComponent = (props: PieComponentProps) => {
    * Checks whether data have all zero values.
    * If so, the no data container is loaded.
    */
-  const isAllZeros = useMemo(() => visData.rows.every((row) => row[metricColumn.id] === 0), [
-    visData.rows,
-    metricColumn,
-  ]);
+  const isAllZeros = useMemo(
+    () => visData.rows.every((row) => row[metricColumn.id] === 0),
+    [visData.rows, metricColumn]
+  );
 
   /**
    * Checks whether data have negative values.

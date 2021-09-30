@@ -30,11 +30,11 @@ class ReadableOf extends Readable {
 jest.mock('axios');
 const request: jest.Mock = jest.requireMock('axios').request;
 
-const mockLogger = ({
+const mockLogger = {
   error: jest.fn(),
   warn: jest.fn(),
   info: jest.fn(),
-} as unknown) as LevelLogger;
+} as unknown as LevelLogger;
 
 test('downloads the url to the path', async () => {
   const BODY = 'abdcefg';

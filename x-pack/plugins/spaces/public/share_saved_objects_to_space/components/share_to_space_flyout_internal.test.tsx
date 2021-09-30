@@ -320,13 +320,8 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out to add a space', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToShare,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+      await setup();
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -348,13 +343,8 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out to remove a space', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToShare,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+      await setup();
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -376,13 +366,8 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out to add and remove a space', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToShare,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+      await setup();
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);

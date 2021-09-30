@@ -28,12 +28,8 @@ import { createExploratoryViewUrl } from '../../../../../observability/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    absoluteDateRangeStart,
-    absoluteDateRangeEnd,
-  } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, absoluteDateRangeStart, absoluteDateRangeEnd } =
+    useGetUrlParams();
 
   const { durationLines, loading } = useSelector(selectDurationLines);
 

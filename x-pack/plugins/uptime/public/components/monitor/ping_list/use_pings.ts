@@ -41,9 +41,10 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
 
   const monitorId = useMonitorId();
 
-  const getPings = useCallback((params: GetPingsParams) => dispatch(getPingsAction(params)), [
-    dispatch,
-  ]);
+  const getPings = useCallback(
+    (params: GetPingsParams) => dispatch(getPingsAction(params)),
+    [dispatch]
+  );
 
   const locations = JSON.stringify(selectedFilters.selectedLocations);
   const excludedLocations = JSON.stringify(selectedFilters.excludedLocations);
