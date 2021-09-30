@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion, SavedObjectReference } from 'kibana/public';
+import type { SavedObjectsMigrationVersion } from 'kibana/public';
 import {
   IAggConfigs,
   SearchSourceFields,
