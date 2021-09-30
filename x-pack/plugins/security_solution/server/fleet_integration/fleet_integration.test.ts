@@ -343,7 +343,7 @@ describe('ingest_integration tests ', () => {
       });
     });
 
-    it("doesn't remove policy from trusted app FF disabled", async () => {
+    it.skip("doesn't remove policy from trusted app FF disabled", async () => {
       await invokeDeleteCallback({
         ...allowedExperimentalValues,
       });
