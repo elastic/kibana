@@ -19,6 +19,10 @@
         height: 200px;
         margin: 5px 0;
       }
+
+      img.screenshot.expanded {
+        height: auto;
+      }
     </style>
     <title>$TITLE</title>
   </head>
@@ -29,7 +33,7 @@
     <script type="text/javascript">
       for (const img of document.getElementsByTagName('img')) {
         img.addEventListener('click', () => {
-          img.style.height = 'auto';
+          img.classList.toggle('expanded');
         });
       }
     </script>

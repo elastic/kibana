@@ -8,7 +8,7 @@
 
 import { createHash } from 'crypto';
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { join, basename } from 'path';
+import { join, basename, resolve } from 'path';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
@@ -107,17 +107,13 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
       : '';
 
     const failureHTML = readFileSync(
-      join(
+      resolve(
         REPO_ROOT,
-        'packages',
-        'kbn-test',
-        'src',
-        'failed_tests_reporter',
-        'report_failures_to_file_html_template.html'
+        'packages/kbn-test/src/failed_tests_reporter/report_failures_to_file_html_template.html'
       )
     )
       .toString()
-      .replace('$TITLE', failure.name.length > 20 ? `...${failure.name.slice(-20)}` : failure.name)
+      .replace('$TITLE', failure.name)
       .replace(
         '$MAIN',
         `
