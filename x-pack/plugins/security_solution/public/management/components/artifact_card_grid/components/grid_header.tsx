@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { CommonProps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
@@ -20,11 +20,17 @@ export type GridHeaderProps = Pick<CommonProps, 'data-test-subj'>;
 export const GridHeader = memo<GridHeaderProps>(({ 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
+  const expandToggleElement = useMemo(
+    () => <div data-test-subj={getTestId('expandCollapsePlaceHolder')} style={{ width: '24px' }} />,
+    [getTestId]
+  );
+
   return (
     <GridHeaderContainer data-test-subj={dataTestSubj}>
       <CardCompressedHeaderLayout
         expanded={false}
-        expandToggle={<div style={{ width: '24px' }} />}
+        expandToggle={expandToggleElement}
+        data-test-subj={getTestId('layout')}
         name={
           <EuiText size="xs" data-test-subj={getTestId('name')}>
             <strong>

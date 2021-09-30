@@ -129,11 +129,13 @@ export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
             >
               {description}
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>{effectScope}</EuiFlexItem>
+            <EuiFlexItem grow={1} data-test-subj={getTestId('effectScope')}>
+              {effectScope}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         {actionMenu === false ? (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj={getTestId('cardActionsPlaceholder')}>
             <ButtonIconPlaceHolder />
           </EuiFlexItem>
         ) : (
