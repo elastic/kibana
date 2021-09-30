@@ -35,6 +35,7 @@ import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
+import { useMonitorHistogram } from './use_monitor_histogram';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -66,6 +67,8 @@ export const MonitorListComponent: ({
   );
 
   const items = list.summaries ?? [];
+
+  useMonitorHistogram({ items });
 
   const nextPagePagination = list.nextPagePagination ?? '';
   const prevPagePagination = list.prevPagePagination ?? '';
