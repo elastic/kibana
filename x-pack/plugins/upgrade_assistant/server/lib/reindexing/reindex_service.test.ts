@@ -762,7 +762,7 @@ describe('reindexService', () => {
       } as ReindexSavedObject;
 
       it('sets reindex status as complete', async () => {
-        const updatedOp = await service.processNextStep(reindexOp);
+        await service.processNextStep(reindexOp);
         expect(actions.updateReindexOp).toHaveBeenCalledWith(reindexOp, {
           status: ReindexStatus.completed,
         });
