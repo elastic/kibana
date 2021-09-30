@@ -30,4 +30,6 @@ kibanaPipeline(timeoutMinutes: 300, checkPrChanges: false, setCommitStatus: fals
       }
     }
   }
+
+  parallel(tasks)
 }
