@@ -99,7 +99,6 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  */
 export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
   const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-    plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
       username: kibanaServerTestUser.username,
