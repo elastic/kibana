@@ -18,7 +18,7 @@ import { LineStyle, FillStyle, IconPosition } from '../../../common/expressions/
 
 import { ColorPicker } from './color_picker';
 import { updateLayer, idPrefix } from '.';
-import { useDebouncedValue } from '../../shared_components';
+import { TooltipWrapper, useDebouncedValue } from '../../shared_components';
 
 const icons = [
   {
@@ -125,28 +125,28 @@ function getIconPositionOptions({
       'data-test-subj': 'lnsXY_markerPosition_auto',
     },
   ];
+  const topLabel = i18n.translate('xpack.lens.xyChart.markerPosition.above', {
+    defaultMessage: 'Top',
+  });
+  const bottomLabel = i18n.translate('xpack.lens.xyChart.markerPosition.below', {
+    defaultMessage: 'Bottom',
+  });
+  const leftLabel = i18n.translate('xpack.lens.xyChart.markerPosition.left', {
+    defaultMessage: 'Left',
+  });
+  const rightLabel = i18n.translate('xpack.lens.xyChart.markerPosition.right', {
+    defaultMessage: 'Right',
+  });
   if (axisMode === 'bottom') {
     const bottomOptions = [
       {
         id: `${idPrefix}above`,
-        label: !isHorizontal
-          ? i18n.translate('xpack.lens.xyChart.markerPosition.above', {
-              defaultMessage: 'Above',
-            })
-          : i18n.translate('xpack.lens.xyChart.markerPosition.right', {
-              defaultMessage: 'Right',
-            }),
+        label: isHorizontal ? rightLabel : topLabel,
         'data-test-subj': 'lnsXY_markerPosition_above',
       },
       {
         id: `${idPrefix}below`,
-        label: !isHorizontal
-          ? i18n.translate('xpack.lens.xyChart.markerPosition.below', {
-              defaultMessage: 'Below',
-            })
-          : i18n.translate('xpack.lens.xyChart.markerPosition.left', {
-              defaultMessage: 'Left',
-            }),
+        label: isHorizontal ? leftLabel : bottomLabel,
         'data-test-subj': 'lnsXY_markerPosition_below',
       },
     ];
@@ -160,24 +160,12 @@ function getIconPositionOptions({
   const yOptions = [
     {
       id: `${idPrefix}left`,
-      label: isHorizontal
-        ? i18n.translate('xpack.lens.xyChart.markerPosition.below', {
-            defaultMessage: 'Below',
-          })
-        : i18n.translate('xpack.lens.xyChart.markerPosition.left', {
-            defaultMessage: 'Left',
-          }),
+      label: isHorizontal ? bottomLabel : leftLabel,
       'data-test-subj': 'lnsXY_markerPosition_left',
     },
     {
       id: `${idPrefix}right`,
-      label: isHorizontal
-        ? i18n.translate('xpack.lens.xyChart.markerPosition.above', {
-            defaultMessage: 'Above',
-          })
-        : i18n.translate('xpack.lens.xyChart.markerPosition.right', {
-            defaultMessage: 'Right',
-          }),
+      label: isHorizontal ? topLabel : rightLabel,
       'data-test-subj': 'lnsXY_markerPosition_right',
     },
   ];
@@ -351,13 +339,21 @@ export const ThresholdPanel = (
           }}
         />
       </EuiFormRow>
-      {currentYConfig?.icon && currentYConfig.icon !== 'none' && (
-        <EuiFormRow
-          display="columnCompressed"
-          fullWidth
-          label={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
-            defaultMessage: 'Icon position',
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
+          defaultMessage: 'Icon position',
+        })}
+      >
+        <TooltipWrapper
+          tooltipContent={i18n.translate('xpack.lens.thresholdMarker.positionRequirementTooltip', {
+            defaultMessage: 'You must select an icon in order to alter its position',
           })}
+          condition={currentYConfig?.icon == null || currentYConfig?.icon === 'none'}
+          position="top"
+          delay="regular"
+          display="block"
         >
           <EuiButtonGroup
             isFullWidth
@@ -366,6 +362,7 @@ export const ThresholdPanel = (
             })}
             data-test-subj="lnsXY_markerPosition_threshold"
             name="markerPosition"
+            isDisabled={currentYConfig?.icon == null || currentYConfig?.icon === 'none'}
             buttonSize="compressed"
             options={getIconPositionOptions({
               isHorizontal,
@@ -377,8 +374,8 @@ export const ThresholdPanel = (
               setYConfig({ forAccessor: accessor, iconPosition: newMode });
             }}
           />
-        </EuiFormRow>
-      )}
+        </TooltipWrapper>
+      </EuiFormRow>
     </>
   );
 };
