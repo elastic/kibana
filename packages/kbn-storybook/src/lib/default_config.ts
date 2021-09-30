@@ -47,6 +47,11 @@ export const defaultConfig: StorybookConfig = {
   },
 };
 
+// defaultConfigWebFinal and mergeWebpackFinal have been moved here  because webpackFinal usage in
+// storybook main.ts somehow is  causing issues with newly added dependency of ts-node most likely
+// an issue with storybook typescript setup see this issue for more details
+// https://github.com/storybookjs/storybook/issues/9610
+
 export const defaultConfigWebFinal = {
   ...defaultConfig,
   webpackFinal: (config: Configuration) => {
