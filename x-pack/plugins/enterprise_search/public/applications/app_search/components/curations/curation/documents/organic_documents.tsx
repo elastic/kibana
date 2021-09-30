@@ -47,25 +47,27 @@ export const OrganicDocuments: React.FC = () => {
           )}
         </h2>
       }
-      subtitle={RESULT_ACTIONS_DIRECTIONS}
+      subtitle={!isAutomated && RESULT_ACTIONS_DIRECTIONS}
     >
       {hasDocuments ? (
         documents.map((document: Result) => (
           <CurationResult
             result={document}
             key={document.id.raw}
-            actions={[
-              {
-                ...HIDE_DOCUMENT_ACTION,
-                onClick: () => addHiddenId(document.id.raw),
-                disabled: isAutomated,
-              },
-              {
-                ...PROMOTE_DOCUMENT_ACTION,
-                onClick: () => addPromotedId(document.id.raw),
-                disabled: isAutomated,
-              },
-            ]}
+            actions={
+              isAutomated
+                ? []
+                : [
+                    {
+                      ...HIDE_DOCUMENT_ACTION,
+                      onClick: () => addHiddenId(document.id.raw),
+                    },
+                    {
+                      ...PROMOTE_DOCUMENT_ACTION,
+                      onClick: () => addPromotedId(document.id.raw),
+                    },
+                  ]
+            }
           />
         ))
       ) : organicDocumentsLoading ? (

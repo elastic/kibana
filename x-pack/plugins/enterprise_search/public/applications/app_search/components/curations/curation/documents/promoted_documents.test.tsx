@@ -65,6 +65,14 @@ describe('PromotedDocuments', () => {
     expect(subtitle.text()).toContain('Documents can be re-ordered');
   });
 
+  it('informs the user the curation is managed if the curation is automated', () => {
+    setMockValues({ ...values, isAutomated: true });
+    const wrapper = shallow(<PromotedDocuments />);
+    const subtitle = mountWithIntl(wrapper.prop('subtitle'));
+
+    expect(subtitle.text()).toContain('managed by App Search');
+  });
+
   describe('empty state', () => {
     it('renders', () => {
       setMockValues({ ...values, curation: { promoted: [] } });
@@ -86,7 +94,13 @@ describe('PromotedDocuments', () => {
     setMockValues({ ...values, curation: { promoted: [] } });
     const wrapper = shallow(<PromotedDocuments />);
 
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    expect(wrapper.find(DataPanel).prop('action')).toBe(false);
+  });
+
+  it('hides the panel actions when the curation is automated', () => {
+    setMockValues({ ...values, isAutomated: true });
+    const wrapper = shallow(<PromotedDocuments />);
+
     expect(wrapper.find(DataPanel).prop('action')).toBe(false);
   });
 
@@ -104,6 +118,14 @@ describe('PromotedDocuments', () => {
       result.prop('actions')[0].onClick();
 
       expect(actions.removePromotedId).toHaveBeenCalledWith('mock-document-4');
+    });
+
+    it('hides demote button for results when the curation is automated', () => {
+      setMockValues({ ...values, isAutomated: true });
+      const wrapper = shallow(<PromotedDocuments />);
+      const result = getDraggableChildren(wrapper.find(EuiDraggable).last());
+
+      expect(result.prop('actions')).toEqual([]);
     });
 
     it('renders a demote all button that demotes all hidden results', () => {

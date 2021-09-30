@@ -55,23 +55,20 @@ export const PromotedDocuments: React.FC = () => {
         </h2>
       }
       subtitle={
-        <FormattedMessage
-          id="xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.description"
-          defaultMessage="Promoted results appear before organic results.{manualDescription}"
-          values={{
-            manualDescription: !isAutomated && (
-              <>
-                {' '}
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.manualDescription"
-                  defaultMessage="Documents can be re-ordered."
-                />
-              </>
-            ),
-          }}
-        />
+        isAutomated ? (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.automatedDescription"
+            defaultMessage="This curation is being managed by App Search"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.appSearch.engine.curations.promotedDocuments.manualDescription"
+            defaultMessage="Promoted results appear before organic results. Documents can be re-ordered."
+          />
+        )
       }
       action={
+        !isAutomated &&
         hasDocuments && (
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
@@ -111,13 +108,16 @@ export const PromotedDocuments: React.FC = () => {
                   <CurationResult
                     key={document.id}
                     result={convertToResultFormat(document)}
-                    actions={[
-                      {
-                        ...DEMOTE_DOCUMENT_ACTION,
-                        onClick: () => removePromotedId(document.id),
-                        disabled: isAutomated,
-                      },
-                    ]}
+                    actions={
+                      isAutomated
+                        ? []
+                        : [
+                            {
+                              ...DEMOTE_DOCUMENT_ACTION,
+                              onClick: () => removePromotedId(document.id),
+                            },
+                          ]
+                    }
                     dragHandleProps={provided.dragHandleProps}
                   />
                 )}
