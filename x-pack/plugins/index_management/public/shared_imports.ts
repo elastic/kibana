@@ -56,4 +56,5 @@ export { isJSON } from '../../../../src/plugins/es_ui_shared/static/validators/s
 export {
   createKibanaReactContext,
   reactRouterNavigate,
+  useKibana,
 } from '../../../../src/plugins/kibana_react/public';

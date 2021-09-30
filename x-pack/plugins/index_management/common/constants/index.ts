@@ -53,3 +53,5 @@ export {
   UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
 } from './ui_metric';
+
+export { MAJOR_VERSION } from './plugin';
