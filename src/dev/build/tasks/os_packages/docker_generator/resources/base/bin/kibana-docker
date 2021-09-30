@@ -184,7 +184,6 @@ kibana_vars=(
     server.uuid
     server.xsrf.allowlist
     server.xsrf.disableProtection
-    server.xsrf.whitelist
     status.allowAnonymous
     status.v6ApiFormat
     telemetry.allowChangingOptInStatus

@@ -353,7 +353,6 @@ const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecat
 };
 
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
-  rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   rewriteCorsSettings,
   kibanaPathConf,
   rewriteBasePathDeprecation,

@@ -36,20 +36,6 @@ describe('core deprecations', () => {
     });
   });
 
-  describe('xsrfDeprecation', () => {
-    it('logs a warning if server.xsrf.whitelist is set', () => {
-      const { migrated, messages } = applyCoreDeprecations({
-        server: { xsrf: { whitelist: ['/path'] } },
-      });
-      expect(migrated.server.xsrf.allowlist).toEqual(['/path']);
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Setting \\"server.xsrf.whitelist\\" has been replaced by \\"server.xsrf.allowlist\\"",
-        ]
-      `);
-    });
-  });
-
   describe('server.cors', () => {
     it('renames server.cors to server.cors.enabled', () => {
       const { migrated } = applyCoreDeprecations({
