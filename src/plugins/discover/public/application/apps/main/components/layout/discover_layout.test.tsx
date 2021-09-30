@@ -37,7 +37,7 @@ setHeaderActionMenuMounter(jest.fn());
 function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
-  services.data.query.timefilter.timefilter.getTime = () => {
+  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
@@ -144,7 +144,7 @@ describe('Discover component', () => {
         <DiscoverLayout {...getProps(indexPatternMock)} />
       </discoverServiceMock.presentationUtil.ContextProvider>
     );
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
   test('selected index pattern with time field displays chart toggle', () => {
     const component = mountWithIntl(
@@ -152,6 +152,6 @@ describe('Discover component', () => {
         <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
       </discoverServiceMock.presentationUtil.ContextProvider>
     );
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 });

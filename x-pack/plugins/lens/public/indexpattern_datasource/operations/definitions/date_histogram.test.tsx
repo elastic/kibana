@@ -9,7 +9,7 @@ import React from 'react';
 import type { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from './index';
 import { shallow } from 'enzyme';
-import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
@@ -415,9 +415,9 @@ describe('date_histogram', () => {
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find(EuiSwitch).prop('onChange')!({
+      instance.find(EuiSwitch).simulate('change', {
         target: { checked: true },
-      } as EuiSwitchEvent);
+      });
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0];
       expect(newLayer).toHaveProperty('columns.col1.params.interval', '30d');
@@ -434,11 +434,11 @@ describe('date_histogram', () => {
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDateHistogramValue"]').prop('onChange')!({
+      instance.find('[data-test-subj="lensDateHistogramValue"]').simulate('change', {
         target: {
           value: '2',
         },
-      } as React.ChangeEvent<HTMLInputElement>);
+      });
       expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('1w'));
     });
 
@@ -498,11 +498,11 @@ describe('date_histogram', () => {
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDateHistogramUnit"]').prop('onChange')!({
+      instance.find('[data-test-subj="lensDateHistogramUnit"]').simulate('change', {
         target: {
           value: 'd',
         },
-      } as React.ChangeEvent<HTMLInputElement>);
+      });
       expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('42d'));
     });
 
@@ -519,11 +519,11 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDateHistogramValue"]').prop('onChange')!({
+      instance.find('[data-test-subj="lensDateHistogramValue"]').simulate('change', {
         target: {
           value: '9',
         },
-      } as React.ChangeEvent<HTMLInputElement>);
+      });
       expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('9d'));
     });
 
