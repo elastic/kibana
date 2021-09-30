@@ -6,14 +6,10 @@
  */
 
 import { resolve } from 'path';
-import webpackMerge from 'webpack-merge';
-import { defaultConfig } from '@kbn/storybook';
-
-import type { Configuration } from 'webpack';
-
+import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
 import { KIBANA_ROOT } from './constants';
 
-const canvasWebpack = {
+export const canvasWebpack = {
   module: {
     rules: [
       // Enable CSS Modules in Storybook (Shareable Runtime)
@@ -67,8 +63,8 @@ const canvasWebpack = {
   },
 };
 
-module.exports = {
+export const canvasStorybookConfig = {
   ...defaultConfig,
   addons: [...(defaultConfig.addons || []), './addon/target/register'],
-  webpackFinal: (config: Configuration) => webpackMerge(config, canvasWebpack),
+  ...mergeWebpackFinal(canvasWebpack),
 };
