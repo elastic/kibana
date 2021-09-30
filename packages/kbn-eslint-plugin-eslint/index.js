@@ -13,5 +13,6 @@ module.exports = {
     'no-restricted-paths': require('./rules/no_restricted_paths'),
     module_migration: require('./rules/module_migration'),
     no_async_promise_body: require('./rules/no_async_promise_body'),
+    no_trailing_import_slash: require('./rules/no_trailing_import_slash'),
   },
 };
