@@ -26,18 +26,19 @@ const serviceNodesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment } = params.query;
+    const { kuery, environment, start, end } = params.query;
 
     const serviceNodes = await getServiceNodes({
       kuery,
       setup,
       serviceName,
       environment,
+      start,
+      end,
     });
     return { serviceNodes };
   },
 });
 
-export const serviceNodeRouteRepository = createApmServerRouteRepository().add(
-  serviceNodesRoute
-);
+export const serviceNodeRouteRepository =
+  createApmServerRouteRepository().add(serviceNodesRoute);

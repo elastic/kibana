@@ -91,7 +91,7 @@ describe('test fetchCharts', () => {
     subjects.totalHits$.subscribe((value) => stateArrHits.push(value.fetchStatus));
 
     savedSearchMockWithTimeField.searchSource.fetch$ = () =>
-      of(({
+      of({
         id: 'Fjk5bndxTHJWU2FldVRVQ0tYR0VqOFEcRWtWNDhOdG5SUzJYcFhONVVZVTBJQToxMDMwOQ==',
         rawResponse: {
           took: 2,
@@ -115,7 +115,7 @@ describe('test fetchCharts', () => {
         total: 1,
         loaded: 1,
         isRestored: false,
-      } as unknown) as IKibanaSearchResponse<estypes.SearchResponse<unknown>>);
+      } as unknown as IKibanaSearchResponse<estypes.SearchResponse<unknown>>);
 
     fetchChart(subjects, savedSearchMockWithTimeField.searchSource, deps).subscribe({
       complete: () => {

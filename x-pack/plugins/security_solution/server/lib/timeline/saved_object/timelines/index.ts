@@ -437,12 +437,10 @@ export const createTimeline = async ({
   savedObjectsClient: SavedObjectsClientContract;
   userInfo: AuthenticatedUser | null;
 }) => {
-  const {
-    transformedFields: migratedAttributes,
-    references,
-  } = timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
-    data: pickSavedTimeline(timelineId, timeline, userInfo),
-  });
+  const { transformedFields: migratedAttributes, references } =
+    timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
+      data: pickSavedTimeline(timelineId, timeline, userInfo),
+    });
 
   const createdTimeline = await savedObjectsClient.create<TimelineWithoutExternalRefs>(
     timelineSavedObjectType,
@@ -452,9 +450,8 @@ export const createTimeline = async ({
     }
   );
 
-  const repopulatedSavedObject = timelineFieldsMigrator.populateFieldsFromReferences(
-    createdTimeline
-  );
+  const repopulatedSavedObject =
+    timelineFieldsMigrator.populateFieldsFromReferences(createdTimeline);
 
   // Create new timeline
   const newTimeline = convertSavedObjectToSavedTimeline(repopulatedSavedObject);
@@ -485,13 +482,11 @@ const updateTimeline = async ({
     timelineId
   );
 
-  const {
-    transformedFields: migratedPatchAttributes,
-    references,
-  } = timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
-    data: pickSavedTimeline(timelineId, timeline, userInfo),
-    existingReferences: rawTimelineSavedObject.references,
-  });
+  const { transformedFields: migratedPatchAttributes, references } =
+    timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
+      data: pickSavedTimeline(timelineId, timeline, userInfo),
+      existingReferences: rawTimelineSavedObject.references,
+    });
 
   // Update Timeline
   await savedObjectsClient.update(timelineSavedObjectType, timelineId, migratedPatchAttributes, {
@@ -517,13 +512,11 @@ const updatePartialSavedTimeline = async (
     timelineId
   );
 
-  const {
-    transformedFields,
-    references,
-  } = timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
-    data: timeline,
-    existingReferences: currentSavedTimeline.references,
-  });
+  const { transformedFields, references } =
+    timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
+      data: timeline,
+      existingReferences: currentSavedTimeline.references,
+    });
 
   const timelineUpdateAttributes = pickSavedTimeline(
     null,
@@ -541,12 +534,11 @@ const updatePartialSavedTimeline = async (
     { references }
   );
 
-  const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferencesForPatch<TimelineWithoutExternalRefs>(
-    {
+  const populatedTimeline =
+    timelineFieldsMigrator.populateFieldsFromReferencesForPatch<TimelineWithoutExternalRefs>({
       dataBeforeRequest: timelineUpdateAttributes,
       dataReturnedFromRequest: updatedTimeline,
-    }
-  );
+    });
 
   return populatedTimeline;
 };

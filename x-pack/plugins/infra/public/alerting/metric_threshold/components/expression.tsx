@@ -67,9 +67,10 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit | undefined>('m');
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
-    createDerivedIndexPattern,
-  ]);
+  const derivedIndexPattern = useMemo(
+    () => createDerivedIndexPattern(),
+    [createDerivedIndexPattern]
+  );
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -235,6 +236,13 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id || 'default');
     }
+
+    if (typeof alertParams.alertOnNoData === 'undefined') {
+      setAlertParams('alertOnNoData', true);
+    }
+    if (typeof alertParams.alertOnGroupDisappear === 'undefined') {
+      setAlertParams('alertOnGroupDisappear', true);
+    }
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
@@ -245,6 +253,11 @@ export const Expressions: React.FC<Props> = (props) => {
   const areAllAggsRate = useMemo(
     () => alertParams.criteria?.every((c) => c.aggType === Aggregators.RATE),
     [alertParams.criteria]
+  );
+
+  const hasGroupBy = useMemo(
+    () => alertParams.groupBy && alertParams.groupBy.length > 0,
+    [alertParams.groupBy]
   );
 
   return (
@@ -396,7 +409,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
-          defaultMessage: 'Create alert per (optional)',
+          defaultMessage: 'Group alerts by (optional)',
         })}
         helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
           defaultMessage:
@@ -414,7 +427,28 @@ export const Expressions: React.FC<Props> = (props) => {
           }}
         />
       </EuiFormRow>
-
+      <EuiSpacer size={'s'} />
+      <EuiCheckbox
+        id="metrics-alert-group-disappear-toggle"
+        label={
+          <>
+            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnGroupDisappear', {
+              defaultMessage: 'Alert me if a group stops reporting data',
+            })}{' '}
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
+                defaultMessage:
+                  'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+              })}
+            >
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </EuiToolTip>
+          </>
+        }
+        disabled={!hasGroupBy}
+        checked={Boolean(hasGroupBy && alertParams.alertOnGroupDisappear)}
+        onChange={(e) => setAlertParams('alertOnGroupDisappear', e.target.checked)}
+      />
       <EuiSpacer size={'m'} />
     </>
   );

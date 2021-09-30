@@ -140,8 +140,7 @@ describe('LicenseExpirationRule', () => {
             ui: {
               isFiring: true,
               message: {
-                text:
-                  'The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link',
+                text: 'The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link',
                 tokens: [
                   {
                     startToken: '#relative',

@@ -16,7 +16,7 @@ export function mockHandlerArguments(
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   return [
-    ({} as unknown) as RequestHandlerContext,
+    {} as unknown as RequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
@@ -31,5 +31,5 @@ export const mockResponseFactory = (resToMock: Array<MethodKeysOf<KibanaResponse
       });
     }
   });
-  return (factory as unknown) as KibanaResponseFactory;
+  return factory as unknown as KibanaResponseFactory;
 };

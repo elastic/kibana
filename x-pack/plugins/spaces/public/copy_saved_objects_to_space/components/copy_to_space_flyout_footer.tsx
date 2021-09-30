@@ -38,13 +38,8 @@ const isResolvableError = ({ error: { type } }: FailedImport) =>
 const isUnresolvableError = (failure: FailedImport) => !isResolvableError(failure);
 
 export const CopyToSpaceFlyoutFooter = (props: Props) => {
-  const {
-    copyInProgress,
-    conflictResolutionInProgress,
-    initialCopyFinished,
-    copyResult,
-    retries,
-  } = props;
+  const { copyInProgress, conflictResolutionInProgress, initialCopyFinished, copyResult, retries } =
+    props;
 
   let summarizedResults = {
     successCount: 0,

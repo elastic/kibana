@@ -36,9 +36,9 @@ export interface AutomaticCrawlSchedulerLogicActions {
   enableCrawlAutomatically(): void;
   fetchCrawlSchedule(): void;
   saveChanges(): void;
-  setCrawlFrequency(
-    crawlFrequency: CrawlSchedule['frequency']
-  ): { crawlFrequency: CrawlSchedule['frequency'] };
+  setCrawlFrequency(crawlFrequency: CrawlSchedule['frequency']): {
+    crawlFrequency: CrawlSchedule['frequency'];
+  };
   setCrawlSchedule(crawlSchedule: CrawlSchedule): { crawlSchedule: CrawlSchedule };
   setCrawlUnit(crawlUnit: CrawlSchedule['unit']): { crawlUnit: CrawlSchedule['unit'] };
   submitCrawlSchedule(): void;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -69,9 +69,14 @@ export const MonitorTags = ({ ping, summary }: Props) => {
 
   const currFilters = parseCurrentFilters(params.filters);
 
-  const [filterType, setFilterType] = useState<string[]>(currFilters.get('tags') ?? []);
+  const [tagFilters, setTagFilters] = useState<string[]>(currFilters.get('tags') ?? []);
 
-  useFilterUpdate('tags', filterType);
+  const excludedTagFilters = useMemo(() => {
+    const currExcludedFilters = parseCurrentFilters(params.excludedFilters);
+    return currExcludedFilters.get('tags') ?? [];
+  }, [params.excludedFilters]);
+
+  useFilterUpdate('tags', tagFilters, excludedTagFilters);
 
   if (tags.length === 0) {
     return summary ? null : (
@@ -93,7 +98,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
             key={tag}
             title={getFilterLabel(tag)}
             onClick={() => {
-              setFilterType([tag]);
+              setTagFilters([tag]);
             }}
             onClickAriaLabel={getFilterLabel(tag)}
             color="hollow"

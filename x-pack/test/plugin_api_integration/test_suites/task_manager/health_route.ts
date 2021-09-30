@@ -140,13 +140,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(status).to.eql('OK');
 
       const sumSampleTaskInWorkload =
-        (workload.value.task_types as {
-          sampleTask?: { count: number };
-        }).sampleTask?.count ?? 0;
-      const scheduledWorkload = (mapValues(
+        (
+          workload.value.task_types as {
+            sampleTask?: { count: number };
+          }
+        ).sampleTask?.count ?? 0;
+      const scheduledWorkload = mapValues(
         keyBy(workload.value.schedule as Array<[string, number]>, ([interval, count]) => interval),
         ([, count]) => count
-      ) as unknown) as { '37m': number | undefined; '37s': number | undefined };
+      ) as unknown as { '37m': number | undefined; '37s': number | undefined };
 
       await scheduleTask({
         taskType: 'sampleTask',
@@ -168,13 +170,13 @@ export default function ({ getService }: FtrProviderContext) {
           (workloadAfterScheduling.task_types as { sampleTask: { count: number } }).sampleTask.count
         ).to.eql(sumSampleTaskInWorkload + 2);
 
-        const schedulesWorkloadAfterScheduling = (mapValues(
+        const schedulesWorkloadAfterScheduling = mapValues(
           keyBy(
             workloadAfterScheduling.schedule as Array<[string, number]>,
             ([interval]) => interval
           ),
           ([, count]) => count
-        ) as unknown) as {
+        ) as unknown as {
           '37m': number;
           '37s': number;
         };

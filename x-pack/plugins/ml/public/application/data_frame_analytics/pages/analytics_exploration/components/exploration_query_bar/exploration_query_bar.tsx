@@ -57,9 +57,10 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
-  const regex = useMemo(() => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'), [
-    filters?.columnId,
-  ]);
+  const regex = useMemo(
+    () => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'),
+    [filters?.columnId]
+  );
 
   /**
    * Restoring state from the URL once on load. If a filter option is active

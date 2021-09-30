@@ -29,13 +29,13 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const applicationStartMock = ({
+const applicationStartMock = {
   capabilities: { navLinks: { management: true, dev_tools: true } },
-} as unknown) as ApplicationStart;
+} as unknown as ApplicationStart;
 
-const applicationStartMockRestricted = ({
+const applicationStartMockRestricted = {
   capabilities: { navLinks: { management: false, dev_tools: false } },
-} as unknown) as ApplicationStart;
+} as unknown as ApplicationStart;
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 

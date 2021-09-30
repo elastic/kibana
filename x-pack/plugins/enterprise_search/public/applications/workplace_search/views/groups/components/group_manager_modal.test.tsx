@@ -23,7 +23,7 @@ const saveItems = jest.fn();
 
 const props = {
   children: <></>,
-  label: 'shared content sources',
+  label: 'organizational content sources',
   allItems: [],
   numSelected: 1,
   hideModal,

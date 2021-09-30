@@ -72,7 +72,12 @@ export const useExceptionLists = ({
 
       abortCtrlRef.current = new AbortController();
 
-      const { page, per_page: perPage, total, data } = await fetchExceptionLists({
+      const {
+        page,
+        per_page: perPage,
+        total,
+        data,
+      } = await fetchExceptionLists({
         filters,
         http,
         namespaceTypes: namespaceTypesAsString,

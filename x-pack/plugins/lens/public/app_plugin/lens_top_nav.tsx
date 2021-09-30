@@ -169,6 +169,7 @@ export const LensTopNavMenu = ({
   );
 
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const {
     isSaveable,
@@ -200,17 +201,31 @@ export const LensTopNavMenu = ({
       datasourceStates,
     });
     const hasIndexPatternsChanged =
-      indexPatterns.length !== indexPatternIds.length ||
-      indexPatternIds.some((id) => !indexPatterns.find((indexPattern) => indexPattern.id === id));
+      indexPatterns.length + rejectedIndexPatterns.length !== indexPatternIds.length ||
+      indexPatternIds.some(
+        (id) =>
+          ![...indexPatterns.map((ip) => ip.id), ...rejectedIndexPatterns].find(
+            (loadedId) => loadedId === id
+          )
+      );
+
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
       getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
-        ({ indexPatterns: indexPatternObjects }) => {
+        ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
+          setRejectedIndexPatterns(rejectedIds);
         }
       );
     }
-  }, [datasourceStates, activeDatasourceId, data.indexPatterns, datasourceMap, indexPatterns]);
+  }, [
+    datasourceStates,
+    activeDatasourceId,
+    rejectedIndexPatterns,
+    datasourceMap,
+    indexPatterns,
+    data.indexPatterns,
+  ]);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -255,7 +270,7 @@ export const LensTopNavMenu = ({
           },
         },
         actions: {
-          inspect: lensInspector.inspect,
+          inspect: () => lensInspector.inspect({ title }),
           exportToCSV: () => {
             if (!activeData) {
               return;
@@ -335,7 +350,7 @@ export const LensTopNavMenu = ({
       setIsSaveModalVisible,
       uiSettings,
       unsavedTitle,
-      lensInspector.inspect,
+      lensInspector,
     ]
   );
 

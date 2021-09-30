@@ -148,9 +148,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await (
-          await (await testSubjects.find('formatRow')).findAllByCssSelector(
-            '[data-test-subj="toggle"]'
-          )
+          await (
+            await testSubjects.find('formatRow')
+          ).findAllByCssSelector('[data-test-subj="toggle"]')
         )[0].click();
         await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
