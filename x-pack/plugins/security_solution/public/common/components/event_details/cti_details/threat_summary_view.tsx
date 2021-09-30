@@ -209,7 +209,7 @@ const ThreatSummaryEnrichmentData: React.FC<{
     <>
       {indicator.length > 0 && (
         <>
-          <EuiPanel hasBorder paddingSize="s" borderRadius="none" grow={false}>
+          <EuiPanel hasBorder paddingSize="s" grow={false}>
             <ThreatSummaryPanelHeader
               title={i18n.INDICATOR_ENRICHMENT_TITLE}
               toolTipContent={i18n.INDICATOR_TOOLTIP_CONTENT}
@@ -240,7 +240,7 @@ const ThreatSummaryEnrichmentData: React.FC<{
 
       {investigation.length > 0 && (
         <>
-          <EuiPanel hasBorder paddingSize="s" borderRadius="none" grow={false}>
+          <EuiPanel hasBorder paddingSize="s" grow={false}>
             <ThreatSummaryPanelHeader
               title={i18n.INVESTIGATION_ENRICHMENT_TITLE}
               toolTipContent={i18n.INVESTIGATION_TOOLTIP_CONTENT}
@@ -275,7 +275,7 @@ const HostRiskDataBlock: React.FC<{
 }> = ({ hostRisk }) => {
   return (
     <>
-      <EuiPanel hasBorder paddingSize="s" borderRadius="none" grow={false}>
+      <EuiPanel hasBorder paddingSize="s" grow={false}>
         <ThreatSummaryPanelHeader
           title={i18n.HOST_RISK_DATA_TITLE}
           toolTipContent={
