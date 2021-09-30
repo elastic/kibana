@@ -87,6 +87,7 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../../../../common/lib/kibana');
 
 const mockRedirectLegacyUrl = jest.fn();
+const mockGetLegacyUrlConflict = jest.fn();
 
 const state: State = {
   ...mockGlobalState,
@@ -151,9 +152,14 @@ describe('RuleDetailsPageComponent', () => {
   async function setup() {
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-    // @ts-expect-error
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.spaces = { ui: { redirectLegacyUrl: mockRedirectLegacyUrl } };
+    useKibanaMock().services.spaces = {
+      ui: {
+        // @ts-expect-error
+        components: { getLegacyUrlConflict: mockGetLegacyUrlConflict },
+        redirectLegacyUrl: mockRedirectLegacyUrl,
+      },
+    };
   }
 
   it('renders correctly', async () => {
@@ -168,6 +174,62 @@ describe('RuleDetailsPageComponent', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
       expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(`rules/id/myfakeruleid`, `rule`);
+    });
+  });
+
+  it('renders correctly when outcome = conflict', async () => {
+    await setup();
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      error: null,
+      loading: false,
+      isExistingRule: true,
+      refresh: jest.fn(),
+      rule: {
+        id: 'myfakeruleid',
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        index: ['index-1'],
+        interval: '5m',
+        references: [],
+        actions: [],
+        enabled: false,
+        false_positives: [],
+        max_signals: 100,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+      },
+    });
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <RuleDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(`rules/id/myfakeruleid`, `rule`);
+      expect(mockGetLegacyUrlConflict).toHaveBeenCalledWith({
+        currentObjectId: 'myfakeruleid',
+        objectNoun: 'rule',
+        otherObjectId: 'aliased_rule_id',
+        otherObjectPath: `rules/id/aliased_rule_id`,
+      });
     });
   });
 });

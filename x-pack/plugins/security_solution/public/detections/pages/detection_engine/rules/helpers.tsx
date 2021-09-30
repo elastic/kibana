@@ -146,7 +146,6 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
 };
 
 export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRule => {
-  console.error('GET ABOUT STEPS DATA', JSON.stringify(rule, null, 2));
   const { name, description, note } = determineDetailsValue(rule, detailsView);
   const {
     author,

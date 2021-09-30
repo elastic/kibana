@@ -302,6 +302,33 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rule]);
 
+  const getLegacyUrlConflictCallout = () => {
+    const outcome = rule?.outcome;
+    if (spacesApi && outcome === 'conflict') {
+      const aliasTargetId = rule?.alias_target_id!; // This is always defined if outcome === 'conflict'
+      // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
+      // callout with a warning for the user, and provide a way for them to navigate to the other rule.
+      const otherRulePath = basePath.prepend(`rules/id/${aliasTargetId}`);
+      return (
+        <>
+          <EuiSpacer />
+          {spacesApi.ui.components.getLegacyUrlConflict({
+            objectNoun: i18nTranslate.translate(
+              'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+              {
+                defaultMessage: 'rule',
+              }
+            ),
+            currentObjectId: rule?.id!,
+            otherObjectId: aliasTargetId,
+            otherObjectPath: otherRulePath,
+          })}
+        </>
+      );
+    }
+    return null;
+  };
+
   useEffect(() => {
     if (!hasIndexRead) {
       setTabs(ruleDetailTabs.filter(({ id }) => id !== RuleDetailTabs.alerts));
@@ -746,6 +773,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexGroup>
               </DetectionEngineHeaderPage>
               {ruleError}
+              {getLegacyUrlConflictCallout()}
               <EuiSpacer />
               <EuiFlexGroup>
                 <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
