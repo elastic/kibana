@@ -35,8 +35,6 @@ A collection of 2 transactions with a combined latency of 5ms
 }
 ```
 
-Please note: `metricset.name: transaction` was only recently introduced. To retain backwards compatability we still use the old filter `{ "exists": { "field": "transaction.duration.histogram" }}` when filtering for aggregated transactions.
-
 ### Latency
 
 Latency is the duration of transactions. This can be calculated using transaction events or metric events (aggregated transactions).
@@ -77,6 +75,8 @@ Note-worthy fields: `transaction.duration.us`, `transaction.duration.histogram`
   }
 }
 ```
+
+Please note: `metricset.name: transaction` was only recently introduced. To retain backwards compatability we still use the old filter `{ "exists": { "field": "transaction.duration.histogram" }}` when filtering for aggregated transactions.
 
 ### Throughput
 
