@@ -35,7 +35,7 @@ export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppA
  * Function that runs Policy Details middleware
  */
 export type MiddlewareRunner = (
-  constext: MiddlewareRunnerContext,
+  context: MiddlewareRunnerContext,
   store: PolicyDetailsStore,
   action: MaybeImmutable<AppAction>
 ) => Promise<void>;
