@@ -41,8 +41,7 @@ export function plugin() {
 
 export type {
   DataViewPublicPluginSetup,
-  DataViewPublicPluginStart,
-  IDataViewPluginServices,
+  DataViewPublicPluginStart, // todo // IDataViewPluginServices,
 } from './types';
 
 // Export plugin after all other imports

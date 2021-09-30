@@ -13,7 +13,7 @@ import {
   RegisterDeprecationsConfig,
 } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternAttributes } from '../../../common';
+import { IndexPatternAttributes } from '../../common';
 
 type IndexPatternAttributesWithFields = Pick<IndexPatternAttributes, 'title' | 'fields'>;
 

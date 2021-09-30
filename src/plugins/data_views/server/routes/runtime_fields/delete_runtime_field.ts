@@ -9,12 +9,12 @@
 import { schema } from '@kbn/config-schema';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
-import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
-import type { DataPluginStart, DataPluginStartDependencies } from '../../../plugin';
+import { IRouter, StartServicesAccessor } from '../../../../../core/server';
+import type { DataViewPluginStart, DataViewPluginStartDependencies } from '../../plugin';
 
 export const registerDeleteRuntimeFieldRoute = (
   router: IRouter,
-  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
+  getStartServices: StartServicesAccessor<DataViewPluginStartDependencies, DataViewPluginStart>
 ) => {
   router.delete(
     {
@@ -35,8 +35,8 @@ export const registerDeleteRuntimeFieldRoute = (
     handleErrors(async (ctx, req, res) => {
       const savedObjectsClient = ctx.core.savedObjects.client;
       const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-      const [, , { indexPatterns }] = await getStartServices();
-      const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
+      const [, , { indexPatternsServiceFactory }] = await getStartServices();
+      const indexPatternsService = await indexPatternsServiceFactory(
         savedObjectsClient,
         elasticsearchClient
       );
