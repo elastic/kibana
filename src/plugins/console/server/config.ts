@@ -15,7 +15,6 @@ import { MAJOR_VERSION } from '../common/constants';
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 const baseSettings = {
-  enabled: schema.boolean({ defaultValue: true }),
   ssl: schema.object({ verify: schema.boolean({ defaultValue: false }) }, {}),
 };
 
@@ -66,10 +65,5 @@ export type ConfigType7x = TypeOf<typeof configSchema7x>;
 
 export const config: PluginConfigDescriptor<ConfigType | ConfigType7x> = {
   schema: kibanaVersion.major < 8 ? configSchema7x : configSchema,
-  deprecations: ({ deprecate, unused }) => [
-    deprecate('enabled', '8.0.0'),
-    deprecate('proxyFilter', '8.0.0'),
-    deprecate('proxyConfig', '8.0.0'),
-    unused('ssl'),
-  ],
+  deprecations: ({ deprecate, unused }) => [unused('ssl')],
 };

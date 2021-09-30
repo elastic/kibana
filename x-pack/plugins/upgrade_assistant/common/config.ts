@@ -8,7 +8,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   /*
    * This will default to true up until the last minor before the next major.
    * In readonly mode, the user will not be able to perform any actions in the UI
