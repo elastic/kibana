@@ -45,7 +45,7 @@ import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { PLUGIN_ID } from '../../../../../../common/constants';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
-import { CreatePackagePolicyPageLayout } from './components';
+import { CreatePackagePolicyPageLayout, PostInstallAddAgentModal } from './components';
 import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
@@ -294,12 +294,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           );
         }
       }
-
-      const fromPolicyWithoutAgentsAssigned = from === 'policy' && agentPolicy && agentCount === 0;
-
-      const fromPackageWithoutAgentsAssigned = packageInfo && agentPolicy && agentCount === 0;
-
       const hasAgentsAssigned = agentCount && agentPolicy;
+      const fromPolicyWithoutAgentsAssigned = from === 'policy' && !hasAgentsAssigned;
+
+      const fromPackageWithoutAgentsAssigned =
+        from === 'package' && packageInfo && !hasAgentsAssigned;
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
@@ -308,17 +307,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             packagePolicyName: packagePolicy.name,
           },
         }),
-        text: fromPolicyWithoutAgentsAssigned
-          ? i18n.translate(
-              'xpack.fleet.createPackagePolicy.policyContextAddAgentNextNotificationMessage',
-              {
-                defaultMessage: `The policy has been updated. Add an agent to the '{agentPolicyName}' policy to deploy this policy.`,
-                values: {
-                  agentPolicyName: agentPolicy!.name,
-                },
-              }
-            )
-          : fromPackageWithoutAgentsAssigned
+        text: fromPackageWithoutAgentsAssigned
           ? toMountPoint(
               // To render the link below we need to mount this JSX in the success toast
               <FormattedMessage
