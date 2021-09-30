@@ -597,7 +597,7 @@ function removeMalformedExceptionsList(
  * Some of these issues could crop up during either user manual errors of modifying things, earlier migration
  * issues, etc... so we are safer to check them as possibilities
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- * @param doc The document that might have ruleId's to migrate into the references
+ * @param doc The document that might have "ruleAlertId" to migrate into the references
  * @returns The document migrated with saved object references
  */
 function addRuleIdsToLegacyNotificationReferences(
@@ -615,7 +615,7 @@ function addRuleIdsToLegacyNotificationReferences(
   } else {
     const existingReferences = references ?? [];
     const existingReferenceFound = existingReferences.find((reference) => {
-      return reference.id === ruleAlertId && reference.type === 'rule';
+      return reference.id === ruleAlertId && reference.type === 'alert';
     });
     if (existingReferenceFound) {
       // skip this if the references already exists for some uncommon reason so we do not add an additional one.
@@ -623,8 +623,8 @@ function addRuleIdsToLegacyNotificationReferences(
     } else {
       const savedObjectReference: SavedObjectReference = {
         id: ruleAlertId,
-        name: 'param:rule_0',
-        type: 'rule',
+        name: 'param:alert_0',
+        type: 'alert',
       };
       const newReferences = [...existingReferences, savedObjectReference];
       return { ...doc, references: newReferences };

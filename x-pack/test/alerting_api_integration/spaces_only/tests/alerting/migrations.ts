@@ -267,9 +267,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.statusCode).to.eql(200);
       expect(response.body._source?.references).to.eql([
         {
-          name: 'param:rule_0',
+          name: 'param:alert_0',
           id: '1a4ed6ae-3c89-44b2-999d-db554144504c',
-          type: 'rule',
+          type: 'alert',
         },
       ]);
     });

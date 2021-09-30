@@ -29,7 +29,7 @@ export const legacyInjectRuleIdReferences = ({
   savedObjectReferences: SavedObjectReference[];
 }): LegacyRulesNotificationParams['ruleAlertId'] => {
   const referenceFound = savedObjectReferences.find((reference) => {
-    return reference.name === 'rule_0';
+    return reference.name === 'alert_0';
   });
   if (referenceFound) {
     if (referenceFound.id !== ruleAlertId) {

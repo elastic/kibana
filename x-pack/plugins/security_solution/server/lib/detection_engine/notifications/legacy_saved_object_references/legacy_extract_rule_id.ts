@@ -38,8 +38,8 @@ export const legacyExtractRuleId = ({
     return [
       {
         id: ruleAlertId,
-        name: 'rule_0',
-        type: 'rule',
+        name: 'alert_0',
+        type: 'alert',
       },
     ];
   }

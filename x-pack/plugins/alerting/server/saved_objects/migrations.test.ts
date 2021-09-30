@@ -1714,14 +1714,31 @@ describe('successful migrations', () => {
         },
         references: [
           {
-            name: 'param:rule_0',
+            name: 'param:alert_0',
             id: '123',
-            type: 'rule',
+            type: 'alert',
           },
         ],
       });
     });
 
+    test('security solution does not migrate anything if its type is not siem.notifications', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
+      const alert = getMockData({
+        alertTypeId: 'other-type',
+        params: {
+          ruleAlertId: '123',
+        },
+      });
+
+      expect(migration7160(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+      });
+    });
     test('security solution does not change anything if "ruleAlertId" is missing', () => {
       const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
       const alert = getMockData({
@@ -1747,9 +1764,9 @@ describe('successful migrations', () => {
         }),
         references: [
           {
-            name: 'param:rule_0',
+            name: 'param:alert_0',
             id: '123',
-            type: 'rule',
+            type: 'alert',
           },
         ],
       };
@@ -1762,9 +1779,9 @@ describe('successful migrations', () => {
         },
         references: [
           {
-            name: 'param:rule_0',
+            name: 'param:alert_0',
             id: '123',
-            type: 'rule',
+            type: 'alert',
           },
         ],
       });
@@ -1801,9 +1818,9 @@ describe('successful migrations', () => {
             type: 'foreign-name',
           },
           {
-            name: 'param:rule_0',
+            name: 'param:alert_0',
             id: '123',
-            type: 'rule',
+            type: 'alert',
           },
         ],
       });
@@ -1820,9 +1837,9 @@ describe('successful migrations', () => {
         }),
         references: [
           {
-            name: 'param:rule_0',
+            name: 'param:alert_0',
             id: '123',
-            type: 'rule',
+            type: 'alert',
           },
         ],
       };
@@ -1835,9 +1852,9 @@ describe('successful migrations', () => {
         },
         references: [
           {
-            name: 'param:rule_0',
+            name: 'param:alert_0',
             id: '123',
-            type: 'rule',
+            type: 'alert',
           },
         ],
       });
@@ -1874,9 +1891,9 @@ describe('successful migrations', () => {
         }),
         references: [
           {
-            name: 'param:rule_0',
+            name: 'param:alert_0',
             id: '123',
-            type: 'rule',
+            type: 'alert',
           },
         ],
       };
@@ -1889,9 +1906,9 @@ describe('successful migrations', () => {
         },
         references: [
           {
-            name: 'param:rule_0',
+            name: 'param:alert_0',
             id: '123',
-            type: 'rule',
+            type: 'alert',
           },
         ],
       });

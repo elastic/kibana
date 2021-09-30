@@ -19,8 +19,8 @@ describe('legacy_inject_references', () => {
   const mockSavedObjectReferences = (): SavedObjectReference[] => [
     {
       id: '123',
-      name: 'rule_0',
-      type: 'rule',
+      name: 'alert_0',
+      type: 'alert',
     },
   ];
 

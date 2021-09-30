@@ -155,8 +155,8 @@ Post migration this structure should look like this after Kibana has started and
     },
     {
       "id" : "933ca720-1be1-11ec-a722-83da1c22a481", <-- Our id here is preferred and used during serialization.
-      "name" : "param:rule_0", <-- We add the name of our reference which is param:rule_0 similar to action_0 but with "param"
-      "type" : "rule" <-- We add the type which is type of rule to the references
+      "name" : "param:alert_0", <-- We add the name of our reference which is param:alert_0 similar to action_0 but with "param"
+      "type" : "alert" <-- We add the type which is type of rule to the references
     }
   ]
 ],
@@ -199,7 +199,7 @@ POST .kibana/_update/alert:933ca720-1be1-11ec-a722-83da1c22a481
 }
 ```
 
-If you just want to remove your your "param:rule_0" and it is the second array element to test the errors within the console
+If you just want to remove your "param:alert_0" and it is the second array element to test the errors within the console
 then you would use
 ```json
 POST .kibana/_update/alert:933ca720-1be1-11ec-a722-83da1c22a481
