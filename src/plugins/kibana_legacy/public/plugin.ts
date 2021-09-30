@@ -24,14 +24,6 @@ export class KibanaLegacyPlugin {
       loadFontAwesome: async () => {
         await import('./font_awesome');
       },
-      /**
-       * Loads angular bootstrap modules. Should be removed once the last consumer has migrated to EUI
-       * @deprecated
-       */
-      loadAngularBootstrap: async () => {
-        const { initAngularBootstrap } = await import('./angular_bootstrap');
-        initAngularBootstrap();
-      },
     };
   }
 }
