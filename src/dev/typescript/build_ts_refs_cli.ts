@@ -30,8 +30,11 @@ const isTypeFailure = (error: any) =>
 
 export async function runBuildRefsCli() {
   run(
-    async ({ log, flags, procRunner }) => {
-      if (process.env.BUILD_TS_REFS_DISABLE === 'true' && !flags.force) {
+    async ({ log, flags, procRunner, statsMeta }) => {
+      const enabled = process.env.BUILD_TS_REFS_DISABLE !== 'true' || !!flags.force;
+      statsMeta.set('buildTsRefsEnabled', enabled);
+
+      if (!enabled) {
         log.info(
           'Building ts refs is disabled because the BUILD_TS_REFS_DISABLE environment variable is set to "true". Pass `--force` to run the build anyway.'
         );
@@ -56,6 +59,12 @@ export async function runBuildRefsCli() {
       const doCapture = process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true';
       const doClean = !!flags.clean || doCapture;
       const doInitCache = cacheEnabled && !doCapture;
+
+      statsMeta.set('buildTsRefsEnabled', enabled);
+      statsMeta.set('buildTsRefsCacheEnabled', cacheEnabled);
+      statsMeta.set('buildTsRefsDoCapture', doCapture);
+      statsMeta.set('buildTsRefsDoClean', doClean);
+      statsMeta.set('buildTsRefsDoInitCache', doInitCache);
 
       if (doClean) {
         log.info('deleting', projects.outDirs.length, 'ts output directories');
@@ -113,9 +122,6 @@ export async function runBuildRefsCli() {
           --no-cache         Disable fetching/extracting outDir caches based on the mergeBase with upstream
           --ignore-type-failures  If tsc reports type errors, ignore them and just log a small warning
         `,
-      },
-      log: {
-        defaultLevel: 'debug',
       },
     }
   );
