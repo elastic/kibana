@@ -6210,7 +6210,6 @@
     "xpack.apm.alertAnnotationCriticalTitle": "紧急告警",
     "xpack.apm.alertAnnotationNoSeverityTitle": "告警",
     "xpack.apm.alertAnnotationWarningTitle": "警告告警",
-    "xpack.apm.alerting.fields.all_option": "全部",
     "xpack.apm.alerting.fields.environment": "环境",
     "xpack.apm.alerting.fields.service": "服务",
     "xpack.apm.alerting.fields.type": "类型",
