@@ -17,7 +17,7 @@ export type {
   DimensionsVisParam,
   MetricVisParam,
   VisParams,
-  Metric,
+  Metric as MetricVisMetric,
 } from './types';
 
 export { metricFunction } from './expression_functions';
