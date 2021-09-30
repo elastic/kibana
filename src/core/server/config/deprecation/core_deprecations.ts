@@ -31,6 +31,7 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecati
   if (typeof corsSettings === 'boolean') {
     addDeprecation({
       message: '"server.cors" is deprecated and has been replaced by "server.cors.enabled"',
+      level: 'warning',
       correctiveActions: {
         manualSteps: [
           `Replace "server.cors: ${corsSettings}" with "server.cors.enabled: ${corsSettings}"`,

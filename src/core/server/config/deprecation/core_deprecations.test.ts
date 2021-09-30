@@ -25,8 +25,9 @@ describe('core deprecations', () => {
       });
       expect(migrated.server.cors).toEqual({ enabled: true });
     });
+
     it('logs a warning message about server.cors renaming', () => {
-      const { messages } = applyCoreDeprecations({
+      const { messages, levels } = applyCoreDeprecations({
         server: { cors: true },
       });
       expect(messages).toMatchInlineSnapshot(`
@@ -34,7 +35,13 @@ describe('core deprecations', () => {
           "\\"server.cors\\" is deprecated and has been replaced by \\"server.cors.enabled\\"",
         ]
       `);
+      expect(levels).toMatchInlineSnapshot(`
+        Array [
+          "warning",
+        ]
+      `);
     });
+
     it('does not log deprecation message when server.cors.enabled set', () => {
       const { migrated, messages } = applyCoreDeprecations({
         server: { cors: { enabled: true } },
