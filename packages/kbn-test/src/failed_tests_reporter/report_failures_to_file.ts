@@ -103,7 +103,7 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
     }
 
     const screenshotHtml = screenshot
-      ? `<img style="cursor: pointer; height: 200px; margin: 5px 0" class="img-fluid img-thumbnail" src="data:image/png;base64,${screenshot}" />`
+      ? `<img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${screenshot}" />`
       : '';
 
     const failureHTML = readFileSync(
