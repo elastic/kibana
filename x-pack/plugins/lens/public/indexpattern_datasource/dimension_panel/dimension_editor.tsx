@@ -422,7 +422,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           maxWidth={false}
         />
       </div>
-      <EuiSpacer size="s" />
+
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         {!incompleteInfo &&
         selectedColumn &&
@@ -636,8 +636,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           />
         )}
       </div>
-
-      <EuiSpacer size="s" />
     </>
   );
 
