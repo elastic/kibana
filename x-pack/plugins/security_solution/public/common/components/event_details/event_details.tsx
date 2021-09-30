@@ -38,7 +38,7 @@ import {
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 
-import { HostRiskScore } from '../../../timelines/containers/host_risk_score/use_host_risk_score';
+import { HostRisk } from '../../../timelines/containers/host_risk_score/use_host_risk_score';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -62,7 +62,7 @@ interface Props {
   isDraggable?: boolean;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
-  hostRisk?: HostRiskScore;
+  hostRisk?: HostRisk;
 }
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`

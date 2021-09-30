@@ -17,7 +17,17 @@ export interface HostRiskScoreRequestOptions extends IEsSearchRequest {
   factoryQueryType?: FactoryQueryTypes;
   hostName: string;
 }
-
 export interface HostRiskScoreStrategyResponse extends IEsSearchResponse {
+  hostRiskScore?: HostRiskScore;
   inspect?: Maybe<Inspect>;
+}
+
+export interface HostRiskScoreResponse {
+  risk_score: number;
+  risk: string;
+}
+
+export interface HostRiskScore {
+  riskScore: number;
+  risk: string;
 }

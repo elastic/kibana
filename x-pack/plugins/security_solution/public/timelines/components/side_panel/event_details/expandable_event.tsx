@@ -22,8 +22,7 @@ import { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
-
-import { HostRiskScore } from '../../../containers/host_risk_score/use_host_risk_score';
+import { HostRisk } from '../../../containers/host_risk_score/use_host_risk_score';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -36,7 +35,7 @@ interface Props {
   messageHeight?: number;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
-  hostRisk?: HostRiskScore;
+  hostRisk?: HostRisk;
 }
 
 interface ExpandableEventTitleProps {

@@ -32,8 +32,7 @@ import { ActionCell } from '../table/action_cell';
 import { BrowserField, BrowserFields, TimelineEventsDetailsItem } from '../../../../../common';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
-
-import { HostRiskScore } from '../../../../timelines/containers/host_risk_score/use_host_risk_score';
+import { HostRisk } from '../../../../timelines/containers/host_risk_score/use_host_risk_score';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;
@@ -272,7 +271,7 @@ const ThreatSummaryEnrichmentData: React.FC<{
 };
 
 const HostRiskDataBlock: React.FC<{
-  hostRisk: HostRiskScore;
+  hostRisk: HostRisk;
 }> = ({ hostRisk }) => {
   return (
     <>
@@ -299,7 +298,7 @@ const HostRiskDataBlock: React.FC<{
 
         {hostRisk.loading && <EuiLoadingSpinner />}
 
-        {!hostRisk.loading && (!hostRisk.isModuleEnabled || hostRisk.fields.length === 0) && (
+        {!hostRisk.loading && (!hostRisk.isModuleEnabled || !hostRisk.hostRiskScore) && (
           <EnrichmentFieldValue>
             <EuiText color="subdued" size="xs">
               {i18n.NO_HOST_RISK_DATA_DESCRIPTION}
@@ -307,10 +306,12 @@ const HostRiskDataBlock: React.FC<{
           </EnrichmentFieldValue>
         )}
 
-        {hostRisk.isModuleEnabled &&
-          hostRisk.fields.map(({ field, value }) => (
-            <EnrichedDataRow field={field} value={value} key={field} />
-          ))}
+        {hostRisk.isModuleEnabled && hostRisk.hostRiskScore && (
+          <>
+            <EnrichedDataRow field={'host.risk.keyword'} value={hostRisk.hostRiskScore.risk} />
+            <EnrichedDataRow field={'host.risk_score'} value={hostRisk.hostRiskScore.riskScore} />
+          </>
+        )}
       </EuiPanel>
       <EuiSpacer size="m" />
     </>
@@ -323,7 +324,7 @@ const ThreatSummaryViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   eventId: string;
   timelineId: string;
-  hostRisk?: HostRiskScore;
+  hostRisk?: HostRisk;
 }> = ({ browserFields, data, enrichments, eventId, timelineId, hostRisk }) => {
   if (!hostRisk && enrichments.length === 0) {
     return null;

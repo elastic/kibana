@@ -9,14 +9,12 @@ import { filter } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useEffect, useState } from 'react';
 
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
-import { inputsActions } from '../../../common/store/actions';
 import { RISKY_HOSTS_INDEX } from '../../../../common/constants';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -30,6 +28,7 @@ import {
   HostsQueries,
   HostRiskScoreRequestOptions,
   HostRiskScoreStrategyResponse,
+  HostRiskScore,
 } from '../../../../common';
 
 type GetHostRiskScoreProps = HostRiskScoreRequestOptions & {
@@ -69,20 +68,13 @@ const getHostRiskScoreWithOptionalSignal = withOptionalSignal(getHostRiskScoreCo
 
 const useHostRiskScoreComplete = () => useObservable(getHostRiskScoreWithOptionalSignal);
 
-const QUERY_ID = 'host_risk_score';
-const noop = () => {};
-
-export interface HostRiskScore {
+export interface HostRisk {
   loading: boolean;
   isModuleEnabled?: boolean;
-  fields: Array<{ field: string; value: string }>;
+  hostRiskScore?: HostRiskScore;
 }
 
-export const useHostRiskScore = ({
-  hostName,
-}: {
-  hostName?: string;
-}): HostRiskScore | undefined => {
+export const useHostRiskScore = ({ hostName }: { hostName?: string }): HostRisk | undefined => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
   const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(
     riskyHostsFeatureEnabled ? undefined : false
@@ -91,32 +83,13 @@ export const useHostRiskScore = ({
   const { addError } = useAppToasts();
   const { data } = useKibana().services;
 
-  const dispatch = useDispatch();
-
   const { error, loading, result, start } = useHostRiskScoreComplete();
-
-  const deleteQuery = useCallback(() => {
-    dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: QUERY_ID }));
-  }, [dispatch]);
 
   useEffect(() => {
     if (!loading && result) {
       setIsModuleEnabled(true);
-      dispatch(
-        inputsActions.setQuery({
-          inputId: 'global',
-          id: QUERY_ID,
-          inspect: {
-            dsl: result.inspect?.dsl ?? [],
-            response: [JSON.stringify(result.rawResponse, null, 2)],
-          },
-          loading,
-          refetch: noop,
-        })
-      );
     }
-    return deleteQuery;
-  }, [deleteQuery, dispatch, loading, result, setIsModuleEnabled]);
+  }, [loading, result, setIsModuleEnabled]);
 
   useEffect(() => {
     if (error) {
@@ -143,19 +116,14 @@ export const useHostRiskScore = ({
     }
   }, [start, data, hostName, riskyHostsFeatureEnabled]);
 
-  const source = result?.rawResponse?.hits?.hits?.[0]?._source;
+  const hostRiskScore = result?.hostRiskScore;
 
   if (!riskyHostsFeatureEnabled || !hostName) {
     return undefined;
   }
 
   return {
-    fields: source
-      ? [
-          { field: 'host.risk.keyword', value: source.risk },
-          { field: 'host.risk_score', value: source.risk_score },
-        ]
-      : [],
+    hostRiskScore,
     isModuleEnabled,
     loading: isModuleEnabled === undefined ? true : loading,
   };
