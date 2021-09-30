@@ -125,6 +125,7 @@ export const useInitSourcerer = (
             body: { patternList: newPatternList },
             signal: abortCtrl.current.signal,
           });
+
           if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
             // first time signals is defined and validated in the sourcerer
             // redo indexFieldsSearch
@@ -144,6 +145,7 @@ export const useInitSourcerer = (
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         }
       };
+
       if (defaultDataView.title.indexOf(newSignalsIndex) === -1) {
         abortCtrl.current.abort();
         asyncSearch([...defaultDataView.title.split(','), newSignalsIndex]);
@@ -155,7 +157,7 @@ export const useInitSourcerer = (
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
       // update signal name also updates sourcerer
       // we hit this the first time signal index is created
-      updateSourcererDataView(signalIndexName);
+      updateSourcererDataView(`${signalIndexName}-*`);
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
     }
   }, [

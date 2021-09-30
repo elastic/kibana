@@ -357,7 +357,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const sourcererDataViews = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
           body: JSON.stringify({
-            patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
+            patternList: [
+              ...configPatternList,
+              ...(signal.name != null ? [`${signal.name}-*`] : []),
+            ],
           }),
         });
         defaultDataView = sourcererDataViews.defaultDataView;

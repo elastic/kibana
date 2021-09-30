@@ -62,7 +62,7 @@ export const findExistingIndices = async (
         }
         const searchResponse = await esClient.fieldCaps({
           index,
-          fields: '@timestamp',
+          fields: '_id',
           ignore_unavailable: true,
           allow_no_indices: false,
         });

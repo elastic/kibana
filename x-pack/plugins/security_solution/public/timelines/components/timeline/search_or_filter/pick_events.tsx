@@ -188,12 +188,15 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         );
       } else if (filter === 'raw') {
         setSelectedOptions(
-          selectablePatterns
-            .filter((index) => index !== signalIndexName)
-            .map((indexSelected) => ({
-              label: indexSelected,
-              value: indexSelected,
-            }))
+          (signalIndexName == null
+            ? selectablePatterns
+            : // indexOf instead of === because the dataView version of signals index
+              // will have a wildcard and the signalIndexName does not include the wildcard
+              selectablePatterns.filter((index) => index.indexOf(signalIndexName) === -1)
+          ).map((indexSelected) => ({
+            label: indexSelected,
+            value: indexSelected,
+          }))
         );
       } else if (filter === 'alert') {
         setSelectedOptions([

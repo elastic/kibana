@@ -29,9 +29,22 @@ export const getScopePatternListSelection = (
   // when our SIEM DATA_VIEW is set, here are the defaults
   if (theDataView && theDataView.id === DEFAULT_DATA_VIEW_ID) {
     if (sourcererScope === SourcererScopeName.default) {
-      patternList = patternList.filter((index) => index !== signalIndexName).sort();
+      // indexOf instead of === because the dataView version of signals index
+      // will have a wildcard and the signalIndexName does not include the wildcard
+      patternList = patternList.filter((index) => index.indexOf(`${signalIndexName}`) === -1);
     } else if (sourcererScope === SourcererScopeName.detections) {
       patternList = signalIndexName != null ? [signalIndexName] : []; // set to signalIndexName whether or not it exists yet in the patternList
+    } else if (sourcererScope === SourcererScopeName.timeline) {
+      patternList =
+        signalIndexName != null
+          ? [
+              // indexOf instead of === because the dataView version of signals index
+              // will have a wildcard and the signalIndexName does not include the wildcard
+              // remove signalIndexName in case its already in there and add it whether or not it exists yet in the patternList
+              ...patternList.filter((index) => index.indexOf(`${signalIndexName}`) === -1),
+              signalIndexName,
+            ]
+          : patternList;
     }
   }
   return patternList.sort();
@@ -49,7 +62,11 @@ export const validateSelectedPatterns = (
           // ensures all selected patterns are selectable
           // and no patterns are duplicated
           (value, index, self) =>
-            self.indexOf(value) === index && dataView.patternList.includes(value)
+            (self.indexOf(value) === index &&
+              // indexOf instead of === because the dataView version of signals index
+              // will have a wildcard and the signalIndexName does not include the wildcard
+              dataView.patternList.some((v) => v.indexOf(value) > -1)) ||
+            state.signalIndexName == null // this is a bad hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
         )
       : [];
 
@@ -83,14 +100,21 @@ export const defaultDataViewByEventType = ({
     signalIndexName,
     defaultDataView: { id, patternList },
   } = state;
-  if (!isEmpty(signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
+  if (signalIndexName != null && (eventType === 'signal' || eventType === 'alert')) {
     return {
-      selectedPatterns: patternList.filter((index) => index === signalIndexName).sort(),
+      // indexOf instead of === because the dataView version of signals index
+      // will have a wildcard and the signalIndexName does not include the wildcard
+      selectedPatterns: patternList.filter((index) => index.indexOf(signalIndexName) === 0).sort(),
       selectedDataViewId: id,
     };
   } else if (eventType === 'raw') {
     return {
-      selectedPatterns: patternList.filter((index) => index !== signalIndexName).sort(),
+      selectedPatterns: (signalIndexName == null
+        ? patternList
+        : // indexOf instead of === because the dataView version of signals index
+          // will have a wildcard and the signalIndexName does not include the wildcard
+          patternList.filter((index) => index.indexOf(signalIndexName) === -1)
+      ).sort(),
       selectedDataViewId: id,
     };
   }

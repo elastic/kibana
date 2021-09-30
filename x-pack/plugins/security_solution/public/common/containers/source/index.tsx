@@ -265,31 +265,54 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                   patternList.includes(pattern)
                 );
                 const patternString = newSelectedPatterns.sort().join();
-                const signalIndexName = signalIndexNameSelector ?? newSignalsIndex;
-                dispatch(
-                  sourcererActions.setSource({
-                    id: sourcererScopeName,
-                    payload: {
-                      // TODO: Steph/sourcerer all the below formatting should be happening serverside
-                      // https://github.com/elastic/security-team/issues/1730
-                      browserFields: getBrowserFields(patternString, response.indexFields),
-                      docValueFields: getDocValueFields(patternString, response.indexFields),
-                      errorMessage: null,
+                const signalIndexName = signalIndexNameSelector
+                  ? `${signalIndexNameSelector}-*`
+                  : newSignalsIndex ?? '';
+                // TODO: Steph/sourcerer needs test
+                if (newSignalsIndex !== null) {
+                  dispatch(
+                    sourcererActions.setSource({
+                      // if new signal index name is set, there wasn't one before so we need to update detections specifically
+                      // we need to update all scopes as there are new fields
+                      // once fields are moved to sourcerer.kibanaDataViews we only need to do this for detections scope
+                      id: SourcererScopeName.detections,
+                      payload: {
+                        browserFields: getBrowserFields(patternString, response.indexFields),
+                        docValueFields: getDocValueFields(patternString, response.indexFields),
+                        errorMessage: null,
+                        id: SourcererScopeName.detections,
+                        indexPattern: getIndexFields(patternString, response.indexFields),
+                        indicesExist: response.indicesExist.includes(signalIndexName),
+                        loading: false,
+                        runtimeMappings: response.runtimeMappings,
+                      },
+                    })
+                  );
+                } else {
+                  dispatch(
+                    sourcererActions.setSource({
                       id: sourcererScopeName,
-                      indexPattern: getIndexFields(patternString, response.indexFields),
-                      indicesExist:
-                        // TODO: Steph/sourcerer needs test
-                        sourcererScopeName === SourcererScopeName.detections
-                          ? signalIndexName != null &&
-                            response.indicesExist.includes(signalIndexName)
-                          : sourcererScopeName === SourcererScopeName.default
-                          ? response.indicesExist.filter((i) => i !== signalIndexName).length > 0
-                          : response.indicesExist.length > 0,
-                      loading: false,
-                      runtimeMappings: response.runtimeMappings,
-                    },
-                  })
-                );
+                      payload: {
+                        // TODO: Steph/sourcerer all the below formatting should be happening serverside
+                        // https://github.com/elastic/security-team/issues/1730
+                        browserFields: getBrowserFields(patternString, response.indexFields),
+                        docValueFields: getDocValueFields(patternString, response.indexFields),
+                        errorMessage: null,
+                        id: sourcererScopeName,
+                        indexPattern: getIndexFields(patternString, response.indexFields),
+                        indicesExist:
+                          // TODO: Steph/sourcerer needs test
+                          sourcererScopeName === SourcererScopeName.detections
+                            ? response.indicesExist.includes(signalIndexName)
+                            : sourcererScopeName === SourcererScopeName.default
+                            ? response.indicesExist.filter((i) => i !== signalIndexName).length > 0
+                            : response.indicesExist.length > 0,
+                        loading: false,
+                        runtimeMappings: response.runtimeMappings,
+                      },
+                    })
+                  );
+                }
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
