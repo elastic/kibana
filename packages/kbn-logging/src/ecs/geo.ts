@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.11/ecs-geo.html
+ * https://www.elastic.co/guide/en/ecs/1.12/ecs-geo.html
  *
  * @internal
  */

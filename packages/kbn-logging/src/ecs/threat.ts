@@ -23,11 +23,11 @@ interface IndicatorNestedFields {
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.11/ecs-threat.html
+ * https://www.elastic.co/guide/en/ecs/1.12/ecs-threat.html
  *
  * @internal
  */
-export interface EcsThreat extends NestedFields {
+export interface EcsThreat {
   enrichments?: Enrichment[];
   indicator?: Indicator;
   framework?: string;

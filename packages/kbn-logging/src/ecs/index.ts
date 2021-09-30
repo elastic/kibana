@@ -16,6 +16,7 @@ import { EcsContainer } from './container';
 import { EcsDataStream } from './data_stream';
 import { EcsDestination } from './destination';
 import { EcsDns } from './dns';
+import { EcsEmail } from './email';
 import { EcsError } from './error';
 import { EcsEvent } from './event';
 import { EcsFile } from './file';
@@ -47,13 +48,13 @@ export { EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from '.
 
 interface EcsField {
   /**
-   * These typings were written as of ECS 1.11.0.
+   * These typings were written as of ECS 1.12.0.
    * Don't change this value without checking the rest
    * of the types to conform to that ECS version.
    *
-   * https://www.elastic.co/guide/en/ecs/1.11/index.html
+   * https://www.elastic.co/guide/en/ecs/1.12/index.html
    */
-  version: '1.11.0';
+  version: '1.12.0';
 }
 
 /**
@@ -73,6 +74,7 @@ export type Ecs = EcsBase &
     data_stream?: EcsDataStream;
     destination?: EcsDestination;
     dns?: EcsDns;
+    email?: EcsEmail;
     error?: EcsError;
     event?: EcsEvent;
     file?: EcsFile;

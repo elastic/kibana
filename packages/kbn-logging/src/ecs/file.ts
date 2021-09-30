@@ -21,7 +21,7 @@ interface NestedFields {
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.11/ecs-file.html
+ * https://www.elastic.co/guide/en/ecs/1.12/ecs-file.html
  *
  * @internal
  */
@@ -34,6 +34,7 @@ export interface EcsFile extends NestedFields {
   directory?: string;
   drive_letter?: string;
   extension?: string;
+  fork_name?: string;
   gid?: string;
   group?: string;
   inode?: string;
