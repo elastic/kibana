@@ -208,14 +208,6 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
   }
 
-  async function isEventLogServiceEnabled() {
-    log.debug(`isEventLogServiceEnabled`);
-    return await supertest
-      .get(`/api/log_event_fixture/isEventLogServiceEnabled`)
-      .set('kbn-xsrf', 'foo')
-      .expect(200);
-  }
-
   async function isEventLogServiceLoggingEntries() {
     log.debug(`isEventLogServiceLoggingEntries`);
     return await supertest
