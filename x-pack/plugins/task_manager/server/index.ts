@@ -12,14 +12,17 @@ import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
 
 export const plugin = (initContext: PluginInitializerContext) => new TaskManagerPlugin(initContext);
 
-export {
+export type {
   TaskInstance,
   ConcreteTaskInstance,
   EphemeralTask,
   TaskRunCreatorFunction,
-  TaskStatus,
   RunContext,
 } from './task';
+
+export { TaskStatus } from './task';
+
+export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
 export { asInterval } from './lib/intervals';
 export {
@@ -30,7 +33,7 @@ export {
 export { RunNowResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 
-export {
+export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
   TaskManagerStartContract,
