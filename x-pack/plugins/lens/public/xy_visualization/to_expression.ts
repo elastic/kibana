@@ -13,6 +13,7 @@ import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
+import { hasIcon } from './xy_config_panel/threshold_panel';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -65,6 +66,7 @@ export function toPreviewExpression(
                 ...config,
                 lineWidth: 1,
                 icon: undefined,
+                textVisibility: false,
               })),
             }
       ),
@@ -338,8 +340,12 @@ export const buildExpression = (
                                 lineStyle: yConfig.lineStyle ? [yConfig.lineStyle] : [],
                                 lineWidth: yConfig.lineWidth ? [yConfig.lineWidth] : [],
                                 fill: [yConfig.fill || 'none'],
-                                icon: yConfig.icon ? [yConfig.icon] : [],
-                                iconPosition: [yConfig.iconPosition || 'auto'],
+                                icon: hasIcon(yConfig.icon) ? [yConfig.icon] : [],
+                                iconPosition:
+                                  hasIcon(yConfig.icon) || yConfig.textVisibility
+                                    ? [yConfig.iconPosition || 'auto']
+                                    : ['auto'],
+                                textVisibility: [yConfig.textVisibility || false],
                               },
                             },
                           ],

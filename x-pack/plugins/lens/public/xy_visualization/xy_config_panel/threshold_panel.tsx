@@ -8,7 +8,14 @@
 import './xy_config_panel.scss';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon, EuiRange } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiComboBox,
+  EuiFormRow,
+  EuiIcon,
+  EuiRange,
+  EuiSwitch,
+} from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State } from '../types';
@@ -175,6 +182,10 @@ function getIconPositionOptions({
     yOptions.reverse();
   }
   return [...options, ...yOptions];
+}
+
+export function hasIcon(icon: string | undefined): icon is string {
+  return icon != null && icon !== 'none';
 }
 
 export const ThresholdPanel = (
@@ -348,9 +359,10 @@ export const ThresholdPanel = (
       >
         <TooltipWrapper
           tooltipContent={i18n.translate('xpack.lens.thresholdMarker.positionRequirementTooltip', {
-            defaultMessage: 'You must select an icon in order to alter its position',
+            defaultMessage:
+              'You must select an icon or show a label in order to alter its position',
           })}
-          condition={currentYConfig?.icon == null || currentYConfig?.icon === 'none'}
+          condition={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
           position="top"
           delay="regular"
           display="block"
@@ -358,11 +370,11 @@ export const ThresholdPanel = (
           <EuiButtonGroup
             isFullWidth
             legend={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
-              defaultMessage: 'Icon position',
+              defaultMessage: 'Marker position',
             })}
             data-test-subj="lnsXY_markerPosition_threshold"
             name="markerPosition"
-            isDisabled={currentYConfig?.icon == null || currentYConfig?.icon === 'none'}
+            isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
             buttonSize="compressed"
             options={getIconPositionOptions({
               isHorizontal,
@@ -375,6 +387,25 @@ export const ThresholdPanel = (
             }}
           />
         </TooltipWrapper>
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.thresholdMarker.textVisibility', {
+          defaultMessage: 'Show label',
+        })}
+        display="columnCompressedSwitch"
+      >
+        <EuiSwitch
+          compressed
+          label={i18n.translate('xpack.lens.thresholdMarker.textVisibility', {
+            defaultMessage: 'Show label',
+          })}
+          showLabel={false}
+          data-test-subj="lns-thresholdMaker-text-visibility"
+          checked={Boolean(currentYConfig?.textVisibility)}
+          onChange={() => {
+            setYConfig({ forAccessor: accessor, textVisibility: !currentYConfig?.textVisibility });
+          }}
+        />
       </EuiFormRow>
     </>
   );

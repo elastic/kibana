@@ -14,6 +14,7 @@ import type { FieldFormat } from 'src/plugins/field_formats/common';
 import type { LayerArgs, YConfig } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
 import type { ColorAssignments } from './color_assignment';
+import { hasIcon } from './xy_config_panel/threshold_panel';
 
 const THRESHOLD_ICON_SIZE = 20;
 
@@ -58,16 +59,16 @@ export const getThresholdRequiredPaddings = (
   thresholdLayers: LayerArgs[],
   axesMap: Record<'left' | 'right', unknown>
 ) => {
-  const positions = Object.keys(Position);
   return thresholdLayers.reduce((memo, layer) => {
-    if (positions.some((pos) => !(pos in memo))) {
-      layer.yConfig?.forEach(({ axisMode, icon, iconPosition }) => {
-        if (axisMode && hasIcon(icon)) {
-          const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
-          memo[placement] = THRESHOLD_ICON_SIZE;
-        }
-      });
-    }
+    layer.yConfig?.forEach(({ axisMode, icon, iconPosition, textVisibility }) => {
+      if (axisMode && (hasIcon(icon) || textVisibility)) {
+        const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
+        memo[placement] = Math.max(
+          memo[placement] || 0,
+          THRESHOLD_ICON_SIZE * (Number(hasIcon(icon)) + Number(textVisibility)) // double the padding size if there's text
+        );
+      }
+    });
     return memo;
   }, {} as Partial<Record<Position, number>>);
 };
@@ -115,7 +116,7 @@ function getBaseIconPlacement(
   return Position.Top;
 }
 
-function getIconPlacement(
+function getMarkerPosition(
   iconPosition: YConfig['iconPosition'],
   axisMode: YConfig['axisMode'],
   axesMap: Record<string, unknown>,
@@ -126,6 +127,46 @@ function getIconPlacement(
     return mapVerticalToHorizontalPlacement(vPosition);
   }
   return vPosition;
+}
+
+function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
+  if (!label) {
+    return;
+  }
+  const Label = (
+    <div className="eui-textTruncate" style={{ maxWidth: THRESHOLD_ICON_SIZE * 3 }}>
+      {label}
+    </div>
+  );
+  return isHorizontal ? (
+    Label
+  ) : (
+    <div
+      style={{
+        display: 'inline-block',
+        overflow: 'hidden',
+        width: THRESHOLD_ICON_SIZE,
+        lineHeight: 1.5,
+      }}
+    >
+      <div
+        style={{
+          display: 'inline-block',
+          whiteSpace: 'nowrap',
+          transform: 'translate(0, 100%) rotate(-90deg)',
+          transformOrigin: '0 0',
+        }}
+      >
+        {Label}
+        <div
+          style={{
+            float: 'left',
+            marginTop: '100%',
+          }}
+        />
+      </div>
+    </div>
+  );
 }
 
 export const ThresholdAnnotations = ({
@@ -203,8 +244,17 @@ export const ThresholdAnnotations = ({
 
           const props = {
             groupId,
-            marker: hasIcon(yConfig.icon) ? <EuiIcon type={yConfig.icon} /> : undefined,
-            markerPosition: getIconPlacement(
+            marker: hasIcon(yConfig.icon) ? (
+              <EuiIcon type={yConfig.icon} />
+            ) : yConfig.textVisibility ? (
+              <EuiIcon type="empty" />
+            ) : undefined,
+            markerBody: getMarkerBody(
+              yConfig.textVisibility ? columnToLabelMap[yConfig.forAccessor] : undefined,
+              (!isHorizontal && yConfig.axisMode === 'bottom') ||
+                (isHorizontal && yConfig.axisMode !== 'bottom')
+            ),
+            markerPosition: getMarkerPosition(
               yConfig.iconPosition,
               yConfig.axisMode,
               axesMap,
