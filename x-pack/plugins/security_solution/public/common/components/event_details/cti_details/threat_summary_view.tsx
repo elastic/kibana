@@ -233,9 +233,10 @@ const ThreatSummaryEnrichmentData: React.FC<{
               />
             ))}
           </EuiPanel>
-          <EuiSpacer size="m" />
         </>
       )}
+
+      {indicator.length > 0 && investigation.length > 0 && <EuiSpacer size="m" />}
 
       {investigation.length > 0 && (
         <>
@@ -263,7 +264,6 @@ const ThreatSummaryEnrichmentData: React.FC<{
               />
             ))}
           </EuiPanel>
-          <EuiSpacer size="m" />
         </>
       )}
     </>
@@ -313,7 +313,6 @@ const HostRiskDataBlock: React.FC<{
           </>
         )}
       </EuiPanel>
-      <EuiSpacer size="m" />
     </>
   );
 };
@@ -340,6 +339,9 @@ const ThreatSummaryViewComponent: React.FC<{
       <EuiSpacer size="s" />
 
       {hostRisk && <HostRiskDataBlock hostRisk={hostRisk} />}
+
+      {hostRisk && enrichments.length > 0 && <EuiSpacer size="m" />}
+
       <ThreatSummaryEnrichmentData
         browserFields={browserFields}
         data={data}

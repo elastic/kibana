@@ -39,6 +39,7 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 
 import { HostRisk } from '../../../timelines/containers/host_risk_score/use_host_risk_score';
+import { InvestigationGuideView } from './investigation_guide_view';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -64,6 +65,11 @@ interface Props {
   timelineId: string;
   hostRisk?: HostRisk;
 }
+
+export const Indent = styled.div`
+  padding: 0 8px;
+  word-break: break-word;
+`;
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   display: flex;
@@ -166,11 +172,14 @@ const EventDetailsComponent: React.FC<Props> = ({
                     enrichments={allEnrichments}
                   />
                 )}
+
                 {isEnrichmentsLoading && (
                   <>
                     <EuiLoadingContent lines={2} />
                   </>
                 )}
+
+                <InvestigationGuideView data={data} />
               </>
             ),
           }

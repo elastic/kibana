@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiSpacer, EuiHorizontalRule, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiSpacer } from '@elastic/eui';
 import { get, getOr, find, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -33,9 +33,7 @@ import {
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
 import { SummaryView } from './summary_view';
 import { AlertSummaryRow, getSummaryColumns, SummaryRow, ThreatDetailsRow } from './helpers';
-import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
-import { MarkdownRenderer } from '../markdown_editor';
-import { LineClamp } from '../line_clamp';
+
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
@@ -314,34 +312,10 @@ const AlertSummaryViewComponent: React.FC<{
     [browserFields, data, eventId, isDraggable, timelineId]
   );
 
-  const ruleId = useMemo(() => {
-    const item = data.find((d) => d.field === 'signal.rule.id');
-    return Array.isArray(item?.originalValue)
-      ? item?.originalValue[0]
-      : item?.originalValue ?? null;
-  }, [data]);
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
-
   return (
     <>
       <EuiSpacer size="s" />
       <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
-      {maybeRule?.note && (
-        <>
-          <EuiHorizontalRule />
-          <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
-            <h5>{i18n.INVESTIGATION_GUIDE}</h5>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <Indent>
-            <EuiText size="xs">
-              <LineClamp lineClampHeight={4.5}>
-                <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
-              </LineClamp>
-            </EuiText>
-          </Indent>
-        </>
-      )}
     </>
   );
 };
