@@ -16,7 +16,7 @@ import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore
 import { Beat } from '../../../components/beats/beat';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-import { PageTemplate, TabMenuItem } from '../page_template';
+import { BeatsTemplate } from './beats_template';
 
 export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   const { instance }: { instance: string } = useParams();
@@ -74,28 +74,17 @@ export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
     setBeatName(response.summary.name);
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
-  const tabs: TabMenuItem[] = [
-    {
-      id: 'overview',
-      label: i18n.translate('xpack.monitoring.beatsNavigation.instance.overviewLinkText', {
-        defaultMessage: 'Overview',
-      }),
-      route: `/beats/beat/${instance}`,
-    },
-  ];
-
   return (
-    <PageTemplate
+    <BeatsTemplate
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
+      instance={instance}
       data-test-subj="beatDetailPage"
-      tabs={tabs}
-      product="beats"
     >
       <div data-test-subj="monitoringBeatsInstanceApp">
         <Beat summary={data.summary} metrics={data.metrics} onBrush={onBrush} zoomInfo={zoomInfo} />
       </div>
-    </PageTemplate>
+    </BeatsTemplate>
   );
 };
