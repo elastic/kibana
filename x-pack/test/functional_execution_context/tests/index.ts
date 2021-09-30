@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup1');
     loadTestFile(require.resolve('./browser'));
     loadTestFile(require.resolve('./server'));
+    loadTestFile(require.resolve('./log_correlation'));
   });
 }

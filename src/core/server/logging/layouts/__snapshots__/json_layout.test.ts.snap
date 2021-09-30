@@ -11,3 +11,5 @@ exports[`\`format()\` correctly formats record. 4`] = `"{\\"ecs\\":{\\"version\\
 exports[`\`format()\` correctly formats record. 5`] = `"{\\"ecs\\":{\\"version\\":\\"1.9.0\\"},\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"message\\":\\"message-5\\",\\"log\\":{\\"level\\":\\"INFO\\",\\"logger\\":\\"context-5\\"},\\"process\\":{\\"pid\\":5355}}"`;
 
 exports[`\`format()\` correctly formats record. 6`] = `"{\\"ecs\\":{\\"version\\":\\"1.9.0\\"},\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"message\\":\\"message-6\\",\\"log\\":{\\"level\\":\\"TRACE\\",\\"logger\\":\\"context-6\\"},\\"process\\":{\\"pid\\":5355}}"`;
+
+exports[`\`format()\` correctly formats record. 7`] = `"{\\"ecs\\":{\\"version\\":\\"1.9.0\\"},\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"message\\":\\"message-6\\",\\"log\\":{\\"level\\":\\"TRACE\\",\\"logger\\":\\"context-7\\"},\\"process\\":{\\"pid\\":5355},\\"span\\":{\\"id\\":\\"spanId-1\\"},\\"trace\\":{\\"id\\":\\"traceId-1\\"},\\"transaction\\":{\\"id\\":\\"transactionId-1\\"}}"`;
