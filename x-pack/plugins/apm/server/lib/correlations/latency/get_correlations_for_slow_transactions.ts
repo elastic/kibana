@@ -13,12 +13,14 @@ import { processSignificantTermAggs } from '../process_significant_term_aggs';
 import { getLatencyDistribution } from './get_latency_distribution';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
+import { Setup } from '../../helpers/setup_request';
 
 interface Options extends CorrelationsOptions {
   durationPercentile: number;
   fieldNames: string[];
   maxLatency: number;
   distributionInterval: number;
+  setup: Setup;
 }
 export async function getCorrelationsForSlowTransactions(options: Options) {
   return withApmSpan('get_correlations_for_slow_transactions', async () => {
