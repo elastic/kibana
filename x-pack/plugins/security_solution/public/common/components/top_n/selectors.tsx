@@ -23,7 +23,9 @@ export const getIndicesSelector = () => {
     const signalIndexName = getSignalIndexNameSelector(state);
     const { selectedPatterns } = getScopesSelector(state)[scopeId];
     selectedPatterns.forEach((index) => {
-      if (signalIndexName != null && index.indexOf(signalIndexName) === -1) {
+      // indexOf instead of === because the dataView version of signals index
+      // will have a wildcard and the signalIndexName does not include the wildcard
+      if (index.indexOf(`${signalIndexName}`) === -1) {
         raw.push(index);
       }
     });
