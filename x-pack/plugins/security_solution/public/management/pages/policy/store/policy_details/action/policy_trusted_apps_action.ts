@@ -5,9 +5,41 @@
  * 2.0.
  */
 
-// TODO: defined trusted apps actions (code below only here to silence TS)
+import { AsyncResourceState } from '../../../../../state';
+import {
+  PostTrustedAppCreateResponse,
+  GetTrustedListAppsResponse,
+} from '../../../../../../../common/endpoint/types';
+export interface PolicyArtifactsAssignableListPageDataChanged {
+  type: 'policyArtifactsAssignableListPageDataChanged';
+  payload: AsyncResourceState<GetTrustedListAppsResponse>;
+}
+
+export interface PolicyArtifactsUpdateTrustedApps {
+  type: 'policyArtifactsUpdateTrustedApps';
+  payload: {
+    trustedAppIds: string[];
+  };
+}
+
+export interface PolicyArtifactsUpdateTrustedAppsChanged {
+  type: 'policyArtifactsUpdateTrustedAppsChanged';
+  payload: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+}
+
+export interface PolicyArtifactsAssignableListExistDataChanged {
+  type: 'policyArtifactsAssignableListExistDataChanged';
+  payload: AsyncResourceState<boolean>;
+}
+
+export interface PolicyArtifactsAssignableListPageDataFilter {
+  type: 'policyArtifactsAssignableListPageDataFilter';
+  payload: { filter: string };
+}
+
 export type PolicyTrustedAppsAction =
-  | {
-      type: 'a';
-    }
-  | { type: 'b' };
+  | PolicyArtifactsAssignableListPageDataChanged
+  | PolicyArtifactsUpdateTrustedApps
+  | PolicyArtifactsUpdateTrustedAppsChanged
+  | PolicyArtifactsAssignableListExistDataChanged
+  | PolicyArtifactsAssignableListPageDataFilter;
