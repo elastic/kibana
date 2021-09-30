@@ -7,12 +7,12 @@
 
 import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { lensSlice } from './lens_slice';
+import { onActiveDataChange } from '.';
 
 /** cancels updates to the store that don't change the state */
 export const optimizingMiddleware = () => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: Action) => {
-    if (lensSlice.actions.onActiveDataChange.match(action)) {
+    if (onActiveDataChange.match(action)) {
       if (isEqual(store.getState().lens.activeData, action.payload)) {
         return;
       }

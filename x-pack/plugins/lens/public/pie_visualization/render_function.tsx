@@ -215,11 +215,11 @@ export function PieComponent(
     },
   });
 
-  const [state, setState] = useState({ isReady: false });
+  const [isReady, setIsReady] = useState(false);
   // It takes a cycle for the chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
-    setState({ isReady: true });
+    setIsReady(true);
   }, []);
 
   const hasNegative = firstTable.rows.some((row) => {
@@ -273,7 +273,7 @@ export function PieComponent(
       reportTitle={props.args.title}
       reportDescription={props.args.description}
       className="lnsPieExpression__container"
-      isReady={state.isReady}
+      isReady={isReady}
     >
       <Chart>
         <Settings
