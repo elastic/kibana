@@ -20,7 +20,7 @@ const inputs = [
   {
     key: 'ftsr-concurrency',
     text: 'Max concurrency per step',
-    default: 10,
+    default: 20,
     required: true,
   },
 ];
@@ -43,7 +43,7 @@ const pipeline = {
       wait: '~',
     },
     {
-      command: '.buildkite/scripts/steps/flaky_tests/runner.sh',
+      command: '.buildkite/pipelines/flaky_tests/runner.sh',
       label: 'Create pipeline',
     },
   ],
