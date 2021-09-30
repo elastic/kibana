@@ -344,4 +344,24 @@ The output directory after extracting an archive no longer includes the target p
 *Impact:*
 Configuration management tools and automation will need to be updated to use the new directory.
 
+[float]
+=== `elasticsearch.preserveHost` is no longer valid
+*Details:* The deprecated `elasticsearch.preserveHost` setting in the `kibana.yml` file has been removed.
+
+*Impact:* Configure {kibana-ref}/settings.html#elasticsearch-requestHeadersWhitelist[`elasticsearch.requestHeadersWhitelist`] to whitelist client-side headers.
+
+[float]
+=== `elasticsearch.startupTimeout` is no longer valid
+*Details:* The deprecated `elasticsearch.startupTimeout` setting in the `kibana.yml` file has been removed.
+
+*Impact:* Kibana will keep on trying to connect to Elasticsearch until it manages to connect.
+
+[float]
+=== `savedObjects.indexCheckTimeout` is no longer valid
+*Details:* The deprecated `savedObjects.indexCheckTimeout` setting in the `kibana.yml` file has been removed.
+
+[float]
+=== `server.xsrf.token` is no longer valid
+*Details:* The deprecated `server.xsrf.token` setting in the `kibana.yml` file has been removed.
+
 // end::notable-breaking-changes[]
