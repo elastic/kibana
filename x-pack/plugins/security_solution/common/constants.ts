@@ -64,23 +64,39 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
 export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
+export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  authentications = 'authentications',
   case = 'case',
+  caseConfigure = 'case-configure',
+  caseCreate = 'case-create',
   detections = 'detections',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
+  events = 'events',
   exceptions = 'exceptions',
+  explore = 'explore',
   hosts = 'hosts',
+  hostsAnomalies = 'hosts-anomalies',
+  hostsExternalAlerts = 'hosts-external_alerts',
+  investigate = 'investigate',
   network = 'network',
+  networkAnomalies = 'network-anomalies',
+  networkDns = 'network-dns',
+  networkExternalAlerts = 'network-external_alerts',
+  networkHttp = 'network-http',
+  networkTls = 'network-tls',
+  timelines = 'timelines',
+  timelinesTemplates = 'timelines-templates',
   overview = 'overview',
   policies = 'policies',
   rules = 'rules',
-  timelines = 'timelines',
   trustedApps = 'trusted_apps',
   ueba = 'ueba',
+  uncommonProcesses = 'uncommon_processes',
 }
 
 export const TIMELINES_PATH = '/timelines';
@@ -201,8 +217,9 @@ export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as con
 
 /**
  * Id for the notifications alerting type
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const NOTIFICATIONS_ID = `siem.notifications`;
+export const LEGACY_NOTIFICATIONS_ID = `siem.notifications`;
 
 /**
  * Special internal structure for tags for signals. This is used
@@ -311,3 +328,5 @@ export const showAllOthersBucket: string[] = [
 export const ELASTIC_NAME = 'estc';
 
 export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;
+
+export const RISKY_HOSTS_INDEX = 'ml_host_risk_score_latest';

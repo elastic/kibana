@@ -446,7 +446,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (res.right.outdatedDocuments.length > 0) {
         return {
           ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX',
+          controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
           progress,
@@ -489,11 +489,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX') {
+  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_TRANSFORM') {
     // We follow a similar control flow as for
     // outdated document search -> outdated document transform -> transform documents bulk index
     // collecting issues along the way rather than failing
-    // REINDEX_SOURCE_TO_TEMP_INDEX handles the document transforms
+    // REINDEX_SOURCE_TO_TEMP_TRANSFORM handles the document transforms
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
     // Increment the processed documents, no matter what the results are.

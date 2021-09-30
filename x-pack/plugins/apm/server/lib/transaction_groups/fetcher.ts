@@ -25,7 +25,7 @@ import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
 
 export interface TopTraceOptions {
@@ -33,6 +33,8 @@ export interface TopTraceOptions {
   kuery: string;
   transactionName?: string;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }
 
 type Key = Record<'service.name' | 'transaction.name', string>;
@@ -57,14 +59,15 @@ export type TransactionGroupRequestBase = ReturnType<typeof getRequest> & {
   };
 };
 
-function getRequest(
-  topTraceOptions: TopTraceOptions,
-  setup: TransactionGroupSetup
-) {
-  const { start, end } = setup;
-
-  const { searchAggregatedTransactions, environment, kuery, transactionName } =
-    topTraceOptions;
+function getRequest(topTraceOptions: TopTraceOptions) {
+  const {
+    searchAggregatedTransactions,
+    environment,
+    kuery,
+    transactionName,
+    start,
+    end,
+  } = topTraceOptions;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -133,7 +136,7 @@ function getRequest(
   };
 }
 
-export type TransactionGroupSetup = Setup & SetupTimeRange;
+export type TransactionGroupSetup = Setup;
 
 function getItemsWithRelativeImpact(
   setup: TransactionGroupSetup,
@@ -143,7 +146,9 @@ function getItemsWithRelativeImpact(
     avg?: number | null;
     count?: number | null;
     transactionType?: string;
-  }>
+  }>,
+  start: number,
+  end: number
 ) {
   const values = items
     .map(({ sum }) => sum)
@@ -152,7 +157,7 @@ function getItemsWithRelativeImpact(
   const max = Math.max(...values);
   const min = Math.min(...values);
 
-  const duration = moment.duration(setup.end - setup.start);
+  const duration = moment.duration(end - start);
   const minutes = duration.asMinutes();
 
   const itemsWithRelativeImpact = items.map((item) => {
@@ -176,7 +181,7 @@ export function topTransactionGroupsFetcher(
   setup: TransactionGroupSetup
 ): Promise<{ items: TransactionGroup[] }> {
   return withApmSpan('get_top_traces', async () => {
-    const request = getRequest(topTraceOptions, setup);
+    const request = getRequest(topTraceOptions);
 
     const params = {
       request,
@@ -195,7 +200,14 @@ export function topTransactionGroupsFetcher(
 
     const items = joinByKey(stats, 'key');
 
-    const itemsWithRelativeImpact = getItemsWithRelativeImpact(setup, items);
+    const { start, end } = topTraceOptions;
+
+    const itemsWithRelativeImpact = getItemsWithRelativeImpact(
+      setup,
+      items,
+      start,
+      end
+    );
 
     const itemsWithKeys = itemsWithRelativeImpact.map((item) => ({
       ...item,

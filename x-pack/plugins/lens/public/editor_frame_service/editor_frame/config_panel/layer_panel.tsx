@@ -57,6 +57,7 @@ export function LayerPanel(
     onRemoveLayer: () => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
+    onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -124,7 +125,11 @@ export function LayerPanel(
     dateRange,
   };
 
-  const { groups, supportStaticValue } = useMemo(
+  const {
+    groups,
+    supportStaticValue,
+    supportFieldFormat = true,
+  } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -173,9 +178,9 @@ export function LayerPanel(
         setNextFocusedButtonId(columnId);
       }
 
-      const filterOperations =
-        groups.find(({ groupId: gId }) => gId === targetItem.groupId)?.filterOperations ||
-        (() => false);
+      const group = groups.find(({ groupId: gId }) => gId === groupId);
+
+      const filterOperations = group?.filterOperations || (() => false);
 
       const dropResult = layerDatasourceOnDrop({
         ...layerDatasourceDropProps,
@@ -188,12 +193,28 @@ export function LayerPanel(
         dropType,
       });
       if (dropResult) {
+        let previousColumn =
+          typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
+
+        // make it inherit only for moving and duplicate
+        if (!previousColumn) {
+          // when duplicating check if the previous column is required
+          if (
+            dropType === 'duplicate_compatible' &&
+            typeof droppedItem.columnId === 'string' &&
+            group?.requiresPreviousColumnOnDuplicate
+          ) {
+            previousColumn = droppedItem.columnId;
+          } else {
+            previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
+          }
+        }
         const newVisState = setDimension({
           columnId,
           groupId,
           layerId: targetLayerId,
           prevState: props.visualizationState,
-          previousColumn: typeof droppedItem.column === 'string' ? droppedItem.column : undefined,
+          previousColumn,
           frame: framePublicAPI,
         });
 
@@ -227,13 +248,25 @@ export function LayerPanel(
   const isDimensionPanelOpen = Boolean(activeId);
 
   const updateDataLayerState = useCallback(
-    (newState: unknown, { isDimensionComplete = true }: { isDimensionComplete?: boolean } = {}) => {
+    (
+      newState: unknown,
+      {
+        isDimensionComplete = true,
+        // this flag is a hack to force a sync render where it was planned an async/setTimeout state update
+        // TODO: revisit this once we get rid of updateDatasourceAsync upstream
+        forceRender = false,
+      }: { isDimensionComplete?: boolean; forceRender?: boolean } = {}
+    ) => {
       if (!activeGroup || !activeId) {
         return;
       }
       if (allAccessors.includes(activeId)) {
         if (isDimensionComplete) {
-          updateDatasourceAsync(datasourceId, newState);
+          if (forceRender) {
+            updateDatasource(datasourceId, newState);
+          } else {
+            updateDatasourceAsync(datasourceId, newState);
+          }
         } else {
           // The datasource can indicate that the previously-valid column is no longer
           // complete, which clears the visualization. This keeps the flyout open and reuses
@@ -263,7 +296,11 @@ export function LayerPanel(
         );
         setActiveDimension({ ...activeDimension, isNew: false });
       } else {
-        updateDatasourceAsync(datasourceId, newState);
+        if (forceRender) {
+          updateDatasource(datasourceId, newState);
+        } else {
+          updateDatasourceAsync(datasourceId, newState);
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -295,11 +332,10 @@ export function LayerPanel(
           hasBorder
           hasShadow
         >
-          <section className="lnsLayerPanel__layerHeader">
+          <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
                 <LayerSettings
-                  layerId={layerId}
                   layerConfigProps={{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
@@ -354,7 +390,7 @@ export function LayerPanel(
                 }}
               />
             )}
-          </section>
+          </header>
 
           {groups.map((group, groupIndex) => {
             const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
@@ -460,6 +496,8 @@ export function LayerPanel(
                                   columnId: accessorConfig.columnId,
                                   groupId: group.groupId,
                                   filterOperations: group.filterOperations,
+                                  invalid: group.invalid,
+                                  invalidMessage: group.invalidMessage,
                                 }}
                               />
                             </DimensionButton>
@@ -478,6 +516,7 @@ export function LayerPanel(
                       layerDatasource={layerDatasource}
                       layerDatasourceDropProps={layerDatasourceDropProps}
                       onClick={(id) => {
+                        props.onEmptyDimensionAdd(id, group);
                         setActiveDimension({
                           activeGroup: group,
                           activeId: id,
@@ -538,6 +577,8 @@ export function LayerPanel(
                   toggleFullscreen,
                   isFullscreen,
                   setState: updateDataLayerState,
+                  supportStaticValue: Boolean(supportStaticValue),
+                  supportFieldFormat: Boolean(supportFieldFormat),
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 }}
               />
