@@ -9,7 +9,7 @@
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
-import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
+import { setHeaderActionMenuMounter, setServices } from '../../../../../kibana_services';
 import { DiscoverLayout } from './discover_layout';
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../../__mocks__/index_pattern';
@@ -135,13 +135,22 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
 }
 
 describe('Discover component', () => {
+  beforeAll(() => {
+    setServices(discoverServiceMock);
+  });
   test('selected index pattern without time field displays no chart toggle', () => {
-    const component = mountWithIntl(<DiscoverLayout {...getProps(indexPatternMock)} />);
+    const component = mountWithIntl(
+      <discoverServiceMock.presentationUtil.ContextProvider>
+        <DiscoverLayout {...getProps(indexPatternMock)} />
+      </discoverServiceMock.presentationUtil.ContextProvider>
+    );
     expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
   });
   test('selected index pattern with time field displays chart toggle', () => {
     const component = mountWithIntl(
-      <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
+      <discoverServiceMock.presentationUtil.ContextProvider>
+        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
+      </discoverServiceMock.presentationUtil.ContextProvider>
     );
     expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
   });

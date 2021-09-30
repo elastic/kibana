@@ -27,6 +27,7 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { useLabs } from '../../../../../presentation_util/public';
+import { ENABLE_NEW_TABLE } from '../../../../../presentation_util/common';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -41,7 +42,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
   const { uiSettings: config, capabilities, indexPatterns, navigation, filterManager } = services;
 
   const { isProjectEnabled } = useLabs();
-  const isLegacy = !isProjectEnabled('labs:discover:enableNewTable');
+  const isLegacy = !isProjectEnabled(ENABLE_NEW_TABLE);
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
 
   /**

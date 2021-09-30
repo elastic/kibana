@@ -20,6 +20,7 @@ import { savedSearchMock } from './saved_search';
 import { UI_SETTINGS } from '../../../data/common';
 import { TopNavMenu } from '../../../navigation/public';
 import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
+import { getStubPluginServices } from '../../../presentation_util/public';
 const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = {
@@ -85,6 +86,7 @@ export const discoverServiceMock = {
   metadata: {
     branch: 'test',
   },
+  presentationUtil: getStubPluginServices(),
   theme: {
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),

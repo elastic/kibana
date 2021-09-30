@@ -14,6 +14,7 @@ import { DocTableEmbeddableProps } from '../apps/main/components/doc_table/doc_t
 import { SearchProps } from './saved_search_embeddable';
 import { useLabs } from '../../../../presentation_util/public';
 import { getServices } from '../../kibana_services';
+import { ENABLE_NEW_TABLE } from '../../../../presentation_util/common';
 
 interface SavedSearchEmbeddableComponentProps {
   searchProps: SearchProps;
@@ -37,7 +38,7 @@ export function SavedSearchEmbeddableComponentSwitch({
   refs,
 }: SavedSearchEmbeddableComponentProps) {
   const { isProjectEnabled } = useLabs();
-  const useLegacyTable = !isProjectEnabled('labs:discover:enableNewTable');
+  const useLegacyTable = !isProjectEnabled(ENABLE_NEW_TABLE);
   if (useLegacyTable) {
     const docTableProps = {
       ...searchProps,

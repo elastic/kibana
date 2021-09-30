@@ -9,7 +9,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
-import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
+import { setHeaderActionMenuMounter, setServices } from '../../../../../kibana_services';
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import { GetStateReturn } from '../../services/discover_state';
@@ -49,15 +49,24 @@ function getProps(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
 }
 
 describe('Discover documents layout', () => {
+  beforeAll(() => {
+    setServices(discoverServiceMock);
+  });
   test('render loading when loading and no documents', () => {
-    const component = mountWithIntl(<DiscoverDocuments {...getProps(FetchStatus.LOADING, [])} />);
+    const component = mountWithIntl(
+      <discoverServiceMock.presentationUtil.ContextProvider>
+        <DiscoverDocuments {...getProps(FetchStatus.LOADING, [])} />
+      </discoverServiceMock.presentationUtil.ContextProvider>
+    );
     expect(component.find('.dscDocuments__loading').exists()).toBeTruthy();
     expect(component.find('.dscTable').exists()).toBeFalsy();
   });
 
   test('render complete when loading but documents were already fetched', () => {
     const component = mountWithIntl(
-      <DiscoverDocuments {...getProps(FetchStatus.LOADING, esHits as ElasticSearchHit[])} />
+      <discoverServiceMock.presentationUtil.ContextProvider>
+        <DiscoverDocuments {...getProps(FetchStatus.LOADING, esHits as ElasticSearchHit[])} />{' '}
+      </discoverServiceMock.presentationUtil.ContextProvider>
     );
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
@@ -65,7 +74,9 @@ describe('Discover documents layout', () => {
 
   test('render complete', () => {
     const component = mountWithIntl(
-      <DiscoverDocuments {...getProps(FetchStatus.COMPLETE, esHits as ElasticSearchHit[])} />
+      <discoverServiceMock.presentationUtil.ContextProvider>
+        <DiscoverDocuments {...getProps(FetchStatus.COMPLETE, esHits as ElasticSearchHit[])} />
+      </discoverServiceMock.presentationUtil.ContextProvider>
     );
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();

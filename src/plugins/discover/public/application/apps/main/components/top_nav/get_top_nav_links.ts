@@ -151,11 +151,11 @@ export const getTopNavLinks = ({
   };
 
   return [
-    ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
     openSearch,
     shareSearch,
     inspectSearch,
+    ...(services.capabilities.advancedSettings.save ? [options] : []),
   ];
 };

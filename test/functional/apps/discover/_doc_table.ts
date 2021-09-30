@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('classic table in window 600x700', async function () {
       before(async () => {
-        await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': true });
+        await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': false });
         await browser.setWindowSize(600, 700);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();

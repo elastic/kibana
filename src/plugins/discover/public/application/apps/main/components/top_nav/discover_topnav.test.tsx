@@ -11,7 +11,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 import { indexPatternMock } from '../../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
-import { TopNavMenuData } from '../../../../../../../navigation/public';
+import { TopNavMenu, TopNavMenuData } from '../../../../../../../navigation/public';
 import { ISearchSource, Query } from '../../../../../../../data/common';
 import { GetStateReturn } from '../../services/discover_state';
 import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
@@ -41,14 +41,17 @@ describe('Discover topnav component', () => {
   test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
     const props = getProps(true);
     const component = shallowWithIntl(<DiscoverTopNav {...props} />);
-    const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['options', 'new', 'save', 'open', 'share', 'inspect']);
+    const topMenuWrapper = component.find(TopNavMenu);
+    const topMenuConfig = topMenuWrapper.props().config!.map((obj: TopNavMenuData) => obj.id);
+    expect(topMenuConfig).toEqual(['labs', 'new', 'save', 'open', 'share', 'inspect', 'options']);
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
     const props = getProps(false);
     const component = shallowWithIntl(<DiscoverTopNav {...props} />);
-    const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect']);
+    const topMenuWrapper = component.find(TopNavMenu);
+
+    const topMenuConfig = topMenuWrapper.props().config!.map((obj: TopNavMenuData) => obj.id);
+    expect(topMenuConfig).toEqual(['labs', 'new', 'open', 'share', 'inspect', 'options']);
   });
 });
