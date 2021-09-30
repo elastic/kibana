@@ -84,6 +84,7 @@ describe('When on the host isolation exceptions page', () => {
 
         expect(renderResult.getByTestId('hostIsolationExceptionsCard')).toBeTruthy();
       });
+
       it('should show API error if one is encountered', async () => {
         getHostIsolationExceptionItemsMock.mockImplementation(() => {
           throw new Error('Server is too far away');

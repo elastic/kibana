@@ -66,10 +66,8 @@ async function loadHostIsolationExceptionsList(
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',
       payload: {
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
         type: 'LoadingResourceState',
-        // @ts-ignore
+        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
         previousState: getCurrentListPageDataState(store.getState()),
       },
     });
