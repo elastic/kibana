@@ -47,7 +47,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
         all: [],
         read: [],
       },
-      ui: ['read_cases'], // uiCapabilities[uiCapabilities[CASES_FEATURE_ID]].read_cases
+      ui: ['read_cases'], // uiCapabilities[CASES_FEATURE_ID].read_cases
     },
   },
 });

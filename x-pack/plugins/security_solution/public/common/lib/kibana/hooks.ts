@@ -156,17 +156,9 @@ export const useGetUserCasesPermissions = () => {
   const uiCapabilities = useKibana().services.application.capabilities;
 
   useEffect(() => {
-    const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities[CASES_FEATURE_ID].crud_cases === 'boolean'
-        ? (uiCapabilities[CASES_FEATURE_ID].crud_cases as boolean)
-        : false;
-    const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities[CASES_FEATURE_ID].read_cases === 'boolean'
-        ? (uiCapabilities[CASES_FEATURE_ID].read_cases as boolean)
-        : false;
     setCasesPermissions({
-      crud: capabilitiesCanUserCRUD,
-      read: capabilitiesCanUserRead,
+      crud: !!uiCapabilities[CASES_FEATURE_ID].crud_cases,
+      read: !!uiCapabilities[CASES_FEATURE_ID].read_cases,
     });
   }, [uiCapabilities]);
 
