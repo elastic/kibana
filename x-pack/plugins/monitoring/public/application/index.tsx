@@ -21,23 +21,23 @@ import { RouteInit } from './route_init';
 import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { BeatsOverviewPage } from './pages/beats/overview';
-<<<<<<< HEAD
 import {
   CODE_PATH_ELASTICSEARCH,
   CODE_PATH_BEATS,
   CODE_PATH_LOGSTASH,
 } from '../../common/constants';
-=======
-import { BeatsInstancesPage } from './pages/beats/instances';
-import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
->>>>>>> 47c9efded8a2a4fc29381d1b64f2d5d1d60465dc
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 import { LogStashOverviewPage } from './pages/logstash/overview';
-import { LogStashNodePage } from './pages/logstash/nodes';
+import { LogStashNodesPage } from './pages/logstash/nodes';
 import { LogStashPipelinesPage } from './pages/logstash/pipelines';
 import { LogStashPipelinePage } from './pages/logstash/pipeline';
+import { BeatsInstancesPage } from './pages/beats/instances';
+import { LogStashNodeAdvancedPage } from './pages/logstash/advanced';
+// import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
+import { LogStashNodePage } from './pages/logstash/node';
+import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
 
 export const renderApp = (
   core: CoreStart,
@@ -124,6 +124,27 @@ const MonitoringApp: React.FC<{
                   {/* Logstash Routes */}
                   <RouteInit
                     path="/logstash/nodes"
+                    component={LogStashNodesPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/node/:uuid/advanced"
+                    component={LogStashNodeAdvancedPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/node/:uuid/pipelines"
+                    component={LogStashNodePipelinesPage}
+                    codePaths={[CODE_PATH_LOGSTASH]}
+                    fetchAllClusters={false}
+                  />
+
+                  <RouteInit
+                    path="/logstash/node/:uuid"
                     component={LogStashNodePage}
                     codePaths={[CODE_PATH_LOGSTASH]}
                     fetchAllClusters={false}

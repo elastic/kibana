@@ -25,7 +25,7 @@ export const LogStashOverviewPage: React.FC<ComponentProps> = ({ clusters }) => 
     cluster_uuid: clusterUuid,
   });
   const [data, setData] = useState(null);
-  const [showShardActivityHistory, setShowShardActivityHistory] = useState(false);
+  // const [showShardActivityHistory, setShowShardActivityHistory] = useState(false);
 
   const title = i18n.translate('xpack.monitoring.logstash.overview.title', {
     defaultMessage: 'Logstash',
@@ -37,7 +37,7 @@ export const LogStashOverviewPage: React.FC<ComponentProps> = ({ clusters }) => 
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/logstash`;
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash`;
 
     const response = await services.http?.fetch(url, {
       method: 'POST',

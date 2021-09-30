@@ -23,7 +23,7 @@ interface SetupModeProps {
   bottomBarComponent: any;
 }
 
-export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
+export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
@@ -32,8 +32,7 @@ export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
     cluster_uuid: clusterUuid,
   });
   const [data, setData] = useState({} as any);
-  const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } =
-    useTable('logstash.nodes');
+  const { getPaginationTableProps } = useTable('logstash.nodes');
 
   const title = i18n.translate('xpack.monitoring.logstash.nodes.routeTitle', {
     defaultMessage: 'Logstash - Nodes',
@@ -45,7 +44,7 @@ export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/logstash/nodes`;
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/nodes`;
     const response = await services.http?.fetch(url, {
       method: 'POST',
       body: JSON.stringify({
@@ -58,8 +57,7 @@ export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
     });
 
     setData(response);
-    updateTotalItemCount(response.totalNodeCount);
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, getPaginationRouteOptions, updateTotalItemCount]);
+  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
     <LogstashTemplate
