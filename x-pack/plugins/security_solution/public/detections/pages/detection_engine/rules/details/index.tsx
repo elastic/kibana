@@ -277,22 +277,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   // persist rule until refresh is complete
   useEffect(() => {
-    console.error('MAYBE RULE', maybeRule);
     if (maybeRule != null) {
       setRule(maybeRule);
     }
   }, [maybeRule]);
 
   useEffect(() => {
-    console.error('RULE', JSON.stringify(rule, null, 2));
     if (rule) {
       const outcome = rule.outcome;
-      console.error('WHAT IS THE OUTCOME?', outcome);
-      console.error('WHAT IS THE SPACES API', spacesApi);
       if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
         const path = basePath.prepend(`rules/id/${rule.id}`);
-        console.error('WHAT IS THE BASE PATH', path);
         spacesApi.ui.redirectLegacyUrl(
           path,
           i18nTranslate.translate(
