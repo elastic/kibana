@@ -29,6 +29,9 @@ for (const key of keys) {
 
 const steps = [];
 const pipeline = {
+  env: {
+    IGNORE_SHIP_CI_STATS_ERROR: 'true',
+  },
   steps: steps,
 };
 
