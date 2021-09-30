@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, CoreStart } from 'src/core/server';
 import {
   TutorialProvider,
   TutorialContextFactory,
@@ -43,7 +43,7 @@ function registerTutorialWithCustomIntegrations(
 }
 
 function registerBeatsTutorialsWithCustomIntegrations(
-  core: CoreSetup,
+  core: CoreStart,
   customIntegrations: CustomIntegrationsPluginSetup,
   tutorial: TutorialSchema
 ) {
@@ -126,11 +126,11 @@ export class TutorialsRegistry {
     };
   }
 
-  public start(core: CoreSetup | undefined, customIntegrations?: CustomIntegrationsPluginSetup) {
+  public start(core: CoreStart, customIntegrations?: CustomIntegrationsPluginSetup) {
     // pre-populate with built in tutorials
     this.tutorialProviders.push(...builtInTutorials);
 
-    if (customIntegrations && core) {
+    if (customIntegrations) {
       builtInTutorials.forEach((provider) => {
         const tutorial = provider({});
         registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);

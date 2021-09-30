@@ -9,10 +9,14 @@
 import { CustomIntegrationsSetup } from './types';
 
 function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsSetup> {
-  return {
-    getAppendCustomIntegrations: jest.fn(),
-    getReplacementCustomIntegrations: jest.fn(),
-  };
+  const mock =
+    jest.Mocked <
+    CustomIntegrationsSetup >
+    {
+      getAppendCustomIntegrations: jest.fn(),
+      getReplacementCustomIntegrations: jest.fn(),
+    };
+  return mock;
 }
 
 export const customIntegrationsMock = {

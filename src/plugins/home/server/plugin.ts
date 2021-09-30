@@ -31,11 +31,9 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   private readonly tutorialsRegistry = new TutorialsRegistry();
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
   private customIntegrations?: CustomIntegrationsPluginSetup;
-  private core?: CoreSetup;
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     this.customIntegrations = plugins.customIntegrations;
-    this.core = core;
 
     core.capabilities.registerProvider(capabilitiesProvider);
     core.savedObjects.registerType(sampleDataTelemetry);
@@ -51,9 +49,9 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     };
   }
 
-  public start(): HomeServerPluginStart {
+  public start(core: CoreStart): HomeServerPluginStart {
     return {
-      tutorials: { ...this.tutorialsRegistry.start(this.core, this.customIntegrations) },
+      tutorials: { ...this.tutorialsRegistry.start(core, this.customIntegrations) },
       sampleData: { ...this.sampleDataRegistry.start() },
     };
   }
