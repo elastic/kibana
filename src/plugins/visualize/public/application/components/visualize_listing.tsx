@@ -123,7 +123,14 @@ export const VisualizeListing = () => {
         hits: hits.filter((result: any) => isLabsEnabled || result.type?.stage !== 'experimental'),
       }));
     },
-    [listingLimit, uiSettings, savedObjectsTagging, savedObjects.client]
+    [
+      listingLimit,
+      uiSettings,
+      savedObjectsTagging,
+      savedObjects.client,
+      visualizations.getAliases,
+      visualizations.get,
+    ]
   );
 
   const deleteItems = useCallback(
