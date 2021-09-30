@@ -450,8 +450,6 @@ export const Expressions: React.FC<Props> = (props) => {
           errorOptions={redundantFilterGroupBy}
         />
       </EuiFormRow>
-<<<<<<< HEAD
-
       {redundantFilterGroupBy.length > 0 && (
         <>
           <EuiSpacer size="s" />
@@ -467,10 +465,6 @@ export const Expressions: React.FC<Props> = (props) => {
           </EuiText>
         </>
       )}
-
-||||||| a7874ff8a5b
-
-=======
       <EuiSpacer size={'s'} />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"
@@ -493,7 +487,6 @@ export const Expressions: React.FC<Props> = (props) => {
         checked={Boolean(hasGroupBy && alertParams.alertOnGroupDisappear)}
         onChange={(e) => setAlertParams('alertOnGroupDisappear', e.target.checked)}
       />
->>>>>>> upstream/master
       <EuiSpacer size={'m'} />
     </>
   );
