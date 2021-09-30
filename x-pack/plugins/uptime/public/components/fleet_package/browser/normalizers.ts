@@ -39,7 +39,9 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKeys.PARAMS]: getBrowserNormalizer(ConfigKeys.PARAMS),
   [ConfigKeys.SCREENSHOTS]: getBrowserNormalizer(ConfigKeys.SCREENSHOTS),
   [ConfigKeys.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.SYNTHETICS_ARGS),
-  [ConfigKeys.JOURNEY_FILTERS_MATCH]: getBrowserNormalizer(ConfigKeys.JOURNEY_FILTERS_MATCH),
+  [ConfigKeys.JOURNEY_FILTERS_MATCH]: getBrowserJsonToJavascriptNormalizer(
+    ConfigKeys.JOURNEY_FILTERS_MATCH
+  ),
   [ConfigKeys.JOURNEY_FILTERS_TAGS]: getBrowserJsonToJavascriptNormalizer(
     ConfigKeys.JOURNEY_FILTERS_TAGS
   ),
