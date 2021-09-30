@@ -122,18 +122,20 @@ System metrics are captured periodically (every 60 seconds by default).
 
 Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
 
-#### Document
+#### Sample document
+
 ```json
 {
   "@timestamp": "2021-09-01T10:00:00.000Z",
   "processor.event": "metric",
   "metricset.name": "app",
   "system.process.cpu.total.norm.pct": 0.003,
-  "system.cpu.total.norm.pct": 0.28,
+  "system.cpu.total.norm.pct": 0.28
 }
 ```
 
 #### Query
+
 ```json
 {
   "size": 0,
@@ -158,7 +160,8 @@ Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.
 
 Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
 
-#### Document
+#### Sample document
+
 ```json
 {
   "@timestamp": "2021-09-01T10:00:00.000Z",
@@ -170,6 +173,7 @@ Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
 ```
 
 #### Query
+
 ```js
 {
   "size": 0,
@@ -201,10 +205,85 @@ Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
 Above example is overly simplified. In reality [we do a bit more](https://github.com/elastic/kibana/blob/fe9b5332e157fd456f81aecfd4ffa78d9e511a66/x-pack/plugins/apm/server/lib/metrics/by_agent/shared/memory/index.ts#L51-L71) to properly calculate memory usage inside containers
 
 # Breakdown metrics
+
 tbd
 
 # Service destination metrics
-tbd
+
+Aggregations of span documents, with the dimensions `span.destination.service.*`.
+
+Note-worthy fields: `span.destination.service.resource`, `span.destination.service.response_time.count`, `span.destination.service.response_time.sum.us`
+
+#### Sample document
+
+```json
+{
+  "@timestamp": "2021-09-01T10:00:00.000Z",
+  "processor.event": "metric",
+  "metricset.name": "service_destination",
+  "span.destination.service.response_time.count": 73,
+  "span.destination.service.response_time.sum.us": 1554192,
+  "span.destination.service.resource": "elasticsearch",
+  "event.outcome": "success"
+}
+```
+
+### Latency
+
+The latency between a service and an (external) endpoint
+
+```json
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        { "terms": { "processor.event": ["metric"] } },
+        { "term": { "metricset.name": "service_destination" } },
+        { "term": { "span.destination.service.resource": "elasticsearch" } }
+      ]
+    }
+  },
+  "aggs": {
+    "latency_sum": {
+      "sum": { "field": "span.destination.service.response_time.sum.us" }
+    },
+    "latency_count": {
+      "sum": { "field": "span.destination.service.response_time.count" }
+    }
+  }
+}
+```
+
+### Throughput
+
+Captures the number of requests made from a service to an (external) endpoint
+
+
+#### Query
+
+```json
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        { "terms": { "processor.event": ["metric"] } },
+        { "term": { "metricset.name": "service_destination" } },
+        { "term": { "span.destination.service.resource": "elasticsearch" } }
+      ]
+    }
+  },
+  "aggs": {
+    "throughput": {
+      "rate": {
+        "field": "span.destination.service.response_time.count",
+        "unit": "minute"
+      }
+    }
+  }
+}
+```
 
 ## Common filters
 
