@@ -19,6 +19,7 @@ import { usageCollectionPluginMock } from '../../../plugins/usage_collection/pub
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
 import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mocks';
+import { savedObjectTaggingOssPluginMock } from '../../saved_objects_tagging_oss/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -66,6 +67,7 @@ const createInstance = async () => {
       getAttributeService: jest.fn(),
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),
+      savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
     });
 
   return {

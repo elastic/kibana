@@ -14,7 +14,7 @@ import type {
   SavedObjectAttributes,
 } from 'kibana/public';
 import type { ChromeStart, OverlayStart } from '../../../../core/public';
-import { SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
+import { SavedObjectNotFound } from '../../../kibana_utils/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
@@ -26,9 +26,11 @@ import {
   saveWithConfirmation,
   isErrorNonFatal,
 } from '../../../../plugins/saved_objects/public';
-import { getTypes, getSpaces } from '../services';
+import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type { VisSavedObject, SerializedVis, ISavedVis } from '../types';
+import type { TypesStart } from '../vis_types';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
@@ -131,11 +133,11 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
 
 export async function findListItems(
   savedObjectsClient: SavedObjectsClientContract,
+  visTypes: Pick<TypesStart, 'get' | 'getAliases'>,
   search: string,
   size: number,
   references?: SavedObjectsFindOptionsReference[]
 ) {
-  const visTypes = getTypes();
   const visAliases = visTypes.getAliases();
   const extensions = visAliases
     .map((v) => v.appExtensions?.visualizations)
@@ -184,6 +186,8 @@ export async function getSavedVisualization(
     savedObjectsClient: SavedObjectsClientContract;
     search: DataPublicPluginStart['search'];
     dataViews: DataPublicPluginStart['dataViews'];
+    spaces: SpacesPluginStart;
+    savedObjectsTagging?: SavedObjectsTaggingApi;
   },
   opts?: any
 ): Promise<VisSavedObject> {
@@ -206,8 +210,8 @@ export async function getSavedVisualization(
   const defaultsProps = getDefaults(opts);
 
   if (!id) {
-    _.assign(savedObject, defaultsProps);
-    return Promise.resolve(savedObject);
+    Object.assign(savedObject, defaultsProps);
+    return savedObject;
   }
 
   const {
@@ -229,18 +233,18 @@ export async function getSavedVisualization(
   // assign the defaults to the response
   _.defaults(savedObject._source, defaultsProps);
 
-  _.assign(savedObject, savedObject._source);
+  Object.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
   savedObject.sharingSavedObjectProps = {
     aliasTargetId,
     outcome,
     errorJSON:
-      outcome === 'conflict' && getSpaces()
+      outcome === 'conflict' && services.spaces
         ? JSON.stringify({
             targetType: SAVED_VIS_TYPE,
             sourceId: id,
-            targetSpace: (await getSpaces().getActiveSpace()).id,
+            targetSpace: (await services.spaces.getActiveSpace()).id,
           })
         : undefined,
   };
@@ -269,7 +273,9 @@ export async function getSavedVisualization(
     config.injectReferences(savedObject, resp.references);
   }
 
-  savedObject.references = resp.references;
+  if (services.savedObjectsTagging) {
+    savedObject.tags = services.savedObjectsTagging.ui.getTagIdsFromReferences(resp.references);
+  }
 
   savedObject.visState = await updateOldState(savedObject.visState);
   if (savedObject.searchSourceFields?.index) {
@@ -294,6 +300,7 @@ export async function saveVisualization(
     savedObjectsClient: SavedObjectsClientContract;
     chrome: ChromeStart;
     overlays: OverlayStart;
+    savedObjectsTagging?: SavedObjectsTaggingApi;
   }
 ) {
   // Save the original id in case the save fails.
@@ -316,7 +323,7 @@ export async function saveVisualization(
     savedSearchId: savedObject.savedSearchId,
     version: savedObject.version,
   };
-  const references: any = savedObject.references || [];
+  let references: any = [];
 
   if (savedObject.searchSource) {
     const { searchSourceJSON, references: searchSourceReferences } =
@@ -332,6 +339,13 @@ export async function saveVisualization(
     const searchSourceJSON = JSON.stringify(searchSourceFields);
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
+  }
+
+  if (services.savedObjectsTagging) {
+    references = services.savedObjectsTagging.ui.updateTagsReferences(
+      references,
+      savedObject.tags || []
+    );
   }
 
   const extractedRefs = extractReferences({ attributes, references });

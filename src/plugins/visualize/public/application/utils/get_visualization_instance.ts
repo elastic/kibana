@@ -67,7 +67,7 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { visualizations, savedObjects, data } = visualizeServices;
+  const { visualizations, savedObjects, data, spaces, savedObjectsTagging } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
 
   /**
@@ -78,6 +78,8 @@ export const getVisualizationInstanceFromInput = async (
     search: data.search,
     savedObjectsClient: savedObjects.client,
     dataViews: data.dataViews,
+    spaces,
+    savedObjectsTagging,
   });
 
   if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
@@ -113,9 +115,15 @@ export const getVisualizationInstance = async (
    */
   opts?: Record<string, unknown> | string
 ) => {
-  const { visualizations, data, savedObjects } = visualizeServices;
+  const { visualizations, data, savedObjects, spaces, savedObjectsTagging } = visualizeServices;
   const savedVis: VisSavedObject = await getSavedVisualization(
-    { search: data.search, savedObjectsClient: savedObjects.client, dataViews: data.dataViews },
+    {
+      search: data.search,
+      savedObjectsClient: savedObjects.client,
+      dataViews: data.dataViews,
+      spaces,
+      savedObjectsTagging,
+    },
     opts
   );
 

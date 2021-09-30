@@ -58,7 +58,15 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient' | 'data'>
+    Pick<
+      VisualizationsStartDeps,
+      | 'inspector'
+      | 'embeddable'
+      | 'savedObjectsClient'
+      | 'data'
+      | 'savedObjectsTaggingOss'
+      | 'spaces'
+    >
   >;
 }
 
@@ -154,6 +162,8 @@ export class VisualizeEmbeddableFactory
           savedObjectsClient: startDeps.core.savedObjects.client,
           search: startDeps.plugins.data.search,
           dataViews: startDeps.plugins.data.dataViews,
+          spaces: startDeps.plugins.spaces,
+          savedObjectsTagging: startDeps.plugins.savedObjectsTaggingOss.getTaggingApi(),
         },
         savedObjectId
       );
@@ -231,11 +241,12 @@ export class VisualizeEmbeddableFactory
       if (visObj) {
         savedVis.uiStateJSON = visObj?.uiState.toString();
       }
-      const { core } = await this.deps.start();
+      const { core, plugins } = await this.deps.start();
       const id = await saveVisualization(savedVis, saveOptions, {
         savedObjectsClient: core.savedObjects.client,
         chrome: core.chrome,
         overlays: core.overlays,
+        savedObjectsTagging: plugins.savedObjectsTaggingOss.getTaggingApi(),
       });
       if (!id || id === '') {
         throw new Error(

@@ -139,6 +139,7 @@ export const getTopNavConfig = (
         savedObjectsClient: savedObjects.client,
         chrome,
         overlays,
+        savedObjectsTagging,
       });
 
       if (id) {
@@ -406,10 +407,7 @@ export const getTopNavConfig = (
                 savedVis.description = newDescription;
 
                 if (savedObjectsTagging) {
-                  savedVis.references = savedObjectsTagging.ui.updateTagsReferences(
-                    [],
-                    selectedTags
-                  );
+                  savedVis.tags = selectedTags;
                 }
 
                 const saveOptions = {
@@ -470,11 +468,7 @@ export const getTopNavConfig = (
               let tagOptions: React.ReactNode | undefined;
 
               if (savedObjectsTagging) {
-                if (savedVis && savedVis.references) {
-                  selectedTags = savedObjectsTagging
-                    ? savedObjectsTagging.ui.getTagIdsFromReferences(savedVis.references)
-                    : [];
-                }
+                selectedTags = savedVis.tags || [];
                 tagOptions = (
                   <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
                     initialSelection={selectedTags}

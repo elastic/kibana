@@ -12,19 +12,18 @@ import {
   saveVisualization,
   SAVED_VIS_TYPE,
 } from './saved_visualize_utils';
+import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
+import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { SavedObjectsClientContract } from '../../../../core/public';
-import { VisTypeAlias } from '../vis_types';
+import { VisTypeAlias, TypesStart } from '../vis_types';
 import type { VisSavedObject } from '../types';
 
 let visTypes = [] as VisTypeAlias[];
 const mockGetAliases = jest.fn(() => visTypes);
+const mockGetTypes = jest.fn((type: string) => type) as unknown as TypesStart['get'];
 jest.mock('../services', () => ({
-  getTypes: jest.fn(() => ({
-    getAliases: mockGetAliases,
-    get: (type: string) => type,
-  })),
   getSpaces: jest.fn(() => ({
     getActiveSpace: () => ({
       id: 'test',
@@ -98,6 +97,11 @@ describe('saved_visualize_utils', () => {
         savedObjectsClient,
         search,
         dataViews,
+        spaces: Promise.resolve({
+          getActiveSpace: () => ({
+            id: 'test',
+          }),
+        }) as unknown as SpacesPluginStart,
       });
       expect(savedVis).toBeDefined();
       expect(savedVis.title).toBe('');
@@ -110,6 +114,11 @@ describe('saved_visualize_utils', () => {
           savedObjectsClient,
           search,
           dataViews,
+          spaces: Promise.resolve({
+            getActiveSpace: () => ({
+              id: 'test',
+            }),
+          }) as unknown as SpacesPluginStart,
         },
         { id: 'test', searchSource: {} }
       );
@@ -124,6 +133,11 @@ describe('saved_visualize_utils', () => {
           savedObjectsClient,
           search,
           dataViews,
+          spaces: Promise.resolve({
+            getActiveSpace: () => ({
+              id: 'test',
+            }),
+          }) as unknown as SpacesPluginStart,
         },
         { id: 'test', searchSource: {} }
       );
@@ -133,6 +147,29 @@ describe('saved_visualize_utils', () => {
           type: 'index-pattern',
         },
       ]);
+    });
+
+    it('should call getTagIdsFromReferences if we provide savedObjectsTagging service', async () => {
+      const mockGetTagIdsFromReferences = jest.fn(() => ['test']);
+      await getSavedVisualization(
+        {
+          savedObjectsClient,
+          search,
+          dataViews,
+          spaces: Promise.resolve({
+            getActiveSpace: () => ({
+              id: 'test',
+            }),
+          }) as unknown as SpacesPluginStart,
+          savedObjectsTagging: {
+            ui: {
+              getTagIdsFromReferences: mockGetTagIdsFromReferences,
+            },
+          } as unknown as SavedObjectsTaggingApi,
+        },
+        { id: 'test', searchSource: {} }
+      );
+      expect(mockGetTagIdsFromReferences).toHaveBeenCalled();
     });
   });
 
@@ -174,6 +211,25 @@ describe('saved_visualize_utils', () => {
       vis.searchSource = { serialize: jest.fn(() => ({ searchSourceJSON: '{}', references: [] })) };
       await saveVisualization(vis, {}, { savedObjectsClient, chrome, overlays });
       expect(vis.searchSource.serialize).toHaveBeenCalled();
+    });
+
+    it('should call updateTagsReferences if we provide savedObjectsTagging service', async () => {
+      const mockUpdateTagsReferences = jest.fn(() => []);
+      await saveVisualization(
+        vis,
+        {},
+        {
+          savedObjectsClient,
+          chrome,
+          overlays,
+          savedObjectsTagging: {
+            ui: {
+              updateTagsReferences: mockUpdateTagsReferences,
+            },
+          } as unknown as SavedObjectsTaggingApi,
+        }
+      );
+      expect(mockUpdateTagsReferences).toHaveBeenCalled();
     });
 
     describe('confirmOverwrite', () => {
@@ -251,7 +307,12 @@ describe('saved_visualize_utils', () => {
     it('searches visualization title and description', async () => {
       const props = testProps();
       const { find } = props.savedObjectsClient;
-      await findListItems(props.savedObjectsClient, props.search, props.size);
+      await findListItems(
+        props.savedObjectsClient,
+        { get: mockGetTypes, getAliases: mockGetAliases },
+        props.search,
+        props.size
+      );
       expect(find.mock.calls).toMatchObject([
         [
           {
@@ -275,7 +336,12 @@ describe('saved_visualize_utils', () => {
         } as VisTypeAlias,
       ];
       const { find } = props.savedObjectsClient;
-      await findListItems(props.savedObjectsClient, props.search, props.size);
+      await findListItems(
+        props.savedObjectsClient,
+        { get: mockGetTypes, getAliases: mockGetAliases },
+        props.search,
+        props.size
+      );
       expect(find.mock.calls).toMatchObject([
         [
           {
@@ -307,7 +373,12 @@ describe('saved_visualize_utils', () => {
         } as VisTypeAlias,
       ];
       const { find } = props.savedObjectsClient;
-      await findListItems(props.savedObjectsClient, props.search, props.size);
+      await findListItems(
+        props.savedObjectsClient,
+        { get: mockGetTypes, getAliases: mockGetAliases },
+        props.search,
+        props.size
+      );
       expect(find.mock.calls).toMatchObject([
         [
           {
@@ -324,7 +395,12 @@ describe('saved_visualize_utils', () => {
         search: 'ahoythere',
       };
       const { find } = props.savedObjectsClient;
-      await findListItems(props.savedObjectsClient, props.search, props.size);
+      await findListItems(
+        props.savedObjectsClient,
+        { get: mockGetTypes, getAliases: mockGetAliases },
+        props.search,
+        props.size
+      );
       expect(find.mock.calls).toMatchObject([
         [
           {
@@ -343,7 +419,13 @@ describe('saved_visualize_utils', () => {
         ],
       };
       const { find } = props.savedObjectsClient;
-      await findListItems(props.savedObjectsClient, props.search, props.size, props.references);
+      await findListItems(
+        props.savedObjectsClient,
+        { get: mockGetTypes, getAliases: mockGetAliases },
+        props.search,
+        props.size,
+        props.references
+      );
       expect(find.mock.calls).toMatchObject([
         [
           {
@@ -390,7 +472,12 @@ describe('saved_visualize_utils', () => {
         ],
       }));
 
-      const items = await findListItems(props.savedObjectsClient, props.search, props.size);
+      const items = await findListItems(
+        props.savedObjectsClient,
+        { get: mockGetTypes, getAliases: mockGetAliases },
+        props.search,
+        props.size
+      );
       expect(items).toEqual({
         total: 2,
         hits: [

@@ -65,6 +65,7 @@ import type {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
 import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import { createVisAsync } from './vis_async';
 
 /**
@@ -103,6 +104,7 @@ export interface VisualizationsStartDeps {
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
   spaces: SpacesPluginStart;
+  savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
 /**
