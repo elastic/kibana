@@ -336,7 +336,18 @@ describe('Lens App', () => {
         {}
       );
     });
-
+    it('handles rejected index pattern', async () => {
+      const customServices = makeDefaultServices(sessionIdSubject);
+      customServices.data.indexPatterns.get = jest
+        .fn()
+        .mockImplementation((id) => Promise.reject({ reason: 'Could not locate that data view' }));
+      const customProps = makeDefaultProps();
+      const { services } = await mountWith({ props: customProps, services: customServices });
+      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({ indexPatterns: [] }),
+        {}
+      );
+    });
     describe('save buttons', () => {
       interface SaveProps {
         newCopyOnSave: boolean;

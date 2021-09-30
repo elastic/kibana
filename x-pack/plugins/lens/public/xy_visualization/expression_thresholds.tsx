@@ -22,30 +22,32 @@ export const computeChartMargins = (
   thresholdPaddings: Partial<Record<Position, number>>,
   labelVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
   titleVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
+  axesMap: Record<'left' | 'right', unknown>,
   isHorizontal: boolean
 ) => {
   const result: Partial<Record<Position, number>> = {};
-  if (labelVisibility?.x && titleVisibility?.x && thresholdPaddings.bottom) {
+  if (!labelVisibility?.x && !titleVisibility?.x && thresholdPaddings.bottom) {
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('bottom') : 'bottom';
     result[placement] = thresholdPaddings.bottom;
   }
   if (
     thresholdPaddings.left &&
-    (isHorizontal || (labelVisibility?.yLeft && titleVisibility?.yLeft))
+    (isHorizontal || (!labelVisibility?.yLeft && !titleVisibility?.yLeft))
   ) {
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('left') : 'left';
     result[placement] = thresholdPaddings.left;
   }
   if (
     thresholdPaddings.right &&
-    (isHorizontal || (labelVisibility?.yRight && titleVisibility?.yRight))
+    (isHorizontal || !axesMap.right || (!labelVisibility?.yRight && !titleVisibility?.yRight))
   ) {
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('right') : 'right';
     result[placement] = thresholdPaddings.right;
   }
   // there's no top axis, so just check if a margin has been computed
-  if (!isHorizontal && thresholdPaddings.top) {
-    result.top = thresholdPaddings.top;
+  if (thresholdPaddings.top) {
+    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('top') : 'top';
+    result[placement] = thresholdPaddings.top;
   }
   return result;
 };
@@ -54,7 +56,7 @@ function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'none';
 }
 
-// Note: it does take into consideration whether the threshold is in view or not
+// Note: it does not take into consideration whether the threshold is in view or not
 export const getThresholdRequiredPaddings = (
   thresholdLayers: LayerArgs[],
   axesMap: Record<'left' | 'right', unknown>
