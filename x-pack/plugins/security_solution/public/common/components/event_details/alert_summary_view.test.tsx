@@ -52,17 +52,6 @@ describe('AlertSummaryView', () => {
     expect(wrapper.find('[data-test-subj="summary-view"]').exists()).toEqual(true);
   });
 
-  test('render investigation guide', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AlertSummaryView {...props} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(true);
-    });
-  });
-
   test("render no investigation guide if it doesn't exist", async () => {
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       rule: {
