@@ -48,7 +48,7 @@ export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-state
 /**
  * The endpoint version when hitting the remote telemetry service
  */
-export const ENDPOINT_VERSION = 'v2';
+export const ENDPOINT_VERSION = 'v3';
 
 /**
  * The telemetry endpoints for the remote telemetry service.
