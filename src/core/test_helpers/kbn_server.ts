@@ -15,7 +15,6 @@ import {
   kibanaTestUser,
 } from '@kbn/test';
 import { defaultsDeep } from 'lodash';
-import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
