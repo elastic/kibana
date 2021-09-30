@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -16,14 +15,27 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 import { PolicyTrustedAppsEmptyUnassigned, PolicyTrustedAppsEmptyUnexisting } from '../empty';
+import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
+import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
+import { PolicyTrustedAppsFlyout } from '../flyout';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
-  const onClickAssignTrustedAppButton = useCallback(() => {
-    /* TODO: to be implemented*/
-  }, []);
+  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+  const navigateCallback = usePolicyDetailsNavigateCallback();
+
+  const showListFlyout = location.show === 'list';
+
   const assignTrustedAppButton = useMemo(
     () => (
-      <EuiButton fill iconType="plusInCircle" onClick={onClickAssignTrustedAppButton}>
+      <EuiButton
+        fill
+        iconType="plusInCircle"
+        onClick={() =>
+          navigateCallback({
+            show: 'list',
+          })
+        }
+      >
         {i18n.translate(
           'xpack.securitySolution.endpoint.policy.trustedApps.layout.assignToPolicy',
           {
@@ -32,7 +44,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         )}
       </EuiButton>
     ),
-    [onClickAssignTrustedAppButton]
+    [navigateCallback]
   );
 
   return (
@@ -70,6 +82,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
           />
         )}
       </EuiPageContent>
+      {showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
     </div>
   );
 });
