@@ -51,9 +51,10 @@ export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
     if (cluster) {
       generateBreadcrumbs(cluster.cluster_name, {
         inBeats: true,
+        instance: beatName,
       });
     }
-  }, [cluster, generateBreadcrumbs]);
+  }, [cluster, beatName, generateBreadcrumbs]);
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
