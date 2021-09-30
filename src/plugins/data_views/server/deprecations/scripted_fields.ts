@@ -41,10 +41,10 @@ export const createScriptedFieldsDeprecationsConfig: (
 
       return [
         {
-          title: i18n.translate('data.deprecations.scriptedFieldsTitle', {
+          title: i18n.translate('dataViews.deprecations.scriptedFieldsTitle', {
             defaultMessage: 'Found index patterns using scripted fields',
           }),
-          message: i18n.translate('data.deprecations.scriptedFieldsMessage', {
+          message: i18n.translate('dataViews.deprecations.scriptedFieldsMessage', {
             defaultMessage: `You have {numberOfIndexPatternsWithScriptedFields} index patterns ({titlesPreview}...) that use scripted fields. Scripted fields are deprecated and will be removed in future. Use runtime fields instead.`,
             values: {
               titlesPreview: indexPatternTitles.slice(0, PREVIEW_LIMIT).join('; '),
@@ -56,10 +56,10 @@ export const createScriptedFieldsDeprecationsConfig: (
           level: 'warning', // warning because it is not set in stone WHEN we remove scripted fields, hence this deprecation is not a blocker for 8.0 upgrade
           correctiveActions: {
             manualSteps: [
-              i18n.translate('data.deprecations.scriptedFields.manualStepOneMessage', {
+              i18n.translate('dataViews.deprecations.scriptedFields.manualStepOneMessage', {
                 defaultMessage: 'Navigate to Stack Management > Kibana > Index Patterns.',
               }),
-              i18n.translate('data.deprecations.scriptedFields.manualStepTwoMessage', {
+              i18n.translate('dataViews.deprecations.scriptedFields.manualStepTwoMessage', {
                 defaultMessage:
                   'Update {numberOfIndexPatternsWithScriptedFields} index patterns that have scripted fields to use runtime fields instead. In most cases, to migrate existing scripts, you will need to change "return <value>;" to "emit(<value>);". Index patterns with at least one scripted field: {allTitles}',
                 values: {

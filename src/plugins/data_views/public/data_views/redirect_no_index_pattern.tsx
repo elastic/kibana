@@ -29,13 +29,10 @@ export const onRedirectNoIndexPattern =
       clearTimeout(timeoutId);
     }
 
-    const bannerMessage = i18n.translate(
-      'data.indexPatterns.ensureDefaultIndexPattern.bannerLabel',
-      {
-        defaultMessage:
-          'To visualize and explore data in Kibana, you must create an index pattern to retrieve data from Elasticsearch.',
-      }
-    );
+    const bannerMessage = i18n.translate('dataViews.ensureDefaultIndexPattern.bannerLabel', {
+      defaultMessage:
+        'To visualize and explore data in Kibana, you must create an index pattern to retrieve data from Elasticsearch.',
+    });
 
     // Avoid being hostile to new users who don't have an index pattern setup yet
     // give them a friendly info message instead of a terse error message

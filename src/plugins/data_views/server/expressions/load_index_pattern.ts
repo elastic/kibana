@@ -39,7 +39,7 @@ export function getFunctionDefinition({
       const kibanaRequest = getKibanaRequest ? getKibanaRequest() : null;
       if (!kibanaRequest) {
         throw new Error(
-          i18n.translate('data.indexPatterns.indexPatternLoad.error.kibanaRequest', {
+          i18n.translate('dataViews.indexPatternLoad.error.kibanaRequest', {
             defaultMessage:
               'A KibanaRequest is required to execute this search on the server. ' +
               'Please provide a request object to the expression execution params.',
