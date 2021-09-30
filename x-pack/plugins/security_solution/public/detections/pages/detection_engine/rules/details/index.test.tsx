@@ -27,7 +27,9 @@ import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
-// import { useKibana } from '../../../../../common/lib/kibana';
+import { coreMock } from '../../../../../../../../../src/core/public/mocks';
+
+import * as commonKibana from '../../../../../common/lib/kibana';
 
 import { fillEmptySeverityMappings } from '../helpers';
 
@@ -84,56 +86,18 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('../../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../../common/lib/kibana');
-
-  return {
-    ...original,
-    useUiSetting$: jest.fn().mockReturnValue([]),
-    useKibana: () => ({
-      services: {
-        spaces: {
-          ui: {
-            redirectLegacyUrl: jest.fn(),
-          },
-        },
-        application: {
-          ...original.useKibana().services.application,
-          navigateToUrl: jest.fn(),
-          capabilities: {
-            actions: jest.fn().mockReturnValue({}),
-            siem: { crud_alerts: true, read_alerts: true },
-          },
-        },
-        timelines: { ...mockTimelines },
-        http: original.useKibana().services.http,
-        // http: {
-        //   ...original.useKibana().services.http,
-        //   basePath: {
-        //     prepend: jest.fn(),
-        //   },
-        // },
-        data: {
-          query: {
-            filterManager: jest.fn().mockReturnValue({}),
-          },
-          search: original.useKibana().services.data.search,
-        },
-      },
-    }),
-    useToasts: jest.fn().mockReturnValue({
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-    }),
-  };
-});
+jest.mock('../../../../../common/lib/kibana');
 
 const state: State = {
   ...mockGlobalState,
 };
 const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+// const prepend = jest.spyOn(useKibana().services.http.basePath, 'prepend');
+
+const mockKibanaHttpService = {
+  basePath: { prepend: jest.fn().mockImplementation((str: string) => str) },
+};
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
@@ -205,7 +169,43 @@ describe('RuleDetailsPageComponent', () => {
     (fillEmptySeverityMappings as jest.Mock).mockReturnValue([]);
   });
 
+  async function setup() {
+    const useUiSettingMock$ = commonKibana.useUiSetting$ as jest.Mocked<
+      typeof commonKibana.useUiSetting$
+    >;
+    const useKibanaMock = commonKibana.useKibana as jest.Mocked<typeof commonKibana.useKibana>;
+    const useToastsMock = commonKibana.useToasts as jest.Mocked<typeof commonKibana.useToasts>;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.http = mockKibanaHttpService;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.spaces = { ui: { redirectLegacyUrl: jest.fn() } };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application = {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      ...useKibanaMock().services.application,
+      capabilities: {
+        actions: jest.fn().mockReturnValue({}),
+        siem: { crud_alerts: true, read_alerts: true },
+      },
+    };
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.timelines = { ...mockTimelines };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.data = {
+      ...commonKibana.useKibana().services.data,
+      query: {
+        filterManager: jest.fn().mockReturnValue({}),
+      },
+    };
+    // // eslint-disable-next-line react-hooks/rules-of-hooks
+    // useKibanaMock().services.data.query.filterManager = jest.fn().mockReturnValue({});
+    // // eslint-disable-next-line react-hooks/rules-of-hooks
+    // useKibanaMock().services.data.search = { search: jest.fn() };
+  }
+
   it('renders correctly', async () => {
+    await setup();
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
@@ -215,6 +215,7 @@ describe('RuleDetailsPageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+      expect(mockKibanaHttpService.basePath.prepend).toHaveBeenCalledWith('rules/id/myfakeruleid');
       // expect((useKibana as jest.Mock)().services.http.basePath.prepend).toHaveBeenCalledWith(
       //   'rules/id/myfakeruleid'
       // );
