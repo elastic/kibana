@@ -24,6 +24,7 @@ describe('ImportSummary', () => {
     failedImports: [],
     successfulImports: [],
     importWarnings: [],
+    allowedTypes: [],
     ...parts,
   });
 
