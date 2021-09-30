@@ -12,6 +12,7 @@ import { join, basename, resolve } from 'path';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
+import { escape } from 'he';
 
 import { TestFailure } from './get_failures';
 
@@ -113,19 +114,19 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
       )
     )
       .toString()
-      .replace('$TITLE', failure.name)
+      .replace('$TITLE', escape(failure.name))
       .replace(
         '$MAIN',
         `
         ${failure.classname
           .split('.')
-          .map((part) => `<h5>${part.replace('·', '.')}</h5>`)
+          .map((part) => `<h5>${escape(part.replace('·', '.'))}</h5>`)
           .join('')}
         <hr />
-        <p><strong>${failure.name}</strong></p>
-        <pre>${failure.failure}</pre>
+        <p><strong>${escape(failure.name)}</strong></p>
+        <pre>${escape(failure.failure)}</pre>
         ${screenshotHtml}
-        <pre>${failure['system-out']}</pre>
+        <pre>${escape(failure['system-out'] || '')}</pre>
       `
       );
 
