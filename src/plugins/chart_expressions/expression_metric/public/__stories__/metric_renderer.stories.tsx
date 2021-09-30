@@ -9,7 +9,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { DatatableColumn } from '../../../../expressions';
+import { DatatableColumn, Range } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { ColorMode, ColorSchemas } from '../../../../charts/common';
 import { metricRenderer } from '../expression_renderers';
@@ -94,6 +94,11 @@ const dataWithBuckets = [
   { 'col-0-1': 56, 'col-0-2': 52, 'col-0-3': 'Wednesday' },
 ];
 
+const colorsRange: Range[] = [
+  { type: 'range', from: 0, to: 50 },
+  { type: 'range', from: 51, to: 150 },
+];
+
 const containerSize = {
   width: '700px',
   height: '700px',
@@ -129,6 +134,76 @@ storiesOf('renderers/visMetric', module)
             metric: {
               ...config.visConfig.metric,
               style: { ...config.visConfig.metric.style, fontSize: 120 },
+            },
+          },
+        }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With color ranges, background color mode', () => {
+    return (
+      <Render
+        renderer={metricRenderer}
+        config={{
+          ...config,
+          visConfig: {
+            ...config.visConfig,
+            metric: {
+              ...config.visConfig.metric,
+              colorsRange,
+              metricColorMode: ColorMode.Background,
+              style: {
+                ...config.visConfig.metric.style,
+                bgColor: true,
+              },
+            },
+          },
+        }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With color ranges, labels color mode', () => {
+    return (
+      <Render
+        renderer={metricRenderer}
+        config={{
+          ...config,
+          visConfig: {
+            ...config.visConfig,
+            metric: {
+              ...config.visConfig.metric,
+              colorsRange,
+              metricColorMode: ColorMode.Labels,
+              style: {
+                ...config.visConfig.metric.style,
+                labelColor: true,
+              },
+            },
+          },
+        }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With color ranges, labels color mode, reverse mode', () => {
+    return (
+      <Render
+        renderer={metricRenderer}
+        config={{
+          ...config,
+          visConfig: {
+            ...config.visConfig,
+            metric: {
+              ...config.visConfig.metric,
+              colorsRange,
+              metricColorMode: ColorMode.Labels,
+              style: {
+                ...config.visConfig.metric.style,
+                labelColor: true,
+              },
+              invertColors: true,
             },
           },
         }}
