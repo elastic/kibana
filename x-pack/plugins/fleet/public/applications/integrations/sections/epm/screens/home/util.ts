@@ -51,7 +51,8 @@ export function mergeAndReplaceCategoryCounts(
   return merged;
 }
 
-export function findReplacementsForEprPackage(
+// This should be exported, to find a replacements for a package (e.g. in the overview-page for an EPR package)
+function findReplacementsForEprPackage(
   replacements: CustomIntegration[],
   packageName: string,
   release: 'beta' | 'experimental' | 'ga'
