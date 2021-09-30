@@ -9,11 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { PageTemplate } from '../page_template';
 import { TabMenuItem, PageTemplateProps } from '../page_template';
 
-interface BeatsTemplateProps extends PageTemplateProps {
-  cluster: any;
-}
-
-export const BeatsTemplate: React.FC<BeatsTemplateProps> = ({ cluster, ...props }) => {
+export const BeatsTemplate: React.FC<PageTemplateProps> = ({ ...props }) => {
   const tabs: TabMenuItem[] = [
     {
       id: 'overview',
