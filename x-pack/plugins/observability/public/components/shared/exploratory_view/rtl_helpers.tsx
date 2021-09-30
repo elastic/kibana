@@ -39,6 +39,7 @@ import { createStubIndexPattern } from '../../../../../../../src/plugins/data/co
 import { AppDataType, UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
+import { casesPluginMock } from '../../../../../cases/public/mocks';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -118,6 +119,7 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    cases: casesPluginMock.createStartContract(),
   };
 
   return core;
