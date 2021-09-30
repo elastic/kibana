@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ExternalService, ExecutorSubActionPushParams } from './types';
+import {
+  ExternalService,
+  ExecutorSubActionPushParams,
+  PushToServiceApiParamsSIR,
+  ExternalServiceSIR,
+} from './types';
 
 export const serviceNowCommonFields = [
   {
@@ -110,8 +115,42 @@ const createMock = (): jest.Mocked<ExternalService> => {
   return service;
 };
 
+const createSIRMock = (): jest.Mocked<ExternalServiceSIR> => {
+  const service = {
+    ...createMock(),
+    addObservableToIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        value: 'https://example.com',
+        observable_sys_id: '3',
+      })
+    ),
+    bulkAddObservableToIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve([
+        {
+          value: '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9',
+          observable_sys_id: '1',
+        },
+        {
+          value: '127.0.0.1',
+          observable_sys_id: '2',
+        },
+        {
+          value: 'https://example.com',
+          observable_sys_id: '3',
+        },
+      ])
+    ),
+  };
+
+  return service;
+};
+
 const externalServiceMock = {
   create: createMock,
+};
+
+const externalServiceSIRMock = {
+  create: createSIRMock,
 };
 
 const executorParams: ExecutorSubActionPushParams = {
@@ -139,6 +178,33 @@ const executorParams: ExecutorSubActionPushParams = {
   ],
 };
 
+const sirParams: PushToServiceApiParamsSIR = {
+  incident: {
+    externalId: 'incident-3',
+    short_description: 'Incident title',
+    description: 'Incident description',
+    dest_ip: ['192.168.1.1', '192.168.1.3'],
+    source_ip: ['192.168.1.2', '192.168.1.4'],
+    malware_hash: ['5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'],
+    malware_url: ['https://example.com'],
+    category: 'software',
+    subcategory: 'os',
+    correlation_id: 'alertID',
+    correlation_display: 'Alerting',
+    priority: '1',
+  },
+  comments: [
+    {
+      commentId: 'case-comment-1',
+      comment: 'A comment',
+    },
+    {
+      commentId: 'case-comment-2',
+      comment: 'Another comment',
+    },
+  ],
+};
+
 const apiParams = executorParams;
 
-export { externalServiceMock, executorParams, apiParams };
+export { externalServiceMock, executorParams, apiParams, sirParams, externalServiceSIRMock };

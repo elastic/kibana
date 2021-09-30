@@ -20,8 +20,9 @@ import {
 import { api } from './api';
 
 const SPLIT_REGEX = /[ ,|\r\n\t]+/;
+const SPLIT_REGEX_GLOBAL = /[ ,|\r\n\t]+/g;
 
-const formatObservables = (observables: string | string[], type: ObservableTypes) => {
+export const formatObservables = (observables: string | string[], type: ObservableTypes) => {
   /**
    * ServiceNow accepted formats are: comma, new line, tab, or pipe separators.
    * Before the application the observables were being sent to ServiceNow as a concatenated string with
@@ -32,7 +33,10 @@ const formatObservables = (observables: string | string[], type: ObservableTypes
   return [...uniqueObservables].filter((obs) => !isEmpty(obs)).map((obs) => ({ value: obs, type }));
 };
 
-const combineObservables = (a: string | string[], b: string | string[]): string | string[] => {
+export const combineObservables = (
+  a: string | string[],
+  b: string | string[]
+): string | string[] => {
   // Both are empty
   if (isEmpty(a) && isEmpty(b)) {
     return [];
@@ -58,25 +62,29 @@ const combineObservables = (a: string | string[], b: string | string[]): string 
     return [...a.split(SPLIT_REGEX), ...b];
   }
 
-  if (isString(b) && Array.isArray(a)) {
-    return [...b.split(SPLIT_REGEX), ...a];
+  if (Array.isArray(a) && isString(b)) {
+    return [...a, ...b.split(SPLIT_REGEX)];
   }
 
   /**
    * a and b are both an array or a string
    */
-  return Array.isArray(a) && Array.isArray(b) ? [...a, ...b] : `${a},${b}`;
+  return Array.isArray(a) && Array.isArray(b)
+    ? [...a, ...b]
+    : isString(a) && isString(b)
+    ? `${a.replace(SPLIT_REGEX_GLOBAL, ',')},${b.replace(SPLIT_REGEX_GLOBAL, ',')}`
+    : [];
 };
 
-const observablesToString = (obs: string | string[] | null): string | null => {
+const observablesToString = (obs: string | string[] | null | undefined): string | null => {
   if (Array.isArray(obs)) {
     return obs.join(',');
   }
 
-  return obs;
+  return obs ?? null;
 };
 
-const prepareParams = (
+export const prepareParams = (
   isLegacy: boolean,
   params: PushToServiceApiParamsSIR
 ): PushToServiceApiParamsSIR => {
