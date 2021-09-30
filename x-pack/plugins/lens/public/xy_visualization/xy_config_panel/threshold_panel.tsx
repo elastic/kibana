@@ -318,10 +318,16 @@ const LineThicknessSlider = ({
           onChange(safeValue);
         }
       }}
-      onBlur={({ currentTarget: { value: newValue } }) => {
-        const convertedValue = newValue === '' ? '' : Number(newValue);
-        if (Number.isInteger(convertedValue)) {
-          onChange(getSafeValue(convertedValue, Number(convertedValue), minRange, maxRange));
+      onBlur={() => {
+        if (unsafeValue !== String(value)) {
+          const safeValue = getSafeValue(
+            unsafeValue === '' ? unsafeValue : Number(unsafeValue),
+            value,
+            minRange,
+            maxRange
+          );
+          onChange(safeValue);
+          setUnsafeValue(String(safeValue));
         }
       }}
     />
