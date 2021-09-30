@@ -213,6 +213,7 @@ function getNoAttemptsRateLimitedActionType() {
       });
       return {
         status: 'error',
+        message: 'intentional failure from action',
         retry: new Date(params.retryAt),
         actionId: '',
       };
