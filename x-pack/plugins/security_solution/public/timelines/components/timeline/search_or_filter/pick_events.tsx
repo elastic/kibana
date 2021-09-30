@@ -304,49 +304,10 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       })),
     [defaultDataView.id, kibanaDataViews]
   );
-  const superSelect = useMemo(
-    () => (
-      <EuiSuperSelect
-        data-test-subj="sourcerer-combo-box"
-        placeholder={i18n.PICK_INDEX_PATTERNS}
-        fullWidth
-        options={dataViewSelectOptions}
-        valueOfSelected={dataViewId}
-        onChange={onChangeSuper}
-      />
-    ),
-    [dataViewSelectOptions, onChangeSuper, dataViewId]
-  );
-  const comboBox = useMemo(
-    () => (
-      <EuiComboBox
-        data-test-subj="timeline-sourcerer"
-        fullWidth
-        onChange={onChangeCombo}
-        options={selectableOptions}
-        placeholder={i18n.PICK_INDEX_PATTERNS}
-        selectedOptions={selectedOptions}
-      />
-    ),
-    [onChangeCombo, selectableOptions, selectedOptions]
-  );
 
   const filterOptions = useMemo(
     () => getEventTypeOptions(filterEventType !== 'custom', dataViewId === defaultDataView.id),
     [defaultDataView.id, filterEventType, dataViewId]
-  );
-
-  const filter = useMemo(
-    () => (
-      <Filter
-        data-test-subj="timeline-sourcerer-radio"
-        options={filterOptions}
-        idSelected={filterEventType}
-        onChange={onChangeFilter}
-        name={i18n.SELECT_INDEX_PATTERNS}
-      />
-    ),
-    [filterEventType, filterOptions, onChangeFilter]
   );
 
   const button = useMemo(() => {
@@ -414,7 +375,13 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
               <>{i18n.SELECT_INDEX_PATTERNS}</>
             </EuiPopoverTitle>
             <EuiSpacer size="s" />
-            {filter}
+            <Filter
+              data-test-subj="timeline-sourcerer-radio"
+              options={filterOptions}
+              idSelected={filterEventType}
+              onChange={onChangeFilter}
+              name={i18n.SELECT_INDEX_PATTERNS}
+            />
             <EuiSpacer size="m" />
             <EuiAccordion
               data-test-subj="sourcerer-accordion"
@@ -425,9 +392,23 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             >
               <>
                 <EuiSpacer size="s" />
-                {superSelect}
+                <EuiSuperSelect
+                  data-test-subj="sourcerer-combo-box"
+                  placeholder={i18n.PICK_INDEX_PATTERNS}
+                  fullWidth
+                  options={dataViewSelectOptions}
+                  valueOfSelected={dataViewId}
+                  onChange={onChangeSuper}
+                />
                 <EuiSpacer size="xs" />
-                {comboBox}
+                <EuiComboBox
+                  data-test-subj="timeline-sourcerer"
+                  fullWidth
+                  onChange={onChangeCombo}
+                  options={selectableOptions}
+                  placeholder={i18n.PICK_INDEX_PATTERNS}
+                  selectedOptions={selectedOptions}
+                />
               </>
             </EuiAccordion>
             {!showAdvanceSettings && (

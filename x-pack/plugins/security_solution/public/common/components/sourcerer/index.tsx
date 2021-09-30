@@ -184,35 +184,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [defaultDataView.id, kibanaDataViews]
   );
 
-  const comboBox = useMemo(
-    () => (
-      <EuiComboBox
-        data-test-subj="sourcerer-combo-box"
-        fullWidth
-        onChange={onChangeCombo}
-        options={selectableOptions}
-        placeholder={i18n.PICK_INDEX_PATTERNS}
-        renderOption={renderOption}
-        selectedOptions={selectedOptions}
-      />
-    ),
-    [selectableOptions, onChangeCombo, renderOption, selectedOptions]
-  );
-
-  const superSelect = useMemo(
-    () => (
-      <EuiSuperSelect
-        data-test-subj="sourcerer-select"
-        placeholder={i18n.PICK_INDEX_PATTERNS}
-        fullWidth
-        options={dataViewSelectOptions}
-        valueOfSelected={dataViewId}
-        onChange={onChangeSuper}
-      />
-    ),
-    [dataViewSelectOptions, onChangeSuper, dataViewId]
-  );
-
   useEffect(() => {
     setDataViewId((prevSelectedOption) =>
       !deepEqual(selectedDataViewId, prevSelectedOption) && selectedDataViewId != null
@@ -253,9 +224,24 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           <EuiSpacer size="s" />
           <EuiText color="default">{i18n.INDEX_PATTERNS_SELECTION_LABEL}</EuiText>
           <EuiSpacer size="xs" />
-          {superSelect}
+          <EuiSuperSelect
+            data-test-subj="sourcerer-select"
+            placeholder={i18n.PICK_INDEX_PATTERNS}
+            fullWidth
+            options={dataViewSelectOptions}
+            valueOfSelected={dataViewId}
+            onChange={onChangeSuper}
+          />
           <EuiSpacer size="xs" />
-          {comboBox}
+          <EuiComboBox
+            data-test-subj="sourcerer-combo-box"
+            fullWidth
+            onChange={onChangeCombo}
+            options={selectableOptions}
+            placeholder={i18n.PICK_INDEX_PATTERNS}
+            renderOption={renderOption}
+            selectedOptions={selectedOptions}
+          />
           <EuiSpacer size="s" />
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>
