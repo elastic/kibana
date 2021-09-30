@@ -129,6 +129,64 @@ describe('ui_settings 7.13.0 migrations', () => {
   });
 });
 
+describe('ui_settings 7.16.0 migrations', () => {
+  const migration = migrations['7.16.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+  test('properly converts doc_table:legacy=false to labs:discover:enableNewTable=true', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'doc_table:legacy': false,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        ' labs:discover:enableNewTable': true,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+  test('properly converts doc_table:legacy=true to labs:discover:enableNewTable=false', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'doc_table:legacy': true,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        ' labs:discover:enableNewTable': false,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+});
+
 describe('ui_settings 8.0.0 migrations', () => {
   const migration = migrations['8.0.0'];
 

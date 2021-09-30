@@ -75,6 +75,25 @@ export const migrations = {
     }),
     references: doc.references || [],
   }),
+  '7.16.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          key === 'doc_table:legacy'
+            ? {
+                ...acc,
+                ['labs:discover:enableNewTable']: !doc.attributes[key],
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
+    references: doc.references || [],
+  }),
   '8.0.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
     ...doc,
     ...(doc.attributes && {
