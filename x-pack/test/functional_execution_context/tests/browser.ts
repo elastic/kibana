@@ -11,9 +11,9 @@ import { assertLogContains, isExecutionContextLog } from '../test_utils';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header', 'home']);
   const retry = getService('retry');
+  const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/112102
-  describe.skip('Browser apps', () => {
+  describe('Browser apps', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -43,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           predicate: (record) =>
             Boolean(record.http?.request?.id?.includes('kibana:application:discover')),
           retry,
+          log,
         });
 
         await assertLogContains({
@@ -57,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/app/discover',
             }),
           retry,
+          log,
         });
 
         await assertLogContains({
@@ -70,6 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/app/discover',
             }),
           retry,
+          log,
         });
       });
 
@@ -80,6 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           predicate: (record) =>
             Boolean(record.http?.request?.id?.includes('kibana:application:discover')),
           retry,
+          log,
         });
 
         await assertLogContains({
@@ -94,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/app/discover',
             }),
           retry,
+          log,
         });
 
         await assertLogContains({
@@ -107,6 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/app/discover',
             }),
           retry,
+          log,
         });
       });
     });
@@ -150,6 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 url: '/app/lens#/edit_by_value',
               }),
             retry,
+            log,
           });
         });
 
@@ -183,6 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 url: '/app/lens#/edit_by_value',
               }),
             retry,
+            log,
           });
         });
 
@@ -196,6 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 )
               ),
             retry,
+            log,
           });
 
           await assertLogContains({
@@ -216,6 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 url: '/app/lens#/edit_by_value',
               }),
             retry,
+            log,
           });
         });
 
@@ -229,6 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 )
               ),
             retry,
+            log,
           });
           await assertLogContains({
             description: 'execution context propagates to Kibana logs',
@@ -248,6 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 url: '/app/lens#/edit_by_value',
               }),
             retry,
+            log,
           });
         });
       });
@@ -262,6 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               )
             ),
           retry,
+          log,
         });
         await assertLogContains({
           description: 'execution context propagates to Kibana logs',
@@ -281,6 +294,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d',
             }),
           retry,
+          log,
         });
       });
 
@@ -294,6 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               )
             ),
           retry,
+          log,
         });
 
         await assertLogContains({
@@ -314,6 +329,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
             }),
           retry,
+          log,
         });
       });
 
@@ -327,6 +343,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               )
             ),
           retry,
+          log,
         });
 
         await assertLogContains({
@@ -347,6 +364,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/app/visualize#/edit/ed78a660-53a0-11e8-acbd-0be0ad9d822b',
             }),
           retry,
+          log,
         });
       });
 
@@ -360,6 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               )
             ),
           retry,
+          log,
         });
 
         await assertLogContains({
@@ -380,6 +399,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/app/visualize#/edit/293b5a30-4c8f-11e8-b3d7-01146121b73d',
             }),
           retry,
+          log,
         });
       });
 
@@ -393,6 +413,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               )
             ),
           retry,
+          log,
         });
 
         await assertLogContains({
@@ -413,6 +434,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/app/visualize#/edit/9886b410-4c8b-11e8-b3d7-01146121b73d',
             }),
           retry,
+          log,
         });
       });
     });

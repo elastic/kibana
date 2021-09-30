@@ -7,6 +7,7 @@
 import Fs from 'fs/promises';
 import Path from 'path';
 import { isEqualWith } from 'lodash';
+import type { ToolingLog } from '@kbn/dev-utils';
 import type { Ecs, KibanaExecutionContext } from 'kibana/server';
 import type { RetryService } from '../../../test/common/services/retry';
 
@@ -34,19 +35,29 @@ export async function assertLogContains({
   description,
   predicate,
   retry,
+  log,
 }: {
   description: string;
   predicate: (record: Ecs) => boolean;
   retry: RetryService;
+  log?: ToolingLog;
 }): Promise<void> {
   // logs are written to disk asynchronously. I sacrificed performance to reduce flakiness.
-  await retry.waitFor(description, async () => {
+  await retry.waitForWithTimeout(description, 1000, async () => {
     const logsStr = await Fs.readFile(logFilePath, 'utf-8');
     const normalizedRecords = logsStr
       .split(endOfLine)
       .filter(Boolean)
       .map((s) => JSON.parse(s));
 
-    return normalizedRecords.some(predicate);
+    const result = normalizedRecords.some(predicate);
+    if (!result && log) {
+      log.error(
+        `Predicate (${JSON.stringify(predicate)}) was not found in logs (${JSON.stringify(
+          normalizedRecords
+        )})`
+      );
+    }
+    return result;
   });
 }
