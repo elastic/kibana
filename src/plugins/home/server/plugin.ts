@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
