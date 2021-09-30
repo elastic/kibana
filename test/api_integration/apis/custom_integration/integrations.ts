@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('get list of append integrations', () => {
       it('should return list of custom integrations that can be appended', async () => {
         const resp = await supertest
-          .get(`/api/customIntegrations/appendCustomIntegrations`)
+          .get(`/internal/customIntegrations/appendCustomIntegrations`)
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('get list of replacement integrations', () => {
       it('should return list of custom integrations that can be used to replace EPR packages', async () => {
         const resp = await supertest
-          .get(`/api/customIntegrations/replacementCustomIntegrations`)
+          .get(`/internal/customIntegrations/replacementCustomIntegrations`)
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 

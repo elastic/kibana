@@ -76,7 +76,7 @@ export function mergeEprPackagesWithReplacements(
     return !category || customIntegration.categories.includes(category);
   });
 
-  // select replacements
+  // Either select replacement or select beat
   eprPackages.forEach((eprPackage) => {
     const hits = findReplacementsForEprPackage(
       filteredReplacements,

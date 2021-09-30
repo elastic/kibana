@@ -56,8 +56,8 @@ export interface CustomIntegration {
   icons: Array<{ src: string; type: string }>;
   categories: Category[];
   shipper: string;
-  eprOverlap?: string;
+  eprOverlap?: string; // name of the equivalent Elastic Agent integration in EPR. e.g. a beat module can correspond to an EPR-package, or an APM-tutorial. When completed, Integrations-UX can preferentially show the EPR-package, rather than the custom-integration
 }
 
-export const ROUTES_APPEND_CUSTOM_INTEGRATIONS = `/api/${PLUGIN_ID}/appendCustomIntegrations`;
-export const ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS = `/api/${PLUGIN_ID}/replacementCustomIntegrations`;
+export const ROUTES_APPEND_CUSTOM_INTEGRATIONS = `/internal/${PLUGIN_ID}/appendCustomIntegrations`;
+export const ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS = `/internal/${PLUGIN_ID}/replacementCustomIntegrations`;
