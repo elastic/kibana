@@ -18,6 +18,7 @@ export interface Props {
 export const BROWSER_TRACE_TYPE = 'browser.relative_trace.type';
 export const BROWSER_TRACE_NAME = 'browser.relative_trace.name';
 export const BROWSER_TRACE_START = 'browser.relative_trace.start.us';
+export const NAVIGATION_START = 'navigationStart';
 
 export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, stepIndex }: Props) => {
   const { settings } = useSelector(selectDynamicSettings);
@@ -51,12 +52,17 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, step
               },
             },
             fields: ['browser.*'],
+            size: 1000,
             _source: false,
           },
         })
       : {},
     [heartbeatIndices, checkGroup, hasNavigationRequest]
   );
+
+  if (!hasNavigationRequest) {
+    return { metrics: [], loading: false };
+  }
 
   const metrics: MarkerItems = [];
 
@@ -68,7 +74,7 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, step
     metricDocs.forEach(({ fields }) => {
       if (fields[BROWSER_TRACE_TYPE]?.[0] === 'mark') {
         const { [BROWSER_TRACE_NAME]: metricType, [BROWSER_TRACE_START]: metricValue } = fields;
-        if (metricType?.[0] === 'navigationStart') {
+        if (metricType?.[0] === NAVIGATION_START) {
           navigationStart = metricValue?.[0];
           navigationStartExist = true;
         }
@@ -77,12 +83,9 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, step
 
     if (navigationStartExist) {
       metricDocs.forEach(({ fields }) => {
-        if (fields['browser.relative_trace.type']?.[0] === 'mark') {
-          const {
-            'browser.relative_trace.name': metricType,
-            'browser.relative_trace.start.us': metricValue,
-          } = fields;
-          if (metricType?.[0] !== 'navigationStart') {
+        if (fields[BROWSER_TRACE_TYPE]?.[0] === 'mark') {
+          const { [BROWSER_TRACE_NAME]: metricType, [BROWSER_TRACE_START]: metricValue } = fields;
+          if (metricType?.[0] !== NAVIGATION_START) {
             metrics.push({
               id: metricType?.[0],
               offset: (metricValue?.[0] - navigationStart) / 1000,

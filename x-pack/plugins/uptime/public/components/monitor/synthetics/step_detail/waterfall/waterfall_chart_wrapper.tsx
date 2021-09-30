@@ -27,7 +27,7 @@ export const renderLegendItem: RenderItem<LegendItem> = (item) => {
 interface Props {
   total: number;
   data: NetworkItems;
-  markerItems: MarkerItems;
+  markerItems?: MarkerItems;
 }
 
 export const WaterfallChartWrapper: React.FC<Props> = ({ data, total, markerItems }) => {

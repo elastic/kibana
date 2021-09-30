@@ -35,11 +35,11 @@ export const LOAD_EVENT_LABEL = i18n.translate('xpack.uptime.synthetics.waterfal
 export const DOCUMENT_CONTENT_LOADED_LABEL = i18n.translate(
   'xpack.uptime.synthetics.waterfall.domContentLabel',
   {
-    defaultMessage: 'DOMContentLoaded',
+    defaultMessage: 'DOM Content Loaded',
   }
 );
 
-export function WaterfallCharMarkers() {
+export function WaterfallChartMarkers() {
   const { markerItems } = useWaterfallContext();
 
   const theme = useTheme();

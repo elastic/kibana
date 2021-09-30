@@ -37,7 +37,7 @@ export interface IWaterfallContext {
     item: WaterfallDataEntry['config']['tooltipProps'],
     index?: number
   ) => JSX.Element;
-  markerItems: MarkerItems;
+  markerItems?: MarkerItems;
 }
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
@@ -55,7 +55,7 @@ interface ProviderProps {
   legendItems?: IWaterfallContext['legendItems'];
   metadata: IWaterfallContext['metadata'];
   renderTooltipItem: IWaterfallContext['renderTooltipItem'];
-  markerItems: MarkerItems;
+  markerItems?: MarkerItems;
 }
 
 export const WaterfallProvider: React.FC<ProviderProps> = ({
