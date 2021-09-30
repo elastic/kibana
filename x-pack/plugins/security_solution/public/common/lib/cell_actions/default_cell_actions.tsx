@@ -7,7 +7,7 @@
 
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get } from 'lodash/fp';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import type {
@@ -35,9 +35,7 @@ import {
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { allowTopN, escapeDataProviderId } from '../../components/drag_and_drop/helpers';
-import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
-import { getAllFieldsByName } from '../../containers/source';
+import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { useKibana } from '../kibana';
 
 export const COLUMNS_WITH_LINKS = [
@@ -96,63 +94,6 @@ const useKibanaServices = () => {
 
   return { timelines, filterManager };
 };
-
-const cellActionTopN = [
-  ({
-      browserFields,
-      data,
-      globalFilters,
-      timelineId,
-      pageSize,
-    }: {
-      browserFields: BrowserFields;
-      data: TimelineNonEcsData[][];
-      globalFilters?: Filter[];
-      timelineId: string;
-      pageSize: number;
-    }) =>
-    ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
-      const [showTopN, setShowTopN] = useState(false);
-      const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
-
-      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-      if (pageRowIndex >= data.length) {
-        return null;
-      }
-
-      const value = getMappedNonEcsValue({
-        data: data[pageRowIndex],
-        fieldName: columnId,
-      });
-
-      const showButton = useMemo(
-        () =>
-          allowTopN({
-            browserField: getAllFieldsByName(browserFields)[columnId],
-            fieldName: columnId,
-            hideTopN: false,
-          }),
-        [columnId]
-      );
-
-      return showButton ? (
-        <ShowTopNButton
-          Component={Component}
-          enablePopOver
-          data-test-subj="hover-actions-show-top-n"
-          field={columnId}
-          globalFilters={globalFilters}
-          onClick={onClick}
-          onFilterAdded={onFilterAdded}
-          ownFocus={false}
-          showTopN={showTopN}
-          showTooltip={false}
-          timelineId={timelineId}
-          value={value}
-        />
-      ) : null;
-    },
-];
 
 const cellActionLink = [
   ({
@@ -342,17 +283,4 @@ export const cellActions: TGridCellAction[] = [
 ];
 
 /** the default actions shown in `EuiDataGrid` cells */
-export const defaultCellActions = [...cellActions, ...cellActionTopN, ...cellActionLink];
-
-export const getDefaultCellActions = ({
-  browserFields,
-  columnId,
-  fieldType,
-}: {
-  browserFields?: BrowserFields;
-  columnId?: string;
-  fieldType?: string;
-}) => {
-  const hasLink = getLink(columnId, fieldType);
-  return [...cellActions, ...(hasLink ? cellActionLink : [])];
-};
+export const defaultCellActions = [...cellActions, ...cellActionLink];

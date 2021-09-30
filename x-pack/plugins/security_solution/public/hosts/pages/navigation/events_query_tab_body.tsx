@@ -26,10 +26,7 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import {
-  defaultCellActions,
-  getDefaultCellActions,
-} from '../../../common/lib/cell_actions/default_cell_actions';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -117,7 +114,6 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         defaultModel={eventsDefaultModel}
         end={endDate}
         entityType="events"
-        getDefaultCellActions={getDefaultCellActions}
         id={TimelineId.hostsPageEvents}
         pageFilters={pageFilters}
         renderCellValue={DefaultCellRenderer}

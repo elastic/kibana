@@ -111,11 +111,6 @@ export interface TGridIntegratedProps {
   entityType: EntityType;
   filters: Filter[];
   filterStatus?: AlertStatus;
-  getDefaultCellActions?: (args: {
-    browserFields?: BrowserFields;
-    columnId?: string;
-    fieldType?: string;
-  }) => TGridCellAction[];
   globalFullScreen: boolean;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
@@ -157,7 +152,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   entityType,
   filters,
   filterStatus,
-  getDefaultCellActions,
   globalFullScreen,
   graphEventId,
   graphOverlay = null,
@@ -361,7 +355,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                           filterQuery={filterQuery}
                           filters={filters}
                           filterStatus={filterStatus}
-                          getDefaultCellActions={getDefaultCellActions}
                           hasAlertsCrud={hasAlertsCrud}
                           id={id}
                           indexNames={indexNames}
