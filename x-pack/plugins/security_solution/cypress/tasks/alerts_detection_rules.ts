@@ -45,6 +45,7 @@ import {
   RULE_DETAILS_DELETE_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 export const activateRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
@@ -71,7 +72,7 @@ export const duplicateFirstRule = () => {
  * flake.
  */
 export const duplicateRuleFromMenu = () => {
-  cy.get(ALL_ACTIONS).should('be.visible');
+  cy.get(LOADING_INDICATOR).should('not.exist');
   cy.root()
     .pipe(($el) => {
       $el.find(ALL_ACTIONS).trigger('click');
