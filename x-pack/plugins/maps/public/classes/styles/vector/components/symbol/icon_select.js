@@ -20,7 +20,6 @@ import { SymbolIcon } from '../legend/symbol_icon';
 import { getCustomIconId, SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
-import { buildSrcUrl } from '../../symbol_utils';
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
@@ -38,7 +37,7 @@ export class IconSelect extends Component {
       ...this.props.customIcons,
       {
         symbolId,
-        icon: image,
+        svg: image,
         name,
       },
     ];
@@ -91,13 +90,14 @@ export class IconSelect extends Component {
     });
 
     if (selectedOption) {
-      const { key, icon, label } = selectedOption;
-      this.props.onChange({ selectedIconId: key, icon, label });
+      const { key, svg, label } = selectedOption;
+      this.props.onChange({ selectedIconId: key, svg, label });
     }
     this._closePopover();
   };
 
   _renderPopoverButton() {
+    const { value, svg, label } = this.props.icon;
     return (
       <EuiFormControlLayout
         icon={{ type: 'arrowDown', side: 'right' }}
@@ -110,15 +110,16 @@ export class IconSelect extends Component {
         <EuiFieldText
           onClick={this._togglePopover}
           onKeyDown={this._handleKeyboardActivity}
-          value={this.props.label}
+          value={label || value}
           compressed
           readOnly
           fullWidth
           prepend={
             <SymbolIcon
-              key={this.props.key}
+              key={value}
               className="mapIconSelectSymbol__inputButton"
-              symbolId={this.props.key}
+              symbolId={value}
+              svg={svg}
               fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
             />
           }
@@ -148,16 +149,16 @@ export class IconSelect extends Component {
       }),
     ];
 
-    const customOptions = this.props.customIcons.map(({ symbolId, icon, name }) => {
+    const customOptions = this.props.customIcons.map(({ symbolId, svg, name }) => {
       return {
         key: symbolId,
         label: name,
-        icon,
+        svg,
         prepend: (
           <SymbolIcon
             key={symbolId}
             symbolId={symbolId}
-            svg={icon}
+            svg={svg}
             fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
           />
         ),
