@@ -8,6 +8,8 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { DatatableColumn } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { ColorMode, ColorSchemas } from '../../../../charts/common';
 import { metricRenderer } from '../expression_renderers';
@@ -17,7 +19,7 @@ const config: MetricVisRenderConfig = {
   visType,
   visData: {
     type: 'datatable',
-    rows: [{ 'col-0-1': 85, 'col-0-2': 30, 'col-0-3': 12 }],
+    rows: [{ 'col-0-1': 85, 'col-0-2': 30 }],
     columns: [
       {
         id: 'col-0-1',
@@ -27,11 +29,6 @@ const config: MetricVisRenderConfig = {
       {
         id: 'col-0-2',
         name: 'Median products count',
-        meta: { type: 'number', params: {} },
-      },
-      {
-        id: 'col-0-3',
-        name: 'Min products count',
         meta: { type: 'number', params: {} },
       },
     ],
@@ -71,18 +68,31 @@ const config: MetricVisRenderConfig = {
           },
           type: 'vis_dimension',
         },
-        {
-          accessor: 2,
-          format: {
-            id: 'number',
-            params: {},
-          },
-          type: 'vis_dimension',
-        },
       ],
     },
   },
 };
+
+const dayColumn: DatatableColumn = {
+  id: 'col-0-3',
+  name: 'Day of the week',
+  meta: { type: 'string', params: {} },
+};
+
+const dayAccessor: ExpressionValueVisDimension = {
+  accessor: 2,
+  format: {
+    id: 'string',
+    params: {},
+  },
+  type: 'vis_dimension',
+};
+
+const dataWithBuckets = [
+  { 'col-0-1': 85, 'col-0-2': 30, 'col-0-3': 'Monday' },
+  { 'col-0-1': 55, 'col-0-2': 32, 'col-0-3': 'Tuesday' },
+  { 'col-0-1': 56, 'col-0-2': 52, 'col-0-3': 'Wednesday' },
+];
 
 const containerSize = {
   width: '700px',
@@ -92,6 +102,26 @@ const containerSize = {
 storiesOf('renderers/visMetric', module)
   .add('Default', () => {
     return <Render renderer={metricRenderer} config={config} {...containerSize} />;
+  })
+  .add('With bucket', () => {
+    return (
+      <Render
+        renderer={metricRenderer}
+        config={{
+          ...config,
+          visData: {
+            ...config.visData,
+            columns: [...config.visData.columns, dayColumn],
+            rows: dataWithBuckets,
+          },
+          visConfig: {
+            ...config.visConfig,
+            dimensions: { ...config.visConfig.dimensions, bucket: dayAccessor },
+          },
+        }}
+        {...containerSize}
+      />
+    );
   })
   .add('With empty results', () => {
     return (
