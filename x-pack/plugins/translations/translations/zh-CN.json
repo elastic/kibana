@@ -6844,8 +6844,6 @@
     "xpack.apm.settings.schema.confirm.title": "请确认您的选择",
     "xpack.apm.settings.schema.confirm.unsupportedConfigs.descriptionText": "系统会替您将兼容的定制 apm-server.yml 用户设置移到 Fleet 服务器设置。我们将会让您了解哪些设置不兼容后，才会移除它们。",
     "xpack.apm.settings.schema.confirm.unsupportedConfigs.title": "以下 apm-server.yml 用户设置不兼容，将会被移除",
-    "xpack.apm.settings.schema.descriptionText.betaCalloutMessage": "此功能为公测版，可能会进行更改。设计和代码相对于正式发行版功能还不够成熟，将按原样提供，且不提供任何保证。公测版功能不受正式发行版功能支持 SLA 的约束。",
-    "xpack.apm.settings.schema.descriptionText.betaCalloutTitle": "数据流在 APM 中为公测版",
     "xpack.apm.settings.schema.descriptionText.irreversibleEmphasisText": "不可逆",
     "xpack.apm.settings.schema.descriptionText.superuserEmphasisText": "超级用户",
     "xpack.apm.settings.schema.disabledReason": "无法切换到数据流：{reasons}",
