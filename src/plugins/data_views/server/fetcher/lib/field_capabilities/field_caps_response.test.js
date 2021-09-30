@@ -13,7 +13,7 @@ import sinon from 'sinon';
 import * as shouldReadFieldFromDocValuesNS from './should_read_field_from_doc_values';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 
-import { getKbnFieldType } from '../../../../common';
+import { getKbnFieldType } from '@kbn/field-types';
 import { readFieldCapsResponse } from './field_caps_response';
 import esResponse from './__fixtures__/es_field_caps_response.json';
 
