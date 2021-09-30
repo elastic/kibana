@@ -45,8 +45,6 @@ export class Handler {
     this.ChartClass = chartTypes[visConfig.get('type')];
     this.uiSettings = uiSettings;
     this.charts = [];
-    this.alerts = [];
-
     this.vis = vis;
     this.visConfig = visConfig;
     this.data = visConfig.data;
@@ -68,7 +66,7 @@ export class Handler {
 
     this.layout = new Layout(visConfig);
     this.binder = new Binder();
-    this.renderArray = _.filter([this.layout, this.chartTitle, this.alerts], Boolean);
+    this.renderArray = _.filter([this.layout, this.chartTitle], Boolean);
 
     this.renderArray = this.renderArray
       .concat(this.valueAxes)
