@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 
 import { getExecuteDetails } from '../../__fixtures__';
 import { defaultWatch } from '../../public/application/models/watch';
-import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
+import { setupEnvironment, pageHelpers, wrapBodyResponse } from './helpers';
 import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
 import { WATCH } from './helpers/jest_constants';
 
@@ -19,19 +19,19 @@ describe('<JsonWatchEdit /> create route', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateJsonTestBed;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   afterAll(() => {
+    jest.useRealTimers();
     server.restore();
   });
 
   describe('on component mount', () => {
     beforeEach(async () => {
       testBed = await setup();
-
-      await act(async () => {
-        const { component } = testBed;
-        await nextTick();
-        component.update();
-      });
+      testBed.component.update();
     });
 
     test('should set the correct page title', () => {
@@ -92,7 +92,6 @@ describe('<JsonWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSubmitButton();
-            await nextTick();
           });
 
           const latestRequest = server.requests[server.requests.length - 1];
@@ -141,9 +140,8 @@ describe('<JsonWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSubmitButton();
-            await nextTick();
-            component.update();
           });
+          component.update();
 
           expect(exists('sectionError')).toBe(true);
           expect(find('sectionError').text()).toContain(error.message);
@@ -169,7 +167,6 @@ describe('<JsonWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSimulateButton();
-            await nextTick();
           });
 
           const latestRequest = server.requests[server.requests.length - 1];
@@ -230,9 +227,8 @@ describe('<JsonWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSimulateButton();
-            await nextTick();
-            component.update();
           });
+          component.update();
 
           const latestRequest = server.requests[server.requests.length - 1];
 

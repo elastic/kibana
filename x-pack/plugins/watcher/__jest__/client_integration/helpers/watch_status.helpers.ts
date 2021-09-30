@@ -89,9 +89,8 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
 
     await act(async () => {
       button.simulate('click');
-      await delay(100);
-      component.update();
     });
+    component.update();
   };
 
   return {
