@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { LoadingPage } from './pages/loading_page';
 import { LicensePage } from './pages/license_page';
 import { ClusterOverview } from './pages/cluster/overview_page';
+import { ClusterListing } from './pages/home/cluster_listing';
 import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalStateProvider } from './global_state_context';
 import { ExternalConfigContext, ExternalConfig } from './external_config_context';
@@ -68,9 +69,10 @@ const MonitoringApp: React.FC<{
                   />
                   <RouteInit
                     path="/home"
-                    component={Home}
+                    component={ClusterListing}
                     codePaths={['all']}
-                    fetchAllClusters={false}
+                    fetchAllClusters={true}
+                    unsetGlobalState={true}
                   />
                   <RouteInit
                     path="/overview"
@@ -123,8 +125,4 @@ const MonitoringApp: React.FC<{
       </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
-};
-
-const Home: React.FC<{}> = () => {
-  return <div>Home page (Cluster listing)</div>;
 };
