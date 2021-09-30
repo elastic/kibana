@@ -8,19 +8,6 @@
 
 import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
-const kibanaPathConf: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
-  if (process.env?.KIBANA_PATH_CONF) {
-    addDeprecation({
-      message: `Environment variable "KIBANA_PATH_CONF" is deprecated. It has been replaced with "KBN_PATH_CONF" pointing to a config folder`,
-      correctiveActions: {
-        manualSteps: [
-          'Use "KBN_PATH_CONF" instead of "KIBANA_PATH_CONF" to point to a config folder.',
-        ],
-      },
-    });
-  }
-};
-
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.server?.basePath && !settings.server?.rewriteBasePath) {
     addDeprecation({
@@ -354,7 +341,6 @@ const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecat
 
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   rewriteCorsSettings,
-  kibanaPathConf,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
   opsLoggingEventDeprecation,
