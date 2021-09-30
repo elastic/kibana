@@ -17,14 +17,14 @@ import {
 } from '../../../types';
 import {
   policyIdFromParams,
-  isOnPolicyTrustedAppsPage,
-  getCurrentArtifactsLocation,
   getAssignableArtifactsList,
   doesPolicyTrustedAppsListNeedUpdate,
   getCurrentPolicyAssignedTrustedAppsState,
   getLatestLoadedPolicyAssignedTrustedAppsState,
   getTrustedAppsPolicyListState,
   isPolicyTrustedAppListLoading,
+  getCurrentArtifactsLocation,
+  isOnPolicyTrustedAppsView,
 } from '../selectors';
 import {
   ImmutableArray,
@@ -46,7 +46,6 @@ import {
 import { parseQueryFilterToKQL } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
 import { PolicyDetailsAction } from '../action';
-import { isOnPolicyTrustedAppsView } from '../selectors/policy_common_selectors';
 import { ServerApiError } from '../../../../../../common/types';
 
 /** Runs all middleware actions associated with the Trusted Apps view in Policy Details */

@@ -6,9 +6,8 @@
  */
 
 import { PolicyDetailsState } from '../../../types';
-import { initialPolicyDetailsState } from '../reducer/initial_policy_details_state';
+import { initialPolicyDetailsState } from '../reducer';
 import {
-  getCurrentArtifactsLocation,
   getAssignableArtifactsList,
   getAssignableArtifactsListIsLoading,
   getUpdateArtifactsIsLoading,
@@ -19,6 +18,7 @@ import {
   getUpdateArtifacts,
   isOnPolicyTrustedAppsPage,
 } from './trusted_apps_selectors';
+import { getCurrentArtifactsLocation } from './policy_common_selectors';
 
 import { ImmutableObject } from '../../../../../../../common/endpoint/types';
 import {

@@ -9,13 +9,13 @@ import { Action } from 'redux';
 import { AsyncResourceState } from '../../../../../state';
 import {
   PostTrustedAppCreateResponse,
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
 } from '../../../../../../../common/endpoint/types';
 import { PolicyArtifactsState } from '../../../types';
 
 export interface PolicyArtifactsAssignableListPageDataChanged {
   type: 'policyArtifactsAssignableListPageDataChanged';
-  payload: AsyncResourceState<GetTrustedListAppsResponse>;
+  payload: AsyncResourceState<GetTrustedAppsListResponse>;
 }
 
 export interface PolicyArtifactsUpdateTrustedApps {
