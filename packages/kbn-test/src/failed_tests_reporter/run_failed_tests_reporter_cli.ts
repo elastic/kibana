@@ -21,6 +21,7 @@ import { readTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 import { getReportMessageIter } from './report_metadata';
 import { reportFailuresToEs } from './report_failures_to_es';
+import { reportFailuresToFile } from './report_failures_to_file';
 
 const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 
@@ -97,6 +98,8 @@ export function runFailedTestsReporterCli() {
         const report = await readTestReport(reportPath);
         const messages = Array.from(getReportMessageIter(report));
         const failures = await getFailures(report);
+
+        reportFailuresToFile(log, failures);
 
         if (indexInEs) {
           await reportFailuresToEs(log, failures);

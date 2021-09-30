@@ -159,13 +159,5 @@ steps:
   - wait: ~
     continue_on_failure: true
 
-  - plugins:
-      - junit-annotate#v1.9.0:
-          artifacts: target/junit/**/*.xml
-          job-uuid-file-pattern: '-bk__(.*).xml'
-
-  - wait: ~
-    continue_on_failure: true
-
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
