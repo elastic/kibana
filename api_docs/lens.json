@@ -3002,7 +3002,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-server.PluginSetupContract.taskManager",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "taskManager",
             "description": [],

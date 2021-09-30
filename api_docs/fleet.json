@@ -5018,7 +5018,13 @@
             "description": [],
             "signature": [
               "(options?: ",
-              "ListArtifactsProps",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.ListArtifactsProps",
+                "text": "ListArtifactsProps"
+              },
               " | undefined) => Promise<",
               {
                 "pluginId": "fleet",
@@ -5048,7 +5054,13 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "ListArtifactsProps",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "server",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-server.ListArtifactsProps",
+                    "text": "ListArtifactsProps"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
@@ -5451,6 +5463,20 @@
           "any"
         ],
         "path": "x-pack/plugins/fleet/server/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.ListArtifactsProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ListArtifactsProps",
+        "description": [],
+        "signature": [
+          "Pick<Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}>, \"page\" | \"perPage\" | \"sortOrder\" | \"kuery\"> & { sortField?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12304,6 +12330,15 @@
             "label": "icons",
             "description": [],
             "signature": [
+              "(",
+              {
+                "pluginId": "customIntegrations",
+                "scope": "common",
+                "docId": "kibCustomIntegrationsPluginApi",
+                "section": "def-common.CustomIntegrationIcon",
+                "text": "CustomIntegrationIcon"
+              },
+              " | ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -12311,7 +12346,7 @@
                 "section": "def-common.PackageSpecIcon",
                 "text": "PackageSpecIcon"
               },
-              "[]"
+              ")[]"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false

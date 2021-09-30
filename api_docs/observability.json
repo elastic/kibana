@@ -4157,6 +4157,34 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.enableInspectEsQueries",
+        "type": "string",
+        "tags": [],
+        "label": "enableInspectEsQueries",
+        "description": [],
+        "signature": [
+          "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.maxSuggestions",
+        "type": "string",
+        "tags": [],
+        "label": "maxSuggestions",
+        "description": [],
+        "signature": [
+          "\"observability:maxSuggestions\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.observabilityAppId",
         "type": "string",
         "tags": [],
