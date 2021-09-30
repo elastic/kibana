@@ -16,7 +16,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const esClient = getService('es');
 
   async function getLastDocId(processorEvent: ProcessorEvent) {
-    const response = await esClient.search({
+    const response = await esClient.search<{
+      [key: string]: { id: string };
+    }>({
       index: ['apm-*'],
       body: {
         query: {
@@ -31,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       },
     });
 
-    return get(response.body.hits.hits[0]._source, `${processorEvent}.id`);
+    return response.body.hits.hits[0]._source![processorEvent].id;
   }
 
   registry.when('Event metadata', { config: 'basic', archives: ['apm_8.0.0'] }, () => {

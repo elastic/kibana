@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty, groupBy, capitalize, partition } from 'lodash';
+import { isEmpty, groupBy, partition } from 'lodash';
 import type { SectionDescriptor } from './types';
 
-const EXCLUDED_FIELDS = ['error.exception', 'span.stacktrace'];
+const EXCLUDED_FIELDS = ['error.exception.stacktrace', 'span.stacktrace'];
 
 export const getSectionsFromFields = (fields: Record<string, any>) => {
   const rows = Object.keys(fields)
@@ -30,7 +30,7 @@ export const getSectionsFromFields = (fields: Record<string, any>) => {
 
       const section: SectionDescriptor = {
         key: first.section,
-        label: capitalize(first.section),
+        label: first.section.toLowerCase(),
         properties: rowsForSection.map((row) => ({
           field: row.field,
           value: row.value,

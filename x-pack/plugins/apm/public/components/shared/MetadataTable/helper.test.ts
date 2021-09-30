@@ -22,7 +22,7 @@ describe('MetadataTable Helper', () => {
     expect(metadataItems).toEqual([
       {
         key: 'http',
-        label: 'Http',
+        label: 'http',
         properties: [
           { field: 'http.headers.Connection', value: ['close'] },
           { field: 'http.headers.Host', value: ['opbeans:3000'] },
@@ -31,7 +31,7 @@ describe('MetadataTable Helper', () => {
       },
       {
         key: 'service',
-        label: 'Service',
+        label: 'service',
         properties: [
           { field: 'service.environment', value: ['production'] },
           { field: 'service.framework.name', value: ['express'] },
@@ -46,7 +46,7 @@ describe('MetadataTable Helper', () => {
       expect(filteredItems).toEqual([
         {
           key: 'http',
-          label: 'Http',
+          label: 'http',
           properties: [
             { field: 'http.headers.Connection', value: ['close'] },
             { field: 'http.headers.Host', value: ['opbeans:3000'] },
@@ -61,7 +61,7 @@ describe('MetadataTable Helper', () => {
       expect(filteredItems).toEqual([
         {
           key: 'service',
-          label: 'Service',
+          label: 'service',
           properties: [{ field: 'service.environment', value: ['production'] }],
         },
       ]);
