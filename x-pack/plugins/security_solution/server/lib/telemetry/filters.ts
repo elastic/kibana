@@ -129,14 +129,12 @@ export const allowlistEventFields: AllowlistFields = {
 
 export const exceptionListEventFields: AllowlistFields = {
   created_at: true,
-  description: true,
   effectScope: true,
   entries: true,
   id: true,
   name: true,
-  os: true,
   os_types: true,
-  version: true,
+  rule_version: true,
 };
 
 /**

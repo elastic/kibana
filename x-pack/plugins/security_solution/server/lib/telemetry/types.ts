@@ -217,7 +217,7 @@ export interface GetEndpointListResponse {
 
 export interface ExceptionListItem {
   id: string;
-  version: number | null;
+  rule_version?: number;
   name: string;
   created_at: string;
   updated_at: string;

@@ -104,7 +104,6 @@ export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedAp
   return {
     id: trustedApplication.id,
     name: trustedApplication.name,
-    version: trustedApplication.version || null,
     created_at: trustedApplication.created_at,
     updated_at: trustedApplication.updated_at,
     entries: trustedApplication.entries,
@@ -122,7 +121,6 @@ export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionLi
   return {
     id: exceptionListItem.id,
     name: exceptionListItem.name,
-    version: exceptionListItem._version || null,
     created_at: exceptionListItem.created_at,
     updated_at: exceptionListItem.updated_at,
     entries: exceptionListItem.entries,
@@ -144,7 +142,7 @@ export const ruleExceptionListItemToTelemetryEvent = (
   return {
     id: exceptionListItem.item_id,
     name: exceptionListItem.description,
-    version: ruleVersion,
+    rule_version: ruleVersion,
     created_at: exceptionListItem.created_at,
     updated_at: exceptionListItem.updated_at,
     entries: exceptionListItem.entries,
