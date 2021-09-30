@@ -24,9 +24,9 @@ export interface ContextMenuWithRouterSupportProps
     Pick<EuiPopoverProps, 'button' | 'anchorPosition' | 'panelPaddingSize'> {
   items: ContextMenuItemNavByRouterProps[];
   /**
-   * The max width for the popup menu. Default is `50ch`.
+   * The max width for the popup menu. Default is `32ch`.
    * **Note** that when used (default behaviour), all menu item's `truncateText` prop will be
-   * overwritten to `true`
+   * overwritten to `true`. Setting this prop's value to `undefined` will suppress the default behaviour.
    */
   maxWidth?: CSSProperties['maxWidth'];
 }
@@ -37,7 +37,7 @@ export interface ContextMenuWithRouterSupportProps
  * Menu also supports automatically closing the popup when an item is clicked.
  */
 export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportProps>(
-  ({ items, button, panelPaddingSize, anchorPosition, maxWidth = '50ch', ...commonProps }) => {
+  ({ items, button, panelPaddingSize, anchorPosition, maxWidth = '32ch', ...commonProps }) => {
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
     const [isOpen, setIsOpen] = useState(false);
 
