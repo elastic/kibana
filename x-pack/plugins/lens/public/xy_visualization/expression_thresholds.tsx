@@ -16,7 +16,7 @@ import type { LensMultiTable } from '../../common/types';
 import type { ColorAssignments } from './color_assignment';
 import { hasIcon } from './xy_config_panel/threshold_panel';
 
-const THRESHOLD_ICON_SIZE = 20;
+const THRESHOLD_MARKER_SIZE = 20;
 
 export const computeChartMargins = (
   thresholdPaddings: Partial<Record<Position, number>>,
@@ -52,10 +52,6 @@ export const computeChartMargins = (
   return result;
 };
 
-function hasIcon(icon: string | undefined): icon is string {
-  return icon != null && icon !== 'none';
-}
-
 // Note: it does not take into consideration whether the threshold is in view or not
 export const getThresholdRequiredPaddings = (
   thresholdLayers: LayerArgs[],
@@ -67,7 +63,7 @@ export const getThresholdRequiredPaddings = (
         const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
         memo[placement] = Math.max(
           memo[placement] || 0,
-          THRESHOLD_ICON_SIZE * (Number(hasIcon(icon)) + Number(textVisibility)) // double the padding size if there's text
+          THRESHOLD_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
         );
       }
     });
@@ -136,7 +132,7 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
     return;
   }
   const Label = (
-    <div className="eui-textTruncate" style={{ maxWidth: THRESHOLD_ICON_SIZE * 3 }}>
+    <div className="eui-textTruncate" style={{ maxWidth: THRESHOLD_MARKER_SIZE * 3 }}>
       {label}
     </div>
   );
@@ -147,7 +143,7 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
       style={{
         display: 'inline-block',
         overflow: 'hidden',
-        width: THRESHOLD_ICON_SIZE,
+        width: THRESHOLD_MARKER_SIZE,
         lineHeight: 1.5,
       }}
     >
