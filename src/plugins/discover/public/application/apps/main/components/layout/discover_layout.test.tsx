@@ -35,7 +35,7 @@ import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(indexPattern: IndexPattern, wasSidebarClosed = false): DiscoverLayoutProps {
+function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): DiscoverLayoutProps {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -153,17 +153,26 @@ describe('Discover component', () => {
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 
-  test('should persist sidebar opened state', () => {
-    const component = mountWithIntl(
-      <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
-    );
-    expect(component.find(DiscoverSidebar).length).toBe(1);
-  });
+  describe('sidebar', () => {
+    test('should be opened if discover:sidebarClosed was not set', () => {
+      const component = mountWithIntl(
+        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
+      );
+      expect(component.find(DiscoverSidebar).length).toBe(1);
+    });
 
-  test('should persist sidebar closed state', () => {
-    const component = mountWithIntl(
-      <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, true)} />
-    );
-    expect(component.find(DiscoverSidebar).length).toBe(0);
+    test('should be opened if discover:sidebarClosed is false', () => {
+      const component = mountWithIntl(
+        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, false)} />
+      );
+      expect(component.find(DiscoverSidebar).length).toBe(1);
+    });
+
+    test('should be closed if discover:sidebarClosed is true', () => {
+      const component = mountWithIntl(
+        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, true)} />
+      );
+      expect(component.find(DiscoverSidebar).length).toBe(0);
+    });
   });
 });
