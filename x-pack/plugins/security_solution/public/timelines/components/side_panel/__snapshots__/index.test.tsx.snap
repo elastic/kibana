@@ -435,13 +435,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
           "indexName": "my-index",
         }
       }
-      hostRisk={
-        Object {
-          "fields": Array [],
-          "isModuleEnabled": false,
-          "loading": false,
-        }
-      }
       isAlert={false}
       isDraggable={false}
       loading={true}
@@ -959,13 +952,6 @@ Array [
                         },
                         "eventId": "my-id",
                         "indexName": "my-index",
-                      }
-                    }
-                    hostRisk={
-                      Object {
-                        "fields": Array [],
-                        "isModuleEnabled": false,
-                        "loading": false,
                       }
                     }
                     isAlert={false}
@@ -2002,13 +1988,6 @@ Array [
                       },
                       "eventId": "my-id",
                       "indexName": "my-index",
-                    }
-                  }
-                  hostRisk={
-                    Object {
-                      "fields": Array [],
-                      "isModuleEnabled": false,
-                      "loading": false,
                     }
                   }
                   isAlert={false}
