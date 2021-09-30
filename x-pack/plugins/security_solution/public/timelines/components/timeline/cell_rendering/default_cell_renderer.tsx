@@ -13,6 +13,12 @@ import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 
 import { CellValueElementProps } from '.';
 import { getLink } from '../../../../common/lib/cell_actions/default_cell_actions';
+import { ExpandTopValue } from '../../../../common/lib/cell_actions/expand_top_value';
+
+const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
+const hasCellActions = (columnId?: string) => {
+  return columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
+};
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   browserFields,
@@ -20,6 +26,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   data,
   ecsData,
   eventId,
+  globalFilters,
   header,
   isDetails,
   isDraggable,
@@ -27,26 +34,41 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   rowRenderers,
   setCellProps,
   timelineId,
-}) => (
-  <>
-    {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-      asPlainText: !!getLink(header.id, header.type),
-      className,
-      columnName: header.id,
-      eventId,
-      field: header,
-      isDraggable,
-      linkValues,
-      timelineId,
-      truncate: true,
-      values: getMappedNonEcsValue({
-        data,
-        fieldName: header.id,
-      }),
-      rowRenderers,
-      browserFields,
-      ecsData,
-      isDetails,
-    })}
-  </>
-);
+}) => {
+  const values = getMappedNonEcsValue({
+    data,
+    fieldName: header.id,
+  });
+  return (
+    <>
+      {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+        asPlainText: !!getLink(header.id, header.type),
+        browserFields,
+        className,
+        columnName: header.id,
+        eventId,
+        field: header,
+        isDraggable,
+        linkValues,
+        timelineId,
+        truncate: true,
+        values: getMappedNonEcsValue({
+          data,
+          fieldName: header.id,
+        }),
+        rowRenderers,
+        ecsData,
+        isDetails,
+      })}
+      {isDetails && browserFields && hasCellActions(header.id) && (
+        <ExpandTopValue
+          browserFields={browserFields}
+          field={header.id}
+          globalFilters={globalFilters}
+          timelineId={timelineId}
+          value={values}
+        />
+      )}
+    </>
+  );
+};

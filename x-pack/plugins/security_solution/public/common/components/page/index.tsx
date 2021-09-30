@@ -35,7 +35,8 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     display: none;
 
     &:first-child,
-    &:nth-child(2) {
+    &:nth-child(2),
+    &:nth-child(3) {
       display: inline-flex;
     }
 
@@ -45,6 +46,7 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     overrides the default styling of EuiDataGrid expand popover footer to
     make it a column of actions instead of the default actions row
   */
+
   .euiDataGridRowCell__popover {
 
     max-width: 815px !important;
@@ -53,17 +55,20 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
     .euiText {
       padding: 8px;
+      &:only-child
     }
 
-    /*
-    REMOVE THIS!!
-  */
-    .data-grid-expanded-plain-text {
-      display: inline-block;
+    .expandable-top-value-button {
+      &.euiButtonEmpty--primary:enabled:focus,
+      .euiButtonEmpty--primary:focus {
+        background-color: transparent;
+      }
     }
+
 
     &.euiPopover__panel.euiPopover__panel-isOpen {
       padding: 0;
+      min-width: 65px;
     }
 
     &.euiPopover__panel.euiPanel--paddingSmall .euiPopoverFooter:not([class*='euiPopoverFooter--padding']) {
@@ -74,6 +79,7 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     .euiPopoverFooter .euiFlexGroup {
       flex-wrap: wrap;
       margin: 0;
+      width: 260px;
 
       .euiButtonEmpty .euiButtonContent {
         justify-content: left;
@@ -119,8 +125,12 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
   }
 
   /* hide open draggable popovers when a modal is being displayed to prevent them from covering the modal */
-  body.euiBody-hasOverlayMask .withHoverActions__popover.euiPopover__panel-isOpen{
-    visibility: hidden !important;
+  body.euiBody-hasOverlayMask {
+    .euiDataGridRowCell__popover.euiPopover__panel-isOpen,
+    .withHoverActions__popover.euiPopover__panel-isOpen {
+      visibility: hidden !important;
+    }
+
   }
 
   /* ensure elastic charts tooltips appear above open euiPopovers */

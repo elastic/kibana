@@ -8,7 +8,6 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useMemo, useState, useCallback } from 'react';
-import styled from 'styled-components';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../../../timelines/common/search_strategy';
 import { allowTopN } from '../../components/drag_and_drop/helpers';
@@ -47,7 +46,7 @@ const ExpandTopValueComponent: React.FC<Props> = ({
 
   return showButton ? (
     <ShowTopNButton
-      className="eui-displayBlock"
+      className="eui-displayBlock expandable-top-value-button"
       Component={EuiButtonEmpty}
       data-test-subj="data-grid-expanded-show-top-n"
       field={field}

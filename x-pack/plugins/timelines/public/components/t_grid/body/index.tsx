@@ -720,7 +720,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
         return renderCellValue({
           browserFields,
-          className: isDetails ? 'data-grid-expanded-plain-text' : undefined,
           columnId: header.id,
           data: rowData,
           ecsData: ecs,
@@ -739,15 +738,15 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       };
       return Cell;
     }, [
-      columnHeaders,
+      pageSize,
       data,
-      id,
+      columnHeaders,
       renderCellValue,
-      tabType,
-      theme,
       browserFields,
       rowRenderers,
-      pageSize,
+      tabType,
+      id,
+      theme,
     ]);
 
     const onChangeItemsPerPage = useCallback(

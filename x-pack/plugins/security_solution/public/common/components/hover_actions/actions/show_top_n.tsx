@@ -12,8 +12,6 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiToolTip,
-  EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StatefulTopN } from '../../top_n';

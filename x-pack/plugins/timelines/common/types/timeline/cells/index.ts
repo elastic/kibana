@@ -7,6 +7,8 @@
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { RowRenderer } from '../../..';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { Ecs } from '../../../ecs';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 import { ColumnHeaderOptions } from '../columns';
@@ -17,6 +19,7 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   className?: string;
   data: TimelineNonEcsData[];
   eventId: string; // _id
+  globalFilters?: Filter[];
   header: ColumnHeaderOptions;
   isDraggable: boolean;
   linkValues: string[] | undefined;

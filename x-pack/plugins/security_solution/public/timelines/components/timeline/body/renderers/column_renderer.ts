@@ -30,7 +30,7 @@ export interface ColumnRenderer {
     values,
   }: {
     asPlainText?: boolean;
-    browserFields: BrowserFields;
+    browserFields?: BrowserFields;
     className?: string;
     columnName: string;
     ecsData?: Ecs;
