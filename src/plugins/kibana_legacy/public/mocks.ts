@@ -15,7 +15,6 @@ const createSetupContract = (): Setup => ({});
 
 const createStartContract = (): Start => ({
   loadFontAwesome: jest.fn(),
-  loadAngularBootstrap: jest.fn(),
 });
 
 export const kibanaLegacyPluginMock = {

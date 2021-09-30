@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import classNames from 'classnames';
 import {
   MetricDistributionChart,
@@ -16,8 +16,8 @@ import {
 import { FieldVisConfig } from '../../types';
 import { kibanaFieldFormat, formatSingleValue } from '../../../utils';
 
-const METRIC_DISTRIBUTION_CHART_WIDTH = 150;
-const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;
+const METRIC_DISTRIBUTION_CHART_WIDTH = 100;
+const METRIC_DISTRIBUTION_CHART_HEIGHT = 10;
 
 export interface NumberContentPreviewProps {
   config: FieldVisConfig;
@@ -59,8 +59,11 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
       <div className={'dataGridChart__legend'} data-test-subj={`${dataTestSubj}-legend`}>
         {legendText && (
           <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup direction={'row'} data-test-subj={`${dataTestSubj}-legend`}>
+            <EuiFlexGroup
+              direction={'row'}
+              data-test-subj={`${dataTestSubj}-legend`}
+              responsive={false}
+            >
               <EuiFlexItem className={'dataGridChart__legend'}>
                 {kibanaFieldFormat(legendText.min, fieldFormat)}
               </EuiFlexItem>
