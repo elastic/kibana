@@ -13,7 +13,7 @@ import {
   SavedObjectFinderUi,
   SavedObjectMetaData,
 } from '../../../../../../src/plugins/saved_objects/public/';
-import { useEmbeddablesService, useLabsService, usePlatformService } from '../../services';
+import { useEmbeddablesService, usePlatformService } from '../../services';
 
 const strings = {
   getNoItemsText: () =>
@@ -29,16 +29,19 @@ export interface Props {
   onClose: () => void;
   onSelect: (id: string, embeddableType: string, isByValueEnabled?: boolean) => void;
   availableEmbeddables: string[];
+  isByValueEnabled?: boolean;
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
+export const AddEmbeddableFlyout: FC<Props> = ({
+  onSelect,
+  availableEmbeddables,
+  onClose,
+  isByValueEnabled,
+}) => {
   const embeddablesService = useEmbeddablesService();
-  const labsService = useLabsService();
   const platformService = usePlatformService();
   const { getEmbeddableFactories } = embeddablesService;
   const { getSavedObjects, getUISettings } = platformService;
-
-  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
 
   const onAddPanel = useCallback(
     (id: string, savedObjectType: string) => {

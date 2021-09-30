@@ -15,6 +15,7 @@ import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
 import { State } from '../../../types';
+import { useLabsService } from '../../services';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
@@ -66,6 +67,9 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   availableEmbeddables,
   ...restProps
 }) => {
+  const labsService = useLabsService();
+  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
+
   const dispatch = useDispatch();
   const pageId = useSelector<State, string>((state) => getSelectedPage(state));
 
@@ -75,7 +79,7 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   );
 
   const onSelect = useCallback(
-    (id: string, type: string, isByValueEnabled?: boolean): void => {
+    (id: string, type: string): void => {
       const partialElement = {
         expression: `markdown "Could not find embeddable for type ${type}" | render`,
       };
@@ -92,7 +96,7 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
       addEmbeddable(pageId, partialElement);
       restProps.onClose();
     },
-    [addEmbeddable, pageId, restProps]
+    [addEmbeddable, pageId, restProps, isByValueEnabled]
   );
 
   return (
@@ -100,6 +104,7 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
       {...restProps}
       availableEmbeddables={availableEmbeddables || []}
       onSelect={onSelect}
+      isByValueEnabled={isByValueEnabled}
     />
   );
 };
