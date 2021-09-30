@@ -32,24 +32,4 @@ describe('configuration deprecations', () => {
     const logs = loggingSystemMock.collect(mockLoggingSystem);
     expect(logs.warn.flat()).toHaveLength(0);
   });
-
-  it('should log deprecation warnings for core deprecations', async () => {
-    root = kbnTestServer.createRoot({
-      optimize: {
-        lazy: true,
-        lazyPort: 9090,
-      },
-    });
-
-    await root.preboot();
-    await root.setup();
-
-    const logs = loggingSystemMock.collect(mockLoggingSystem);
-    expect(logs.warn.flat()).toMatchInlineSnapshot(`
-      Array [
-        "You no longer need to configure \\"optimize.lazy\\".",
-        "You no longer need to configure \\"optimize.lazyPort\\".",
-      ]
-    `);
-  });
 });

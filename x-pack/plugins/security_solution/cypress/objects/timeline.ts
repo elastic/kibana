@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { TimelineResponse } from '../../common/types/timeline';
+
 export interface Timeline {
   title: string;
   description: string;
@@ -61,7 +63,9 @@ export const caseTimeline = (): Timeline => ({
   id: '0162c130-78be-11ea-9718-118a926974a4',
 });
 
-export const expectedExportedTimelineTemplate = (templateResponse: Cypress.Response) => {
+export const expectedExportedTimelineTemplate = (
+  templateResponse: Cypress.Response<TimelineResponse>
+) => {
   const timelineTemplateBody = templateResponse.body.data.persistTimeline.timeline;
 
   return {
@@ -78,14 +82,14 @@ export const expectedExportedTimelineTemplate = (templateResponse: Cypress.Respo
     kqlQuery: {
       filterQuery: {
         kuery: {
-          expression: timelineTemplateBody.kqlQuery.filterQuery.kuery.expression,
+          expression: timelineTemplateBody.kqlQuery?.filterQuery?.kuery?.expression,
           kind: 'kuery',
         },
       },
     },
     dateRange: {
-      start: timelineTemplateBody.dateRange.start,
-      end: timelineTemplateBody.dateRange.end,
+      start: timelineTemplateBody.dateRange?.start,
+      end: timelineTemplateBody.dateRange?.end,
     },
     description: timelineTemplateBody.description,
     title: timelineTemplateBody.title,
@@ -103,7 +107,7 @@ export const expectedExportedTimelineTemplate = (templateResponse: Cypress.Respo
   };
 };
 
-export const expectedExportedTimeline = (timelineResponse: Cypress.Response) => {
+export const expectedExportedTimeline = (timelineResponse: Cypress.Response<TimelineResponse>) => {
   const timelineBody = timelineResponse.body.data.persistTimeline.timeline;
 
   return {
@@ -119,10 +123,10 @@ export const expectedExportedTimeline = (timelineResponse: Cypress.Response) => 
     kqlMode: 'filter',
     kqlQuery: {
       filterQuery: {
-        kuery: { expression: timelineBody.kqlQuery.filterQuery.kuery.expression, kind: 'kuery' },
+        kuery: { expression: timelineBody.kqlQuery?.filterQuery?.kuery?.expression, kind: 'kuery' },
       },
     },
-    dateRange: { start: timelineBody.dateRange.start, end: timelineBody.dateRange.end },
+    dateRange: { start: timelineBody.dateRange?.start, end: timelineBody.dateRange?.end },
     description: timelineBody.description,
     title: timelineBody.title,
     created: timelineBody.created,
