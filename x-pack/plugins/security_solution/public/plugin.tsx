@@ -35,7 +35,7 @@ import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 
 import {
-  APP_ID,
+  APP_UI_ID,
   OVERVIEW_PATH,
   APP_OVERVIEW_PATH,
   APP_PATH,
@@ -44,7 +44,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
 } from '../common/constants';
 
-import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
+import { getDeepLinks } from './app/deep_links';
 import { manageOldSiemRoutes } from './helpers';
 import {
   IndexFieldsStrategyRequest,
@@ -98,12 +98,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         usageCollection: plugins.usageCollection,
         telemetryManagementSection: plugins.telemetryManagementSection,
       },
-      APP_ID
+      APP_UI_ID
     );
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
-        id: APP_ID,
+        id: APP_UI_ID,
         title: APP_NAME,
         description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
           defaultMessage:
@@ -133,7 +133,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      id: APP_ID,
+      id: APP_UI_ID,
       title: APP_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
@@ -232,11 +232,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
     } else {
-      updateGlobalNavigation({
-        capabilities: core.application.capabilities,
-        updater$: this.appUpdater$,
-        enableExperimental: this.experimentalFeatures,
-      });
+      this.appUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+        deepLinks: getDeepLinks(
+          this.experimentalFeatures,
+          undefined,
+          core.application.capabilities
+        ),
+      }));
     }
 
     return {};
@@ -313,9 +316,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return {
       overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),
+      cases: subPlugins.cases.start(),
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
-      cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
       ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null

@@ -6,16 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
 
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityPageName } from '../types';
-import {
-  AppDeepLink,
-  ApplicationStart,
-  AppNavLinkStatus,
-  AppUpdater,
-} from '../../../../../../src/core/public';
+import { AppDeepLink, ApplicationStart, AppNavLinkStatus } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
   DETECT,
@@ -362,18 +356,21 @@ export function getDeepLinks(
           return false;
         }
         if (deepLink.id === SecurityPageName.case) {
-          return capabilities == null || capabilities.siem.read_cases === true;
+          return capabilities == null || capabilities[CASES_FEATURE_ID].read_cases === true;
         }
         if (deepLink.id === SecurityPageName.ueba) {
           return enableExperimental.uebaEnabled;
         }
-        return true;
+        if (deepLink.id === SecurityPageName.investigate) {
+          return true;
+        }
+        return capabilities?.siem.show ?? false;
       })
       .map((deepLink) => {
         if (
           deepLink.id === SecurityPageName.case &&
           capabilities != null &&
-          capabilities.siem.crud_cases === false
+          capabilities[CASES_FEATURE_ID].crud_cases === false
         ) {
           return {
             ...deepLink,
@@ -400,19 +397,4 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
     licenseType === 'enterprise' ||
     licenseType === 'trial'
   );
-}
-
-export function updateGlobalNavigation({
-  capabilities,
-  updater$,
-  enableExperimental,
-}: {
-  capabilities: ApplicationStart['capabilities'];
-  updater$: Subject<AppUpdater>;
-  enableExperimental: ExperimentalFeatures;
-}) {
-  updater$.next(() => ({
-    navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent showing main nav link
-    deepLinks: getDeepLinks(enableExperimental, undefined, capabilities),
-  }));
 }

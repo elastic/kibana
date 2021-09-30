@@ -9,7 +9,13 @@ import { isEmpty } from 'lodash/fp';
 import { matchPath } from 'react-router-dom';
 
 import { CoreStart } from '../../../../src/core/public';
-import { ALERTS_PATH, APP_ID, EXCEPTIONS_PATH, RULES_PATH, UEBA_PATH } from '../common/constants';
+import {
+  ALERTS_PATH,
+  APP_UI_ID,
+  EXCEPTIONS_PATH,
+  RULES_PATH,
+  UEBA_PATH,
+} from '../common/constants';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -52,49 +58,49 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
 
   switch (pageName) {
     case SecurityPageName.overview:
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.overview,
         replace: true,
         path,
       });
       break;
     case 'ml-hosts':
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         replace: true,
         path: `/ml-hosts${path}`,
       });
       break;
     case SecurityPageName.hosts:
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         replace: true,
         path,
       });
       break;
     case 'ml-network':
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.network,
         replace: true,
         path: `/ml-network${path}`,
       });
       break;
     case SecurityPageName.network:
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.network,
         replace: true,
         path,
       });
       break;
     case SecurityPageName.timelines:
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.timelines,
         replace: true,
         path,
       });
       break;
     case SecurityPageName.case:
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         replace: true,
         path,
@@ -102,28 +108,28 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       break;
     case SecurityPageName.detections:
     case SecurityPageName.alerts:
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.alerts,
         replace: true,
         path,
       });
       break;
     case SecurityPageName.rules:
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         replace: true,
         path,
       });
       break;
     case SecurityPageName.exceptions:
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.exceptions,
         replace: true,
         path,
       });
       break;
     default:
-      application.navigateToApp(APP_ID, {
+      application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.overview,
         replace: true,
         path,

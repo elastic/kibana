@@ -39,16 +39,15 @@ export const UserPrivilegesProvider = ({
   kibanaCapabilities,
   children,
 }: UserPrivilegesProviderProps) => {
+  const listPrivileges = useFetchListPrivileges();
+  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
+  const endpointPrivileges = useEndpointPrivileges();
   const [kibanaSecuritySolutionsPrivileges, setKibanaSecuritySolutionsPrivileges] = useState({
     crud: false,
     read: false,
   });
   const crud: boolean = kibanaCapabilities[SERVER_APP_ID].crud === true;
   const read: boolean = kibanaCapabilities[SERVER_APP_ID].show === true;
-
-  const listPrivileges = useFetchListPrivileges(read);
-  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(read);
-  const endpointPrivileges = useEndpointPrivileges();
 
   useEffect(() => {
     setKibanaSecuritySolutionsPrivileges((currPrivileges) => {

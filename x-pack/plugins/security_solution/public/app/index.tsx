@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, RouteProps, Switch } from 'react-router-dom';
 import { OVERVIEW_PATH } from '../../common/constants';
 
 import { NotFoundPage } from './404';
@@ -24,6 +24,10 @@ export const renderApp = ({
   usageCollection,
   subPlugins,
 }: RenderAppProps): (() => void) => {
+  const allRoutes = Object.entries(subPlugins).reduce<RouteProps[]>(
+    (acc, [, value]) => [...acc, ...value.routes],
+    []
+  );
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   render(
@@ -36,22 +40,9 @@ export const renderApp = ({
     >
       <ApplicationUsageTrackingProvider>
         <Switch>
-          {[
-            ...subPlugins.overview.routes,
-            ...subPlugins.alerts.routes,
-            ...subPlugins.rules.routes,
-            ...subPlugins.exceptions.routes,
-            ...subPlugins.hosts.routes,
-            ...subPlugins.network.routes,
-            // will be undefined if enabledExperimental.uebaEnabled === false
-            ...(subPlugins.ueba != null ? subPlugins.ueba.routes : []),
-            ...subPlugins.timelines.routes,
-            ...subPlugins.cases.routes,
-            ...subPlugins.management.routes,
-          ].map((route, index) => (
-            <Route key={`route-${index}`} {...route} />
-          ))}
-
+          {allRoutes.map((route, index) => {
+            return <Route key={`route-${index}`} {...route} />;
+          })}
           <Route path="" exact>
             <Redirect to={OVERVIEW_PATH} />
           </Route>

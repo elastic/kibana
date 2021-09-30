@@ -15,7 +15,7 @@ import * as i18n from '../translations';
 import { NetworkRouteType } from '../navigation/types';
 import { NetworkRouteSpyState } from '../../../common/utils/route/types';
 import { GetUrlForApp } from '../../../common/components/navigation/types';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 
 export const type = networkModel.NetworkType.details;
@@ -36,7 +36,7 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(APP_ID, {
+      href: getUrlForApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.network,
         path: !isEmpty(search[0]) ? search[0] : '',
       }),
@@ -47,7 +47,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: decodeIpv6(params.detailName),
-        href: getUrlForApp(APP_ID, {
+        href: getUrlForApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.network,
           path: getNetworkDetailsUrl(
             params.detailName,
