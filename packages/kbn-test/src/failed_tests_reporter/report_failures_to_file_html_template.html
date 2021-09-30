@@ -20,5 +20,10 @@
     <div class="col-lg-10 mx-auto p-3 py-md-5">
       <main>$MAIN</main>
     </div>
+    <script type="text/javascript">
+      for (const img of document.getElementsByTagName('img')) {
+        img.addEventListener('click', (_) => (img.style.height = 'auto'));
+      }
+    </script>
   </body>
 </html>

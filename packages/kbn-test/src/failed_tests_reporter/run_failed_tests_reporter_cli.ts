@@ -99,7 +99,7 @@ export function runFailedTestsReporterCli() {
         const messages = Array.from(getReportMessageIter(report));
         const failures = await getFailures(report);
 
-        reportFailuresToFile(failures);
+        reportFailuresToFile(log, failures);
 
         if (indexInEs) {
           await reportFailuresToEs(log, failures);

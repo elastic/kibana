@@ -7,17 +7,55 @@
  */
 
 import { createHash } from 'crypto';
-import { mkdirSync, readFileSync } from 'fs';
-import { writeFileSync } from 'fs';
-import { join } from 'path';
+import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
+import { join, basename } from 'path';
 
+import { ToolingLog } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { TestFailure } from './get_failures';
 
-export function reportFailuresToFile(failures: TestFailure[]) {
+const findScreenshots = (dirPath: string, allScreenshots: string[] = []) => {
+  const files = readdirSync(dirPath);
+
+  for (const file of files) {
+    if (statSync(join(dirPath, file)).isDirectory()) {
+      if (file.match(/node_modules/)) {
+        continue;
+      }
+
+      allScreenshots = findScreenshots(join(dirPath, file), allScreenshots);
+    } else {
+      const fullPath = join(dirPath, file);
+      if (fullPath.match(/screenshots\/failure\/.+\.png$/)) {
+        allScreenshots.push(fullPath);
+      }
+    }
+  }
+
+  return allScreenshots;
+};
+
+export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
   if (!failures?.length) {
     return;
+  }
+
+  let screenshots: string[];
+  try {
+    screenshots = [
+      ...findScreenshots(join(REPO_ROOT, 'test', 'functional')),
+      ...findScreenshots(join(REPO_ROOT, 'x-pack', 'test', 'functional')),
+    ];
+  } catch (e) {
+    log.error(e as Error);
+    screenshots = [];
+  }
+
+  const screenshotsByName: Record<string, string> = {};
+  for (const screenshot of screenshots) {
+    const [name] = basename(screenshot).split('.');
+    screenshotsByName[name] = screenshot;
   }
 
   // Jest could, in theory, fail 1000s of tests and write 1000s of failures
@@ -54,6 +92,20 @@ export function reportFailuresToFile(failures: TestFailure[]) {
       2
     );
 
+    let screenshot = '';
+    const screenshotName = `${failure.name.replace(/([^ a-zA-Z0-9-]+)/g, '_')}`;
+    if (screenshotsByName[screenshotName]) {
+      try {
+        screenshot = readFileSync(screenshotsByName[screenshotName]).toString('base64');
+      } catch (e) {
+        log.error(e as Error);
+      }
+    }
+
+    const screenshotHtml = screenshot
+      ? `<img style="cursor: pointer; height: 200px; margin: 5px 0" class="img-fluid img-thumbnail" src="data:image/png;base64,${screenshot}" />`
+      : '';
+
     const failureHTML = readFileSync(
       join(
         REPO_ROOT,
@@ -76,6 +128,7 @@ export function reportFailuresToFile(failures: TestFailure[]) {
         <hr />
         <p><strong>${failure.name}</strong></p>
         <pre>${failure.failure}</pre>
+        ${screenshotHtml}
         <pre>${failure['system-out']}</pre>
       `
       );
