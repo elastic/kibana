@@ -9,6 +9,7 @@ import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { VectorIcon } from './vector_icon';
+import { IconStaticOptions } from '../../../../../../common/descriptor_types';
 
 interface Props {
   styleName: VECTOR_STYLES;
@@ -17,9 +18,10 @@ interface Props {
   isLinesOnly: boolean;
   isPointsOnly: boolean;
   symbolId?: string;
+  icon?: IconStaticOptions;
 }
 
-export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, symbolId }: Props) {
+export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, icon }: Props) {
   function renderIcon() {
     if (styleName === VECTOR_STYLES.LABEL_COLOR) {
       return (
@@ -35,7 +37,7 @@ export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, s
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
         strokeColor={color}
-        symbolId={symbolId}
+        icon={icon}
       />
     );
   }

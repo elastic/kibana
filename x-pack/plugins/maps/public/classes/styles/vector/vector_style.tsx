@@ -745,10 +745,10 @@ export class VectorStyle implements IVectorStyle {
     return formatters ? formatters[fieldName] : null;
   };
 
-  _getSymbolId() {
+  _getIconOptions() {
     return this.arePointsSymbolizedAsCircles() || this._iconStyleProperty.isDynamic()
       ? undefined
-      : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
+      : (this._iconStyleProperty as StaticIconProperty).getOptions();
   }
 
   getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
@@ -775,9 +775,9 @@ export class VectorStyle implements IVectorStyle {
       <VectorIcon
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
-        symbolId={this._getSymbolId()}
         strokeColor={strokeColor}
         fillColor={fillColor}
+        icon={this._getIconOptions()}
       />
     );
   }
@@ -817,7 +817,7 @@ export class VectorStyle implements IVectorStyle {
         styles={this._getLegendDetailStyleProperties()}
         isPointsOnly={this._getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
-        symbolId={this._getSymbolId()}
+        icon={this._getIconOptions()}
       />
     );
   }

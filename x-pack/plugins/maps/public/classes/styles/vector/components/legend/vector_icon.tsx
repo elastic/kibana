@@ -11,16 +11,18 @@ import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
 import { PolygonIcon } from './polygon_icon';
 import { SymbolIcon } from './symbol_icon';
+import { IconStaticOptions } from '../../../../../../common/descriptor_types';
 
 interface Props {
   fillColor?: string;
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   strokeColor?: string;
-  symbolId?: string;
+  icon?: IconStaticOptions;
 }
 
-export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, symbolId }: Props) {
+export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, icon }: Props) {
+  const { value: symbolId, svg } = icon || {};
   if (isLinesOnly) {
     const style = {
       stroke: strokeColor,
@@ -48,6 +50,7 @@ export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, 
       key={`${symbolId}${fillColor}${strokeColor}`}
       symbolId={symbolId}
       fill={fillColor}
+      svg={svg}
       stroke={strokeColor}
     />
   );

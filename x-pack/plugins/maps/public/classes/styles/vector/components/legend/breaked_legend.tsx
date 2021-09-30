@@ -10,13 +10,14 @@ import _ from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { Category } from './category';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+import { IconStaticOptions } from '../../../../../../common/descriptor_types';
 
 const EMPTY_VALUE = '';
 
 export interface Break {
   color: string;
   label: ReactElement<any> | string | number;
-  symbolId?: string;
+  icon?: IconStaticOptions;
 }
 
 interface Props {
@@ -75,7 +76,7 @@ export class BreakedLegend extends Component<Props, State> {
             color={brk.color}
             isLinesOnly={this.props.isLinesOnly}
             isPointsOnly={this.props.isPointsOnly}
-            symbolId={brk.symbolId}
+            icon={brk.icon}
           />
         </EuiFlexItem>
       );

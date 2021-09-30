@@ -11,11 +11,12 @@ import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
 import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
+import { IconStaticOptions } from '../../../../../common/descriptor_types';
 
 export type LegendProps = {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
-  symbolId?: string;
+  icon?: IconStaticOptions;
 };
 
 export interface IStyleProperty<T> {

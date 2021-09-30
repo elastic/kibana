@@ -22,6 +22,7 @@ import {
   FieldFormatter,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
+import { IconStaticOptions } from '../../../../../common/descriptor_types';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -324,7 +325,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
   }
 
-  _getOrdinalBreaks(symbolId?: string): Break[] {
+  _getOrdinalBreaks(icon?: IconStaticOptions): Break[] {
     let colorStops: Array<number | string> | null = null;
     let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
     if (this._options.useCustomColorRamp) {
@@ -360,7 +361,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
           {
             color: colors[colors.length - 1],
             label: this.formatField(dynamicRound(rangeFieldMeta.max)),
-            symbolId,
+            icon,
           },
         ];
       }
@@ -404,20 +405,20 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       breaks.push({
         color,
         label,
-        symbolId,
+        icon,
       });
     }
     return breaks;
   }
 
-  _getCategoricalBreaks(symbolId?: string): Break[] {
+  _getCategoricalBreaks(icon?: IconStaticOptions): Break[] {
     const breaks: Break[] = [];
     const { stops, defaultColor } = this._getColorPaletteStops();
     stops.forEach(({ stop, color }: { stop: string | number | null; color: string | null }) => {
       if (stop !== null && color != null) {
         breaks.push({
           color,
-          symbolId,
+          icon,
           label: this.formatField(stop),
         });
       }
@@ -426,18 +427,18 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       breaks.push({
         color: defaultColor,
         label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
-        symbolId,
+        icon,
       });
     }
     return breaks;
   }
 
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, icon }: LegendProps) {
     let breaks: Break[] = [];
     if (this.isOrdinal()) {
-      breaks = this._getOrdinalBreaks(symbolId);
+      breaks = this._getOrdinalBreaks(icon);
     } else if (this.isCategorical()) {
-      breaks = this._getCategoricalBreaks(symbolId);
+      breaks = this._getCategoricalBreaks(icon);
     }
     return (
       <BreakedLegend
