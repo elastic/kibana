@@ -103,6 +103,21 @@ storiesOf('renderers/visMetric', module)
   .add('Default', () => {
     return <Render renderer={metricRenderer} config={config} {...containerSize} />;
   })
+  .add('Without labels', () => {
+    return (
+      <Render
+        renderer={metricRenderer}
+        config={{
+          ...config,
+          visConfig: {
+            ...config.visConfig,
+            metric: { ...config.visConfig.metric, labels: { show: false } },
+          },
+        }}
+        {...containerSize}
+      />
+    );
+  })
   .add('With bucket', () => {
     return (
       <Render
