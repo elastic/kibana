@@ -203,7 +203,8 @@ Above example is overly simplified. In reality [we do a bit more](https://github
 # Breakdown metrics
 tbd
 
-# Service destinatio metrics
+# Service destination metrics
+tbd
 
 ## Common filters
 
