@@ -10,6 +10,7 @@ import { EuiToken, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getJobTypeAriaLabel } from '../../util/field_types_utils';
 import type { JobFieldType } from '../../../../../common';
+import './_index.scss';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
@@ -41,13 +42,13 @@ export const typeToEuiIconMap: Record<string, { iconType: string; color?: string
   ip_range: { iconType: 'tokenIP' },
   // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
   murmur3: { iconType: 'tokenFile' },
-  number: { iconType: 'tokenNumber', color: 'euiColorVis0' },
-  number_range: { iconType: 'tokenNumber', color: 'euiColorVis0' },
-  histogram: { iconType: 'tokenHistogram', color: 'euiColorVis0' },
+  number: { iconType: 'tokenNumber' },
+  number_range: { iconType: 'tokenNumber' },
+  histogram: { iconType: 'tokenHistogram' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   string: { iconType: 'tokenString' },
-  text: { iconType: 'tokenString', color: 'euiColorVis1' },
-  keyword: { iconType: 'tokenText', color: 'euiColorVis1' },
+  text: { iconType: 'tokenString' },
+  keyword: { iconType: 'tokenKeyword' },
   nested: { iconType: 'tokenNested' },
 };
 
@@ -61,9 +62,6 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
   const containerProps = { ...token, ariaLabel, needsAria };
 
   if (tooltipEnabled === true) {
-    // wrap the inner component inside <span> because EuiToolTip doesn't seem
-    // to support having another component directly inside the tooltip anchor
-    // see https://github.com/elastic/eui/issues/839
     return (
       <EuiToolTip
         position="left"
@@ -71,6 +69,7 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
           defaultMessage: '{type} type',
           values: { type },
         })}
+        anchorClassName="dvFieldTypeIcon__anchor"
       >
         <FieldTypeIconContainer {...containerProps} />
       </EuiToolTip>
@@ -96,10 +95,14 @@ const FieldTypeIconContainer: FC<FieldTypeIconContainerProps> = ({
     wrapperProps['aria-label'] = ariaLabel;
   }
   return (
-    <span data-test-subj="fieldTypeIcon" {...rest}>
-      <span {...wrapperProps}>
-        <EuiToken iconType={iconType} color={color} shape="square" size="s" {...rest} />
-      </span>
-    </span>
+    <EuiToken
+      iconType={iconType}
+      color={color}
+      shape="square"
+      size="s"
+      data-test-subj="fieldTypeIcon"
+      {...wrapperProps}
+      {...rest}
+    />
   );
 };

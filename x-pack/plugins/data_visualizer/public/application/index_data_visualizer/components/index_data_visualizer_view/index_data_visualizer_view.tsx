@@ -23,10 +23,12 @@ import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_tab
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import {
   KBN_FIELD_TYPES,
   UI_SETTINGS,
   Query,
+  generateFilters,
 } from '../../../../../../../../src/plugins/data/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -63,11 +65,11 @@ import { DatePickerWrapper } from '../../../common/components/date_picker_wrappe
 import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
-import { getEsQueryFromSavedSearch } from '../../utils/saved_search_utils';
+import { createMergedEsQuery, getEsQueryFromSavedSearch } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
-import { DataViewField, DataView } from '../../../../../../../../src/plugins/data/common';
+import { IndexPatternField, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import './_index.scss';
 
 interface DataVisualizerPageState {
@@ -116,6 +118,7 @@ export const getDefaultDataVisualizerListState = (
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+  filters: [],
   showDistributions: true,
   showAllFields: false,
   showEmptyFields: false,
@@ -123,7 +126,7 @@ export const getDefaultDataVisualizerListState = (
 });
 
 export interface IndexDataVisualizerViewProps {
-  currentIndexPattern: DataView;
+  currentIndexPattern: IndexPattern;
   currentSavedSearch: SavedSearchSavedObject | null;
   additionalLinks?: ResultLink[];
 }
@@ -151,6 +154,15 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       setCurrentSavedSearch(dataVisualizerProps?.currentSavedSearch);
     }
   }, [dataVisualizerProps?.currentSavedSearch]);
+
+  useEffect(() => {
+    return () => {
+      // When navigating away from the index pattern
+      // Reset all previously set filters
+      // to make sure new page doesn't have unrelated filters
+      data.query.filterManager.removeAll();
+    };
+  }, [currentIndexPattern.id, data.query.filterManager]);
 
   const getTimeBuckets = useCallback(() => {
     return new TimeBuckets({
@@ -210,7 +222,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     }
   }, [currentIndexPattern, toasts]);
 
-  const indexPatternFields: DataViewField[] = currentIndexPattern.fields;
+  const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
@@ -237,6 +249,9 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
+      if (dataVisualizerListState.filters) {
+        data.query.filterManager.setFilters(dataVisualizerListState.filters);
+      }
       return {
         searchQuery: dataVisualizerListState.searchQuery,
         searchString: dataVisualizerListState.searchString,
@@ -257,6 +272,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       searchQuery: Query['query'];
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
+      filters: Filter[];
     }) => {
       // When the user loads saved search and then clear or modify the query
       // we should remove the saved search and replace it with the index pattern id
@@ -269,6 +285,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
         searchQueryLanguage: searchParams.queryLanguage,
+        filters: searchParams.filters,
       });
     },
     [currentSavedSearch, dataVisualizerListState, setDataVisualizerListState]
@@ -310,6 +327,52 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
+
+  const onAddFilter = useCallback(
+    (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
+      const newFilters = generateFilters(
+        data.query.filterManager,
+        field,
+        values,
+        operation,
+        String(currentIndexPattern.id)
+      );
+      if (newFilters) {
+        data.query.filterManager.addFilters(newFilters);
+      }
+
+      // Merge current query with new filters
+      const mergedQuery = {
+        query: searchString || '',
+        language: searchQueryLanguage,
+      };
+
+      const combinedQuery = createMergedEsQuery(
+        {
+          query: searchString || '',
+          language: searchQueryLanguage,
+        },
+        data.query.filterManager.getFilters() ?? [],
+        currentIndexPattern,
+        uiSettings
+      );
+
+      setSearchParams({
+        searchQuery: combinedQuery,
+        searchString: mergedQuery.query,
+        queryLanguage: mergedQuery.language as SearchQueryLanguage,
+        filters: data.query.filterManager.getFilters(),
+      });
+    },
+    [
+      currentIndexPattern,
+      data.query.filterManager,
+      searchQueryLanguage,
+      searchString,
+      setSearchParams,
+      uiSettings,
+    ]
+  );
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -757,13 +820,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               item={item}
               indexPattern={currentIndexPattern}
               combinedQuery={{ searchQueryLanguage, searchString }}
+              onAddFilter={onAddFilter}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentIndexPattern, searchQueryLanguage, searchString]
+    [currentIndexPattern, searchQueryLanguage, searchString, onAddFilter]
   );
 
   // Some actions open up fly-out or popup
@@ -879,6 +943,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     visibleFieldNames={visibleFieldNames}
                     setVisibleFieldNames={setVisibleFieldNames}
                     showEmptyFields={showEmptyFields}
+                    onAddFilter={onAddFilter}
                   />
                   <EuiSpacer size={'m'} />
                   <FieldCountPanel

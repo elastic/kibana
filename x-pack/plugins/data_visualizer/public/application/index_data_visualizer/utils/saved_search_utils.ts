@@ -16,7 +16,7 @@ import {
   Filter,
 } from '@kbn/es-query';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
-import { DataView } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
@@ -32,12 +32,24 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | Sa
     : // @ts-expect-error kibanaSavedObjectMeta does exist
       savedSearch?.kibanaSavedObjectMeta;
 
-  return typeof search?.searchSourceJSON === 'string'
-    ? (JSON.parse(search.searchSourceJSON) as {
-        query: Query;
-        filter: any[];
-      })
-    : undefined;
+  const parsed =
+    typeof search?.searchSourceJSON === 'string'
+      ? (JSON.parse(search.searchSourceJSON) as {
+          query: Query;
+          filter: Filter[];
+        })
+      : undefined;
+
+  // Remove indexRefName because saved search might no longer be relevant
+  // if user modifies the query or filter
+  // after opening a saved search
+  if (parsed && Array.isArray(parsed.filter)) {
+    parsed.filter.forEach((f) => {
+      // @ts-expect-error indexRefName does appear in meta for newly created saved search
+      f.meta.indexRefName = undefined;
+    });
+  }
+  return parsed;
 }
 
 /**
@@ -47,7 +59,7 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | Sa
 export function createMergedEsQuery(
   query?: Query,
   filters?: Filter[],
-  indexPattern?: DataView,
+  indexPattern?: IndexPattern,
   uiSettings?: IUiSettingsClient
 ) {
   let combinedQuery: any = getDefaultQuery();
@@ -94,7 +106,7 @@ export function getEsQueryFromSavedSearch({
   filters,
   filterManager,
 }: {
-  indexPattern: DataView;
+  indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
   savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
   query?: Query;
@@ -109,6 +121,8 @@ export function getEsQueryFromSavedSearch({
 
   // If no saved search available, use user's query and filters
   if (!savedSearchData && userQuery) {
+    if (filterManager && userFilters) filterManager.setFilters(userFilters);
+
     const combinedQuery = createMergedEsQuery(
       userQuery,
       Array.isArray(userFilters) ? userFilters : [],

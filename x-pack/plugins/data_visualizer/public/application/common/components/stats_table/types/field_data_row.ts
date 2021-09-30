@@ -6,9 +6,9 @@
  */
 
 import type { FieldVisConfig, FileBasedFieldVisConfig } from './field_vis_config';
-import { DataViewField } from '../../../../../../../../../src/plugins/data/common';
+import { IndexPatternField } from '../../../../../../../../../src/plugins/data/common';
 
 export interface FieldDataRowProps {
   config: FieldVisConfig | FileBasedFieldVisConfig;
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }

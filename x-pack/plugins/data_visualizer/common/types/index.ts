@@ -30,5 +30,5 @@ export interface DataVisualizerTableState {
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
 
 export function isSavedSearchSavedObject(arg: unknown): arg is SavedSearchSavedObject {
-  return isPopulatedObject(arg, ['id', 'type']);
+  return isPopulatedObject(arg, ['id', 'type', 'attributes']);
 }
