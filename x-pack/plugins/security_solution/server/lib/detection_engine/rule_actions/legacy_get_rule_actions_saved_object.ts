@@ -29,7 +29,7 @@ interface LegacyGetRuleActionsSavedObject {
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyRulesActionsSavedObject {
-  id: string; // TODO: Should we move this to make it impossible to rely on it within the code base?
+  id: string;
   actions: LegacyRuleAlertAction[];
   alertThrottle: string | null;
   ruleThrottle: string;
