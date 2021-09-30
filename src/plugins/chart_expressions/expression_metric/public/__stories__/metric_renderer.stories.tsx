@@ -61,7 +61,11 @@ const config: MetricVisRenderConfig = {
           type: 'vis_dimension',
         },
         {
-          accessor: 1,
+          accessor: {
+            id: 'col-0-2',
+            name: 'Median products count',
+            meta: { type: 'number' },
+          },
           format: {
             id: 'number',
             params: {},
@@ -80,7 +84,11 @@ const dayColumn: DatatableColumn = {
 };
 
 const dayAccessor: ExpressionValueVisDimension = {
-  accessor: 2,
+  accessor: {
+    id: 'col-0-3',
+    name: 'Day of the week',
+    meta: { type: 'string' },
+  },
   format: {
     id: 'string',
     params: {},
