@@ -17,6 +17,7 @@ import { TableFieldValue } from './table_cell_value';
 export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
   field: 'action',
   className: 'kbnDocViewer__tableActionsCell',
+  width: '108px',
   mobileOptions: { header: false },
   name: (
     <EuiText size="xs">
