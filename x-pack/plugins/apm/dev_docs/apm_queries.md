@@ -19,7 +19,7 @@ or
 
 #### Aggregated (metric) document:
 
-A collection of 2 transactions with a combined latency of 5ms
+A pre-aggregated document with 2 transactions with a combined latency of 5ms
 
 ```json
 {
@@ -216,11 +216,14 @@ Note-worthy fields: `span.destination.service.resource`, `span.destination.servi
 
 #### Sample document
 
+A pre-aggregated document with 73 span requests from opbeans-ruby to elasticsearch, and a combined latency of 1554ms
+
 ```json
 {
   "@timestamp": "2021-09-01T10:00:00.000Z",
   "processor.event": "metric",
   "metricset.name": "service_destination",
+  "service.name": "opbeans-ruby",
   "span.destination.service.response_time.count": 73,
   "span.destination.service.response_time.sum.us": 1554192,
   "span.destination.service.resource": "elasticsearch",
