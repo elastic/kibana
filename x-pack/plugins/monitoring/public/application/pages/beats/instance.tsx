@@ -6,54 +6,59 @@
  */
 
 import React, { useContext, useState, useCallback, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { useTable } from '../../hooks/use_table';
-import { BeatsTemplate } from './beats_template';
+import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore
-import { Listing } from '../../../components/beats/listing';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
-import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { Beat } from '../../../components/beats/beat';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { BeatsTemplate } from './beats_template';
 
-interface SetupModeProps {
-  setupMode: any;
-  flyoutComponent: any;
-  bottomBarComponent: any;
-}
+export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
+  const { instance }: { instance: string } = useParams();
 
-export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
-  const { updateTotalItemCount, getPaginationTableProps } = useTable('beats.instances');
+  const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   }) as any;
   const [data, setData] = useState({} as any);
+  const [beatName, setBeatName] = useState('');
 
-  const title = i18n.translate('xpack.monitoring.beats.routeTitle', { defaultMessage: 'Beats' });
+  const title = i18n.translate('xpack.monitoring.beats.instance.routeTitle', {
+    defaultMessage: 'Beats - {instanceName} - Overview',
+    values: {
+      instanceName: beatName,
+    },
+  });
 
-  const pageTitle = i18n.translate('xpack.monitoring.beats.listing.pageTitle', {
-    defaultMessage: 'Beats listing',
+  const pageTitle = i18n.translate('xpack.monitoring.beats.instance.pageTitle', {
+    defaultMessage: 'Beat instance: {beatName}',
+    values: {
+      beatName,
+    },
   });
 
   useEffect(() => {
     if (cluster) {
       generateBreadcrumbs(cluster.cluster_name, {
         inBeats: true,
+        instance: beatName,
       });
     }
-  }, [cluster, generateBreadcrumbs]);
+  }, [cluster, beatName, generateBreadcrumbs]);
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${clusterUuid}/beats/beats`;
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/beats/beat/${instance}`;
     const response = await services.http?.fetch(url, {
       method: 'POST',
       body: JSON.stringify({
@@ -66,37 +71,19 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     });
 
     setData(response);
-    updateTotalItemCount(response.stats.total);
-  }, [
-    ccs,
-    clusterUuid,
-    services.data?.query.timefilter.timefilter,
-    services.http,
-    updateTotalItemCount,
-  ]);
+    setBeatName(response.summary.name);
+  }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
     <BeatsTemplate
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      data-test-subj="beatsListingPage"
+      instance={instance}
+      data-test-subj="beatDetailPage"
     >
-      <div data-test-subj="monitoringBeatsInstancesApp">
-        <SetupModeRenderer
-          render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
-            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-              {flyoutComponent}
-              <Listing
-                stats={data.stats}
-                data={data.listing}
-                setupMode={setupMode}
-                {...getPaginationTableProps()}
-              />
-              {bottomBarComponent}
-            </SetupModeContext.Provider>
-          )}
-        />
+      <div data-test-subj="monitoringBeatsInstanceApp">
+        <Beat summary={data.summary} metrics={data.metrics} onBrush={onBrush} zoomInfo={zoomInfo} />
       </div>
     </BeatsTemplate>
   );
