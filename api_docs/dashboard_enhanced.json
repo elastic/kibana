@@ -607,14 +607,8 @@
               "UrlGeneratorsSetup",
               "; url: ",
               "UrlService",
-              "; navigate(options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.RedirectOptions",
-                "text": "RedirectOptions"
-              },
+              "<unknown>; navigate(options: ",
+              "RedirectOptions",
               "<",
               "SerializableRecord",
               ">): void; }"
@@ -712,14 +706,8 @@
               "UrlGeneratorsStart",
               "; url: ",
               "UrlService",
-              "; navigate(options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.RedirectOptions",
-                "text": "RedirectOptions"
-              },
+              "<unknown>; navigate(options: ",
+              "RedirectOptions",
               "<",
               "SerializableRecord",
               ">): void; }"
