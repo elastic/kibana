@@ -103,6 +103,7 @@
     "**/istanbul-instrumenter-loader/schema-utils": "1.0.0",
     "**/load-grunt-config/js-yaml": "^3.13.1",
     "**/minimist": "^1.2.5",
+    "**/refractor/prismjs": "~1.25.0",
     "**/request": "^2.88.2",
     "**/sass-graph/yargs/yargs-parser": "5.0.0-security.0",
     "**/terser-webpack-plugin/serialize-javascript": "^2.1.1",
