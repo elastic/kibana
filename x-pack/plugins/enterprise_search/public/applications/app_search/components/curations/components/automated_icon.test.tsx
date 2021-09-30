@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React from 'react';
 
-export const CurationsSettings: React.FC = () => {
-  return null;
-};
+import { shallow } from 'enzyme';
+
+import { AutomatedIcon } from './automated_icon';
+
+describe('AutomatedIcon', () => {
+  it('renders', () => {
+    expect(shallow(<AutomatedIcon />).is('svg')).toBe(true);
+  });
+});
