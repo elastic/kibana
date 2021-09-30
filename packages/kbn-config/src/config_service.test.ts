@@ -261,42 +261,6 @@ test('correctly passes context', async () => {
   expect(await value$.pipe(first()).toPromise()).toMatchSnapshot();
 });
 
-test('handles enabled path, but only marks the enabled path as used', async () => {
-  const initialConfig = {
-    pid: {
-      enabled: true,
-      file: '/some/file.pid',
-    },
-  };
-
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
-  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-
-  const isEnabled = await configService.isEnabledAtPath('pid');
-  expect(isEnabled).toBe(true);
-
-  const unusedPaths = await configService.getUnusedPaths();
-  expect(unusedPaths).toEqual(['pid.file']);
-});
-
-test('handles enabled path when path is array', async () => {
-  const initialConfig = {
-    pid: {
-      enabled: true,
-      file: '/some/file.pid',
-    },
-  };
-
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
-  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-
-  const isEnabled = await configService.isEnabledAtPath(['pid']);
-  expect(isEnabled).toBe(true);
-
-  const unusedPaths = await configService.getUnusedPaths();
-  expect(unusedPaths).toEqual(['pid.file']);
-});
-
 test('handles disabled path and marks config as used', async () => {
   const initialConfig = {
     pid: {
@@ -307,6 +271,14 @@ test('handles disabled path and marks config as used', async () => {
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+
+  configService.setSchema(
+    'pid',
+    schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      file: schema.string(),
+    })
+  );
 
   const isEnabled = await configService.isEnabledAtPath('pid');
   expect(isEnabled).toBe(false);
@@ -338,7 +310,7 @@ test('does not throw if schema does not define "enabled" schema', async () => {
   expect(value.enabled).toBe(undefined);
 });
 
-test('treats config as enabled if config path is not present in config', async () => {
+test('treats config as enabled if config path is not present in schema', async () => {
   const initialConfig = {};
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
@@ -351,10 +323,10 @@ test('treats config as enabled if config path is not present in config', async (
   expect(unusedPaths).toEqual([]);
 });
 
-test('read "enabled" even if its schema is not present', async () => {
+test('does not read "enabled" if its schema is not present', async () => {
   const initialConfig = {
     foo: {
-      enabled: true,
+      enabled: false, // should be ignored as it is not in schema
     },
   };
 
@@ -363,38 +335,6 @@ test('read "enabled" even if its schema is not present', async () => {
 
   const isEnabled = await configService.isEnabledAtPath('foo');
   expect(isEnabled).toBe(true);
-});
-
-test('logs deprecation if schema is not present and "enabled" is used', async () => {
-  const initialConfig = {
-    foo: {
-      enabled: true,
-    },
-  };
-
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
-  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-
-  await configService.isEnabledAtPath('foo');
-  expect(configService.getHandledDeprecatedConfigs()).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        "foo",
-        Array [
-          Object {
-            "configPath": "foo.enabled",
-            "correctiveActions": Object {
-              "manualSteps": Array [
-                "Remove \\"foo.enabled\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
-              ],
-            },
-            "message": "Configuring \\"foo.enabled\\" is deprecated and will be removed in 8.0.0.",
-            "title": "Setting \\"foo.enabled\\" is deprecated",
-          },
-        ],
-      ],
-    ]
-  `);
 });
 
 test('allows plugins to specify "enabled" flag via validation schema', async () => {
@@ -425,7 +365,7 @@ test('allows plugins to specify "enabled" flag via validation schema', async () 
   expect(await configService.isEnabledAtPath('baz')).toBe(true);
 });
 
-test('does not throw during validation is every schema is valid', async () => {
+test('does not throw during validation if every schema is valid', async () => {
   const rawConfig = getRawConfigProvider({ stringKey: 'foo', numberKey: 42 });
 
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
@@ -435,7 +375,7 @@ test('does not throw during validation is every schema is valid', async () => {
   await expect(configService.validate()).resolves.toBeUndefined();
 });
 
-test('throws during validation is any schema is invalid', async () => {
+test('throws during validation if any schema is invalid', async () => {
   const rawConfig = getRawConfigProvider({ stringKey: 123, numberKey: 42 });
 
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
