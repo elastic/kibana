@@ -15,14 +15,16 @@ import type {
   SavedObjectsFindResult,
 } from '../../../../../core/server';
 import type { SavedVisState } from '../../../../visualizations/common';
+import type { Panel } from '../../common/types';
 
 export interface TimeseriesUsage {
   timeseries_use_last_value_mode_total: number;
+  timeseries_table_use_aggregate_function: number;
 }
 
 const doTelemetryFoVisualizations = async (
   soClient: SavedObjectsClientContract | ISavedObjectsRepository,
-  telemetryUseLastValueMode: (savedVis: SavedVisState) => void
+  calculateTelemetry: (savedVis: SavedVisState<Panel>) => void
 ) => {
   const finder = await soClient.createPointInTimeFinder({
     type: 'visualization',
@@ -34,9 +36,9 @@ const doTelemetryFoVisualizations = async (
     (response.saved_objects || []).forEach(({ attributes }: SavedObjectsFindResult<any>) => {
       if (attributes?.visState) {
         try {
-          const visState: SavedVisState = JSON.parse(attributes.visState);
+          const visState: SavedVisState<Panel> = JSON.parse(attributes.visState);
 
-          telemetryUseLastValueMode(visState);
+          calculateTelemetry(visState);
         } catch {
           // nothing to be here, "so" not valid
         }
@@ -48,12 +50,12 @@ const doTelemetryFoVisualizations = async (
 
 const doTelemetryForByValueVisualizations = async (
   soClient: SavedObjectsClientContract | ISavedObjectsRepository,
-  telemetryUseLastValueMode: (savedVis: SavedVisState) => void
+  telemetryUseLastValueMode: (savedVis: SavedVisState<Panel>) => void
 ) => {
   const byValueVisualizations = await findByValueEmbeddables(soClient, 'visualization');
 
   for (const item of byValueVisualizations) {
-    telemetryUseLastValueMode(item.savedVis as unknown as SavedVisState);
+    telemetryUseLastValueMode(item.savedVis as unknown as SavedVisState<Panel>);
   }
 };
 
@@ -62,9 +64,10 @@ export const getStats = async (
 ): Promise<TimeseriesUsage | undefined> => {
   const timeseriesUsage = {
     timeseries_use_last_value_mode_total: 0,
+    timeseries_table_use_aggregate_function: 0,
   };
 
-  function telemetryUseLastValueMode(visState: SavedVisState) {
+  function telemetryUseLastValueMode(visState: SavedVisState<Panel>) {
     if (
       visState.type === 'metrics' &&
       visState.params.type !== 'timeseries' &&
@@ -75,10 +78,33 @@ export const getStats = async (
     }
   }
 
+  function telemetryTableAggFunction(visState: SavedVisState<Panel>) {
+    if (
+      visState.type === 'metrics' &&
+      visState.params.type === 'table' &&
+      visState.params.series &&
+      visState.params.series.length > 0
+    ) {
+      const usesAggregateFunction = visState.params.series.some(
+        (s) => s.aggregate_by && s.aggregate_function
+      );
+      if (usesAggregateFunction) {
+        timeseriesUsage.timeseries_table_use_aggregate_function++;
+      }
+    }
+  }
+
   await Promise.all([
+    // last value usage telemetry
     doTelemetryFoVisualizations(soClient, telemetryUseLastValueMode),
     doTelemetryForByValueVisualizations(soClient, telemetryUseLastValueMode),
+    //  table aggregate function telemetry
+    doTelemetryFoVisualizations(soClient, telemetryTableAggFunction),
+    doTelemetryForByValueVisualizations(soClient, telemetryTableAggFunction),
   ]);
 
-  return timeseriesUsage.timeseries_use_last_value_mode_total ? timeseriesUsage : undefined;
+  return timeseriesUsage.timeseries_use_last_value_mode_total ||
+    timeseriesUsage.timeseries_table_use_aggregate_function
+    ? timeseriesUsage
+    : undefined;
 };
