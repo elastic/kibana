@@ -33,18 +33,38 @@ const formatObservables = (observables: string | string[], type: ObservableTypes
 };
 
 const combineObservables = (a: string | string[], b: string | string[]): string | string[] => {
+  // Both are empty
   if (isEmpty(a) && isEmpty(b)) {
     return [];
   }
 
+  /**
+   * One of a or b can be empty
+   * but not both
+   */
+  if (isEmpty(a)) {
+    return b;
+  }
+
+  if (isEmpty(b)) {
+    return a;
+  }
+
+  /**
+   * Neither of a or b is empty
+   * a and b can be either a string or an array
+   */
   if (isString(a) && Array.isArray(b)) {
-    return [...b, ...a.split(SPLIT_REGEX)];
+    return [...a.split(SPLIT_REGEX), ...b];
   }
 
   if (isString(b) && Array.isArray(a)) {
-    return [...a, ...b.split(SPLIT_REGEX)];
+    return [...b.split(SPLIT_REGEX), ...a];
   }
 
+  /**
+   * a and b are both an array or a string
+   */
   return Array.isArray(a) && Array.isArray(b) ? [...a, ...b] : `${a},${b}`;
 };
 
