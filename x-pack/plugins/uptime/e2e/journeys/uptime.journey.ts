@@ -45,6 +45,10 @@ journey('uptime', ({ page, params }) => {
   });
 
   step('change uptime index pattern', async () => {
+    if (await page.$(byTestId('toastCloseButton'))) {
+      await page.click(byTestId('toastCloseButton'));
+    }
+
     await page.click(byTestId('settings-page-link'));
 
     await page.waitForTimeout(5 * 1000);
