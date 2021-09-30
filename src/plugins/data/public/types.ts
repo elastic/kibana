@@ -11,6 +11,8 @@ import { CoreStart } from 'src/core/public';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
+// todo rename this
+import { DataViewPublicPluginStart } from 'src/plugins/data_views/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
@@ -35,6 +37,7 @@ export interface DataSetupDependencies {
 export interface DataStartDependencies {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  dataViews: DataViewPublicPluginStart;
 }
 
 /**

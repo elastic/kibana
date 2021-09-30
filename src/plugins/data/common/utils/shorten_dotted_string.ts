@@ -17,3 +17,4 @@ const DOT_PREFIX_RE = /(.).+?\./g;
 export function shortenDottedString(input: any) {
   return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
 }
+// todo remove?

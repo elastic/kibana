@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './data_views/field.stub';
-export * from './data_views/data_view.stub';
 export * from './es_query/stubs';
