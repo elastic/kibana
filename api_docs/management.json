@@ -196,7 +196,7 @@
                 "signature": [
                   "Pick<Pick<",
                   "CreateManagementItemArgs",
-                  ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"title\" | \"id\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\">"
+                  ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"id\" | \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,
@@ -221,7 +221,7 @@
                 "section": "def-public.RegisterManagementAppArgs",
                 "text": "RegisterManagementAppArgs"
               },
-              ", \"title\" | \"id\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">) => ",
+              ", \"id\" | \"title\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">) => ",
               {
                 "pluginId": "management",
                 "scope": "public",
@@ -249,7 +249,7 @@
                     "section": "def-public.RegisterManagementAppArgs",
                     "text": "RegisterManagementAppArgs"
                   },
-                  ", \"title\" | \"id\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">"
+                  ", \"id\" | \"title\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,

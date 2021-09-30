@@ -46,6 +46,11 @@ export const CATEGORY_DISPLAY = {
 
 export type Category = keyof typeof CATEGORY_DISPLAY;
 
+export interface CustomIntegrationIcon {
+  src: string;
+  type: 'eui' | 'svg';
+}
+
 export interface CustomIntegration {
   id: string;
   title: string;
@@ -53,7 +58,7 @@ export interface CustomIntegration {
   type: 'ui_link';
   uiInternalPath: string;
   isBeta: boolean;
-  icons: Array<{ src: string; type: string }>;
+  icons: CustomIntegrationIcon[];
   categories: Category[];
   shipper: string;
   eprOverlap?: string; // name of the equivalent Elastic Agent integration in EPR. e.g. a beat module can correspond to an EPR-package, or an APM-tutorial. When completed, Integrations-UX can preferentially show the EPR-package, rather than the custom-integration
