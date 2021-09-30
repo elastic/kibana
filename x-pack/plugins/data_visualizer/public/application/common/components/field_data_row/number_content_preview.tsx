@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FileBasedFieldVisConfig } from '../stats_table/types';
 
 export const FileBasedNumberContentPreview = ({ config }: { config: FileBasedFieldVisConfig }) => {
@@ -23,28 +23,34 @@ export const FileBasedNumberContentPreview = ({ config }: { config: FileBasedFie
     <EuiFlexGroup direction={'column'} gutterSize={'xs'}>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
-          <b>
+          <EuiText size={'xs'}>
             <FormattedMessage id="xpack.dataVisualizer.fieldStats.minTitle" defaultMessage="min" />
-          </b>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <b>
+          <EuiText size={'xs'}>
             <FormattedMessage
               id="xpack.dataVisualizer.fieldStats.medianTitle"
               defaultMessage="median"
             />
-          </b>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <b>
+          <EuiText size={'xs'}>
             <FormattedMessage id="xpack.dataVisualizer.fieldStats.maxTitle" defaultMessage="max" />
-          </b>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem>{stats.min}</EuiFlexItem>
-        <EuiFlexItem>{stats.median}</EuiFlexItem>
-        <EuiFlexItem>{stats.max}</EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size={'xs'}>{stats.min}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size={'xs'}>{stats.median}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size={'xs'}>{stats.max}</EuiText>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

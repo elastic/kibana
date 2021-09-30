@@ -6,7 +6,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiCallOut, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +26,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
 
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerTextContent'}>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false} className="dvText__wrapper">
         {numExamples > 0 && <ExamplesList examples={examples} />}
         {numExamples === 0 && (
           <Fragment>
@@ -44,7 +44,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
                 id="xpack.dataVisualizer.dataGrid.fieldText.fieldNotPresentDescription"
                 defaultMessage="This field was not present in the {sourceParam} field of documents queried."
                 values={{
-                  sourceParam: <span className="fieldDataCard__codeContent">_source</span>,
+                  sourceParam: <span className="dvExpandedRow__codeContent">_source</span>,
                 }}
               />
 
@@ -54,10 +54,10 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
                 id="xpack.dataVisualizer.dataGrid.fieldText.fieldMayBePopulatedDescription"
                 defaultMessage="It may be populated, for example, using a {copyToParam} parameter in the document mapping, or be pruned from the {sourceParam} field after indexing through the use of {includesParam} and {excludesParam} parameters."
                 values={{
-                  copyToParam: <span className="fieldDataCard__codeContent">copy_to</span>,
-                  sourceParam: <span className="fieldDataCard__codeContent">_source</span>,
-                  includesParam: <span className="fieldDataCard__codeContent">includes</span>,
-                  excludesParam: <span className="fieldDataCard__codeContent">excludes</span>,
+                  copyToParam: <span className="dvExpandedRow__codeContent">copy_to</span>,
+                  sourceParam: <span className="dvExpandedRow__codeContent">_source</span>,
+                  includesParam: <span className="dvExpandedRow__codeContent">includes</span>,
+                  excludesParam: <span className="dvExpandedRow__codeContent">excludes</span>,
                 }}
               />
             </EuiCallOut>
