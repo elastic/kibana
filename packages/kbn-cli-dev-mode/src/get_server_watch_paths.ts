@@ -52,7 +52,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
 
   const ignorePaths = [
     /[\\\/](\..*|node_modules|bower_components|target|public|__[a-z0-9_]+__|coverage)([\\\/]|$)/,
-    /\.test\.(js|tsx?)$/,
+    /\.(test|spec)\.(js|ts|tsx)$/,
     /\.(md|sh|txt)$/,
     /debug\.log$/,
     ...pluginInternalDirsIgnore,
