@@ -346,10 +346,10 @@ export const usePivotConfig = (
   const pivotAggsArr = useMemo(() => dictionaryToArray(aggList), [aggList]);
   const pivotGroupByArr = useMemo(() => dictionaryToArray(groupByList), [groupByList]);
 
-  const requestPayload = useMemo(() => getRequestPayload(pivotAggsArr, pivotGroupByArr), [
-    pivotAggsArr,
-    pivotGroupByArr,
-  ]);
+  const requestPayload = useMemo(
+    () => getRequestPayload(pivotAggsArr, pivotGroupByArr),
+    [pivotAggsArr, pivotGroupByArr]
+  );
 
   const validationStatus = useMemo(() => {
     return validatePivotConfig(requestPayload.pivot);

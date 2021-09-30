@@ -6,13 +6,14 @@
  */
 
 import { useQuery } from 'react-query';
-
+import { IndexPattern } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 
 interface UseScheduledQueryGroupQueryLastResultsProps {
   actionId: string;
   agentIds?: string[];
   interval: number;
+  logsIndexPattern?: IndexPattern;
   skip?: boolean;
 }
 
@@ -20,6 +21,7 @@ export const useScheduledQueryGroupQueryLastResults = ({
   actionId,
   agentIds,
   interval,
+  logsIndexPattern,
   skip = false,
 }: UseScheduledQueryGroupQueryLastResultsProps) => {
   const data = useKibana().services.data;
@@ -27,23 +29,9 @@ export const useScheduledQueryGroupQueryLastResults = ({
   return useQuery(
     ['scheduledQueryLastResults', { actionId }],
     async () => {
-      const indexPattern = await data.indexPatterns.find('logs-*');
-      const searchSource = await data.search.searchSource.create({
-        index: indexPattern[0],
-        size: 0,
-        aggs: {
-          runs: {
-            terms: {
-              field: 'response_id',
-              order: { first_event_ingested_time: 'desc' },
-              size: 1,
-            },
-            aggs: {
-              first_event_ingested_time: { min: { field: '@timestamp' } },
-              unique_agents: { cardinality: { field: 'agent.id' } },
-            },
-          },
-        },
+      const lastResultsSearchSource = await data.search.searchSource.create({
+        index: logsIndexPattern,
+        size: 1,
         query: {
           // @ts-expect-error update types
           bool: {
@@ -59,26 +47,62 @@ export const useScheduledQueryGroupQueryLastResults = ({
                   action_id: actionId,
                 },
               },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: `now-${interval * 2}s`,
-                    lte: 'now',
-                  },
-                },
-              },
             ],
           },
         },
       });
 
-      return searchSource.fetch$().toPromise();
+      const lastResultsResponse = await lastResultsSearchSource.fetch$().toPromise();
+
+      const responseId = lastResultsResponse.rawResponse?.hits?.hits[0]?._source?.response_id;
+
+      if (responseId) {
+        const aggsSearchSource = await data.search.searchSource.create({
+          index: logsIndexPattern,
+          size: 0,
+          aggs: {
+            unique_agents: { cardinality: { field: 'agent.id' } },
+          },
+          query: {
+            // @ts-expect-error update types
+            bool: {
+              should: agentIds?.map((agentId) => ({
+                match_phrase: {
+                  'agent.id': agentId,
+                },
+              })),
+              minimum_should_match: 1,
+              filter: [
+                {
+                  match_phrase: {
+                    action_id: actionId,
+                  },
+                },
+                {
+                  match_phrase: {
+                    response_id: responseId,
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        const aggsResponse = await aggsSearchSource.fetch$().toPromise();
+
+        return {
+          '@timestamp': lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'],
+          // @ts-expect-error update types
+          uniqueAgentsCount: aggsResponse.rawResponse.aggregations?.unique_agents?.value,
+          docCount: aggsResponse.rawResponse?.hits?.total,
+        };
+      }
+
+      return null;
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && agentIds?.length),
-      // @ts-expect-error update types
-      select: (response) => response.rawResponse.aggregations?.runs?.buckets[0] ?? [],
+      enabled: !!(!skip && actionId && interval && agentIds?.length && logsIndexPattern),
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }

@@ -86,7 +86,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.integrationsAllLinkText"
-              defaultMessage="Browse"
+              defaultMessage="Browse integrations"
             />
           ),
           isSelected: section === 'browse',
@@ -96,7 +96,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.integrationsInstalledLinkText"
-              defaultMessage="Manage"
+              defaultMessage="Installed integrations"
             />
           ),
           isSelected: section === 'manage',

@@ -4050,6 +4050,60 @@
             },
             "deprecated": {
               "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -4063,6 +4117,127 @@
             },
             "deprecated": {
               "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "csv_searchsource_immediate": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -4076,6 +4251,127 @@
             },
             "deprecated": {
               "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "PNGV2": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -4090,8 +4386,36 @@
             "deprecated": {
               "type": "long"
             },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
             "app": {
               "properties": {
+                "search": {
+                  "type": "long"
+                },
                 "canvas workpad": {
                   "type": "long"
                 },
@@ -4105,6 +4429,76 @@
             },
             "layout": {
               "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "printable_pdf_v2": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
                 "print": {
                   "type": "long"
                 },
@@ -4143,6 +4537,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4156,6 +4553,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4169,6 +4585,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4182,6 +4617,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4199,6 +4653,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4212,6 +4669,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4225,6 +4701,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4238,6 +4733,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4255,6 +4769,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4268,6 +4785,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4281,6 +4817,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4294,6 +4849,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4311,6 +4885,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4324,6 +4901,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4337,6 +4933,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4350,6 +4965,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4367,6 +5001,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4380,6 +5017,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4393,6 +5049,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4406,6 +5081,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4418,6 +5112,31 @@
                   }
                 }
               }
+            }
+          }
+        },
+        "output_size": {
+          "properties": {
+            "1.0": {
+              "type": "long"
+            },
+            "5.0": {
+              "type": "long"
+            },
+            "25.0": {
+              "type": "long"
+            },
+            "50.0": {
+              "type": "long"
+            },
+            "75.0": {
+              "type": "long"
+            },
+            "95.0": {
+              "type": "long"
+            },
+            "99.0": {
+              "type": "long"
             }
           }
         },
@@ -4442,6 +5161,60 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -4455,6 +5228,127 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "csv_searchsource_immediate": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -4468,6 +5362,127 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "PNGV2": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -4482,8 +5497,36 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "app": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4497,6 +5540,76 @@
                 },
                 "layout": {
                   "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "printable_pdf_v2": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
                     "print": {
                       "type": "long"
                     },
@@ -4535,6 +5648,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4548,6 +5664,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4561,6 +5696,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4574,6 +5728,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4591,6 +5764,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4604,6 +5780,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4617,6 +5812,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4630,6 +5844,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4647,6 +5880,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4660,6 +5896,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4673,6 +5928,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4686,6 +5960,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4703,6 +5996,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4716,6 +6012,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4729,6 +6044,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4742,6 +6076,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4759,6 +6112,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4772,6 +6128,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4785,6 +6160,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4798,6 +6192,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4810,6 +6223,31 @@
                       }
                     }
                   }
+                }
+              }
+            },
+            "output_size": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
                 }
               }
             }
@@ -5617,12 +7055,6 @@
                 "description": "The number of spaces which have this feature disabled."
               }
             },
-            "timelion": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of spaces which have this feature disabled."
-              }
-            },
             "dev_tools": {
               "type": "long",
               "_meta": {
@@ -5832,6 +7264,12 @@
                 }
               }
             }
+          }
+        },
+        "task_type_exclusion": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
           }
         }
       }

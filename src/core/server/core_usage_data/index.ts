@@ -7,7 +7,15 @@
  */
 
 export { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
-export type { CoreUsageDataSetup, ConfigUsageData, CoreUsageDataStart } from './types';
+export type {
+  InternalCoreUsageDataSetup,
+  ConfigUsageData,
+  CoreUsageDataStart,
+  CoreUsageDataSetup,
+  CoreUsageCounter,
+  CoreIncrementUsageCounter,
+  CoreIncrementCounterParams,
+} from './types';
 export { CoreUsageDataService } from './core_usage_data_service';
 export { CoreUsageStatsClient, REPOSITORY_RESOLVE_OUTCOME_STATS } from './core_usage_stats_client';
 

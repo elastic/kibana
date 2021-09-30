@@ -10,12 +10,14 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { CoreUsageDataService } from './core_usage_data_service';
 import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
-import { CoreUsageData, CoreUsageDataSetup, CoreUsageDataStart } from './types';
+import { CoreUsageData, InternalCoreUsageDataSetup, CoreUsageDataStart } from './types';
 
 const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
-  const setupContract: jest.Mocked<CoreUsageDataSetup> = {
+  const setupContract: jest.Mocked<InternalCoreUsageDataSetup> = {
     registerType: jest.fn(),
     getClient: jest.fn().mockReturnValue(usageStatsClient),
+    registerUsageCounter: jest.fn(),
+    incrementUsageCounter: jest.fn(),
   };
   return setupContract;
 };

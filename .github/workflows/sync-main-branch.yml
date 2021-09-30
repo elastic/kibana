@@ -9,6 +9,7 @@ jobs:
   sync_latest_from_upstream:
     runs-on: ubuntu-latest
     name: Sync latest commits from master branch
+    if: github.repository == 'elastic/kibana'
 
     steps:
       - name: Checkout target repo

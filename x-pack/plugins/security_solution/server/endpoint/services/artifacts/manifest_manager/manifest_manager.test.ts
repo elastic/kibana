@@ -37,6 +37,8 @@ import {
 
 import { ManifestManager } from './manifest_manager';
 import { EndpointArtifactClientInterface } from '../artifact_client';
+import { EndpointError } from '../../../errors';
+import { InvalidInternalManifestError } from '../errors';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -104,11 +106,13 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(
         buildManifestManagerContextMock({ savedObjectsClient })
       );
-      const error = { output: { statusCode: 500 } };
+      const error = { message: 'bad request', output: { statusCode: 500 } };
 
       savedObjectsClient.get = jest.fn().mockRejectedValue(error);
 
-      await expect(manifestManager.getLastComputedManifest()).rejects.toStrictEqual(error);
+      await expect(manifestManager.getLastComputedManifest()).rejects.toThrow(
+        new EndpointError('bad request', error)
+      );
     });
 
     test('Throws error when no version on the manifest', async () => {
@@ -120,7 +124,7 @@ describe('ManifestManager', () => {
       savedObjectsClient.get = jest.fn().mockResolvedValue({});
 
       await expect(manifestManager.getLastComputedManifest()).rejects.toStrictEqual(
-        new Error('No version returned for manifest.')
+        new InvalidInternalManifestError('Internal Manifest map SavedObject is missing version')
       );
     });
 
@@ -179,11 +183,11 @@ describe('ManifestManager', () => {
           }
         });
 
-      (manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>).getArtifact.mockImplementation(
-        async (id) => {
-          return ARTIFACTS_BY_ID[id];
-        }
-      );
+      (
+        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+      ).getArtifact.mockImplementation(async (id) => {
+        return ARTIFACTS_BY_ID[id];
+      });
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -206,6 +210,59 @@ describe('ManifestManager', () => {
       expect(manifest?.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_WINDOWS)).toBe(false);
       expect(manifest?.getArtifactTargetPolicies(ARTIFACT_TRUSTED_APPS_WINDOWS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+      );
+    });
+
+    test("Retrieve non empty manifest and skips over artifacts that can't be found", async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const manifestManagerContext = buildManifestManagerContextMock({ savedObjectsClient });
+      const manifestManager = new ManifestManager(manifestManagerContext);
+
+      savedObjectsClient.get = jest
+        .fn()
+        .mockImplementation(async (objectType: string, id: string) => {
+          if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
+            return {
+              attributes: {
+                created: '20-01-2020 10:00:00.000Z',
+                schemaVersion: 'v2',
+                semanticVersion: '1.0.0',
+                artifacts: [
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_LINUX, policyId: undefined },
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
+                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
+                ],
+              },
+              version: '2.0.0',
+            };
+          } else {
+            return null;
+          }
+        });
+
+      (
+        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+      ).getArtifact.mockImplementation(async (id) => {
+        // report the MACOS Exceptions artifact as not found
+        return id === ARTIFACT_ID_EXCEPTIONS_MACOS ? undefined : ARTIFACTS_BY_ID[id];
+      });
+
+      const manifest = await manifestManager.getLastComputedManifest();
+
+      expect(manifest?.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(1, 5));
+
+      expect(manifestManagerContext.logger.error).toHaveBeenCalledWith(
+        new InvalidInternalManifestError(
+          `artifact id [${ARTIFACT_ID_EXCEPTIONS_MACOS}] not found!`,
+          {
+            entry: ARTIFACTS_BY_ID[ARTIFACT_ID_EXCEPTIONS_MACOS],
+            action: 'removed from internal ManifestManger tracking map',
+          }
+        )
       );
     });
   });
@@ -565,7 +622,10 @@ describe('ManifestManager', () => {
         )
       ).resolves.toStrictEqual([
         error,
-        new Error(`Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`),
+        new EndpointError(
+          `Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`,
+          ARTIFACTS_BY_ID[ARTIFACT_ID_TRUSTED_APPS_MACOS]
+        ),
       ]);
 
       expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
@@ -720,7 +780,7 @@ describe('ManifestManager', () => {
       ]);
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([
-        new Error(`Package Policy ${TEST_POLICY_ID_1} has no config.`),
+        new EndpointError(`Package Policy ${TEST_POLICY_ID_1} has no 'inputs[0].config'`),
       ]);
 
       expect(context.packagePolicyService.update).toHaveBeenCalledTimes(0);
@@ -942,6 +1002,76 @@ describe('ManifestManager', () => {
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
 
       expect(context.packagePolicyService.update).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('cleanup artifacts', () => {
+    const mockPolicyListIdsResponse = (items: string[]) =>
+      jest.fn().mockResolvedValue({
+        items,
+        page: 1,
+        per_page: 100,
+        total: items.length,
+      });
+
+    test('Successfully removes orphan artifacts', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+      const manifest = await manifestManager.buildNewManifest();
+
+      await manifestManager.cleanup(manifest);
+      const artifactToBeRemoved = await context.artifactClient.getArtifact('');
+      expect(artifactToBeRemoved).not.toBeUndefined();
+
+      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledWith(
+        getArtifactId(artifactToBeRemoved!)
+      );
+    });
+
+    test('When there is no artifact to be removed', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+
+      context.artifactClient.listArtifacts = jest.fn().mockResolvedValue([
+        {
+          id: '123',
+          type: 'trustlist',
+          identifier: 'endpoint-trustlist-windows-v1',
+          packageName: 'endpoint',
+          encryptionAlgorithm: 'none',
+          relative_url: '/api/fleet/artifacts/trustlist-v1/d801aa1fb',
+          compressionAlgorithm: 'zlib',
+          decodedSha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+          decodedSize: 14,
+          encodedSha256: 'd29238d40',
+          encodedSize: 22,
+          body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
+          created: '2021-03-08T14:47:13.714Z',
+        },
+      ]);
+      const manifest = await manifestManager.buildNewManifest();
+
+      await manifestManager.cleanup(manifest);
+
+      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledTimes(0);
     });
   });
 });

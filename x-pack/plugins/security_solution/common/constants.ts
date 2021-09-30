@@ -64,23 +64,39 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
 export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
+export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  authentications = 'authentications',
   case = 'case',
+  caseConfigure = 'case-configure',
+  caseCreate = 'case-create',
   detections = 'detections',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
+  events = 'events',
   exceptions = 'exceptions',
+  explore = 'explore',
   hosts = 'hosts',
+  hostsAnomalies = 'hosts-anomalies',
+  hostsExternalAlerts = 'hosts-external_alerts',
+  investigate = 'investigate',
   network = 'network',
+  networkAnomalies = 'network-anomalies',
+  networkDns = 'network-dns',
+  networkExternalAlerts = 'network-external_alerts',
+  networkHttp = 'network-http',
+  networkTls = 'network-tls',
+  timelines = 'timelines',
+  timelinesTemplates = 'timelines-templates',
   overview = 'overview',
   policies = 'policies',
   rules = 'rules',
-  timelines = 'timelines',
   trustedApps = 'trusted_apps',
   ueba = 'ueba',
+  uncommonProcesses = 'uncommon_processes',
 }
 
 export const TIMELINES_PATH = '/timelines';
@@ -187,24 +203,23 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
 /**
  * Id for the signals alerting type
  */
-export const SIGNALS_ID = `siem.signals`;
+export const SIGNALS_ID = `siem.signals` as const;
 
 /**
- * Id's for reference rule types
+ * IDs for RAC rule types
  */
-export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
-export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
-
-export const QUERY_ALERT_TYPE_ID = `siem.queryRule`;
-export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
-export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
-export const ML_ALERT_TYPE_ID = `siem.mlRule`;
-export const THRESHOLD_ALERT_TYPE_ID = `siem.thresholdRule`;
+const RULE_TYPE_PREFIX = `siem` as const;
+export const EQL_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.eqlRule` as const;
+export const INDICATOR_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.indicatorRule` as const;
+export const ML_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.mlRule` as const;
+export const QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.queryRule` as const;
+export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as const;
 
 /**
  * Id for the notifications alerting type
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const NOTIFICATIONS_ID = `siem.notifications`;
+export const LEGACY_NOTIFICATIONS_ID = `siem.notifications`;
 
 /**
  * Special internal structure for tags for signals. This is used
@@ -313,3 +328,5 @@ export const showAllOthersBucket: string[] = [
 export const ELASTIC_NAME = 'estc';
 
 export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;
+
+export const RISKY_HOSTS_INDEX = 'ml_host_risk_score_latest';

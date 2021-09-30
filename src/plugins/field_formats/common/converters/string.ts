@@ -109,7 +109,7 @@ export class StringFormat extends FieldFormat {
     });
   }
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: string | number) => {
     if (val === '') {
       return emptyLabel;
     }
@@ -119,13 +119,13 @@ export class StringFormat extends FieldFormat {
       case 'upper':
         return String(val).toUpperCase();
       case 'title':
-        return this.toTitleCase(val);
+        return this.toTitleCase(String(val));
       case 'short':
-        return shortenDottedString(val);
+        return asPrettyString(shortenDottedString(val));
       case 'base64':
-        return this.base64Decode(val);
+        return this.base64Decode(String(val));
       case 'urlparam':
-        return decodeURIComponent(val);
+        return decodeURIComponent(String(val));
       default:
         return asPrettyString(val);
     }
@@ -136,8 +136,8 @@ export class StringFormat extends FieldFormat {
       return `<span class="ffString__emptyValue">${emptyLabel}</span>`;
     }
 
-    return hit?.highlight?.[field?.name]
-      ? getHighlightHtml(escape(val), hit.highlight[field.name])
+    return hit?.highlight?.[field?.name!]
+      ? getHighlightHtml(escape(val), hit.highlight[field!.name])
       : escape(this.textConvert(val));
   };
 }

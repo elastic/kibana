@@ -27,7 +27,8 @@ import { PartialFilter } from '../../types';
 
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.patch(
     {
@@ -121,7 +122,12 @@ export const patchRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const existingRule = await readRules({ rulesClient, ruleId, id });
+            const existingRule = await readRules({
+              isRuleRegistryEnabled,
+              rulesClient,
+              ruleId,
+              id,
+            });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
@@ -185,7 +191,7 @@ export const patchRulesBulkRoute = (
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id, ruleId });
             }

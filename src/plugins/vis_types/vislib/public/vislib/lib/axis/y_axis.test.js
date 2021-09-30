@@ -22,16 +22,8 @@ let yAxis;
 let yAxisDiv;
 
 const timeSeries = [
-  1408734060000,
-  1408734090000,
-  1408734120000,
-  1408734150000,
-  1408734180000,
-  1408734210000,
-  1408734240000,
-  1408734270000,
-  1408734300000,
-  1408734330000,
+  1408734060000, 1408734090000, 1408734120000, 1408734150000, 1408734180000, 1408734210000,
+  1408734240000, 1408734270000, 1408734300000, 1408734330000,
 ];
 
 const defaultGraphData = [
@@ -81,7 +73,7 @@ function createData(seriesData) {
   buildYAxis = function (params) {
     const visConfig = new VisConfig(
       {
-        type: 'histogram',
+        type: 'heatmap',
       },
       data,
       mockUiState,

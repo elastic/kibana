@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectWithMetadata } from '../../../../common';
+import type { SavedObjectWithMetadata, SavedObjectManagementTypeInfo } from '../../../../common';
 import { getSavedObjectLabel } from '../../../lib';
 
 export interface DeleteConfirmModalProps {
@@ -35,6 +35,7 @@ export interface DeleteConfirmModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   selectedObjects: SavedObjectWithMetadata[];
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
@@ -42,6 +43,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   onConfirm,
   onCancel,
   selectedObjects,
+  allowedTypes,
 }) => {
   const undeletableObjects = useMemo(() => {
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
@@ -86,7 +88,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               title={
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.title"
-                  defaultMessage="Some objects cannot deleted"
+                  defaultMessage="Some objects cannot be deleted"
                 />
               }
               iconType="alert"
@@ -95,7 +97,8 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               <p>
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.content"
-                  defaultMessage="Some of the selected objects cannot be deleted, and are not listed in the table summary"
+                  defaultMessage="{objectCount, plural, one {# object is} other {# objects are}} hidden and cannot be deleted. {objectCount, plural, one {It was} other {They were}} excluded from the table summary."
+                  values={{ objectCount: undeletableObjects.length }}
                 />
               </p>
             </EuiCallOut>
@@ -144,7 +147,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               ),
               width: '50px',
               render: (type, { icon }) => (
-                <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+                <EuiToolTip position="top" content={getSavedObjectLabel(type, allowedTypes)}>
                   <EuiIcon type={icon} />
                 </EuiToolTip>
               ),
@@ -186,6 +189,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                   fill
                   color="danger"
                   onClick={onConfirm}
+                  disabled={deletableObjects.length === 0}
                   data-test-subj="confirmModalConfirmButton"
                 >
                   <FormattedMessage

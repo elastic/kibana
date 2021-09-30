@@ -117,7 +117,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send(job);
   };
   const generatePdf = async (username: string, password: string, job: JobParamsPDF) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/printablePdf`)
       .auth(username, password)
@@ -125,15 +125,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams });
   };
   const generatePng = async (username: string, password: string, job: JobParamsPNG) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/png`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generateCsv = async (username: string, password: string, job: JobParamsCSV) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+  const generateCsv = async (job: JobParamsCSV, username = 'elastic', password = 'changeme') => {
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)
       .auth(username, password)
@@ -154,6 +154,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     log.debug(`ReportingAPI.postJobJSON((${apiPath}): ${JSON.stringify(jobJSON)})`);
     const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON);
     return body.path;
+  };
+
+  const getCompletedJobOutput = async (downloadReportPath: string) => {
+    const response = await supertest.get(downloadReportPath);
+    return response.text as unknown;
   };
 
   const deleteAllReports = async () => {
@@ -184,7 +189,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const makeAllReportingIndicesUnmanaged = async () => {
     log.debug('ReportingAPI.makeAllReportingIndicesUnmanaged');
-    const settings: any = {
+    const settings = {
       'index.lifecycle.name': null,
     };
     await esSupertest
@@ -216,6 +221,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     generateCsv,
     postJob,
     postJobJSON,
+    getCompletedJobOutput,
     deleteAllReports,
     checkIlmMigrationStatus,
     migrateReportingIndices,

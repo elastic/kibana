@@ -158,8 +158,8 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     initializeSources: async () => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? '/api/workplace_search/org/sources'
-        : '/api/workplace_search/account/sources';
+        ? '/internal/workplace_search/org/sources'
+        : '/internal/workplace_search/account/sources';
 
       try {
         const response = await HttpLogic.values.http.get(route);
@@ -194,8 +194,8 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     setSourceSearchability: async ({ sourceId, searchable }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/searchable`
-        : `/api/workplace_search/account/sources/${sourceId}/searchable`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/searchable`
+        : `/internal/workplace_search/account/sources/${sourceId}/searchable`;
 
       try {
         await HttpLogic.values.http.put(route, {
@@ -242,8 +242,8 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 
 export const fetchSourceStatuses = async (isOrganization: boolean) => {
   const route = isOrganization
-    ? '/api/workplace_search/org/sources/status'
-    : '/api/workplace_search/account/sources/status';
+    ? '/internal/workplace_search/org/sources/status'
+    : '/internal/workplace_search/account/sources/status';
   let response;
 
   try {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from '../../../../kibana_services';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { getSortArray, SortPairArr } from '../components/doc_table/lib/get_sort';
 
 /**

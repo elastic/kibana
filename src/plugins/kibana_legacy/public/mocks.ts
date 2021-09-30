@@ -14,9 +14,6 @@ export type Start = jest.Mocked<ReturnType<KibanaLegacyPlugin['start']>>;
 const createSetupContract = (): Setup => ({});
 
 const createStartContract = (): Start => ({
-  config: {
-    defaultAppId: 'home',
-  },
   loadFontAwesome: jest.fn(),
   loadAngularBootstrap: jest.fn(),
 });

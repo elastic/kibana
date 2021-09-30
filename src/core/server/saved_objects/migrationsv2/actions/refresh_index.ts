@@ -22,19 +22,18 @@ export interface RefreshIndexParams {
 /**
  * Wait for Elasticsearch to reindex all the changes.
  */
-export const refreshIndex = ({
-  client,
-  targetIndex,
-}: RefreshIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError,
-  { refreshed: boolean }
-> => () => {
-  return client.indices
-    .refresh({
-      index: targetIndex,
-    })
-    .then(() => {
-      return Either.right({ refreshed: true });
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+export const refreshIndex =
+  ({
+    client,
+    targetIndex,
+  }: RefreshIndexParams): TaskEither.TaskEither<RetryableEsClientError, { refreshed: boolean }> =>
+  () => {
+    return client.indices
+      .refresh({
+        index: targetIndex,
+      })
+      .then(() => {
+        return Either.right({ refreshed: true });
+      })
+      .catch(catchRetryableEsClientErrors);
+  };

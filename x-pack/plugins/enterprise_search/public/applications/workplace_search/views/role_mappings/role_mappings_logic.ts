@@ -47,11 +47,9 @@ interface RoleMappingsActions extends RoleMappingsBaseActions {
   setDefaultGroup(availableGroups: RoleGroup[]): { availableGroups: RoleGroup[] };
   setRoleMapping(roleMapping: WSRoleMapping): { roleMapping: WSRoleMapping };
   setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
-  setRoleMappings({
-    roleMappings,
-  }: {
+  setRoleMappings({ roleMappings }: { roleMappings: WSRoleMapping[] }): {
     roleMappings: WSRoleMapping[];
-  }): { roleMappings: WSRoleMapping[] };
+  };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
   handleGroupSelectionChange(groupIds: string[]): { groupIds: string[] };
@@ -168,6 +166,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       null,
       {
         setRoleMapping: (_, { roleMapping }) => roleMapping,
+        initializeRoleMappings: () => null,
         resetState: () => null,
         closeUsersAndRolesFlyout: () => null,
       },
@@ -354,7 +353,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
   listeners: ({ actions, values }) => ({
     enableRoleBasedAccess: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/role_mappings/enable_role_based_access';
+      const route = '/internal/workplace_search/org/role_mappings/enable_role_based_access';
 
       try {
         const response = await http.post(route);
@@ -365,7 +364,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     },
     initializeRoleMappings: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/role_mappings';
+      const route = '/internal/workplace_search/org/role_mappings';
 
       try {
         const response = await http.get(route);
@@ -392,7 +391,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     },
     handleDeleteMapping: async ({ roleMappingId }) => {
       const { http } = HttpLogic.values;
-      const route = `/api/workplace_search/org/role_mappings/${roleMappingId}`;
+      const route = `/internal/workplace_search/org/role_mappings/${roleMappingId}`;
 
       try {
         await http.delete(route);
@@ -425,8 +424,8 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       });
 
       const request = !roleMapping
-        ? http.post('/api/workplace_search/org/role_mappings', { body })
-        : http.put(`/api/workplace_search/org/role_mappings/${roleMapping.id}`, { body });
+        ? http.post('/internal/workplace_search/org/role_mappings', { body })
+        : http.put(`/internal/workplace_search/org/role_mappings/${roleMapping.id}`, { body });
 
       const SUCCESS_MESSAGE = !roleMapping
         ? ROLE_MAPPING_CREATED_MESSAGE
@@ -467,9 +466,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       });
 
       try {
-        const response = await http.post('/api/workplace_search/org/single_user_role_mapping', {
-          body,
-        });
+        const response = await http.post(
+          '/internal/workplace_search/org/single_user_role_mapping',
+          {
+            body,
+          }
+        );
         actions.setSingleUserRoleMapping(response);
         actions.setUserCreated();
         actions.initializeRoleMappings();

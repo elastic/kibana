@@ -41,9 +41,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('applies filters for multiple fields', async () => {
       await uptime.selectFilterItems({
-        location: ['mpls'],
-        port: ['5678'],
-        scheme: ['http'],
+        Location: ['mpls'],
+        Port: ['5678'],
+        Scheme: ['http'],
       });
       await uptime.pageHasExpectedIds([
         '0000-intermittent',

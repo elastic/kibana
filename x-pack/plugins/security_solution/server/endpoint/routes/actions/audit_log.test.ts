@@ -48,19 +48,13 @@ describe('Action Log API', () => {
       }).not.toThrow();
     });
 
-    it('should work without query params', () => {
+    it('should not work when no params while requesting with query params', () => {
       expect(() => {
         EndpointActionLogRequestSchema.query.validate({});
-      }).not.toThrow();
+      }).toThrow();
     });
 
-    it('should work with query params', () => {
-      expect(() => {
-        EndpointActionLogRequestSchema.query.validate({ page: 10, page_size: 100 });
-      }).not.toThrow();
-    });
-
-    it('should work with all query params', () => {
+    it('should work with all required query params', () => {
       expect(() => {
         EndpointActionLogRequestSchema.query.validate({
           page: 10,
@@ -71,24 +65,24 @@ describe('Action Log API', () => {
       }).not.toThrow();
     });
 
-    it('should work with just startDate', () => {
+    it('should not work without endDate', () => {
       expect(() => {
         EndpointActionLogRequestSchema.query.validate({
           page: 1,
           page_size: 100,
           start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
         });
-      }).not.toThrow();
+      }).toThrow();
     });
 
-    it('should work with just endDate', () => {
+    it('should not work without startDate', () => {
       expect(() => {
         EndpointActionLogRequestSchema.query.validate({
           page: 1,
           page_size: 100,
           end_date: new Date().toISOString(), // today
         });
-      }).not.toThrow();
+      }).toThrow();
     });
 
     it('should not work without allowed page and page_size params', () => {

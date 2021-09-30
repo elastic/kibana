@@ -28,7 +28,8 @@ export class ExpressionRevealImagePlugin
       ExpressionRevealImagePluginStart,
       SetupDeps,
       StartDeps
-    > {
+    >
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
     expressions.registerFunction(revealImageFunction);
   }

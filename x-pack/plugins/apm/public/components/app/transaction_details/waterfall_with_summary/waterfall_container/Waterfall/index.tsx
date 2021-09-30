@@ -21,7 +21,6 @@ import { WaterfallFlyout } from './waterfall_flyout';
 import {
   IWaterfall,
   IWaterfallItem,
-  IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
 const Container = euiStyled.div`
@@ -61,9 +60,8 @@ const WaterfallItemsContainer = euiStyled.div`
 interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
-  exceedsMax: boolean;
 }
-export function Waterfall({ waterfall, exceedsMax, waterfallItemId }: Props) {
+export function Waterfall({ waterfall, waterfallItemId }: Props) {
   const history = useHistory();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
@@ -74,37 +72,10 @@ export function Waterfall({ waterfall, exceedsMax, waterfallItemId }: Props) {
   const agentMarks = getAgentMarks(waterfall.entryWaterfallTransaction?.doc);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
-  function renderItems(
-    childrenByParentId: Record<string | number, IWaterfallSpanOrTransaction[]>
-  ) {
-    const { entryWaterfallTransaction } = waterfall;
-    if (!entryWaterfallTransaction) {
-      return null;
-    }
-    return (
-      <AccordionWaterfall
-        // used to recreate the entire tree when `isAccordionOpen` changes, collapsing or expanding all elements.
-        key={`accordion_state_${isAccordionOpen}`}
-        isOpen={isAccordionOpen}
-        item={entryWaterfallTransaction}
-        level={0}
-        waterfallItemId={waterfallItemId}
-        errorsPerTransaction={waterfall.errorsPerTransaction}
-        duration={duration}
-        childrenByParentId={childrenByParentId}
-        timelineMargins={TIMELINE_MARGINS}
-        onClickWaterfallItem={(item: IWaterfallItem) =>
-          toggleFlyout({ history, item })
-        }
-        onToggleEntryTransaction={() => setIsAccordionOpen((isOpen) => !isOpen)}
-      />
-    );
-  }
-
   return (
     <HeightRetainer>
       <Container>
-        {exceedsMax && (
+        {waterfall.apiResponse.exceedsMax && (
           <EuiCallOut
             color="warning"
             size="s"
@@ -132,7 +103,25 @@ export function Waterfall({ waterfall, exceedsMax, waterfallItemId }: Props) {
             />
           </div>
           <WaterfallItemsContainer>
-            {renderItems(waterfall.childrenByParentId)}
+            {!waterfall.entryWaterfallTransaction ? null : (
+              <AccordionWaterfall
+                // used to recreate the entire tree when `isAccordionOpen` changes, collapsing or expanding all elements.
+                key={`accordion_state_${isAccordionOpen}`}
+                isOpen={isAccordionOpen}
+                item={waterfall.entryWaterfallTransaction}
+                level={0}
+                waterfallItemId={waterfallItemId}
+                duration={duration}
+                waterfall={waterfall}
+                timelineMargins={TIMELINE_MARGINS}
+                onClickWaterfallItem={(item: IWaterfallItem) =>
+                  toggleFlyout({ history, item })
+                }
+                onToggleEntryTransaction={() =>
+                  setIsAccordionOpen((isOpen) => !isOpen)
+                }
+              />
+            )}
           </WaterfallItemsContainer>
         </div>
 

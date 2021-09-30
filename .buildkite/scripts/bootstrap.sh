@@ -5,7 +5,7 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 echo "--- yarn install and bootstrap"
-yarn kbn bootstrap
+retry 2 15 yarn kbn bootstrap
 
 ###
 ### upload ts-refs-cache artifacts as quickly as possible so they are available for download

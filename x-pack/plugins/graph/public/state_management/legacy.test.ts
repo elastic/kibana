@@ -80,7 +80,7 @@ describe('legacy sync sagas', () => {
     expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
   });
 
-  it('notifies angular when fields are selected', () => {
+  it('notifies react when fields are selected', () => {
     env.store.dispatch(selectField('field1'));
     expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
   });

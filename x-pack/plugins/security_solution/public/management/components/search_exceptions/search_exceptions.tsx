@@ -58,12 +58,10 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
       (ev: React.ChangeEvent<HTMLInputElement>) => setQuery(ev.target.value),
       [setQuery]
     );
-    const handleOnSearch = useCallback(() => onSearch(query, includedPolicies, excludedPolicies), [
-      onSearch,
-      query,
-      includedPolicies,
-      excludedPolicies,
-    ]);
+    const handleOnSearch = useCallback(
+      () => onSearch(query, includedPolicies, excludedPolicies),
+      [onSearch, query, includedPolicies, excludedPolicies]
+    );
 
     const handleOnSearchQuery = useCallback(
       (value) => {

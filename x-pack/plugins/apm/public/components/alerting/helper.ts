@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import datemath from '@elastic/datemath';
+import moment from 'moment';
 
 export interface AlertMetadata {
   environment: string;
@@ -15,12 +14,25 @@ export interface AlertMetadata {
   end?: string;
 }
 
-export function getAbsoluteTimeRange(windowSize: number, windowUnit: string) {
-  const now = new Date().toISOString();
+export type TimeUnit = 's' | 'm' | 'h' | 'd';
+
+const BUCKET_SIZE = 20;
+
+export function getIntervalAndTimeRange({
+  windowSize,
+  windowUnit,
+}: {
+  windowSize: number;
+  windowUnit: TimeUnit;
+}) {
+  const end = Date.now();
+  const start =
+    end -
+    moment.duration(windowSize, windowUnit).asMilliseconds() * BUCKET_SIZE;
 
   return {
-    start:
-      datemath.parse(`now-${windowSize}${windowUnit}`)?.toISOString() ?? now,
-    end: now,
+    interval: `${windowSize}${windowUnit}`,
+    start: new Date(start).toISOString(),
+    end: new Date(end).toISOString(),
   };
 }

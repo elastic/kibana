@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { updateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -24,7 +23,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 export const updateRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: IRuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
   router.put(
     {
@@ -61,11 +60,12 @@ export const updateRulesRoute = (
 
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const rule = await updateRules({
-          spaceId: context.securitySolution.getSpaceId(),
+          defaultOutputIndex: siemClient.getSignalsIndex(),
+          isRuleRegistryEnabled,
           rulesClient,
           ruleStatusClient,
-          defaultOutputIndex: siemClient.getSignalsIndex(),
           ruleUpdate: request.body,
+          spaceId: context.securitySolution.getSpaceId(),
         });
 
         if (rule != null) {
@@ -74,7 +74,11 @@ export const updateRulesRoute = (
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
-          const [validated, errors] = transformValidate(rule, ruleStatuses[0]);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleStatuses[0],
+            isRuleRegistryEnabled
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

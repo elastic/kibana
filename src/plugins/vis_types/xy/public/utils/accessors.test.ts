@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { COMPLEX_SPLIT_ACCESSOR, getComplexAccessor } from './accessors';
+import {
+  COMPLEX_SPLIT_ACCESSOR,
+  getComplexAccessor,
+  isPercentileIdEqualToSeriesId,
+} from './accessors';
 import { BUCKET_TYPES } from '../../../../data/common';
 import { AccessorFn, Datum } from '@elastic/charts';
 
@@ -97,5 +101,39 @@ describe('XY chart datum accessors', () => {
     const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
 
     expect(accessor).toBeUndefined();
+  });
+});
+
+describe('isPercentileIdEqualToSeriesId', () => {
+  it('should be equal for plain column ids', () => {
+    const seriesColumnId = 'col-0-1';
+    const columnId = `${seriesColumnId}`;
+
+    const isEqual = isPercentileIdEqualToSeriesId(columnId, seriesColumnId);
+    expect(isEqual).toBeTruthy();
+  });
+
+  it('should be equal for column with percentile', () => {
+    const seriesColumnId = '1';
+    const columnId = `${seriesColumnId}.95`;
+
+    const isEqual = isPercentileIdEqualToSeriesId(columnId, seriesColumnId);
+    expect(isEqual).toBeTruthy();
+  });
+
+  it('should not be equal for column with percentile equal to seriesColumnId', () => {
+    const seriesColumnId = '1';
+    const columnId = `2.1`;
+
+    const isEqual = isPercentileIdEqualToSeriesId(columnId, seriesColumnId);
+    expect(isEqual).toBeFalsy();
+  });
+
+  it('should not be equal for column with percentile, where columnId contains seriesColumnId', () => {
+    const seriesColumnId = '1';
+    const columnId = `${seriesColumnId}2.1`;
+
+    const isEqual = isPercentileIdEqualToSeriesId(columnId, seriesColumnId);
+    expect(isEqual).toBeFalsy();
   });
 });

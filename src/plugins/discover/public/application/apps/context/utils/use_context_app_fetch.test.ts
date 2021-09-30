@@ -51,7 +51,7 @@ jest.mock('../services/anchor', () => ({
 const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pattern-id') => {
   const dangerNotification = jest.fn();
 
-  setServices(({
+  setServices({
     data: {
       search: {
         searchSource: {
@@ -71,11 +71,11 @@ const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pa
         }
       },
     },
-  } as unknown) as DiscoverServices);
+  } as unknown as DiscoverServices);
 
   return {
     dangerNotification,
-    props: ({
+    props: {
       anchorId: 'mock_anchor_id',
       indexPatternId,
       indexPattern: indexPatternMock,
@@ -86,7 +86,7 @@ const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pa
       },
       useNewFieldsApi: false,
       services: getServices(),
-    } as unknown) as ContextAppFetchProps,
+    } as unknown as ContextAppFetchProps,
   };
 };
 
