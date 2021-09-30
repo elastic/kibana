@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { SemVer } from 'semver';
 
 jest.mock('../../../../lib/proxy_request', () => ({
   proxyRequest: jest.fn(),
 }));
 
 import { duration } from 'moment';
+import { MAJOR_VERSION } from '../../../../../common/constants';
 import { ProxyConfigCollection } from '../../../../lib';
 import { RouteDependencies, ProxyDependencies } from '../../../../routes';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../services';
@@ -51,5 +53,6 @@ export const getProxyRouteHandlerDeps = ({
         }
       : defaultProxyValue,
     log,
+    kibanaVersion: new SemVer(MAJOR_VERSION),
   };
 };

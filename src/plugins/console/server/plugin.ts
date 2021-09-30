@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { SemVer } from 'semver';
 
 import { ProxyConfigCollection } from './lib';
 import { SpecDefinitionsService, EsLegacyConfigService } from './services';
@@ -34,10 +35,17 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
         save: true,
       },
     }));
-
+    const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
     const config = this.ctx.config.get();
     const globalConfig = this.ctx.config.legacy.get();
-    const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
+
+    let pathFilters: RegExp[] | undefined;
+    let proxyConfigCollection: ProxyConfigCollection | undefined;
+    if (kibanaVersion.major < 8) {
+      // "pathFilters" and "proxyConfig" are only used in 7.x
+      pathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
+      proxyConfigCollection = new ProxyConfigCollection(config.proxyConfig);
+    }
 
     this.esLegacyConfigService.setup(elasticsearch.legacy.config$);
 
@@ -51,7 +59,6 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
         specDefinitionService: this.specDefinitionsService,
       },
       proxy: {
-        proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
         readLegacyESConfig: async (): Promise<ESConfigForProxy> => {
           const legacyConfig = await this.esLegacyConfigService.readConfig();
           return {
@@ -59,8 +66,11 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
             ...legacyConfig,
           };
         },
-        pathFilters: proxyPathFilters,
+        // Deprecated settings (only used in 7.x):
+        proxyConfigCollection,
+        pathFilters,
       },
+      kibanaVersion,
     });
 
     return {
