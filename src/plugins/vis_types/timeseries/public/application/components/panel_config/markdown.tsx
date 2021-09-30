@@ -255,7 +255,7 @@ export class MarkdownPanelConfig extends Component<
                 <FormattedMessage
                   id="visTypeTimeseries.markdown.optionsTab.customCSSLabel"
                   defaultMessage="Custom CSS"
-                  description="CSS is names of technologies and should not be translated."
+                  description="CSS is name of technology and should not be translated."
                 />
               </span>
             </EuiTitle>

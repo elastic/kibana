@@ -18038,20 +18038,6 @@ lead@^1.0.0:
   dependencies:
     flush-write-stream "^1.0.2"
 
-"less@npm:@elastic/less@2.7.3-kibana":
-  version "2.7.3-kibana"
-  resolved "https://registry.yarnpkg.com/@elastic/less/-/less-2.7.3-kibana.tgz#3de5e0b06bb095b1cc1149043d67f8dc36272d23"
-  integrity sha512-Okm31ZKE28/m3bH0h0mNpQH0zqVWNFqRKDlsBd1AYHGdM1yBq4mzeO6IRUykB81XDGlqL0m4ThSA7mc3hy+LVg==
-  optionalDependencies:
-    errno "^0.1.1"
-    graceful-fs "^4.1.2"
-    image-size "~0.5.0"
-    mime "^1.2.11"
-    mkdirp "^0.5.0"
-    promise "^7.1.1"
-    request "2.81.0"
-    source-map "^0.5.3"
-
 leven@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/leven/-/leven-3.1.0.tgz#77891de834064cccba82ae7842bb6b14a13ed7f2"
