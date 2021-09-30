@@ -64,7 +64,7 @@ describe('test fetchCharts', () => {
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async (done) => {
     const subjects = getDataSubjects();
-    const deps = ({
+    const deps = {
       appStateContainer: {
         getState: () => {
           return { interval: 'auto' };
@@ -76,7 +76,7 @@ describe('test fetchCharts', () => {
       onResults: jest.fn(),
       savedSearch: savedSearchMock,
       searchSessionId: '123',
-    } as unknown) as FetchAllSubDeps;
+    } as unknown as FetchAllSubDeps;
     deps.data.query.timefilter.timefilter.getTime = () => {
       return { from: '2021-07-07T00:05:13.590', to: '2021-07-07T11:20:13.590' };
     };
@@ -136,7 +136,7 @@ describe('test fetchCharts', () => {
   test('change of fetchStatus on fetch error', async (done) => {
     const subjects = getDataSubjects();
 
-    const deps = ({
+    const deps = {
       appStateContainer: {
         getState: () => {
           return { interval: 'auto' };
@@ -148,7 +148,7 @@ describe('test fetchCharts', () => {
       onResults: jest.fn(),
       savedSearch: savedSearchMock,
       searchSessionId: '123',
-    } as unknown) as FetchAllSubDeps;
+    } as unknown as FetchAllSubDeps;
 
     savedSearchMockWithTimeField.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
 

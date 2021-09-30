@@ -26,14 +26,14 @@ describe('test fetchDocuments', () => {
   test('changes of fetchStatus are correct when starting with FetchStatus.UNINITIALIZED', async (done) => {
     const subjects = getDataSubjects();
     const { documents$ } = subjects;
-    const deps = ({
+    const deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
       savedSearch: savedSearchMock,
       searchSessionId: '123',
       services: discoverServiceMock,
-    } as unknown) as FetchAllSubDeps;
+    } as unknown as FetchAllSubDeps;
 
     const stateArr: FetchStatus[] = [];
 
@@ -53,14 +53,14 @@ describe('test fetchDocuments', () => {
   test('change of fetchStatus on fetch error', async (done) => {
     const subjects = getDataSubjects();
     const { documents$ } = subjects;
-    const deps = ({
+    const deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
       savedSearch: savedSearchMock,
       searchSessionId: '123',
       services: discoverServiceMock,
-    } as unknown) as FetchAllSubDeps;
+    } as unknown as FetchAllSubDeps;
 
     savedSearchMock.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
 

@@ -27,14 +27,14 @@ describe('test fetchTotalHits', () => {
     const subjects = getDataSubjects();
     const { totalHits$ } = subjects;
 
-    const deps = ({
+    const deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
       savedSearch: savedSearchMock,
       searchSessionId: '123',
       data: discoverServiceMock.data,
-    } as unknown) as FetchAllSubDeps;
+    } as unknown as FetchAllSubDeps;
 
     const stateArr: FetchStatus[] = [];
 
@@ -54,14 +54,14 @@ describe('test fetchTotalHits', () => {
   test('change of fetchStatus on fetch error', async (done) => {
     const subjects = getDataSubjects();
     const { totalHits$ } = subjects;
-    const deps = ({
+    const deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
       savedSearch: savedSearchMock,
       searchSessionId: '123',
       data: discoverServiceMock.data,
-    } as unknown) as FetchAllSubDeps;
+    } as unknown as FetchAllSubDeps;
 
     savedSearchMock.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
 
