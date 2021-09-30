@@ -84,6 +84,8 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
         expression: `markdown "Could not find embeddable for type ${type}" | render`,
       };
 
+      // If by-value is enabled, we'll handle both by-reference and by-value embeddables
+      // with the new generic `embeddable` function
       if (isByValueEnabled) {
         const config = encode({ id });
         partialElement.expression = `embeddable config="${config}" 
