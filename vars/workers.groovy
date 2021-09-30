@@ -22,7 +22,7 @@ def label(size) {
     case 'xxl':
       return 'docker && tests-xxl && gobld/machineType:custom-64-327680'
     case 'n2-standard-16':
-      return 'docker && linux && immutable && gobld/machineType:n2-standard-16'
+      return 'docker && ubuntu && immutable && gobld/machineType:n2-standard-16'
     case 'ci-group-6':
       return 'docker && ubuntu && immutable && gobld/machineType:n2-custom-6-16384'
   }
