@@ -10,7 +10,7 @@ import { last, findIndex, isNaN } from 'lodash';
 import React, { Component } from 'react';
 import { isColorDark } from '@elastic/eui';
 import { MetricVisValue } from './metric_value';
-import { MetricInput, VisParams, Metric } from '../../common';
+import { MetricInput, VisParams, MetricVisMetric as Metric } from '../../common';
 import type { FieldFormatsContentType, IFieldFormat } from '../../../../field_formats/common';
 import { Datatable } from '../../../../expressions/public';
 import { getHeatmapColors } from '../../../../charts/public';

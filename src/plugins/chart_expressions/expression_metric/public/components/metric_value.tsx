@@ -9,7 +9,7 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import type { Metric } from '../../common';
+import type { MetricVisMetric as Metric } from '../../common';
 
 interface MetricVisValueProps {
   metric: Metric;
