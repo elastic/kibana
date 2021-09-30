@@ -6,17 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { run, combineErrors, createFlagError, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { run, combineErrors, createFlagError } from '@kbn/dev-utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
-
-const runStartTime = Date.now();
-const log = new ToolingLog({
-  level: 'info',
-  writeTo: process.stdout,
-});
-const reportTime = getTimeReporter(log, 'precommit_hook');
 
 run(
   async ({ log, flags }) => {
@@ -57,18 +50,8 @@ run(
     }
 
     if (errors.length) {
-      const combinedError = combineErrors(errors);
-      reportTime(runStartTime, 'error', {
-        success: false,
-        error: combinedError.message,
-      });
-      throw combinedError;
+      throw combineErrors(errors);
     }
-
-    reportTime(runStartTime, 'total', {
-      success: true,
-      fix: flags.fix,
-    });
   },
   {
     description: `

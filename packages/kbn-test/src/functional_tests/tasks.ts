@@ -176,7 +176,7 @@ export async function startServers({
       },
     });
 
-    reportTime(runStartTime, 'total', {
+    reportTime(runStartTime, 'ready', {
       success: true,
       ...options,
     });

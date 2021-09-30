@@ -326,7 +326,7 @@ exports.Cluster = class Cluster {
       const lines = parseEsLog(data.toString());
       lines.forEach((line) => {
         if (line.message.includes('license mode is')) {
-          reportTime(startTime, 'total', {
+          reportTime(startTime, 'ready', {
             success: true,
           });
         }
