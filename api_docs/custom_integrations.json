@@ -179,7 +179,14 @@
             "label": "icons",
             "description": [],
             "signature": [
-              "{ src: string; type: string; }[]"
+              {
+                "pluginId": "customIntegrations",
+                "scope": "common",
+                "docId": "kibCustomIntegrationsPluginApi",
+                "section": "def-common.CustomIntegrationIcon",
+                "text": "CustomIntegrationIcon"
+              },
+              "[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -447,7 +454,14 @@
             "label": "icons",
             "description": [],
             "signature": [
-              "{ src: string; type: string; }[]"
+              {
+                "pluginId": "customIntegrations",
+                "scope": "common",
+                "docId": "kibCustomIntegrationsPluginApi",
+                "section": "def-common.CustomIntegrationIcon",
+                "text": "CustomIntegrationIcon"
+              },
+              "[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -472,6 +486,42 @@
             "tags": [],
             "label": "shipper",
             "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "customIntegrations",
+        "id": "def-common.CustomIntegrationIcon",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomIntegrationIcon",
+        "description": [],
+        "path": "src/plugins/custom_integrations/common/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.CustomIntegrationIcon.src",
+            "type": "string",
+            "tags": [],
+            "label": "src",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.CustomIntegrationIcon.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"eui\" | \"svg\""
+            ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
           }
