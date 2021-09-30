@@ -15,7 +15,6 @@ export const plugin = () => new KibanaLegacyPlugin();
 
 export * from './plugin';
 
-export { PaginateDirectiveProvider, PaginateControlsDirectiveProvider } from './paginate/paginate';
 export * from './angular';
 export * from './notify';
 export * from './utils';
