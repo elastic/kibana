@@ -16,7 +16,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiBadge } from '@elastic/eui';
 
-import { getPageHeaderActions, getPageTitle, mountWithIntl } from '../../../../test_helpers';
+import { getPageHeaderActions, getPageTitle } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 
