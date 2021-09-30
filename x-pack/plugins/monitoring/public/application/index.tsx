@@ -22,6 +22,7 @@ import { NoDataPage } from './pages/no_data';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { BeatsOverviewPage } from './pages/beats/overview';
 import { BeatsInstancesPage } from './pages/beats/instances';
+import { BeatsInstancePage } from './pages/beats/instance';
 import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
@@ -111,6 +112,13 @@ const MonitoringApp: React.FC<{
                   />
 
                   {/* Beats Views */}
+                  <RouteInit
+                    path="/beats/beat/:instance"
+                    component={BeatsInstancePage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    fetchAllClusters={false}
+                  />
+
                   <RouteInit
                     path="/beats/beats"
                     component={BeatsInstancesPage}
