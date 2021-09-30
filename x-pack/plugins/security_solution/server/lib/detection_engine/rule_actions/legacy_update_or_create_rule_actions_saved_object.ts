@@ -13,8 +13,6 @@ import { legacyGetRuleActionsSavedObject } from './legacy_get_rule_actions_saved
 import { legacyCreateRuleActionsSavedObject } from './legacy_create_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 import { legacyUpdateRuleActionsSavedObject } from './legacy_update_rule_actions_saved_object';
-// eslint-disable-next-line no-restricted-imports
-import { LegacyRuleActions } from './legacy_types';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -27,6 +25,8 @@ interface LegacyUpdateOrCreateRuleActionsSavedObject {
 }
 
 /**
+ * NOTE: This should _only_ be seen to be used within the legacy route of "legacyCreateLegacyNotificationRoute" and not exposed and not
+ * used anywhere else. If you see it being used anywhere else, that would be a bug.
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyUpdateOrCreateRuleActionsSavedObject = async ({
@@ -34,7 +34,7 @@ export const legacyUpdateOrCreateRuleActionsSavedObject = async ({
   ruleAlertId,
   actions,
   throttle,
-}: LegacyUpdateOrCreateRuleActionsSavedObject): Promise<LegacyRuleActions> => {
+}: LegacyUpdateOrCreateRuleActionsSavedObject): Promise<void> => {
   const ruleActions = await legacyGetRuleActionsSavedObject({
     ruleAlertId,
     savedObjectsClient,

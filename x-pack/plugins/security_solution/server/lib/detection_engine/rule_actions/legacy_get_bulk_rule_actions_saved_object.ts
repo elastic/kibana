@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsFindOptionsReference } from 'kibana/server';
 import { AlertServices } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
@@ -14,7 +15,6 @@ import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_type
 import { legacyGetRuleActionsFromSavedObject } from './legacy_utils';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
-import { buildChunkedOrFilter } from '../signals/utils';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -31,21 +31,30 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
   alertIds,
   savedObjectsClient,
 }: LegacyGetBulkRuleActionsSavedObject): Promise<Record<string, LegacyRulesActionsSavedObject>> => {
-  const filter = buildChunkedOrFilter(
-    `${legacyRuleActionsSavedObjectType}.attributes.ruleAlertId`,
-    alertIds
-  );
+  const references = alertIds.map<SavedObjectsFindOptionsReference>((alertId) => ({
+    id: alertId,
+    type: 'alert',
+  }));
   const {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     saved_objects,
   } = await savedObjectsClient.find<LegacyIRuleActionsAttributesSavedObjectAttributes>({
     type: legacyRuleActionsSavedObjectType,
     perPage: 10000,
-    filter,
+    hasReference: references,
   });
   return saved_objects.reduce(
     (acc: { [key: string]: LegacyRulesActionsSavedObject }, savedObject) => {
-      acc[savedObject.attributes.ruleAlertId] = legacyGetRuleActionsFromSavedObject(savedObject);
+      const ruleAlertId = savedObject.references.find((reference) => {
+        // Find the first rule alert and assume that is the one we want since we should only ever have 1.
+        return reference.type === 'alert';
+      });
+      // We check to ensure we have found a "ruleAlertId" and hopefully we have.
+      // Fallback is if we don't have one is to try to use the "savedObject.attributes.ruleAlertId" if it still exists as a last resort.
+      // The only reason this should ever happen is if migrations did not run, which should not be the case, but we are safe guarding here at the moment in case it does.
+      const ruleAlertIdKey =
+        ruleAlertId != null ? ruleAlertId.id : savedObject.attributes.ruleAlertId;
+      acc[ruleAlertIdKey] = legacyGetRuleActionsFromSavedObject(savedObject);
       return acc;
     },
     {}

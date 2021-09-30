@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectReference } from 'kibana/server';
 import { AlertServices } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
@@ -15,7 +16,6 @@ import { legacyGetThrottleOptions } from './legacy_utils';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 import { AlertAction } from '../../../../../alerting/common';
-import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -29,6 +29,8 @@ interface LegacyUpdateRuleActionsSavedObject {
 }
 
 /**
+ * NOTE: This should _only_ be seen to be used within the legacy route of "legacyCreateLegacyNotificationRoute" and not exposed and not
+ * used anywhere else. If you see it being used anywhere else, that would be a bug.
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyUpdateRuleActionsSavedObject = async ({
@@ -37,7 +39,22 @@ export const legacyUpdateRuleActionsSavedObject = async ({
   actions,
   throttle,
   ruleActions,
-}: LegacyUpdateRuleActionsSavedObject): Promise<LegacyRulesActionsSavedObject> => {
+}: LegacyUpdateRuleActionsSavedObject): Promise<void> => {
+  const referenceWithAlertId = [{ id: ruleAlertId, type: 'alert', name: 'alert_0' }];
+  const actionReferences =
+    actions != null
+      ? actions.map((action, index) => ({
+          id: action.id,
+          type: 'action',
+          name: `action_${index}`,
+        }))
+      : ruleActions.actions.map((action, index) => ({
+          id: action.id,
+          type: 'action',
+          name: `action_${index}`,
+        }));
+
+  const references: SavedObjectReference[] = [...referenceWithAlertId, ...actionReferences];
   const throttleOptions = throttle
     ? legacyGetThrottleOptions(throttle)
     : {
@@ -45,25 +62,29 @@ export const legacyUpdateRuleActionsSavedObject = async ({
         alertThrottle: ruleActions.alertThrottle,
       };
 
-  const options = {
+  const attributes: LegacyIRuleActionsAttributesSavedObjectAttributes = {
     actions:
       actions != null
-        ? actions.map((action) => transformAlertToRuleAction(action))
-        : ruleActions.actions,
+        ? actions.map(({ group, params, actionTypeId }, index) => ({
+            actionRef: `action_${index}`,
+            group,
+            params,
+            action_type_id: actionTypeId,
+          }))
+        : // eslint-disable-next-line @typescript-eslint/naming-convention
+          ruleActions.actions.map(({ group, params, action_type_id }, index) => ({
+            actionRef: `action_${index}`,
+            group,
+            params,
+            action_type_id,
+          })),
     ...throttleOptions,
   };
 
   await savedObjectsClient.update<LegacyIRuleActionsAttributesSavedObjectAttributes>(
     legacyRuleActionsSavedObjectType,
     ruleActions.id,
-    {
-      ruleAlertId,
-      ...options,
-    }
+    attributes,
+    { references }
   );
-
-  return {
-    id: ruleActions.id,
-    ...options,
-  };
 };

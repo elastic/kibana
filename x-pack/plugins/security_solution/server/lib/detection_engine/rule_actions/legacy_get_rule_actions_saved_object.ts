@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { SavedObjectsFindOptionsReference } from 'kibana/server';
 import { AlertServices } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
+import {
+  LegacyIRuleActionsAttributesSavedObjectAttributes,
+  LegacyRuleAlertAction,
+} from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsFromSavedObject } from './legacy_utils';
 
@@ -26,8 +29,8 @@ interface LegacyGetRuleActionsSavedObject {
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyRulesActionsSavedObject {
-  id: string;
-  actions: RuleAlertAction[];
+  id: string; // TODO: Should we move this to make it impossible to rely on it within the code base?
+  actions: LegacyRuleAlertAction[];
   alertThrottle: string | null;
   ruleThrottle: string;
 }
@@ -39,14 +42,17 @@ export const legacyGetRuleActionsSavedObject = async ({
   ruleAlertId,
   savedObjectsClient,
 }: LegacyGetRuleActionsSavedObject): Promise<LegacyRulesActionsSavedObject | null> => {
+  const reference: SavedObjectsFindOptionsReference = {
+    id: ruleAlertId,
+    type: 'alert',
+  };
   const {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     saved_objects,
   } = await savedObjectsClient.find<LegacyIRuleActionsAttributesSavedObjectAttributes>({
     type: legacyRuleActionsSavedObjectType,
     perPage: 1,
-    search: `${ruleAlertId}`,
-    searchFields: ['ruleAlertId'],
+    hasReference: reference,
   });
 
   if (!saved_objects[0]) {
