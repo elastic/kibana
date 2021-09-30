@@ -9,8 +9,6 @@ import { CONTEXT_DEFAULTS, QUERY } from '../../../common/constants';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { SortOrder, CursorDirection, MonitorSummariesResult } from '../../../common/runtime_types';
 import { QueryContext, MonitorSummaryIterator } from './search';
-import { HistogramPoint, Histogram } from '../../../common/runtime_types';
-import { getHistogramInterval } from '../helper/get_histogram_interval';
 
 export interface CursorPagination {
   cursorKey?: any;
@@ -69,23 +67,6 @@ export const getMonitorStates: UMElasticsearchQueryFn<
 
   const iterator = new MonitorSummaryIterator(queryContext);
   const page = await iterator.nextPage(size);
-
-  const minInterval = getHistogramInterval(
-    queryContext.dateRangeStart,
-    queryContext.dateRangeEnd,
-    12
-  );
-
-  // const histograms = await getHistogramForMonitors(
-  //   queryContext,
-  //   page.monitorSummaries.map((s) => s.monitor_id),
-  //   minInterval
-  // );
-  //
-  // page.monitorSummaries.forEach((s) => {
-  //   s.histogram = histograms[s.monitor_id];
-  //   s.minInterval = minInterval;
-  // });
 
   return {
     summaries: page.monitorSummaries,

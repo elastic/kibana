@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   getBreakpoint,
 } from '@elastic/eui';
-import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
+import { X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
 import { ExpandedRowMap } from './types';
@@ -68,7 +68,7 @@ export const MonitorListComponent: ({
 
   const items = list.summaries ?? [];
 
-  useMonitorHistogram({ items });
+  const { histogramsById, minInterval } = useMonitorHistogram({ items });
 
   const nextPagePagination = list.nextPagePagination ?? '';
   const prevPagePagination = list.prevPagePagination ?? '';
@@ -152,15 +152,15 @@ export const MonitorListComponent: ({
       ? [
           {
             align: 'left' as const,
-            field: 'histogram.points',
+            field: 'monitor_id',
             name: labels.HISTORY_COLUMN_LABEL,
             mobileOptions: {
               show: false,
             },
-            render: (histogramSeries: HistogramPoint[] | null, summary: MonitorSummary) => (
+            render: (monitorId: string) => (
               <MonitorBarSeries
-                histogramSeries={histogramSeries}
-                minInterval={summary.minInterval!}
+                histogramSeries={histogramsById?.[monitorId]?.points}
+                minInterval={minInterval!}
               />
             ),
           },

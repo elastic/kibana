@@ -7,6 +7,7 @@
 
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
+import { estypes } from '@elastic/elasticsearch';
 import {
   Histogram,
   HistogramPoint,
@@ -14,13 +15,13 @@ import {
 } from '../../../../common/runtime_types/monitor';
 import { useGetUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
-import { useEsSearch, createEsParams } from '../../../../../observability/public';
+import { useEsSearch } from '../../../../../observability/public';
 import { esKuerySelector } from '../../../state/selectors';
 import { getHistogramInterval } from '../../../../common/lib/get_histogram_interval';
 import { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
-  const { dateRangeStart, dateRangeEnd, statusFilter, query } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, statusFilter } = useGetUrlParams();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
@@ -28,7 +29,7 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
 
   const monitorIds = (items ?? []).map(({ monitor_id: monitorId }) => monitorId);
 
-  const queryParams = getQueryParams(
+  const { queryParams, minInterval } = getQueryParams(
     dateRangeStart,
     dateRangeEnd,
     filters,
@@ -41,32 +42,32 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
     lastRefresh,
   ]);
 
-  const histoBuckets = data?.aggregations?.histogram.buckets ?? [];
-  const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {
+  const histogramBuckets = data?.aggregations?.histogram.buckets ?? [];
+  const simplified = histogramBuckets.map((histogramBucket) => {
     const byId: { [key: string]: number } = {};
-    histoBucket.by_id.buckets.forEach((idBucket: any) => {
-      byId[idBucket.key] = idBucket.totalDown.value;
+    histogramBucket.by_id.buckets.forEach((idBucket) => {
+      byId[idBucket.key] = idBucket.totalDown.value as number;
     });
     return {
-      timestamp: parseInt(histoBucket.key, 10),
       byId,
+      timestamp: histogramBucket.key,
     };
   });
 
-  const histosById: { [key: string]: Histogram } = {};
+  const histogramsById: { [key: string]: Histogram } = {};
   monitorIds.forEach((id: string) => {
     const points: HistogramPoint[] = [];
-    simplified.forEach((simpleHisto) => {
+    simplified.forEach(({ byId, timestamp }) => {
       points.push({
-        timestamp: simpleHisto.timestamp,
+        timestamp,
         up: undefined,
-        down: simpleHisto.byId[id],
+        down: byId[id],
       });
     });
-    histosById[id] = { points };
+    histogramsById[id] = { points };
   });
 
-  return histosById;
+  return { histogramsById, loading, minInterval };
 };
 
 const getQueryParams = (
@@ -78,11 +79,11 @@ const getQueryParams = (
 ) => {
   const minInterval = getHistogramInterval(dateRangeStart, dateRangeEnd, 12);
 
-  return createEsParams({
+  const queryParams = {
     index: 'heartbeat-*',
     body: {
       size: 0,
-      query: {``
+      query: {
         bool: {
           filter: [
             {
@@ -103,7 +104,7 @@ const getQueryParams = (
                 },
               },
             },
-          ],
+          ] as estypes.QueryDslQueryContainer,
         },
       },
       aggs: {
@@ -112,23 +113,25 @@ const getQueryParams = (
             field: '@timestamp',
             // 12 seems to be a good size for performance given
             // long monitor lists of up to 100 on the overview page
-            // fixed_interval: minInterval + 'ms',
+            fixed_interval: minInterval + 'ms',
           },
-          // aggs: {
-          //   by_id: {
-          //     terms: {
-          //       field: 'monitor.id',
-          //       size: Math.max(monitorIds.length, 1),
-          //     },
-          //     aggs: {
-          //       totalDown: {
-          //         sum: { field: 'summary.down' },
-          //       },
-          //     },
-          //   },
-          // },
+          aggs: {
+            by_id: {
+              terms: {
+                field: 'monitor.id',
+                size: Math.max(monitorIds.length, 1),
+              },
+              aggs: {
+                totalDown: {
+                  sum: { field: 'summary.down' },
+                },
+              },
+            },
+          },
         },
       },
     },
-  });
+  };
+
+  return { queryParams, minInterval };
 };
