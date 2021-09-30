@@ -51,3 +51,4 @@ export const getEditPath = ({ pipelineName }: { pipelineName: string }): string 
 export const getCreatePath = (): string => _getCreatePath();
 export const getClonePath = ({ clonedPipelineName }: { clonedPipelineName: string }): string =>
   _getClonePath(clonedPipelineName, true);
+export const getCreateFromCsvPath = (): string => _getCreateFromCsvPath();

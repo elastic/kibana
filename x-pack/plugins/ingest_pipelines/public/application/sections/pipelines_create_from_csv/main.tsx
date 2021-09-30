@@ -82,8 +82,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
         );
         setErrorDetails(
           i18n.translate('xpack.ingestPipelines.createFromCsv.processFile.unexpectedError', {
-            defaultMessage: 'Unexpected error {e}',
-            values: { e },
+            defaultMessage: 'Unexpected error',
           })
         );
       }
@@ -117,8 +116,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           i18n.translate(
             'xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorDetails',
             {
-              defaultMessage: 'Unexpected error {e}',
-              values: { e },
+              defaultMessage: 'Unexpected error',
             }
           )
         );

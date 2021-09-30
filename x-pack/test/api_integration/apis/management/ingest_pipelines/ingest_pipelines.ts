@@ -495,5 +495,25 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('Create from CSV', () => {
+      const PIPELINE_ID = 'test_create_pipeline';
+      const REQUIRED_FIELDS_PIPELINE_ID = 'test_create_required_fields_pipeline';
+
+      after(async () => {
+        // Clean up any pipelines created in test cases
+        await Promise.all([PIPELINE_ID, REQUIRED_FIELDS_PIPELINE_ID].map(deletePipeline)).catch(
+          (err) => {
+            // eslint-disable-next-line no-console
+            console.log(`[Cleanup error] Error deleting pipelines: ${err.message}`);
+            throw err;
+          }
+        );
+      });
+
+      it('should map and create a pipeline', async () => {
+        
+      });
+    });
   });
 }

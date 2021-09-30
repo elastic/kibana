@@ -48,6 +48,10 @@ const appServices = {
       createUrl: jest.fn(),
     }),
   },
+  fileUpload: {
+    getMaxBytes: jest.fn().mockReturnValue(100),
+    getMaxBytesFormatted: jest.fn().mockReturnValue('100')
+  }
 };
 
 export const setupEnvironment = () => {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { stringifyJson, parseJson } from './utils';
+export { stringifyJson, parseJson, readFile } from './utils';

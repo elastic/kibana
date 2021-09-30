@@ -71,5 +71,9 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
       return await Promise.all(pipelines.map((pipeline) => getPipelineName(pipeline)));
     },
+
+    async createPipelineFromCsv() {
+      
+    }
   };
 }

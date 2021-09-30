@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act } from 'react-dom/test-utils';
+
+import { EuiFilePicker } from '@elastic/eui';
+
+import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { PipelinesCreateFromCsv } from '../../../public/application/sections/pipelines_create_from_csv';
+import { WithAppDependencies } from './setup_environment';
+import { getCreateFromCsvPath, ROUTES } from '../../../public/application/services/navigation';
+
+const testBedConfig: TestBedConfig = {
+  memoryRouter: {
+    initialEntries: [getCreateFromCsvPath()],
+    componentRoutePath: ROUTES.createFromCsv,
+  },
+  doMountAsync: true,
+};
+
+const initTestBed = registerTestBed(WithAppDependencies(PipelinesCreateFromCsv), testBedConfig);
+
+export type PipelineCreateFromCsvTestBed = TestBed<PipelineCreateFromCsvTestSubjects> & {
+  actions: ReturnType<typeof createFromCsvActions>;
+};
+const createFromCsvActions = (testBed: TestBed) => {
+  
+  // User Actions
+
+  const selectCsvForUpload = (file?: File) => {
+    const { component } = testBed;
+    let csv = [file ? file : 'foo'] as any;
+    component.find(EuiFilePicker).prop('onChange')!(csv);
+  };
+
+  const clickProcessCsv = () => {
+    const { component, find } = testBed;
+
+    act(() => {
+      find('processFileButton').simulate('click');
+    });
+
+    component.update();
+  };
+
+  return {
+    selectCsvForUpload,
+    clickProcessCsv
+  };
+};
+
+export const setup = async (): Promise<PipelineCreateFromCsvTestBed> => {
+  const testBed = await initTestBed();
+
+  return {
+    ...testBed,
+    actions: createFromCsvActions(testBed),
+  };
+};
+
+export type PipelineCreateFromCsvTestSubjects =
+  | 'pageTitle'
+  | 'documentationLink'
+  | 'processFileButton'
+  | 'csvFilePicker'
+  ;

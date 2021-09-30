@@ -76,6 +76,7 @@ export const PipelinesCsvUploader: FC<Props> = ({
         >
           <EuiFilePicker
             id="filePicker"
+            data-test-subj="csvFilePicker"
             initialPromptText={i18n.translate(
               'xpack.ingestPipelines.createFromCsv.fileUpload.selectOrDragAndDropFileDescription',
               {
