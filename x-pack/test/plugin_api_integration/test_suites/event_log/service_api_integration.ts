@@ -19,14 +19,6 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('Event Log service API', () => {
-    it('should check if it is enabled', async () => {
-      const configValue = config
-        .get('kbnTestServer.serverArgs')
-        .find((val: string) => val === '--xpack.eventLog.enabled=true');
-      const result = await isEventLogServiceEnabled();
-      expect(configValue).to.be.eql(`--xpack.eventLog.enabled=${result.body.isEnabled}`);
-    });
-
     it('should check if logging entries is enabled', async () => {
       const configValue = config
         .get('kbnTestServer.serverArgs')
