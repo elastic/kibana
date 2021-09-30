@@ -269,7 +269,7 @@ export const Expressions: React.FC<Props> = (props) => {
       groupName: group,
       pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`),
     }));
-  }, [hasGroupBy]);
+  }, [alertParams.groupBy, hasGroupBy]);
 
   const redundantFilterGroupBy = useMemo(() => {
     if (!alertParams.filterQuery || !groupByFilterTestPatterns) return [];
