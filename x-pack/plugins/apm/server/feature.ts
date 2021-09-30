@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SubFeaturePrivilegeGroupType } from '../../features/common';
 import { LicenseType } from '../../licensing/common/types';
 import { AlertType, APM_SERVER_FEATURE_ID } from '../common/alert_types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
