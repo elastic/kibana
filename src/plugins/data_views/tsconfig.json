@@ -12,7 +12,8 @@
     "server/**/*",
     "config.ts",
     "common/**/*.json",
-    "public/**/*.json"
+    "public/**/*.json",
+    "server/**/*.json"
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },

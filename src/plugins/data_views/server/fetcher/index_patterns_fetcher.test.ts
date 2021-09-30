@@ -8,7 +8,7 @@
 
 import { IndexPatternsFetcher } from '.';
 import { ElasticsearchClient } from 'kibana/server';
-import * as indexNotFoundException from '../../../data/common/search/test_data/index_not_found_exception.json';
+import * as indexNotFoundException from './index_not_found_exception.json';
 
 describe('Index Pattern Fetcher - server', () => {
   let indexPatterns: IndexPatternsFetcher;
