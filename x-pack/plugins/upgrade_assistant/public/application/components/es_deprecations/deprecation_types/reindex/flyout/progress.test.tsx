@@ -33,7 +33,7 @@ describe('ReindexProgress', () => {
   steps={
     Array [
       Object {
-        "status": "incomplete",
+        "status": "inProgress",
         "title": <FormattedMessage
           defaultMessage="Setting old index to read-only"
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
@@ -131,7 +131,7 @@ describe('ReindexProgress', () => {
   steps={
     Array [
       Object {
-        "status": "incomplete",
+        "status": "inProgress",
         "title": <FormattedMessage
           defaultMessage="Setting old index to read-only"
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
