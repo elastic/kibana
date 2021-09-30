@@ -132,7 +132,7 @@ describe('register()', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
     expect(() => registry.register(alertType)).toThrowError(
-      new Error(`invalid value of type [duration], should be:`)
+      new Error(`Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`)
     );
   });
 
@@ -224,18 +224,7 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register(alertType);
-    expect(registry.get('test').actionGroups).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "default",
-          "name": "Default",
-        },
-        Object {
-          "id": "backToAwesome",
-          "name": "Back To Awesome",
-        },
-      ]
-    `);
+    expect(registry.get('test').ruleTaskTimeout).toBe('13m');
   });
 
   test('throws if the custom recovery group is contained in the AlertType action groups', () => {
@@ -294,6 +283,7 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      ruleTaskTimeout: '20m'
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register(alertType);
@@ -303,6 +293,7 @@ describe('register()', () => {
         Object {
           "alerting:test": Object {
             "createTaskRunner": [Function],
+            "timeout": "20m",
             "title": "Test",
           },
         },
