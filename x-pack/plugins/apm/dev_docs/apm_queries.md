@@ -232,7 +232,7 @@ Most Elasticsearch queries will need to have one or more filters. There are a co
         { "terms": { "processor.event": ["metric"] }},
 
         // metric set is a subtype of `processor.event: metric`
-        { "terms": { "metricset.name": ["metric"] }},
+        { "terms": { "metricset.name": ["transaction"] }},
 
         // time range
         {
