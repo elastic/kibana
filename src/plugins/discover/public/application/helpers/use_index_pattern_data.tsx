@@ -9,9 +9,9 @@
 import { useEffect } from 'react';
 import { filter } from 'rxjs/operators';
 import { TimeRange } from 'src/plugins/data/public';
-import { DataView, DEFAULT_QUERY_LANGUAGE } from 'src/plugins/data/common';
+import { IndexPattern, isCompleteResponse, SearchSource } from '../../../../data/public';
 import { DiscoverServices } from '../../build_services';
-import { IndexPattern, isCompleteResponse, SearchSource } from '../../../../data/common';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../../data/common';
 
 export const useIndexPatternData = (
   indexPattern: DataView | undefined,
