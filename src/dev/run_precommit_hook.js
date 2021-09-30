@@ -71,7 +71,11 @@ run(
       help: `
       --fix              Execute eslint in --fix mode
       --max-files        Max files number to check against. If exceeded the script will skip the execution
-      --ref              Run checks against any git ref files (example HEAD or <commit_sha>) instead of running against staged ones
+      --ref              Run checks against git ref files instead of running against staged ones
+                         Examples:
+                           HEAD~1..HEAD   files changed in the commit at HEAD
+                           HEAD           equivalent to HEAD~1..HEAD
+                           main...        files changed in current branch since the common ancestor with main
     `,
     },
   }
