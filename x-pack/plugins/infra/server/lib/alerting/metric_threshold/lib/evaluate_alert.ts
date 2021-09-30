@@ -232,10 +232,14 @@ const getMetric: (
         aggType,
         dropPartialBucketsOptions,
         calculatedTimerange,
-        isNumber(result.hits.total) ? result.hits.total : result.hits.total.value
+        result.hits
+          ? isNumber(result.hits.total)
+            ? result.hits.total
+            : result.hits.total.value
+          : 0
       ),
     };
-  } catch (e) {
+  } catch (e: any) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it
       const causedByType = e.body?.error?.caused_by?.type;

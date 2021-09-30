@@ -479,6 +479,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // some type of layers can produce groups even if invalid. Keep this information to visually show the user that.
   invalid?: boolean;
   invalidMessage?: string;
+  // need a special flag to know when to pass the previous column on duplicating
+  requiresPreviousColumnOnDuplicate?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
