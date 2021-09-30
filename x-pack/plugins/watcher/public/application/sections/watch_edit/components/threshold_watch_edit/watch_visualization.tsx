@@ -21,7 +21,6 @@ import moment from 'moment-timezone';
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SemVer } from 'semver';
 
 import { VisualizeOptions } from '../../../../models/visualize_options';
 import { ThresholdWatch } from '../../../../models/watch/threshold_watch';

@@ -515,7 +515,6 @@ export const useField = <T, FormType = FormData, I = T>(
         if (resetValue) {
           hasBeenReset.current = true;
           const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
-          // updateStateIfMounted('value', newValue);
           setValue(newValue);
           return newValue;
         }
