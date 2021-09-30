@@ -7,13 +7,17 @@
 
 import React from 'react';
 
+import classnames from 'classnames';
 import { getMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 
 import { CellValueElementProps } from '.';
 import { getLink } from '../../../../common/lib/cell_actions/default_cell_actions';
-import { ExpandTopValue } from '../../../../common/lib/cell_actions/expand_top_value';
+import {
+  ExpandTopValue,
+  StyledContent,
+} from '../../../../common/lib/cell_actions/expand_top_value';
 
 const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
 const hasCellActions = (columnId?: string) => {
@@ -39,27 +43,33 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     data,
     fieldName: header.id,
   });
+  const classNames = classnames({
+    'expanded-value': isDetails,
+    'eui-textBreakWord': isDetails,
+  });
   return (
     <>
-      {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-        asPlainText: !!getLink(header.id, header.type),
-        browserFields,
-        className,
-        columnName: header.id,
-        eventId,
-        field: header,
-        isDraggable,
-        linkValues,
-        timelineId,
-        truncate: true,
-        values: getMappedNonEcsValue({
-          data,
-          fieldName: header.id,
-        }),
-        rowRenderers,
-        ecsData,
-        isDetails,
-      })}
+      <StyledContent className={classNames}>
+        {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+          asPlainText: !!getLink(header.id, header.type), // we want to render value with links as plain text but keep other formatters like badge.
+          browserFields,
+          className,
+          columnName: header.id,
+          eventId,
+          field: header,
+          isDraggable,
+          linkValues,
+          timelineId,
+          truncate: isDetails ? false : true,
+          values: getMappedNonEcsValue({
+            data,
+            fieldName: header.id,
+          }),
+          rowRenderers,
+          ecsData,
+          isDetails,
+        })}
+      </StyledContent>
       {isDetails && browserFields && hasCellActions(header.id) && (
         <ExpandTopValue
           browserFields={browserFields}

@@ -63,33 +63,25 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
 
     &.euiPopover__panel.euiPopover__panel-isOpen {
-      padding: 0;
+      padding: 8px 0;
       min-width: 65px;
     }
 
-    &.euiPopover__panel.euiPanel--paddingSmall .euiPopoverFooter:not([class*='euiPopoverFooter--padding']) {
-      padding: 0;
-      margin: 0;
-    }
 
-    .euiPopoverFooter .euiFlexGroup {
-      flex-direction: column;
-      margin: 0;
+    .euiPopoverFooter {
+      border: 0;
+      .euiFlexGroup {
+        flex-direction: column;
 
-      .euiButtonEmpty .euiButtonContent {
-        justify-content: left;
-      }
+        .euiButtonEmpty .euiButtonContent {
+          justify-content: left;
+        }
 
-      &.euiFlexGroup--gutterSmall > .euiFlexItem {
+        &.euiFlexGroup--gutterSmall > .euiFlexItem {
+          &:first-child,
+          &:nth-child(2) {
+            display: none;
 
-
-        &:first-child,
-        &:nth-child(2) {
-          display: none;
-
-
-        &:last-child {
-          padding-bottom: 8px;
         }
       }
     }

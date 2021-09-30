@@ -28,6 +28,13 @@ interface Props {
 const StyledFlexGroup = styled(EuiFlexGroup)`
   border-top: 1px solid #d3dae6;
   border-bottom: 1px solid #d3dae6;
+  margin-top: 2px;
+`;
+
+export const StyledContent = styled.div`
+  &.expanded-value {
+    padding: 0 8px;
+  }
 `;
 
 const ExpandTopValueComponent: React.FC<Props> = ({
@@ -59,26 +66,28 @@ const ExpandTopValueComponent: React.FC<Props> = ({
 
   return (
     <>
-      {showButton ? (
-        <ShowTopNButton
-          className="eui-displayBlock expandable-top-value-button"
-          Component={EuiButtonEmpty}
-          data-test-subj="data-grid-expanded-show-top-n"
-          field={field}
-          flush="both"
-          globalFilters={globalFilters}
-          iconSide="right"
-          iconType="arrowDown"
-          isExpandable
-          onClick={onClick}
-          onFilterAdded={onFilterAdded ?? noop}
-          ownFocus={false}
-          showTopN={showTopN}
-          showTooltip={false}
-          timelineId={timelineId}
-          value={value}
-        />
-      ) : null}
+      <StyledContent className="expanded-value">
+        {showButton ? (
+          <ShowTopNButton
+            className="eui-displayBlock expandable-top-value-button"
+            Component={EuiButtonEmpty}
+            data-test-subj="data-grid-expanded-show-top-n"
+            field={field}
+            flush="both"
+            globalFilters={globalFilters}
+            iconSide="right"
+            iconType="arrowDown"
+            isExpandable
+            onClick={onClick}
+            onFilterAdded={onFilterAdded ?? noop}
+            ownFocus={false}
+            showTopN={showTopN}
+            showTooltip={false}
+            timelineId={timelineId}
+            value={value}
+          />
+        ) : null}
+      </StyledContent>
       <StyledFlexGroup gutterSize="s">
         <EuiFlexItem>
           {timelines.getHoverActions().getFilterForValueButton({
