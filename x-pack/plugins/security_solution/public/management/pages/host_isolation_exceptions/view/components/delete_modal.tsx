@@ -95,7 +95,7 @@ export const HostIsolationExceptionDeleteModal = memo<{}>(() => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.title"
+              id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.subtitle"
               defaultMessage='You are deleting exception "{name}".'
               values={{ name: <b className="eui-textBreakWord">{exception?.name}</b> }}
             />
