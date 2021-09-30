@@ -178,7 +178,7 @@ const serverHostZeroDeprecation: ConfigDeprecation = (settings, fromPath, addDep
 
 const removeFromConfigStep = (setting: string) => {
   return i18n.translate('core.deprecations.common.removeFromConfig', {
-    defaultMessage: `Remove "{setting}" from your kibana configs.`,
+    defaultMessage: `Remove "{setting}" from your kibana configuration.`,
     values: {
       setting,
     },
