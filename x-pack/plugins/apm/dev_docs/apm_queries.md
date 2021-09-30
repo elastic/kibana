@@ -117,7 +117,7 @@ Note-worthy fields: `event.outcome`
 
 System metrics are captured periodically (every 60 seconds by default).
 
-#### CPU
+### CPU
 
 ```json
 {
@@ -151,7 +151,8 @@ Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.
 }
 ```
 
-#### Memory
+### Memory
+
 
 ```json
 {
@@ -165,7 +166,7 @@ Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.
 
 Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
 
-```json
+```js
 {
   "size": 0,
   "query": {
@@ -208,7 +209,7 @@ Most Elasticsearch queries will need to have one or more filters. There are a co
 - stability: Running an aggregation on unrelated documents could cause the entire query to fail
 - performance: limiting the number of documents will make the query faster
 
-```json
+```js
 {
   "query": {
     "bool": {
