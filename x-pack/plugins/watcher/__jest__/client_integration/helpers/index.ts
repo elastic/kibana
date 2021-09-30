@@ -13,7 +13,7 @@ import { setup as watchEditSetup } from './watch_edit.helpers';
 
 export { nextTick, getRandomString, findTestSubject, TestBed } from '@kbn/test/jest';
 export { wrapBodyResponse, unwrapBodyResponse } from './body_response';
-export { setupEnvironment } from './setup_environment';
+export { setupEnvironment, kibanaVersion } from './setup_environment';
 
 export const pageHelpers = {
   watchList: { setup: watchListSetup },

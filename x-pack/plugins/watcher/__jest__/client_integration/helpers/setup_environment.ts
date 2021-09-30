@@ -7,7 +7,10 @@
 
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+import { SemVer } from 'semver';
+
 import { init as initHttpRequests } from './http_requests';
+import { MAJOR_VERSION } from '../../../common/constants';
 import { setHttpClient, setSavedObjectsClient } from '../../../public/application/lib/api';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
@@ -25,6 +28,8 @@ const mockSavedObjectsClient = () => {
     find: (_params?: any) => {},
   };
 };
+
+export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 export const setupEnvironment = () => {
   const { server, httpRequestsMockHelpers } = initHttpRequests();

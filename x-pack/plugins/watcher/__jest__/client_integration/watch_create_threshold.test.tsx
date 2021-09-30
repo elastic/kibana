@@ -9,9 +9,16 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
+
 import { getExecuteDetails } from '../../__fixtures__';
 import { WATCH_TYPES } from '../../common/constants';
-import { setupEnvironment, pageHelpers, wrapBodyResponse, unwrapBodyResponse } from './helpers';
+import {
+  setupEnvironment,
+  pageHelpers,
+  wrapBodyResponse,
+  unwrapBodyResponse,
+  kibanaVersion,
+} from './helpers';
 import { WatchCreateThresholdTestBed } from './helpers/watch_create_threshold.helpers';
 
 const WATCH_NAME = 'my_test_watch';
@@ -755,6 +762,60 @@ describe('<ThresholdWatchEdit /> create route', () => {
               watch: thresholdWatch,
             })
           );
+        });
+      });
+
+      describe('watch visualize data payload', () => {
+        test('should send the correct payload', async () => {
+          const { form, find, component } = testBed;
+
+          // Set up required fields
+          await act(async () => {
+            form.setInputValue('nameInput', WATCH_NAME);
+            find('indicesComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]);
+            form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
+          });
+          component.update();
+
+          const latestReqToGetVisualizeData = server.requests.find(
+            (req) => req.method === 'POST' && req.url === '/api/watcher/watch/visualize'
+          );
+          if (!latestReqToGetVisualizeData) {
+            throw new Error(`No request found to fetch visualize data.`);
+          }
+
+          const requestBody = unwrapBodyResponse(latestReqToGetVisualizeData.requestBody);
+
+          expect(requestBody.watch).toEqual({
+            id: requestBody.watch.id, // id is dynamic
+            name: 'my_test_watch',
+            type: 'threshold',
+            isNew: true,
+            isActive: true,
+            actions: [],
+            index: ['index1'],
+            timeField: '@timestamp',
+            triggerIntervalSize: 1,
+            triggerIntervalUnit: 'm',
+            aggType: 'count',
+            termSize: 5,
+            termOrder: 'desc',
+            thresholdComparator: '>',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            hasTermsAgg: false,
+            threshold: 1000,
+          });
+
+          if (kibanaVersion.major < 8) {
+            // In 7.x we use the deprecated "interval" parameter
+            expect(requestBody.options.interval).toBeDefined();
+            expect(requestBody.options.fixed_interval).not.toBeDefined();
+          } else {
+            // From 8.x we use the more precise "fixed_interval" to get visualize data
+            expect(requestBody.options.interval).not.toBeDefined();
+            expect(requestBody.options.fixed_interval).toBeDefined();
+          }
         });
       });
 

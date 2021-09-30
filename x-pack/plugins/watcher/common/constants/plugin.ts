@@ -16,3 +16,5 @@ export const PLUGIN = {
     });
   },
 };
+
+export const MAJOR_VERSION = '8.0.0';

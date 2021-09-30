@@ -9,6 +9,8 @@ import React from 'react';
 import { of } from 'rxjs';
 import { ComponentType } from 'enzyme';
 import { LocationDescriptorObject } from 'history';
+import { SemVer } from 'semver';
+
 import {
   docLinksServiceMock,
   uiSettingsServiceMock,
@@ -17,7 +19,9 @@ import {
   scopedHistoryMock,
 } from '../../../../../../src/core/public/mocks';
 import { AppContextProvider } from '../../../public/application/app_context';
+import { AppDeps } from '../../../public/application/app';
 import { LicenseStatus } from '../../../common/types/license_status';
+import { MAJOR_VERSION } from '../../../common/constants';
 
 class MockTimeBuckets {
   setBounds(_domain: any) {
@@ -35,7 +39,7 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}${location.search ? '?' + location.search : ''}`;
 });
 
-export const mockContextValue = {
+export const mockContextValue: AppDeps = {
   licenseStatus$: of<LicenseStatus>({ valid: true }),
   docLinks: docLinksServiceMock.createStartContract(),
   setBreadcrumbs: jest.fn(),
@@ -49,6 +53,7 @@ export const mockContextValue = {
   http: httpServiceMock.createSetupContract(),
   history,
   getUrlForApp: jest.fn(),
+  kibanaVersion: new SemVer(MAJOR_VERSION),
 };
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
