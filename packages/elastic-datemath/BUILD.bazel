@@ -58,11 +58,12 @@ ts_project(
 )
 
 types_pkg(
-  name = "npm_package_types",
+  name = "npm_module_types",
   package_name = "@types/elastic__datemath",
   data = SRCS + DEPS + [
     "tsconfig.json",
     "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
     ":tsc_types",
   ]
 )
@@ -70,7 +71,7 @@ types_pkg(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":target_node", ":tsc_types", ":npm_package_types"],
+  deps = DEPS + [":target_node", ":tsc_types", ":npm_module_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

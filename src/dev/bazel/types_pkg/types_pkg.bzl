@@ -7,8 +7,6 @@
 #
 
 load("@build_bazel_rules_nodejs//:providers.bzl", "run_node")
-#load("@build_bazel_rules_nodejs//internal/node:node.bzl", "nodejs_binary")
-#load("@npm//typescript:index.bzl", "tsc")
 
 def _join(*elements):
   segments = [f for f in elements if f]
@@ -16,48 +14,39 @@ def _join(*elements):
     return "/".join(segments)
   return "."
 
+def _dts_inputs(files):
+  return [f for f in files if f.path.endswith(".d.ts") and not f.path.endswith(".map")]
+
 def _types_pkg_impl(ctx):
-  out = ctx.actions.declare_file(_join(ctx.label.name, "package.json"))
-#  out = ctx.actions.declare_file("package.json")
   inputs = ctx.files.data[:]
+  package_json_output = ctx.actions.declare_file(_join(ctx.label.name, "package.json"))
+  outputs = [package_json_output]
 
   ctx.actions.expand_template(
-    output = out,
+    output = package_json_output,
     template = ctx.file._template,
     substitutions = {"{NAME}": ctx.attr.package_name},
   )
 
-  outputs = []
-  outputs.append(out)
-#  # outputs.append(ctx.actions.declare_file(ctx.label.name + "index.d.ts"))
-#  js_out = ctx.actions.declare_directory("%s" % ctx.attr.name)
-#  outputs.append(js_out)
-#
-#  extractor_args = ctx.actions.args()
-#  extractor_args.add_all([
-#    ctx.expand_location("tsconfig.json"),
-#    ctx.expand_location("index.d.ts"),
-#    "index.d.ts"
-#  ])
-#
-#  ctx.actions.run(
-#    progress_message = "Running API Extractor",
-#    mnemonic = "APIExtractor",
-#    executable = ctx.executable._api_extractor,
-#    inputs = inputs,
-#    outputs = outputs,
-#    arguments = [extractor_args],
-#  )
+  api_extracted_output = ctx.actions.declare_file(_join(ctx.label.name, "index.d.ts"))
+  outputs.append(api_extracted_output)
 
-  # run_node(
-  #   ctx,
-  #   inputs = inputs,
-  #   arguments = [extractor_args],
-  #   outputs = outputs,
-  #   mnemonic = "ApiExtractor",
-  #   executable = "_api_extractor"
-  #   execution_requirements = {},
-  # )
+  extractor_args = ctx.actions.args()
+  package_path = ctx.label.package
+
+  extractor_args.add(_join(package_path, "tsconfig.json"))
+  extractor_args.add_joined([s.path for s in _dts_inputs(ctx.files.data)], join_with = ",", omit_if_empty = False)
+  extractor_args.add(api_extracted_output.path)
+
+  run_node(
+    ctx,
+    inputs = inputs,
+    arguments = [extractor_args],
+    outputs = [api_extracted_output],
+    mnemonic = "ApiExtractor",
+    executable = "_api_extractor",
+    execution_requirements = {},
+  )
 
   return [DefaultInfo(files = depset(outputs))]
 

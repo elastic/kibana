@@ -13,6 +13,8 @@ exports_files(
 nodejs_binary(
   name = "api_extractor",
   data = [
+    "@npm//@bazel/typescript",
+    "@npm//@microsoft/api-extractor",
     ":api_extractor.js",
   ],
   entry_point = ":api_extractor.js",

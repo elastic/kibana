@@ -14,7 +14,10 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-const { format, parseTsconfig } = require('typescript');
+console.log(process.argv);
+console.log(process.cwd());
+
+const { format, parseTsconfig } = require('@bazel/typescript');
 const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
 const fs = require('fs');
 const path = require('path');
