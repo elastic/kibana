@@ -77,11 +77,9 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
           justify-content: left;
         }
 
-        &.euiFlexGroup--gutterSmall > .euiFlexItem {
-          &:first-child,
-          &:nth-child(2) {
+        .euiFlexItem:first-child,
+        .euiFlexItem:nth-child(2) {
             display: none;
-
         }
       }
     }
@@ -106,8 +104,8 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     .withHoverActions__popover.euiPopover__panel-isOpen {
       visibility: hidden !important;
     }
-
   }
+
 
   /* ensure elastic charts tooltips appear above open euiPopovers */
   .echTooltip {

@@ -31,10 +31,8 @@ const StyledFlexGroup = styled(EuiFlexGroup)`
   margin-top: 2px;
 `;
 
-export const StyledContent = styled.div`
-  &.expanded-value {
-    padding: 0 8px;
-  }
+export const StyledContent = styled.div<{ $isDetails: boolean }>`
+  padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
 `;
 
 const ExpandTopValueComponent: React.FC<Props> = ({
@@ -66,7 +64,7 @@ const ExpandTopValueComponent: React.FC<Props> = ({
 
   return (
     <>
-      <StyledContent className="expanded-value">
+      <StyledContent $isDetails>
         {showButton ? (
           <ShowTopNButton
             className="eui-displayBlock expandable-top-value-button"

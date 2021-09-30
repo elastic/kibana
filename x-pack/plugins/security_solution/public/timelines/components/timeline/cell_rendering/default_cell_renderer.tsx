@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import classnames from 'classnames';
 import { getMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
@@ -43,13 +42,10 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     data,
     fieldName: header.id,
   });
-  const classNames = classnames({
-    'expanded-value': isDetails,
-    'eui-textBreakWord': isDetails,
-  });
+  const styledContentClassName = isDetails ? 'eui-textBreakWord' : '';
   return (
     <>
-      <StyledContent className={classNames}>
+      <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
           asPlainText: !!getLink(header.id, header.type), // we want to render value with links as plain text but keep other formatters like badge.
           browserFields,
