@@ -115,7 +115,7 @@ const MonitoringApp: React.FC<{
                   <RouteInit
                     path="/beats/beat/:instance"
                     component={BeatsInstancePage}
-                    codePaths={[CODE_PATH_ELASTICSEARCH]}
+                    codePaths={[CODE_PATH_BEATS]}
                     fetchAllClusters={false}
                   />
 
