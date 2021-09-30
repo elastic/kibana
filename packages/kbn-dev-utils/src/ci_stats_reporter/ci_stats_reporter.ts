@@ -93,20 +93,21 @@ export class CiStatsReporter {
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
 
     const defaultMetadata = {
-      osPlatform: Os.platform(),
-      osRelease: Os.release(),
-      osArch: Os.arch(),
-      cpuCount: Os.cpus()?.length,
-      cpuModel: Os.cpus()[0]?.model,
-      cpuSpeed: Os.cpus()[0]?.speed,
-      freeMem: Os.freemem(),
-      totalMem: Os.totalmem(),
-      email: isElasticCommitter ? email : undefined,
       committerHash: email
         ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
         : undefined,
+      cpuCount: Os.cpus()?.length,
+      cpuModel: Os.cpus()[0]?.model,
+      cpuSpeed: Os.cpus()[0]?.speed,
+      email: isElasticCommitter ? email : undefined,
+      freeMem: Os.freemem(),
       isElasticCommitter,
       kibanaUuid,
+      nestedTiming: process.env.CI_STATS_NESTED_TIMING,
+      osArch: Os.arch(),
+      osPlatform: Os.platform(),
+      osRelease: Os.release(),
+      totalMem: Os.totalmem(),
     };
 
     this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);

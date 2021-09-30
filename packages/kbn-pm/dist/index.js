@@ -9013,13 +9013,9 @@ const BootstrapCommand = {
       upstreamBranch: kbn.kibanaProject.json.branch,
       // prevent loading @kbn/utils by passing null
       kibanaUuid: kbn.getUuid() || null,
-      timings: timings.map(t => _objectSpread(_objectSpread({
+      timings: timings.map(t => _objectSpread({
         group: 'scripts/kbn bootstrap'
-      }, t), {}, {
-        meta: {
-          nestedTiming: process.env.CI_STATS_NESTED_TIMING
-        }
-      }))
+      }, t))
     });
   }
 
@@ -9114,18 +9110,19 @@ class CiStatsReporter {
 
     const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
     const defaultMetadata = {
-      osPlatform: _os.default.platform(),
-      osRelease: _os.default.release(),
-      osArch: _os.default.arch(),
+      committerHash: email ? _crypto.default.createHash('sha256').update(email).digest('hex').substring(0, 20) : undefined,
       cpuCount: (_Os$cpus = _os.default.cpus()) === null || _Os$cpus === void 0 ? void 0 : _Os$cpus.length,
       cpuModel: (_Os$cpus$ = _os.default.cpus()[0]) === null || _Os$cpus$ === void 0 ? void 0 : _Os$cpus$.model,
       cpuSpeed: (_Os$cpus$2 = _os.default.cpus()[0]) === null || _Os$cpus$2 === void 0 ? void 0 : _Os$cpus$2.speed,
-      freeMem: _os.default.freemem(),
-      totalMem: _os.default.totalmem(),
       email: isElasticCommitter ? email : undefined,
-      committerHash: email ? _crypto.default.createHash('sha256').update(email).digest('hex').substring(0, 20) : undefined,
+      freeMem: _os.default.freemem(),
       isElasticCommitter,
-      kibanaUuid
+      kibanaUuid,
+      nestedTiming: process.env.CI_STATS_NESTED_TIMING,
+      osArch: _os.default.arch(),
+      osPlatform: _os.default.platform(),
+      osRelease: _os.default.release(),
+      totalMem: _os.default.totalmem()
     };
     this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
     return await this.req({

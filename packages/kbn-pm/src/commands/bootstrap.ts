@@ -148,7 +148,6 @@ export const BootstrapCommand: ICommand = {
       timings: timings.map((t) => ({
         group: 'scripts/kbn bootstrap',
         ...t,
-        meta: { nestedTiming: process.env.CI_STATS_NESTED_TIMING },
       })),
     });
   },

@@ -8,6 +8,7 @@
 
 import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
+import normalizePath from 'normalize-path';
 import { CiStatsReporter } from '../ci_stats_reporter';
 import { ToolingLog } from '../tooling_log';
 
@@ -25,11 +26,7 @@ export class Metrics {
     this.startTime = Date.now();
 
     // standardize to unix path
-    this.filePath = path
-      .relative(REPO_ROOT, process.argv[1])
-      .replace('.js', '')
-      .split(path.sep)
-      .join('/');
+    this.filePath = normalizePath(path.relative(REPO_ROOT, process.argv[1]).replace('.js', ''));
   }
 
   createTiming(meta: object, command?: string) {
