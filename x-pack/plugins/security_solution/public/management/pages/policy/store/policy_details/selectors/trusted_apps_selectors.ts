@@ -151,13 +151,9 @@ export const isPolicyTrustedAppListLoading: PolicyDetailsSelector<boolean> = cre
 );
 
 export const getPolicyTrustedAppList: PolicyDetailsSelector<GetTrustedAppsListResponse['data']> =
-  createSelector(
-    getLatestLoadedPolicyAssignedTrustedAppsState,
-    getCurrentArtifactsLocation,
-    (assignedState, currentUrlLocation) => {
-      return assignedState?.data.artifacts.data ?? [];
-    }
-  );
+  createSelector(getLatestLoadedPolicyAssignedTrustedAppsState, (assignedState) => {
+    return assignedState?.data.artifacts.data ?? [];
+  });
 
 export const getPolicyTrustedAppsListPagination: PolicyDetailsSelector<Pagination> = createSelector(
   getLatestLoadedPolicyAssignedTrustedAppsState,

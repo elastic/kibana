@@ -9,19 +9,8 @@ import { ImmutableReducer } from '../../../../../../common/store';
 import { PolicyDetailsState } from '../../../types';
 import { AppAction } from '../../../../../../common/store/actions';
 import { initialPolicyDetailsState } from './initial_policy_details_state';
-import { isOnPolicyTrustedAppsView } from '../selectors/policy_common_selectors';
-import {
-  AssignedTrustedAppsListStateChanged,
-  PolicyDetailsListOfAllPoliciesStateChanged,
-} from '../action/policy_trusted_apps_action';
-import { Immutable } from '../../../../../../../common/endpoint/types';
 import { isUninitialisedResourceState } from '../../../../../state';
-import { getCurrentPolicyAssignedTrustedAppsState } from '../selectors';
-
-type ActionSpecificReducer<A extends AppAction = AppAction> = (
-  state: Immutable<PolicyDetailsState>,
-  action: Immutable<A>
-) => Immutable<PolicyDetailsState>;
+import { getCurrentPolicyAssignedTrustedAppsState, isOnPolicyTrustedAppsView } from '../selectors';
 
 export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
   state = initialPolicyDetailsState(),
@@ -72,19 +61,7 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
     };
   }
 
-  // FIXME:PT refactor this and the above
-  switch (action.type) {
-    case 'assignedTrustedAppsListStateChanged':
-      return handleAssignedTrustedAppsListStateChanged(state, action);
-    case 'policyDetailsListOfAllPoliciesStateChanged':
-      return handlePolicyDetailsListOfAllPoliciesStateChanged(state, action);
-    default:
-      return state;
-  }
-};
-
-const handleAssignedTrustedAppsListStateChanged: ActionSpecificReducer<AssignedTrustedAppsListStateChanged> =
-  (state, action) => {
+  if (action.type === 'assignedTrustedAppsListStateChanged') {
     return {
       ...state,
       artifacts: {
@@ -92,10 +69,9 @@ const handleAssignedTrustedAppsListStateChanged: ActionSpecificReducer<AssignedT
         assignedList: action.payload,
       },
     };
-  };
+  }
 
-const handlePolicyDetailsListOfAllPoliciesStateChanged: ActionSpecificReducer<PolicyDetailsListOfAllPoliciesStateChanged> =
-  (state, action) => {
+  if (action.type === 'policyDetailsListOfAllPoliciesStateChanged') {
     return {
       ...state,
       artifacts: {
@@ -103,4 +79,7 @@ const handlePolicyDetailsListOfAllPoliciesStateChanged: ActionSpecificReducer<Po
         policies: action.payload,
       },
     };
-  };
+  }
+
+  return state;
+};
