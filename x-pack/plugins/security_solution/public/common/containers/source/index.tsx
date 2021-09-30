@@ -269,7 +269,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                   ? `${signalIndexNameSelector}-*`
                   : newSignalsIndex ?? '';
                 // TODO: Steph/sourcerer needs test
-                if (newSignalsIndex !== null) {
+                if (newSignalsIndex != null) {
                   dispatch(
                     sourcererActions.setSource({
                       // if new signal index name is set, there wasn't one before so we need to update detections specifically
