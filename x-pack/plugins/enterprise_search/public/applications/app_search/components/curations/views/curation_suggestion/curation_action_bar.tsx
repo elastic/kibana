@@ -64,7 +64,12 @@ export const CurationActionBar: React.FC<Props> = ({ onAcceptClick, onRejectClic
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <CurationActionsPopover />
+                  <CurationActionsPopover
+                    onAccept={() => {}}
+                    onAutomate={() => {}}
+                    onReject={() => {}}
+                    onTurnOff={() => {}}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
