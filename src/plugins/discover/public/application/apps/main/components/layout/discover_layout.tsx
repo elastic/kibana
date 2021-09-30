@@ -43,7 +43,7 @@ import { useDataState } from '../../utils/use_data_state';
 /**
  * Local storage key for sidebar persistence state
  */
-const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
+export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
