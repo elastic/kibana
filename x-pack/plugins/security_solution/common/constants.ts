@@ -77,6 +77,7 @@ export enum SecurityPageName {
   detections = 'detections',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
+  hostIsolationExceptions = 'host_isolation_exceptions',
   events = 'events',
   exceptions = 'exceptions',
   explore = 'explore',
@@ -114,6 +115,7 @@ export const MANAGEMENT_PATH = '/administration';
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints`;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps`;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters`;
+export const HOST_ISOLATION_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/host_isolation_exceptions`;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}`;
@@ -130,6 +132,7 @@ export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}`;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}`;
 export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}`;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}`;
+export const APP_HOST_ISOLATION_EXCEPTIONS_PATH = `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
