@@ -112,7 +112,7 @@ export function useTable(storageKey: string) {
     setSorting(cleanSortingData({ sort }));
     setLocalStorageData(storage, {
       page,
-      sort,
+      sort: { sort },
     });
   };
 
