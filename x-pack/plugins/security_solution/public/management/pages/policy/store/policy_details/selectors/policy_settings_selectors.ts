@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { ILicense } from '../../../../../../../../licensing/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
-import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../../../types';
+import { PolicyDetailsState } from '../../../types';
 import {
   Immutable,
   NewPolicyData,
@@ -24,6 +24,7 @@ import {
 } from '../../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
+import { isOnPolicyTrustedAppsPage } from './trusted_apps_selectors';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -80,28 +81,11 @@ export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean =>
   return !state.policyItem && !state.apiError;
 };
 
-/**
- * Returns current artifacts location
- */
-export const getCurrentArtifactsLocation = (
-  state: Immutable<PolicyDetailsState>
-): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifacts.location;
-
 /** Returns a boolean of whether the user is on the policy form page or not */
 export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {
   return (
     matchPath(state.location?.pathname ?? '', {
       path: MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
-      exact: true,
-    }) !== null
-  );
-};
-
-/** Returns a boolean of whether the user is on the policy details page or not */
-export const isOnPolicyTrustedAppsPage = (state: Immutable<PolicyDetailsState>) => {
-  return (
-    matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
       exact: true,
     }) !== null
   );
