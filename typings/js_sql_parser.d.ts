@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { Injectable, IDirectiveFactory, IScope, IAttributes, IController } from 'angular';
-
-export const KbnAccessibleClickProvider: Injectable<
-  IDirectiveFactory<IScope, JQLite, IAttributes, IController>
->;
+declare module 'js-sql-parser';

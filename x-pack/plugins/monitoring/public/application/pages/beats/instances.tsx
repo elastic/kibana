@@ -29,7 +29,7 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
-  const { getPaginationTableProps } = useTable('beats.instances');
+  const { updateTotalItemCount, getPaginationTableProps } = useTable('beats.instances');
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
@@ -66,7 +66,14 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     });
 
     setData(response);
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
+    updateTotalItemCount(response.stats.total);
+  }, [
+    ccs,
+    clusterUuid,
+    services.data?.query.timefilter.timefilter,
+    services.http,
+    updateTotalItemCount,
+  ]);
 
   return (
     <BeatsTemplate
