@@ -28,7 +28,7 @@ export function getCorrelationsFilters({
 }: CorrelationsClientParams) {
   const correlationsFilters: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-    ...rangeQuery(start, end),
+    ...(start && end ? rangeQuery(start, end) : []),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { useCallback, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
 import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
@@ -13,6 +13,7 @@ import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 import { DEBOUNCE_INTERVAL } from '../../../../common/correlations/constants';
 import type {
   ChangePoint,
+  ChangePointParams,
   ChangePointsResponse,
 } from '../../../../common/correlations/change_point/types';
 
@@ -20,7 +21,7 @@ import { callApmApi } from '../../../services/rest/createCallApmApi';
 
 import {
   getInitialResponse,
-  getFailedTransactionsCorrelationsSortedByScore,
+  getChangePointsSortedByScore,
   getReducer,
   CorrelationsProgress,
 } from './utils/analysis_hook_utils';
@@ -32,7 +33,9 @@ const LOADED_FIELD_CANDIDATES = LOADED_OVERALL_HISTOGRAM + 0.05;
 const LOADED_DONE = 1;
 const PROGRESS_STEP_P_VALUES = 0.9;
 
-export function useChangePointDetection() {
+export function useChangePointDetection(
+  searchStrategyParams: ChangePointParams
+) {
   const fetchParams = useFetchParams();
 
   // This use of useReducer (the dispatch function won't get reinstantiated
@@ -115,8 +118,9 @@ export function useChangePointDetection() {
             fieldsToSample.add(d.fieldName);
           });
           changePoints.push(...pValues.failedTransactionsCorrelations);
-          responseUpdate.changePoints =
-            getFailedTransactionsCorrelationsSortedByScore([...changePoints]);
+          responseUpdate.changePoints = getChangePointsSortedByScore([
+            ...changePoints,
+          ]);
         }
 
         chunkLoadCounter++;
@@ -175,14 +179,6 @@ export function useChangePointDetection() {
     });
     setResponse.flush();
   }, [setResponse]);
-
-  // auto-update
-  useEffect(() => {
-    startFetch();
-    return () => {
-      abortCtrl.current.abort();
-    };
-  }, [startFetch, cancelFetch]);
 
   const { error, loaded, isRunning, ...returnedResponse } = response;
   const progress = useMemo(

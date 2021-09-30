@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { fetchChangePointPValues } from './query_change_point';
 export { fetchFailedTransactionsCorrelationPValues } from './query_failure_correlation';
 export { fetchPValues } from './query_p_values';
 export { fetchSignificantCorrelations } from './query_significant_correlations';

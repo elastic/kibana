@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldValuePair, HistogramItem } from '../types';
+import { FieldValuePair } from '../types';
 import { FieldStats } from '../field_stats_types';
 
 export interface ChangePoint extends FieldValuePair {
@@ -14,10 +14,16 @@ export interface ChangePoint extends FieldValuePair {
   score: number;
   pValue: number | null;
   normalizedScore: number;
-  failurePercentage: number;
-  successPercentage: number;
-  histogram: HistogramItem[];
 }
+
+export interface WindowParameters {
+  baselineMin: number;
+  baselineMax: number;
+  deviationMin: number;
+  deviationMax: number;
+}
+
+export type ChangePointParams = Partial<WindowParameters>;
 
 export interface ChangePointsResponse {
   ccsWarning: boolean;

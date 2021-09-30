@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ChangePoint } from '../../../../../common/correlations/change_point/types';
 import type { FailedTransactionsCorrelation } from '../../../../../common/correlations/failed_transactions_correlations/types';
 import type { LatencyCorrelation } from '../../../../../common/correlations/latency_correlations/types';
 
@@ -12,6 +13,10 @@ export interface CorrelationsProgress {
   error?: string;
   isRunning: boolean;
   loaded: number;
+}
+
+export function getChangePointsSortedByScore(changePoints: ChangePoint[]) {
+  return changePoints.sort((a, b) => b.score - a.score);
 }
 
 export function getLatencyCorrelationsSortedByCorrelation(

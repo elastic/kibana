@@ -25,12 +25,13 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
+import { WindowParameters } from '../../../../common/correlations/change_point/types';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
@@ -44,12 +45,6 @@ import { getChartAnomalyTimeseries } from './helper/get_chart_anomaly_timeseries
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
 import { getTimeZone } from './helper/timezone';
 
-interface WindowParameters {
-  baselineMin: number;
-  baselineMax: number;
-  deviationMin: number;
-  deviationMax: number;
-}
 interface Props {
   id: string;
   fetchStatus: FETCH_STATUS;
@@ -157,22 +152,35 @@ export function TimeseriesChart({
     const baselineMin = baselineMax - baselineWindow;
 
     return {
-      baselineMin,
-      baselineMax,
-      deviationMin,
-      deviationMax,
+      baselineMin: Math.round(baselineMin),
+      baselineMax: Math.round(baselineMax),
+      deviationMin: Math.round(deviationMin),
+      deviationMax: Math.round(deviationMax),
     };
   };
 
   const changePoint: ProjectionClickListener = ({ x }) => {
+    console.log('x', x);
     if (typeof x === 'number') {
       const wp = getWindowParameters(x, min, max);
       setWindowParameters(wp);
     }
   };
+  console.log('windowXXX', windowParameters);
 
-  const { progress, response, startFetch, cancelFetch } =
-    useChangePointDetection();
+  const { progress, response, startFetch } = useChangePointDetection(
+    windowParameters ?? {}
+  );
+
+  useEffect(() => {
+    if (windowParameters) {
+      startFetch();
+    }
+  }, [windowParameters, startFetch]);
+
+  if (progress.isRunning) {
+    console.log('useChangePointDetection', progress, response);
+  }
 
   return (
     <ChartContainer
