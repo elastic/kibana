@@ -59,7 +59,7 @@ export class SessionTimeout {
 
   constructor(
     private notifications: NotificationsSetup,
-    private sessionExpired: SessionExpired,
+    private sessionExpired: Pick<SessionExpired, 'logout'>,
     private http: HttpSetup,
     private tenant: string
   ) {}
