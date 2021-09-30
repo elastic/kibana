@@ -70,7 +70,8 @@ export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, p
         body={
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policy.trustedApps.empty.unassigned.content"
-            defaultMessage="There are currently no trusted applications assigned to Policy-1. Assign trusted applications now or add and manage them on the trusted applications page."
+            defaultMessage="There are currently no trusted applications assigned to {policyName}. Assign trusted applications now or add and manage them on the trusted applications page."
+            values={{ policyName }}
           />
         }
         actions={[
