@@ -27,6 +27,7 @@ import {
   GetTimelinesArgs,
   SingleTimelineResponseType,
   TimelineType,
+  ResolvedSingleTimelineResponseType,
 } from '../../../common/types/timeline';
 import {
   TIMELINE_URL,
@@ -69,6 +70,12 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorR
 const decodeSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
   pipe(
     SingleTimelineResponseType.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+const decodeResolvedSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
+  pipe(
+    ResolvedSingleTimelineResponseType.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
@@ -319,7 +326,7 @@ export const resolveTimeline = async (id: string) => {
     }
   );
 
-  return decodeSingleTimelineResponse(response);
+  return decodeResolvedSingleTimelineResponse(response);
 };
 
 export const getTimelineTemplate = async (templateTimelineId: string) => {
@@ -330,6 +337,19 @@ export const getTimelineTemplate = async (templateTimelineId: string) => {
   });
 
   return decodeSingleTimelineResponse(response);
+};
+
+export const getResolvedTimelineTemplate = async (templateTimelineId: string) => {
+  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(
+    TIMELINE_RESOLVE_URL,
+    {
+      query: {
+        template_timeline_id: templateTimelineId,
+      },
+    }
+  );
+
+  return decodeResolvedSingleTimelineResponse(response);
 };
 
 export const getAllTimelines = async (args: GetTimelinesArgs, abortSignal: AbortSignal) => {
