@@ -118,6 +118,24 @@ storiesOf('renderers/visMetric', module)
       />
     );
   })
+  .add('With custom font size', () => {
+    return (
+      <Render
+        renderer={metricRenderer}
+        config={{
+          ...config,
+          visConfig: {
+            ...config.visConfig,
+            metric: {
+              ...config.visConfig.metric,
+              style: { ...config.visConfig.metric.style, fontSize: 120 },
+            },
+          },
+        }}
+        {...containerSize}
+      />
+    );
+  })
   .add('With bucket', () => {
     return (
       <Render
