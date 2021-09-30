@@ -24,6 +24,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       );
       await datePickerInput.clearValueWithKeyboard({ charByChar: true });
       await datePickerInput.type([time, browser.keys.RETURN]);
+      await this.waitForLoading();
     },
 
     async getWaffleMap() {
