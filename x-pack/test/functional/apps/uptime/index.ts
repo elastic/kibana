@@ -42,7 +42,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
 
   describe('Uptime app', function () {
-    this.tags('ciGroup10');
+    this.tags('ciGroup6');
 
     beforeEach('delete settings', async () => {
       await deleteUptimeSettingsObject(server);
