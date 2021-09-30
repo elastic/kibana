@@ -22,7 +22,9 @@
     </div>
     <script type="text/javascript">
       for (const img of document.getElementsByTagName('img')) {
-        img.addEventListener('click', (_) => (img.style.height = 'auto'));
+        img.addEventListener('click', () => {
+          img.style.height = 'auto';
+        });
       }
     </script>
   </body>
