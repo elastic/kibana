@@ -2547,7 +2547,6 @@
     "discover.notifications.invalidTimeRangeTitle": "無効な時間範囲",
     "discover.notifications.notSavedSearchTitle": "検索「{savedSearchTitle}」は保存されませんでした。",
     "discover.notifications.savedSearchTitle": "検索「{savedSearchTitle}」が保存されました。",
-    "discover.openOptionsPopover.gotToAllSettings": "すべてのDiscoverオプション",
     "discover.reloadSavedSearchButton": "検索をリセット",
     "discover.removeColumnLabel": "列を削除",
     "discover.rootBreadcrumb": "Discover",

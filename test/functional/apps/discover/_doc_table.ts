@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('legacy', async function () {
       before(async () => {
-        await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': true });
+        await kibanaServer.uiSettings.update({ 'labs:discover:enableNewTable': false });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });

@@ -2573,7 +2573,6 @@
     "discover.notifications.invalidTimeRangeTitle": "时间范围无效",
     "discover.notifications.notSavedSearchTitle": "搜索“{savedSearchTitle}”未保存。",
     "discover.notifications.savedSearchTitle": "搜索“{savedSearchTitle}”已保存",
-    "discover.openOptionsPopover.gotToAllSettings": "所有 Discover 选项",
     "discover.partialHits": "≥{formattedHits} 个{hits, plural, other {命中}}",
     "discover.reloadSavedSearchButton": "重置搜索",
     "discover.removeColumnLabel": "移除列",
