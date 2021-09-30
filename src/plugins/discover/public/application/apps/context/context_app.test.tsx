@@ -19,6 +19,7 @@ import { DiscoverServices } from '../../../build_services';
 import { indexPatternsMock } from '../../../__mocks__/index_patterns';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../../__mocks__/ui_settings';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
@@ -69,7 +70,11 @@ describe('ContextApp test', () => {
   });
 
   it('renders correctly', async () => {
-    const component = mountWithIntl(<ContextApp {...defaultProps} />);
+    const component = mountWithIntl(
+      <discoverServiceMock.presentationUtil.ContextProvider>
+        <ContextApp {...defaultProps} />
+      </discoverServiceMock.presentationUtil.ContextProvider>
+    );
     await waitFor(() => {
       expect(component.find(ContextAppContent).length).toBe(1);
       const topNavMenu = component.find(mockTopNavMenu);
@@ -79,7 +84,11 @@ describe('ContextApp test', () => {
   });
 
   it('should set filters correctly', async () => {
-    const component = mountWithIntl(<ContextApp {...defaultProps} />);
+    const component = mountWithIntl(
+      <discoverServiceMock.presentationUtil.ContextProvider>
+        <ContextApp {...defaultProps} />
+      </discoverServiceMock.presentationUtil.ContextProvider>
+    );
 
     await act(async () => {
       component.find(ContextAppContent).invoke('addFilter')(

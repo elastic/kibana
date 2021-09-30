@@ -40,13 +40,6 @@ test('getTopNavLinks result', () => {
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
-        "run": [Function],
-        "testId": "discoverOptionsButton",
-      },
-      Object {
         "description": "New Search",
         "id": "new",
         "label": "New",
@@ -80,6 +73,13 @@ test('getTopNavLinks result', () => {
         "label": "Inspect",
         "run": [Function],
         "testId": "openInspectorButton",
+      },
+      Object {
+        "description": "Options",
+        "id": "options",
+        "label": "Options",
+        "run": [Function],
+        "testId": "discoverOptionsButton",
       },
     ]
   `);

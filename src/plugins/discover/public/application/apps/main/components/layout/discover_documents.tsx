@@ -32,7 +32,6 @@ import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../doc_table/doc_table_infinite';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { useLabs } from '../../../../../../../presentation_util/public';
-import { ENABLE_NEW_TABLE } from '../../../../../../../presentation_util/common';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -63,7 +62,7 @@ function DiscoverDocumentsComponent({
   const { isProjectEnabled } = useLabs();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isLegacy = !isProjectEnabled(ENABLE_NEW_TABLE);
+  const isLegacy = !isProjectEnabled('labs:discover:enableNewTable');
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState: DataDocumentsMsg = useDataState(documents$);
