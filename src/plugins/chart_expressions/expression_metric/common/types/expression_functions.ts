@@ -18,7 +18,7 @@ import { ColorSchemas, ColorMode } from '../../../../charts/common';
 import { VisParams, visType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
-export interface Arguments {
+export interface MetricArguments {
   percentageMode: boolean;
   colorSchema: ColorSchemas;
   colorMode: ColorMode;
@@ -33,17 +33,17 @@ export interface Arguments {
   bucket: ExpressionValueVisDimension;
 }
 
-export type Input = Datatable;
+export type MetricInput = Datatable;
 
 export interface MetricVisRenderConfig {
   visType: typeof visType;
-  visData: Input;
+  visData: MetricInput;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
 }
 
 export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof EXPRESSION_METRIC_NAME,
-  Input,
-  Arguments,
+  MetricInput,
+  MetricArguments,
   ExpressionValueRender<MetricVisRenderConfig>
 >;

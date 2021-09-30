@@ -10,8 +10,8 @@ export const PLUGIN_ID = 'expressionMetricVis';
 export const PLUGIN_NAME = 'expressionMetricVis';
 
 export type {
-  Arguments as MetricArguments,
-  Input as MetricInput,
+  MetricArguments,
+  MetricInput,
   MetricVisRenderConfig,
   MetricVisExpressionFunctionDefinition,
   DimensionsVisParam,
