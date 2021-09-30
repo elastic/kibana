@@ -7,7 +7,7 @@
 
 import type {
   CustomIntegration,
-  Category,
+  IntegrationCategory,
 } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { PackageListItem } from '../../../../../../../common/types/models';
@@ -29,7 +29,7 @@ export function mergeAndReplaceCategoryCounts(
       match.count += count;
     } else {
       merged.push({
-        id: category as Category,
+        id: category as IntegrationCategory,
         count,
       });
     }
@@ -69,7 +69,7 @@ function findReplacementsForEprPackage(
 export function mergeEprPackagesWithReplacements(
   eprPackages: PackageListItem[],
   replacements: CustomIntegration[],
-  category: Category
+  category: IntegrationCategory
 ): Array<PackageListItem | CustomIntegration> {
   const merged: Array<PackageListItem | CustomIntegration> = [];
 

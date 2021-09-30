@@ -15,7 +15,7 @@ import {
 import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
-import { Category } from '../../../../custom_integrations/common';
+import { IntegrationCategory } from '../../../../custom_integrations/common';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 
 function registerTutorialWithCustomIntegrations(
@@ -25,7 +25,7 @@ function registerTutorialWithCustomIntegrations(
   customIntegrations.registerCustomIntegration({
     id: tutorial.id,
     title: tutorial.name,
-    categories: (tutorial.integrationBrowserCategories ?? []) as Category[],
+    categories: (tutorial.integrationBrowserCategories ?? []) as IntegrationCategory[],
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
     icons: tutorial.euiIconType
@@ -50,7 +50,7 @@ function registerBeatsTutorialsWithCustomIntegrations(
   customIntegrations.registerCustomIntegration({
     id: tutorial.name,
     title: tutorial.name,
-    categories: tutorial.integrationBrowserCategories as Category[],
+    categories: tutorial.integrationBrowserCategories as IntegrationCategory[],
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
     icons: tutorial.euiIconType

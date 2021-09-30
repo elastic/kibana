@@ -36,7 +36,7 @@ import type { PackageListItem } from '../../../../types';
 
 import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 
-import type { Category } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import { mergeAndReplaceCategoryCounts, mergeEprPackagesWithReplacements } from './util';
 import { CategoryFacets } from './category_facets';
@@ -286,7 +286,7 @@ const AvailablePackages: React.FC = memo(() => {
       ? mergeEprPackagesWithReplacements(
           eprPackages || [],
           replacementCustomIntegrations || [],
-          selectedCategory as Category
+          selectedCategory as IntegrationCategory
         )
       : [];
   }, [
@@ -303,7 +303,7 @@ const AvailablePackages: React.FC = memo(() => {
         if (!selectedCategory) {
           return true;
         }
-        return integration.categories.indexOf(selectedCategory as Category) >= 0;
+        return integration.categories.indexOf(selectedCategory as IntegrationCategory) >= 0;
       })
     : [];
 

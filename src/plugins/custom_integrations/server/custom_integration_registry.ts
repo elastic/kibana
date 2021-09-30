@@ -7,7 +7,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { Category, CATEGORY_DISPLAY, CustomIntegration } from '../common';
+import { IntegrationCategory, INTEGRATION_CATEGORY_DISPLAY, CustomIntegration } from '../common';
 
 function isAddable(integration: CustomIntegration): boolean {
   return !!integration.categories.length && !integration.eprOverlap;
@@ -43,11 +43,11 @@ export class CustomIntegrationRegistry {
       return;
     }
 
-    const allowedCategories: Category[] = (customIntegration.categories ?? []).filter(
+    const allowedCategories: IntegrationCategory[] = (customIntegration.categories ?? []).filter(
       (category) => {
-        return CATEGORY_DISPLAY.hasOwnProperty(category);
+        return INTEGRATION_CATEGORY_DISPLAY.hasOwnProperty(category);
       }
-    ) as Category[];
+    ) as IntegrationCategory[];
 
     this._integrations.push({ ...customIntegration, categories: allowedCategories });
   }

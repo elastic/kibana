@@ -8,7 +8,7 @@
 
 import { CustomIntegrationRegistry } from './custom_integration_registry';
 import { loggerMock, MockedLogger } from '@kbn/logging/mocks';
-import { Category, CustomIntegration } from '../common';
+import { IntegrationCategory, CustomIntegration } from '../common';
 
 describe('CustomIntegrationsRegistry', () => {
   let mockLogger: MockedLogger;
@@ -49,7 +49,7 @@ describe('CustomIntegrationsRegistry', () => {
       const registry = new CustomIntegrationRegistry(mockLogger, true);
       registry.registerCustomIntegration({
         ...integration,
-        categories: ['upload_file', 'foobar'] as Category[],
+        categories: ['upload_file', 'foobar'] as IntegrationCategory[],
       });
       expect(registry.getAppendCustomIntegrations()).toEqual([
         {
@@ -169,7 +169,7 @@ describe('CustomIntegrationsRegistry', () => {
         ...integration,
         id: 'bar',
         eprOverlap: 'aws',
-        categories: ['foobar'] as unknown as Category[],
+        categories: ['foobar'] as unknown as IntegrationCategory[],
       });
       expect(registry.getReplacementCustomIntegrations()).toEqual([]);
     });
