@@ -27,7 +27,9 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
   state = initialPolicyDetailsState(),
   action
 ) => {
-  // If not on the Trusted Apps Policy view, then just return
+  /* ----------------------------------------------------------
+     If not on the Trusted Apps Policy view, then just return
+     ---------------------------------------------------------- */
   if (!isOnPolicyTrustedAppsView(state)) {
     // If the artifacts state namespace needs resetting, then do it now
     if (!isUninitialisedResourceState(getCurrentPolicyAssignedTrustedAppsState(state))) {
@@ -40,6 +42,37 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
     return state;
   }
 
+  if (action.type === 'policyArtifactsAssignableListPageDataChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        assignableList: action.payload,
+      },
+    };
+  }
+
+  if (action.type === 'policyArtifactsUpdateTrustedAppsChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        trustedAppsToUpdate: action.payload,
+      },
+    };
+  }
+
+  if (action.type === 'policyArtifactsAssignableListExistDataChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        assignableListEntriesExist: action.payload,
+      },
+    };
+  }
+
+  // FIXME:PT refactor this and the above
   switch (action.type) {
     case 'assignedTrustedAppsListStateChanged':
       return handleAssignedTrustedAppsListStateChanged(state, action);

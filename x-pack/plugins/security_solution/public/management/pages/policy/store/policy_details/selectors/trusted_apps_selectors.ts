@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
 import {
@@ -15,18 +16,24 @@ import {
   PolicyDetailsState,
 } from '../../../types';
 import {
-  GetTrustedAppsListResponse,
   Immutable,
+  ImmutableArray,
+  PostTrustedAppCreateResponse,
+  GetTrustedAppsListResponse,
   PolicyData,
 } from '../../../../../../../common/endpoint/types';
-import { getCurrentArtifactsLocation } from './policy_common_selectors';
+import {
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+} from '../../../../../common/constants';
 import {
   getLastLoadedResourceState,
+  isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
   LoadedResourceState,
 } from '../../../../../state';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../../common/constants';
+import { getCurrentArtifactsLocation } from './policy_common_selectors';
 
 export const doesPolicyHaveTrustedApps = (
   state: PolicyDetailsState
@@ -36,6 +43,80 @@ export const doesPolicyHaveTrustedApps = (
     loading: false,
     hasTrustedApps: true,
   };
+};
+
+/**
+ * Returns current assignable artifacts list
+ */
+export const getAssignableArtifactsList = (
+  state: Immutable<PolicyDetailsState>
+): Immutable<GetTrustedAppsListResponse> | undefined =>
+  getLastLoadedResourceState(state.artifacts.assignableList)?.data;
+
+/**
+ * Returns if assignable list is loading
+ */
+export const getAssignableArtifactsListIsLoading = (
+  state: Immutable<PolicyDetailsState>
+): boolean => isLoadingResourceState(state.artifacts.assignableList);
+
+/**
+ * Returns if update action is loading
+ */
+export const getUpdateArtifactsIsLoading = (state: Immutable<PolicyDetailsState>): boolean =>
+  isLoadingResourceState(state.artifacts.trustedAppsToUpdate);
+
+/**
+ * Returns if update action is loading
+ */
+export const getUpdateArtifactsIsFailed = (state: Immutable<PolicyDetailsState>): boolean =>
+  isFailedResourceState(state.artifacts.trustedAppsToUpdate);
+
+/**
+ * Returns if update action is done successfully
+ */
+export const getUpdateArtifactsLoaded = (state: Immutable<PolicyDetailsState>): boolean => {
+  return isLoadedResourceState(state.artifacts.trustedAppsToUpdate);
+};
+
+/**
+ * Returns true if there is data assignable even if the search didn't returned it.
+ */
+export const getAssignableArtifactsListExist = (state: Immutable<PolicyDetailsState>): boolean => {
+  return (
+    isLoadedResourceState(state.artifacts.assignableListEntriesExist) &&
+    state.artifacts.assignableListEntriesExist.data
+  );
+};
+
+/**
+ * Returns true if there is data assignable even if the search didn't returned it.
+ */
+export const getAssignableArtifactsListExistIsLoading = (
+  state: Immutable<PolicyDetailsState>
+): boolean => {
+  return isLoadingResourceState(state.artifacts.assignableListEntriesExist);
+};
+
+/**
+ * Returns artifacts to be updated
+ */
+export const getUpdateArtifacts = (
+  state: Immutable<PolicyDetailsState>
+): ImmutableArray<PostTrustedAppCreateResponse> | undefined => {
+  return state.artifacts.trustedAppsToUpdate.type === 'LoadedResourceState'
+    ? state.artifacts.trustedAppsToUpdate.data
+    : undefined;
+};
+
+/** Returns a boolean of whether the user is on the policy details page or not */
+export const isOnPolicyTrustedAppsPage = (state: Immutable<PolicyDetailsState>) => {
+  return (
+    matchPath(state.location?.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+      exact: true,
+    }) !== null
+  );
 };
 
 export const getCurrentPolicyAssignedTrustedAppsState: PolicyDetailsSelector<

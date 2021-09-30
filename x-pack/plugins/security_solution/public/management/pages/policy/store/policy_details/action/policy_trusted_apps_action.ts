@@ -6,7 +6,39 @@
  */
 
 import { Action } from 'redux';
+import { AsyncResourceState } from '../../../../../state';
+import {
+  PostTrustedAppCreateResponse,
+  GetTrustedListAppsResponse,
+} from '../../../../../../../common/endpoint/types';
 import { PolicyArtifactsState } from '../../../types';
+
+export interface PolicyArtifactsAssignableListPageDataChanged {
+  type: 'policyArtifactsAssignableListPageDataChanged';
+  payload: AsyncResourceState<GetTrustedListAppsResponse>;
+}
+
+export interface PolicyArtifactsUpdateTrustedApps {
+  type: 'policyArtifactsUpdateTrustedApps';
+  payload: {
+    trustedAppIds: string[];
+  };
+}
+
+export interface PolicyArtifactsUpdateTrustedAppsChanged {
+  type: 'policyArtifactsUpdateTrustedAppsChanged';
+  payload: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+}
+
+export interface PolicyArtifactsAssignableListExistDataChanged {
+  type: 'policyArtifactsAssignableListExistDataChanged';
+  payload: AsyncResourceState<boolean>;
+}
+
+export interface PolicyArtifactsAssignableListPageDataFilter {
+  type: 'policyArtifactsAssignableListPageDataFilter';
+  payload: { filter: string };
+}
 
 export interface AssignedTrustedAppsListStateChanged
   extends Action<'assignedTrustedAppsListStateChanged'> {
@@ -22,5 +54,10 @@ export interface PolicyDetailsListOfAllPoliciesStateChanged
  * All of the possible actions for Trusted Apps under the Policy Details store
  */
 export type PolicyTrustedAppsAction =
+  | PolicyArtifactsAssignableListPageDataChanged
+  | PolicyArtifactsUpdateTrustedApps
+  | PolicyArtifactsUpdateTrustedAppsChanged
+  | PolicyArtifactsAssignableListExistDataChanged
+  | PolicyArtifactsAssignableListPageDataFilter
   | AssignedTrustedAppsListStateChanged
   | PolicyDetailsListOfAllPoliciesStateChanged;

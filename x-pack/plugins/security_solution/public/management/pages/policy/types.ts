@@ -13,6 +13,7 @@ import {
   ProtectionFields,
   PolicyData,
   UIPolicyConfig,
+  PostTrustedAppCreateResponse,
   MaybeImmutable,
   GetTrustedAppsListResponse,
 } from '../../../../common/endpoint/types';
@@ -24,7 +25,6 @@ import {
   UpdatePackagePolicyResponse,
 } from '../../../../../fleet/common';
 import { AsyncResourceState } from '../../state';
-import { TrustedAppsListData } from '../trusted_apps/state';
 import { ImmutableMiddlewareAPI } from '../../../common/store';
 import { AppAction } from '../../../common/store/actions';
 import { TrustedAppsService } from '../trusted_apps/service';
@@ -85,7 +85,11 @@ export interface PolicyArtifactsState {
   /** artifacts location params  */
   location: PolicyDetailsArtifactsPageLocation;
   /** A list of artifacts can be linked to the policy  */
-  availableList: AsyncResourceState<TrustedAppsListData>;
+  assignableList: AsyncResourceState<GetTrustedAppsListResponse>;
+  /** Represents if available trusted apps entries exist, regardless of whether the list is showing results  */
+  assignableListEntriesExist: AsyncResourceState<boolean>;
+  /** A list of trusted apps going to be updated  */
+  trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
   /** List of artifacts currently assigned to the policy (body specific and global) */
   assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
   /** A list of all available polices */
