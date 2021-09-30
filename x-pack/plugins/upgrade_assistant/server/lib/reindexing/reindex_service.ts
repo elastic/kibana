@@ -151,21 +151,10 @@ export const reindexServiceFactory = (
       });
     }
 
-    // Resume consumers if we ever got past this point.
-    if (reindexOp.attributes.lastCompletedStep >= ReindexStep.indexGroupServicesStopped) {
-      await resumeIndexGroupServices(reindexOp);
-    }
-
     return reindexOp;
   };
 
   // ------ Functions used to process the state machine
-
-  const stopIndexGroupServices = async (reindexOp: ReindexSavedObject) => {
-    return actions.updateReindexOp(reindexOp, {
-      lastCompletedStep: ReindexStep.indexGroupServicesStopped,
-    });
-  };
 
   /**
    * Sets the original index as readonly so new data can be indexed until the reindex
@@ -362,17 +351,6 @@ export const reindexServiceFactory = (
     });
   };
 
-  const resumeIndexGroupServices = async (reindexOp: ReindexSavedObject) => {
-    // Only change the status if we're still in-progress (this function is also called when the reindex fails or is cancelled)
-    if (reindexOp.attributes.status === ReindexStatus.inProgress) {
-      return actions.updateReindexOp(reindexOp, {
-        lastCompletedStep: ReindexStep.indexGroupServicesStarted,
-      });
-    } else {
-      return reindexOp;
-    }
-  };
-
   // ------ The service itself
 
   return {
@@ -500,9 +478,6 @@ export const reindexServiceFactory = (
         try {
           switch (lockedReindexOp.attributes.lastCompletedStep) {
             case ReindexStep.created:
-              lockedReindexOp = await stopIndexGroupServices(lockedReindexOp);
-              break;
-            case ReindexStep.indexGroupServicesStopped:
               lockedReindexOp = await setReadonly(lockedReindexOp);
               break;
             case ReindexStep.readonly:
@@ -518,12 +493,10 @@ export const reindexServiceFactory = (
               lockedReindexOp = await switchAlias(lockedReindexOp);
               break;
             case ReindexStep.aliasCreated:
-              lockedReindexOp = await resumeIndexGroupServices(lockedReindexOp);
-              break;
-            case ReindexStep.indexGroupServicesStarted:
               lockedReindexOp = await actions.updateReindexOp(lockedReindexOp, {
                 status: ReindexStatus.completed,
               });
+              break;
             default:
               break;
           }

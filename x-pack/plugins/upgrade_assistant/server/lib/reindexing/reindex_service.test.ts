@@ -446,52 +446,6 @@ describe('reindexService', () => {
       mappings: { _doc: { properties: { timestampl: { type: 'date' } } } },
     };
 
-    describe('indexConsumersStopped', () => {
-      const reindexOp = {
-        id: '1',
-        attributes: {
-          ...defaultAttributes,
-          lastCompletedStep: ReindexStep.indexGroupServicesStopped,
-        },
-      } as ReindexSavedObject;
-
-      it('blocks writes and updates lastCompletedStep', async () => {
-        clusterClient.asCurrentUser.indices.putSettings.mockResolvedValueOnce(
-          asApiResponse({ acknowledged: true })
-        );
-        const updatedOp = await service.processNextStep(reindexOp);
-        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
-        expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
-          index: 'myIndex',
-          body: { settings: { blocks: { write: true } } },
-        });
-      });
-
-      it('fails if setting updates are not acknowledged', async () => {
-        clusterClient.asCurrentUser.indices.putSettings.mockResolvedValueOnce(
-          asApiResponse({ acknowledged: false })
-        );
-        const updatedOp = await service.processNextStep(reindexOp);
-        expect(updatedOp.attributes.lastCompletedStep).toEqual(
-          ReindexStep.indexGroupServicesStopped
-        );
-        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
-        expect(updatedOp.attributes.errorMessage).not.toBeNull();
-        expect(log.error).toHaveBeenCalledWith(expect.any(String));
-      });
-
-      it('fails if setting updates fail', async () => {
-        clusterClient.asCurrentUser.indices.putSettings.mockRejectedValueOnce(new Error('blah!'));
-        const updatedOp = await service.processNextStep(reindexOp);
-        expect(updatedOp.attributes.lastCompletedStep).toEqual(
-          ReindexStep.indexGroupServicesStopped
-        );
-        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
-        expect(updatedOp.attributes.errorMessage).not.toBeNull();
-        expect(log.error).toHaveBeenCalledWith(expect.any(String));
-      });
-    });
-
     describe('readonly', () => {
       const reindexOp = {
         id: '1',
@@ -798,18 +752,20 @@ describe('reindexService', () => {
       });
     });
 
-    describe('indexGroupServicesStarted', () => {
+    describe('aliasCreated', () => {
       const reindexOp = {
         id: '1',
         attributes: {
           ...defaultAttributes,
-          lastCompletedStep: ReindexStep.indexGroupServicesStarted,
+          lastCompletedStep: ReindexStep.aliasCreated,
         },
       } as ReindexSavedObject;
 
-      it('sets to completed', async () => {
+      it('sets reindex status as complete', async () => {
         const updatedOp = await service.processNextStep(reindexOp);
-        expect(updatedOp.attributes.status).toEqual(ReindexStatus.completed);
+        expect(actions.updateReindexOp).toHaveBeenCalledWith(reindexOp, {
+          status: ReindexStatus.completed,
+        });
       });
     });
   });

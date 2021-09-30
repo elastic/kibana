@@ -33,11 +33,6 @@ export const LOCK_WINDOW = moment.duration(90, 'seconds');
  */
 export interface ReindexActions {
   /**
-   * Namespace for ML-specific actions.
-   */
-  // ml: MlActions;
-
-  /**
    * Creates a new reindexOp, does not perform any pre-flight checks.
    * @param indexName
    * @param opts Additional options when creating the reindex operation
