@@ -353,14 +353,6 @@ export const getDefaultCellActions = ({
   columnId?: string;
   fieldType?: string;
 }) => {
-  const hasTopN =
-    browserFields && columnId
-      ? allowTopN({
-          browserField: getAllFieldsByName(browserFields)[columnId],
-          fieldName: columnId,
-          hideTopN: false,
-        })
-      : false;
   const hasLink = getLink(columnId, fieldType);
-  return [...cellActions, ...(hasTopN ? cellActionTopN : []), ...(hasLink ? cellActionLink : [])];
+  return [...cellActions, ...(hasLink ? cellActionLink : [])];
 };

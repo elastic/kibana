@@ -6,11 +6,17 @@
  */
 
 import { head } from 'lodash/fp';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Filter } from '../../../../../../../../../src/plugins/data/public';
+import { BrowserField } from '../../../../../../../timelines/common/search_strategy/index_fields';
 
 import { ColumnHeaderOptions } from '../../../../../../common';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import { allowTopN } from '../../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
+import { ShowTopNButton } from '../../../../../common/components/hover_actions/actions/show_top_n';
+import { getAllFieldsByName } from '../../../../../common/containers/source';
+import { ExpandTopValue } from '../../../../../common/lib/cell_actions/expand_top_value';
 import { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';
 import { parseValue } from './parse_value';
@@ -22,12 +28,15 @@ export const plainColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) =>
     dataExistsAtColumn(columnName, data),
 
+  // eslint-disable-next-line react/display-name
   renderColumn: ({
     asPlainText,
+    browserFields,
     className,
     columnName,
     eventId,
     field,
+    globalFilters,
     isDetails,
     isDraggable = true,
     timelineId,
@@ -36,10 +45,12 @@ export const plainColumnRenderer: ColumnRenderer = {
     linkValues,
   }: {
     asPlainText?: boolean;
+    browserFields: BrowserField;
     className?: string;
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
+    globalFilters?: Filter[];
     isDetails: boolean;
     isDraggable?: boolean;
     timelineId: string;
@@ -47,8 +58,9 @@ export const plainColumnRenderer: ColumnRenderer = {
     values: string[] | undefined | null;
     linkValues?: string[] | null | undefined;
   }) => {
-    return values != null
-      ? values.map((value, i) => (
+    return values != null ? (
+      <>
+        {values.map((value, i) => (
           <FormattedFieldValue
             asPlainText={asPlainText}
             className={className}
@@ -63,7 +75,19 @@ export const plainColumnRenderer: ColumnRenderer = {
             truncate={truncate}
             value={parseValue(value)}
           />
-        ))
-      : getEmptyTagValue();
+        ))}
+        {isDetails && (
+          <ExpandTopValue
+            browserFields={browserFields}
+            field={columnName}
+            globalFilters={globalFilters}
+            timelineId={timelineId}
+            value={values}
+          />
+        )}
+      </>
+    ) : (
+      getEmptyTagValue()
+    );
   },
 };

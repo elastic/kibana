@@ -12,6 +12,8 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiToolTip,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StatefulTopN } from '../../top_n';
@@ -37,7 +39,11 @@ interface Props {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   enablePopOver?: boolean;
   field: string;
+  flush?: 'left' | 'right' | 'both';
   globalFilters?: Filter[];
+  iconSide?: 'left' | 'right';
+  iconType?: string;
+  isExpandable?: boolean;
   onClick: () => void;
   onFilterAdded?: () => void;
   ownFocus: boolean;
@@ -53,6 +59,10 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     Component,
     enablePopOver,
     field,
+    flush,
+    iconSide,
+    iconType,
+    isExpandable,
     onClick,
     onFilterAdded,
     ownFocus,
@@ -72,7 +82,8 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         ? SourcererScopeName.detections
         : SourcererScopeName.default;
     const { browserFields, indexPattern } = useSourcererScope(activeScope);
-
+    const icon = iconType ?? 'visBarVertical';
+    const side = iconSide ?? 'left';
     const basicButton = useMemo(
       () =>
         Component ? (
@@ -80,8 +91,10 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
             aria-label={SHOW_TOP(field)}
             className={className}
             data-test-subj="show-top-field"
-            icon="visBarVertical"
-            iconType="visBarVertical"
+            icon={icon}
+            iconType={icon}
+            iconSide={side}
+            flush={flush}
             onClick={onClick}
             title={SHOW_TOP(field)}
           >
@@ -93,11 +106,11 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
             className="securitySolution__hoverActionButton"
             data-test-subj="show-top-field"
             iconSize="s"
-            iconType="visBarVertical"
+            iconType={icon}
             onClick={onClick}
           />
         ),
-      [Component, className, field, onClick]
+      [Component, className, field, flush, icon, onClick, side]
     );
 
     const button = useMemo(
@@ -139,6 +152,15 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
       ),
       [browserFields, field, indexPattern, onClick, onFilterAdded, timelineId, value, globalFilters]
     );
+
+    if (isExpandable) {
+      return (
+        <>
+          {basicButton}
+          {showTopN && topNPannel}
+        </>
+      );
+    }
 
     return showTopN ? (
       enablePopOver ? (

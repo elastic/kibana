@@ -48,14 +48,17 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
   .euiDataGridRowCell__popover {
 
     max-width: 815px !important;
+    max-height: none !important;
     overflow: hidden;
 
     .euiText {
       padding: 8px;
     }
 
+    /*
+    REMOVE THIS!!
+  */
     .data-grid-expanded-plain-text {
-      width: 234px;
       display: inline-block;
     }
 
@@ -71,20 +74,23 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     .euiPopoverFooter .euiFlexGroup {
       flex-wrap: wrap;
       margin: 0;
-      width: 260px;
 
       .euiButtonEmpty .euiButtonContent {
         justify-content: left;
-
-
       }
 
       &.euiFlexGroup--gutterSmall > .euiFlexItem {
         margin: 2px 0;
+        flex: 100%;
 
         &:first-child,
         &:nth-child(2) {
           padding-top: 2px;
+          flex: 50%;
+
+          .euiButtonEmpty .euiButtonContent {
+            justify-content: center;
+          }
         }
 
         &:nth-child(3) {
