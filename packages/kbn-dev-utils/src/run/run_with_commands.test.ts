@@ -45,6 +45,7 @@ it('extends the context using extendContext()', async () => {
     flags: expect.any(Object),
     addCleanupTask: expect.any(Function),
     procRunner: expect.any(ProcRunner),
+    statsMeta: expect.any(Map),
     extraContext: true,
   });
 
