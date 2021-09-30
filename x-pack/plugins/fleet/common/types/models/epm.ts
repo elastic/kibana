@@ -19,6 +19,8 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
+import type { CustomIntegrationIcon } from '../../../../../../src/plugins/custom_integrations/common';
+
 import type {
   PackageSpecManifest,
   PackageSpecIcon,
@@ -360,6 +362,18 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   id: string;
 };
+
+export interface IntegrationCardItem {
+  uiInternalPathUrl: string;
+  release?: 'beta' | 'experimental' | 'ga';
+  description: string;
+  name: string;
+  title: string;
+  version: string;
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
+  integration: string;
+  id: string;
+}
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
