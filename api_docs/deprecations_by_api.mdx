@@ -1,6 +1,6 @@
 ---
 id: kibDevDocsDeprecationsByApi
-slug: /kibana-dev-docs/deprecated-api-list-by-api
+slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
 date: 2021-07-27
@@ -15,13 +15,13 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | ---------------|-----------|-----------|
 | <DocLink id="kibDashboardPluginApi" section="def-public.DashboardStart.dashboardUrlGenerator" text="dashboardUrlGenerator"/> | securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IndexPattern" text="IndexPattern"/> | visTypeTimeseries, reporting, discover, observability, infra, maps, dataVisualizer, ml, apm, lens, osquery, securitySolution, transform, savedObjects, visualizations, indexPatternFieldEditor, dashboard, graph, stackAlerts, uptime, indexPatternEditor, indexPatternManagement, inputControlVis, savedObjectsManagement, visualize, visDefaultEditor, visTypeVega | - |
-| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternField" text="IndexPatternField"/> | indexPatternFieldEditor, discover, maps, dataVisualizer, securitySolution, indexPatternEditor, indexPatternManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, lens | - |
+| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternField" text="IndexPatternField"/> | indexPatternFieldEditor, discover, maps, securitySolution, indexPatternEditor, indexPatternManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, dataVisualizer, lens | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IIndexPattern" text="IIndexPattern"/> | timelines, infra, ml, monitoring, securitySolution, indexPatternManagement, stackAlerts, transform | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | home, savedObjects, security, fleet, indexPatternFieldEditor, discover, visualizations, dashboard, lens, observability, maps, fileUpload, dataVisualizer, ml, infra, apm, graph, monitoring, osquery, securitySolution, stackAlerts, transform, upgradeAssistant, uptime, indexPatternEditor, indexPatternManagement, inputControlVis, kibanaOverview, savedObjectsManagement, visualize, visTypeTimelion, visTypeTimeseries, visTypeVega | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPattern" text="IndexPattern"/> | visTypeTimeseries, reporting, discover, observability, infra, maps, dataVisualizer, ml, apm, lens, osquery, securitySolution, transform, savedObjects, visualizations, indexPatternFieldEditor, dashboard, graph, stackAlerts, uptime, indexPatternEditor, indexPatternManagement, inputControlVis, savedObjectsManagement, visualize, visDefaultEditor, visTypeVega | - |
-| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternField" text="IndexPatternField"/> | indexPatternFieldEditor, discover, maps, dataVisualizer, securitySolution, indexPatternEditor, indexPatternManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, lens | - |
+| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternField" text="IndexPatternField"/> | indexPatternFieldEditor, discover, maps, securitySolution, indexPatternEditor, indexPatternManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, dataVisualizer, lens | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IIndexPattern" text="IIndexPattern"/> | timelines, infra, ml, monitoring, securitySolution, indexPatternManagement, stackAlerts, transform | - |
-| <DocLink id="kibDataPluginApi" section="def-server.IndexPatternField" text="IndexPatternField"/> | indexPatternFieldEditor, discover, maps, dataVisualizer, securitySolution, indexPatternEditor, indexPatternManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, lens | - |
+| <DocLink id="kibDataPluginApi" section="def-server.IndexPatternField" text="IndexPatternField"/> | indexPatternFieldEditor, discover, maps, securitySolution, indexPatternEditor, indexPatternManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, dataVisualizer, lens | - |
 | <DocLink id="kibDataPluginApi" section="def-server.IndexPattern" text="IndexPattern"/> | visTypeTimeseries, reporting, discover, observability, infra, maps, dataVisualizer, ml, apm, lens, osquery, securitySolution, transform, savedObjects, visualizations, indexPatternFieldEditor, dashboard, graph, stackAlerts, uptime, indexPatternEditor, indexPatternManagement, inputControlVis, savedObjectsManagement, visualize, visDefaultEditor, visTypeVega | - |
 | <DocLink id="kibLicensingPluginApi" section="def-public.PublicLicense.mode" text="mode"/> | apm, security, securitySolution | - |
 | <DocLink id="kibLicensingPluginApi" section="def-server.PublicLicense.mode" text="mode"/> | apm, security, securitySolution | - |
@@ -231,3 +231,6 @@ Safe to remove.
 | <DocLink id="kibCorePluginApi" section="def-server.HttpServiceSetup.auth" text="auth"/> |
 | <DocLink id="kibCorePluginApi" section="def-server.PluginManifest.extraPublicDirs" text="extraPublicDirs"/> |
 | <DocLink id="kibCorePluginApi" section="def-server.SavedObjectsImportFailure.title" text="title"/> |
+| <DocLink id="kibKbnEsQueryPluginApi" section="def-common.IndexPatternBase" text="IndexPatternBase"/> |
+| <DocLink id="kibKbnEsQueryPluginApi" section="def-common.IndexPatternFieldBase" text="IndexPatternFieldBase"/> |
+| <DocLink id="kibKbnLegacyLoggingPluginApi" section="def-server.LegacyLoggingConfig" text="LegacyLoggingConfig"/> |

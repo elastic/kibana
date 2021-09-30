@@ -2813,9 +2813,6 @@
         "tags": [],
         "label": "METRIC_TYPE",
         "description": [],
-        "signature": [
-          "METRIC_TYPE"
-        ],
         "path": "node_modules/@kbn/analytics/target_types/metrics/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -2858,9 +2855,6 @@
         "tags": [],
         "label": "DropResult",
         "description": [],
-        "signature": [
-          "DropResult"
-        ],
         "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -3355,7 +3349,13 @@
             "text": "ElasticsearchClient"
           },
           "; logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; }) => Promise<void>"
         ],
         "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
@@ -3469,7 +3469,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
                 "deprecated": false
@@ -3734,7 +3740,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
             "deprecated": false
@@ -3753,7 +3765,13 @@
         "label": "AbstractObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "ServerRouteRepository",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.ServerRouteRepository",
+            "text": "ServerRouteRepository"
+          },
           "<",
           {
             "pluginId": "observability",
@@ -3771,7 +3789,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           ", Record<string, ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<string, ",
           "Mixed",
           " | undefined, ",
@@ -3863,7 +3887,13 @@
         "description": [],
         "signature": [
           "TEndpoint extends \"GET /api/observability/rules/alerts/dynamic_index_pattern\" ? { \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
           "TypeC",
           "<{ query: ",
@@ -3891,7 +3921,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           ">; }[TEndpoint] extends ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<any, any, any, infer TReturnType, Record<string, any>> ? TReturnType : never : never"
         ],
         "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -3920,7 +3956,13 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "ServerRouteRepository",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.ServerRouteRepository",
+            "text": "ServerRouteRepository"
+          },
           "<",
           {
             "pluginId": "observability",
@@ -3938,7 +3980,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           ", { \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
           "TypeC",
           "<{ query: ",
@@ -4152,6 +4200,34 @@
           "\"observabilityCases\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.enableInspectEsQueries",
+        "type": "string",
+        "tags": [],
+        "label": "enableInspectEsQueries",
+        "description": [],
+        "signature": [
+          "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.maxSuggestions",
+        "type": "string",
+        "tags": [],
+        "label": "maxSuggestions",
+        "description": [],
+        "signature": [
+          "\"observability:maxSuggestions\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

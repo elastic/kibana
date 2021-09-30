@@ -2368,7 +2368,13 @@
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data/common/data_views/fields/data_view_field.ts",
@@ -2443,7 +2449,13 @@
             "description": [],
             "signature": [
               "() => { count: number; script: string | undefined; lang: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined; customLabel: string | undefined; }"
             ],
             "path": "src/plugins/data/common/data_views/fields/data_view_field.ts",
@@ -4282,6 +4294,18 @@
           },
           {
             "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/search_panel/search_panel.tsx"
           },
           {
@@ -4298,23 +4322,19 @@
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_pattern_management/index_pattern_management.tsx"
           },
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_pattern_management/index_pattern_management.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
           },
           {
             "plugin": "dataVisualizer",
@@ -4507,6 +4527,14 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
           },
           {
             "plugin": "infra",
@@ -5407,14 +5435,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
           },
           {
             "plugin": "ml",
@@ -7242,14 +7262,6 @@
             "path": "x-pack/plugins/maps/public/classes/layers/choropleth_layer_wizard/layer_template.tsx"
           },
           {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/index_pattern_util.test.ts"
           },
@@ -7907,6 +7919,14 @@
           },
           {
             "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/types/field_data_row.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/types/field_data_row.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/util/field_types_utils.ts"
           },
           {
@@ -7914,6 +7934,34 @@
             "path": "x-pack/plugins/data_visualizer/public/application/common/util/field_types_utils.ts"
           },
           {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/expanded_row/index_based_expanded_row.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/expanded_row/index_based_expanded_row.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/search_panel/search_panel.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/search_panel/search_panel.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
+          },
+          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/server/routes/field_stats.ts"
           },
@@ -8064,6 +8112,14 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/components/sidebar/discover_field_visualize.d.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
           }
         ],
         "children": [],
@@ -8990,7 +9046,13 @@
             "text": "FieldSpec"
           },
           " extends ",
-          "DataViewFieldBase"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          }
         ],
         "path": "src/plugins/data/common/data_views/types.ts",
         "deprecated": false,
@@ -9244,7 +9306,13 @@
             "label": "type",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/data/common/data_views/types.ts",
             "deprecated": false
@@ -9313,7 +9381,13 @@
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubType",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data/common/data_views/types.ts",
@@ -9633,7 +9707,13 @@
             "text": "IFieldType"
           },
           " extends ",
-          "DataViewFieldBase"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          }
         ],
         "path": "src/plugins/data/common/data_views/fields/types.ts",
         "deprecated": true,
@@ -10330,7 +10410,13 @@
             "text": "IIndexPattern"
           },
           " extends ",
-          "DataViewBase"
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          }
         ],
         "path": "src/plugins/data/common/data_views/types.ts",
         "deprecated": true,
@@ -13015,7 +13101,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/data/common/data_views/expressions/load_index_pattern.ts",

@@ -3259,9 +3259,6 @@
         "tags": [],
         "label": "MlJobBlocked",
         "description": [],
-        "signature": [
-          "MlJobBlocked"
-        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false

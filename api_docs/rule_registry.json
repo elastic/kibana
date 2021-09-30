@@ -757,7 +757,13 @@
             ],
             "signature": [
               "(featureId: ",
-              "AlertConsumers",
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "server",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-server.AlertConsumers",
+                "text": "AlertConsumers"
+              },
               ", dataset?: ",
               {
                 "pluginId": "ruleRegistry",
@@ -781,7 +787,13 @@
                 "label": "featureId",
                 "description": [],
                 "signature": [
-                  "AlertConsumers"
+                  {
+                    "pluginId": "@kbn/rule-data-utils",
+                    "scope": "server",
+                    "docId": "kibKbnRuleDataUtilsPluginApi",
+                    "section": "def-server.AlertConsumers",
+                    "text": "AlertConsumers"
+                  }
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
@@ -878,7 +890,13 @@
         "description": [],
         "signature": [
           "(logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           ", ruleDataClient: Pick<",
           {
             "pluginId": "ruleRegistry",
@@ -920,7 +938,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
             "deprecated": false,
@@ -961,7 +985,13 @@
         "description": [],
         "signature": [
           "({ logger, ruleDataClient }: { logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; ruleDataClient: ",
           {
             "pluginId": "ruleRegistry",
@@ -1017,7 +1047,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
                 "deprecated": false
@@ -1064,7 +1100,13 @@
             "text": "IRuleDataClient"
           },
           "; logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; }) => <TState extends Record<string, unknown>, TParams extends Record<string, unknown>, TServices extends ",
           {
             "pluginId": "ruleRegistry",
@@ -1163,7 +1205,13 @@
                 "text": "IRuleDataClient"
               },
               "; logger: ",
-              "Logger",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              },
               "; }"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_factory.ts",
@@ -1922,7 +1970,13 @@
             "text": "IRuleDataClient"
           },
           "; logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; }) => <TState extends Record<string, unknown>, TParams extends Record<string, unknown>, TServices extends ",
           {
             "pluginId": "ruleRegistry",
@@ -1970,7 +2024,13 @@
                 "text": "IRuleDataClient"
               },
               "; logger: ",
-              "Logger",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              },
               "; }"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
