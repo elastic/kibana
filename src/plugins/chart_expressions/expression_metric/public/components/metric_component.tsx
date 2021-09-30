@@ -16,7 +16,6 @@ import { Datatable } from '../../../../expressions/public';
 import { getHeatmapColors } from '../../../../charts/public';
 import { getFormatService } from '../format_service';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { Range } from '../../../../expressions/public';
 
 import './metric.scss';
 
@@ -32,7 +31,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
-    const max = (last(colorsRange) as Range).to;
+    const max = last(colorsRange)?.to ?? 1;
     const labels: string[] = [];
 
     colorsRange.forEach((range: any) => {
@@ -65,7 +64,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     });
 
     if (bucket === -1) {
-      if (val < config.colorsRange[0].from) bucket = 0;
+      if (config.colorsRange?.[0] && val < config.colorsRange?.[0].from) bucket = 0;
       else bucket = config.colorsRange.length - 1;
     }
 
@@ -111,8 +110,8 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     const config = this.props.visParams.metric;
     const dimensions = this.props.visParams.dimensions;
     const isPercentageMode = config.percentageMode;
-    const min = config.colorsRange[0].from;
-    const max = (last(config.colorsRange) as Range).to;
+    const min = config.colorsRange?.[0]?.from ?? 0;
+    const max = last(config.colorsRange)?.to ?? 0;
     const colors = this.getColors();
     const labels = this.getLabels();
     const metrics: Metric[] = [];
@@ -137,7 +136,6 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
           value = (value - min) / (max - min);
         }
         value = this.getFormattedValue(formatter, value, 'html');
-
         if (bucketColumnId) {
           const bucketValue = this.getFormattedValue(bucketFormatter, row[bucketColumnId]);
           title = `${bucketValue} - ${title}`;
