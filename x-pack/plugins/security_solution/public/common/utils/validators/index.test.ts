@@ -29,7 +29,7 @@ describe('helpers', () => {
       expect(isUrlInvalid('https://www.exam%22ple.com')).toBeFalsy();
     });
 
-    test('should validate characters incorrectly such as ;', () => {
+    test('should validate characters incorrectly such as ]', () => {
       expect(isUrlInvalid('https://www.example.com[')).toBeTruthy();
     });
 

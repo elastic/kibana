@@ -11,6 +11,7 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
+    { "path": "../custom_integrations/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../share/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },

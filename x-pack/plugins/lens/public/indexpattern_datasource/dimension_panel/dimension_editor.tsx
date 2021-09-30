@@ -680,7 +680,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const hasFormula =
     !isFullscreen && operationSupportMatrix.operationWithoutField.has(formulaOperationName);
 
-  const hasTabs = hasFormula || supportStaticValue;
+  const hasTabs = !isFullscreen && (hasFormula || supportStaticValue);
 
   return (
     <div id={columnId}>
