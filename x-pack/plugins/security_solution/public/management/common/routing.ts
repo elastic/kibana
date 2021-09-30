@@ -16,6 +16,7 @@ import {
   MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
+  MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
@@ -26,6 +27,7 @@ import { appendSearch } from '../../common/components/link_to/helpers';
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
 import { EventFiltersPageLocation } from '../pages/event_filters/types';
+import { HostIsolationExceptionsPageLocation } from '../pages/host_isolation_exceptions/types';
 import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
@@ -200,6 +202,26 @@ const normalizeEventFiltersPageLocation = (
   }
 };
 
+const normalizeHostIsolationExceptionsPageLocation = (
+  location?: Partial<EventFiltersPageLocation>
+): Partial<EventFiltersPageLocation> => {
+  if (location) {
+    return {
+      ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
+        ? { page_index: location.page_index }
+        : {}),
+      ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { page_size: location.page_size }
+        : {}),
+      ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
+      ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
+      ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+    };
+  } else {
+    return {};
+  }
+};
+
 /**
  * Given an object with url params, and a given key, return back only the first param value (case multiples were defined)
  * @param query
@@ -325,5 +347,33 @@ export const getEventFiltersListPath = (location?: Partial<EventFiltersPageLocat
 
   return `${path}${appendSearch(
     querystring.stringify(normalizeEventFiltersPageLocation(location))
+  )}`;
+};
+
+export const extractHostIsolationExceptionsPageLocation = (
+  query: querystring.ParsedUrlQuery
+): HostIsolationExceptionsPageLocation => {
+  const showParamValue = extractFirstParamValue(
+    query,
+    'show'
+  ) as HostIsolationExceptionsPageLocation['show'];
+
+  return {
+    ...extractListPaginationParams(query),
+    show:
+      showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
+    id: extractFirstParamValue(query, 'id'),
+  };
+};
+
+export const getHostIsolationExceptionsListPath = (
+  location?: Partial<HostIsolationExceptionsPageLocation>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH, {
+    tabName: AdministrationSubTab.hostIsolationExceptions,
+  });
+
+  return `${path}${appendSearch(
+    querystring.stringify(normalizeHostIsolationExceptionsPageLocation(location))
   )}`;
 };
