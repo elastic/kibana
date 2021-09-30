@@ -11,5 +11,7 @@ Please do not import from any other files when looking to use a custom rule
 """
 
 load("//src/dev/bazel:jsts_transpiler.bzl", _jsts_transpiler = "jsts_transpiler")
+load("//src/dev/bazel/types_pkg:types_pkg.bzl", _types_pkg = "types_pkg")
 
 jsts_transpiler = _jsts_transpiler
+types_pkg = _types_pkg

@@ -1,0 +1,19 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@build_bazel_rules_nodejs//internal/node:node.bzl", "nodejs_binary")
+
+exports_files(
+  [
+    "package_json.tpl",
+    "api_extractor.js"
+  ],
+  visibility = ["//visibility:public"]
+)
+
+nodejs_binary(
+  name = "api_extractor",
+  data = [
+    ":api_extractor.js",
+  ],
+  entry_point = ":api_extractor.js",
+)
