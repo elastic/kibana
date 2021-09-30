@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { PackagePolicy } from '../../../../../fleet/common';
 
 import {
@@ -33,6 +34,32 @@ export const getTrustedAppByPolicy = function (): TrustedApp {
       createConditionEntry(ConditionEntryField.HASH, 'match', '1234234659af249ddf3e40864e9fb241'),
       createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
     ],
+  };
+};
+
+export const getPutTrustedAppByPolicyMock = function (): ExceptionListItemSchema {
+  return {
+    id: '123',
+    _version: '1',
+    comments: [],
+    namespace_type: 'agnostic',
+    created_at: '11/11/2011T11:11:11.111',
+    created_by: 'admin',
+    updated_at: '11/11/2011T11:11:11.111',
+    updated_by: 'admin',
+    name: 'linux trusted app 1',
+    description: 'Linux trusted app 1',
+    os_types: [OperatingSystem.LINUX],
+    tags: ['policy:9da95be9-9bee-4761-a8c4-28d6d9bd8c71'],
+    entries: [
+      createConditionEntry(ConditionEntryField.HASH, 'match', '1234234659af249ddf3e40864e9fb241'),
+      createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
+    ],
+    item_id: '1',
+    list_id: '1',
+    meta: undefined,
+    tie_breaker_id: '1',
+    type: 'simple',
   };
 };
 
