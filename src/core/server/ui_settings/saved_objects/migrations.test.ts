@@ -154,7 +154,7 @@ describe('ui_settings 7.16.0 migrations', () => {
       id: '8.0.0',
       attributes: {
         buildNum: 9007199254740991,
-        ' labs:discover:enableNewTable': true,
+        'labs:discover:enableNewTable': true,
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
@@ -178,7 +178,7 @@ describe('ui_settings 7.16.0 migrations', () => {
       id: '8.0.0',
       attributes: {
         buildNum: 9007199254740991,
-        ' labs:discover:enableNewTable': false,
+        'labs:discover:enableNewTable': false,
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
