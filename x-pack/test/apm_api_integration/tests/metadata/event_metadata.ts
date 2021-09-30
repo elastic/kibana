@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { get } from 'lodash';
 import { PROCESSOR_EVENT } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../plugins/apm/common/processor_event';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
