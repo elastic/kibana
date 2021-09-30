@@ -342,6 +342,7 @@ export const ThresholdPanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
+        isDisabled={currentYConfig?.icon == null || currentYConfig?.icon === 'none'}
         label={i18n.translate('xpack.lens.xyChart.thresholdMarker.position', {
           defaultMessage: 'Icon position',
         })}
