@@ -10,6 +10,8 @@ import {
   ExecutorSubActionPushParams,
   PushToServiceApiParamsSIR,
   ExternalServiceSIR,
+  Observable,
+  ObservableTypes,
 } from './types';
 
 export const serviceNowCommonFields = [
@@ -205,6 +207,28 @@ const sirParams: PushToServiceApiParamsSIR = {
   ],
 };
 
+const observables: Observable[] = [
+  {
+    value: '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9',
+    type: ObservableTypes.sha256,
+  },
+  {
+    value: '127.0.0.1',
+    type: ObservableTypes.ip4,
+  },
+  {
+    value: 'https://example.com',
+    type: ObservableTypes.url,
+  },
+];
+
 const apiParams = executorParams;
 
-export { externalServiceMock, executorParams, apiParams, sirParams, externalServiceSIRMock };
+export {
+  externalServiceMock,
+  executorParams,
+  apiParams,
+  sirParams,
+  externalServiceSIRMock,
+  observables,
+};

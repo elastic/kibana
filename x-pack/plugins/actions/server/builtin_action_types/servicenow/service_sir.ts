@@ -60,7 +60,7 @@ export const createExternalServiceSIR: ServiceFactory = (
     });
 
     snService.checkInstance(res);
-    return { ...res.data.result };
+    return res.data.result;
   };
 
   const addObservableToIncident = async (
