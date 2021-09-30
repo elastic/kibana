@@ -270,11 +270,12 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                   : newSignalsIndex ?? '';
                 // TODO: Steph/sourcerer needs test
                 if (newSignalsIndex != null) {
+                  // if new signal index name is set, there wasn't one before so we need to update detections specifically
+                  // technically, we need to update all scopes as there are can be new fields in signals index
+                  // once fields are moved to sourcerer.kibanaDataViews we only need to do this for detections scope
+                  // TODO: Steph/sourcerer https://github.com/elastic/security-team/issues/1730 to be done before 7.16 feature freeze
                   dispatch(
                     sourcererActions.setSource({
-                      // if new signal index name is set, there wasn't one before so we need to update detections specifically
-                      // we need to update all scopes as there are new fields
-                      // once fields are moved to sourcerer.kibanaDataViews we only need to do this for detections scope
                       id: SourcererScopeName.detections,
                       payload: {
                         browserFields: getBrowserFields(patternString, response.indexFields),
