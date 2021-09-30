@@ -1,0 +1,23 @@
+{
+  "type":"doc",
+  "value":{
+    "id":"a4cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f",
+    "index":"ml_host_risk_score_latest",
+    "source":{
+      "@timestamp":"2021-03-10T14:51:05.766Z",
+      "risk_score":21,
+      "host":{
+        "name":"ip-10-10-10-121"
+      },
+      "rules":{
+        "Unusual Linux Username":{
+          "average_risk":21,
+          "rule_count":2,
+          "rule_risk":42
+        }
+      },
+      "ingest_timestamp":"2021-03-09T18:02:08.319296053Z",
+      "risk":"Low"
+    }
+  }
+}

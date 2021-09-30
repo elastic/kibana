@@ -38,6 +38,7 @@ import {
   syncDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
+  areRefreshIntervalsEqual,
 } from '../lib';
 
 export interface UseDashboardStateProps {
@@ -241,13 +242,17 @@ export const useDashboardAppState = ({
 
           const savedTimeChanged =
             lastSaved.timeRestore &&
-            !areTimeRangesEqual(
+            (!areTimeRangesEqual(
               {
                 from: savedDashboard?.timeFrom,
                 to: savedDashboard?.timeTo,
               },
               timefilter.getTime()
-            );
+            ) ||
+              !areRefreshIntervalsEqual(
+                savedDashboard?.refreshInterval,
+                timefilter.getRefreshInterval()
+              ));
 
           /**
            * changes to the dashboard should only be considered 'unsaved changes' when

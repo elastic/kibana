@@ -153,7 +153,10 @@ export class DocLinksService {
         },
         addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
         kibana: `${KIBANA_DOCS}index.html`,
-        upgradeAssistant: `${KIBANA_DOCS}upgrade-assistant.html`,
+        upgradeAssistant: {
+          overview: `${KIBANA_DOCS}upgrade-assistant.html`,
+          batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
+        },
         rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
         elasticsearch: {
           docsBase: `${ELASTICSEARCH_DOCS}`,
@@ -282,6 +285,7 @@ export class DocLinksService {
           outlierDetectionRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`,
           regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`,
           classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-class-aucroc`,
+          setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
@@ -606,7 +610,10 @@ export interface DocLinksStart {
     };
     readonly addData: string;
     readonly kibana: string;
-    readonly upgradeAssistant: string;
+    readonly upgradeAssistant: {
+      readonly overview: string;
+      readonly batchReindex: string;
+    };
     readonly rollupJobs: string;
     readonly elasticsearch: Record<string, string>;
     readonly siem: {
