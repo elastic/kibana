@@ -2,7 +2,7 @@
 
 Transactions are stored in two different formats:
 
-#### Individual transactions documents
+#### Individual transactions document
 
 A single transaction with a latency of 2ms
 
@@ -17,7 +17,7 @@ A single transaction with a latency of 2ms
 
 or
 
-#### Aggregated (metric) documents:
+#### Aggregated (metric) document:
 
 A collection of 2 transactions with a combined latency of 5ms
 
@@ -119,6 +119,7 @@ System metrics are captured periodically (every 60 seconds by default).
 
 ### CPU
 
+#### Document
 ```json
 {
   "@timestamp": "2021-09-01T10:00:00.000Z",
@@ -131,6 +132,7 @@ System metrics are captured periodically (every 60 seconds by default).
 
 Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
 
+#### Query
 ```json
 {
   "size": 0,
@@ -153,7 +155,7 @@ Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.
 
 ### Memory
 
-
+#### Document
 ```json
 {
   "@timestamp": "2021-09-01T10:00:00.000Z",
@@ -166,6 +168,7 @@ Note-worthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.
 
 Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
 
+#### Query
 ```js
 {
   "size": 0,
