@@ -132,7 +132,9 @@ describe('register()', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
     expect(() => registry.register(alertType)).toThrowError(
-      new Error(`Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`)
+      new Error(
+        `Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`
+      )
     );
   });
 
@@ -283,7 +285,7 @@ describe('register()', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
-      ruleTaskTimeout: '20m'
+      ruleTaskTimeout: '20m',
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
     registry.register(alertType);
