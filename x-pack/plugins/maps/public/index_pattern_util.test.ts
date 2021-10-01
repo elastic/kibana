@@ -18,19 +18,6 @@ import { IndexPatternField } from 'src/plugins/data/public';
 
 describe('getSourceFields', () => {
   test('Should remove multi fields from field list', () => {
-    /*
-    const agentKeyword = {
-      name: 'agent.keyword',
-      subType: {
-        multi: {
-          parent: 'agent',
-        },
-      },
-      isSubtypeMulti: () => true,
-      isSubtypeNested: () => false,
-      type: 'string',
-    } as IndexPatternField;
-    */
 
     const agent = new IndexPatternField({
       name: 'agent',
