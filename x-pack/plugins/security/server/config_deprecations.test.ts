@@ -7,9 +7,14 @@
 
 import { cloneDeep } from 'lodash';
 
-import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { applyDeprecations, ConfigDeprecationContext, configDeprecationFactory } from '@kbn/config';
 
 import { securityConfigDeprecationProvider } from './config_deprecations';
+
+const deprecationContext: ConfigDeprecationContext = {
+  branch: 'master',
+  version: '8.0.0',
+};
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
@@ -19,6 +24,7 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
     deprecations.map((deprecation) => ({
       deprecation,
       path: 'xpack.security',
+      context: deprecationContext,
     })),
     () =>
       ({ message }) =>
