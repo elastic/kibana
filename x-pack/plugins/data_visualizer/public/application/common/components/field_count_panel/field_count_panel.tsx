@@ -28,12 +28,13 @@ export const FieldCountPanel: FC<Props> = ({
     <EuiFlexGroup
       alignItems="center"
       gutterSize="xs"
-      style={{ marginLeft: 4 }}
       data-test-subj="dataVisualizerFieldCountPanel"
+      responsive={false}
+      className="dvFieldCount__panel"
     >
       <TotalFieldsCount fieldsCountStats={fieldsCountStats} />
       <MetricFieldsCount metricsStats={metricsStats} />
-      <EuiFlexItem>
+      <EuiFlexItem className={'dvFieldCount__item'}>
         <EuiSwitch
           data-test-subj="dataVisualizerShowEmptyFieldsSwitch"
           label={
