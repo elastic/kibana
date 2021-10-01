@@ -19,7 +19,7 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DataViewPluginStart } from './plugin';
 import { registerRoutes } from './routes';
-import { indexPatternSavedObjectType } from './saved_objects';
+import { dataViewSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 import { DataViewsService } from '../common';
 import { FieldFormatsStart } from '../../field_formats/server';
@@ -84,7 +84,7 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
     core: CoreSetup<IndexPatternsServiceStartDeps, DataViewPluginStart>,
     { expressions, usageCollection }: IndexPatternsServiceSetupDeps
   ) {
-    core.savedObjects.registerType(indexPatternSavedObjectType);
+    core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
 
     registerRoutes(core.http, core.getStartServices);

@@ -137,8 +137,6 @@ export class DataPublicPlugin
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
-
-    // todo see if needed
     setIndexPatterns(dataViews);
 
     const query = this.queryService.start({

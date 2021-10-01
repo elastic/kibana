@@ -39,10 +39,7 @@ export function plugin() {
   return new DataViewPublicPlugin();
 }
 
-export type {
-  DataViewPublicPluginSetup,
-  DataViewPublicPluginStart, // todo // IDataViewPluginServices,
-} from './types';
+export type { DataViewPublicPluginSetup, DataViewPublicPluginStart } from './types';
 
 // Export plugin after all other imports
 export type { DataViewPublicPlugin as DataPlugin };

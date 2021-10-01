@@ -12,6 +12,7 @@ import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server
 import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from '.';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataViewPluginSetup {}
 
 // todo simplify

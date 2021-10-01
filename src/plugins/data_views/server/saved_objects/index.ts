@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { indexPatternSavedObjectType } from './index_patterns';
+export { dataViewSavedObjectType } from './data_views';

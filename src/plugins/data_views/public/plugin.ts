@@ -23,6 +23,7 @@ import {
   SavedObjectsClientPublicToCommon,
 } from '.';
 
+// todo review file
 export class DataViewPublicPlugin
   implements
     Plugin<

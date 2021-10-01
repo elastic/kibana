@@ -8,4 +8,3 @@
 
 export * from './field.stub';
 export * from './data_views/data_view.stub';
-// todo this looks a lot like mocks

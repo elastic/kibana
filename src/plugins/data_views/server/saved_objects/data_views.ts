@@ -10,8 +10,7 @@ import type { SavedObjectsType } from 'kibana/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 
-// todo rename
-export const indexPatternSavedObjectType: SavedObjectsType = {
+export const dataViewSavedObjectType: SavedObjectsType = {
   name: DATA_VIEW_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: 'single',
