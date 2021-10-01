@@ -12,6 +12,7 @@ import { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './
 import { CustomIntegration } from '../common';
 import { CustomIntegrationRegistry } from './custom_integration_registry';
 import { defineRoutes } from './routes/define_routes';
+import { registerLanguageClients } from './language_clients';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart>
@@ -32,6 +33,8 @@ export class CustomIntegrationsPlugin
 
     const router = core.http.createRouter();
     defineRoutes(router, this.customIngegrationRegistry);
+
+    registerLanguageClients(core, this.customIngegrationRegistry);
 
     return {
       registerCustomIntegration: (integration: Omit<CustomIntegration, 'type'>) => {
