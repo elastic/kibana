@@ -74,3 +74,15 @@ retry() {
     fi
   done
 }
+
+set_git_merge_base() {
+  GITHUB_PR_MERGE_BASE="$(buildkite-agent meta-data get merge-base --default '')"
+
+  if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+    git fetch origin "$GITHUB_PR_TARGET_BRANCH"
+    GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD)"
+    buildkite-agent meta-data set merge-base "$GITHUB_PR_MERGE_BASE"
+  fi
+
+  export GITHUB_PR_MERGE_BASE
+}
