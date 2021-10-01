@@ -16,8 +16,6 @@ export interface EcsLog {
   level?: string;
   logger?: string;
   origin?: Origin;
-  /** @deprecated - use `event.original` instead */
-  original?: string;
   syslog?: Syslog;
 }
 
