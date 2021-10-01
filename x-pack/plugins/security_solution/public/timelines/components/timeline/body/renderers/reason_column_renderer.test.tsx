@@ -19,7 +19,7 @@ import {
   RowRenderer,
   RowRendererId,
 } from '../../../../../../common';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../../../timelines/public/mock';
 import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../../timelines/public/components';
 import { cloneDeep } from 'lodash';

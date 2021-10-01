@@ -22,8 +22,6 @@ export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[
 export const plainColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) =>
     dataExistsAtColumn(columnName, data),
-
-  // eslint-disable-next-line react/display-name
   renderColumn: ({
     asPlainText,
     className,
@@ -31,7 +29,6 @@ export const plainColumnRenderer: ColumnRenderer = {
     eventId,
     field,
     globalFilters,
-    isDetails,
     isDraggable = true,
     timelineId,
     truncate,
@@ -44,16 +41,14 @@ export const plainColumnRenderer: ColumnRenderer = {
     eventId: string;
     field: ColumnHeaderOptions;
     globalFilters?: Filter[];
-    isDetails: boolean;
     isDraggable?: boolean;
     timelineId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
     linkValues?: string[] | null | undefined;
-  }) => {
-    return values != null ? (
-      <>
-        {values.map((value, i) => (
+  }) =>
+    values != null
+      ? values.map((value, i) => (
           <FormattedFieldValue
             asPlainText={asPlainText}
             className={className}
@@ -68,10 +63,6 @@ export const plainColumnRenderer: ColumnRenderer = {
             truncate={truncate}
             value={parseValue(value)}
           />
-        ))}
-      </>
-    ) : (
-      getEmptyTagValue()
-    );
-  },
+        ))
+      : getEmptyTagValue(),
 };
