@@ -36,7 +36,6 @@ export interface EcsProcess extends NestedFields {
   name?: string;
   pgid?: number;
   pid?: number;
-  ppid?: number;
   start?: string;
   title?: string;
   uptime?: number;
