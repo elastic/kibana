@@ -84,6 +84,7 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     >
       <div data-test-subj="monitoringBeatsInstancesApp">
         <SetupModeRenderer
+          productName="beats"
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
