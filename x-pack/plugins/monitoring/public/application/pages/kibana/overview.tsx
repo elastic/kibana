@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
 import { KibanaTemplate } from './kibana_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
@@ -14,6 +15,7 @@ import { ComponentProps } from '../../route_init';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 // @ts-ignore
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { useCharts } from '../../hooks/use_charts';
 import {
   EuiPage,
@@ -60,11 +62,15 @@ const KibanaOverview = ({ data }: { data: any }) => {
   );
 };
 
-export const KibanaOverviewPage: React.FC<ComponentProps> = () => {
+export const KibanaOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const [data, setData] = useState<any>();
   const clusterUuid = globalState.cluster_uuid;
+  const cluster = find(clusters, {
+    cluster_uuid: clusterUuid,
+  }) as any;
   const ccs = globalState.ccs;
   const title = i18n.translate('xpack.monitoring.kibana.overview.title', {
     defaultMessage: 'Kibana',
@@ -72,6 +78,14 @@ export const KibanaOverviewPage: React.FC<ComponentProps> = () => {
   const pageTitle = i18n.translate('xpack.monitoring.kibana.overview.pageTitle', {
     defaultMessage: 'Kibana overview',
   });
+
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inKibana: true,
+      });
+    }
+  }, [cluster]);
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
