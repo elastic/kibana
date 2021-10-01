@@ -55,7 +55,7 @@ export const legacyGetRuleActionsFromSavedObject = (
           },
         ];
       } else {
-        // We cannot find it so we return no actions. Pray ... Pray we do not reach this line ever.
+        // We cannot find it so we return no actions. This line should not be reached.
         return [];
       }
     }
