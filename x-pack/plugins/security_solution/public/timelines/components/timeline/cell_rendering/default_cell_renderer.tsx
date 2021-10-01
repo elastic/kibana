@@ -25,7 +25,6 @@ const hasCellActions = (columnId?: string) => {
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   browserFields,
-  className,
   data,
   ecsData,
   eventId,
@@ -49,7 +48,6 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
           asPlainText: !!getLink(header.id, header.type), // we want to render value with links as plain text but keep other formatters like badge.
           browserFields,
-          className,
           columnName: header.id,
           ecsData,
           eventId,
@@ -57,13 +55,13 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           isDetails,
           isDraggable,
           linkValues,
+          rowRenderers,
           timelineId,
           truncate: isDetails ? false : true,
           values: getMappedNonEcsValue({
             data,
             fieldName: header.id,
           }),
-          rowRenderers,
         })}
       </StyledContent>
       {isDetails && browserFields && hasCellActions(header.id) && (

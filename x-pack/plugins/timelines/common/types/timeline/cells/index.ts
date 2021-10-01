@@ -16,7 +16,6 @@ import { ColumnHeaderOptions } from '../columns';
 /** The following props are provided to the function called by `renderCellValue` */
 export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   asPlainText?: boolean;
-  className?: string;
   data: TimelineNonEcsData[];
   eventId: string; // _id
   globalFilters?: Filter[];

@@ -24,11 +24,9 @@ export const plainColumnRenderer: ColumnRenderer = {
     dataExistsAtColumn(columnName, data),
   renderColumn: ({
     asPlainText,
-    className,
     columnName,
     eventId,
     field,
-    globalFilters,
     isDraggable = true,
     timelineId,
     truncate,
@@ -36,7 +34,6 @@ export const plainColumnRenderer: ColumnRenderer = {
     linkValues,
   }: {
     asPlainText?: boolean;
-    className?: string;
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
@@ -51,7 +48,6 @@ export const plainColumnRenderer: ColumnRenderer = {
       ? values.map((value, i) => (
           <FormattedFieldValue
             asPlainText={asPlainText}
-            className={className}
             contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
             eventId={eventId}
             fieldFormat={field.format || ''}

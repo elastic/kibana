@@ -25,6 +25,7 @@ export interface ColumnRenderer {
     isDetails,
     isDraggable,
     linkValues,
+    rowRenderers,
     timelineId,
     truncate,
     values,

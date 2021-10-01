@@ -64,7 +64,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
 
   return (
     <>
-      <StyledContent $isDetails>
+      <StyledContent $isDetails data-test-subj="data-grid-expanded-cell-value-actions">
         {showButton ? (
           <ShowTopNButton
             className="eui-displayBlock expandable-top-value-button"
