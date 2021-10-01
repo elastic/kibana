@@ -30,7 +30,7 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
   useEffect(() => {
     const path = window.location.hash.substr(1);
     getUrlTracker().restorePreviousUrl();
-    services.urlForwarding.navigateToLegacyKibanaUrl(path);
+    urlForwarding.navigateToLegacyKibanaUrl(path);
 
     const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
       defaultMessage: 'Page not found',
@@ -63,7 +63,7 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
         core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-  }, [core.overlays.banners, services, history, urlForwarding]);
+  }, [core.overlays.banners, history, urlForwarding]);
 
   return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
 }
