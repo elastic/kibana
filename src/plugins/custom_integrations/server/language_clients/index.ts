@@ -23,11 +23,11 @@ interface LanguageIntegration {
 export const integrations: LanguageIntegration[] = [
   {
     id: 'all',
-    title: i18n.translate('custom_integrations.languageclients.AllTitle', {
+    title: i18n.translate('customIntegrations.languageclients.AllTitle', {
       defaultMessage: 'Elasticsearch Clients',
     }),
     euiIconName: 'logoElasticsearch',
-    description: i18n.translate('custom_integrations.languageclients.AllDescription', {
+    description: i18n.translate('customIntegrations.languageclients.AllDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official language clients.',
     }),
@@ -35,11 +35,11 @@ export const integrations: LanguageIntegration[] = [
   },
   {
     id: 'javascript',
-    title: i18n.translate('custom_integrations.languageclients.JavascriptTitle', {
+    title: i18n.translate('customIntegrations.languageclients.JavascriptTitle', {
       defaultMessage: 'Elasticsearch JavaScript Client',
     }),
     icon: 'nodejs.svg',
-    description: i18n.translate('custom_integrations.languageclients.JavascriptDescription', {
+    description: i18n.translate('customIntegrations.languageclients.JavascriptDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Node.js client.',
     }),
@@ -48,11 +48,11 @@ export const integrations: LanguageIntegration[] = [
   },
   {
     id: 'ruby',
-    title: i18n.translate('custom_integrations.languageclients.RubyTitle', {
+    title: i18n.translate('customIntegrations.languageclients.RubyTitle', {
       defaultMessage: 'Elasticsearch Ruby Client',
     }),
     icon: 'ruby.svg',
-    description: i18n.translate('custom_integrations.languageclients.RubyDescription', {
+    description: i18n.translate('customIntegrations.languageclients.RubyDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Ruby client.',
     }),
@@ -61,11 +61,11 @@ export const integrations: LanguageIntegration[] = [
   },
   {
     id: 'go',
-    title: i18n.translate('custom_integrations.languageclients.GoTitle', {
+    title: i18n.translate('customIntegrations.languageclients.GoTitle', {
       defaultMessage: 'Elasticsearch Go Client',
     }),
     icon: 'go.svg',
-    description: i18n.translate('custom_integrations.languageclients.GoDescription', {
+    description: i18n.translate('customIntegrations.languageclients.GoDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Go client.',
     }),
@@ -73,11 +73,11 @@ export const integrations: LanguageIntegration[] = [
   },
   {
     id: 'dotnet',
-    title: i18n.translate('custom_integrations.languageclients.DotNetTitle', {
+    title: i18n.translate('customIntegrations.languageclients.DotNetTitle', {
       defaultMessage: 'Elasticsearch .NET Client',
     }),
     icon: 'dotnet.svg',
-    description: i18n.translate('custom_integrations.languageclients.DotNetDescription', {
+    description: i18n.translate('customIntegrations.languageclients.DotNetDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official .NET client.',
     }),
@@ -85,11 +85,11 @@ export const integrations: LanguageIntegration[] = [
   },
   {
     id: 'php',
-    title: i18n.translate('custom_integrations.languageclients.PhpTitle', {
+    title: i18n.translate('customIntegrations.languageclients.PhpTitle', {
       defaultMessage: 'Elasticsearch PHP Client',
     }),
     icon: 'php.svg',
-    description: i18n.translate('custom_integrations.languageclients.PhpDescription', {
+    description: i18n.translate('customIntegrations.languageclients.PhpDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official .PHP client.',
     }),
@@ -97,11 +97,11 @@ export const integrations: LanguageIntegration[] = [
   },
   {
     id: 'perl',
-    title: i18n.translate('custom_integrations.languageclients.PerlTitle', {
+    title: i18n.translate('customIntegrations.languageclients.PerlTitle', {
       defaultMessage: 'Elasticsearch Perl Client',
     }),
     icon: 'perl.svg',
-    description: i18n.translate('custom_integrations.languageclients.PerlDescription', {
+    description: i18n.translate('customIntegrations.languageclients.PerlDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Perl client.',
     }),
@@ -109,11 +109,11 @@ export const integrations: LanguageIntegration[] = [
   },
   {
     id: 'python',
-    title: i18n.translate('custom_integrations.languageclients.PythonTitle', {
+    title: i18n.translate('customIntegrations.languageclients.PythonTitle', {
       defaultMessage: 'Elasticsearch Python Client',
     }),
     icon: 'python.svg',
-    description: i18n.translate('custom_integrations.languageclients.PythonDescription', {
+    description: i18n.translate('customIntegrations.languageclients.PythonDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Python client.',
     }),
@@ -121,11 +121,11 @@ export const integrations: LanguageIntegration[] = [
   },
   {
     id: 'rust',
-    title: i18n.translate('custom_integrations.languageclients.RustTitle', {
+    title: i18n.translate('customIntegrations.languageclients.RustTitle', {
       defaultMessage: 'Elasticsearch Rust Client',
     }),
     icon: 'rust.svg',
-    description: i18n.translate('custom_integrations.languageclients.RustDescription', {
+    description: i18n.translate('customIntegrations.languageclients.RustDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Rust client.',
     }),
@@ -133,11 +133,11 @@ export const integrations: LanguageIntegration[] = [
   },
   {
     id: 'java',
-    title: i18n.translate('custom_integrations.languageclients.JavaTitle', {
+    title: i18n.translate('customIntegrations.languageclients.JavaTitle', {
       defaultMessage: 'Elasticsearch Java Client',
     }),
     euiIconName: 'logoElasticsearch', // don't have a java-icon just yet
-    description: i18n.translate('custom_integrations.languageclients.JavaDescription', {
+    description: i18n.translate('customIntegrations.languageclients.JavaDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Java client.',
     }),
