@@ -24,9 +24,14 @@ import { getCustomIntegrations } from '../../services/custom_integrations';
 
 import { useRequest, sendRequest } from './use_request';
 
-export function useGetAddableCustomIntegrations() {
+export function useGetAppendCustomIntegrations() {
   const customIntegrations = getCustomIntegrations();
   return useAsync(customIntegrations.getAppendCustomIntegrations, []);
+}
+
+export function useGetReplacementCustomIntegrations() {
+  const customIntegrations = getCustomIntegrations();
+  return useAsync(customIntegrations.getReplacementCustomIntegrations, []);
 }
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
