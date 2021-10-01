@@ -10,11 +10,16 @@ import { EuiCallOut } from '@elastic/eui';
 
 import * as i18n from './translations';
 
-const DeprecatedCalloutComponent: React.FC = () => {
+interface Props {
+  isEdit: boolean;
+}
+
+const DeprecatedCalloutComponent: React.FC<Props> = ({ isEdit }) => {
+  const color = isEdit ? 'danger' : 'warning';
   return (
     <EuiCallOut
       title={i18n.LEGACY_CONNECTOR_WARNING_TITLE}
-      color="danger"
+      color={color}
       iconType="alert"
       data-test-subj="legacy-connector-warning-callout"
     >
