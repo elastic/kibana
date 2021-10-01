@@ -33,7 +33,7 @@ Show information pertaining to the saved objects in the .kibana index
 
 Examples:
 
-See 'saved_objects_info_svc.md'
+See 'README.md'
 
       `,
       flags: expectedFlags(),
