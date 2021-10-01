@@ -92,6 +92,7 @@ const clientSearchMock = (
 const getApmIndicesMock = async () =>
   ({
     // eslint-disable-next-line @typescript-eslint/naming-convention
+    'xpack.apm.transactionIndices': 'apm-*',
     'apm_oss.transactionIndices': 'apm-*',
   } as ApmIndicesConfig);
 

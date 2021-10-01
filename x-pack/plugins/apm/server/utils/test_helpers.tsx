@@ -28,6 +28,12 @@ interface MockSetup {
   uiFilters: UxUIFilters;
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
+    'xpack.apm.sourcemapIndices': string;
+    'xpack.apm.errorIndices': string;
+    'xpack.apm.onboardingIndices': string;
+    'xpack.apm.spanIndices': string;
+    'xpack.apm.transactionIndices': string;
+    'xpack.apm.metricsIndices': string;
     'apm_oss.sourcemapIndices': string;
     'apm_oss.errorIndices': string;
     'apm_oss.onboardingIndices': string;
@@ -86,6 +92,12 @@ export async function inspectSearchParams(
     uiFilters: options?.uiFilters ?? {},
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
+      'xpack.apm.sourcemapIndices': 'myIndex',
+      'xpack.apm.errorIndices': 'myIndex',
+      'xpack.apm.onboardingIndices': 'myIndex',
+      'xpack.apm.spanIndices': 'myIndex',
+      'xpack.apm.transactionIndices': 'myIndex',
+      'xpack.apm.metricsIndices': 'myIndex',
       'apm_oss.sourcemapIndices': 'myIndex',
       'apm_oss.errorIndices': 'myIndex',
       'apm_oss.onboardingIndices': 'myIndex',

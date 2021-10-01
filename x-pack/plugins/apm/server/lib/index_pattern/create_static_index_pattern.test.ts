@@ -25,6 +25,10 @@ function getMockSavedObjectsClient(existingIndexPatternTitle: string) {
 
 const setup = {
   indices: {
+    'xpack.apm.transactionIndices': 'apm-*-transaction-*',
+    'xpack.apm.spanIndices': 'apm-*-span-*',
+    'xpack.apm.errorIndices': 'apm-*-error-*',
+    'xpack.apm.metricsIndices': 'apm-*-metrics-*',
     'apm_oss.transactionIndices': 'apm-*-transaction-*',
     'apm_oss.spanIndices': 'apm-*-span-*',
     'apm_oss.errorIndices': 'apm-*-error-*',

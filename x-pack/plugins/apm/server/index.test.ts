@@ -24,6 +24,10 @@ describe('mergeConfigs', () => {
     } as APMXPackConfig;
 
     expect(mergeConfigs(apmConfig)).toEqual({
+      'xpack.apm.errorIndices': 'logs-apm*,apm-*-error-*',
+      'xpack.apm.metricsIndices': 'metrics-apm*,apm-*-metric-*',
+      'xpack.apm.spanIndices': 'traces-apm*,apm-*-span-*',
+      'xpack.apm.transactionIndices': 'traces-apm*,apm-*-transaction-*',
       'apm_oss.errorIndices': 'logs-apm*,apm-*-error-*',
       'apm_oss.metricsIndices': 'metrics-apm*,apm-*-metric-*',
       'apm_oss.spanIndices': 'traces-apm*,apm-*-span-*',

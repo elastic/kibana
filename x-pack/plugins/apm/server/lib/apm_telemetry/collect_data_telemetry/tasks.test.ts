@@ -15,6 +15,10 @@ import {
 describe('data telemetry collection tasks', () => {
   const indices = {
     /* eslint-disable @typescript-eslint/naming-convention */
+    'xpack.apm.errorIndices': 'apm-8.0.0-error',
+    'xpack.apm.metricsIndices': 'apm-8.0.0-metric',
+    'xpack.apm.spanIndices': 'apm-8.0.0-span',
+    'xpack.apm.transactionIndices': 'apm-8.0.0-transaction',
     'apm_oss.errorIndices': 'apm-8.0.0-error',
     'apm_oss.metricsIndices': 'apm-8.0.0-metric',
     'apm_oss.spanIndices': 'apm-8.0.0-span',

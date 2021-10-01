@@ -44,6 +44,12 @@ describe('get buckets', () => {
         ) as APMConfig,
         indices: {
           /* eslint-disable @typescript-eslint/naming-convention */
+          'xpack.apm.sourcemapIndices': 'apm-*',
+          'xpack.apm.errorIndices': 'apm-*',
+          'xpack.apm.onboardingIndices': 'apm-*',
+          'xpack.apm.spanIndices': 'apm-*',
+          'xpack.apm.transactionIndices': 'apm-*',
+          'xpack.apm.metricsIndices': 'apm-*',
           'apm_oss.sourcemapIndices': 'apm-*',
           'apm_oss.errorIndices': 'apm-*',
           'apm_oss.onboardingIndices': 'apm-*',

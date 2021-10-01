@@ -13,6 +13,10 @@ import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 describe('getApmIndexPatternTitle', () => {
   it('returns an index pattern title by combining existing indicies', () => {
     const title = getApmIndexPatternTitle({
+      'xpack.apm.transactionIndices': 'apm-*-transaction-*',
+      'xpack.apm.spanIndices': 'apm-*-span-*',
+      'xpack.apm.errorIndices': 'apm-*-error-*',
+      'xpack.apm.metricsIndices': 'apm-*-metrics-*',
       'apm_oss.transactionIndices': 'apm-*-transaction-*',
       'apm_oss.spanIndices': 'apm-*-span-*',
       'apm_oss.errorIndices': 'apm-*-error-*',
@@ -25,6 +29,10 @@ describe('getApmIndexPatternTitle', () => {
 
   it('removes duplicates', () => {
     const title = getApmIndexPatternTitle({
+      'xpack.apm.transactionIndices': 'apm-*',
+      'xpack.apm.spanIndices': 'apm-*',
+      'xpack.apm.errorIndices': 'apm-*',
+      'xpack.apm.metricsIndices': 'apm-*',
       'apm_oss.transactionIndices': 'apm-*',
       'apm_oss.spanIndices': 'apm-*',
       'apm_oss.errorIndices': 'apm-*',

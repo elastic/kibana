@@ -39,6 +39,12 @@ export const readKibanaConfig = () => {
 
   return {
     /* eslint-disable @typescript-eslint/naming-convention */
+    'xpack.apm.transactionIndices': 'apm-*',
+    'xpack.apm.metricsIndices': 'apm-*',
+    'xpack.apm.errorIndices': 'apm-*',
+    'xpack.apm.spanIndices': 'apm-*',
+    'xpack.apm.onboardingIndices': 'apm-*',
+    'xpack.apm.sourcemapIndices': 'apm-*',
     'apm_oss.transactionIndices': 'apm-*',
     'apm_oss.metricsIndices': 'apm-*',
     'apm_oss.errorIndices': 'apm-*',

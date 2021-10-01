@@ -14,6 +14,12 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const mockIndices = {
   /* eslint-disable @typescript-eslint/naming-convention */
+  'xpack.apm.sourcemapIndices': 'myIndex',
+  'xpack.apm.errorIndices': 'myIndex',
+  'xpack.apm.onboardingIndices': 'myIndex',
+  'xpack.apm.spanIndices': 'myIndex',
+  'xpack.apm.transactionIndices': 'myIndex',
+  'xpack.apm.metricsIndices': 'myIndex',
   'apm_oss.sourcemapIndices': 'myIndex',
   'apm_oss.errorIndices': 'myIndex',
   'apm_oss.onboardingIndices': 'myIndex',
