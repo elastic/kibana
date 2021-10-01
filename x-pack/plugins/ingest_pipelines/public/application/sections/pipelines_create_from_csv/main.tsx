@@ -15,7 +15,6 @@ import { PipelinesCsvUploader } from './pipelines_csv_uploader';
 import { PipelinesPreview } from './pipelines_preview';
 import { Error } from './error_display';
 import { Instructions } from './instructions';
-import { readFile } from '../../lib/utils';
 import { FieldCopyAction, Processor } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
@@ -47,7 +46,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
   const onFileUpload = async (action: FieldCopyAction) => {
     if (file != null && file.length > 0) {
       setIsLoading(true);
-      processFile(file[0], action);
+      await processFile(file[0], action);
     }
   };
 
@@ -69,9 +68,9 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
 
     if (csv.size <= maxBytes) {
       try {
-        const fileContents = await readFile(csv, maxBytes);
+        const fileContents = await services.fileReader.readFile(csv, maxBytes);
 
-        fetchPipelineFromMapping(fileContents, action);
+        await fetchPipelineFromMapping(fileContents, action);
       } catch (e) {
         setIsLoading(false);
         setIsUploaded(false);
@@ -159,7 +158,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
 
       <Instructions />
 
-      {hasError && <Error errorTitle={errorTitle} errorDetails={errorDetails} />}
+      {hasError && (<Error errorTitle={errorTitle} errorDetails={errorDetails} />)}
 
       <EuiSpacer size="xl" />
 

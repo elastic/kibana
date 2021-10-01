@@ -5,33 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
+
+import { API_BASE_PATH } from '../../common/constants';
 
 import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelineCreateFromCsvTestBed } from './helpers/pipelines_create_from_csv.helpers';
 
 const { setup } = pageHelpers.pipelinesCreateFromCsv;
 
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
-
 describe('<PipelinesCreateFromCsv />', () => {
-  const { server } = setupEnvironment();
+  const { server, httpRequestsMockHelpers} = setupEnvironment();
   let testBed: PipelineCreateFromCsvTestBed;
 
   afterAll(() => {
@@ -90,39 +74,75 @@ describe('<PipelinesCreateFromCsv />', () => {
         });
 
         testBed.component.update();
+
+        httpRequestsMockHelpers.setMapToPipelineResponse({}, undefined);
       });
 
-      test('should send the correct payload', async () => {
+      test('should map pipeline from file upload', async () => {
         const { actions } = testBed;
+        const totalRequests = server.requests.length;
 
-        actions.clickProcessCsv();
+        await act(async () => {
+          actions.clickProcessCsv();
+        });
 
-        const latestRequest = server.requests[server.requests.length - 1];
+        expect(server.requests.length).toBe(totalRequests + 1);
+        expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/map`);
+      });
 
-        const expected = {
-          name: 'my_pipeline',
-          description: 'pipeline description',
-          processors: [],
+      test('should render an error message if error mapping pipeline', async () => {
+        const { actions, find, exists } = testBed;
+
+        const errorTitle = 'title';
+        const errorDetails = 'helpful description';
+
+        const error = {
+          status: 400,
+          error: 'Bad Request',
+          message: `${errorTitle}:${errorDetails}`,
         };
 
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
-      });
+        httpRequestsMockHelpers.setMapToPipelineResponse(undefined, { body: error });
 
-      test('should surface API errors from the request', async () => {
+        actions.selectCsvForUpload(mockFile);
+        await actions.clickProcessCsv();
         
+        expect(exists('errorCallout')).toBe(true);
+        expect(find('errorCallout').text()).toContain(errorTitle);
+        expect(find('errorCallout').text()).toContain(errorDetails);
       });
+      
 
-      describe('result options', () => {
-        test('continue to create', async () => {
-          
-        });
+      describe('results', () => {
+        const mockFile = {
+          name: 'foo.csv',
+          path: '/home/foo.csv',
+          size: 100
+        } as unknown as File;
   
-        test('copy to clipboard', async () => {
-          
-        });
+        beforeEach(async () => {
+          await act(async () => {
+            testBed = await setup();
+          });
   
-        test('download', async () => {
+          testBed.component.update();
+        });  
+
+        test('result buttons', async () => {
+          const { exists, find } = testBed;
+
+          await testBed.actions.uploadFile(mockFile);
+
+          expect(exists('pipelineMappingsJSONEditor')).toBe(true);
           
+          expect(exists('continueToCreate')).toBe(true);
+          expect(find('continueToCreate').text()).toContain('Continue to create ingest node pipeline');
+
+          expect(exists('copyToClipboard')).toBe(true);
+          expect(find('copyToClipboard').text()).toContain('Copy JSON to clipboard');
+
+          expect(exists('downloadJson')).toBe(true);
+          expect(find('downloadJson').text()).toContain('Download JSON');
         });
       });  
     });

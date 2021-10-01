@@ -114,40 +114,52 @@ export const PipelinesPreview: FC<Props> = ({
 
         <EuiSpacer size="m" />
 
-        {
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onClickToCreatePipeline}>
-                <FormattedMessage
-                  id="xpack.ingestPipelines.createFromCsv.preview.createPipeline"
-                  defaultMessage="Continue to create ingest node pipeline"
-                />
-              </EuiButton>
-            </EuiFlexItem>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={onClickToCreatePipeline}
+              data-test-subj="continueToCreate"
+            >
+              <FormattedMessage
+                id="xpack.ingestPipelines.createFromCsv.preview.createPipeline"
+                defaultMessage="Continue to create ingest node pipeline"
+              />
+            </EuiButton>
+          </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiCopy textToCopy={processorsJson}>
-                {(copy: () => void) => (
-                  <EuiButtonEmpty iconType="copy" size="s" onClick={copy}>
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.createFromCsv.preview.copy"
-                      defaultMessage="Copy JSON to clipboard"
-                    />
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCopy textToCopy={processorsJson}>
+              {(copy: () => void) => (
+                <EuiButtonEmpty
+                  iconType="copy"
+                  size="s"
+                  onClick={copy}
+                  data-test-subj="copyToClipboard"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.createFromCsv.preview.copy"
+                    defaultMessage="Copy JSON to clipboard"
+                  />
+                </EuiButtonEmpty>
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="download" size="s" onClick={onDownload}>
-                <FormattedMessage
-                  id="xpack.ingestPipelines.createFromCsv.preview.download"
-                  defaultMessage="Download JSON"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="download"
+              size="s"
+              onClick={onDownload}
+              data-test-subj="downloadJson"
+            >
+              <FormattedMessage
+                id="xpack.ingestPipelines.createFromCsv.preview.download"
+                defaultMessage="Download JSON"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -36,8 +36,4 @@ describe('utils', () => {
       expect(parseJson('{invalidJsonString}')).toEqual([]);
     });
   });
-
-  describe('readFile()', () => {
-
-  });
 });

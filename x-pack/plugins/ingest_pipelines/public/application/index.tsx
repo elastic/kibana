@@ -19,13 +19,14 @@ import { API_BASE_PATH } from '../../common/constants';
 import { AuthorizationProvider } from '../shared_imports';
 
 import { App } from './app';
-import { DocumentationService, UiMetricService, ApiService, BreadcrumbService } from './services';
+import { DocumentationService, UiMetricService, ApiService, BreadcrumbService, FileReaderService } from './services';
 
 export interface AppServices {
   breadcrumbs: BreadcrumbService;
   metric: UiMetricService;
   documentation: DocumentationService;
   api: ApiService;
+  fileReader: FileReaderService;
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;

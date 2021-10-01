@@ -16,7 +16,7 @@ interface Props {
 
 export const Error: FC<Props> = ({ errorTitle, errorDetails }) => {
   return (
-    <EuiCallOut title={errorTitle} color="danger" iconType="alert">
+    <EuiCallOut title={errorTitle} color="danger" iconType="alert" data-test-subj="errorCallout">
       <p>
         <FormattedMessage
           id="xpack.ingestPipelines.createFromCsv.errorMessage"

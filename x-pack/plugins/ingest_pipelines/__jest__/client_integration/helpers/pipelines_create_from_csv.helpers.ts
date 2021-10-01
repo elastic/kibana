@@ -37,19 +37,25 @@ const createFromCsvActions = (testBed: TestBed) => {
     component.find(EuiFilePicker).prop('onChange')!(csv);
   };
 
-  const clickProcessCsv = () => {
+  const clickProcessCsv = async () => {
     const { component, find } = testBed;
 
-    act(() => {
+    await act(async () => {
       find('processFileButton').simulate('click');
     });
 
     component.update();
   };
 
+  const uploadFile = async (file?: File) => {
+    selectCsvForUpload(file);
+    await clickProcessCsv();
+  };
+
   return {
     selectCsvForUpload,
-    clickProcessCsv
+    clickProcessCsv,
+    uploadFile
   };
 };
 
@@ -67,4 +73,10 @@ export type PipelineCreateFromCsvTestSubjects =
   | 'documentationLink'
   | 'processFileButton'
   | 'csvFilePicker'
+  | 'errorCallout'
+  | 'errorDetailsMessage'
+  | 'pipelineMappingsJSONEditor'
+  | 'continueToCreate'
+  | 'copyToClipboard'
+  | 'downloadJson'
   ;

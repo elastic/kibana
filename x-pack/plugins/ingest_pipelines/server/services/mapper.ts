@@ -31,6 +31,10 @@ interface Mapping {
 }
 
 export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
+  if (!file || file.length === 0) {
+    return null;
+  }
+
   const config: Papa.ParseConfig = {
     header: true,
     skipEmptyLines: true,
@@ -39,7 +43,11 @@ export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
   const { data, errors, meta } = parseOutput;
 
   if (errors.length > 0) {
-    return null;
+    throw new Error(
+      i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors', {
+        defaultMessage: 'Error parsing file',
+      })
+    );
   }
 
   const includesCheck = (arr: string[], target: string[]) => target.every((v) => arr.includes(v));
