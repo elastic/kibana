@@ -38,7 +38,7 @@ it('produces the right watch and ignore list', () => {
   expect(ignorePaths).toMatchInlineSnapshot(`
     Array [
       /\\[\\\\\\\\\\\\/\\]\\(\\\\\\.\\.\\*\\|node_modules\\|bower_components\\|target\\|public\\|__\\[a-z0-9_\\]\\+__\\|coverage\\)\\(\\[\\\\\\\\\\\\/\\]\\|\\$\\)/,
-      /\\\\\\.test\\\\\\.\\(js\\|tsx\\?\\)\\$/,
+      /\\\\\\.\\(test\\|spec\\)\\\\\\.\\(js\\|ts\\|tsx\\)\\$/,
       /\\\\\\.\\(md\\|sh\\|txt\\)\\$/,
       /debug\\\\\\.log\\$/,
       <absolute path>/src/plugins/*/test/**,
