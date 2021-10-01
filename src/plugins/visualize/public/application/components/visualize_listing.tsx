@@ -19,7 +19,7 @@ import { useLocation } from 'react-router-dom';
 
 import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { useKibana, TableListView } from '../../../../kibana_react/public';
-import { VISUALIZE_ENABLE_LABS_SETTING, findListItems } from '../../../../visualizations/public';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';

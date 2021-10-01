@@ -17,7 +17,6 @@ import { TopNavMenuData } from 'src/plugins/navigation/public';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeInput,
-  saveVisualization,
 } from '../../../../visualizations/public';
 import {
   showSaveModal,
