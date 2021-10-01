@@ -26,7 +26,6 @@ const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
 
 export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
   private capabilities$: Subject<Capabilities> = new Subject();
-  constructor() {}
 
   setup(
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
