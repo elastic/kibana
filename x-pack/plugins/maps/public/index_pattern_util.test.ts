@@ -18,7 +18,6 @@ import { IndexPatternField } from 'src/plugins/data/public';
 
 describe('getSourceFields', () => {
   test('Should remove multi fields from field list', () => {
-
     const agent = new IndexPatternField({
       name: 'agent',
       searchable: true,
