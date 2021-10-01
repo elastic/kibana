@@ -17,16 +17,12 @@ Low-level building blocks
 provide greater flexibility, but require more code to stitch them together into a meaningful UX. This results in higher maintenance cost for consumers and greater UI/UX variability
 across Kibana.
 
-For example, if an application is using <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns"/> and
-
-{' '}
-<DocLink id="kibBuildingBlocks" section="search-source" text="Search Source" />, their application would
+For example, if an application is using <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns"/> and <DocLink id="kibBuildingBlocks" section="search-source" text="Search Source" />, their application would
 automatically support runtime fields. If the app is instead using the lower-level <DocLink
   id="kibBuildingBlocks"
   section="search-strategy"
   text="Search Strategy"
-/>
-, additional work would be required.
+/>, additional work would be required.
 
 Armed with this knowledge, you can choose what works best for your use case!
 
@@ -39,25 +35,14 @@ The following high-level building blocks can be rendered directly into your appl
 ### Query Bar
 
 The <DocLink id="kibDataPlugin" text="Data plugin"/> provides a high-level Query Bar component that comes with support for Lucene, KQL, Saved Queries,
-and <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns"/>.
-
-If you would like to expose the ability to search and filter on Elasticsearch data, the Query Bar provided by the
-
-<DocLink id="kibDataPlugin" text="Data plugin" />
-is your go-to building block.
+and <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns"/>. If you would like to expose the ability to search and filter on Elasticsearch data, the Query Bar provided by the <DocLink id="kibDataPlugin" text="Data plugin" /> is your go-to building block.
 
 **Github labels**: `Team:AppServices`, `Feature:QueryBar`
 
 ### Dashboard Embeddable
 
 Add a Dashboard Embeddable directly inside your application to provide users with a set of visualizations and graphs that work seamlessly
-with the <DocLink id="kibBuildingBlocks" section="query-bar" text="Query Bar"/>. Every feature that is added to a registered
-
-<DocLink id="kibBuildingBlocks" section="embeddables" text="Embeddable" />
-(Lens, Maps, Saved Searches and more) will be available automatically, as well as any
-<DocLink id="kibBuildingBlocks" section="ui-actions--triggers" text="UI Actions" /> that are added to
-the Embeddable context menu panel (for example, drilldowns, custom panel time ranges, and "share to"
-features).
+with the <DocLink id="kibBuildingBlocks" section="query-bar" text="Query Bar"/>. Every feature that is added to a registered <DocLink id="kibBuildingBlocks" section="embeddables" text="Embeddable" /> (Lens, Maps, Saved Searches and more) will be available automatically, as well as any <DocLink id="kibBuildingBlocks" section="ui-actions--triggers" text="UI Actions" /> that are added to the Embeddable context menu panel (for example, drilldowns, custom panel time ranges, and "share to" features).
 
 The Dashboard Embeddable is one of the highest-level UI components you can add to your application.
 
@@ -65,14 +50,7 @@ The Dashboard Embeddable is one of the highest-level UI components you can add t
 
 ### Lens Embeddable
 
-Check out the Lens Embeddable if you wish to show users visualizations based on Elasticsearch data without worrying about query building and chart rendering. It's built on top of the
-
-{' '}
-<DocLink id="kibBuildingBlocks" section="expressions" text="Expression language" />, and integrates with
-<DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns" />
-and <DocLink id="kibBuildingBlocks" section="ui-actions--triggers" text="UI Actions" />. Using the
-same configuration, it's also possible to link to a prefilled Lens editor, allowing the user to
-drill deeper and explore their data.
+Check out the Lens Embeddable if you wish to show users visualizations based on Elasticsearch data without worrying about query building and chart rendering. It's built on top of the <DocLink id="kibBuildingBlocks" section="expressions" text="Expression language" />, and integrates with <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns" /> and <DocLink id="kibBuildingBlocks" section="ui-actions--triggers" text="UI Actions" />. Using the same configuration, it's also possible to link to a prefilled Lens editor, allowing the user to drill deeper and explore their data.
 
 **Github labels**: `Team:VisEditors`, `Feature:Lens`
 
@@ -107,16 +85,15 @@ Index Patterns are used in many other high-level building blocks so we highly re
 ### Search Source
 
 <DocLink id="kibDataPlugin" section="searchsource" text="Search Source" /> is a high-level search service
-offered by the
-<DocLink id="kibDataPlugin" section="searchsource" text="Data plugin" />. It requires an
-<DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Pattern" />, and abstracts away
+offered by the <DocLink id="kibDataPlugin" section="searchsource" text="Data plugin" />. It requires
+an <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Pattern" />, and abstracts away
 the raw ES DSL and search endpoint. Internally it uses the ES <DocLink
   id="kibBuildingBlocks"
   section="search-strategies"
   text="Search Strategy"
 />
-. Use Search Source if you need to query data from Elasticsearch, and you aren't already using one
-of the high-level UI Components that handles this internally.
+. Use Search Source if you need to query data from Elasticsearch, and you aren't already using one of
+the high-level UI Components that handles this internally.
 
 **Github labels**: `Team:AppServices`, `Feature:Search`
 
@@ -131,11 +108,7 @@ languages, like EQL and SQL. These are very low-level building blocks so expect 
 ### Expressions
 
 Expressions are a low-level building block that can be used if you have advanced search needs that requiring piping results into additional functionality, like
-joining and manipulating data. Lens and Canvas are built on top of Expressions. Most developers should be able to use
-
-{' '}
-<DocLink id="kibBuildingBlocks" section="lens-embeddable" text="Lens" /> or
-<DocLink id="kibBuildingBlocks" section="search-source" text="Search Source" />, rather than need to
+joining and manipulating data. Lens and Canvas are built on top of Expressions. Most developers should be able to use <DocLink id="kibBuildingBlocks" section="lens-embeddable" text="Lens" /> or <DocLink id="kibBuildingBlocks" section="search-source" text="Search Source" />, rather than need to
 access the Expression language directly.{' '}
 
 **Github labels**: `Team:AppServices`, `Feature:ExpressionLanguage`
