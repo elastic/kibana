@@ -133,6 +133,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   if (noDataConfig) {
     return (
       <EuiPageTemplate
+        data-test-subj={rest['data-test-subj']}
         template={template}
         className={classes}
         pageSideBar={pageSideBar}
@@ -142,7 +143,6 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
           className: classNames(sideBarClasses, pageSideBarProps?.className),
         }}
         {...NO_DATA_PAGE_TEMPLATE_PROPS}
-        {...rest}
       >
         <NoDataPage {...noDataConfig} />
       </EuiPageTemplate>
