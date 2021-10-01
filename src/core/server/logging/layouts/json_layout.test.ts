@@ -94,7 +94,7 @@ test('`format()` correctly formats record with meta-data and correct ECS version
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.12.0' },
+    ecs: { version: '8.0.0' },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     log: {
       level: 'DEBUG',
