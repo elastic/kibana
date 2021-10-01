@@ -22,7 +22,7 @@ import {
 } from './utils';
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus } from '../signals/__mocks__/es_results';
-import { resolveAlertMock } from './__mocks__/request_responses';
+import { getAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -229,14 +229,12 @@ describe.each([
       rulesClient = rulesClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      rulesClient.resolve.mockResolvedValue(
-        resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-      );
+      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
       const res = await getFailingRules(['my-fake-id'], rulesClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const foundRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,
@@ -245,12 +243,12 @@ describe.each([
           message: 'oops',
         },
       };
-      rulesClient.resolve.mockResolvedValue(foundRule);
+      rulesClient.get.mockResolvedValue(foundRule);
       const res = await getFailingRules([foundRule.id], rulesClient);
       expect(res).toEqual({ [foundRule.id]: foundRule });
     });
     it('getFailingRules throws an error', async () => {
-      rulesClient.resolve.mockImplementation(() => {
+      rulesClient.get.mockImplementation(() => {
         throw new Error('my test error');
       });
       let error;

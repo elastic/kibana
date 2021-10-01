@@ -380,8 +380,7 @@ export const resolveSimpleRuleOutput = (
  */
 export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { rule_id, ...ruleWithoutRuleId } = rule;
+  const { rule_id: rId, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
 };
 
@@ -391,8 +390,7 @@ export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<Rul
  */
 export const resolveSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { rule_id, ...ruleWithoutRuleId } = rule;
+  const { rule_id: rId, ...ruleWithoutRuleId } = rule;
   return { outcome: 'exactMatch', ...ruleWithoutRuleId };
 };
 

@@ -51,7 +51,6 @@ export const ruleStatusSavedObjectsClientFactory = (
     if (ids.length === 0) {
       return {};
     }
-
     const filter = buildChunkedOrFilter(`${ruleStatusSavedObjectType}.attributes.alertId`, ids);
     const order: 'desc' = 'desc';
     const aggs = {

@@ -46,7 +46,6 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       }
 
       const ids = body.ids;
-
       try {
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const [statusesById, failingRules] = await Promise.all([
