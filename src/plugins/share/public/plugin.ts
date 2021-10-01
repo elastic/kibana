@@ -21,6 +21,7 @@ import {
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
+import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
@@ -86,8 +87,6 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     const { application, http } = core;
     const { basePath } = http;
 
-    application.register(createShortUrlRedirectApp(core, window.location));
-
     this.url = new UrlService({
       baseUrl: basePath.publicBaseUrl || basePath.serverBasePath,
       version: this.initializerContext.env.packageInfo.version,
@@ -107,7 +106,27 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         });
         return url;
       },
+      shortUrls: {
+        get: () => ({
+          create: async () => {
+            throw new Error('Not implemented');
+          },
+          get: async () => {
+            throw new Error('Not implemented');
+          },
+          delete: async () => {
+            throw new Error('Not implemented');
+          },
+          resolve: async () => {
+            throw new Error('Not implemented.');
+          },
+        }),
+      },
     });
+
+    this.url.locators.create(new LegacyShortUrlLocatorDefinition());
+
+    application.register(createShortUrlRedirectApp(core, window.location, this.url));
 
     this.redirectManager = new RedirectManager({
       url: this.url,
