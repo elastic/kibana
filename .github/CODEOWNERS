@@ -448,3 +448,6 @@
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
 
+# Logstash
+/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services
+
