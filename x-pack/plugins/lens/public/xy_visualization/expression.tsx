@@ -191,20 +191,18 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 const MemoizedChart = React.memo(XYChart);
 
 export function XYChartReportable(props: XYChartRenderProps) {
-  const [state, setState] = useState({
-    isReady: false,
-  });
+  const [isReady, setIsReady] = useState(false);
 
   // It takes a cycle for the XY chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
-    setState({ isReady: true });
-  }, [setState]);
+    setIsReady(true);
+  }, [setIsReady]);
 
   return (
     <VisualizationContainer
       className="lnsXyExpression__container"
-      isReady={state.isReady}
+      isReady={isReady}
       reportTitle={props.args.title}
       reportDescription={props.args.description}
     >
@@ -838,7 +836,6 @@ export function XYChart({
         <ThresholdAnnotations
           thresholdLayers={thresholdLayers}
           data={data}
-          colorAssignments={colorAssignments}
           syncColors={syncColors}
           paletteService={paletteService}
           formatters={{
