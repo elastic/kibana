@@ -41,12 +41,10 @@ $controlMinWidth: $euiSize * 14;
     cursor: grabbing;
     height: $euiButtonHeight;
     align-items: center;
-    border-radius: 6px;
+    border-radius: $euiBorderRadius;
     @include euiFontSizeS;
     font-weight: $euiFontWeightSemiBold;
-    box-shadow:
-      #{$euiFormControlBoxShadow},
-      inset 0 0 0 1px $euiFormBorderColor;
+    @include euiFormControlDefaultShadow;
     background-color: $euiFormInputGroupLabelBackground;
     min-width: $controlMinWidth;
   }
