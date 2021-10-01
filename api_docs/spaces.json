@@ -1489,7 +1489,7 @@
             "section": "def-common.GetSpaceResult",
             "text": "GetSpaceResult"
           },
-          ", \"color\" | \"description\" | \"id\" | \"name\" | \"initials\" | \"imageUrl\" | \"_reserved\">"
+          ", \"color\" | \"id\" | \"description\" | \"name\" | \"initials\" | \"imageUrl\" | \"_reserved\">"
         ],
         "path": "x-pack/plugins/spaces/public/types.ts",
         "deprecated": false,
