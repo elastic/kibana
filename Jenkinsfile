@@ -11,6 +11,7 @@ kibanaLibrary.load()
 kibanaPipeline(timeoutMinutes: 300, checkPrChanges: false, setCommitStatus: false) {
   withEnv([
     'IGNORE_SHIP_CI_STATS_ERROR=true',
+    'CI_PARALLEL_PROCESS_NUMBER=1',
   ]) {
     workers.ci(name: "test-x", size: 'n2-standard-16', ramDisk: true) {
       kibanaPipeline.buildPlugins()
