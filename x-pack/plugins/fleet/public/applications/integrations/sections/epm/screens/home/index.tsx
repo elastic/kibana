@@ -38,7 +38,9 @@ import type { IntegrationCardItem } from '../../../../../../../common/types/mode
 
 import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
-import { mergeAndReplaceCategoryCounts, mergeEprPackagesWithReplacements } from './util';
+import { useMergeEprPackagesWithReplacements } from '../../../../../../hooks/use_merge_epr_with_replacements';
+
+import { mergeAndReplaceCategoryCounts } from './util';
 import { CategoryFacets } from './category_facets';
 import type { CategoryFacet } from './category_facets';
 
@@ -282,20 +284,12 @@ const AvailablePackages: React.FC = memo(() => {
   const { loading: isLoadingReplacementCustomIntegrations, value: replacementCustomIntegrations } =
     useGetReplacementCustomIntegrations();
 
-  const mergedEprPackages: Array<PackageListItem | CustomIntegration> = useMemo(() => {
-    return !isLoadingReplacementCustomIntegrations
-      ? mergeEprPackagesWithReplacements(
-          eprPackages || [],
-          replacementCustomIntegrations || [],
-          selectedCategory as IntegrationCategory
-        )
-      : [];
-  }, [
-    eprPackages,
-    replacementCustomIntegrations,
-    isLoadingReplacementCustomIntegrations,
-    selectedCategory,
-  ]);
+  const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
+    useMergeEprPackagesWithReplacements(
+      eprPackages || [],
+      replacementCustomIntegrations || [],
+      selectedCategory as IntegrationCategory
+    );
 
   const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
     useGetAppendCustomIntegrations();
