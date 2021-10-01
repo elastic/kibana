@@ -16,12 +16,12 @@ export interface IndicesSelector {
 
 export const getIndicesSelector = () => {
   const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
-  const getScopesSelector = sourcererSelectors.scopesSelector();
+  const getScopeSelector = sourcererSelectors.scopeIdSelector();
 
   return (state: State, scopeId: SourcererScopeName): IndicesSelector => {
     const raw: string[] = [];
     const signalIndexName = getSignalIndexNameSelector(state);
-    const { selectedPatterns } = getScopesSelector(state)[scopeId];
+    const { selectedPatterns } = getScopeSelector(state, scopeId);
     selectedPatterns.forEach((index) => {
       // indexOf instead of === because the dataView version of signals index
       // will have a wildcard and the signalIndexName does not include the wildcard

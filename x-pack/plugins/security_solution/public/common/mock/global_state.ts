@@ -41,11 +41,11 @@ import { allowedExperimentalValues } from '../../../common/experimental_features
 
 export const mockSourcererState = {
   ...initialSourcererState,
-  signalIndexName: DEFAULT_SIGNALS_INDEX,
+  signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
   defaultDataView: {
     id: DEFAULT_DATA_VIEW_ID,
-    title: [...DEFAULT_INDEX_PATTERN, DEFAULT_SIGNALS_INDEX].join(','),
-    patternList: [...DEFAULT_INDEX_PATTERN, DEFAULT_SIGNALS_INDEX],
+    title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename-*`].join(','),
+    patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename-*`],
   },
 };
 
@@ -324,7 +324,17 @@ export const mockGlobalState: State = {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: mockSourcererState.defaultDataView.patternList.filter(
-          (p) => p !== DEFAULT_SIGNALS_INDEX
+          (p) => p.indexOf(DEFAULT_SIGNALS_INDEX) === -1
+        ),
+        browserFields: mockBrowserFields,
+        indexPattern: mockIndexPattern,
+        docValueFields: mockDocValueFields,
+      },
+      [SourcererScopeName.detections]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.detections],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: mockSourcererState.defaultDataView.patternList.filter(
+          (p) => p.indexOf(DEFAULT_SIGNALS_INDEX) === 0
         ),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,

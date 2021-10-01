@@ -9,6 +9,7 @@ import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
 import { KibanaDataView, ManageScope, SourcererScopeById, SourcererScopeName } from './model';
+import { getScopePatternListSelection } from './helpers';
 
 export const sourcererKibanaDataViewsSelector = ({ sourcerer }: State): KibanaDataView[] =>
   sourcerer.kibanaDataViews;
@@ -46,7 +47,7 @@ export interface SelectedDataView {
   selectedPatterns: string[];
 }
 
-// TODO: Steph/sourcerer needs tests/cleanup
+// tested via containers/source/index.test.tsx
 export const getSelectedDataViewSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();
@@ -69,7 +70,7 @@ export const getSelectedDataViewSelector = () => {
       if (scopeId === SourcererScopeName.detections && signalIndexName != null) {
         selectedPatterns = [signalIndexName];
       } else if (scopeId !== SourcererScopeName.detections && theDataView != null) {
-        selectedPatterns = theDataView.patternList;
+        selectedPatterns = getScopePatternListSelection(theDataView, scopeId, signalIndexName);
       }
     }
 

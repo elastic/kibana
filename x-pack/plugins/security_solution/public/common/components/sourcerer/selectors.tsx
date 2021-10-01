@@ -17,13 +17,13 @@ export const getSourcererScopeSelector = () => {
   const getKibanaDataViewsSelector = sourcererSelectors.kibanaDataViewsSelector();
   const getDefaultDataViewSelector = sourcererSelectors.defaultDataViewSelector();
   const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
-  const getScopesSelector = sourcererSelectors.scopesSelector();
+  const getScopeSelector = sourcererSelectors.scopeIdSelector();
 
   return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
     const kibanaDataViews = getKibanaDataViewsSelector(state);
     const defaultDataView = getDefaultDataViewSelector(state);
     const signalIndexName = getSignalIndexNameSelector(state);
-    const scope = getScopesSelector(state)[scopeId];
+    const scope = getScopeSelector(state, scopeId);
 
     return {
       defaultDataView,

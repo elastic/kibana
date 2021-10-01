@@ -28,6 +28,8 @@ export interface ManageScope {
   docValueFields: DocValueFields[];
   errorMessage: string | null;
   id: SourcererScopeName;
+  // the index pattern value passed to the search to make the query
+  // includes fields and a title with active index names
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;

@@ -217,7 +217,9 @@ export const useFetchIndex = (
  * Sourcerer specific index fields hook/request
  * sets redux state, returns nothing
  */
-export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
+export const useIndexFields = (
+  sourcererScopeName: SourcererScopeName
+): { indexFieldsSearch: (selectedDataViewId: string, newSignalsIndex?: string) => void } => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -334,7 +336,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
             },
           });
       };
-
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();

@@ -41,7 +41,6 @@ export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'securitySolution:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
-export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
 export const DEFAULT_FROM = 'now/d';
 export const DEFAULT_TO = 'now/d';
 export const DEFAULT_INTERVAL_PAUSE = true;
