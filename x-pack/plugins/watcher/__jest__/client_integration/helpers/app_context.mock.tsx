@@ -9,7 +9,6 @@ import React from 'react';
 import { of } from 'rxjs';
 import { ComponentType } from 'enzyme';
 import { LocationDescriptorObject } from 'history';
-import { SemVer } from 'semver';
 
 import {
   docLinksServiceMock,
@@ -21,7 +20,6 @@ import {
 import { AppContextProvider } from '../../../public/application/app_context';
 import { AppDeps } from '../../../public/application/app';
 import { LicenseStatus } from '../../../common/types/license_status';
-import { MAJOR_VERSION } from '../../../common/constants';
 
 class MockTimeBuckets {
   setBounds(_domain: any) {
@@ -53,7 +51,6 @@ export const mockContextValue: AppDeps = {
   http: httpServiceMock.createSetupContract(),
   history,
   getUrlForApp: jest.fn(),
-  kibanaVersion: new SemVer(MAJOR_VERSION),
 };
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {

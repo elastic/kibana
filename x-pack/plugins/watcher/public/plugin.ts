@@ -6,15 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  CoreSetup,
-  Plugin,
-  CoreStart,
-  Capabilities,
-  PluginInitializerContext,
-} from 'kibana/public';
+import { CoreSetup, Plugin, CoreStart, Capabilities } from 'kibana/public';
 import { first, map, skip } from 'rxjs/operators';
-import { SemVer } from 'semver';
 import { Subject, combineLatest } from 'rxjs';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
@@ -33,14 +26,13 @@ const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
 
 export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
   private capabilities$: Subject<Capabilities> = new Subject();
-  constructor(private ctx: PluginInitializerContext) {}
+  constructor() {}
 
   setup(
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
     { licensing, management, data, home, charts }: Dependencies
   ) {
     const esSection = management.sections.section.insightsAndAlerting;
-    const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
 
     const pluginName = i18n.translate(
       'xpack.watcher.sections.watchList.managementSection.watcherDisplayName',
@@ -82,7 +74,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
           history,
           getUrlForApp: application.getUrlForApp,
-          kibanaVersion,
         });
 
         return () => {
