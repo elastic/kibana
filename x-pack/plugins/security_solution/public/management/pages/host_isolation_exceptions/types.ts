@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../state/async_resource_state';
 
 export interface HostIsolationExceptionsPageLocation {
@@ -20,4 +25,10 @@ export interface HostIsolationExceptionsPageLocation {
 export interface HostIsolationExceptionsPageState {
   entries: AsyncResourceState<FoundExceptionListItemSchema>;
   location: HostIsolationExceptionsPageLocation;
+  form: {
+    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema | undefined;
+    status: AsyncResourceState<ExceptionListItemSchema>;
+    hasNameError: boolean;
+    hasIpError: boolean;
+  };
 }
