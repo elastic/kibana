@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./exploratory_view'));
     loadTestFile(require.resolve('./alerts'));
     loadTestFile(require.resolve('./alerts/workflow_status'));
+    loadTestFile(require.resolve('./alerts/pagination'));
   });
 }
