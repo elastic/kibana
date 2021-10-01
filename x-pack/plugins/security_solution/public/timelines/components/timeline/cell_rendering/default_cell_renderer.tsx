@@ -14,7 +14,7 @@ import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 import { CellValueElementProps } from '.';
 import { getLink } from '../../../../common/lib/cell_actions/default_cell_actions';
 import {
-  ExpandTopValue,
+  ExpandedCellValueActions,
   StyledContent,
 } from '../../../../common/lib/cell_actions/expand_top_value';
 
@@ -67,7 +67,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         })}
       </StyledContent>
       {isDetails && browserFields && hasCellActions(header.id) && (
-        <ExpandTopValue
+        <ExpandedCellValueActions
           browserFields={browserFields}
           field={header.id}
           globalFilters={globalFilters}

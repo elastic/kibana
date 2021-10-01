@@ -35,7 +35,7 @@ export const StyledContent = styled.div<{ $isDetails: boolean }>`
   padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
 `;
 
-const ExpandTopValueComponent: React.FC<Props> = ({
+const ExpandedCellValueActionsComponent: React.FC<Props> = ({
   browserFields,
   field,
   globalFilters,
@@ -116,6 +116,6 @@ const ExpandTopValueComponent: React.FC<Props> = ({
   );
 };
 
-ExpandTopValueComponent.displayName = 'ExpandTopValueComponent';
+ExpandedCellValueActionsComponent.displayName = 'ExpandedCellValueActionsComponent';
 
-export const ExpandTopValue = React.memo(ExpandTopValueComponent);
+export const ExpandedCellValueActions = React.memo(ExpandedCellValueActionsComponent);
