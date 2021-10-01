@@ -37,7 +37,7 @@ export interface ColumnRenderer {
     eventId: string;
     field: ColumnHeaderOptions;
     globalFilters?: Filter[];
-    isDetails: boolean;
+    isDetails?: boolean;
     isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];

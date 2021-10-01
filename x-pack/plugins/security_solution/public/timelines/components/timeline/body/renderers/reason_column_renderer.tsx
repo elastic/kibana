@@ -40,7 +40,7 @@ export const reasonColumnRenderer: ColumnRenderer = {
     ecsData?: Ecs;
     eventId: string;
     field: ColumnHeaderOptions;
-    isDetails: boolean;
+    isDetails?: boolean;
     isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];
@@ -103,7 +103,7 @@ const ReasonCell: React.FC<{
           {value}
           <h4>{i18n.EVENT_RENDERER_POPOVER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>
           <EuiSpacer size="xs" />
-          <EuiPanel color="subdued" data-test-subj="tGridEmptyState">
+          <EuiPanel color="subdued" data-test-subj="reason-cell-renderer">
             {rowRender}
           </EuiPanel>
         </>
