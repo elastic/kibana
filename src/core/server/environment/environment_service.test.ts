@@ -17,7 +17,6 @@ import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { mockCoreContext } from '../core_context.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
 
 jest.mock('./resolve_uuid', () => ({
   resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
