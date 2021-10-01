@@ -79,20 +79,4 @@ for (const testSuite of testSuites) {
   }
 }
 
-steps.push(
-  {
-    wait: '~',
-    continue_on_failure: true,
-  },
-  {
-    plugins: [
-      {
-        'junit-annotate#v1.9.0': {
-          artifacts: 'target/junit/**/*.xml',
-        },
-      },
-    ],
-  }
-);
-
 console.log(JSON.stringify(pipeline, null, 2));
