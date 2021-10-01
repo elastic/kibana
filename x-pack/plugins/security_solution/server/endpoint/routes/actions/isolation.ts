@@ -6,13 +6,18 @@
  */
 
 import moment from 'moment';
-import { RequestHandler } from 'src/core/server';
+import { ElasticsearchClient, RequestHandler, Logger } from 'src/core/server';
 import uuid from 'uuid';
 import { TypeOf } from '@kbn/config-schema';
+import { LogsEndpointAction } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { CommentType } from '../../../../../cases/common';
 import { CasesByAlertId } from '../../../../../cases/common/api/cases/case';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
-import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTIONS_DS,
+  ISOLATE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE,
+} from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import { EndpointAction, HostMetadata } from '../../../../common/endpoint/types';
 import {
@@ -51,6 +56,31 @@ export function registerHostIsolationRoutes(
     isolationRequestHandler(endpointContext, false)
   );
 }
+
+const doLogsEndpointActionDsExists = async ({
+  esClient,
+  logger,
+  dataStreamName,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  dataStreamName: string;
+}): Promise<boolean> => {
+  let doesIndexTemplateExist;
+  try {
+    doesIndexTemplateExist = await esClient.indices.existsIndexTemplate({
+      name: dataStreamName,
+    });
+  } catch (error) {
+    const errorType = error?.type ?? '';
+    if (errorType !== 'resource_not_found_exception') {
+      logger.error(error);
+      throw error;
+    }
+    return false;
+  }
+  return doesIndexTemplateExist.statusCode === 404 ? false : true;
+};
 
 export const isolationRequestHandler = function (
   endpointContext: EndpointAppContext,
@@ -106,25 +136,82 @@ export const isolationRequestHandler = function (
     caseIDs = [...new Set(caseIDs)];
 
     // create an Action ID and dispatch it to ES & Fleet Server
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    let esClient = context.core.elasticsearch.client.asInternalUser;
     const actionID = uuid.v4();
-    let result;
+
+    let fleetActionIndexResult;
+    let logsEndpointActionsResult;
+
+    const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+    const doc = {
+      '@timestamp': moment().toISOString(),
+      agent: {
+        id: agents,
+      },
+      EndpointAction: {
+        action_id: actionID,
+        expiration: moment().add(2, 'weeks').toISOString(),
+        type: 'INPUT_ACTION',
+        input_type: 'endpoint',
+        data: {
+          command: isolate ? 'isolate' : 'unisolate',
+          comment: req.body.comment ?? undefined,
+        },
+      } as Omit<EndpointAction, 'agents' | 'user_id'>,
+      user: {
+        id: user!.username,
+      },
+    };
+
+    // if .logs-endpoint.actions data stream exists
+    // create action request record in .logs-endpoint.actions DS as the user
+    const doesLogsEndpointActionsDsExist = await doLogsEndpointActionDsExists({
+      esClient,
+      logger: endpointContext.logFactory.get('host-isolation'),
+      dataStreamName: ENDPOINT_ACTIONS_DS,
+    });
+    if (doesLogsEndpointActionsDsExist) {
+      esClient = context.core.elasticsearch.client.asCurrentUser;
+      try {
+        logsEndpointActionsResult = await esClient.index<LogsEndpointAction>({
+          index: `${ENDPOINT_ACTIONS_DS}-default`,
+          body: {
+            ...doc,
+          },
+        });
+      } catch (e) {
+        return res.customError({
+          statusCode: 500,
+          body: { message: e },
+        });
+      }
+
+      if (logsEndpointActionsResult.statusCode !== 201) {
+        return res.customError({
+          statusCode: 500,
+          body: {
+            message: logsEndpointActionsResult.body.result,
+          },
+        });
+      }
+    }
+
+    // create action request record as system user in .fleet-actions
     try {
-      result = await esClient.index<EndpointAction>({
+      // we use this check to ensure the user has permission to write to this new index
+      // and thus allow this action to be added to the fleet index by kibana
+      if (!doesLogsEndpointActionsDsExist) {
+        esClient = context.core.elasticsearch.client.asCurrentUser;
+      }
+
+      fleetActionIndexResult = await esClient.index<EndpointAction>({
         index: AGENT_ACTIONS_INDEX,
         body: {
-          action_id: actionID,
-          '@timestamp': moment().toISOString(),
-          expiration: moment().add(2, 'weeks').toISOString(),
-          type: 'INPUT_ACTION',
-          input_type: 'endpoint',
-          agents: endpointData.map((endpt: HostMetadata) => endpt.elastic.agent.id),
-          user_id: user!.username,
+          ...doc.EndpointAction,
+          '@timestamp': doc['@timestamp'],
+          agents,
           timeout: 300, // 5 minutes
-          data: {
-            command: isolate ? 'isolate' : 'unisolate',
-            comment: req.body.comment ?? undefined,
-          },
+          user_id: doc.user.id,
         },
       });
     } catch (e) {
@@ -134,11 +221,11 @@ export const isolationRequestHandler = function (
       });
     }
 
-    if (result.statusCode !== 201) {
+    if (fleetActionIndexResult.statusCode !== 201) {
       return res.customError({
         statusCode: 500,
         body: {
-          message: result.body.result,
+          message: fleetActionIndexResult.body.result,
         },
       });
     }
