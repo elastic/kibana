@@ -178,17 +178,21 @@ describe('Sourcerer Hooks', () => {
       });
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch.mock.calls[3][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
-        payload: { signalIndexName: DEFAULT_SIGNALS_INDEX },
-      });
       expect(mockDispatch.mock.calls[2][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',
           selectedDataViewId: mockSourcererState.defaultDataView.id,
-          selectedPatterns: mockSourcererState.defaultDataView.patternList,
+          selectedPatterns: mockSourcererState.defaultDataView.patternList.sort(),
         },
+      });
+      expect(mockDispatch.mock.calls[3][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+        payload: { loading: true },
+      });
+      expect(mockDispatch.mock.calls[4][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
+        payload: { signalIndexName: DEFAULT_SIGNALS_INDEX },
       });
     });
   });
