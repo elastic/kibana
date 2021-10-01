@@ -47,6 +47,7 @@ export type SecurityNavKey =
   | SecurityPageName.endpoints
   | SecurityPageName.eventFilters
   | SecurityPageName.exceptions
+  | SecurityPageName.hostIsolationExceptions
   | SecurityPageName.hosts
   | SecurityPageName.network
   | SecurityPageName.overview

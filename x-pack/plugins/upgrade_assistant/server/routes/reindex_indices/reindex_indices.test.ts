@@ -11,6 +11,8 @@ import { licensingMock } from '../../../../licensing/server/mocks';
 import { securityMock } from '../../../../security/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
+import { handleEsError } from '../../shared_imports';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -60,6 +62,7 @@ describe('reindex API', () => {
       credentialStore,
       router: mockRouter,
       licensing: licensingMock.createSetup(),
+      lib: { handleEsError },
       getSecurityPlugin: () => securityMock.createStart(),
     };
     registerReindexIndicesRoutes(routeDependencies, () => worker);
@@ -123,6 +126,24 @@ describe('reindex API', () => {
           },
         },
       ]);
+    });
+
+    it('returns es errors', async () => {
+      mockReindexService.findReindexOperation.mockResolvedValueOnce(null);
+      mockReindexService.detectReindexWarnings.mockRejectedValueOnce(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(
+        routeHandlerContextMock,
+        createRequestMock({ params: { indexName: 'anIndex' } }),
+        kibanaResponseFactory
+      );
+
+      expect(resp.status).toEqual(404);
     });
 
     it("returns null for both if reindex operation doesn't exist and index doesn't exist", async () => {
