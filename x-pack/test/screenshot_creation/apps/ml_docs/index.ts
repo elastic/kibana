@@ -12,6 +12,7 @@ export const FLIGHTS_INDEX_PATTERN = 'kibana_sample_data_flights';
 export const LOGS_INDEX_PATTERN = 'kibana_sample_data_logs';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
+  const browser = getService('browser');
   const ml = getService('ml');
 
   describe('machine learning docs', function () {
@@ -19,6 +20,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     before(async () => {
       await ml.testResources.installAllKibanaSampleData();
+      await ml.testResources.setKibanaTimeZoneToUTC();
+      await browser.setWindowSize(1920, 1080);
     });
 
     after(async () => {

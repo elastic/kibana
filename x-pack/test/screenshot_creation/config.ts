@@ -6,6 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
@@ -13,6 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     // default to the xpack functional config
     ...xpackFunctionalConfig.getAll(),
+    services,
     testFiles: [require.resolve('./apps')],
     junit: {
       ...xpackFunctionalConfig.get('junit'),

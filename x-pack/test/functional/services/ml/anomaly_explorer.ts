@@ -174,5 +174,9 @@ export function MachineLearningAnomalyExplorerProvider({
         `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
       );
     },
+
+    async scrollChartsContainerIntoView() {
+      await testSubjects.scrollIntoView('mlExplorerChartsContainer');
+    },
   };
 }
