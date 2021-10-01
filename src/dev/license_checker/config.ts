@@ -22,6 +22,7 @@ export const LICENSE_ALLOWED = [
   '(MIT OR Apache-2.0)',
   '(MIT OR GPL-3.0)',
   '(WTFPL OR MIT)',
+  '(MIT OR WTFPL)',
   '(Unlicense OR Apache-2.0)',
   'AFLv2.1',
   'Apache 2.0',
