@@ -95,27 +95,25 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
       id={node}
       pageType="nodes"
     >
-      <div data-test-subj="elasticsearchNodeListingPage">
-        <SetupModeRenderer
-          render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
-            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-              {flyoutComponent}
-              <NodeReact
-                alerts={{}}
-                nodeId={node}
-                clusterUuid={clusterUuid}
-                onBrush={onBrush}
-                zoomInfo={zoomInfo}
-                toggleShowSystemIndices={toggleShowSystemIndices}
-                showSystemIndices={showSystemIndices}
-                nodesByIndices={nodesByIndicesData}
-                {...data}
-              />
-              {bottomBarComponent}
-            </SetupModeContext.Provider>
-          )}
-        />
-      </div>
+      <SetupModeRenderer
+        render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
+          <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+            {flyoutComponent}
+            <NodeReact
+              alerts={{}}
+              nodeId={node}
+              clusterUuid={clusterUuid}
+              onBrush={onBrush}
+              zoomInfo={zoomInfo}
+              toggleShowSystemIndices={toggleShowSystemIndices}
+              showSystemIndices={showSystemIndices}
+              nodesByIndices={nodesByIndicesData}
+              {...data}
+            />
+            {bottomBarComponent}
+          </SetupModeContext.Provider>
+        )}
+      />
     </ItemTemplate>
   );
 };
