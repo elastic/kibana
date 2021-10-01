@@ -20,60 +20,34 @@ import {
 import { api } from './api';
 
 const SPLIT_REGEX = /[ ,|\r\n\t]+/;
-const SPLIT_REGEX_GLOBAL = /[ ,|\r\n\t]+/g;
 
-export const formatObservables = (observables: string | string[], type: ObservableTypes) => {
+export const formatObservables = (observables: string[], type: ObservableTypes) => {
   /**
    * ServiceNow accepted formats are: comma, new line, tab, or pipe separators.
    * Before the application the observables were being sent to ServiceNow as a concatenated string with
    * delimiter. With the application the format changed to an array of observables.
    */
-  const obsAsArray = Array.isArray(observables) ? observables : observables.split(SPLIT_REGEX);
-  const uniqueObservables = new Set(obsAsArray);
+  const uniqueObservables = new Set(observables);
   return [...uniqueObservables].filter((obs) => !isEmpty(obs)).map((obs) => ({ value: obs, type }));
 };
 
-export const combineObservables = (
-  a: string | string[],
-  b: string | string[]
-): string | string[] => {
-  // Both are empty
-  if (isEmpty(a) && isEmpty(b)) {
+const obsAsArray = (obs: string | string[]): string[] => {
+  if (isEmpty(obs)) {
     return [];
   }
 
-  /**
-   * One of a or b can be empty
-   * but not both
-   */
-  if (isEmpty(a)) {
-    return b;
+  if (isString(obs)) {
+    return obs.split(SPLIT_REGEX);
   }
 
-  if (isEmpty(b)) {
-    return a;
-  }
+  return obs;
+};
 
-  /**
-   * Neither of a or b is empty
-   * a and b can be either a string or an array
-   */
-  if (isString(a) && Array.isArray(b)) {
-    return [...a.split(SPLIT_REGEX), ...b];
-  }
+export const combineObservables = (a: string | string[], b: string | string[]): string[] => {
+  const first = obsAsArray(a);
+  const second = obsAsArray(b);
 
-  if (Array.isArray(a) && isString(b)) {
-    return [...a, ...b.split(SPLIT_REGEX)];
-  }
-
-  /**
-   * a and b are both an array or a string
-   */
-  return Array.isArray(a) && Array.isArray(b)
-    ? [...a, ...b]
-    : isString(a) && isString(b)
-    ? `${a.replace(SPLIT_REGEX_GLOBAL, ',')},${b.replace(SPLIT_REGEX_GLOBAL, ',')}`
-    : [];
+  return [...first, ...second];
 };
 
 const observablesToString = (obs: string | string[] | null | undefined): string | null => {
@@ -159,10 +133,10 @@ const pushToServiceHandler = async ({
   if (!config.isLegacy) {
     const sirExternalService = externalService as ExternalServiceSIR;
 
-    const obsWithType: Array<[string | string[], ObservableTypes]> = [
+    const obsWithType: Array<[string[], ObservableTypes]> = [
       [combineObservables(destIP ?? [], sourceIP ?? []), ObservableTypes.ip4],
-      [malwareHash ?? [], ObservableTypes.sha256],
-      [malwareUrl ?? [], ObservableTypes.url],
+      [obsAsArray(malwareHash ?? []), ObservableTypes.sha256],
+      [obsAsArray(malwareUrl ?? []), ObservableTypes.url],
     ];
 
     const observables = obsWithType.map(([obs, type]) => formatObservables(obs, type)).flat();

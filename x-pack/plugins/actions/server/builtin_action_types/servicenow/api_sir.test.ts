@@ -37,15 +37,15 @@ describe('api_sir', () => {
     });
 
     test('it returns a if b is empty', async () => {
-      expect(combineObservables('a', '')).toEqual('a');
+      expect(combineObservables('a', '')).toEqual(['a']);
     });
 
     test('it returns b if a is empty', async () => {
       expect(combineObservables([], ['b'])).toEqual(['b']);
     });
 
-    test('it combines two strings with comma delimiter', async () => {
-      expect(combineObservables('a,b', 'c,d')).toEqual('a,b,c,d');
+    test('it combines two strings', async () => {
+      expect(combineObservables('a,b', 'c,d')).toEqual(['a', 'b', 'c', 'd']);
     });
 
     test('it combines two arrays', async () => {
@@ -91,30 +91,15 @@ describe('api_sir', () => {
     });
 
     test('it combines two strings with different delimiter', async () => {
-      expect(combineObservables('a|b|c', 'd e f')).toEqual('a,b,c,d,e,f');
+      expect(combineObservables('a|b|c', 'd e f')).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
     });
   });
 
   describe('formatObservables', () => {
-    test('it formats string observables correctly', async () => {
-      expect(formatObservables('a,b,c', ObservableTypes.ip4)).toEqual([
-        { type: 'ipv4-addr', value: 'a' },
-        { type: 'ipv4-addr', value: 'b' },
-        { type: 'ipv4-addr', value: 'c' },
-      ]);
-    });
-
     test('it formats array observables correctly', async () => {
       expect(formatObservables(['a', 'b', 'c'], ObservableTypes.ip4)).toEqual([
         { type: 'ipv4-addr', value: 'a' },
         { type: 'ipv4-addr', value: 'b' },
-        { type: 'ipv4-addr', value: 'c' },
-      ]);
-    });
-
-    test('it removes duplicates from string observables correctly', async () => {
-      expect(formatObservables('a,a,c', ObservableTypes.ip4)).toEqual([
-        { type: 'ipv4-addr', value: 'a' },
         { type: 'ipv4-addr', value: 'c' },
       ]);
     });
@@ -126,16 +111,11 @@ describe('api_sir', () => {
       ]);
     });
 
-    test('it removes empty string observables correctly', async () => {
-      expect(formatObservables('', ObservableTypes.ip4)).toEqual([]);
-      expect(formatObservables('a,,c', ObservableTypes.ip4)).toEqual([
-        { type: 'ipv4-addr', value: 'a' },
-        { type: 'ipv4-addr', value: 'c' },
-      ]);
+    test('it formats an empty array correctly', async () => {
+      expect(formatObservables([], ObservableTypes.ip4)).toEqual([]);
     });
 
-    test('it removes empty array observables correctly', async () => {
-      expect(formatObservables([], ObservableTypes.ip4)).toEqual([]);
+    test('it removes empty observables correctly', async () => {
       expect(formatObservables(['a', '', 'c'], ObservableTypes.ip4)).toEqual([
         { type: 'ipv4-addr', value: 'a' },
         { type: 'ipv4-addr', value: 'c' },
