@@ -14,8 +14,8 @@ def _join(*elements):
     return "/".join(segments)
   return "."
 
-def _dts_inputs(files):
-  return [f for f in files if f.path.endswith(".d.ts") and not f.path.endswith(".map")]
+def _dts_inputs(pkg_path, files):
+  return [f for f in files if f.path.endswith(_join(pkg_path, "target_types", "index.d.ts")) and not f.path.endswith(".map")]
 
 def _types_pkg_impl(ctx):
   inputs = ctx.files.data[:]
@@ -35,7 +35,7 @@ def _types_pkg_impl(ctx):
   package_path = ctx.label.package
 
   extractor_args.add(_join(package_path, "tsconfig.json"))
-  extractor_args.add_joined([s.path for s in _dts_inputs(ctx.files.data)], join_with = ",", omit_if_empty = False)
+  extractor_args.add_joined([s.path for s in _dts_inputs(package_path, ctx.files.data)], join_with = ",", omit_if_empty = False)
   extractor_args.add(api_extracted_output.path)
 
   run_node(

@@ -1,6 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "types_pkg")
 
 PKG_BASE_NAME = "kbn-analytics"
 PKG_REQUIRE_NAME = "@kbn/analytics"
@@ -78,10 +78,21 @@ ts_project(
   tsconfig = ":tsconfig",
 )
 
+types_pkg(
+  name = "npm_module_types",
+  package_name = "@types/kbn__analytics",
+  data = SRCS + TYPES_DEPS + [
+    "tsconfig.json",
+    "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
+    ":tsc_types",
+  ]
+)
+
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types", ":npm_module_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
