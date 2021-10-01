@@ -18,6 +18,9 @@ type ServiceFactory = (
 ) => Promise<DataViewsService>;
 export interface DataViewPluginStart {
   dataViewsServiceFactory: ServiceFactory;
+  /**
+   * @deprecated Renamed to dataViewsServiceFactory
+   */
   indexPatternsServiceFactory: ServiceFactory;
 }
 
