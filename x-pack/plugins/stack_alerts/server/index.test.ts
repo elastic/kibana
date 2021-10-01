@@ -5,9 +5,14 @@
  * 2.0.
  */
 import { config } from './index';
-import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { applyDeprecations, ConfigDeprecationContext, configDeprecationFactory } from '@kbn/config';
 
 const CONFIG_PATH = 'xpack.stack_alerts';
+const deprecationContext: ConfigDeprecationContext = {
+  version: '8.0.0',
+  branch: 'master',
+};
+
 const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
   const deprecationMessages: string[] = [];
@@ -19,6 +24,7 @@ const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => 
     deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
+      context: deprecationContext,
     })),
     () =>
       ({ message }) =>
