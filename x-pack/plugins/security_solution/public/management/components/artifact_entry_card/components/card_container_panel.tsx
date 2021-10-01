@@ -18,7 +18,7 @@ export const EuiPanelStyled = styled(EuiPanel)`
 
 export type CardContainerPanelProps = Exclude<EuiPanelProps, 'hasBorder' | 'paddingSize'>;
 
-export const CardContainerPanel = memo<EuiPanelProps>(({ className, ...props }) => {
+export const CardContainerPanel = memo<CardContainerPanelProps>(({ className, ...props }) => {
   return (
     <EuiPanelStyled
       {...props}
