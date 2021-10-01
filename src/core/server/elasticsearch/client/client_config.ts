@@ -10,6 +10,7 @@ import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
 import { Duration } from 'moment';
 import { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
+import { AgentOptions } from '@elastic/elasticsearch/lib/Connection';
 import { ElasticsearchConfig } from '../elasticsearch_config';
 import { DEFAULT_HEADERS } from '../default_headers';
 
@@ -59,6 +60,10 @@ export function parseClientOptions(
     // do not make assumption on user-supplied data content
     // fixes https://github.com/elastic/kibana/issues/101944
     disablePrototypePoisoningProtection: true,
+    agent: {
+      maxSockets: Infinity,
+      keepAlive: config.keepAlive,
+    },
   };
 
   if (config.pingTimeout != null) {
@@ -72,11 +77,6 @@ export function parseClientOptions(
       typeof config.sniffInterval === 'boolean'
         ? config.sniffInterval
         : getDurationAsMs(config.sniffInterval);
-  }
-  if (config.keepAlive) {
-    clientOptions.agent = {
-      keepAlive: config.keepAlive,
-    };
   }
 
   if (!scoped) {
