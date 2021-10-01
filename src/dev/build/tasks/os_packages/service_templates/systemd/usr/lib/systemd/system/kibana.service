@@ -8,6 +8,7 @@ After=network-online.target
 Type=simple
 User=kibana
 Group=kibana
+PrivateTmp=true
 
 Environment=KBN_HOME=/usr/share/kibana
 Environment=KBN_PATH_CONF=/etc/kibana
