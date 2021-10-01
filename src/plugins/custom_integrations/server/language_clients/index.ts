@@ -9,17 +9,30 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from 'kibana/server';
 import { CustomIntegrationRegistry } from '../custom_integration_registry';
-import { PLUGIN_ID } from '../../common';
+import { CustomIntegrationIcon, PLUGIN_ID } from '../../common';
 
 interface LanguageIntegration {
   id: string;
   title: string;
-  icon: string;
+  icon?: string;
+  euiIconName?: string;
   description: string;
   docUrl: string;
 }
 
 export const integrations: LanguageIntegration[] = [
+  {
+    id: 'all',
+    title: i18n.translate('custom_integrations.languageclients.AllTitle', {
+      defaultMessage: 'Elasticsearch Clients',
+    }),
+    euiIconName: 'logoElasticsearch',
+    description: i18n.translate('custom_integrations.languageclients.AllDescription', {
+      defaultMessage:
+        'Start building your custom application on top of Elasticsearch with the official language clients.',
+    }),
+    docUrl: 'https://www.elastic.co/guide/en/elasticsearch/client/index.html',
+  },
   {
     id: 'javascript',
     title: i18n.translate('custom_integrations.languageclients.JavascriptTitle', {
@@ -33,10 +46,123 @@ export const integrations: LanguageIntegration[] = [
     docUrl:
       'https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/introduction.html',
   },
+  {
+    id: 'ruby',
+    title: i18n.translate('custom_integrations.languageclients.RubyTitle', {
+      defaultMessage: 'Elasticsearch Ruby Client',
+    }),
+    icon: 'ruby.svg',
+    description: i18n.translate('custom_integrations.languageclients.RubyDescription', {
+      defaultMessage:
+        'Start building your custom application on top of Elasticsearch with the official Ruby client.',
+    }),
+    docUrl:
+      'https://www.elastic.co/guide/en/elasticsearch/client/ruby-api/current/ruby_client.html',
+  },
+  {
+    id: 'go',
+    title: i18n.translate('custom_integrations.languageclients.GoTitle', {
+      defaultMessage: 'Elasticsearch Go Client',
+    }),
+    icon: 'go.svg',
+    description: i18n.translate('custom_integrations.languageclients.GoDescription', {
+      defaultMessage:
+        'Start building your custom application on top of Elasticsearch with the official Go client.',
+    }),
+    docUrl: 'https://www.elastic.co/guide/en/elasticsearch/client/go-api/current/overview.html',
+  },
+  {
+    id: 'dotnet',
+    title: i18n.translate('custom_integrations.languageclients.DotNetTitle', {
+      defaultMessage: 'Elasticsearch .NET Client',
+    }),
+    icon: 'dotnet.svg',
+    description: i18n.translate('custom_integrations.languageclients.DotNetDescription', {
+      defaultMessage:
+        'Start building your custom application on top of Elasticsearch with the official .NET client.',
+    }),
+    docUrl: 'https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/index.html',
+  },
+  {
+    id: 'php',
+    title: i18n.translate('custom_integrations.languageclients.PhpTitle', {
+      defaultMessage: 'Elasticsearch PHP Client',
+    }),
+    icon: 'php.svg',
+    description: i18n.translate('custom_integrations.languageclients.PhpDescription', {
+      defaultMessage:
+        'Start building your custom application on top of Elasticsearch with the official .PHP client.',
+    }),
+    docUrl: 'https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/index.html',
+  },
+  {
+    id: 'perl',
+    title: i18n.translate('custom_integrations.languageclients.PerlTitle', {
+      defaultMessage: 'Elasticsearch Perl Client',
+    }),
+    icon: 'php.svg',
+    description: i18n.translate('custom_integrations.languageclients.PerlDescription', {
+      defaultMessage:
+        'Start building your custom application on top of Elasticsearch with the official Perl client.',
+    }),
+    docUrl: 'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/current/index.html',
+  },
+  {
+    id: 'python',
+    title: i18n.translate('custom_integrations.languageclients.PythonTitle', {
+      defaultMessage: 'Elasticsearch Python Client',
+    }),
+    icon: 'python.svg',
+    description: i18n.translate('custom_integrations.languageclients.PythonDescription', {
+      defaultMessage:
+        'Start building your custom application on top of Elasticsearch with the official Python client.',
+    }),
+    docUrl: 'https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/index.html',
+  },
+  {
+    id: 'rust',
+    title: i18n.translate('custom_integrations.languageclients.RustTitle', {
+      defaultMessage: 'Elasticsearch Rust Client',
+    }),
+    icon: 'rust.svg',
+    description: i18n.translate('custom_integrations.languageclients.RustDescription', {
+      defaultMessage:
+        'Start building your custom application on top of Elasticsearch with the official Rust client.',
+    }),
+    docUrl: 'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/current/index.html',
+  },
+  {
+    id: 'java',
+    title: i18n.translate('custom_integrations.languageclients.JavaTitle', {
+      defaultMessage: 'Elasticsearch Java Client',
+    }),
+    euiIconName: 'logoElasticsearch', // don't have a java-icon just yet
+    description: i18n.translate('custom_integrations.languageclients.JavaDescription', {
+      defaultMessage:
+        'Start building your custom application on top of Elasticsearch with the official Java client.',
+    }),
+    docUrl:
+      'https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.x/_elasticsearch_java_high_level_client.html',
+  },
 ];
 
 export function registerLanguageClients(core: CoreSetup, registry: CustomIntegrationRegistry) {
   integrations.forEach((integration) => {
+    const icons: CustomIntegrationIcon[] = [];
+    if (integration.euiIconName) {
+      icons.push({
+        type: 'eui',
+        src: integration.euiIconName,
+      });
+    } else if (integration.icon) {
+      icons.push({
+        type: 'svg',
+        src: core.http.basePath.prepend(
+          `/plugins/${PLUGIN_ID}/assets/language_clients/${integration.icon}`
+        ),
+      });
+    }
+
     registry.registerCustomIntegration({
       id: `language_client.${integration.id}`,
       title: integration.title,
@@ -45,14 +171,7 @@ export function registerLanguageClients(core: CoreSetup, registry: CustomIntegra
       shipper: 'language_clients',
       uiInternalPath: integration.docUrl,
       isBeta: false,
-      icons: [
-        {
-          type: 'svg',
-          src: core.http.basePath.prepend(
-            `/plugins/${PLUGIN_ID}/assets/language_clients/${integration.icon}`
-          ),
-        },
-      ],
+      icons,
       categories: ['elastic_stack', 'custom', 'language_client'],
     });
   });
