@@ -14,10 +14,12 @@ export {
   mergeCapabilitiesWithFields,
   getCapabilitiesForRollupIndices,
 } from './fetcher';
-export { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns_service';
+export { IndexPatternsServiceStart } from './types';
 
 import { PluginInitializerContext } from 'src/core/server';
-import { DataViewServerPlugin, DataViewPluginSetup, DataViewPluginStart } from './plugin';
+import { DataViewServerPlugin } from './plugin';
+import { DataViewPluginSetup, DataViewPluginStart } from './types';
+export type { dataViewsServiceFactory } from './data_views_service_factory';
 
 /**
  * Static code to be shared externally

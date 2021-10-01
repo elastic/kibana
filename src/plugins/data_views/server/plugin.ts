@@ -7,27 +7,19 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
-import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from '.';
-import { UsageCollectionSetup } from '../../usage_collection/server';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataViewPluginSetup {}
-
-// todo simplify
-export type DataViewPluginStart = IndexPatternsServiceStart;
-
-export interface DataViewPluginSetupDependencies {
-  fieldFormats: FieldFormatsSetup;
-  expressions: ExpressionsServerSetup;
-  usageCollection?: UsageCollectionSetup;
-}
-
-export interface DataViewPluginStartDependencies {
-  fieldFormats: FieldFormatsStart;
-  logger: Logger;
-}
+import { dataViewsServiceFactory } from './data_views_service_factory';
+import { registerRoutes } from './routes';
+import { dataViewSavedObjectType } from './saved_objects';
+import { capabilitiesProvider } from './capabilities_provider';
+import { getIndexPatternLoad } from './expressions';
+import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
+import { createScriptedFieldsDeprecationsConfig } from './deprecations';
+import {
+  DataViewPluginSetup,
+  DataViewPluginStart,
+  DataViewPluginSetupDependencies,
+  DataViewPluginStartDependencies,
+} from './types';
 
 export class DataViewServerPlugin
   implements
@@ -38,34 +30,36 @@ export class DataViewServerPlugin
       DataViewPluginStartDependencies
     >
 {
-  private readonly indexPatterns = new IndexPatternsServiceProvider();
   private readonly logger: Logger;
 
-  // todo look at this PluginInitializerContext
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
   }
 
   public setup(
-    core: CoreSetup<DataViewPluginStartDependencies, DataViewPluginStart>,
+    core: CoreSetup<DataViewPluginStart, DataViewPluginStart>,
     { expressions, usageCollection }: DataViewPluginSetupDependencies
   ) {
-    this.indexPatterns.setup(core, {
-      expressions,
-      logger: this.logger.get('indexPatterns'),
-      usageCollection,
-    });
+    core.savedObjects.registerType(dataViewSavedObjectType);
+    core.capabilities.registerProvider(capabilitiesProvider);
+
+    registerRoutes(core.http, core.getStartServices);
+
+    expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
+    registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
+    core.deprecations.registerDeprecations(createScriptedFieldsDeprecationsConfig(core));
 
     return {};
   }
 
-  public start(core: CoreStart, { fieldFormats }: DataViewPluginStartDependencies) {
-    const indexPatterns = this.indexPatterns.start(core, {
-      fieldFormats,
-      logger: this.logger.get('indexPatterns'),
-    });
-
-    return indexPatterns;
+  public start({ uiSettings }: CoreStart, { fieldFormats }: DataViewPluginStartDependencies) {
+    return {
+      indexPatternsServiceFactory: dataViewsServiceFactory({
+        logger: this.logger.get('indexPatterns'),
+        uiSettings,
+        fieldFormats,
+      }),
+    };
   }
 
   public stop() {}
