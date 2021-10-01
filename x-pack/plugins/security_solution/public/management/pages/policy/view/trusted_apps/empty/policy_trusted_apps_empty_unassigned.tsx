@@ -13,6 +13,7 @@ import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/end
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { getPolicyTrustedAppsPath, getTrustedAppsListPath } from '../../../../../common/routing';
 import { APP_ID } from '../../../../../../../common/constants';
+import { usePolicyDetailsNavigateCallback } from '../../policy_hooks';
 
 interface CommonProps {
   policyId: string;
@@ -20,6 +21,7 @@ interface CommonProps {
 }
 
 export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, policyName }) => {
+  const navigateCallback = usePolicyDetailsNavigateCallback();
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
     const path = getTrustedAppsListPath();
@@ -75,7 +77,15 @@ export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, p
           />
         }
         actions={[
-          <EuiButton color="primary" fill>
+          <EuiButton
+            color="primary"
+            fill
+            onClick={() =>
+              navigateCallback({
+                show: 'list',
+              })
+            }
+          >
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policy.trustedApps.empty.unassigned.primaryAction"
               defaultMessage="Assign trusted applications"

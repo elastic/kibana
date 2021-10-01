@@ -8,7 +8,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
