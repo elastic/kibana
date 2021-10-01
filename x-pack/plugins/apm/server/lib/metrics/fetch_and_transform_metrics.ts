@@ -54,7 +54,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   environment,
   kuery,
   setup,
-  serviceName,
+  serviceAgentIds,
   serviceNodeName,
   start,
   end,
@@ -66,7 +66,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   environment: string;
   kuery: string;
   setup: Setup;
-  serviceName: string;
+  serviceAgentIds: string[];
   serviceNodeName?: string;
   start: number;
   end: number;
@@ -80,7 +80,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   const projection = getMetricsProjection({
     environment,
     kuery,
-    serviceName,
+    serviceAgentIds,
     serviceNodeName,
     start,
     end,

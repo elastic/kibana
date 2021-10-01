@@ -25,7 +25,7 @@ describe('metrics queries', () => {
       mock = await inspectSearchParams((setup) =>
         getCPUChartData({
           setup,
-          serviceName: 'foo',
+          serviceAgentIds: ['foo'],
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
@@ -41,7 +41,7 @@ describe('metrics queries', () => {
       mock = await inspectSearchParams((setup) =>
         getMemoryChartData({
           setup,
-          serviceName: 'foo',
+          serviceAgentIds: ['foo'],
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
@@ -57,7 +57,7 @@ describe('metrics queries', () => {
       mock = await inspectSearchParams((setup) =>
         getHeapMemoryChart({
           setup,
-          serviceName: 'foo',
+          serviceAgentIds: ['foo'],
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
@@ -73,7 +73,7 @@ describe('metrics queries', () => {
       mock = await inspectSearchParams((setup) =>
         getNonHeapMemoryChart({
           setup,
-          serviceName: 'foo',
+          serviceAgentIds: ['foo'],
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
@@ -89,7 +89,7 @@ describe('metrics queries', () => {
       mock = await inspectSearchParams((setup) =>
         getThreadCountChart({
           setup,
-          serviceName: 'foo',
+          serviceAgentIds: ['foo'],
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',

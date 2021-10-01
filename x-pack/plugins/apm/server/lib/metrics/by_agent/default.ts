@@ -12,21 +12,21 @@ import { getMemoryChartData } from './shared/memory';
 export async function getDefaultMetricsCharts({
   environment,
   kuery,
-  serviceName,
+  serviceAgentIds,
   setup,
   start,
   end,
 }: {
   environment: string;
   kuery: string;
-  serviceName: string;
+  serviceAgentIds: string[];
   setup: Setup;
   start: number;
   end: number;
 }) {
   const charts = await Promise.all([
-    getCPUChartData({ environment, kuery, setup, serviceName, start, end }),
-    getMemoryChartData({ environment, kuery, setup, serviceName, start, end }),
+    getCPUChartData({ environment, kuery, setup, serviceAgentIds, start, end }),
+    getMemoryChartData({ environment, kuery, setup, serviceAgentIds, start, end }),
   ]);
 
   return { charts };

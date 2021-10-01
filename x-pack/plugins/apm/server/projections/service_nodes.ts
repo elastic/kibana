@@ -10,14 +10,14 @@ import { mergeProjection } from './util/merge_projection';
 import { getMetricsProjection } from './metrics';
 
 export function getServiceNodesProjection({
-  serviceName,
+  serviceAgentIds,
   serviceNodeName,
   environment,
   kuery,
   start,
   end,
 }: {
-  serviceName: string;
+  serviceAgentIds: string[];
   serviceNodeName?: string;
   environment: string;
   kuery: string;
@@ -26,7 +26,7 @@ export function getServiceNodesProjection({
 }) {
   return mergeProjection(
     getMetricsProjection({
-      serviceName,
+      serviceAgentIds,
       serviceNodeName,
       environment,
       kuery,

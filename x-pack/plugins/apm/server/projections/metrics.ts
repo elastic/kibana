@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
-  SERVICE_NAME,
+  AGENT_EPHEMERAL_ID,
   SERVICE_NODE_NAME,
 } from '../../common/elasticsearch_fieldnames';
 import { rangeQuery, kqlQuery } from '../../../observability/server';
@@ -30,20 +30,20 @@ function getServiceNodeNameFilters(serviceNodeName?: string) {
 export function getMetricsProjection({
   environment,
   kuery,
-  serviceName,
+  serviceAgentIds,
   serviceNodeName,
   start,
   end,
 }: {
   environment: string;
   kuery: string;
-  serviceName: string;
+  serviceAgentIds: string[];
   serviceNodeName?: string;
   start: number;
   end: number;
 }) {
   const filter = [
-    { term: { [SERVICE_NAME]: serviceName } },
+    { terms: { [AGENT_EPHEMERAL_ID]: serviceAgentIds } },
     ...getServiceNodeNameFilters(serviceNodeName),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),

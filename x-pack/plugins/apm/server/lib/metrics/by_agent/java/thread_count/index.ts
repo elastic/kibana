@@ -45,7 +45,7 @@ export async function getThreadCountChart({
   environment,
   kuery,
   setup,
-  serviceName,
+  serviceAgentIds,
   serviceNodeName,
   start,
   end,
@@ -53,7 +53,7 @@ export async function getThreadCountChart({
   environment: string;
   kuery: string;
   setup: Setup;
-  serviceName: string;
+  serviceAgentIds: string[];
   serviceNodeName?: string;
   start: number;
   end: number;
@@ -62,7 +62,7 @@ export async function getThreadCountChart({
     environment,
     kuery,
     setup,
-    serviceName,
+    serviceAgentIds,
     serviceNodeName,
     start,
     end,

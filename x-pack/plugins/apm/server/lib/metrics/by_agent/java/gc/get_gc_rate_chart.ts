@@ -35,7 +35,7 @@ function getGcRateChart({
   environment,
   kuery,
   setup,
-  serviceName,
+  serviceAgentIds,
   serviceNodeName,
   start,
   end,
@@ -43,7 +43,7 @@ function getGcRateChart({
   environment: string;
   kuery: string;
   setup: Setup;
-  serviceName: string;
+  serviceAgentIds: string[];
   serviceNodeName?: string;
   start: number;
   end: number;
@@ -52,7 +52,7 @@ function getGcRateChart({
     environment,
     kuery,
     setup,
-    serviceName,
+    serviceAgentIds,
     serviceNodeName,
     start,
     end,

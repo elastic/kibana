@@ -27,6 +27,7 @@ export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
 
 export const AGENT = 'agent';
+export const AGENT_EPHEMERAL_ID = 'agent.ephemeral_id';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
 

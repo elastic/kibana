@@ -19,7 +19,7 @@ export function getJavaMetricsCharts({
   environment,
   kuery,
   setup,
-  serviceName,
+  serviceAgentIds,
   serviceNodeName,
   start,
   end,
@@ -27,7 +27,7 @@ export function getJavaMetricsCharts({
   environment: string;
   kuery: string;
   setup: Setup;
-  serviceName: string;
+  serviceAgentIds: string[];
   serviceNodeName?: string;
   start: number;
   end: number;
@@ -37,7 +37,7 @@ export function getJavaMetricsCharts({
       environment,
       kuery,
       setup,
-      serviceName,
+      serviceAgentIds,
       serviceNodeName,
       start,
       end,

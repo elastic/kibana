@@ -27,7 +27,7 @@ export async function fetchAndTransformGcMetrics({
   environment,
   kuery,
   setup,
-  serviceName,
+  serviceAgentIds,
   serviceNodeName,
   chartBase,
   fieldName,
@@ -38,7 +38,7 @@ export async function fetchAndTransformGcMetrics({
   environment: string;
   kuery: string;
   setup: Setup;
-  serviceName: string;
+  serviceAgentIds: string[];
   serviceNodeName?: string;
   start: number;
   end: number;
@@ -53,7 +53,7 @@ export async function fetchAndTransformGcMetrics({
   const projection = getMetricsProjection({
     environment,
     kuery,
-    serviceName,
+    serviceAgentIds,
     serviceNodeName,
     start,
     end,

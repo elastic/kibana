@@ -17,6 +17,7 @@ interface Options {
   mockResponse?: (
     request: ESSearchRequest
   ) => ESSearchResponse<unknown, ESSearchRequest>;
+  call?: number;
   uiFilters?: Record<string, string>;
   config?: Partial<APMConfig>;
 }
@@ -106,7 +107,7 @@ export async function inspectSearchParams(
   }
 
   return {
-    params: spy.mock.calls[0]?.[1],
+    params: spy.mock.calls[options?.call ?? 0]?.[1],
     response,
     error,
     spy,

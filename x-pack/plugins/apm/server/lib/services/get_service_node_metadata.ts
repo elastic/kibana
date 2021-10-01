@@ -14,6 +14,8 @@ import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { getSearchAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getServiceAgentIds } from './get_service_agent_ids';
 
 export async function getServiceNodeMetadata({
   kuery,
@@ -32,10 +34,23 @@ export async function getServiceNodeMetadata({
 }) {
   const { apmEventClient } = setup;
 
+  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    ...setup,
+    kuery: '',
+  });
+
+  const serviceAgentIds = await getServiceAgentIds({
+    serviceName,
+    setup,
+    searchAggregatedTransactions,
+    start,
+    end,
+  });
+
   const query = mergeProjection(
     getServiceNodesProjection({
       kuery,
-      serviceName,
+      serviceAgentIds,
       serviceNodeName,
       environment: ENVIRONMENT_ALL.value,
       start,

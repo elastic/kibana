@@ -16,7 +16,9 @@ import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
 import { mergeProjection } from '../../projections/util/merge_projection';
+import { getSearchAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup } from '../helpers/setup_request';
+import { getServiceAgentIds } from '../services/get_service_agent_ids';
 
 const getServiceNodes = async ({
   kuery,
@@ -35,9 +37,22 @@ const getServiceNodes = async ({
 }) => {
   const { apmEventClient } = setup;
 
+  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    ...setup,
+    kuery: '',
+  });
+
+  const serviceAgentIds = await getServiceAgentIds({
+    serviceName,
+    setup,
+    searchAggregatedTransactions,
+    start,
+    end,
+  });
+
   const projection = getServiceNodesProjection({
     kuery,
-    serviceName,
+    serviceAgentIds,
     environment,
     start,
     end,

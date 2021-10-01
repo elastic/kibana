@@ -53,7 +53,7 @@ export async function getNonHeapMemoryChart({
   environment,
   kuery,
   setup,
-  serviceName,
+  serviceAgentIds,
   serviceNodeName,
   start,
   end,
@@ -61,7 +61,7 @@ export async function getNonHeapMemoryChart({
   environment: string;
   kuery: string;
   setup: Setup;
-  serviceName: string;
+  serviceAgentIds: string[];
   serviceNodeName?: string;
   start: number;
   end: number;
@@ -70,7 +70,7 @@ export async function getNonHeapMemoryChart({
     environment,
     kuery,
     setup,
-    serviceName,
+    serviceAgentIds,
     serviceNodeName,
     start,
     end,

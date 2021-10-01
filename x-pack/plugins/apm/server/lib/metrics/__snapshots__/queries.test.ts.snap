@@ -67,8 +67,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -150,8 +152,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -311,8 +315,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -399,8 +405,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -480,8 +488,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -581,8 +591,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -670,8 +682,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -837,8 +851,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -931,8 +947,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -1018,8 +1036,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -1125,8 +1145,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -1203,8 +1225,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -1359,8 +1383,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -1442,8 +1468,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {
@@ -1518,8 +1546,10 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "terms": Object {
+              "agent.ephemeral_id": Array [
+                "foo",
+              ],
             },
           },
           Object {

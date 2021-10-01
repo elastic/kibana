@@ -53,6 +53,53 @@ Object {
 }
 `;
 
+exports[`services queries fetches the service agent ids 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+      "transaction",
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "agents": Object {
+        "terms": Object {
+          "field": "agent.ephemeral_id",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "agent.ephemeral_id",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
 exports[`services queries fetches the service agent name 1`] = `
 Object {
   "apm": Object {
