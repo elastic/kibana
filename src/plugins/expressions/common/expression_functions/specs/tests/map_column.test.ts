@@ -12,8 +12,9 @@ import { Datatable } from '../../../expression_types';
 import { mapColumn, MapColumnArguments } from '../map_column';
 import { emptyTable, functionWrapper, testTable, tableWithNulls } from './utils';
 
-const pricePlusTwo = (datatable: Datatable) =>
-  of(typeof datatable.rows[0].price === 'number' ? datatable.rows[0].price + 2 : null);
+const pricePlusTwo = jest.fn((datatable: Datatable) =>
+  of(typeof datatable.rows[0].price === 'number' ? datatable.rows[0].price + 2 : null)
+);
 
 describe('mapColumn', () => {
   const fn = functionWrapper(mapColumn);
@@ -262,6 +263,35 @@ describe('mapColumn', () => {
               meta: expect.objectContaining({ type: 'number' }),
             }),
           ],
+        }),
+      ]);
+    });
+  });
+
+  it('supports partial results', () => {
+    testScheduler.run(({ expectObservable, cold }) => {
+      pricePlusTwo.mockReturnValueOnce(cold('ab|', { a: 1000, b: 2000 }));
+
+      expectObservable(
+        runFn(testTable, {
+          id: 'pricePlusTwo',
+          name: 'pricePlusTwo',
+          expression: pricePlusTwo,
+        })
+      ).toBe('01|', [
+        expect.objectContaining({
+          rows: expect.arrayContaining([
+            expect.objectContaining({
+              pricePlusTwo: 1000,
+            }),
+          ]),
+        }),
+        expect.objectContaining({
+          rows: expect.arrayContaining([
+            expect.objectContaining({
+              pricePlusTwo: 2000,
+            }),
+          ]),
         }),
       ]);
     });

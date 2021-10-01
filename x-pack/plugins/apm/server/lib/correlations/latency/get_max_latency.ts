@@ -8,7 +8,7 @@
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { TopSigTerm } from '../process_significant_term_aggs';
 
 export async function getMaxLatency({
@@ -16,7 +16,7 @@ export async function getMaxLatency({
   filters,
   topSigTerms = [],
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   filters: ESFilter[];
   topSigTerms?: TopSigTerm[];
 }) {

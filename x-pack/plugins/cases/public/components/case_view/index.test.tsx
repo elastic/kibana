@@ -18,6 +18,7 @@ import {
   getAlertUserAction,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
+import { SpacesApi } from '../../../../spaces/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
@@ -46,6 +47,14 @@ const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const onCaseDataSuccessMock = jest.fn();
+
+const spacesUiApiMock = {
+  redirectLegacyUrl: jest.fn().mockResolvedValue(undefined),
+  components: {
+    getLegacyUrlConflict: jest.fn().mockReturnValue(<div data-test-subj="conflict-component" />),
+  },
+};
 
 const alertsHit = [
   {
@@ -119,6 +128,7 @@ export const caseProps: CaseComponentProps = {
   },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
+  onCaseDataSuccess: onCaseDataSuccessMock,
 };
 
 export const caseClosedProps: CaseComponentProps = {
@@ -138,6 +148,7 @@ describe('CaseView ', () => {
     isLoading: false,
     isError: false,
     data,
+    resolveOutcome: 'exactMatch',
     updateCase,
     fetchCase,
   };
@@ -174,6 +185,7 @@ describe('CaseView ', () => {
       actionTypeTitle: '.servicenow',
       iconClass: 'logoSecurity',
     });
+    useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;
   });
 
   it('should render CaseComponent', async () => {
@@ -361,6 +373,15 @@ describe('CaseView ', () => {
     await waitFor(() => {
       expect(updateObject.updateKey).toEqual('title');
       expect(updateObject.updateValue).toEqual(newTitle);
+      expect(updateObject.onSuccess).toBeDefined();
+    });
+
+    updateObject.onSuccess(); // simulate the request has succeed
+    await waitFor(() => {
+      expect(onCaseDataSuccessMock).toHaveBeenCalledWith({
+        ...caseProps.caseData,
+        title: newTitle,
+      });
     });
   });
 
@@ -395,36 +416,7 @@ describe('CaseView ', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <CaseView
-          {...{
-            allCasesNavigation: {
-              href: 'all-cases-href',
-              onClick: jest.fn(),
-            },
-            caseDetailsNavigation: {
-              href: 'case-details-href',
-              onClick: jest.fn(),
-            },
-            caseId: '1234',
-            configureCasesNavigation: {
-              href: 'configure-cases-href',
-              onClick: jest.fn(),
-            },
-            getCaseDetailHrefWithCommentId: jest.fn(),
-            onComponentInitialized: jest.fn(),
-            actionsNavigation: {
-              href: jest.fn(),
-              onClick: jest.fn(),
-            },
-            ruleDetailsNavigation: {
-              href: jest.fn(),
-              onClick: jest.fn(),
-            },
-            showAlertDetails: jest.fn(),
-            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-            userCanCrud: true,
-          }}
-        />
+        <CaseView {...caseProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -439,36 +431,7 @@ describe('CaseView ', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <CaseView
-          {...{
-            allCasesNavigation: {
-              href: 'all-cases-href',
-              onClick: jest.fn(),
-            },
-            caseDetailsNavigation: {
-              href: 'case-details-href',
-              onClick: jest.fn(),
-            },
-            caseId: '1234',
-            configureCasesNavigation: {
-              href: 'configure-cases-href',
-              onClick: jest.fn(),
-            },
-            getCaseDetailHrefWithCommentId: jest.fn(),
-            onComponentInitialized: jest.fn(),
-            actionsNavigation: {
-              href: jest.fn(),
-              onClick: jest.fn(),
-            },
-            ruleDetailsNavigation: {
-              href: jest.fn(),
-              onClick: jest.fn(),
-            },
-            showAlertDetails: jest.fn(),
-            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-            userCanCrud: true,
-          }}
-        />
+        <CaseView {...caseProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -477,43 +440,66 @@ describe('CaseView ', () => {
   });
 
   it('should return case view when data is there', async () => {
-    (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
+    (useGetCase as jest.Mock).mockImplementation(() => ({
+      ...defaultGetCase,
+      resolveOutcome: 'exactMatch',
+    }));
     const wrapper = mount(
       <TestProviders>
-        <CaseView
-          {...{
-            allCasesNavigation: {
-              href: 'all-cases-href',
-              onClick: jest.fn(),
-            },
-            caseDetailsNavigation: {
-              href: 'case-details-href',
-              onClick: jest.fn(),
-            },
-            caseId: '1234',
-            configureCasesNavigation: {
-              href: 'configure-cases-href',
-              onClick: jest.fn(),
-            },
-            getCaseDetailHrefWithCommentId: jest.fn(),
-            onComponentInitialized: jest.fn(),
-            actionsNavigation: {
-              href: jest.fn(),
-              onClick: jest.fn(),
-            },
-            ruleDetailsNavigation: {
-              href: jest.fn(),
-              onClick: jest.fn(),
-            },
-            showAlertDetails: jest.fn(),
-            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-            userCanCrud: true,
-          }}
-        />
+        <CaseView {...caseProps} />
       </TestProviders>
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
+      expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
+      expect(spacesUiApiMock.redirectLegacyUrl).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should redirect case view when resolves to alias match', async () => {
+    const resolveAliasId = `${defaultGetCase.data.id}_2`;
+    (useGetCase as jest.Mock).mockImplementation(() => ({
+      ...defaultGetCase,
+      resolveOutcome: 'aliasMatch',
+      resolveAliasId,
+    }));
+    const wrapper = mount(
+      <TestProviders>
+        <CaseView {...caseProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
+      expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
+      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith(
+        `cases/${resolveAliasId}`,
+        'case'
+      );
+    });
+  });
+
+  it('should redirect case view when resolves to conflict', async () => {
+    const resolveAliasId = `${defaultGetCase.data.id}_2`;
+    (useGetCase as jest.Mock).mockImplementation(() => ({
+      ...defaultGetCase,
+      resolveOutcome: 'conflict',
+      resolveAliasId,
+    }));
+    const wrapper = mount(
+      <TestProviders>
+        <CaseView {...caseProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="conflict-component"]').exists()).toBeTruthy();
+      expect(spacesUiApiMock.redirectLegacyUrl).not.toHaveBeenCalled();
+      expect(spacesUiApiMock.components.getLegacyUrlConflict).toHaveBeenCalledWith({
+        objectNoun: 'case',
+        currentObjectId: defaultGetCase.data.id,
+        otherObjectId: resolveAliasId,
+        otherObjectPath: `cases/${resolveAliasId}`,
+      });
     });
   });
 
@@ -521,41 +507,12 @@ describe('CaseView ', () => {
     (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
     const wrapper = mount(
       <TestProviders>
-        <CaseView
-          {...{
-            allCasesNavigation: {
-              href: 'all-cases-href',
-              onClick: jest.fn(),
-            },
-            caseDetailsNavigation: {
-              href: 'case-details-href',
-              onClick: jest.fn(),
-            },
-            caseId: '1234',
-            configureCasesNavigation: {
-              href: 'configure-cases-href',
-              onClick: jest.fn(),
-            },
-            getCaseDetailHrefWithCommentId: jest.fn(),
-            onComponentInitialized: jest.fn(),
-            actionsNavigation: {
-              href: jest.fn(),
-              onClick: jest.fn(),
-            },
-            ruleDetailsNavigation: {
-              href: jest.fn(),
-              onClick: jest.fn(),
-            },
-            showAlertDetails: jest.fn(),
-            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-            userCanCrud: true,
-          }}
-        />
+        <CaseView {...caseProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     await waitFor(() => {
-      expect(fetchCaseUserActions).toBeCalledWith('1234', 'resilient-2', undefined);
+      expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id, 'resilient-2', undefined);
       expect(fetchCase).toBeCalled();
     });
   });
