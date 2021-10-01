@@ -260,6 +260,12 @@ URL that it derived from the actual server address and `xpack.security.public` s
 *Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
 [float]
+=== Legacy `optimize.*` settings are no longer supported
+*Details:*  The legacy optimizer has been removed and any `optimize.*` settings have been deprecated since 7.10. These settings have been removed as they are no longer in use.
+
+*Impact:* Any of the legacy `optimize.*` settings will prevent Kibana from starting up. Going forward, to run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. See https://github.com/elastic/kibana/pull/73154 for more details.
+
+[float]
 === kibana.keystore has moved from the `data` folder to the `config` folder
 *Details:* By default, kibana.keystore has moved from the configured `path.data` folder to `<root>/config` for archive distributions
 and `/etc/kibana` for package distributions.  If a pre-existing keystore exists in the data directory that path will continue to be used.
@@ -337,5 +343,25 @@ The output directory after extracting an archive no longer includes the target p
 
 *Impact:*
 Configuration management tools and automation will need to be updated to use the new directory.
+
+[float]
+=== `elasticsearch.preserveHost` is no longer valid
+*Details:* The deprecated `elasticsearch.preserveHost` setting in the `kibana.yml` file has been removed.
+
+*Impact:* Configure {kibana-ref}/settings.html#elasticsearch-requestHeadersWhitelist[`elasticsearch.requestHeadersWhitelist`] to whitelist client-side headers.
+
+[float]
+=== `elasticsearch.startupTimeout` is no longer valid
+*Details:* The deprecated `elasticsearch.startupTimeout` setting in the `kibana.yml` file has been removed.
+
+*Impact:* Kibana will keep on trying to connect to Elasticsearch until it manages to connect.
+
+[float]
+=== `savedObjects.indexCheckTimeout` is no longer valid
+*Details:* The deprecated `savedObjects.indexCheckTimeout` setting in the `kibana.yml` file has been removed.
+
+[float]
+=== `server.xsrf.token` is no longer valid
+*Details:* The deprecated `server.xsrf.token` setting in the `kibana.yml` file has been removed.
 
 // end::notable-breaking-changes[]
