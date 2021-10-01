@@ -5,30 +5,17 @@
  * 2.0.
  */
 
-import { readRules } from './read_rules';
+import { asyncForEach } from '@kbn/std';
 import { DeleteRuleOptions } from './types';
 
-export const deleteRules = async ({ alertsClient, id, ruleId }: DeleteRuleOptions) => {
-  const rule = await readRules({ alertsClient, id, ruleId });
-  if (rule == null) {
-    return null;
-  }
-
-  if (ruleId != null) {
-    await alertsClient.delete({ id: rule.id });
-    return rule;
-  } else if (id != null) {
-    try {
-      await alertsClient.delete({ id });
-      return rule;
-    } catch (err) {
-      if (err.output.statusCode === 404) {
-        return null;
-      } else {
-        throw err;
-      }
-    }
-  } else {
-    return null;
-  }
+export const deleteRules = async ({
+  rulesClient,
+  ruleStatusClient,
+  ruleStatuses,
+  id,
+}: DeleteRuleOptions) => {
+  await rulesClient.delete({ id });
+  await asyncForEach(ruleStatuses, async (obj) => {
+    await ruleStatusClient.delete(obj.id);
+  });
 };

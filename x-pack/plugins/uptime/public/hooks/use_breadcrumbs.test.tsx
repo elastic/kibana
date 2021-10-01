@@ -8,11 +8,10 @@
 import { ChromeBreadcrumb } from 'kibana/public';
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { mountWithRouter } from '../lib/helper/enzyme_helpers';
+import { mountWithRouter } from '../lib';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
-import { MountWithReduxProvider } from '../lib/helper/helper_with_redux';
+import { UptimeUrlParams, getSupportedUrlParams, MountWithReduxProvider } from '../lib/helper';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 
 describe('useBreadcrumbs', () => {
@@ -20,14 +19,8 @@ describe('useBreadcrumbs', () => {
     const [getBreadcrumbs, core] = mockCore();
 
     const expectedCrumbs: ChromeBreadcrumb[] = [
-      {
-        text: 'Crumb: ',
-        href: 'http://href.example.net',
-      },
-      {
-        text: 'Crumb II: Son of Crumb',
-        href: 'http://href2.example.net',
-      },
+      { text: 'Crumb: ', href: 'http://href.example.net' },
+      { text: 'Crumb II: Son of Crumb', href: 'http://href2.example.net' },
     ];
 
     const Component = () => {
@@ -47,7 +40,9 @@ describe('useBreadcrumbs', () => {
 
     const urlParams: UptimeUrlParams = getSupportedUrlParams({});
     expect(JSON.stringify(getBreadcrumbs())).toEqual(
-      JSON.stringify([makeBaseBreadcrumb('/app/uptime', urlParams)].concat(expectedCrumbs))
+      JSON.stringify(
+        makeBaseBreadcrumb('/app/uptime', '/app/observability', urlParams).concat(expectedCrumbs)
+      )
     );
   });
 });
@@ -59,7 +54,7 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
   };
   const core = {
     application: {
-      getUrlForApp: () => '/app/uptime',
+      getUrlForApp: (app: string) => (app === 'uptime' ? '/app/uptime' : '/app/observability'),
       navigateToUrl: jest.fn(),
     },
     chrome: {

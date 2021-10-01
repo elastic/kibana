@@ -8,15 +8,16 @@
 import type {
   AssetReference,
   CategorySummaryList,
-  Installable,
-  RegistrySearchResult,
+  PackageList,
   PackageInfo,
   PackageUsageStats,
+  InstallType,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
   query: {
     experimental?: boolean;
+    include_policy_templates?: boolean;
   };
 }
 
@@ -32,7 +33,7 @@ export interface GetPackagesRequest {
 }
 
 export interface GetPackagesResponse {
-  response: Array<Installable<RegistrySearchResult>>;
+  response: PackageList;
 }
 
 export interface GetLimitedPackagesResponse {
@@ -83,8 +84,10 @@ export interface IBulkInstallPackageHTTPError {
 }
 
 export interface InstallResult {
-  assets: AssetReference[];
-  status: 'installed' | 'already_installed';
+  assets?: AssetReference[];
+  status?: 'installed' | 'already_installed';
+  error?: Error;
+  installType: InstallType;
 }
 
 export interface BulkInstallPackageInfo {

@@ -5,63 +5,101 @@
  * 2.0.
  */
 
+import type { History } from 'history';
+import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Router } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import type { StartServicesAccessor } from 'src/core/public';
-import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
+import { I18nProvider } from '@kbn/i18n/react';
 
+import type { CoreStart, StartServicesAccessor } from '../../../../../../src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import type { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
+import type { AuthenticationServiceSetup } from '../../authentication';
+import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbsProvider,
+  createBreadcrumbsChangeHandler,
+} from '../../components/breadcrumb';
+import { AuthenticationProvider } from '../../components/use_current_user';
 import type { PluginStartDependencies } from '../../plugin';
 
 interface CreateParams {
+  authc: AuthenticationServiceSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export const apiKeysManagementApp = Object.freeze({
   id: 'api_keys',
-  create({ getStartServices }: CreateParams) {
-    const title = i18n.translate('xpack.security.management.apiKeysTitle', {
-      defaultMessage: 'API Keys',
-    });
+  create({ authc, getStartServices }: CreateParams) {
     return {
       id: this.id,
       order: 30,
-      title,
-      async mount({ element, setBreadcrumbs }) {
-        setBreadcrumbs([
-          {
-            text: title,
-            href: `/`,
-          },
-        ]);
-
-        const [[core], { APIKeysGridPage }, { APIKeysAPIClient }] = await Promise.all([
+      title: i18n.translate('xpack.security.management.apiKeysTitle', {
+        defaultMessage: 'API keys',
+      }),
+      async mount({ element, setBreadcrumbs, history }) {
+        const [[coreStart], { APIKeysGridPage }, { APIKeysAPIClient }] = await Promise.all([
           getStartServices(),
           import('./api_keys_grid'),
           import('./api_keys_api_client'),
         ]);
 
-        core.chrome.docTitle.change(title);
-
         render(
-          <KibanaContextProvider services={core}>
-            <core.i18n.Context>
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
+          >
+            <Breadcrumb
+              text={i18n.translate('xpack.security.management.apiKeysTitle', {
+                defaultMessage: 'API keys',
+              })}
+              href="/"
+            >
               <APIKeysGridPage
-                notifications={core.notifications}
-                apiKeysAPIClient={new APIKeysAPIClient(core.http)}
+                history={history}
+                notifications={coreStart.notifications}
+                apiKeysAPIClient={new APIKeysAPIClient(coreStart.http)}
               />
-            </core.i18n.Context>
-          </KibanaContextProvider>,
+            </Breadcrumb>
+          </Providers>,
           element
         );
 
         return () => {
-          core.chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },
     } as RegisterManagementAppArgs;
   },
 });
+
+export interface ProvidersProps {
+  services: CoreStart;
+  history: History;
+  authc: AuthenticationServiceSetup;
+  onChange?: BreadcrumbsChangeHandler;
+}
+
+export const Providers: FunctionComponent<ProvidersProps> = ({
+  services,
+  history,
+  authc,
+  onChange,
+  children,
+}) => (
+  <KibanaContextProvider services={services}>
+    <AuthenticationProvider authc={authc}>
+      <I18nProvider>
+        <Router history={history}>
+          <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+        </Router>
+      </I18nProvider>
+    </AuthenticationProvider>
+  </KibanaContextProvider>
+);

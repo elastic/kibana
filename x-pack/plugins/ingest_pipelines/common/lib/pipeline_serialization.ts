@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { PipelinesByName, Pipeline } from '../types';
+import { estypes } from '@elastic/elasticsearch';
+import { Pipeline, Processor } from '../types';
 
-export function deserializePipelines(pipelinesByName: PipelinesByName): Pipeline[] {
+export function deserializePipelines(pipelinesByName: {
+  [key: string]: estypes.IngestPipeline;
+}): Pipeline[] {
   const pipelineNames: string[] = Object.keys(pipelinesByName);
 
-  const deserializedPipelines = pipelineNames.map((name: string) => {
+  const deserializedPipelines = pipelineNames.map<Pipeline>((name: string) => {
     return {
       ...pipelinesByName[name],
+      processors: (pipelinesByName[name]?.processors as Processor[]) ?? [],
+      on_failure: pipelinesByName[name]?.on_failure as Processor[],
       name,
     };
   });

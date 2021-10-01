@@ -17,9 +17,10 @@ import { useToastNotificationService } from '../../../../../services/toast_notif
 
 interface Props {
   analyticsId: string;
+  dataTestSubj: string;
 }
 
-export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
+export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }) => {
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -58,7 +59,7 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
   useRefreshAnalyticsList({ onRefresh: getMessages });
 
   return (
-    <div className="mlExpandedRowJobMessages">
+    <div className="mlExpandedRowJobMessages" data-test-subj={dataTestSubj}>
       <JobMessages
         messages={messages}
         loading={isLoading}

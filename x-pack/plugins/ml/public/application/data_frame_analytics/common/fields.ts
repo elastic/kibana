@@ -16,7 +16,7 @@ import {
   isRegressionAnalysis,
 } from '../../../../common/util/analytics_utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
-import { newJobCapsService } from '../../services/new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
 import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
@@ -54,18 +54,18 @@ export const ML__ID_COPY = 'ml__id_copy';
 export const ML__INCREMENTAL_ID = 'ml__incremental_id';
 
 export const isKeywordAndTextType = (fieldName: string): boolean => {
-  const { fields } = newJobCapsService;
+  const { fields } = newJobCapsServiceAnalytics;
 
   const fieldType = fields.find((field) => field.name === fieldName)?.type;
   let isBothTypes = false;
 
   // If it's a keyword type - check if it has a corresponding text type
   if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.KEYWORD) {
-    const field = newJobCapsService.getFieldById(fieldName.replace(/\.keyword$/, ''));
+    const field = newJobCapsServiceAnalytics.getFieldById(fieldName.replace(/\.keyword$/, ''));
     isBothTypes = field !== null && field.type === ES_FIELD_TYPES.TEXT;
   } else if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.TEXT) {
     //   If text, check if has corresponding keyword type
-    const field = newJobCapsService.getFieldById(`${fieldName}.keyword`);
+    const field = newJobCapsServiceAnalytics.getFieldById(`${fieldName}.keyword`);
     isBothTypes = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
   }
 
@@ -180,24 +180,22 @@ export const getDefaultFieldsFromJobCaps = (
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
 
-  const featureImportanceFields = [];
-  const topClassesFields = [];
   const allFields: any = [];
   let type: ES_FIELD_TYPES | undefined;
   let predictedField: string | undefined;
 
   if (isOutlierAnalysis(jobConfig.analysis)) {
-    if (jobConfig.analysis.outlier_detection.compute_feature_influence) {
-      featureImportanceFields.push({
-        id: `${resultsField}.${FEATURE_INFLUENCE}`,
-        name: `${resultsField}.${FEATURE_INFLUENCE}`,
-        type: KBN_FIELD_TYPES.UNKNOWN,
-      });
+    if (!jobConfig.analysis.outlier_detection.compute_feature_influence) {
+      // remove all feature influence fields
+      fields = fields.filter(
+        (field) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}`)
+      );
+    } else {
+      // remove flattened feature influence fields
+      fields = fields.filter(
+        (field: any) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
+      );
     }
-    // remove flattened feature influence fields
-    fields = fields.filter(
-      (field) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
-    );
 
     // Only need to add these fields if we didn't use dest index pattern to get the fields
     if (needsDestIndexFields === true) {
@@ -211,7 +209,7 @@ export const getDefaultFieldsFromJobCaps = (
 
   if (isClassificationAnalysis(jobConfig.analysis) || isRegressionAnalysis(jobConfig.analysis)) {
     const dependentVariable = getDependentVar(jobConfig.analysis);
-    type = newJobCapsService.getFieldById(dependentVariable)?.type;
+    type = newJobCapsServiceAnalytics.getFieldById(dependentVariable)?.type;
     const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
     const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
     const numTopClasses = getNumTopClasses(jobConfig.analysis);
@@ -221,24 +219,24 @@ export const getDefaultFieldsFromJobCaps = (
       predictionFieldName ? predictionFieldName : defaultPredictionField
     }`;
 
-    if ((numTopFeatureImportanceValues ?? 0) > 0) {
-      featureImportanceFields.push({
-        id: `${resultsField}.${FEATURE_IMPORTANCE}`,
-        name: `${resultsField}.${FEATURE_IMPORTANCE}`,
-        type: KBN_FIELD_TYPES.UNKNOWN,
-      });
+    if ((numTopFeatureImportanceValues ?? 0) === 0) {
+      // remove all feature importance fields
+      fields = fields.filter(
+        (field: any) => !field.name.includes(`${resultsField}.${FEATURE_IMPORTANCE}`)
+      );
+    } else {
       // remove flattened feature importance fields
       fields = fields.filter(
         (field: any) => !field.name.includes(`${resultsField}.${FEATURE_IMPORTANCE}.`)
       );
     }
 
-    if ((numTopClasses ?? 0) > 0) {
-      topClassesFields.push({
-        id: `${resultsField}.${TOP_CLASSES}`,
-        name: `${resultsField}.${TOP_CLASSES}`,
-        type: KBN_FIELD_TYPES.UNKNOWN,
-      });
+    if ((numTopClasses ?? 0) === 0) {
+      // remove all top classes fields
+      fields = fields.filter(
+        (field: any) => !field.name.includes(`${resultsField}.${TOP_CLASSES}`)
+      );
+    } else {
       // remove flattened top classes fields
       fields = fields.filter(
         (field: any) => !field.name.includes(`${resultsField}.${TOP_CLASSES}.`)
@@ -258,7 +256,7 @@ export const getDefaultFieldsFromJobCaps = (
     }
   }
 
-  allFields.push(...fields, ...featureImportanceFields, ...topClassesFields);
+  allFields.push(...fields);
   allFields.sort(({ name: a }: { name: string }, { name: b }: { name: string }) =>
     sortExplorationResultsFields(a, b, jobConfig)
   );

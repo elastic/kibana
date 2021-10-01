@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 import { contentSources } from '../../../__mocks__/content_sources.mock';
 import { groups } from '../../../__mocks__/groups.mock';
 
@@ -23,7 +23,7 @@ const saveItems = jest.fn();
 
 const props = {
   children: <></>,
-  label: 'shared content sources',
+  label: 'organizational content sources',
   allItems: [],
   numSelected: 1,
   hideModal,

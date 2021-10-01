@@ -65,6 +65,7 @@ describe('executeActionRoute', () => {
         someData: 'data',
       },
       source: asHttpRequestExecutionSource(req),
+      relatedSavedObjects: [],
     });
 
     expect(res.ok).toHaveBeenCalled();
@@ -75,9 +76,7 @@ describe('executeActionRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.execute.mockResolvedValueOnce(
-      (null as unknown) as ActionTypeExecutorResult<void>
-    );
+    actionsClient.execute.mockResolvedValueOnce(null as unknown as ActionTypeExecutorResult<void>);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -101,6 +100,7 @@ describe('executeActionRoute', () => {
     expect(actionsClient.execute).toHaveBeenCalledWith({
       actionId: '1',
       params: {},
+      relatedSavedObjects: [],
       source: asHttpRequestExecutionSource(req),
     });
 

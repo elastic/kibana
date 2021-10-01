@@ -38,6 +38,7 @@ interface Props {
   workingDirectory: string | null | undefined;
   args: string[] | null | undefined;
   session: string | null | undefined;
+  isDraggable?: boolean;
 }
 
 export const AuditdGenericFileLine = React.memo<Props>(
@@ -59,6 +60,7 @@ export const AuditdGenericFileLine = React.memo<Props>(
     session,
     text,
     fileIcon,
+    isDraggable,
   }) => (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
       <SessionUserHostWorkingDir
@@ -70,6 +72,7 @@ export const AuditdGenericFileLine = React.memo<Props>(
         secondary={secondary}
         workingDirectory={workingDirectory}
         session={session}
+        isDraggable={isDraggable}
       />
       {(filePath != null || processExecutable != null) && (
         <TokensFlexItem grow={false} component="span">
@@ -81,6 +84,7 @@ export const AuditdGenericFileLine = React.memo<Props>(
           contextId={contextId}
           eventId={id}
           field="file.path"
+          isDraggable={isDraggable}
           value={filePath}
           iconType={fileIcon}
         />
@@ -96,12 +100,19 @@ export const AuditdGenericFileLine = React.memo<Props>(
           endgamePid={undefined}
           endgameProcessName={undefined}
           eventId={id}
+          isDraggable={isDraggable}
           processPid={processPid}
           processName={processName}
           processExecutable={processExecutable}
         />
       </TokensFlexItem>
-      <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
+      <Args
+        eventId={id}
+        args={args}
+        contextId={contextId}
+        isDraggable={isDraggable}
+        processTitle={processTitle}
+      />
       {result != null && (
         <TokensFlexItem grow={false} component="span">
           {i18n.WITH_RESULT}
@@ -112,6 +123,7 @@ export const AuditdGenericFileLine = React.memo<Props>(
           contextId={contextId}
           eventId={id}
           field="auditd.result"
+          isDraggable={isDraggable}
           queryValue={result}
           value={result}
         />
@@ -124,15 +136,16 @@ AuditdGenericFileLine.displayName = 'AuditdGenericFileLine';
 
 interface GenericDetailsProps {
   browserFields: BrowserFields;
-  data: Ecs;
   contextId: string;
+  data: Ecs;
   text: string;
   fileIcon: IconType;
   timelineId: string;
+  isDraggable?: boolean;
 }
 
 export const AuditdGenericFileDetails = React.memo<GenericDetailsProps>(
-  ({ data, contextId, text, fileIcon = 'document', timelineId }) => {
+  ({ data, contextId, text, fileIcon = 'document', timelineId, isDraggable }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -169,9 +182,10 @@ export const AuditdGenericFileDetails = React.memo<GenericDetailsProps>(
             secondary={secondary}
             fileIcon={fileIcon}
             result={result}
+            isDraggable={isDraggable}
           />
           <EuiSpacer size="s" />
-          <NetflowRenderer data={data} timelineId={timelineId} />
+          <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
         </Details>
       );
     } else {

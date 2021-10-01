@@ -21,13 +21,8 @@ import {
   MAP_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 
-export function getMapsVisTypeAlias(
-  visualizations: VisualizationsSetup,
-  showMapVisualizationTypes: boolean
-) {
-  if (!showMapVisualizationTypes) {
-    visualizations.hideTypes(['region_map', 'tile_map']);
-  }
+export function getMapsVisTypeAlias(visualizations: VisualizationsSetup) {
+  visualizations.hideTypes(['region_map', 'tile_map']);
 
   const appDescription = i18n.translate('xpack.maps.visTypeAlias.description', {
     defaultMessage: 'Create and style maps with multiple layers and indices.',

@@ -131,17 +131,18 @@ describe('WaterfallChartWrapper', () => {
   });
 
   it('opens flyout on sidebar click and closes on flyout close button', async () => {
-    const { getByText, getAllByText, getByTestId, queryByText, getByRole } = render(
+    const { getByText, getByTestId, queryByText, getByRole } = render(
       <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
     );
 
-    expect(getByText(`1. ${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`1.`)).toBeInTheDocument();
     expect(queryByText('Content type')).not.toBeInTheDocument();
     expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
 
     // open flyout
-    // selecter matches both button and accessible text. Button is the second element in the array;
-    const sidebarButton = getAllByText(/1./)[1];
+    // selector matches both button and accessible text. Button is the second element in the array;
+    const sidebarButton = getByTestId(`middleTruncatedTextButton1`);
     fireEvent.click(sidebarButton);
 
     // check for sample flyout items
@@ -163,17 +164,18 @@ describe('WaterfallChartWrapper', () => {
   });
 
   it('opens flyout on sidebar click and closes on second sidebar click', async () => {
-    const { getByText, getAllByText, getByTestId, queryByText } = render(
+    const { getByText, getByTestId, queryByText } = render(
       <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
     );
 
-    expect(getByText(`1. ${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(getByText(`1.`)).toBeInTheDocument();
     expect(queryByText('Content type')).not.toBeInTheDocument();
     expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
 
     // open flyout
-    // selecter matches both button and accessible text. Button is the second element in the array;
-    const sidebarButton = getAllByText(/1./)[1];
+    // selector matches both button and accessible text. Button is the second element in the array;
+    const sidebarButton = getByTestId(`middleTruncatedTextButton1`);
     fireEvent.click(sidebarButton);
 
     // check for sample flyout items and that the flyout is focused
@@ -199,12 +201,10 @@ const NETWORK_EVENTS = {
     {
       timestamp: '2021-01-21T10:31:21.537Z',
       method: 'GET',
-      url:
-        'https://apv-static.minute.ly/videos/v-c2a526c7-450d-428e-1244649-a390-fb639ffead96-s45.746-54.421m.mp4',
+      url: 'https://apv-static.minute.ly/videos/v-c2a526c7-450d-428e-1244649-a390-fb639ffead96-s45.746-54.421m.mp4',
       status: 206,
       mimeType: 'video/mp4',
       requestSentTime: 241114127.474,
-      requestStartTime: 241114129.214,
       loadEndTime: 241116573.402,
       timings: {
         total: 2445.928000001004,
@@ -226,7 +226,6 @@ const NETWORK_EVENTS = {
       status: 200,
       mimeType: 'image/gif',
       requestSentTime: 241114749.202,
-      requestStartTime: 241114750.426,
       loadEndTime: 241114805.541,
       timings: {
         queueing: 1.2240000069141388,
@@ -248,7 +247,6 @@ const NETWORK_EVENTS = {
       status: 200,
       mimeType: 'application/json',
       requestSentTime: 241114268.04299998,
-      requestStartTime: 241114270.184,
       loadEndTime: 241114665.609,
       timings: {
         total: 397.5659999996424,
@@ -270,7 +268,6 @@ const NETWORK_EVENTS = {
       status: 200,
       mimeType: 'application/javascript',
       requestSentTime: 241114303.84899998,
-      requestStartTime: 241114306.416,
       loadEndTime: 241114370.361,
       timings: {
         send: 1.357000001007691,
@@ -292,7 +289,6 @@ const NETWORK_EVENTS = {
       status: 200,
       mimeType: 'application/javascript',
       requestSentTime: 241114305.939,
-      requestStartTime: 241114310.393,
       loadEndTime: 241114938.264,
       timings: {
         wait: 51.61500000394881,

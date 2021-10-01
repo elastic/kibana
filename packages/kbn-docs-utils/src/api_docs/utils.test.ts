@@ -69,15 +69,17 @@ it('test removeBrokenLinks', () => {
 
   const pluginApiMap: { [key: string]: PluginApi } = {};
   plugins.map((plugin) => {
-    pluginApiMap[plugin.manifest.id] = getPluginApi(project, plugin, plugins, log);
+    pluginApiMap[plugin.manifest.id] = getPluginApi(project, plugin, plugins, log, false);
   });
 
-  const missingApiItems: { [key: string]: string[] } = {};
+  const missingApiItems: { [key: string]: { [key: string]: string[] } } = {};
 
   plugins.forEach((plugin) => {
     const id = plugin.manifest.id;
     const pluginApi = pluginApiMap[id];
-    removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap);
+    removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap, log);
   });
-  expect(missingApiItems.pluginA.indexOf('public.ImNotExportedFromIndex')).toBeGreaterThan(-1);
+  expect(missingApiItems.pluginA['pluginA-public-ImNotExportedFromIndex'].length).toBeGreaterThan(
+    0
+  );
 });

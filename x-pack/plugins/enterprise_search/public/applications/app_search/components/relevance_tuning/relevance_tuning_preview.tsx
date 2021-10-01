@@ -21,6 +21,7 @@ import { RelevanceTuningLogic } from '.';
 const emptyCallout = (
   <EuiEmptyPrompt
     data-test-subj="EmptyQueryPrompt"
+    iconType="glasses"
     body={i18n.translate(
       'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.enterQueryMessage',
       {
@@ -48,7 +49,7 @@ export const RelevanceTuningPreview: React.FC = () => {
   const { engineName, isMetaEngine } = useValues(EngineLogic);
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel color="subdued">
       <EuiTitle size="m">
         <h2>
           {i18n.translate('xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.title', {

@@ -8,10 +8,11 @@
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_data_by_agent';
-import { createRoute } from './create_route';
+import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
-export const metricsChartsRoute = createRoute({
+const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',
   params: t.type({
     path: t.type({
@@ -30,11 +31,12 @@ export const metricsChartsRoute = createRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { params } = context;
+  handler: async (resources) => {
+    const { params } = resources;
+    const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const { agentName, environment, kuery, serviceNodeName } = params.query;
+    const { agentName, environment, kuery, serviceNodeName, start, end } =
+      params.query;
     return await getMetricsChartDataByAgent({
       environment,
       kuery,
@@ -42,6 +44,11 @@ export const metricsChartsRoute = createRoute({
       serviceName,
       agentName,
       serviceNodeName,
+      start,
+      end,
     });
   },
 });
+
+export const metricsRouteRepository =
+  createApmServerRouteRepository().add(metricsChartsRoute);

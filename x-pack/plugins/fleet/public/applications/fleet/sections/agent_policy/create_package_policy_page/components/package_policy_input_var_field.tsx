@@ -7,21 +7,21 @@
 
 import React, { useState, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFormRow,
   EuiSwitch,
   EuiFieldText,
-  EuiComboBox,
   EuiText,
-  EuiCodeEditor,
   EuiFieldPassword,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import type { RegistryVarsEntry } from '../../../../types';
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
-import 'brace/mode/yaml';
-import 'brace/theme/textmate';
+import { MultiTextInput } from './multi_text_input';
 
 export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
@@ -29,7 +29,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   onChange: (newValue: any) => void;
   errors?: string[] | null;
   forceShowErrors?: boolean;
-}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors }) => {
+  frozen?: boolean;
+}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors, frozen }) => {
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const { multi, required, type, title, name, description } = varDef;
   const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
@@ -39,36 +40,45 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   const field = useMemo(() => {
     if (multi) {
       return (
-        <EuiComboBox
-          noSuggestions
-          isInvalid={isInvalid}
-          selectedOptions={value.map((val: string) => ({ label: val }))}
-          onCreateOption={(newVal: any) => {
-            onChange([...value, newVal]);
-          }}
-          onChange={(newVals: any[]) => {
-            onChange(newVals.map((val) => val.label));
-          }}
+        <MultiTextInput
+          value={value}
+          onChange={onChange}
           onBlur={() => setIsDirty(true)}
+          isDisabled={frozen}
         />
       );
     }
     switch (type) {
       case 'yaml':
-        return (
-          <EuiCodeEditor
+        return frozen ? (
+          <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">
+            <pre>{value}</pre>
+          </EuiCodeBlock>
+        ) : (
+          <CodeEditor
+            languageId="yaml"
             width="100%"
-            mode="yaml"
-            theme="textmate"
-            setOptions={{
-              minLines: 10,
-              maxLines: 30,
-              tabSize: 2,
-              showGutter: false,
-            }}
+            height="300px"
             value={value}
-            onChange={(newVal) => onChange(newVal)}
-            onBlur={() => setIsDirty(true)}
+            onChange={onChange}
+            options={{
+              minimap: {
+                enabled: false,
+              },
+              ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
+                defaultMessage: 'YAML Code Editor',
+              }),
+              scrollBeyondLastLine: false,
+              wordWrap: 'off',
+              wrappingIndent: 'indent',
+              tabSize: 2,
+              // To avoid left margin
+              lineNumbers: 'off',
+              lineNumbersMinChars: 0,
+              glyphMargin: false,
+              folding: false,
+              lineDecorationsWidth: 0,
+            }}
           />
         );
       case 'bool':
@@ -79,6 +89,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             showLabel={false}
             onChange={(e) => onChange(e.target.checked)}
             onBlur={() => setIsDirty(true)}
+            disabled={frozen}
           />
         );
       case 'password':
@@ -89,6 +100,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             value={value === undefined ? '' : value}
             onChange={(e) => onChange(e.target.value)}
             onBlur={() => setIsDirty(true)}
+            disabled={frozen}
           />
         );
       default:
@@ -98,10 +110,11 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             value={value === undefined ? '' : value}
             onChange={(e) => onChange(e.target.value)}
             onBlur={() => setIsDirty(true)}
+            disabled={frozen}
           />
         );
     }
-  }, [isInvalid, multi, onChange, type, value, fieldLabel]);
+  }, [isInvalid, multi, onChange, type, value, fieldLabel, frozen]);
 
   // Boolean cannot be optional by default set to false
   const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);

@@ -9,6 +9,8 @@ import { EntityFieldType } from './anomalies';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields';
 
+export const ML_APPLY_TIME_RANGE_CONFIG = 'ml.jobSelectorFlyout.applyTimeRange';
+
 export type PartitionFieldConfig =
   | {
       /**
@@ -34,6 +36,9 @@ export type PartitionFieldsConfig =
   | Partial<Record<EntityFieldType, PartitionFieldConfig>>
   | undefined;
 
+export type ApplyTimeRangeConfig = boolean | undefined;
+
 export type MlStorage = Partial<{
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
+  [ML_APPLY_TIME_RANGE_CONFIG]: ApplyTimeRangeConfig;
 }> | null;

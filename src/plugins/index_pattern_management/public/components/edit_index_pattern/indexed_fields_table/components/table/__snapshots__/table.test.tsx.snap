@@ -18,7 +18,7 @@ exports[`Table render name 2`] = `
         </span>
       }
       title="Runtime field"
-      type="indexSettings"
+      type="indexRuntime"
     />
   </span>
 </span>
@@ -138,7 +138,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "Elastic",
         "excluded": false,
-        "format": "",
+        "hasRuntime": false,
         "info": Array [],
         "isMapped": true,
         "kbnType": "string",
@@ -149,7 +149,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "timestamp",
         "excluded": false,
-        "format": "YYYY-MM-DD",
+        "hasRuntime": false,
         "info": Array [],
         "isMapped": true,
         "kbnType": "date",
@@ -159,7 +159,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "conflictingField",
         "excluded": false,
-        "format": "",
+        "hasRuntime": false,
         "info": Array [],
         "isMapped": true,
         "kbnType": "conflict",
@@ -169,6 +169,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "customer",
         "excluded": false,
+        "hasRuntime": true,
         "info": Array [],
         "isMapped": false,
         "kbnType": "text",

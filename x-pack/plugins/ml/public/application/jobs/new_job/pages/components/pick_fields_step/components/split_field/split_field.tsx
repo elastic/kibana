@@ -7,29 +7,33 @@
 
 import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 
-import { SplitFieldSelect } from './split_field_select';
+import { SplitFieldSelect } from '../split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   newJobCapsService,
   filterCategoryFields,
-} from '../../../../../../../services/new_job_capabilities_service';
+} from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
+import { Field } from '../../../../../../../../../common/types/fields';
 import {
   MultiMetricJobCreator,
+  RareJobCreator,
   isMultiMetricJobCreator,
-  PopulationJobCreator,
-  isPopulationJobCreator,
 } from '../../../../../common/job_creator';
 
 export const SplitFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
-  const canClearSelection = isMultiMetricJobCreator(jc);
+  const jobCreator = jc as MultiMetricJobCreator | RareJobCreator;
 
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
-  const categoryFields = useMemo(
+  const allCategoryFields = useMemo(
     () => [...newJobCapsService.categoryFields, ...runtimeCategoryFields],
     []
+  );
+  const categoryFields = useFilteredCategoryFields(
+    allCategoryFields,
+    jobCreator,
+    jobCreatorUpdated
   );
   const [splitField, setSplitField] = useState(jobCreator.splitField);
 
@@ -47,20 +51,39 @@ export const SplitFieldSelector: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description jobType={jobCreator.type}>
+    <Description>
       <SplitFieldSelect
         fields={categoryFields}
         changeHandler={setSplitField}
         selectedField={splitField}
-        isClearable={canClearSelection}
-        testSubject={
-          isMultiMetricJobCreator(jc)
-            ? 'mlMultiMetricSplitFieldSelect'
-            : isPopulationJobCreator(jc)
-            ? 'mlPopulationSplitFieldSelect'
-            : undefined
-        }
+        isClearable={true}
+        testSubject="mlMultiMetricSplitFieldSelect"
       />
     </Description>
   );
 };
+
+// remove the rare (by) and population (over) fields from the by field options in the rare wizard
+function useFilteredCategoryFields(
+  allCategoryFields: Field[],
+  jobCreator: MultiMetricJobCreator | RareJobCreator,
+  jobCreatorUpdated: number
+) {
+  const [fields, setFields] = useState(allCategoryFields);
+
+  useEffect(() => {
+    if (isMultiMetricJobCreator(jobCreator)) {
+      setFields(allCategoryFields);
+    } else {
+      const rf = jobCreator.rareField;
+      const pf = jobCreator.populationField;
+      if (rf !== null || pf !== null) {
+        setFields(allCategoryFields.filter(({ name }) => name !== rf?.name && name !== pf?.name));
+      } else {
+        setFields(allCategoryFields);
+      }
+    }
+  }, [jobCreatorUpdated]);
+
+  return fields;
+}

@@ -10,7 +10,6 @@ import { RunContext } from '../../../../task_manager/server';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { ReportingConfigType } from '../../config';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -24,8 +23,7 @@ describe('Execute Report Task', () => {
   let configType: ReportingConfigType;
   beforeAll(async () => {
     configType = createMockConfigSchema();
-    const mockConfig = createMockConfig(configType);
-    mockReporting = await createMockReportingCore(mockConfig);
+    mockReporting = await createMockReportingCore(configType);
   });
 
   it('Instance setup', () => {
@@ -56,20 +54,20 @@ describe('Execute Report Task', () => {
 
     const task = new ExecuteReportTask(mockReporting, configType, logger);
     const taskDef = task.getTaskDefinition();
-    const taskRunner = taskDef.createTaskRunner(({
+    const taskRunner = taskDef.createTaskRunner({
       taskInstance: {
         id: 'random-task-id',
         params: { index: 'cool-reporting-index', id: 'cool-reporting-id' },
       },
-    } as unknown) as RunContext);
+    } as unknown as RunContext);
     expect(taskRunner).toHaveProperty('run');
     expect(taskRunner).toHaveProperty('cancel');
   });
 
   it('Max Concurrency is 0 if pollEnabled is false', () => {
-    const queueConfig = ({
+    const queueConfig = {
       queue: { pollEnabled: false, timeout: 55000 },
-    } as unknown) as ReportingConfigType['queue'];
+    } as unknown as ReportingConfigType['queue'];
 
     const task = new ExecuteReportTask(mockReporting, { ...configType, ...queueConfig }, logger);
     expect(task.getStatus()).toBe('uninitialized');

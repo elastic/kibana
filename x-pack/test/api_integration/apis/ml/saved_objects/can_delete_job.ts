@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
         idStarSpace
       );
 
-      await ml.api.asignJobToSpaces(adJobIdSpace12, 'anomaly-detector', [idSpace2], idSpace1);
+      await ml.api.updateJobSpaces(adJobIdSpace12, 'anomaly-detector', [idSpace2], [], idSpace1);
       await ml.api.assertJobSpaces(adJobIdSpace12, 'anomaly-detector', [idSpace1, idSpace2]);
 
       await ml.testResources.setKibanaTimeZoneToUTC();

@@ -19,3 +19,13 @@ export const getStatusColor = (status: number) => {
   if (status >= 500) color = 'danger';
   return color;
 };
+
+export const attemptToFormatJson = (possibleJson: string) => {
+  try {
+    // it is JSON, we can format it with newlines/indentation
+    return JSON.stringify(JSON.parse(possibleJson), null, 2);
+  } catch {
+    // if it's not JSON, we return the original content
+    return possibleJson;
+  }
+};

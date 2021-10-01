@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-import { SEARCH_SESSION_TYPE } from '../../common';
+import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';
 import { searchSessionSavedObjectMigrations } from './search_session_migration';
 
 export const searchSessionSavedObjectType: SavedObjectsType = {
@@ -64,6 +64,9 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
         type: 'keyword',
       },
       username: {
+        type: 'keyword',
+      },
+      version: {
         type: 'keyword',
       },
     },

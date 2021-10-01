@@ -1,25 +1,16 @@
 # data_enhanced
 
-The `data_enhanced` plugin is the x-pack counterpart to the OSS `data` plugin.
+The `data_enhanced` plugin is the x-pack counterpart to the `src/plguins/data` plugin.
 
-It exists to provide Elastic-licensed services, or parts of services, which
-enhance existing OSS functionality from `data`.
+It exists to provide services, or parts of services, which
+enhance existing functionality from `src/plugins/data`.
 
-Currently the `data_enhanced` plugin doesn't return any APIs which you can
+Currently, the `data_enhanced` plugin doesn't return any APIs which you can
 consume directly, however it is possible that you are indirectly relying on the
-enhanced functionality that it provides via the OSS `data` plugin.
+enhanced functionality that it provides via the `data` plugin from `src/`.
 
 Here is the functionality it adds:
 
-## KQL Autocomplete
+## Search Sessions
 
-The OSS autocomplete service provides suggestions for field names and values
-based on suggestion providers which are registered to the service. This plugin
-registers the autocomplete provider for KQL to the OSS service.
-
-## Async, Rollup, and EQL Search Strategies
-
-This plugin enhances the OSS search service with an ES search strategy that
-uses async search (or rollups) behind the scenes. It also registers an EQL
-search strategy.
-
+Search sessions are handy when you want to enable a user to run something asynchronously (for example, a dashboard over a long period of time), and then quickly restore the results at a later time. The Search Service transparently fetches results from the .async-search index, instead of running each request again.

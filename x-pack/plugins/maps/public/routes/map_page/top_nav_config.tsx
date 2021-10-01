@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Adapters } from 'src/plugins/inspector/public';
 import {
-  getCoreChrome,
   getMapsCapabilities,
   getIsAllowByValueEmbeddables,
   getInspector,
@@ -28,7 +27,12 @@ import {
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { SavedMap } from './saved_map';
 import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
-import { SavedObjectSaveModalDashboard } from '../../../../../../src/plugins/presentation_util/public';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '../../../../../../src/plugins/presentation_util/public';
+
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export function getTopNavConfig({
   savedMap,
@@ -87,7 +91,6 @@ export function getTopNavConfig({
       }),
       testId: 'mapsFullScreenMode',
       run() {
-        getCoreChrome().setIsVisible(false);
         enableFullScreen();
       },
     }
@@ -146,9 +149,8 @@ export function getTopNavConfig({
         const saveModalProps = {
           onSave: async (
             props: OnSaveProps & {
-              returnToOrigin?: boolean;
               dashboardId?: string | null;
-              addToLibrary?: boolean;
+              addToLibrary: boolean;
             }
           ) => {
             try {
@@ -176,7 +178,7 @@ export function getTopNavConfig({
             await savedMap.save({
               ...props,
               newTags: selectedTags,
-              saveByReference: Boolean(props.addToLibrary),
+              saveByReference: props.addToLibrary,
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
             return { id: 'id' };
@@ -192,21 +194,38 @@ export function getTopNavConfig({
           }),
         };
         const PresentationUtilContext = getPresentationUtilContext();
-        const saveModal =
-          savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables() ? (
+
+        let saveModal;
+
+        if (savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+          saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
+              onSave={async (props: OnSaveProps) => {
+                return saveModalProps.onSave({ ...props, addToLibrary: true });
+              }}
               originatingApp={savedMap.getOriginatingApp()}
               getAppNameFromId={savedMap.getAppNameFromId}
+              returnToOriginSwitchLabel={
+                savedMap.isByValue()
+                  ? i18n.translate('xpack.maps.topNav.updatePanel', {
+                      defaultMessage: 'Update panel on {originatingAppName}',
+                      values: { originatingAppName: savedMap.getOriginatingAppName() },
+                    })
+                  : undefined
+              }
               options={tagSelector}
             />
-          ) : (
+          );
+        } else {
+          saveModal = (
             <SavedObjectSaveModalDashboard
               {...saveModalProps}
               canSaveByReference={true} // we know here that we have save capabilities.
               tagOptions={tagSelector}
             />
           );
+        }
 
         showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
       },

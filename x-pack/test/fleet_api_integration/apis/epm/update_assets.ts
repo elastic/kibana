@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -35,6 +36,8 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('updates all assets when updating a package to a different version', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
+
     before(async () => {
       await installPackage(pkgKey);
       await installPackage(pkgUpdateKey);
@@ -199,23 +202,58 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(resPipeline2.statusCode).equal(404);
     });
-    it('should have updated the template components', async function () {
-      const res = await es.transport.request({
+    it('should have updated the component templates', async function () {
+      const resMappings = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${logsTemplateName}-mappings`,
+        path: `/_component_template/${logsTemplateName}@mappings`,
       });
-      expect(res.statusCode).equal(200);
-      expect(res.body.component_templates[0].component_template.template.mappings).eql({
+      expect(resMappings.statusCode).equal(200);
+      expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
         dynamic: true,
-        properties: { '@timestamp': { type: 'date' } },
       });
       const resSettings = await es.transport.request({
         method: 'GET',
-        path: `/_component_template/${logsTemplateName}-settings`,
+        path: `/_component_template/${logsTemplateName}@settings`,
       });
-      expect(res.statusCode).equal(200);
+      expect(resSettings.statusCode).equal(200);
       expect(resSettings.body.component_templates[0].component_template.template.settings).eql({
-        index: { lifecycle: { name: 'reference2' } },
+        index: {
+          lifecycle: { name: 'reference2' },
+          codec: 'best_compression',
+          mapping: {
+            total_fields: {
+              limit: '10000',
+            },
+          },
+          number_of_routing_shards: '30',
+          number_of_shards: '1',
+          query: {
+            default_field: ['logs_test_name', 'new_field_name'],
+          },
+          refresh_interval: '5s',
+        },
+      });
+      const resUserSettings = await es.transport.request({
+        method: 'GET',
+        path: `/_component_template/${logsTemplateName}@custom`,
+      });
+      expect(resUserSettings.statusCode).equal(200);
+      expect(resUserSettings.body).eql({
+        component_templates: [
+          {
+            name: 'logs-all_assets.test_logs@custom',
+            component_template: {
+              _meta: {
+                package: {
+                  name: 'all_assets',
+                },
+              },
+              template: {
+                settings: {},
+              },
+            },
+          },
+        ],
       });
     });
     it('should have updated the index patterns', async function () {
@@ -297,6 +335,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'lens',
           },
           {
+            id: 'sample_security_rule',
+            type: 'security-rule',
+          },
+          {
             id: 'sample_ml_module',
             type: 'ml-module',
           },
@@ -319,12 +361,40 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs@mappings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs@settings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs@custom',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs2',
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs2@settings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs2@custom',
+            type: 'component_template',
+          },
+          {
             id: 'metrics-all_assets.test_metrics',
             type: 'index_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@settings',
+            type: 'component_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@custom',
+            type: 'component_template',
           },
         ],
         es_index_patterns: {
@@ -350,6 +420,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: '7f4c5aca-b4f5-5f0a-95af-051da37513fc', type: 'epm-packages-assets' },
           { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
+          { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
           { id: 'c7bf1a39-e057-58a0-afde-fb4b48751d8c', type: 'epm-packages-assets' },
           { id: '8c665f28-a439-5f43-b5fd-8fda7b576735', type: 'epm-packages-assets' },
         ],

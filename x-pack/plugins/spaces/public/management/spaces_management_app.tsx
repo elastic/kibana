@@ -12,9 +12,13 @@ import { Route, Router, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../src/plugins/kibana_react/public';
+import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -36,22 +40,16 @@ export const spacesManagementApp = Object.freeze({
       title,
 
       async mount({ element, setBreadcrumbs, history }) {
-        const [startServices, { SpacesGridPage }, { ManageSpacePage }] = await Promise.all([
-          getStartServices(),
-          import('./spaces_grid'),
-          import('./edit_space'),
-        ]);
+        const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
+          await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
 
-        const [
-          { notifications, i18n: i18nStart, application, chrome },
-          { features },
-        ] = startServices;
         const spacesBreadcrumbs = [
           {
             text: title,
             href: `/`,
           },
         ];
+        const { notifications, i18n: i18nStart, application, chrome } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -76,6 +74,7 @@ export const spacesManagementApp = Object.freeze({
               text: i18n.translate('xpack.spaces.management.createSpaceBreadcrumb', {
                 defaultMessage: 'Create',
               }),
+              href: '/create',
             },
           ]);
 
@@ -86,7 +85,6 @@ export const spacesManagementApp = Object.freeze({
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
-              getUrlForApp={application.getUrlForApp}
             />
           );
         };
@@ -113,29 +111,30 @@ export const spacesManagementApp = Object.freeze({
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
               history={history}
-              getUrlForApp={application.getUrlForApp}
             />
           );
         };
 
         render(
-          <i18nStart.Context>
-            <RedirectAppLinks application={application}>
-              <Router history={history}>
-                <Switch>
-                  <Route path={['', '/']} exact>
-                    <SpacesGridPageWithBreadcrumbs />
-                  </Route>
-                  <Route path="/create">
-                    <CreateSpacePageWithBreadcrumbs />
-                  </Route>
-                  <Route path="/edit/:spaceId">
-                    <EditSpacePageWithBreadcrumbs />
-                  </Route>
-                </Switch>
-              </Router>
-            </RedirectAppLinks>
-          </i18nStart.Context>,
+          <KibanaContextProvider services={coreStart}>
+            <i18nStart.Context>
+              <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
+                <Router history={history}>
+                  <Switch>
+                    <Route path={['', '/']} exact>
+                      <SpacesGridPageWithBreadcrumbs />
+                    </Route>
+                    <Route path="/create">
+                      <CreateSpacePageWithBreadcrumbs />
+                    </Route>
+                    <Route path="/edit/:spaceId">
+                      <EditSpacePageWithBreadcrumbs />
+                    </Route>
+                  </Switch>
+                </Router>
+              </RedirectAppLinks>
+            </i18nStart.Context>
+          </KibanaContextProvider>,
           element
         );
 

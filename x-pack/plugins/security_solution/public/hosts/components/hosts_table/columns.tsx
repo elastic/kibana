@@ -78,7 +78,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     hideForMobile: false,
     sortable: true,
     render: (lastSeen: Maybe<string | string[]> | undefined) => {
-      if (lastSeen != null) {
+      if (lastSeen != null && lastSeen.length > 0) {
         return (
           <FormattedRelativePreferenceDate
             value={Array.isArray(lastSeen) ? lastSeen[0] : lastSeen}

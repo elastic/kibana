@@ -217,12 +217,8 @@ export class IndexActionsContextMenu extends Component {
         getUrlForApp,
       });
       if (actionExtensionDefinition) {
-        const {
-          buttonLabel,
-          requestMethod,
-          successMessage,
-          renderConfirmModal,
-        } = actionExtensionDefinition;
+        const { buttonLabel, requestMethod, successMessage, renderConfirmModal } =
+          actionExtensionDefinition;
         if (requestMethod) {
           items.push({
             name: buttonLabel,
@@ -696,7 +692,8 @@ export class IndexActionsContextMenu extends Component {
             iconSide = 'right',
             anchorPosition = 'rightUp',
             label = i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonLabel', {
-              defaultMessage: 'Manage {selectedIndexCount, plural, one {index} other {indices}}',
+              defaultMessage:
+                'Manage {selectedIndexCount, plural, one {index} other {{selectedIndexCount} indices}}',
               values: { selectedIndexCount },
             }),
             iconType = 'arrowDown',

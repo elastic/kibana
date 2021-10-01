@@ -16,6 +16,7 @@ export {
   AlertTypeDisabledReason,
   ErrorThatHandlesItsOwnResponse,
   isErrorThatHandlesItsOwnResponse,
+  ElasticsearchError,
 } from './errors';
 export {
   executionStatusFromState,

@@ -12,13 +12,13 @@ import { Config } from '../../common';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 
 export function registerAlertTypes({
-  alertTypeRegistry,
+  ruleTypeRegistry,
   config,
 }: {
-  alertTypeRegistry: TriggersAndActionsUIPublicPluginSetup['alertTypeRegistry'];
+  ruleTypeRegistry: TriggersAndActionsUIPublicPluginSetup['ruleTypeRegistry'];
   config: Config;
 }) {
-  alertTypeRegistry.register(getGeoContainmentAlertType());
-  alertTypeRegistry.register(getThresholdAlertType());
-  alertTypeRegistry.register(getEsQueryAlertType());
+  ruleTypeRegistry.register(getGeoContainmentAlertType());
+  ruleTypeRegistry.register(getThresholdAlertType());
+  ruleTypeRegistry.register(getEsQueryAlertType());
 }

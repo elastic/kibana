@@ -13,7 +13,6 @@ import { of } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
-import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';
 import { getDefaultChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
@@ -86,12 +85,9 @@ describe('AnomalyExplorerChartsService', () => {
   };
   const anomalyExplorerService = new AnomalyExplorerChartsService(
     timefilterMock,
-    (mlApiServicesMock as unknown) as MlApiServices,
-    (mlResultsServiceMock as unknown) as MlResultsService
+    mlApiServicesMock as unknown as MlApiServices,
+    mlResultsServiceMock as unknown as MlResultsService
   );
-  const explorerService = {
-    setCharts: jest.fn(),
-  };
 
   const timeRange = {
     earliestMs: 1486656000000,
@@ -104,14 +100,10 @@ describe('AnomalyExplorerChartsService', () => {
     );
   });
 
-  afterEach(() => {
-    explorerService.setCharts.mockClear();
-  });
-
   test('should return anomaly data without explorer service', async () => {
     const anomalyData = (await anomalyExplorerService.getAnomalyData(
       undefined,
-      (combinedJobRecords as unknown) as Record<string, CombinedJob>,
+      combinedJobRecords as unknown as Record<string, CombinedJob>,
       1000,
       mockAnomalyChartRecords,
       timeRange.earliestMs,
@@ -123,29 +115,11 @@ describe('AnomalyExplorerChartsService', () => {
     assertAnomalyDataResult(anomalyData);
   });
 
-  test('should set anomaly data with explorer service side effects', async () => {
-    await anomalyExplorerService.getAnomalyData(
-      (explorerService as unknown) as ExplorerService,
-      (combinedJobRecords as unknown) as Record<string, CombinedJob>,
-      1000,
-      mockAnomalyChartRecords,
-      timeRange.earliestMs,
-      timeRange.latestMs,
-      timefilterMock,
-      0,
-      12
-    );
-
-    expect(explorerService.setCharts.mock.calls.length).toBe(2);
-    assertAnomalyDataResult(explorerService.setCharts.mock.calls[0][0]);
-    assertAnomalyDataResult(explorerService.setCharts.mock.calls[1][0]);
-  });
-
   test('call anomalyChangeListener with empty series config', async () => {
     const anomalyData = (await anomalyExplorerService.getAnomalyData(
       undefined,
       // @ts-ignore
-      (combinedJobRecords as unknown) as Record<string, CombinedJob>,
+      combinedJobRecords as unknown as Record<string, CombinedJob>,
       1000,
       [],
       timeRange.earliestMs,
@@ -166,7 +140,7 @@ describe('AnomalyExplorerChartsService', () => {
 
     const anomalyData = (await anomalyExplorerService.getAnomalyData(
       undefined,
-      (combinedJobRecords as unknown) as Record<string, CombinedJob>,
+      combinedJobRecords as unknown as Record<string, CombinedJob>,
       1000,
       mockAnomalyChartRecordsClone,
       timeRange.earliestMs,

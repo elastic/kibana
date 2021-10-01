@@ -8,7 +8,7 @@
 import React from 'react';
 import DateMath from '@elastic/datemath';
 import { MonitorCharts } from './monitor_charts';
-import { shallowWithRouter } from '../../lib/helper/enzyme_helpers';
+import { shallowWithRouter } from '../../lib';
 
 describe('MonitorCharts component', () => {
   let dateMathSpy: any;

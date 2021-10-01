@@ -5,7 +5,7 @@
       ".fleet-actions": {
       }
     },
-    "index": ".fleet-actions_1",
+    "index": ".fleet-actions-7",
     "mappings": {
       "_meta": {
         "migrationHash": "6527beea5a4a2f33acb599585ed4710442ece7f2"
@@ -52,7 +52,7 @@
       ".fleet-agents": {
       }
     },
-    "index": ".fleet-agents_1",
+    "index": ".fleet-agents-7",
     "mappings": {
       "_meta": {
         "migrationHash": "87cab95ac988d78a78d0d66bbf05361b65dcbacf"
@@ -289,7 +289,7 @@
       ".fleet-enrollment-api-keys": {
       }
     },
-    "index": ".fleet-enrollment-api-keys_1",
+    "index": ".fleet-enrollment-api-keys-7",
     "mappings": {
       "_meta": {
         "migrationHash": "06bef724726f3bea9f474a09be0a7f7881c28d4a"
@@ -338,7 +338,7 @@
       ".fleet-policies": {
       }
     },
-    "index": ".fleet-policies_1",
+    "index": ".fleet-policies-7",
     "mappings": {
       "_meta": {
         "migrationHash": "c2c2a49b19562942fa7c1ff1537e66e751cdb4fa"
@@ -382,7 +382,7 @@
       ".fleet-servers": {
       }
     },
-    "index": ".fleet-servers_1",
+    "index": ".fleet-servers-7",
     "mappings": {
       "_meta": {
         "migrationHash": "e2782448c7235ec9af66ca7997e867d715ac379c"

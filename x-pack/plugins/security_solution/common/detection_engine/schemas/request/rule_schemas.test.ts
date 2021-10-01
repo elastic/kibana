@@ -6,9 +6,8 @@
  */
 
 import { createRulesSchema, CreateRulesSchema, SavedQueryCreateSchema } from './rule_schemas';
-import { exactCheck } from '../../../exact_check';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 import {
   getCreateSavedQueryRulesSchemaMock,
@@ -322,6 +321,19 @@ describe('create rules schema', () => {
       severity: 'low',
       interval: '5m',
       type: 'query',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('You can send in a namespace', () => {
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      namespace: 'a namespace',
     };
 
     const decoded = createRulesSchema.decode(payload);
@@ -1162,12 +1174,8 @@ describe('create rules schema', () => {
 
     test('threat_index, threat_query, and threat_mapping are required when type is "threat_match" and validation fails without them', () => {
       /* eslint-disable @typescript-eslint/naming-convention */
-      const {
-        threat_index,
-        threat_query,
-        threat_mapping,
-        ...payload
-      } = getCreateThreatMatchRulesSchemaMock();
+      const { threat_index, threat_query, threat_mapping, ...payload } =
+        getCreateThreatMatchRulesSchemaMock();
       const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);

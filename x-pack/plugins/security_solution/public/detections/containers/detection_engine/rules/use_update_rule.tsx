@@ -7,7 +7,7 @@
 
 import { useEffect, useState, Dispatch } from 'react';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { UpdateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
 import { transformOutput } from './transforms';
@@ -26,7 +26,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
   const [rule, setRule] = useState<UpdateRulesSchema | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -42,7 +42,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
           }
         } catch (error) {
           if (isSubscribed) {
-            errorToToaster({ title: i18n.RULE_ADD_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.RULE_ADD_FAILURE });
           }
         }
         if (isSubscribed) {
@@ -56,7 +56,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, dispatchToaster]);
+  }, [rule, addError]);
 
   return [{ isLoading, isSaved }, setRule];
 };

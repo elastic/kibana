@@ -14,6 +14,7 @@ import {
   supportsGeoTileAgg,
 } from './index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
+import { IndexPatternField } from 'src/plugins/data/public';
 
 describe('getSourceFields', () => {
   test('Should remove multi fields from field list', () => {
@@ -21,7 +22,7 @@ describe('getSourceFields', () => {
       {
         name: 'agent',
         type: 'string',
-      },
+      } as IndexPatternField,
       {
         name: 'agent.keyword',
         subType: {
@@ -30,7 +31,7 @@ describe('getSourceFields', () => {
           },
         },
         type: 'string',
-      },
+      } as IndexPatternField,
     ];
     const sourceFields = getSourceFields(fields);
     expect(sourceFields).toEqual([{ name: 'agent', type: 'string' }]);
@@ -44,7 +45,7 @@ describe('Gold+ licensing', () => {
         name: 'location',
         type: 'geo_point',
         aggregatable: true,
-      },
+      } as IndexPatternField,
       supportedInBasic: true,
       supportedInGold: true,
     },
@@ -53,7 +54,7 @@ describe('Gold+ licensing', () => {
         name: 'location',
         type: 'geo_shape',
         aggregatable: false,
-      },
+      } as IndexPatternField,
       supportedInBasic: false,
       supportedInGold: false,
     },
@@ -62,7 +63,7 @@ describe('Gold+ licensing', () => {
         name: 'location',
         type: 'geo_shape',
         aggregatable: true,
-      },
+      } as IndexPatternField,
       supportedInBasic: false,
       supportedInGold: true,
     },

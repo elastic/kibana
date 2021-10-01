@@ -7,7 +7,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useContext, useCallback, useMemo } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -69,11 +69,8 @@ export const ResolverWithoutProviders = React.memo(
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
 
-    const {
-      processNodePositions,
-      connectingEdgeLineSegments,
-    } = useSelector((state: ResolverState) =>
-      selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
+    const { processNodePositions, connectingEdgeLineSegments } = useSelector(
+      (state: ResolverState) => selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
     );
 
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
@@ -95,11 +92,8 @@ export const ResolverWithoutProviders = React.memo(
     const isLoading = useSelector(selectors.isTreeLoading);
     const hasError = useSelector(selectors.hadErrorLoadingTree);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
+    const resolverTreeHasNodes = useSelector(selectors.resolverTreeHasNodes);
     const colorMap = useColors();
-
-    const noProcessEventsFound = useMemo(() => processNodePositions.size < 1, [
-      processNodePositions,
-    ]);
 
     return (
       <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
@@ -117,9 +111,7 @@ export const ResolverWithoutProviders = React.memo(
               />
             </div>
           </div>
-        ) : noProcessEventsFound ? (
-          <ResolverNoProcessEvents />
-        ) : (
+        ) : resolverTreeHasNodes ? (
           <>
             <GraphContainer
               data-test-subj="resolver:graph"
@@ -160,6 +152,8 @@ export const ResolverWithoutProviders = React.memo(
             </GraphContainer>
             <PanelRouter />
           </>
+        ) : (
+          <ResolverNoProcessEvents />
         )}
         <GraphControls />
         <SymbolDefinitions />

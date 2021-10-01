@@ -53,3 +53,25 @@ export const EXCEPTION_OPERATOR_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Operator',
   }
 );
+
+export const ADD_NESTED_DESCRIPTION = i18n.translate(
+  'xpack.lists.exceptions.builder.addNestedDescription',
+  {
+    defaultMessage: 'Add nested condition',
+  }
+);
+
+export const ADD_NON_NESTED_DESCRIPTION = i18n.translate(
+  'xpack.lists.exceptions.builder.addNonNestedDescription',
+  {
+    defaultMessage: 'Add non-nested condition',
+  }
+);
+
+export const AND = i18n.translate('xpack.lists.exceptions.andDescription', {
+  defaultMessage: 'AND',
+});
+
+export const OR = i18n.translate('xpack.lists.exceptions.orDescription', {
+  defaultMessage: 'OR',
+});

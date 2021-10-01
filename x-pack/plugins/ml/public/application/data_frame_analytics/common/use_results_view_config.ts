@@ -15,7 +15,7 @@ import { extractErrorMessage } from '../../../../common/util/errors';
 
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';
-import { newJobCapsService } from '../../services/new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../contexts/ml';
 
 import { DataFrameAnalyticsConfig } from '../common';
@@ -125,7 +125,7 @@ export const useResultsViewConfig = (jobId: string) => {
             }
 
             if (indexP !== undefined) {
-              await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
+              await newJobCapsServiceAnalytics.initializeFromIndexPattern(indexP);
               setJobConfig(analyticsConfigs.data_frame_analytics[0]);
               setIndexPattern(indexP);
               setIsInitialized(true);

@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { LogMeta } from './log_meta';
 import { LogRecord } from './log_record';
-
-/**
- * Contextual metadata
- *
- * @public
- */
-export interface LogMeta {
-  [key: string]: any;
-}
 
 /**
  * Logger exposes all the necessary methods to log any type of information and
@@ -30,28 +22,28 @@ export interface Logger {
    * @param message - The log message
    * @param meta -
    */
-  trace(message: string, meta?: LogMeta): void;
+  trace<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void;
 
   /**
    * Log messages useful for debugging and interactive investigation
    * @param message - The log message
    * @param meta -
    */
-  debug(message: string, meta?: LogMeta): void;
+  debug<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void;
 
   /**
    * Logs messages related to general application flow
    * @param message - The log message
    * @param meta -
    */
-  info(message: string, meta?: LogMeta): void;
+  info<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void;
 
   /**
    * Logs abnormal or unexpected errors or messages
    * @param errorOrMessage - An Error object or message string to log
    * @param meta -
    */
-  warn(errorOrMessage: string | Error, meta?: LogMeta): void;
+  warn<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void;
 
   /**
    * Logs abnormal or unexpected errors or messages that caused a failure in the application flow
@@ -59,7 +51,7 @@ export interface Logger {
    * @param errorOrMessage - An Error object or message string to log
    * @param meta -
    */
-  error(errorOrMessage: string | Error, meta?: LogMeta): void;
+  error<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void;
 
   /**
    * Logs abnormal or unexpected errors or messages that caused an unrecoverable failure
@@ -67,7 +59,7 @@ export interface Logger {
    * @param errorOrMessage - An Error object or message string to log
    * @param meta -
    */
-  fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
+  fatal<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void;
 
   /** @internal */
   log(record: LogRecord): void;

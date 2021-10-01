@@ -8,34 +8,83 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
-import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
+import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions } from '.';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 jest.mock('../../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn(),
+  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
+}));
+jest.mock(
+  '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
+  () => ({
+    useInvestigateInTimeline: jest.fn().mockReturnValue({
+      investigateInTimelineActionItems: [],
+      investigateInTimelineAlertClick: jest.fn(),
+      showInvestigateInTimelineAction: false,
+    }),
+  })
+);
+
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        navigateToApp: jest.fn(),
+        getUrlForApp: jest.fn(),
+        capabilities: {
+          siem: { crud_alerts: true, read_alerts: true },
+        },
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
+      savedObjects: {
+        client: {},
+      },
+      timelines: { ...mockTimelines },
+    },
+  }),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
+  useGetUserCasesPermissions: jest.fn(),
 }));
 
-describe('Actions', () => {
-  beforeEach(() => {
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-  });
+const defaultProps = {
+  ariaRowindex: 2,
+  checked: false,
+  columnId: '',
+  columnValues: 'abc def',
+  data: mockTimelineData[0].data,
+  ecsData: mockTimelineData[0].ecs,
+  eventId: 'abc',
+  eventIdToNoteIds: {},
+  index: 2,
+  isEventPinned: false,
+  loadingEventIds: [],
+  onEventDetailsPanelOpened: () => {},
+  onRowSelected: () => {},
+  refetch: () => {},
+  rowIndex: 10,
+  setEventsDeleted: () => {},
+  setEventsLoading: () => {},
+  showCheckboxes: true,
+  showNotes: false,
+  timelineId: 'test',
+  toggleShowNotes: () => {},
+};
 
+describe('Actions', () => {
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
       <TestProviders>
-        <Actions
-          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          ariaRowindex={2}
-          checked={false}
-          columnValues={'abc def'}
-          eventId="abc"
-          loadingEventIds={[]}
-          onEventDetailsPanelOpened={jest.fn()}
-          onRowSelected={jest.fn()}
-          showCheckboxes={true}
-        />
+        <Actions {...defaultProps} />
       </TestProviders>
     );
 
@@ -45,20 +94,96 @@ describe('Actions', () => {
   test('it does NOT render a checkbox for selecting the event when `showCheckboxes` is `false`', () => {
     const wrapper = mount(
       <TestProviders>
-        <Actions
-          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          ariaRowindex={2}
-          checked={false}
-          columnValues={'abc def'}
-          eventId="abc"
-          loadingEventIds={[]}
-          onEventDetailsPanelOpened={jest.fn()}
-          onRowSelected={jest.fn()}
-          showCheckboxes={false}
-        />
+        <Actions {...defaultProps} showCheckboxes={false} />
       </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
+  });
+
+  test('it does NOT render a checkbox for selecting the event when `tGridEnabled` is `true`', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    const wrapper = mount(
+      <TestProviders>
+        <Actions {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
+  });
+  describe('Alert context menu enabled?', () => {
+    test('it disables for eventType=raw', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
+      ).toBe(true);
+    });
+    test('it enables for eventType=signal', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        signal: { rule: { id: ['123'] } },
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
+      ).toBe(false);
+    });
+    test('it disables for event.kind: undefined and agent.type: endpoint', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        agent: { type: ['endpoint'] },
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
+      ).toBe(true);
+    });
+    test('it enables for event.kind: event and agent.type: endpoint', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['event'] },
+        agent: { type: ['endpoint'] },
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
+      ).toBe(false);
+    });
+    test('it enables for event.kind: alert and agent.type: endpoint', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
+      ).toBe(false);
+    });
   });
 });

@@ -12,8 +12,7 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, fromRoot } from '@kbn/utils';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
 import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
@@ -53,7 +52,6 @@ const pathCollector = function () {
 };
 
 const configPathCollector = pathCollector();
-const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
@@ -65,15 +63,18 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     delete rawConfig.xpack;
   }
 
+  // only used to set cliArgs.envName, we don't want to inject that into the config
+  delete extraCliOptions.env;
+
   if (opts.dev) {
-    set('env', 'development');
+    if (!has('elasticsearch.serviceAccountToken')) {
+      if (!has('elasticsearch.username')) {
+        set('elasticsearch.username', 'kibana_system');
+      }
 
-    if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'kibana_system');
-    }
-
-    if (!has('elasticsearch.password')) {
-      set('elasticsearch.password', 'changeme');
+      if (!has('elasticsearch.password')) {
+        set('elasticsearch.password', 'changeme');
+      }
     }
 
     if (opts.ssl) {
@@ -136,7 +137,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     }
   }
 
-  set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   merge(extraCliOptions);
@@ -168,23 +168,15 @@ export default function (program) {
       'Deprecated, set logging file destination in your configuration'
     )
     .option(
-      '--plugin-dir <path>',
-      'A path to scan for plugins, this can be specified multiple ' +
-        'times to specify multiple directories',
-      pluginDirCollector,
-      [fromRoot('plugins')]
-    )
-    .option(
       '--plugin-path <path>',
       'A path to a plugin which should be included by the server, ' +
         'this can be specified multiple times to specify multiple paths',
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
-  if (!IS_KIBANA_DISTRIBUTABLE) {
+  if (!isKibanaDistributable()) {
     command
       .option('--oss', 'Start Kibana without X-Pack')
       .option(

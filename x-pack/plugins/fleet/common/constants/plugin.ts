@@ -6,3 +6,4 @@
  */
 
 export const PLUGIN_ID = 'fleet';
+export const INTEGRATIONS_PLUGIN_ID = 'integrations';

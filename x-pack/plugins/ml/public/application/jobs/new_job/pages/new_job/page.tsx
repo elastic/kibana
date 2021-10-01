@@ -24,6 +24,7 @@ import {
   jobCreatorFactory,
   isAdvancedJobCreator,
   isCategorizationJobCreator,
+  isRareJobCreator,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -37,7 +38,7 @@ import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
@@ -171,6 +172,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
       const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
       jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
+    } else if (isRareJobCreator(jobCreator)) {
+      const rare = newJobCapsService.getAggById('rare');
+      const freqRare = newJobCapsService.getAggById('freq_rare');
+      jobCreator.setDefaultDetectorProperties(rare, freqRare);
     }
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { find, some, reduce, values, sortBy } from 'lodash';
+import { find, some, reduce, values, sortBy, get } from 'lodash';
 import { hasPrimaryChildren } from '../lib/has_primary_children';
 import { decorateShards } from '../lib/decorate_shards';
 
@@ -28,8 +28,8 @@ export function nodesByIndices() {
     }
 
     function createIndexAddShard(obj, shard) {
-      const node = shard.node || 'unassigned';
-      const index = shard.index;
+      const node = get(shard, 'node.name', shard.node || 'unassigned');
+      const index = get(shard, 'index.name', shard.index);
       if (!obj[node]) {
         createNode(obj, nodes[node], node);
       }

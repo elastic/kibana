@@ -6,44 +6,48 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { withApmSpan } from '../../utils/with_apm_span';
 
-export function getServiceCount({
+export async function getServiceCount({
   setup,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  return withApmSpan('observability_overview_get_service_count', async () => {
-    const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
-    const params = {
-      apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-          ProcessorEvent.error,
-          ProcessorEvent.metric,
-        ],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: rangeQuery(start, end),
-          },
+  const params = {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: rangeQuery(start, end),
         },
-        aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
       },
-    };
+      aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
+    },
+  };
 
-    const { aggregations } = await apmEventClient.search(params);
-    return aggregations?.serviceCount.value || 0;
-  });
+  const { aggregations } = await apmEventClient.search(
+    'observability_overview_get_service_count',
+    params
+  );
+  return aggregations?.serviceCount.value || 0;
 }

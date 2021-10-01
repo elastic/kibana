@@ -6,7 +6,7 @@
  */
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   AxisStyle,
   Chart,
@@ -43,7 +43,6 @@ const baselineStyle: LineAnnotationStyle = {
   details: {
     fontFamily: 'Arial',
     fontSize: 10,
-    fontStyle: 'bold',
     fill: euiColorMediumShade,
     padding: 0,
   },
@@ -137,7 +136,7 @@ export const DecisionPathChart = ({
         {regressionBaselineData && (
           <LineAnnotation
             id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"
-            domainType={AnnotationDomainTypes.YDomain}
+            domainType={AnnotationDomainType.YDomain}
             dataValues={regressionBaselineData}
             style={baselineStyle}
             marker={AnnotationBaselineMarker}

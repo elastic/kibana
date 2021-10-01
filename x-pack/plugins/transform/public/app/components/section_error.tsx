@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
@@ -23,9 +23,17 @@ export const SectionError: React.FunctionComponent<Props> = ({
   const errorMessage = error?.message ?? JSON.stringify(error, null, 2);
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
-      <pre>{errorMessage}</pre>
-      {actions ? actions : null}
-    </EuiCallOut>
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiEmptyPrompt
+        iconType="alert"
+        title={<h2>{title}</h2>}
+        body={
+          <p>
+            <pre>{errorMessage}</pre>
+            {actions ? actions : null}
+          </p>
+        }
+      />
+    </EuiPageContent>
   );
 };

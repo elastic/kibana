@@ -9,11 +9,11 @@ import type { KibanaRequest } from 'src/core/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
-import { isAgentsSetup, unenrollForAgentPolicyId } from './agents';
+import { unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
-const fakeRequest = ({
+const fakeRequest = {
   headers: {},
   getBasePath: () => '',
   path: '/',
@@ -26,7 +26,7 @@ const fakeRequest = ({
       url: '/',
     },
   },
-} as unknown) as KibanaRequest;
+} as unknown as KibanaRequest;
 
 export async function agentPolicyUpdateEventHandler(
   soClient: SavedObjectsClientContract,
@@ -34,28 +34,24 @@ export async function agentPolicyUpdateEventHandler(
   action: string,
   agentPolicyId: string
 ) {
-  // If Agents are not setup skip this hook
-  if (!(await isAgentsSetup(soClient))) {
-    return;
-  }
-
   // `soClient` from ingest `appContextService` is used to create policy change actions
   // to ensure encrypted SOs are handled correctly
   const internalSoClient = appContextService.getInternalUserSOClient(fakeRequest);
 
   if (action === 'created') {
     await generateEnrollmentAPIKey(soClient, esClient, {
+      name: 'Default',
       agentPolicyId,
     });
-    await agentPolicyService.createFleetPolicyChangeAction(internalSoClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
   }
 
   if (action === 'updated') {
-    await agentPolicyService.createFleetPolicyChangeAction(internalSoClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
   }
 
   if (action === 'deleted') {
     await unenrollForAgentPolicyId(soClient, esClient, agentPolicyId);
-    await deleteEnrollmentApiKeyForAgentPolicyId(soClient, esClient, agentPolicyId);
+    await deleteEnrollmentApiKeyForAgentPolicyId(esClient, agentPolicyId);
   }
 }

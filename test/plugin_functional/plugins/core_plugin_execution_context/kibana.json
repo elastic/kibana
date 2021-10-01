@@ -1,0 +1,12 @@
+{
+  "id": "corePluginExecutionContext",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["core_plugin_execution_context"],
+  "server": true,
+  "ui": false
+}

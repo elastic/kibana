@@ -7,8 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export { LEGACY_BASE_ALERT_API_PATH } from '../../../../alerting/common';
-export { BASE_ACTION_API_PATH } from '../../../../actions/common';
+export {
+  BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
+} from '../../../../alerting/common';
+export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../../../actions/common';
 
 export type Section = 'connectors' | 'rules';
 

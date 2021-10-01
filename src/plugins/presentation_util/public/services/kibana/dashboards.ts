@@ -8,7 +8,7 @@
 
 import { PresentationUtilPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../create';
-import { PresentationDashboardsService } from '..';
+import { PresentationDashboardsService } from '../dashboards';
 
 export type DashboardsServiceFactory = KibanaPluginServiceFactory<
   PresentationDashboardsService,

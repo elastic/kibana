@@ -6,20 +6,20 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
-import { SavedObjectType } from '../../../common/types';
-import {
-  ExceptionListSoSchema,
+import type {
   FilterOrUndefined,
   FoundExceptionListSchema,
+  NamespaceTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { SavedObjectType, getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 
-import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionList } from './utils';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+
+import { transformSavedObjectsToFoundExceptionList } from './utils';
 
 interface FindExceptionListOptions {
   namespaceType: NamespaceTypeArray;

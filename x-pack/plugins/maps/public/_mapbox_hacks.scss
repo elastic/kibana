@@ -10,8 +10,13 @@
 
   .mapboxgl-ctrl-group:not(:empty) {
     @include euiBottomShadowLarge;
+    @include mapToolbarButtonGroupBorderRadius;
     background-color: $euiColorEmptyShade;
-    border-radius: $euiBorderRadius;
+    transition: transform $euiAnimSpeedNormal ease-in-out;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
 
     > button {
       @include size($euiSizeXL);
@@ -20,6 +25,18 @@
         border: none;
       }
     }
+  }
+
+  .mapboxgl-ctrl button:not(:disabled) {
+    transition: background $euiAnimSpeedNormal ease-in-out;
+
+    &:hover {
+      background-color: transparentize($euiColorDarkShade, .9);
+    }
+  }
+
+  .mapboxgl-ctrl-group button:focus:focus-visible {
+    box-shadow: none;
   }
 }
 

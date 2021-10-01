@@ -65,7 +65,7 @@ export const getFormActions = (testBed: TestBed) => {
 
     await act(async () => {
       if (settings) {
-        find('mockCodeEditor').simulate('change', {
+        find('settingsEditor').simulate('change', {
           jsonString: JSON.stringify(settings),
         }); // Using mocked EuiCodeEditor
       }
@@ -118,7 +118,7 @@ export const getFormActions = (testBed: TestBed) => {
 
     await act(async () => {
       if (aliases) {
-        find('mockCodeEditor').simulate('change', {
+        find('aliasesEditor').simulate('change', {
           jsonString: JSON.stringify(aliases),
         }); // Using mocked EuiCodeEditor
       }
@@ -161,4 +161,6 @@ export type ComponentTemplateFormTestSubjects =
   | 'stepReview.summaryTab'
   | 'stepReview.requestTab'
   | 'versionField'
+  | 'aliasesEditor'
+  | 'settingsEditor'
   | 'versionField.input';

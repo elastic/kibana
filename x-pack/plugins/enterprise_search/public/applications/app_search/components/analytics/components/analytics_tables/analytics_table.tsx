@@ -68,7 +68,7 @@ export const AnalyticsTable: React.FC<Props> = ({ items, hasClicks, isSmall }) =
             <h4>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.analytics.table.empty.noQueriesTitle',
-                { defaultMessage: 'No queries' }
+                { defaultMessage: 'No queries to display' }
               )}
             </h4>
           }

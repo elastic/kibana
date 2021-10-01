@@ -59,6 +59,9 @@ export const APP_CLUSTER_PRIVILEGES = [
   'cluster:admin/transform/stop',
 ];
 
+// Minimum privileges required to return transform node count
+export const NODES_INFO_PRIVILEGES = ['cluster:monitor/transform/get'];
+
 // Equivalent of capabilities.canGetTransform
 export const APP_GET_TRANSFORM_CLUSTER_PRIVILEGES = [
   'cluster.cluster:monitor/transform/get',
@@ -77,7 +80,7 @@ export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/dataframe/transforms/DataFrameTransformStats.java#L243
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -85,6 +88,7 @@ export const TRANSFORM_STATE = {
   STARTED: 'started',
   STOPPED: 'stopped',
   STOPPING: 'stopping',
+  WAITING: 'waiting',
 } as const;
 
 const transformStates = Object.values(TRANSFORM_STATE);

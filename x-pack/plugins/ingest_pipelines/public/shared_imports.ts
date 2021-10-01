@@ -43,6 +43,7 @@ export {
   ArrayItem,
   FormHook,
   useFormContext,
+  UseMultiFields,
   FormDataProvider,
   OnFormUpdateArg,
   FieldConfig,
@@ -52,6 +53,7 @@ export {
   ValidationConfig,
   useFormData,
   FormOptions,
+  SerializerFunc,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {

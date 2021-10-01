@@ -9,39 +9,32 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiPageHeader, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-
 import { AppLogic } from '../../app_logic';
-import { EngineLogic } from '../engine';
+import { EngineLogic, getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
+import { DocumentCreationButton, EmptyState } from './components';
 import { DOCUMENTS_TITLE } from './constants';
-import { DocumentCreationButton } from './document_creation_button';
 import { SearchExperience } from './search_experience';
 
-interface Props {
-  engineBreadcrumb: string[];
-}
-
-export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { isMetaEngine } = useValues(EngineLogic);
+export const Documents: React.FC = () => {
+  const { isMetaEngine, hasNoDocuments } = useValues(EngineLogic);
   const { myRole } = useValues(AppLogic);
 
   return (
-    <>
-      <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE]} />
-      <EuiPageHeader
-        pageTitle={DOCUMENTS_TITLE}
-        rightSideItems={
-          myRole.canManageEngineDocuments && !isMetaEngine
-            ? [<DocumentCreationButton />]
-            : undefined
-        }
-      />
-      <FlashMessages />
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs([DOCUMENTS_TITLE])}
+      pageHeader={{
+        pageTitle: DOCUMENTS_TITLE,
+        rightSideItems:
+          myRole.canManageEngineDocuments && !isMetaEngine ? [<DocumentCreationButton />] : [],
+      }}
+      isEmptyState={hasNoDocuments}
+      emptyState={<EmptyState />}
+    >
       {isMetaEngine && (
         <>
           <EuiCallOut
@@ -65,6 +58,6 @@ export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
         </>
       )}
       <SearchExperience />
-    </>
+    </AppSearchPageTemplate>
   );
 };

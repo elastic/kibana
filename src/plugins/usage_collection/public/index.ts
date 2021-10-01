@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
+import type { PluginInitializerContext } from 'src/core/public';
 import { UsageCollectionPlugin } from './plugin';
 
-export { METRIC_TYPE } from '@kbn/analytics';
-export { UsageCollectionSetup, UsageCollectionStart } from './plugin';
+export type { UsageCollectionSetup, UsageCollectionStart } from './plugin';
 export { TrackApplicationView } from './components';
+export type { TrackApplicationViewProps } from './components';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new UsageCollectionPlugin(initializerContext);

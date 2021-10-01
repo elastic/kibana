@@ -9,6 +9,7 @@ import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collecti
 import { get } from 'lodash';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { ActionsUsage } from './types';
+import { ActionsConfig } from '../config';
 
 const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
   // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
@@ -17,6 +18,7 @@ const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
   __email: { type: 'long' },
   __index: { type: 'long' },
   __pagerduty: { type: 'long' },
+  __swimlane: { type: 'long' },
   '__server-log': { type: 'long' },
   __slack: { type: 'long' },
   __webhook: { type: 'long' },
@@ -28,6 +30,7 @@ const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
 
 export function createActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
+  config: ActionsConfig,
   taskManager: Promise<TaskManagerStartContract>
 ) {
   return usageCollection.makeUsageCollector<ActionsUsage>({
@@ -37,8 +40,18 @@ export function createActionsUsageCollector(
       return true;
     },
     schema: {
+      alert_history_connector_enabled: {
+        type: 'boolean',
+        _meta: { description: 'Indicates if preconfigured alert history connector is enabled.' },
+      },
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },
+      count_active_alert_history_connectors: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of preconfigured alert history connectors used by rules.',
+        },
+      },
       count_by_type: byTypeSchema,
       count_active_by_type: byTypeSchema,
     },
@@ -50,11 +63,14 @@ export function createActionsUsageCollector(
 
         return {
           ...state,
+          alert_history_connector_enabled: config.preconfiguredAlertHistoryEsIndex,
         };
       } catch (err) {
         return {
+          alert_history_connector_enabled: false,
           count_total: 0,
           count_active_total: 0,
+          count_active_alert_history_connectors: 0,
           count_active_by_type: {},
           count_by_type: {},
         };
@@ -84,8 +100,9 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
 
 export function registerActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
+  config: ActionsConfig,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  const collector = createActionsUsageCollector(usageCollection, taskManager);
+  const collector = createActionsUsageCollector(usageCollection, config, taskManager);
   usageCollection.registerCollector(collector);
 }

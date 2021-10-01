@@ -9,15 +9,16 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { borderRadius, px, unit, units } from '../../../style/variables';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { KeyValueTable } from '../KeyValueTable';
 import { flattenObject } from '../../../utils/flattenObject';
 
 const VariablesContainer = euiStyled.div`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
-  border-radius: 0 0 ${borderRadius} ${borderRadius};
-  padding: ${px(units.half)} ${px(unit)};
+  border-radius: 0 0 ${({ theme }) =>
+    `${theme.eui.euiBorderRadiusSmall} ${theme.eui.euiBorderRadiusSmall}`};
+  padding:  ${({ theme }) =>
+    `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
 `;
 
 interface Props {

@@ -20,9 +20,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
 
   describe('discover data grid doc link', function () {
+    before(async () => {
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+    });
+
     beforeEach(async function () {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
@@ -41,8 +48,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[0].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
+      await retry.waitFor('hit loaded', async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        return !!hasDocHit;
+      });
     });
 
     // no longer relevant as null field won't be returned in the Fields API response

@@ -5,26 +5,31 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 import { InfraSources } from '../../lib/sources';
+import { resolveLogSourceConfiguration } from '../../../common/log_sources';
+import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 
-// NOTE: TEMPORARY: This will become a subset of the new resolved KIP compatible log source configuration.
 export interface LogQueryFields {
   indexPattern: string;
   timestamp: string;
 }
 
-// NOTE: TEMPORARY: This will become a subset of the new resolved KIP compatible log source configuration.
-export const createGetLogQueryFields = (sources: InfraSources) => {
+export const createGetLogQueryFields = (sources: InfraSources, framework: KibanaFramework) => {
   return async (
     sourceId: string,
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient
   ): Promise<LogQueryFields> => {
     const source = await sources.getSourceConfiguration(savedObjectsClient, sourceId);
+    const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
+      source.configuration,
+      await framework.getIndexPatternsService(savedObjectsClient, elasticsearchClient)
+    );
 
     return {
-      indexPattern: source.configuration.logAlias,
-      timestamp: source.configuration.fields.timestamp,
+      indexPattern: resolvedLogSourceConfiguration.indices,
+      timestamp: resolvedLogSourceConfiguration.timestampField,
     };
   };
 };

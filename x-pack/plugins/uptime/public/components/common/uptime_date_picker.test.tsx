@@ -10,9 +10,9 @@ import { UptimeDatePicker } from './uptime_date_picker';
 import {
   renderWithRouter,
   shallowWithRouter,
+  MountWithReduxProvider,
   mountWithRouterRedux,
-} from '../../lib/helper/enzyme_helpers';
-import { MountWithReduxProvider } from '../../lib/helper/helper_with_redux';
+} from '../../lib';
 import { UptimeStartupPluginsContextProvider } from '../../contexts';
 import { startPlugins } from '../../lib/__mocks__/uptime_plugin_start_mock';
 import { ClientPluginsStart } from '../../apps/plugin';
@@ -39,7 +39,7 @@ describe('UptimeDatePicker component', () => {
 
     const component = mountWithRouterRedux(
       <UptimeStartupPluginsContextProvider
-        {...((startPlugins as unknown) as Partial<ClientPluginsStart>)}
+        {...(startPlugins as unknown as Partial<ClientPluginsStart>)}
       >
         <UptimeDatePicker />
       </UptimeStartupPluginsContextProvider>,
@@ -56,7 +56,7 @@ describe('UptimeDatePicker component', () => {
 
     expect(customHistory.push).toHaveBeenCalledWith({
       pathname: '/',
-      search: 'dateRangeStart=now-30m&dateRangeEnd=now-15m',
+      search: 'dateRangeEnd=now-15m&dateRangeStart=now-30m',
     });
   });
 
@@ -69,7 +69,7 @@ describe('UptimeDatePicker component', () => {
 
     const component = mountWithRouterRedux(
       <UptimeStartupPluginsContextProvider
-        {...((startPlugins as unknown) as Partial<ClientPluginsStart>)}
+        {...(startPlugins as unknown as Partial<ClientPluginsStart>)}
       >
         <UptimeDatePicker />
       </UptimeStartupPluginsContextProvider>,

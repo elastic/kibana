@@ -10,6 +10,9 @@ export const CLOUD_AVAILABILITY_ZONE = 'cloud.availability_zone';
 export const CLOUD_PROVIDER = 'cloud.provider';
 export const CLOUD_REGION = 'cloud.region';
 export const CLOUD_MACHINE_TYPE = 'cloud.machine.type';
+export const CLOUD_ACCOUNT_ID = 'cloud.account.id';
+export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
+export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
@@ -105,10 +108,13 @@ export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
 export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
 export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 
+export const METRICSET_NAME = 'metricset.name';
+
 export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
 export const HOST_NAME = 'host.hostname';
+export const HOSTNAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';

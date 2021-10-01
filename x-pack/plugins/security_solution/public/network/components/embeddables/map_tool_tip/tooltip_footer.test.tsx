@@ -42,7 +42,7 @@ describe('ToolTipFilter', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('disabled')
+        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('isDisabled')
       ).toBe(true);
     });
 
@@ -70,9 +70,9 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(wrapper.find('[data-test-subj="next-feature-button"]').first().prop('disabled')).toBe(
-        false
-      );
+      expect(
+        wrapper.find('[data-test-subj="next-feature-button"]').first().prop('isDisabled')
+      ).toBe(false);
     });
 
     test('nextFeature is called when featureIndex is < totalFeatures', () => {
@@ -102,7 +102,7 @@ describe('ToolTipFilter', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('disabled')
+        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
 
@@ -130,9 +130,9 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(wrapper.find('[data-test-subj="next-feature-button"]').first().prop('disabled')).toBe(
-        true
-      );
+      expect(
+        wrapper.find('[data-test-subj="next-feature-button"]').first().prop('isDisabled')
+      ).toBe(true);
     });
 
     test('nextFunction is not called when featureIndex >== totalFeatures', () => {
@@ -161,7 +161,7 @@ describe('ToolTipFilter', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('disabled')
+        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('isDisabled')
       ).toBe(true);
     });
 
@@ -189,9 +189,9 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(wrapper.find('[data-test-subj="next-feature-button"]').first().prop('disabled')).toBe(
-        true
-      );
+      expect(
+        wrapper.find('[data-test-subj="next-feature-button"]').first().prop('isDisabled')
+      ).toBe(true);
     });
 
     test('nextFunction is not called when only a single feature is provided', () => {
@@ -221,7 +221,7 @@ describe('ToolTipFilter', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('disabled')
+        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
 
@@ -249,9 +249,9 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(wrapper.find('[data-test-subj="next-feature-button"]').first().prop('disabled')).toBe(
-        false
-      );
+      expect(
+        wrapper.find('[data-test-subj="next-feature-button"]').first().prop('isDisabled')
+      ).toBe(false);
     });
 
     test('nextFunction is called when featureIndex > 0 && featureIndex < totalFeatures', () => {

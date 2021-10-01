@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import { groups } from '../../__mocks__/groups.mock';
 import { meta } from '../../__mocks__/meta.mock';
 
@@ -18,9 +19,8 @@ import { EuiFieldSearch, EuiLoadingSpinner } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { FlashMessages } from '../../../shared/flash_messages';
-import { Loading } from '../../../shared/loading';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { getPageHeaderActions } from '../../../test_helpers';
 
 import { AddGroupModal } from './components/add_group_modal';
 import { ClearFiltersLink } from './components/clear_filters_link';
@@ -50,7 +50,6 @@ const mockValues = {
   filteredSources: [],
   filteredUsers: [],
   filterValue: '',
-  isFederatedAuth: false,
 };
 
 describe('GroupOverview', () => {
@@ -68,16 +67,8 @@ describe('GroupOverview', () => {
   it('renders', () => {
     const wrapper = shallow(<Groups />);
 
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(GroupsTable)).toHaveLength(1);
     expect(wrapper.find(TableFilters)).toHaveLength(1);
-  });
-
-  it('returns loading when loading', () => {
-    setMockValues({ ...mockValues, groupsDataLoading: true });
-    const wrapper = shallow(<Groups />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('gets search results when filters changed', () => {
@@ -96,9 +87,14 @@ describe('GroupOverview', () => {
       ...mockValues,
       newGroup: { name: 'group', id: '123' },
       messages: [mockSuccessMessage],
+      // Needed for diving into page template
+      contentSource: {},
+      group: {},
     });
-    const wrapper = shallow(<Groups />);
-    const flashMessages = wrapper.find(FlashMessages).dive().shallow();
+    const wrapper = shallow(<Groups />)
+      .dive()
+      .dive();
+    const flashMessages = wrapper.find(FlashMessages).dive().childAt(0).dive();
 
     expect(flashMessages.find('[data-test-subj="NewGroupManageButton"]')).toHaveLength(1);
   });
@@ -115,35 +111,12 @@ describe('GroupOverview', () => {
     expect(wrapper.find(ClearFiltersLink)).toHaveLength(1);
   });
 
-  it('renders inviteUsersButton when not federated auth', () => {
-    setMockValues({
-      ...mockValues,
-      isFederatedAuth: false,
-    });
-
+  it('renders inviteUsersButton', () => {
     const wrapper = shallow(<Groups />);
+    const actions = getPageHeaderActions(wrapper);
 
-    const Action: React.FC = () =>
-      wrapper.find(ViewContentHeader).props().action as React.ReactElement<any, any> | null;
-    const action = shallow(<Action />);
-
-    expect(action.find('[data-test-subj="InviteUsersButton"]')).toHaveLength(1);
-    expect(action.find(EuiButtonTo)).toHaveLength(1);
-  });
-
-  it('does not render inviteUsersButton when federated auth', () => {
-    setMockValues({
-      ...mockValues,
-      isFederatedAuth: true,
-    });
-
-    const wrapper = shallow(<Groups />);
-
-    const Action: React.FC = () =>
-      wrapper.find(ViewContentHeader).props().action as React.ReactElement<any, any> | null;
-    const action = shallow(<Action />);
-
-    expect(action.find('[data-test-subj="InviteUsersButton"]')).toHaveLength(0);
+    expect(actions.find('[data-test-subj="InviteUsersButton"]')).toHaveLength(1);
+    expect(actions.find(EuiButtonTo)).toHaveLength(1);
   });
 
   it('renders EuiLoadingSpinner when loading', () => {

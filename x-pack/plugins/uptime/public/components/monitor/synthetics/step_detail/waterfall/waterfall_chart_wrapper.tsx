@@ -81,6 +81,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     );
   }, [flyoutData, isFlyoutVisible, onFlyoutClose]);
 
+  const highestSideBarIndex = Math.max(...series.map((sr) => sr.x));
+
   const renderSidebarItem: RenderItem<SidebarItem> = useCallback(
     (item) => {
       return (
@@ -88,10 +90,11 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
           item={item}
           renderFilterScreenReaderText={hasFilters && !onlyHighlighted}
           onClick={onSidebarClick}
+          highestIndex={highestSideBarIndex}
         />
       );
     },
-    [hasFilters, onlyHighlighted, onSidebarClick]
+    [hasFilters, onlyHighlighted, onSidebarClick, highestSideBarIndex]
   );
 
   useTrackMetric({ app: 'uptime', metric: 'waterfall_chart_view', metricType: METRIC_TYPE.COUNT });
@@ -122,16 +125,16 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
       <WaterfallChart
         tickFormat={useCallback((d: number) => `${Number(d).toFixed(0)} ms`, [])}
         domain={domain}
-        barStyleAccessor={useCallback((datum) => {
-          if (!datum.datum.config.isHighlighted) {
+        barStyleAccessor={useCallback(({ datum }) => {
+          if (!datum.config?.isHighlighted) {
             return {
               rect: {
-                fill: datum.datum.config.colour,
+                fill: datum.config?.colour,
                 opacity: '0.1',
               },
             };
           }
-          return datum.datum.config.colour;
+          return datum.config.colour;
         }, [])}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}

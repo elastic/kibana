@@ -9,10 +9,10 @@ import { updateRuleApiKeyRoute } from './update_rule_api_key';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { alertsClientMock } from '../alerts_client.mock';
+import { rulesClientMock } from '../rules_client.mock';
 import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
-const alertsClient = alertsClientMock.create();
+const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -32,10 +32,10 @@ describe('updateRuleApiKeyRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_update_api_key"`);
 
-    alertsClient.updateApiKey.mockResolvedValueOnce();
+    rulesClient.updateApiKey.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: {
           id: '1',
@@ -46,8 +46,8 @@ describe('updateRuleApiKeyRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(alertsClient.updateApiKey).toHaveBeenCalledTimes(1);
-    expect(alertsClient.updateApiKey.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.updateApiKey).toHaveBeenCalledTimes(1);
+    expect(rulesClient.updateApiKey.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -66,11 +66,11 @@ describe('updateRuleApiKeyRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    alertsClient.updateApiKey.mockRejectedValue(
+    rulesClient.updateApiKey.mockRejectedValue(
       new AlertTypeDisabledError('Fail', 'license_invalid')
     );
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
     ]);

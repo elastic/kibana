@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiTableBody, EuiTableRow, EuiTableRowCell, EuiText, EuiHealth } from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, EuiText, EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '..';
@@ -17,7 +17,7 @@ import { ResultSettingsLogic } from '..';
 export const DisabledFieldsBody: React.FC = () => {
   const { schemaConflicts } = useValues(ResultSettingsLogic);
   return (
-    <EuiTableBody>
+    <>
       {Object.keys(schemaConflicts).map((fieldName) => (
         <EuiTableRow key={fieldName}>
           <EuiTableRowCell colSpan={6}>
@@ -35,6 +35,6 @@ export const DisabledFieldsBody: React.FC = () => {
           </EuiTableRowCell>
         </EuiTableRow>
       ))}
-    </EuiTableBody>
+    </>
   );
 };

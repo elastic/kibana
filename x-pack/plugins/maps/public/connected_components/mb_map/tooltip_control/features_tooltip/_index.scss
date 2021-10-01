@@ -1,0 +1,38 @@
+.mapFeatureTooltip_table {
+  width: 100%;
+  max-height: calc(49vh - #{$euiSizeXL * 2});
+
+  td {
+    padding: $euiSizeXS;
+  }
+}
+
+.mapFeatureTooltip_row {
+  border-bottom: 1px solid $euiColorLightestShade;
+}
+
+.mapFeatureTooltip_actionLinks {
+  padding: $euiSizeXS;
+}
+
+.mapFeatureTooltip_backButton {
+  padding-left: 0;
+}
+
+.mapFeatureTooltip__propertyLabel {
+  max-width: $euiSizeXL * 4;
+  font-weight: $euiFontWeightSemiBold;
+}
+
+.mapFeatureTooltip_actionsRow {
+  > span {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.mapFeatureTooltip_layerIcon {
+  img {
+    margin-bottom: 0;
+  }
+}

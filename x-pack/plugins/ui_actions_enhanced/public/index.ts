@@ -18,7 +18,6 @@ export {
   StartContract as AdvancedUiActionsStart,
 } from './plugin';
 
-export { ActionWizard } from './components';
 export {
   ActionFactoryDefinition as UiActionsEnhancedActionFactoryDefinition,
   ActionFactory as UiActionsEnhancedActionFactory,
@@ -35,5 +34,17 @@ export {
 
 export { DynamicActionsState } from './services/ui_actions_service_enhancements';
 
-export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns';
-export * from './drilldowns/url_drilldown';
+export {
+  DrilldownDefinition as UiActionsEnhancedDrilldownDefinition,
+  DrilldownTemplate as UiActionsEnhancedDrilldownTemplate,
+} from './drilldowns';
+export {
+  urlDrilldownCompileUrl,
+  UrlDrilldownCollectConfig,
+  UrlDrilldownConfig,
+  UrlDrilldownGlobalScope,
+  urlDrilldownGlobalScopeProvider,
+  UrlDrilldownScope,
+  urlDrilldownValidateUrl,
+  urlDrilldownValidateUrlTemplate,
+} from './drilldowns/url_drilldown';

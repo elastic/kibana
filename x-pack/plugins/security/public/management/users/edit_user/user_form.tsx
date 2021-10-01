@@ -41,8 +41,8 @@ export const THROTTLE_USERS_WAIT = 10000;
 
 export interface UserFormValues {
   username?: string;
-  full_name: string;
-  email: string;
+  full_name?: string;
+  email?: string;
   password?: string;
   confirm_password?: string;
   roles: readonly string[];
@@ -75,9 +75,10 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 }) => {
   const { services } = useKibana();
 
-  const [rolesState, getRoles] = useAsyncFn(() => new RolesAPIClient(services.http!).getRoles(), [
-    services.http,
-  ]);
+  const [rolesState, getRoles] = useAsyncFn(
+    () => new RolesAPIClient(services.http!).getRoles(),
+    [services.http]
+  );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getUsersThrottled = useCallback(
@@ -262,6 +263,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         >
           <EuiFieldText
             name="username"
+            data-test-subj={'userFormUserNameInput'}
             icon="user"
             value={form.values.username}
             isLoading={form.isValidating}
@@ -283,6 +285,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             >
               <EuiFieldText
                 name="full_name"
+                data-test-subj={'userFormFullNameInput'}
                 value={form.values.full_name}
                 isInvalid={form.touched.full_name && !!form.errors.full_name}
                 onChange={eventHandlers.onChange}
@@ -298,6 +301,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             >
               <EuiFieldText
                 name="email"
+                data-test-subj={'userFormEmailInput'}
                 value={form.values.email}
                 isInvalid={form.touched.email && !!form.errors.email}
                 onChange={eventHandlers.onChange}
@@ -337,6 +341,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           >
             <EuiFieldPassword
               name="password"
+              data-test-subj={'passwordInput'}
               type="dual"
               value={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
@@ -354,6 +359,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           >
             <EuiFieldPassword
               name="confirm_password"
+              data-test-subj={'passwordConfirmationInput'}
               type="dual"
               value={form.values.confirm_password}
               isInvalid={form.touched.confirm_password && !!form.errors.confirm_password}

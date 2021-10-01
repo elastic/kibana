@@ -48,6 +48,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
     eventId,
     eventEnd,
     eventStart,
+    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -76,6 +77,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
         <UserProcess
           contextId={contextId}
           eventId={eventId}
+          isDraggable={isDraggable}
           processName={processName}
           userName={userName}
         />
@@ -88,6 +90,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           eventId={eventId}
           eventEnd={eventEnd}
           eventStart={eventStart}
+          isDraggable={isDraggable}
         />
       </EuiFlexItemMarginRight>
 
@@ -104,6 +107,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           destinationPackets={destinationPackets}
           destinationPort={destinationPort}
           eventId={eventId}
+          isDraggable={isDraggable}
           networkBytes={networkBytes}
           networkCommunityId={networkCommunityId}
           networkDirection={networkDirection}

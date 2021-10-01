@@ -35,12 +35,11 @@ import type {
   ScopedHistory,
 } from 'src/core/public';
 import type { IndexPatternsContract } from 'src/plugins/data/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { KibanaFeature } from '../../../../../features/common';
 import type { FeaturesPluginStart } from '../../../../../features/public';
-import type { Space } from '../../../../../spaces/public';
+import type { Space, SpacesApiUi } from '../../../../../spaces/public';
 import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,
@@ -125,7 +124,7 @@ function useIndexPatternsTitles(
         fatalErrors.add(err);
         throw err;
       })
-      .then(setIndexPatternsTitles);
+      .then((titles) => setIndexPatternsTitles(titles.filter(Boolean)));
   }, [fatalErrors, indexPatterns, notifications]);
 
   return indexPatternsTitles;
@@ -185,10 +184,8 @@ function useRole(
             privileges: [],
           };
 
-          const {
-            allowRoleDocumentLevelSecurity,
-            allowRoleFieldLevelSecurity,
-          } = license.getFeatures();
+          const { allowRoleDocumentLevelSecurity, allowRoleFieldLevelSecurity } =
+            license.getFeatures();
 
           if (allowRoleFieldLevelSecurity) {
             emptyOption.field_security = {
@@ -256,13 +253,12 @@ function useFeatures(
         // possible that a user with `manage_security` will attempt to visit the role management page without the
         // correct Kibana privileges. If that's the case, then they receive a partial view of the role, and the UI does
         // not allow them to make changes to that role's kibana privileges. When this user visits the edit role page,
-        // this API endpoint will throw a 404, which causes view to fail completely. So we instead attempt to detect the
-        // 404 here, and respond in a way that still allows the UI to render itself.
-        const unauthorizedForFeatures = err.response?.status === 404;
+        // this API endpoint will throw a 403, which causes view to fail completely. So we instead attempt to detect the
+        // 403 here, and respond in a way that still allows the UI to render itself.
+        const unauthorizedForFeatures = err.response?.status === 403;
         if (unauthorizedForFeatures) {
           return [] as KibanaFeature[];
         }
-
         fatalErrors.add(err);
       })
       .then((retrievedFeatures) => {
@@ -296,7 +292,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
-
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
   const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors, notifications);
@@ -376,7 +371,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getRoleName = () => {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFormRow
           label={
             <FormattedMessage

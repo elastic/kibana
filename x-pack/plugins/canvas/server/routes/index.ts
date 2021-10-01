@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger, ElasticsearchServiceSetup } from 'src/core/server';
+import { IRouter, Logger } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { initCustomElementsRoutes } from './custom_elements';
@@ -14,13 +14,13 @@ import { initShareablesRoutes } from './shareables';
 import { initWorkpadRoutes } from './workpad';
 import { initTemplateRoutes } from './templates';
 import { initFunctionsRoutes } from './functions';
+import { CanvasRouteHandlerContext } from '../workpad_route_context';
 
 export interface RouteInitializerDeps {
-  router: IRouter;
+  router: IRouter<CanvasRouteHandlerContext>;
   logger: Logger;
   expressions: ExpressionsServerSetup;
   bfetch: BfetchServerSetup;
-  elasticsearch: ElasticsearchServiceSetup;
 }
 
 export function initRoutes(deps: RouteInitializerDeps) {

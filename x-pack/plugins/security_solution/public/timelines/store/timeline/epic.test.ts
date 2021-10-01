@@ -6,59 +6,61 @@
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Direction } from '../../../../common/search_strategy';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
-import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 import { TimelineModel } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
+      const columns: TimelineModel['columns'] = [
+        {
+          columnHeaderType: 'not-filtered',
+          id: '@timestamp',
+          initialWidth: 190,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'message',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.category',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.action',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'host.name',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'source.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'destination.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'user.name',
+          initialWidth: 180,
+        },
+      ];
       const timelineModel: TimelineModel = {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.notes,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            width: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            width: 180,
-          },
-        ],
+        columns,
+        defaultColumns: columns,
         dataProviders: [
           {
             id: 'hosts-table-hostName-DESKTOP-QBBSCUT',
@@ -73,8 +75,7 @@ describe('Epic Timeline', () => {
             },
             and: [
               {
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 name: 'event.module: endgame',
                 enabled: true,
                 excluded: false,
@@ -90,6 +91,7 @@ describe('Epic Timeline', () => {
         ],
         deletedEventIds: [],
         description: '',
+        documentType: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
           tiebreakerField: '',
@@ -144,6 +146,8 @@ describe('Epic Timeline', () => {
           },
         },
         loadingEventIds: [],
+        queryFields: [],
+        selectAll: false,
         title: 'saved',
         timelineType: TimelineType.default,
         templateTimelineId: null,
@@ -212,8 +216,7 @@ describe('Epic Timeline', () => {
               {
                 enabled: true,
                 excluded: false,
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 kqlQuery: '',
                 name: 'event.module: endgame',
                 queryMatch: {

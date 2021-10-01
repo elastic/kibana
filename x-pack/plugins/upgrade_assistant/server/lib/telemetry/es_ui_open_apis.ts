@@ -33,25 +33,25 @@ type UpsertUIOpenOptionDependencies = UIOpen & { savedObjects: SavedObjectsServi
 
 export async function upsertUIOpenOption({
   overview,
-  cluster,
-  indices,
+  elasticsearch,
   savedObjects,
+  kibana,
 }: UpsertUIOpenOptionDependencies): Promise<UIOpen> {
   if (overview) {
     await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'overview' });
   }
 
-  if (cluster) {
-    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'cluster' });
+  if (elasticsearch) {
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'elasticsearch' });
   }
 
-  if (indices) {
-    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'indices' });
+  if (kibana) {
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'kibana' });
   }
 
   return {
     overview,
-    cluster,
-    indices,
+    elasticsearch,
+    kibana,
   };
 }

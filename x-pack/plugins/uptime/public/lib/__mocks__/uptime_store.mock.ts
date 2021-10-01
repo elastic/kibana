@@ -13,16 +13,6 @@ import { AppState } from '../../state';
  * Jest to accept its use within a jest.mock()
  */
 export const mockState: AppState = {
-  overviewFilters: {
-    filters: {
-      locations: [],
-      ports: [],
-      schemes: [],
-      tags: [],
-    },
-    errors: [],
-    loading: false,
-  },
   dynamicSettings: {
     settings: DYNAMIC_SETTINGS_DEFAULTS,
     loading: false,
@@ -32,15 +22,6 @@ export const mockState: AppState = {
     monitorLocationsList: new Map(),
     loading: false,
     errors: [],
-  },
-  snapshot: {
-    count: {
-      up: 2,
-      down: 0,
-      total: 2,
-    },
-    errors: [],
-    loading: false,
   },
   ui: {
     alertFlyoutVisible: false,
@@ -53,11 +34,6 @@ export const mockState: AppState = {
   monitorStatus: {
     status: null,
     loading: false,
-  },
-  indexPattern: {
-    index_pattern: null,
-    loading: false,
-    errors: [],
   },
   ping: {
     pingHistogram: null,
@@ -104,10 +80,7 @@ export const mockState: AppState = {
     },
   },
   certificates: {
-    certs: {
-      data: null,
-      loading: false,
-    },
+    total: 0,
   },
   selectedFilters: null,
   alerts: {
@@ -120,4 +93,9 @@ export const mockState: AppState = {
   },
   journeys: {},
   networkEvents: {},
+  synthetics: {
+    blocks: {},
+    cacheSize: 0,
+    hitCount: [],
+  },
 };

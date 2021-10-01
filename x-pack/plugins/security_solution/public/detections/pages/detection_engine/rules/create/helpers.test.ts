@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { List } from '../../../../../../common/detection_engine/schemas/types';
+import { List } from '@kbn/securitysolution-io-ts-list-types';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import {
@@ -40,7 +40,7 @@ import {
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
-import { Threat, Threats } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -249,14 +249,14 @@ describe('helpers', () => {
         ...mockData,
         ruleType: 'machine_learning',
         anomalyThreshold: 44,
-        machineLearningJobId: 'some_jobert_id',
+        machineLearningJobId: ['some_jobert_id'],
       };
       const result = formatDefineStepData(mockStepData);
 
       const expected: DefineStepRuleJson = {
         type: 'machine_learning',
         anomaly_threshold: 44,
-        machine_learning_job_id: 'some_jobert_id',
+        machine_learning_job_id: ['some_jobert_id'],
         timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         timeline_title: 'Titled timeline',
       };

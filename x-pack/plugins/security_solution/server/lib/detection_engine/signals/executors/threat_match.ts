@@ -7,56 +7,65 @@
 
 import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
-import { RefreshTypes } from '../../types';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, ThreatRuleAttributes } from '../types';
+import { RuleRangeTuple, AlertAttributes, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
+import { ThreatRuleParams } from '../../schemas/rule_schemas';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const threatMatchExecutor = async ({
   rule,
-  tuples,
+  tuple,
   listClient,
   exceptionItems,
   services,
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
+  experimentalFeatures,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
-  rule: SavedObject<ThreatRuleAttributes>;
-  tuples: RuleRangeTuple[];
+  rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
   eventsTelemetry: TelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
   return createThreatSignals({
-    tuples,
+    tuple,
     threatMapping: ruleParams.threatMapping,
     query: ruleParams.query,
     inputIndex,
     type: ruleParams.type,
     filters: ruleParams.filters ?? [],
     language: ruleParams.language,
-    name: rule.attributes.name,
     savedId: ruleParams.savedId,
     services,
     exceptionItems,
@@ -65,18 +74,8 @@ export const threatMatchExecutor = async ({
     eventsTelemetry,
     alertId: rule.id,
     outputIndex: ruleParams.outputIndex,
-    params: ruleParams,
+    ruleSO: rule,
     searchAfterSize,
-    actions: rule.attributes.actions,
-    createdBy: rule.attributes.createdBy,
-    createdAt: rule.attributes.createdAt,
-    updatedBy: rule.attributes.updatedBy,
-    interval: rule.attributes.schedule.interval,
-    updatedAt: rule.updated_at ?? '',
-    enabled: rule.attributes.enabled,
-    refresh,
-    tags: rule.attributes.tags,
-    throttle: rule.attributes.throttle,
     threatFilters: ruleParams.threatFilters ?? [],
     threatQuery: ruleParams.threatQuery,
     threatLanguage: ruleParams.threatLanguage,
@@ -85,5 +84,7 @@ export const threatMatchExecutor = async ({
     threatIndicatorPath: ruleParams.threatIndicatorPath,
     concurrentSearches: ruleParams.concurrentSearches ?? 1,
     itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+    bulkCreate,
+    wrapHits,
   });
 };

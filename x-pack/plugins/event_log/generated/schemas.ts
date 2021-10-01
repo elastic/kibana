@@ -13,6 +13,7 @@
 // the event log
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 type DeepPartial<T> = {
@@ -101,6 +102,12 @@ export const EventSchema = schema.maybe(
     kibana: schema.maybe(
       schema.object({
         server_uuid: ecsString(),
+        task: schema.maybe(
+          schema.object({
+            scheduled: ecsDate(),
+            schedule_delay: ecsNumber(),
+          })
+        ),
         alerting: schema.maybe(
           schema.object({
             instance_id: ecsString(),
@@ -116,9 +123,11 @@ export const EventSchema = schema.maybe(
               namespace: ecsString(),
               id: ecsString(),
               type: ecsString(),
+              type_id: ecsString(),
             })
           )
         ),
+        version: ecsVersion(),
       })
     ),
   })
@@ -145,4 +154,13 @@ const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 function validateDate(isoDate: string) {
   if (ISO_DATE_PATTERN.test(isoDate)) return;
   return 'string is not a valid ISO date: ' + isoDate;
+}
+
+function ecsVersion() {
+  return schema.maybe(schema.string({ validate: validateVersion }));
+}
+
+function validateVersion(version: string) {
+  if (semver.valid(version)) return;
+  return 'string is not a valid version: ' + version;
 }

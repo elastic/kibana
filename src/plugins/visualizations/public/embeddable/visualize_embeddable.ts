@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
-  IIndexPattern,
+  IndexPattern,
   TimeRange,
   Query,
   esFilters,
@@ -47,7 +47,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean };
@@ -69,7 +69,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editPath: string;
   editApp: string;
   editUrl: string;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   visTypeName: string;
 }
 
@@ -85,7 +85,8 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+{
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
@@ -136,6 +137,9 @@ export class VisualizeEmbeddable
     this.deps = deps;
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
+    this.searchSessionId = this.input.searchSessionId;
+    this.query = this.input.query;
+
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
@@ -149,8 +153,9 @@ export class VisualizeEmbeddable
     }
 
     this.subscriptions.push(
-      this.getUpdated$().subscribe(() => {
+      this.getInput$().subscribe(() => {
         const isDirty = this.handleChanges();
+
         if (isDirty && this.handler) {
           this.updateHandler();
         }
@@ -182,7 +187,11 @@ export class VisualizeEmbeddable
     if (!adapters) return;
 
     return this.deps.start().plugins.inspector.open(adapters, {
-      title: this.getTitle(),
+      title:
+        this.getTitle() ||
+        i18n.translate('visualizations.embeddable.inspectorTitle', {
+          defaultMessage: 'Inspector',
+        }),
     });
   };
 
@@ -367,11 +376,20 @@ export class VisualizeEmbeddable
     }
   }
 
-  public reload = () => {
-    this.handleVisUpdate();
+  public reload = async () => {
+    await this.handleVisUpdate();
   };
 
   private async updateHandler() {
+    const context = {
+      type: 'visualization',
+      name: this.vis.type.title,
+      id: this.vis.id ?? 'an_unsaved_vis',
+      description: this.vis.title || this.input.title || this.vis.type.name,
+      url: this.output.editUrl,
+      parent: this.parent?.getInput().executionContext,
+    };
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
@@ -381,7 +399,9 @@ export class VisualizeEmbeddable
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
+      interactive: !this.input.disableTriggers,
       inspectorAdapters: this.inspectorAdapters,
+      executionContext: context,
     };
     if (this.abortController) {
       this.abortController.abort();
@@ -395,13 +415,13 @@ export class VisualizeEmbeddable
     });
 
     if (this.handler && !abortController.signal.aborted) {
-      this.handler.update(this.expression, expressionParams);
+      await this.handler.update(this.expression, expressionParams);
     }
   }
 
   private handleVisUpdate = async () => {
     this.handleChanges();
-    this.updateHandler();
+    await this.updateHandler();
   };
 
   private uiStateChangeHandler = () => {
@@ -411,7 +431,7 @@ export class VisualizeEmbeddable
   };
 
   public supportedTriggers(): string[] {
-    return this.vis.type.getSupportedTriggers?.() ?? [];
+    return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {

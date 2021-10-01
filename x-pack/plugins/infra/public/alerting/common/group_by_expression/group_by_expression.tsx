@@ -60,7 +60,7 @@ export const GroupByExpression: React.FC<Props> = ({
               uppercase={true}
               value={expressionValue}
               isActive={isPopoverOpen}
-              onClick={() => setIsPopoverOpen(true)}
+              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             />
           }
           isOpen={isPopoverOpen}

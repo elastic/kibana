@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ThemeProvider } from 'styled-components';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
 import { useUiSetting$ } from '../../../../src/plugins/kibana_react/public';
@@ -23,8 +23,7 @@ import { AppPluginStartDependencies } from './types';
 import { OsqueryApp } from './components/app';
 import { DEFAULT_DARK_MODE, PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';
-
-const queryClient = new QueryClient();
+import { queryClient } from './query_client';
 
 const OsqueryAppContext = () => {
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);

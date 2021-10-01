@@ -317,6 +317,7 @@ describe('findRelationships', () => {
           title: 'title',
           icon: 'icon',
           editUrl: 'editUrl',
+          hiddenType: false,
           inAppUrl: {
             path: 'path',
             uiCapabilitiesPath: 'uiCapabilitiesPath',

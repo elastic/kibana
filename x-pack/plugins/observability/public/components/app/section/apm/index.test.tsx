@@ -15,6 +15,8 @@ import * as pluginContext from '../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
+import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -27,7 +29,7 @@ jest.mock('react-router-dom', () => ({
 describe('APMSection', () => {
   beforeAll(() => {
     jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
-      hasData: {
+      hasDataMap: {
         apm: {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           hasData: true,
@@ -35,12 +37,14 @@ describe('APMSection', () => {
       },
     } as HasDataContextValue);
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: ({
+      core: {
         uiSettings: { get: jest.fn() },
         http: { basePath: { prepend: jest.fn() } },
-      } as unknown) as CoreStart,
+      } as unknown as CoreStart,
       appMountParameters: {} as AppMountParameters,
-      plugins: ({
+      config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
+      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+      plugins: {
         data: {
           query: {
             timefilter: {
@@ -53,9 +57,36 @@ describe('APMSection', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPublicPluginsStart,
+      } as unknown as ObservabilityPublicPluginsStart,
+      ObservabilityPageTemplate: KibanaPageTemplate,
     }));
   });
+
+  it('renders transaction stat less than 1k', () => {
+    const resp = {
+      appLink: '/app/apm',
+      stats: {
+        services: { value: 11, type: 'number' },
+        transactions: { value: 900, type: 'number' },
+      },
+      series: {
+        transactions: { coordinates: [] },
+      },
+    };
+    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      data: resp,
+      status: fetcherHook.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+    const { getByText, queryAllByTestId } = render(<APMSection bucketSize="60s" />);
+
+    expect(getByText('APM')).toBeInTheDocument();
+    expect(getByText('View in app')).toBeInTheDocument();
+    expect(getByText('Services 11')).toBeInTheDocument();
+    expect(getByText('Throughput 900.0 tpm')).toBeInTheDocument();
+    expect(queryAllByTestId('loading')).toEqual([]);
+  });
+
   it('renders with transaction series and stats', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: response,

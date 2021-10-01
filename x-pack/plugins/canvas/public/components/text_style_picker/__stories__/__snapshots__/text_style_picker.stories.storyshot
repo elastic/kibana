@@ -225,8 +225,9 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             <button
               aria-pressed={false}
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              data-test-subj="bold"
               disabled={false}
-              id="bold"
+              id="generated-id"
               onClick={[Function]}
               style={
                 Object {
@@ -240,6 +241,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorBold"
                   size="m"
                 />
@@ -253,8 +255,9 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             <button
               aria-pressed={false}
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              data-test-subj="italic"
               disabled={false}
-              id="italic"
+              id="generated-id"
               onClick={[Function]}
               style={
                 Object {
@@ -268,6 +271,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorItalic"
                   size="m"
                 />
@@ -281,8 +285,9 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             <button
               aria-pressed={false}
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              data-test-subj="underline"
               disabled={false}
-              id="underline"
+              id="generated-id"
               onClick={[Function]}
               style={
                 Object {
@@ -296,6 +301,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorUnderline"
                   size="m"
                 />
@@ -327,8 +333,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             <label
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
               disabled={false}
-              htmlFor="left"
-              onClick={[Function]}
+              htmlFor="generated-id"
               style={
                 Object {
                   "minWidth": undefined,
@@ -340,6 +345,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignLeft"
                   size="m"
                 />
@@ -349,8 +355,9 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   <input
                     checked={true}
                     className="euiScreenReaderOnly"
+                    data-test-subj="left"
                     disabled={false}
-                    id="left"
+                    id="generated-id"
                     name="generated-id"
                     onChange={[Function]}
                     type="radio"
@@ -362,8 +369,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             <label
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
               disabled={false}
-              htmlFor="center"
-              onClick={[Function]}
+              htmlFor="generated-id"
               style={
                 Object {
                   "minWidth": undefined,
@@ -375,6 +381,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignCenter"
                   size="m"
                 />
@@ -384,8 +391,9 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   <input
                     checked={false}
                     className="euiScreenReaderOnly"
+                    data-test-subj="center"
                     disabled={false}
-                    id="center"
+                    id="generated-id"
                     name="generated-id"
                     onChange={[Function]}
                     type="radio"
@@ -397,8 +405,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             <label
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
               disabled={false}
-              htmlFor="right"
-              onClick={[Function]}
+              htmlFor="generated-id"
               style={
                 Object {
                   "minWidth": undefined,
@@ -410,6 +417,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignRight"
                   size="m"
                 />
@@ -419,8 +427,9 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   <input
                     checked={false}
                     className="euiScreenReaderOnly"
+                    data-test-subj="right"
                     disabled={false}
-                    id="right"
+                    id="generated-id"
                     name="generated-id"
                     onChange={[Function]}
                     type="radio"
@@ -662,8 +671,9 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             <button
               aria-pressed={false}
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              data-test-subj="bold"
               disabled={false}
-              id="bold"
+              id="generated-id"
               onClick={[Function]}
               style={
                 Object {
@@ -677,6 +687,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorBold"
                   size="m"
                 />
@@ -690,8 +701,9 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             <button
               aria-pressed={false}
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              data-test-subj="italic"
               disabled={false}
-              id="italic"
+              id="generated-id"
               onClick={[Function]}
               style={
                 Object {
@@ -705,6 +717,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorItalic"
                   size="m"
                 />
@@ -718,8 +731,9 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             <button
               aria-pressed={false}
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              data-test-subj="underline"
               disabled={false}
-              id="underline"
+              id="generated-id"
               onClick={[Function]}
               style={
                 Object {
@@ -733,6 +747,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorUnderline"
                   size="m"
                 />
@@ -764,8 +779,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             <label
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
               disabled={false}
-              htmlFor="left"
-              onClick={[Function]}
+              htmlFor="generated-id"
               style={
                 Object {
                   "minWidth": undefined,
@@ -777,6 +791,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignLeft"
                   size="m"
                 />
@@ -786,8 +801,9 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   <input
                     checked={true}
                     className="euiScreenReaderOnly"
+                    data-test-subj="left"
                     disabled={false}
-                    id="left"
+                    id="generated-id"
                     name="generated-id"
                     onChange={[Function]}
                     type="radio"
@@ -799,8 +815,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             <label
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
               disabled={false}
-              htmlFor="center"
-              onClick={[Function]}
+              htmlFor="generated-id"
               style={
                 Object {
                   "minWidth": undefined,
@@ -812,6 +827,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignCenter"
                   size="m"
                 />
@@ -821,8 +837,9 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   <input
                     checked={false}
                     className="euiScreenReaderOnly"
+                    data-test-subj="center"
                     disabled={false}
-                    id="center"
+                    id="generated-id"
                     name="generated-id"
                     onChange={[Function]}
                     type="radio"
@@ -834,8 +851,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             <label
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
               disabled={false}
-              htmlFor="right"
-              onClick={[Function]}
+              htmlFor="generated-id"
               style={
                 Object {
                   "minWidth": undefined,
@@ -847,6 +863,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignRight"
                   size="m"
                 />
@@ -856,8 +873,9 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   <input
                     checked={false}
                     className="euiScreenReaderOnly"
+                    data-test-subj="right"
                     disabled={false}
-                    id="right"
+                    id="generated-id"
                     name="generated-id"
                     onChange={[Function]}
                     type="radio"

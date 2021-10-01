@@ -3,6 +3,7 @@
   "client": {
     "classes": [
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-public.AbstractDashboardDrilldown",
         "type": "Class",
         "tags": [],
@@ -42,20 +43,29 @@
           },
           ">"
         ],
+        "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.AbstractDashboardDrilldown.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-public.AbstractDashboardDrilldown.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "params",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dashboardEnhanced",
@@ -65,49 +75,45 @@
                     "text": "Params"
                   }
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 36
-                }
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 36
-            }
+            "returnComment": []
           },
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.AbstractDashboardDrilldown.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 38
-            }
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.AbstractDashboardDrilldown.supportedTriggers",
             "type": "Function",
+            "tags": [],
             "label": "supportedTriggers",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 40
-            },
             "signature": [
               "() => string[]"
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
-            "id": "def-public.AbstractDashboardDrilldown.getURL",
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-public.AbstractDashboardDrilldown.getLocation",
             "type": "Function",
-            "label": "getURL",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
             "signature": [
               "(config: ",
               {
@@ -118,21 +124,19 @@
                 "text": "DrilldownConfig"
               },
               ", context: Context) => Promise<",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.KibanaURL",
-                "text": "KibanaURL"
-              },
-              ">"
+              "KibanaLocation",
+              "<object>>"
             ],
-            "description": [],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-public.AbstractDashboardDrilldown.getLocation.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "config",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dashboardEnhanced",
@@ -142,94 +146,83 @@
                     "text": "DrilldownConfig"
                   }
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 42
-                }
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-public.AbstractDashboardDrilldown.getLocation.$2",
                 "type": "Uncategorized",
+                "tags": [],
                 "label": "context",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "Context"
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 42
-                }
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 42
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.AbstractDashboardDrilldown.order",
-            "type": "number",
-            "label": "order",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 44
-            },
-            "signature": [
-              "100"
-            ]
-          },
-          {
-            "id": "def-public.AbstractDashboardDrilldown.getDisplayName",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => string"
-            ],
-            "description": [],
-            "label": "getDisplayName",
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 46
-            },
-            "tags": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-public.AbstractDashboardDrilldown.order",
+            "type": "number",
             "tags": [],
-            "id": "def-public.AbstractDashboardDrilldown.euiIcon",
-            "type": "string",
-            "label": "euiIcon",
+            "label": "order",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 48
-            },
             "signature": [
-              "\"dashboardApp\""
-            ]
+              "100"
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false
           },
           {
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-public.AbstractDashboardDrilldown.getDisplayName",
+            "type": "Function",
             "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-public.AbstractDashboardDrilldown.euiIcon",
+            "type": "string",
+            "tags": [],
+            "label": "euiIcon",
+            "description": [],
+            "signature": [
+              "\"dashboardApp\""
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.AbstractDashboardDrilldown.CollectConfig",
             "type": "Function",
+            "tags": [],
             "label": "CollectConfig",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 54
-            },
             "signature": [
+              "() => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
+                "section": "def-common.UiComponentInstance",
+                "text": "UiComponentInstance"
               },
               "<",
               {
@@ -256,48 +249,34 @@
                 "text": "BaseActionFactoryContext"
               },
               ">>"
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.AbstractDashboardDrilldown.createConfig",
             "type": "Function",
-            "children": [],
+            "tags": [],
+            "label": "createConfig",
+            "description": [],
             "signature": [
               "() => { dashboardId: string; useCurrentFilters: boolean; useCurrentDateRange: boolean; }"
             ],
-            "description": [],
-            "label": "createConfig",
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 56
-            },
-            "tags": [],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.AbstractDashboardDrilldown.isConfigValid",
             "type": "Function",
-            "children": [
-              {
-                "type": "Object",
-                "label": "config",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "dashboardEnhanced",
-                    "scope": "common",
-                    "docId": "kibDashboardEnhancedPluginApi",
-                    "section": "def-common.DrilldownConfig",
-                    "text": "DrilldownConfig"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 62
-                }
-              }
-            ],
+            "tags": [],
+            "label": "isConfigValid",
+            "description": [],
             "signature": [
               "(config: ",
               {
@@ -316,23 +295,16 @@
                 "text": "DrilldownConfig"
               }
             ],
-            "description": [],
-            "label": "isConfigValid",
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 62
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.AbstractDashboardDrilldown.getHref",
-            "type": "Function",
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-public.AbstractDashboardDrilldown.isConfigValid.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "config",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dashboardEnhanced",
@@ -342,26 +314,20 @@
                     "text": "DrilldownConfig"
                   }
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 67
-                }
-              },
-              {
-                "type": "Uncategorized",
-                "label": "context",
-                "isRequired": true,
-                "signature": [
-                  "Context"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 67
-                }
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-public.AbstractDashboardDrilldown.getHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getHref",
+            "description": [],
             "signature": [
               "(config: ",
               {
@@ -373,23 +339,16 @@
               },
               ", context: Context) => Promise<string>"
             ],
-            "description": [],
-            "label": "getHref",
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 67
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.AbstractDashboardDrilldown.execute",
-            "type": "Function",
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-public.AbstractDashboardDrilldown.getHref.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "config",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dashboardEnhanced",
@@ -399,26 +358,34 @@
                     "text": "DrilldownConfig"
                   }
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 72
-                }
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-public.AbstractDashboardDrilldown.getHref.$2",
                 "type": "Uncategorized",
+                "tags": [],
                 "label": "context",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "Context"
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 72
-                }
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-public.AbstractDashboardDrilldown.execute",
+            "type": "Function",
+            "tags": [],
+            "label": "execute",
+            "description": [],
             "signature": [
               "(config: ",
               {
@@ -430,69 +397,105 @@
               },
               ", context: Context) => Promise<void>"
             ],
-            "description": [],
-            "label": "execute",
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 72
-            },
-            "tags": [],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-public.AbstractDashboardDrilldown.execute.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dashboardEnhanced",
+                    "scope": "common",
+                    "docId": "kibDashboardEnhancedPluginApi",
+                    "section": "def-common.DrilldownConfig",
+                    "text": "DrilldownConfig"
+                  }
+                ],
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-public.AbstractDashboardDrilldown.execute.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
-            "id": "def-public.AbstractDashboardDrilldown.urlGenerator",
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-public.AbstractDashboardDrilldown.locator",
             "type": "Object",
-            "label": "urlGenerator",
             "tags": [],
+            "label": "locator",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 77
-            },
             "signature": [
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
               {
                 "pluginId": "dashboard",
                 "scope": "public",
                 "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardUrlGenerator",
-                "text": "DashboardUrlGenerator"
-              }
-            ]
+                "section": "def-public.DashboardAppLocatorParams",
+                "text": "DashboardAppLocatorParams"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-          "lineNumber": 34
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-public.Params",
         "type": "Interface",
+        "tags": [],
         "label": "Params",
         "description": [],
-        "tags": [],
+        "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.Params.start",
             "type": "Function",
+            "tags": [],
             "label": "start",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 27
-            },
             "signature": [
+              "() => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "public",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.StartServicesGetter",
-                "text": "StartServicesGetter"
+                "section": "def-public.StartServices",
+                "text": "StartServices"
               },
               "<{ uiActionsEnhanced: ",
               {
@@ -525,33 +528,34 @@
                 "docId": "kibCorePluginApi",
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
-              }
-            ]
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-          "lineNumber": 26
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-public.SetupDependencies",
         "type": "Interface",
+        "tags": [],
         "label": "SetupDependencies",
         "description": [],
-        "tags": [],
+        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.SetupDependencies.uiActionsEnhanced",
             "type": "Object",
+            "tags": [],
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 17
-            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -560,18 +564,17 @@
                 "section": "def-public.SetupContract",
                 "text": "SetupContract"
               }
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.SetupDependencies.embeddable",
             "type": "Object",
+            "tags": [],
             "label": "embeddable",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 18
-            },
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -580,52 +583,59 @@
                 "section": "def-public.EmbeddableSetup",
                 "text": "EmbeddableSetup"
               }
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.SetupDependencies.share",
             "type": "CompoundType",
+            "tags": [],
             "label": "share",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 19
-            },
             "signature": [
+              "{ register: (shareMenuProvider: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginSetup",
-                "text": "SharePluginSetup"
-              }
-            ]
+                "section": "def-public.ShareMenuProvider",
+                "text": "ShareMenuProvider"
+              },
+              ") => void; } & { urlGenerators: ",
+              "UrlGeneratorsSetup",
+              "; url: ",
+              "UrlService",
+              "<unknown>; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              "SerializableRecord",
+              ">): void; }"
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-          "lineNumber": 16
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-public.StartDependencies",
         "type": "Interface",
+        "tags": [],
         "label": "StartDependencies",
         "description": [],
-        "tags": [],
+        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.StartDependencies.uiActionsEnhanced",
             "type": "Object",
+            "tags": [],
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 23
-            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -634,18 +644,17 @@
                 "section": "def-public.StartContract",
                 "text": "StartContract"
               }
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.StartDependencies.data",
             "type": "Object",
+            "tags": [],
             "label": "data",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 24
-            },
             "signature": [
               {
                 "pluginId": "data",
@@ -654,18 +663,17 @@
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
               }
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.StartDependencies.embeddable",
             "type": "Object",
+            "tags": [],
             "label": "embeddable",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 25
-            },
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -674,38 +682,46 @@
                 "section": "def-public.EmbeddableStart",
                 "text": "EmbeddableStart"
               }
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.StartDependencies.share",
             "type": "CompoundType",
+            "tags": [],
             "label": "share",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 26
-            },
             "signature": [
+              "{ toggleShareContextMenu: (options: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginStart",
-                "text": "SharePluginStart"
-              }
-            ]
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { urlGenerators: ",
+              "UrlGeneratorsStart",
+              "; url: ",
+              "UrlService",
+              "<unknown>; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              "SerializableRecord",
+              ">): void; }"
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-public.StartDependencies.dashboard",
             "type": "Object",
+            "tags": [],
             "label": "dashboard",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 27
-            },
             "signature": [
               {
                 "pluginId": "dashboard",
@@ -714,60 +730,55 @@
                 "section": "def-public.DashboardStart",
                 "text": "DashboardStart"
               }
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-          "lineNumber": 22
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-public.Config",
         "type": "Type",
-        "label": "Config",
         "tags": [],
+        "label": "Config",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/types.ts",
-          "lineNumber": 11
-        },
         "signature": [
           "{ dashboardId?: string | undefined; useCurrentFilters: boolean; useCurrentDateRange: boolean; }"
         ],
+        "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/types.ts",
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "dashboardEnhanced",
       "id": "def-public.SetupContract",
       "type": "Interface",
+      "tags": [],
       "label": "SetupContract",
       "description": [],
-      "tags": [],
+      "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+      "deprecated": false,
       "children": [],
-      "source": {
-        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-        "lineNumber": 31
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "dashboardEnhanced",
       "id": "def-public.StartContract",
       "type": "Interface",
+      "tags": [],
       "label": "StartContract",
       "description": [],
-      "tags": [],
+      "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+      "deprecated": false,
       "children": [],
-      "source": {
-        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-        "lineNumber": 34
-      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -777,22 +788,22 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-server.SetupDependencies",
         "type": "Interface",
+        "tags": [],
         "label": "SetupDependencies",
         "description": [],
-        "tags": [],
+        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-server.SetupDependencies.uiActionsEnhanced",
             "type": "Object",
+            "tags": [],
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-              "lineNumber": 13
-            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -801,41 +812,37 @@
                 "section": "def-server.SetupContract",
                 "text": "SetupContract"
               }
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-          "lineNumber": 12
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-server.StartDependencies",
         "type": "Interface",
+        "tags": [],
         "label": "StartDependencies",
         "description": [],
-        "tags": [],
+        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "dashboardEnhanced",
             "id": "def-server.StartDependencies.uiActionsEnhanced",
             "type": "Uncategorized",
+            "tags": [],
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-              "lineNumber": 17
-            },
             "signature": [
               "void"
-            ]
+            ],
+            "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-          "lineNumber": 16
-        },
         "initialIsOpen": false
       }
     ],
@@ -843,30 +850,28 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "dashboardEnhanced",
       "id": "def-server.SetupContract",
       "type": "Interface",
+      "tags": [],
       "label": "SetupContract",
       "description": [],
-      "tags": [],
+      "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+      "deprecated": false,
       "children": [],
-      "source": {
-        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-        "lineNumber": 21
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "dashboardEnhanced",
       "id": "def-server.StartContract",
       "type": "Interface",
+      "tags": [],
       "label": "StartContract",
       "description": [],
-      "tags": [],
+      "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+      "deprecated": false,
       "children": [],
-      "source": {
-        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-        "lineNumber": 24
-      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -875,34 +880,12 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-common.createExtract",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-common.createExtract.{\n- drilldownId,\n}",
-            "type": "Object",
-            "label": "{\n  drilldownId,\n}",
-            "tags": [],
-            "description": [],
-            "children": [
-              {
-                "tags": [],
-                "id": "def-common.createExtract.{\n- drilldownId,\n}.drilldownId",
-                "type": "string",
-                "label": "drilldownId",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-                  "lineNumber": 49
-                }
-              }
-            ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-              "lineNumber": 48
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createExtract",
+        "description": [],
         "signature": [
           "({ drilldownId, }: { drilldownId: string; }) => (state: ",
           {
@@ -924,45 +907,42 @@
           "SavedObjectReference",
           "[]; }"
         ],
-        "description": [],
-        "label": "createExtract",
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-          "lineNumber": 46
-        },
-        "tags": [],
+        "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-common.createExtract.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  drilldownId,\n}",
+            "description": [],
+            "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-common.createExtract.$1.drilldownId",
+                "type": "string",
+                "tags": [],
+                "label": "drilldownId",
+                "description": [],
+                "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-common.createInject",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-common.createInject.{\n- drilldownId,\n}",
-            "type": "Object",
-            "label": "{\n  drilldownId,\n}",
-            "tags": [],
-            "description": [],
-            "children": [
-              {
-                "tags": [],
-                "id": "def-common.createInject.{\n- drilldownId,\n}.drilldownId",
-                "type": "string",
-                "label": "drilldownId",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-                  "lineNumber": 34
-                }
-              }
-            ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-              "lineNumber": 33
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createInject",
+        "description": [],
         "signature": [
           "({ drilldownId, }: { drilldownId: string; }) => (state: ",
           {
@@ -983,13 +963,32 @@
             "text": "SerializedEvent"
           }
         ],
-        "description": [],
-        "label": "createInject",
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-          "lineNumber": 31
-        },
-        "tags": [],
+        "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-common.createInject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  drilldownId,\n}",
+            "description": [],
+            "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dashboardEnhanced",
+                "id": "def-common.createInject.$1.drilldownId",
+                "type": "string",
+                "tags": [],
+                "label": "drilldownId",
+                "description": [],
+                "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -998,35 +997,33 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-common.DrilldownConfig",
         "type": "Type",
-        "label": "DrilldownConfig",
         "tags": [],
+        "label": "DrilldownConfig",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/types.ts",
-          "lineNumber": 9
-        },
         "signature": [
           "{ dashboardId?: string | undefined; useCurrentFilters: boolean; useCurrentDateRange: boolean; }"
         ],
+        "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/types.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "dashboardEnhanced",
         "id": "def-common.EMBEDDABLE_TO_DASHBOARD_DRILLDOWN",
         "type": "string",
+        "tags": [],
         "label": "EMBEDDABLE_TO_DASHBOARD_DRILLDOWN",
         "description": [
           "\nNOTE: DO NOT CHANGE THIS STRING WITHOUT CAREFUL CONSIDERATOIN, BECAUSE IT IS\nSTORED IN SAVED OBJECTS.\n\nAlso temporary dashboard drilldown migration code inside embeddable plugin relies on it\nx-pack/plugins/embeddable_enhanced/public/embeddables/embeddable_action_storage.ts"
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/constants.ts",
-          "lineNumber": 15
-        },
         "signature": [
           "\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\""
         ],
+        "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

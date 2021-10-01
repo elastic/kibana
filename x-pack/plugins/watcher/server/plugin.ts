@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  ILegacyCustomClusterClient,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from 'kibana/server';
+import { i18n } from '@kbn/i18n';
+
+import { CoreStart, CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+
 import { PLUGIN, INDEX_NAMES } from '../common/constants';
-import type {
-  Dependencies,
-  LicenseStatus,
-  RouteDependencies,
-  WatcherRequestHandlerContext,
-} from './types';
+
+import type { SetupDependencies, StartDependencies, RouteDependencies } from './types';
 
 import { registerSettingsRoutes } from './routes/api/settings';
 import { registerIndicesRoutes } from './routes/api/indices';
@@ -27,31 +20,31 @@ import { registerWatchesRoutes } from './routes/api/watches';
 import { registerWatchRoutes } from './routes/api/watch';
 import { registerListFieldsRoute } from './routes/api/register_list_fields_route';
 import { registerLoadHistoryRoute } from './routes/api/register_load_history_route';
-import { elasticsearchJsPlugin } from './lib/elasticsearch_js_plugin';
 
-async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-  const [core] = await getStartServices();
-  const esConfig = { plugins: [elasticsearchJsPlugin] };
-  return core.elasticsearch.legacy.createClient('watcher', esConfig);
-}
+import { License, handleEsError } from './shared_imports';
 
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
-  private readonly log: Logger;
-  private watcherESClient?: ILegacyCustomClusterClient;
-
-  private licenseStatus: LicenseStatus = {
-    hasRequired: false,
-  };
+  private readonly license: License;
+  private readonly logger: Logger;
 
   constructor(ctx: PluginInitializerContext) {
-    this.log = ctx.logger.get();
+    this.logger = ctx.logger.get();
+    this.license = new License();
   }
 
-  setup({ http, getStartServices }: CoreSetup, { licensing, features }: Dependencies) {
-    const router = http.createRouter<WatcherRequestHandlerContext>();
+  setup({ http, getStartServices }: CoreSetup, { licensing, features }: SetupDependencies) {
+    this.license.setup({
+      pluginName: PLUGIN.getI18nName(i18n),
+      logger: this.logger,
+    });
+
+    const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
       router,
-      getLicenseStatus: () => this.licenseStatus,
+      license: this.license,
+      lib: {
+        handleEsError,
+      },
     };
 
     features.registerElasticsearchFeature({
@@ -80,16 +73,6 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext<WatcherRequestHandlerContext, 'watcher'>(
-      'watcher',
-      async (ctx, request) => {
-        this.watcherESClient = this.watcherESClient ?? (await getCustomEsClient(getStartServices));
-        return {
-          client: this.watcherESClient.asScoped(request),
-        };
-      }
-    );
-
     registerListFieldsRoute(routeDependencies);
     registerLoadHistoryRoute(routeDependencies);
     registerIndicesRoutes(routeDependencies);
@@ -97,32 +80,15 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     registerSettingsRoutes(routeDependencies);
     registerWatchesRoutes(routeDependencies);
     registerWatchRoutes(routeDependencies);
+  }
 
-    licensing.license$.subscribe(async (license) => {
-      const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
-      const hasMinimumLicense = state === 'valid';
-      if (hasMinimumLicense && license.getFeature(PLUGIN.ID)) {
-        this.log.info('Enabling Watcher plugin.');
-        this.licenseStatus = {
-          hasRequired: true,
-        };
-      } else {
-        if (message) {
-          this.log.info(message);
-        }
-        this.licenseStatus = {
-          hasRequired: false,
-          message,
-        };
-      }
+  start(core: CoreStart, { licensing }: StartDependencies) {
+    this.license.start({
+      pluginId: PLUGIN.ID,
+      minimumLicenseType: PLUGIN.MINIMUM_LICENSE_REQUIRED,
+      licensing,
     });
   }
 
-  start() {}
-
-  stop() {
-    if (this.watcherESClient) {
-      this.watcherESClient.close();
-    }
-  }
+  stop() {}
 }

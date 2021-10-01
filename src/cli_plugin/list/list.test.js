@@ -64,7 +64,6 @@ describe('kibana cli', function () {
           "log: plugin1@5.0.0-alpha2",
           "log: plugin2@3.2.1",
           "log: plugin3@1.2.3",
-          "log: ",
         ]
       `);
     });
@@ -91,6 +90,15 @@ describe('kibana cli', function () {
       }).toThrowErrorMatchingInlineSnapshot(
         `"Unable to read kibana.json file for plugin invalid-plugin"`
       );
+    });
+
+    it('show message if no plugins are installed', function () {
+      list(pluginDir, logger);
+      expect(logger.messages).toMatchInlineSnapshot(`
+        Array [
+          "log: No plugins installed.",
+        ]
+      `);
     });
   });
 });

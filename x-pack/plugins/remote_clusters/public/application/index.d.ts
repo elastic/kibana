@@ -12,7 +12,8 @@ export declare const renderApp: (
   elem: HTMLElement | null,
   I18nContext: I18nStart['Context'],
   appDependencies: {
-    isCloudEnabled?: boolean;
+    isCloudEnabled: boolean;
+    cloudBaseUrl: string;
   },
   history: ScopedHistory
 ) => ReturnType<RegisterManagementAppArgs['mount']>;

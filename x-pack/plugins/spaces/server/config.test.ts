@@ -13,13 +13,15 @@ import { spacesConfigDeprecationProvider } from './config';
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = spacesConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
-  const migrated = applyDeprecations(
+  const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
       deprecation,
       path: '',
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -37,7 +39,7 @@ describe('spaces config', () => {
 
         expect(messages).toMatchInlineSnapshot(`
         Array [
-          "Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)",
+          "Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)",
         ]
       `);
         expect(migrated).toEqual(originalConfig);

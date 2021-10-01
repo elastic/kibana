@@ -7,7 +7,7 @@
 
 import { Query } from 'src/plugins/data/public';
 import type { Operation } from '../../../types';
-import { TimeScaleUnit } from '../../time_scale';
+import type { TimeScaleUnit } from '../../../../common/expressions';
 import type { OperationType } from '../definitions';
 
 export interface BaseIndexPatternColumn extends Operation {
@@ -16,6 +16,7 @@ export interface BaseIndexPatternColumn extends Operation {
   customLabel?: boolean;
   timeScale?: TimeScaleUnit;
   filter?: Query;
+  timeShift?: string;
 }
 
 // Formatting can optionally be added to any column

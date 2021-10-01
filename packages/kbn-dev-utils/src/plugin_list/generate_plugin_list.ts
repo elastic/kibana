@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
 
 import normalizePath from 'normalize-path';
@@ -49,7 +48,7 @@ NOTE:
     node scripts/build_plugin_list_docs
 
   You can update the template within ${normalizePath(
-    Path.relative(REPO_ROOT, Fs.realpathSync(Path.resolve(__dirname, __filename)))
+    Path.relative(REPO_ROOT, Path.resolve(__dirname, __filename))
   )}
 
 ////

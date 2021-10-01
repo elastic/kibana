@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { StaticStyleProperty } from './static_style_property';
 import { LabelStaticOptions } from '../../../../../common/descriptor_types';
 
@@ -18,7 +18,9 @@ export class StaticTextProperty extends StaticStyleProperty<LabelStaticOptions> 
     if (this.getOptions().value.length) {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', this.getOptions().value);
     } else {
-      mbMap.setLayoutProperty(mbLayerId, 'text-field', null);
+      if (typeof mbMap.getLayoutProperty(mbLayerId, 'text-field') !== 'undefined') {
+        mbMap.setLayoutProperty(mbLayerId, 'text-field', undefined);
+      }
     }
   }
 }

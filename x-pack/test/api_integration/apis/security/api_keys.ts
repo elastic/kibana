@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,6 +22,45 @@ export default function ({ getService }: FtrProviderContext) {
           .then((response: Record<string, any>) => {
             const payload = response.body;
             expect(payload).to.eql({ apiKeysEnabled: true });
+          });
+      });
+    });
+
+    describe('POST /internal/security/api_key', () => {
+      it('should allow an API Key to be created', async () => {
+        await supertest
+          .post('/internal/security/api_key')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            name: 'test_api_key',
+            expiration: '12d',
+            role_descriptors: {
+              role_1: {
+                cluster: ['monitor'],
+              },
+            },
+          })
+          .expect(200)
+          .then((response: Record<string, any>) => {
+            const { name } = response.body;
+            expect(name).to.eql('test_api_key');
+          });
+      });
+
+      it('should allow an API Key to be created with metadata', async () => {
+        await supertest
+          .post('/internal/security/api_key')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            name: 'test_api_key_with_metadata',
+            metadata: {
+              foo: 'bar',
+            },
+          })
+          .expect(200)
+          .then((response: Record<string, any>) => {
+            const { name } = response.body;
+            expect(name).to.eql('test_api_key_with_metadata');
           });
       });
     });

@@ -10,6 +10,7 @@ import * as pluginContext from './use_plugin_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import * as kibanaUISettings from './use_kibana_ui_settings';
+import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -23,7 +24,8 @@ describe('useTimeRange', () => {
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       core: {} as CoreStart,
       appMountParameters: {} as AppMountParameters,
-      plugins: ({
+      config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
+      plugins: {
         data: {
           query: {
             timefilter: {
@@ -36,7 +38,9 @@ describe('useTimeRange', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPublicPluginsStart,
+      } as unknown as ObservabilityPublicPluginsStart,
+      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+      ObservabilityPageTemplate: () => null,
     }));
     jest.spyOn(kibanaUISettings, 'useKibanaUISettings').mockImplementation(() => ({
       from: '2020-10-08T05:00:00.000Z',
@@ -63,7 +67,8 @@ describe('useTimeRange', () => {
         jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
           core: {} as CoreStart,
           appMountParameters: {} as AppMountParameters,
-          plugins: ({
+          config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
+          plugins: {
             data: {
               query: {
                 timefilter: {
@@ -76,7 +81,9 @@ describe('useTimeRange', () => {
                 },
               },
             },
-          } as unknown) as ObservabilityPublicPluginsStart,
+          } as unknown as ObservabilityPublicPluginsStart,
+          observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+          ObservabilityPageTemplate: () => null,
         }));
       });
       it('returns ranges and absolute times from kibana default settings', () => {

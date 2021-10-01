@@ -8,10 +8,11 @@
 
 import { join } from 'path';
 import { PackageInfo } from '@kbn/config';
-import { distDir as uiSharedDepsDistDir } from '@kbn/ui-shared-deps';
+import { fromRoot } from '@kbn/utils';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import { IRouter } from '../../http';
 import { UiPlugins } from '../../plugins';
-import { fromRoot } from '../../utils';
 import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 
@@ -27,7 +28,7 @@ import { registerRouteForBundle } from './bundles_route';
  */
 export function registerBundleRoutes({
   router,
-  serverBasePath, // serverBasePath
+  serverBasePath,
   uiPlugins,
   packageInfo,
 }: {
@@ -43,9 +44,16 @@ export function registerBundleRoutes({
   const fileHashCache = new FileHashCache();
 
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps/`,
-    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps/`,
-    bundlesPath: uiSharedDepsDistDir,
+    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
+    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
+    bundlesPath: UiSharedDepsNpm.distDir,
+    fileHashCache,
+    isDist,
+  });
+  registerRouteForBundle(router, {
+    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
+    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
+    bundlesPath: UiSharedDepsSrc.distDir,
     fileHashCache,
     isDist,
   });
@@ -57,10 +65,10 @@ export function registerBundleRoutes({
     isDist,
   });
 
-  [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir }]) => {
+  [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
     registerRouteForBundle(router, {
-      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/`,
-      routePath: `/${buildNum}/bundles/plugin/${id}/`,
+      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/${version}/`,
+      routePath: `/${buildNum}/bundles/plugin/${id}/${version}/`,
       bundlesPath: publicTargetDir,
       fileHashCache,
       isDist,

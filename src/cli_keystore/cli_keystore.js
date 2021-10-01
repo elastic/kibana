@@ -7,8 +7,8 @@
  */
 
 import _ from 'lodash';
+import { kibanaPackageJson as pkg } from '@kbn/utils';
 
-import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
 import { Keystore } from '../cli/keystore';
 

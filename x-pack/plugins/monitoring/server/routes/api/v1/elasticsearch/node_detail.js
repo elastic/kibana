@@ -12,7 +12,7 @@ import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardStats, getShardAllocation } from '../../../../lib/elasticsearch/shards';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs/get_logs';
@@ -52,7 +52,8 @@ export function esNodeRoute(server) {
       const filebeatIndexPattern = prefixIndexPattern(
         config,
         config.get('monitoring.ui.logs.index'),
-        '*'
+        '*',
+        true
       );
       const isAdvanced = req.payload.is_advanced;
 
@@ -76,7 +77,11 @@ export function esNodeRoute(server) {
       try {
         const cluster = await getClusterStats(req, esIndexPattern, clusterUuid);
 
-        const clusterState = get(cluster, 'cluster_state', { nodes: {} });
+        const clusterState = get(
+          cluster,
+          'cluster_state',
+          get(cluster, 'elasticsearch.cluster.stats.state')
+        );
         const shardStats = await getShardStats(req, esIndexPattern, cluster, {
           includeIndices: true,
           includeNodes: true,
@@ -91,13 +96,23 @@ export function esNodeRoute(server) {
         const metrics = await getMetrics(req, esIndexPattern, metricSet, [
           { term: { 'source_node.uuid': nodeUuid } },
         ]);
-
         let logs;
         let shardAllocation;
         if (!isAdvanced) {
           // TODO: Why so many fields needed for a single component (shard legend)?
-          const shardFilter = { term: { 'shard.node': nodeUuid } };
-          const stateUuid = get(cluster, 'cluster_state.state_uuid');
+          const shardFilter = {
+            bool: {
+              should: [
+                { term: { 'shard.node': nodeUuid } },
+                { term: { 'elasticsearch.node.name': nodeUuid } },
+              ],
+            },
+          };
+          const stateUuid = get(
+            cluster,
+            'cluster_state.state_uuid',
+            get(cluster, 'elasticsearch.cluster.stats.state.state_uuid')
+          );
           const allocationOptions = {
             shardFilter,
             stateUuid,

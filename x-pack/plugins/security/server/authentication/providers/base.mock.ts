@@ -17,9 +17,11 @@ export type MockAuthenticationProviderOptions = ReturnType<
 
 export function mockAuthenticationProviderOptions(options?: { name: string }) {
   return {
+    getServerBaseURL: () => 'test-protocol://test-hostname:1234',
     client: elasticsearchServiceMock.createClusterClient(),
     logger: loggingSystemMock.create().get(),
     basePath: httpServiceMock.createBasePath(),
+    getRequestOriginalURL: jest.fn(),
     tokens: { refresh: jest.fn(), invalidate: jest.fn() },
     name: options?.name ?? 'basic1',
     urls: {

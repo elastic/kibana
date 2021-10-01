@@ -13,10 +13,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSuperSelect } from '@
 
 import { i18n } from '@kbn/i18n';
 
-import { GEOLOCATION, TEXT, DATE } from '../../../../shared/constants/field_types';
-import { SchemaTypes } from '../../../../shared/types';
+import { SchemaType } from '../../../../shared/schema/types';
 
-import { BoostIcon } from '../boost_icon';
+import { BoostIcon } from '../components';
 import { FUNCTIONAL_DISPLAY, PROXIMITY_DISPLAY, VALUE_DISPLAY } from '../constants';
 import { RelevanceTuningLogic } from '../relevance_tuning_logic';
 import { Boost, BoostType } from '../types';
@@ -65,19 +64,21 @@ const BASE_OPTIONS = [
   },
 ];
 
-const filterInvalidOptions = (value: BoostType, type: SchemaTypes) => {
+const filterInvalidOptions = (value: BoostType, type: SchemaType) => {
   // Proximity and Functional boost types are not valid for text fields
-  if (type === TEXT && [BoostType.Proximity, BoostType.Functional].includes(value)) return false;
+  if (type === SchemaType.Text && [BoostType.Proximity, BoostType.Functional].includes(value))
+    return false;
   // Value and Functional boost types are not valid for geolocation fields
-  if (type === GEOLOCATION && [BoostType.Functional, BoostType.Value].includes(value)) return false;
+  if (type === SchemaType.Geolocation && [BoostType.Functional, BoostType.Value].includes(value))
+    return false;
   // Functional boosts are not valid for date fields
-  if (type === DATE && value === BoostType.Functional) return false;
+  if (type === SchemaType.Date && value === BoostType.Functional) return false;
   return true;
 };
 
 interface Props {
   name: string;
-  type: SchemaTypes;
+  type: SchemaType;
   boosts?: Boost[];
 }
 

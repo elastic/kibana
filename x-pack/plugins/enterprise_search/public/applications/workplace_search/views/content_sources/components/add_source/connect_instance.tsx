@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
+import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../../constants';
 import { DOCUMENT_PERMISSIONS_DOCS_URL, ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
 import { FeatureIds, Configuration, Features } from '../../../../types';
 import { LEARN_MORE_LINK } from '../../constants';
@@ -44,7 +45,6 @@ import {
   CONNECT_NOT_SYNCED_TEXT,
   SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE,
   SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE,
-  SOURCE_FEATURES_EXPLORE_BUTTON,
 } from './constants';
 import { SourceFeatures } from './source_features';
 
@@ -55,8 +55,6 @@ interface ConnectInstanceProps {
   objTypes?: string[];
   name: string;
   serviceType: string;
-  sourceDescription: string;
-  connectStepDescription: string;
   needsPermissions: boolean;
   onFormCreated(name: string): void;
 }
@@ -67,8 +65,6 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   objTypes,
   name,
   serviceType,
-  sourceDescription,
-  connectStepDescription,
   needsPermissions,
   onFormCreated,
   header,
@@ -86,9 +82,8 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue,
   } = useActions(AddSourceLogic);
 
-  const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } = useValues(
-    AddSourceLogic
-  );
+  const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
+    useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -160,14 +155,14 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const permissionField = (
     <>
-      <EuiPanel paddingSize="l">
-        <EuiTitle size="xs">
-          <h3>
+      <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
+        <EuiTitle size="s">
+          <h1>
             <strong>{CONNECT_DOC_PERMISSIONS_TITLE}</strong>
-          </h3>
+          </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
+        <EuiText color="subdued" size="s">
           {!needsPermissions && (
             <span>
               <FormattedMessage
@@ -191,11 +186,9 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
             </span>
           )}
         </EuiText>
-        <EuiSpacer size="s" />
         {!indexPermissionsValue && (
           <>
-            <EuiSpacer size="s" />
-            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning" size="s">
+            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning">
               <p>
                 {CONNECT_NOT_SYNCED_TEXT}
                 {needsPermissions && whichDocsLink}
@@ -236,7 +229,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
         <EuiSpacer size="s" />
         <EuiText size="xs">
           <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-            {SOURCE_FEATURES_EXPLORE_BUTTON}
+            {EXPLORE_PLATINUM_FEATURES_LINK}
           </EuiLink>
         </EuiText>
       </EuiPanel>
@@ -272,12 +265,12 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
-          <EuiPanel paddingSize="none">
-            <EuiPanel hasShadow={false} paddingSize="l">
+          <EuiPanel paddingSize="none" hasShadow={false} color="subdued">
+            <EuiPanel hasShadow={false} paddingSize="l" color="subdued">
               {header}
             </EuiPanel>
             <EuiHorizontalRule margin="xs" />
-            <EuiPanel hasShadow={false} paddingSize="l">
+            <EuiPanel hasShadow={false} paddingSize="l" color="subdued">
               <SourceFeatures features={features} name={name} objTypes={objTypes} />
             </EuiPanel>
           </EuiPanel>

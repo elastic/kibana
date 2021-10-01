@@ -9,5 +9,5 @@ import { i18n } from '@kbn/i18n';
 
 export const CRAWLER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.crawler.title',
-  { defaultMessage: 'Crawler' }
+  { defaultMessage: 'Web Crawler' }
 );

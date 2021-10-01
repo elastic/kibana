@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   EuiTable,
   EuiTableBody,
   EuiTableHeader,
@@ -129,9 +130,9 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText size="s">
-          <h4>{isRemote ? REMOTE_SOURCES_TOGGLE_TEXT : STANDARD_SOURCES_TOGGLE_TEXT}</h4>
-        </EuiText>
+        <EuiTitle size="xxs">
+          <h3>{isRemote ? REMOTE_SOURCES_TOGGLE_TEXT : STANDARD_SOURCES_TOGGLE_TEXT}</h3>
+        </EuiTitle>
         <EuiText color="subdued" size="s">
           {isRemote ? REMOTE_SOURCES_TABLE_DESCRIPTION : STANDARD_SOURCES_TABLE_DESCRIPTION}
         </EuiText>
@@ -152,7 +153,7 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
           {contentSources.map((source, i) => (
             <EuiTableRow key={i}>
               <EuiTableRowCell>{source.name}</EuiTableRowCell>
-              <EuiTableRowCell>
+              <EuiTableRowCell align="right">
                 <EuiSwitch
                   checked={!!source.isEnabled}
                   disabled={sectionDisabled}

@@ -29,7 +29,7 @@ import {
   PivotQuery,
 } from './request';
 import { LatestFunctionConfigUI } from '../../../common/types/transform';
-import { RuntimeField } from '../../../../../../src/plugins/data/common/index_patterns';
+import { RuntimeField } from '../../../../../../src/plugins/data/common';
 
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
@@ -266,7 +266,7 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getCreateTransformRequestBody() with runtime mappings', () => {
+  test('getCreateTransformRequestBody() with runtime fields', () => {
     const runtimeMappings = {
       rt_bytes_bigger: {
         type: 'double',

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Filter } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
-import { Filter } from '../../es_query/filters';
 import { ExpressionFunctionKibanaFilter } from './kibana_filter';
 
 export const filtersToAst = (filters: Filter[] | Filter) => {
@@ -17,7 +17,8 @@ export const filtersToAst = (filters: Filter[] | Filter) => {
       buildExpressionFunction<ExpressionFunctionKibanaFilter>('kibanaFilter', {
         query: JSON.stringify(restOfFilter),
         negate: filter.meta.negate,
+        disabled: filter.meta.disabled,
       }),
-    ]);
+    ]).toAst();
   });
 };

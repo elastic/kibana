@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
+import { visualizationSavedObjectTypeMigrations } from '../migrations/visualization_saved_object_migrations';
 
 export const visualizationSavedObjectType: SavedObjectsType = {
   name: 'visualization',
@@ -19,9 +19,6 @@ export const visualizationSavedObjectType: SavedObjectsType = {
     importableAndExportable: true,
     getTitle(obj) {
       return obj.attributes.title;
-    },
-    getEditUrl(obj) {
-      return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {

@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { basename, dirname, relative, resolve } from 'path';
-import { memoize } from 'lodash';
+import Path from 'path';
+
 import { IMinimatch, Minimatch } from 'minimatch';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { parseTsConfig } from './ts_configfile';
+import { ProjectSet } from './project_set';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
     (pattern) =>
-      new Minimatch(resolve(directory, pattern), {
+      new Minimatch(Path.resolve(directory, pattern), {
         dot: true,
       })
   );
@@ -26,68 +27,151 @@ function testMatchers(matchers: IMinimatch[], path: string) {
   return matchers.some((matcher) => matcher.match(path));
 }
 
-const parentProjectFactory = memoize(function (parentConfigPath: string) {
-  return new Project(parentConfigPath);
-});
+export interface ProjectOptions {
+  name?: string;
+  disableTypeCheck?: boolean;
+}
+
+interface LoadOptions {
+  history?: string[];
+  cache?: Map<string, Project>;
+  skipConfigValidation?: boolean;
+}
 
 export class Project {
-  public directory: string;
-  public name: string;
-  public config: any;
-  public disableTypeCheck: boolean;
+  static load(
+    tsConfigPath: string,
+    projectOptions?: ProjectOptions,
+    loadOptions: LoadOptions = {}
+  ): Project {
+    const cache = loadOptions.cache ?? new Map<string, Project>();
+    const cached = cache.get(tsConfigPath);
+    if (cached) {
+      return cached;
+    }
 
-  private readonly include: IMinimatch[];
-  private readonly exclude: IMinimatch[];
-  private readonly parent?: Project;
+    const config = parseTsConfig(tsConfigPath);
 
-  constructor(
-    public tsConfigPath: string,
-    options: { name?: string; disableTypeCheck?: boolean } = {}
-  ) {
-    this.config = parseTsConfig(tsConfigPath);
+    if (!loadOptions?.skipConfigValidation) {
+      if (config.files) {
+        throw new Error(`${tsConfigPath} must not use "files" key`);
+      }
 
-    const { files, include, exclude = [], extends: extendsPath } = this.config as {
-      files?: string[];
-      include?: string[];
-      exclude?: string[];
-      extends?: string;
-    };
+      if (!config.include) {
+        throw new Error(`${tsConfigPath} must have an "include" key`);
+      }
+    }
 
-    if (files || !include) {
-      throw new Error(
-        `[${tsConfigPath}]: tsconfig.json files in the Kibana repo must use "include" keys and not "files"`
+    const directory = Path.dirname(tsConfigPath);
+    const disableTypeCheck = projectOptions?.disableTypeCheck || false;
+    const name =
+      projectOptions?.name || Path.relative(REPO_ROOT, directory) || Path.basename(directory);
+    const include = config.include ? makeMatchers(directory, config.include) : undefined;
+    const exclude = config.exclude ? makeMatchers(directory, config.exclude) : undefined;
+
+    let baseProject;
+    if (config.extends) {
+      const baseConfigPath = Path.resolve(directory, config.extends);
+
+      // prevent circular deps
+      if (loadOptions.history?.includes(baseConfigPath)) {
+        throw new Error(
+          `circular "extends" are not supported in tsconfig files: ${loadOptions.history} => ${baseConfigPath}`
+        );
+      }
+
+      baseProject = Project.load(
+        baseConfigPath,
+        {},
+        {
+          skipConfigValidation: true,
+          history: [...(loadOptions.history ?? []), tsConfigPath],
+          cache,
+        }
       );
     }
 
-    this.directory = dirname(this.tsConfigPath);
-    this.disableTypeCheck = options.disableTypeCheck || false;
-    this.name = options.name || relative(REPO_ROOT, this.directory) || basename(this.directory);
-    this.include = makeMatchers(this.directory, include);
-    this.exclude = makeMatchers(this.directory, exclude);
-
-    if (extendsPath !== undefined) {
-      const parentConfigPath = resolve(this.directory, extendsPath);
-      this.parent = parentProjectFactory(parentConfigPath);
-    }
+    const project = new Project(
+      tsConfigPath,
+      directory,
+      name,
+      config,
+      disableTypeCheck,
+      baseProject,
+      include,
+      exclude
+    );
+    cache.set(tsConfigPath, project);
+    return project;
   }
 
-  public isAbsolutePathSelected(path: string): boolean {
-    return this.isExcluded(path) ? false : this.isIncluded(path);
+  constructor(
+    public readonly tsConfigPath: string,
+    public readonly directory: string,
+    public readonly name: string,
+    public readonly config: any,
+    public readonly disableTypeCheck: boolean,
+
+    public readonly baseProject?: Project,
+    private readonly include?: IMinimatch[],
+    private readonly exclude?: IMinimatch[]
+  ) {}
+
+  private getInclude(): IMinimatch[] {
+    return this.include ? this.include : this.baseProject?.getInclude() ?? [];
   }
 
-  public isExcluded(path: string): boolean {
-    if (testMatchers(this.exclude, path)) return true;
-    if (this.parent) {
-      return this.parent.isExcluded(path);
-    }
-    return false;
+  private getExclude(): IMinimatch[] {
+    return this.exclude ? this.exclude : this.baseProject?.getExclude() ?? [];
   }
 
-  public isIncluded(path: string): boolean {
-    if (testMatchers(this.include, path)) return true;
-    if (this.parent) {
-      return this.parent.isIncluded(path);
+  public isAbsolutePathSelected(path: string) {
+    return testMatchers(this.getExclude(), path) ? false : testMatchers(this.getInclude(), path);
+  }
+
+  public isCompositeProject(): boolean {
+    const own = this.config.compilerOptions?.composite;
+    return !!(own === undefined ? this.baseProject?.isCompositeProject() : own);
+  }
+
+  public getOutDir(): string | undefined {
+    if (this.config.compilerOptions?.outDir) {
+      return Path.resolve(this.directory, this.config.compilerOptions.outDir);
     }
-    return false;
+    if (this.baseProject) {
+      return this.baseProject.getOutDir();
+    }
+    return undefined;
+  }
+
+  public getRefdPaths(): string[] {
+    if (this.config.references) {
+      return (this.config.references as Array<{ path: string }>).map(({ path }) =>
+        Path.resolve(this.directory, path)
+      );
+    }
+
+    return this.baseProject ? this.baseProject.getRefdPaths() : [];
+  }
+
+  public getProjectsDeep(cache?: Map<string, Project>) {
+    const projects = new Set<Project>();
+    const queue = new Set<string>([this.tsConfigPath]);
+
+    for (const path of queue) {
+      const project = Project.load(path, {}, { skipConfigValidation: true, cache });
+      projects.add(project);
+      for (const refPath of project.getRefdPaths()) {
+        queue.add(refPath);
+      }
+    }
+
+    return new ProjectSet(projects);
+  }
+
+  public getConfigPaths(): string[] {
+    return this.baseProject
+      ? [this.tsConfigPath, ...this.baseProject.getConfigPaths()]
+      : [this.tsConfigPath];
   }
 }

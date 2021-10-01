@@ -10,8 +10,7 @@ import './space_card.scss';
 import { EuiCard, EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
+import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 

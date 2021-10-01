@@ -24,6 +24,7 @@ import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { DataPublicPluginStart } from '../../../../data/public/types';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { LINE_FEED_CHARACTER } from 'src/plugins/data/common/exports/export_csv';
+import { getStubPluginServices } from '../../../../presentation_util/public';
 
 describe('Export CSV action', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -59,6 +60,7 @@ describe('Export CSV action', () => {
       uiActions: {} as any,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       http: coreStart.http,
+      presentationUtil: getStubPluginServices(),
     };
     const input = getSampleDashboardInput({
       panels: {
@@ -98,12 +100,12 @@ describe('Export CSV action', () => {
 
   test('Should download a compatible Embeddable', async () => {
     const action = new ExportCSVAction({ core: coreStart, data: dataMock });
-    const result = ((await action.execute({ embeddable, asString: true })) as unknown) as
+    const result = (await action.execute({ embeddable, asString: true })) as unknown as
       | undefined
       | Record<string, { content: string; type: string }>;
     expect(result).toEqual({
       'Hello Kibana.csv': {
-        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibana,undefined${LINE_FEED_CHARACTER}`,
+        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibana,${LINE_FEED_CHARACTER}`,
         type: 'text/plain;charset=utf-8',
       },
     });
@@ -116,10 +118,10 @@ describe('Export CSV action', () => {
       { id: ' 404' },
       embeddable.getRoot() as IContainer
     );
-    const result = ((await action.execute({
+    const result = (await action.execute({
       embeddable: errorEmbeddable,
       asString: true,
-    })) as unknown) as undefined | Record<string, string>;
+    })) as unknown as undefined | Record<string, string>;
     expect(result).toBeUndefined();
   });
 });

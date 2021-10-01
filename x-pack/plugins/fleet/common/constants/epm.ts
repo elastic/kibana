@@ -9,16 +9,35 @@ export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
 export const MAX_TIME_COMPLETE_INSTALL = 60000;
 
+export const FLEET_SYSTEM_PACKAGE = 'system';
+export const FLEET_ELASTIC_AGENT_PACKAGE = 'elastic_agent';
 export const FLEET_SERVER_PACKAGE = 'fleet_server';
+export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 
-export const requiredPackages = {
-  System: 'system',
-  Endpoint: 'endpoint',
-  ElasticAgent: 'elastic_agent',
-} as const;
+/*
+ Package rules:
+|               | unremovablePackages | defaultPackages | autoUpdatePackages |
+|---------------|:---------------------:|:---------------:|:------------------:|
+| Removable     |         ❌             |        ✔️        |          ✔️         |
+| Auto-installs |         ❌             |        ✔️        |          ❌         |
+| Auto-updates  |         ❌             |        ✔️        |          ✔️         |
 
-// these are currently identical. we can separate if they later diverge
-export const defaultPackages = requiredPackages;
+`endpoint` is a special package. It needs to autoupdate, it needs to _not_ be
+removable, but it doesn't install by default. Following the table, it needs to
+be in `unremovablePackages` and in `autoUpdatePackages`, but not in
+`defaultPackages`.
+*/
+
+export const unremovablePackages = [
+  FLEET_SYSTEM_PACKAGE,
+  FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_SERVER_PACKAGE,
+  FLEET_ENDPOINT_PACKAGE,
+];
+
+export const defaultPackages = unremovablePackages.filter((p) => p !== FLEET_ENDPOINT_PACKAGE);
+
+export const autoUpdatePackages = [FLEET_ENDPOINT_PACKAGE];
 
 export const agentAssetTypes = {
   Input: 'input',
@@ -28,6 +47,9 @@ export const dataTypes = {
   Logs: 'logs',
   Metrics: 'metrics',
 } as const;
+
+// currently identical but may be a subset or otherwise different some day
+export const monitoringTypes = Object.values(dataTypes);
 
 export const installationStatuses = {
   Installed: 'installed',

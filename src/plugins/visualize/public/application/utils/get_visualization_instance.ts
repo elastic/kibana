@@ -18,28 +18,34 @@ import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
 import { createSavedSearchesLoader } from '../../../../discover/public';
+import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
 import { VisualizeServices } from '../types';
+
+function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
+  const originalError = error.original || error;
+  return (
+    originalError instanceof SavedFieldNotFound ||
+    originalError instanceof SavedFieldTypeInvalidForAgg
+  );
+}
 
 const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const {
-    data,
-    createVisEmbeddableFromObject,
-    savedObjects,
-    savedObjectsPublic,
-  } = visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedObjects, savedObjectsPublic } =
+    visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
+    id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
-    id: '',
+    searchSessionId: data.search.session.getSessionId(),
   })) as VisualizeEmbeddableContract;
 
   embeddableHandler.getOutput$().subscribe((output) => {
-    if (output.error) {
+    if (output.error && !isErrorRelatedToRuntimeFields(output.error)) {
       data.search.showError(
-        ((output.error as unknown) as ExpressionValueError['error']).original || output.error
+        (output.error as unknown as ExpressionValueError['error']).original || output.error
       );
     }
   });

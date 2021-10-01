@@ -59,9 +59,9 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should not rerequest when zoom changes do not cause geotile_grid precision to change', async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.2);
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.4);
           const beforeSameZoom = await getRequestTimestamp();
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.8);
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.6);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeSameZoom);
         });
@@ -141,7 +141,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
-          const response = await PageObjects.maps.getResponse();
+          const { rawResponse: response } = await PageObjects.maps.getResponse();
           expect(response.aggregations.gridSplit.buckets.length).to.equal(1);
         });
       });
@@ -152,7 +152,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          const response = await PageObjects.maps.getResponse();
+          const { rawResponse: response } = await PageObjects.maps.getResponse();
           expect(response.aggregations.gridSplit.buckets.length).to.equal(4);
         });
 
@@ -204,7 +204,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
-          const response = await PageObjects.maps.getResponse();
+          const { rawResponse: response } = await PageObjects.maps.getResponse();
           expect(response.aggregations.gridSplit.buckets.length).to.equal(1);
         });
       });
@@ -215,7 +215,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          const response = await PageObjects.maps.getResponse();
+          const { rawResponse: response } = await PageObjects.maps.getResponse();
           expect(response.aggregations.gridSplit.buckets.length).to.equal(4);
         });
 
@@ -244,7 +244,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          const response = await PageObjects.maps.getResponse();
+          const { rawResponse: response } = await PageObjects.maps.getResponse();
           expect(response.aggregations.gridSplit.buckets.length).to.equal(13);
         });
       });

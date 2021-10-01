@@ -9,12 +9,13 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
   >
     No monitoring data found.
   </h1>
-  <main
+  <div
     class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
     <div
       class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+      role="main"
     >
       <span
         data-euiicon-type="monitoringApp"
@@ -86,7 +87,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         </span>
       </button>
     </div>
-  </main>
+  </div>
 </div>
 `;
 
@@ -99,12 +100,13 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
   >
     No monitoring data found.
   </h1>
-  <main
+  <div
     class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
     <div
       class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+      role="main"
     >
       <span
         data-euiicon-type="monitoringApp"
@@ -176,6 +178,6 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         </span>
       </button>
     </div>
-  </main>
+  </div>
 </div>
 `;

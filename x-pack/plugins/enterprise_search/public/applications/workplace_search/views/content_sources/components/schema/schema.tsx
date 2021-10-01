@@ -20,19 +20,18 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { IndexingStatus } from '../../../../../shared/indexing_status';
-import { Loading } from '../../../../../shared/loading';
-import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
+import { SchemaAddFieldModal, SchemaErrorsCallout } from '../../../../../shared/schema';
 import { AppLogic } from '../../../../app_logic';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
+import { NAV } from '../../../../constants';
 import { getReindexJobRoute } from '../../../../routes';
+import { SourceLayout } from '../source_layout';
 
 import {
   SCHEMA_ADD_FIELD_BUTTON,
   SCHEMA_MANAGE_SCHEMA_TITLE,
   SCHEMA_MANAGE_SCHEMA_DESCRIPTION,
   SCHEMA_FILTER_PLACEHOLDER,
-  SCHEMA_UPDATING,
   SCHEMA_SAVE_BUTTON,
   SCHEMA_EMPTY_SCHEMA_TITLE,
   SCHEMA_EMPTY_SCHEMA_DESCRIPTION,
@@ -43,7 +42,6 @@ import { SchemaLogic } from './schema_logic';
 export const Schema: React.FC = () => {
   const {
     initializeSchema,
-    onIndexingComplete,
     addNewField,
     updateFields,
     openAddFieldModal,
@@ -68,38 +66,33 @@ export const Schema: React.FC = () => {
     initializeSchema();
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   const hasSchemaFields = Object.keys(activeSchema).length > 0;
-  const { isActive, hasErrors, percentageComplete, activeReindexJobId } = mostRecentIndexJob;
+  const { hasErrors, activeReindexJobId } = mostRecentIndexJob;
 
   const addFieldButton = (
     <EuiButtonEmpty color="primary" data-test-subj="AddFieldButton" onClick={openAddFieldModal}>
       {SCHEMA_ADD_FIELD_BUTTON}
     </EuiButtonEmpty>
   );
-  const statusPath = isOrganization
-    ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}/status`
-    : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}/status`;
 
   return (
-    <>
+    <SourceLayout
+      pageChrome={[NAV.SCHEMA]}
+      pageViewTelemetry="source_schema"
+      isLoading={dataLoading}
+    >
       <ViewContentHeader
         title={SCHEMA_MANAGE_SCHEMA_TITLE}
         description={SCHEMA_MANAGE_SCHEMA_DESCRIPTION}
       />
       <div>
-        {(isActive || hasErrors) && (
-          <IndexingStatus
-            itemId={sourceId}
-            viewLinkPath={getReindexJobRoute(
+        {hasErrors && (
+          <SchemaErrorsCallout
+            viewErrorsPath={getReindexJobRoute(
               sourceId,
-              mostRecentIndexJob.activeReindexJobId.toString(),
+              activeReindexJobId.toString(),
               isOrganization
             )}
-            statusPath={statusPath}
-            onComplete={onIndexingComplete}
-            {...mostRecentIndexJob}
           />
         )}
         {hasSchemaFields ? (
@@ -118,20 +111,14 @@ export const Schema: React.FC = () => {
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>{addFieldButton}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    {percentageComplete < 100 ? (
-                      <EuiButton isLoading fill>
-                        {SCHEMA_UPDATING}
-                      </EuiButton>
-                    ) : (
-                      <EuiButton
-                        disabled={formUnchanged}
-                        data-test-subj="UpdateTypesButton"
-                        onClick={updateFields}
-                        fill
-                      >
-                        {SCHEMA_SAVE_BUTTON}
-                      </EuiButton>
-                    )}
+                    <EuiButton
+                      disabled={formUnchanged}
+                      data-test-subj="UpdateTypesButton"
+                      onClick={updateFields}
+                      fill
+                    >
+                      {SCHEMA_SAVE_BUTTON}
+                    </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -140,7 +127,7 @@ export const Schema: React.FC = () => {
             <SchemaFieldsTable />
           </>
         ) : (
-          <EuiPanel>
+          <EuiPanel hasShadow={false} color="subdued">
             <EuiEmptyPrompt
               iconType="managementApp"
               title={<h2>{SCHEMA_EMPTY_SCHEMA_TITLE}</h2>}
@@ -157,6 +144,6 @@ export const Schema: React.FC = () => {
           closeAddFieldModal={closeAddFieldModal}
         />
       )}
-    </>
+    </SourceLayout>
   );
 };

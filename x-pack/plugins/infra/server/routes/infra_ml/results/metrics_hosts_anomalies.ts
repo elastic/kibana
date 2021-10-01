@@ -40,6 +40,7 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           pagination: paginationParam,
           metric,
           query,
+          hostName,
         },
       } = request.body;
 
@@ -63,6 +64,12 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           query,
           sort,
           pagination,
+          influencerFilter: hostName
+            ? {
+                fieldName: 'host.name',
+                fieldValue: hostName,
+              }
+            : undefined,
         });
 
         return response.ok({

@@ -22,10 +22,10 @@ const resultFields = {
 };
 
 describe('result settings routes', () => {
-  describe('GET /api/app_search/engines/{name}/result_settings/details', () => {
+  describe('GET /internal/app_search/engines/{name}/result_settings/details', () => {
     const mockRouter = new MockRouter({
       method: 'get',
-      path: '/api/app_search/engines/{engineName}/result_settings/details',
+      path: '/internal/app_search/engines/{engineName}/result_settings/details',
     });
 
     beforeEach(() => {
@@ -46,10 +46,10 @@ describe('result settings routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{name}/result_settings', () => {
+  describe('PUT /internal/app_search/engines/{name}/result_settings', () => {
     const mockRouter = new MockRouter({
       method: 'put',
-      path: '/api/app_search/engines/{engineName}/result_settings',
+      path: '/internal/app_search/engines/{engineName}/result_settings',
     });
 
     beforeEach(() => {
@@ -69,22 +69,6 @@ describe('result settings routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:engineName/result_settings',
-      });
-    });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = {
-          body: {
-            result_fields: resultFields,
-          },
-        };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('missing required fields', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
       });
     });
   });

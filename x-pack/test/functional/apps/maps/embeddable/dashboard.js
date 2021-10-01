@@ -35,6 +35,7 @@ export default function ({ getPageObjects, getService }) {
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
+      await PageObjects.dashboard.waitForRenderComplete();
     });
 
     after(async () => {
@@ -69,7 +70,9 @@ export default function ({ getPageObjects, getService }) {
       await dashboardPanelActions.openInspectorByTitle('join example');
       await retry.try(async () => {
         const joinExampleRequestNames = await inspector.getRequestNames();
-        expect(joinExampleRequestNames).to.equal('geo_shapes*,meta_for_geo_shapes*.shape_name');
+        expect(joinExampleRequestNames).to.equal(
+          'geo_shapes*,meta_for_geo_shapes*.runtime_shape_name'
+        );
       });
       await inspector.close();
 
@@ -80,7 +83,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
-      const response = await PageObjects.maps.getResponseFromDashboardPanel(
+      const { rawResponse: response } = await PageObjects.maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
       );
       expect(response.aggregations.gridSplit.buckets.length).to.equal(6);
@@ -90,16 +93,16 @@ export default function ({ getPageObjects, getService }) {
       await filterBar.selectIndexPattern('logstash-*');
       await filterBar.addFilter('machine.os', 'is', 'win 8');
       await filterBar.selectIndexPattern('meta_for_geo_shapes*');
-      await filterBar.addFilter('shape_name', 'is', 'alpha');
+      await filterBar.addFilter('shape_name', 'is', 'alpha'); // runtime fields do not have autocomplete
 
-      const gridResponse = await PageObjects.maps.getResponseFromDashboardPanel(
+      const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
       );
       expect(gridResponse.aggregations.gridSplit.buckets.length).to.equal(1);
 
-      const joinResponse = await PageObjects.maps.getResponseFromDashboardPanel(
+      const { rawResponse: joinResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
         'join example',
-        'meta_for_geo_shapes*.shape_name'
+        'meta_for_geo_shapes*.runtime_shape_name'
       );
       expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
     });

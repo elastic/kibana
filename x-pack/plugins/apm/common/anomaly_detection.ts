@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ANOMALY_SEVERITY } from '../../ml/common';
+import { ANOMALY_SEVERITY } from './ml_constants';
 import {
   getSeverityType,
   getSeverityColor as mlGetSeverityColor,
@@ -32,6 +32,8 @@ export function getSeverity(score: number | undefined) {
 export function getSeverityColor(score: number) {
   return mlGetSeverityColor(score);
 }
+
+export const ML_TRANSACTION_LATENCY_DETECTOR_INDEX = 0;
 
 export const ML_ERRORS = {
   INVALID_LICENSE: i18n.translate(

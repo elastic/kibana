@@ -96,7 +96,9 @@ const initialInput: DashboardContainerInput = {
 export const DashboardEmbeddableByValue = ({
   DashboardContainerByValueRenderer,
 }: {
-  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
+  DashboardContainerByValueRenderer: ReturnType<
+    DashboardStart['getDashboardContainerByValueRenderer']
+  >;
 }) => {
   const [input, setInput] = useState(initialInput);
 

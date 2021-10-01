@@ -14,7 +14,7 @@ import { relativeDownloadUrlFromArtifact } from '../../../../../fleet/server';
 export class ManifestEntry {
   private artifact: InternalArtifactSchema;
 
-  constructor(artifact: InternalArtifactSchema, private isFleetServerEnabled: boolean = false) {
+  constructor(artifact: InternalArtifactSchema) {
     this.artifact = artifact;
   }
 
@@ -47,14 +47,10 @@ export class ManifestEntry {
   }
 
   public getUrl(): string {
-    if (this.isFleetServerEnabled) {
-      return relativeDownloadUrlFromArtifact({
-        identifier: this.getIdentifier(),
-        decodedSha256: this.getDecodedSha256(),
-      });
-    }
-
-    return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getDecodedSha256()}`;
+    return relativeDownloadUrlFromArtifact({
+      identifier: this.getIdentifier(),
+      decodedSha256: this.getDecodedSha256(),
+    });
   }
 
   public getArtifact(): InternalArtifactSchema {

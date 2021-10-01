@@ -6,11 +6,12 @@
  */
 
 import { get } from 'lodash';
-import { platformService } from '../services';
+import { pluginServices } from '../services';
 import { getDefaultWorkpad } from './defaults';
 
 export const getInitialState = (path) => {
-  const { getHasWriteAccess } = platformService.getService();
+  const platformService = pluginServices.getServices().platform;
+  const { getHasWriteAccess } = platformService;
 
   const state = {
     app: {}, // Kibana stuff in here

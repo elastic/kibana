@@ -11,68 +11,21 @@ import type {
   SignalSearchResponse,
   BulkResponse,
   BulkItem,
-  RuleAlertAttributes,
   SignalHit,
   WrappedSignalHit,
+  AlertAttributes,
 } from '../types';
-import { SavedObject, SavedObjectsFindResponse } from '../../../../../../../../src/core/server';
+import { SavedObject } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
-import { RuleTypeParams } from '../../types';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import { RuleParams } from '../../schemas/rule_schemas';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
-export const sampleRuleAlertParams = (
-  maxSignals?: number | undefined,
-  riskScore?: number | undefined
-): RuleTypeParams => ({
-  author: ['Elastic'],
-  buildingBlockType: 'default',
-  ruleId: 'rule-1',
-  description: 'Detecting root and admin users',
-  eventCategoryOverride: undefined,
-  falsePositives: [],
-  immutable: false,
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  type: 'query',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  severityMapping: [],
-  query: 'user.name: root or user.name: admin',
-  language: 'kuery',
-  license: 'Elastic License',
-  outputIndex: '.siem-signals',
-  references: ['http://google.com'],
-  riskScore: riskScore ? riskScore : 50,
-  riskScoreMapping: [],
-  ruleNameOverride: undefined,
-  maxSignals: maxSignals ? maxSignals : 10000,
-  note: '',
-  anomalyThreshold: undefined,
-  machineLearningJobId: undefined,
-  filters: undefined,
-  savedId: undefined,
-  threshold: undefined,
-  threatFilters: undefined,
-  threatQuery: undefined,
-  threatMapping: undefined,
-  threatIndex: undefined,
-  threatIndicatorPath: undefined,
-  threatLanguage: undefined,
-  timelineId: undefined,
-  timelineTitle: undefined,
-  timestampOverride: undefined,
-  meta: undefined,
-  threat: undefined,
-  version: 1,
-  exceptionsList: getListArrayMock(),
-  concurrentSearches: undefined,
-  itemsPerSearch: undefined,
-});
-
-export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
+export const sampleRuleSO = <T extends RuleParams>(params: T): SavedObject<AlertAttributes<T>> => {
   return {
     id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     type: 'alert',
@@ -90,7 +43,7 @@ export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
         interval: '5m',
       },
       throttle: 'no_actions',
-      params: sampleRuleAlertParams(),
+      params,
     },
     references: [],
   };
@@ -110,21 +63,33 @@ export const expectedRule = (): RulesSchema => {
     output_index: '.siem-signals',
     description: 'Detecting root and admin users',
     from: 'now-6m',
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
     immutable: false,
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     interval: '5m',
     language: 'kuery',
     license: 'Elastic License',
+    meta: {
+      someMeta: 'someField',
+    },
     name: 'rule-name',
     query: 'user.name: root or user.name: admin',
-    references: ['http://google.com'],
+    references: ['http://example.com', 'https://example.com'],
     severity: 'high',
     severity_mapping: [],
     tags: ['some fake tag 1', 'some fake tag 2'],
-    threat: [],
+    threat: getThreatMock(),
     type: 'query',
     to: 'now',
-    note: '',
+    note: '# Investigative notes',
     enabled: true,
     created_by: 'sample user',
     updated_by: 'sample user',
@@ -132,6 +97,8 @@ export const expectedRule = (): RulesSchema => {
     updated_at: '2020-03-27T22:55:59.577Z',
     created_at: '2020-03-27T22:55:59.577Z',
     throttle: 'no_actions',
+    timeline_id: 'some-timeline-id',
+    timeline_title: 'some-timeline-title',
     exceptions_list: getListArrayMock(),
   };
 };
@@ -149,6 +116,7 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 
 export const sampleDocWithSortId = (
   someUuid: string = sampleIdGuid,
+  sortIds: string[] = ['1234567891111', '2233447556677'],
   ip?: string | string[],
   destIp?: string | string[]
 ): SignalSourceHit => ({
@@ -173,13 +141,13 @@ export const sampleDocWithSortId = (
     'source.ip': ip ? (Array.isArray(ip) ? ip : [ip]) : ['127.0.0.1'],
     'destination.ip': destIp ? (Array.isArray(destIp) ? destIp : [destIp]) : ['127.0.0.1'],
   },
-  sort: ['1234567891111'],
+  sort: sortIds,
 });
 
 export const sampleDocNoSortId = (
   someUuid: string = sampleIdGuid,
   ip?: string
-): SignalSourceHit => ({
+): SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -199,6 +167,22 @@ export const sampleDocNoSortId = (
   },
   sort: [],
 });
+
+export const sampleDocNoSortIdWithTimestamp = (
+  someUuid: string = sampleIdGuid,
+  ip?: string
+): SignalSourceHit & {
+  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+} => {
+  const doc = sampleDocNoSortId(someUuid, ip);
+  return {
+    ...doc,
+    _source: {
+      ...doc._source,
+      '@timestamp': new Date().toISOString(),
+    },
+  };
+};
 
 export const sampleDocSeverity = (severity?: unknown, fieldName?: string): SignalSourceHit => {
   const doc = {
@@ -258,12 +242,12 @@ export const sampleWrappedSignalHit = (): WrappedSignalHit => {
   };
 };
 
-export const sampleDocWithAncestors = (): SignalSearchResponse => {
+export const sampleDocWithAncestors = (): SignalSearchResponse & {
+  hits: { hits: Array<ReturnType<typeof sampleDocNoSortId>> };
+} => {
   const sampleDoc = sampleDocNoSortId();
   delete sampleDoc.sort;
-  // @ts-expect-error @elastic/elasticsearch _source is optional
   delete sampleDoc._source.source;
-  // @ts-expect-error @elastic/elasticsearch _source is optional
   sampleDoc._source.signal = {
     parent: {
       id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -359,7 +343,7 @@ export const sampleSignalHit = (): SignalHit => ({
       type: 'query',
       threat: [],
       version: 1,
-      status: 'succeeded',
+      status: RuleExecutionStatus.succeeded,
       status_date: '2020-02-22T16:47:50.047Z',
       last_success_at: '2020-02-22T16:47:50.047Z',
       last_success_message: 'succeeded',
@@ -424,7 +408,7 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
       type: 'query',
       threat: [],
       version: 1,
-      status: 'succeeded',
+      status: RuleExecutionStatus.succeeded,
       status_date: '2020-02-22T16:47:50.047Z',
       last_success_at: '2020-02-22T16:47:50.047Z',
       last_success_message: 'succeeded',
@@ -595,7 +579,9 @@ export const sampleBulkCreateErrorResult = {
 
 export const sampleDocSearchResultsNoSortId = (
   someUuid: string = sampleIdGuid
-): SignalSearchResponse => ({
+): SignalSearchResponse & {
+  hits: { hits: Array<ReturnType<typeof sampleDocNoSortId>> };
+} => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -664,7 +650,8 @@ export const repeatedSearchResultsWithSortId = (
   pageSize: number,
   guids: string[],
   ips?: Array<string | string[]>,
-  destIps?: Array<string | string[]>
+  destIps?: Array<string | string[]>,
+  sortIds?: string[]
 ): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
@@ -680,6 +667,7 @@ export const repeatedSearchResultsWithSortId = (
     hits: Array.from({ length: pageSize }).map((x, index) => ({
       ...sampleDocWithSortId(
         guids[index],
+        sortIds,
         ips ? ips[index] : '127.0.0.1',
         destIps ? destIps[index] : '127.0.0.1'
       ),
@@ -741,7 +729,7 @@ export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () 
   attributes: {
     alertId: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
     statusDate: '2020-03-27T22:55:59.517Z',
-    status: 'succeeded',
+    status: RuleExecutionStatus.succeeded,
     lastFailureAt: null,
     lastSuccessAt: '2020-03-27T22:55:59.517Z',
     lastFailureMessage: null,
@@ -754,17 +742,6 @@ export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () 
   references: [],
   updated_at: '2020-03-27T22:55:59.577Z',
   version: 'WzgyMiwxXQ==',
-});
-
-export const exampleFindRuleStatusResponse: (
-  mockStatuses: Array<SavedObject<IRuleStatusSOAttributes>>
-) => SavedObjectsFindResponse<IRuleStatusSOAttributes> = (
-  mockStatuses = [exampleRuleStatus()]
-) => ({
-  total: 1,
-  per_page: 6,
-  page: 1,
-  saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
 export const mockLogger = loggingSystemMock.createLogger();

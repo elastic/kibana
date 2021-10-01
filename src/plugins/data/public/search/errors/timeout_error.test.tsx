@@ -20,17 +20,6 @@ describe('SearchTimeoutError', () => {
     startMock.application.navigateToApp.mockImplementation(jest.fn());
   });
 
-  it('Should navigate to upgrade', () => {
-    const e = new SearchTimeoutError(new AbortError(), TimeoutErrorMode.UPGRADE);
-    const component = mount(e.getErrorMessage(startMock.application));
-
-    expect(component.find('EuiButton').length).toBe(1);
-    component.find('EuiButton').simulate('click');
-    expect(startMock.application.navigateToUrl).toHaveBeenCalledWith(
-      'https://www.elastic.co/subscriptions'
-    );
-  });
-
   it('Should create contact admin message', () => {
     const e = new SearchTimeoutError(new AbortError(), TimeoutErrorMode.CONTACT);
     const component = mount(e.getErrorMessage(startMock.application));

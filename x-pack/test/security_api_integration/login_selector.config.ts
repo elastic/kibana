@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaAPITestsConfig = await readConfigFile(
@@ -96,11 +96,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `xpack.security.authc.realms.saml.saml2.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
         'xpack.security.authc.realms.saml.saml2.attributes.principal=urn:oid:0.0.7',
       ],
-      serverEnvVars: {
-        // We're going to use the same TGT multiple times and during a short period of time, so we
-        // have to disable replay cache so that ES doesn't complain about that.
-        ES_JAVA_OPTS: `-Djava.security.krb5.conf=${kerberosConfigPath} -Dsun.security.krb5.rcache=none`,
-      },
+
+      // We're going to use the same TGT multiple times and during a short period of time, so we
+      // have to disable replay cache so that ES doesn't complain about that.
+      esJavaOpts: `-Djava.security.krb5.conf=${kerberosConfigPath} -Dsun.security.krb5.rcache=none`,
     },
 
     kbnTestServer: {

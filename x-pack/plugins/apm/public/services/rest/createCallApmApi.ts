@@ -6,29 +6,70 @@
  */
 
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { parseEndpoint } from '../../../common/apm_api/parse_endpoint';
+import * as t from 'io-ts';
+import type {
+  ClientRequestParamsOf,
+  formatRequest as formatRequestType,
+  ReturnOf,
+  RouteRepositoryClient,
+  ServerRouteRepository,
+  ServerRoute,
+} from '@kbn/server-route-repository';
+// @ts-expect-error cannot find module or correspondent type declarations
+// The code and types are at separated folders on @kbn/server-route-repository
+// so in order to do targeted imports they must me imported separately, and
+// an error is expected here
+import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { APMAPI } from '../../../server/routes/create_apm_api';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { Client } from '../../../server/routes/typings';
-
-export type APMClient = Client<APMAPI['_S']>;
-export type AutoAbortedAPMClient = Client<APMAPI['_S'], { abortable: false }>;
+import type {
+  APMServerRouteRepository,
+  APMRouteHandlerResources,
+  APIEndpoint,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../server';
+import { InspectResponse } from '../../../typings/common';
 
 export type APMClientOptions = Omit<
   FetchOptions,
   'query' | 'body' | 'pathname' | 'signal'
 > & {
-  endpoint: string;
   signal: AbortSignal | null;
-  params?: {
-    body?: any;
-    query?: Record<string, any>;
-    path?: Record<string, any>;
-  };
 };
+
+export type APMClient = RouteRepositoryClient<
+  APMServerRouteRepository,
+  APMClientOptions
+>;
+
+export type AutoAbortedAPMClient = RouteRepositoryClient<
+  APMServerRouteRepository,
+  Omit<APMClientOptions, 'signal'>
+>;
+
+export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
+  APMServerRouteRepository,
+  TEndpoint
+> & {
+  _inspect?: InspectResponse;
+};
+
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
+  ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
+
+export type AbstractAPMRepository = ServerRouteRepository<
+  APMRouteHandlerResources,
+  {},
+  Record<
+    string,
+    ServerRoute<string, t.Mixed | undefined, APMRouteHandlerResources, any, {}>
+  >
+>;
+
+export type AbstractAPMClient = RouteRepositoryClient<
+  AbstractAPMRepository,
+  APMClientOptions
+>;
 
 export let callApmApi: APMClient = () => {
   throw new Error(
@@ -37,9 +78,16 @@ export let callApmApi: APMClient = () => {
 };
 
 export function createCallApmApi(core: CoreStart | CoreSetup) {
-  callApmApi = ((options: APMClientOptions) => {
-    const { endpoint, params, ...opts } = options;
-    const { method, pathname } = parseEndpoint(endpoint, params?.path);
+  callApmApi = ((options) => {
+    const { endpoint, ...opts } = options;
+    const { params } = options as unknown as {
+      params?: Partial<Record<string, any>>;
+    };
+
+    const { method, pathname } = formatRequest(
+      endpoint,
+      params?.path
+    ) as ReturnType<typeof formatRequestType>;
 
     return callApi(core, {
       ...opts,
@@ -50,10 +98,3 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
     });
   }) as APMClient;
 }
-
-// infer return type from API
-export type APIReturnType<
-  TPath extends keyof APMAPI['_S']
-> = APMAPI['_S'][TPath] extends { ret: any }
-  ? APMAPI['_S'][TPath]['ret']
-  : unknown;

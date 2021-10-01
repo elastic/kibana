@@ -12,3 +12,10 @@ checks-reporter-with-killswitch "Server Integration Tests" \
     --bail \
     --debug \
     --kibana-install-dir $KIBANA_INSTALL_DIR
+
+# Tests that must be run against source in order to build test plugins
+checks-reporter-with-killswitch "Status Integration Tests" \
+  node scripts/functional_tests \
+    --config test/server_integration/http/platform/config.status.ts \
+    --bail \
+    --debug \

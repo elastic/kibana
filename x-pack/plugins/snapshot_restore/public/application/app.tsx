@@ -10,14 +10,16 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+
 import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common';
 import {
   useAuthorizationContext,
-  SectionError,
+  PageError,
   WithPrivileges,
   NotAuthorizedSection,
 } from '../shared_imports';
-import { SectionLoading } from './components';
+import { PageLoading } from './components';
 import { DEFAULT_SECTION, Section } from './constants';
 import {
   RepositoryAdd,
@@ -42,7 +44,7 @@ export const App: React.FunctionComponent = () => {
   const sectionsRegex = sections.join('|');
 
   return apiError ? (
-    <SectionError
+    <PageError
       title={
         <FormattedMessage
           id="xpack.snapshotRestore.app.checkingPrivilegesErrorMessage"
@@ -55,14 +57,14 @@ export const App: React.FunctionComponent = () => {
     <WithPrivileges privileges={APP_REQUIRED_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
       {({ isLoading, hasPrivileges, privilegesMissing }) =>
         isLoading ? (
-          <SectionLoading>
+          <PageLoading>
             <FormattedMessage
               id="xpack.snapshotRestore.app.checkingPrivilegesDescription"
               defaultMessage="Checking privileges…"
             />
-          </SectionLoading>
+          </PageLoading>
         ) : hasPrivileges ? (
-          <div data-test-subj="snapshotRestoreApp">
+          <div data-test-subj="snapshotRestoreApp" className={APP_WRAPPER_CLASS}>
             <Switch>
               <Route exact path="/add_repository" component={RepositoryAdd} />
               <Route exact path="/edit_repository/:name*" component={RepositoryEdit} />
@@ -84,7 +86,7 @@ export const App: React.FunctionComponent = () => {
             </Switch>
           </div>
         ) : (
-          <EuiPageContent>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
             <NotAuthorizedSection
               title={
                 <FormattedMessage

@@ -25,18 +25,15 @@ export type {
   InvalidateAPIKeysParams,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
+  AuthenticationServiceStart,
 } from './authentication';
 export type { CheckPrivilegesPayload } from './authorization';
-export {
-  LegacyAuditLogger,
-  AuditLogger,
-  AuditEvent,
-  EventCategory,
-  EventType,
-  EventOutcome,
-} from './audit';
+export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
+export { LegacyAuditLogger, AuditLogger, AuditEvent } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
+export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
+export { AuditServiceSetup } from './audit';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,

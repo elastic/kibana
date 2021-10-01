@@ -6,22 +6,6 @@
  * Side Public License, v 1.
  */
 
-export interface AnchorLink {
-  /**
-   * The plugin that contains the API being referenced.
-   */
-  pluginName: string;
-  /**
-   * It's possible the client and the server both emit an API with
-   * the same name so we need scope in here to add uniqueness.
-   */
-  scope: ApiScope;
-  /**
-   * The name of the api.
-   */
-  apiName: string;
-}
-
 /**
  * The kinds of typescript types we want to show in the docs. `Unknown` is used if
  * we aren't accounting for a particular type. See {@link getPropertyTypeKind}
@@ -111,7 +95,7 @@ export interface ApiDeclaration {
    * Used for an anchor link to this Api. Can't use label as there can be two labels with the same
    * text within the Client section and the Server section.
    */
-  id?: string;
+  id: string;
 
   /**
    * The name of the api.
@@ -163,7 +147,7 @@ export interface ApiDeclaration {
   tags?: string[];
 
   /**
-   * Every plugn that exposes functionality from their setup and start contract
+   * Every plugin that exposes functionality from their setup and start contract
    * should have a single exported type for each. These get pulled to the top because
    * they are accessed differently than other exported functionality and types.
    */
@@ -172,12 +156,27 @@ export interface ApiDeclaration {
   /**
    * Used to create links to github to view the code for this API.
    */
-  source: SourceLink;
-}
-
-export interface SourceLink {
   path: string;
-  lineNumber: number;
+
+  /**
+   * Other plugins that reference this API item (along with SourceLink info for each reference).
+   */
+  references?: ApiReference[];
+
+  /**
+   * The id of the plugin this API belongs to.
+   */
+  parentPluginId: string;
+
+  /**
+   * Certain deprecated APIs may specify a removeBy date.
+   */
+  removeBy?: string;
+
+  /**
+   * Is this API deprecated or not?
+   */
+  deprecated?: boolean;
 }
 
 /**
@@ -197,3 +196,38 @@ export enum Lifecycle {
   START = 'start',
   SETUP = 'setup',
 }
+
+// Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
+export interface MissingApiItemMap {
+  [key: string]: { [key: string]: string[] };
+}
+
+export interface ApiReference {
+  plugin: string;
+  path: string;
+}
+
+// A mapping of plugin id to a list of every deprecated API it uses, and where it's referenced.
+export interface ReferencedDeprecationsByPlugin {
+  // Key is the plugin id.
+  [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
+}
+
+// A mapping of deprecated API id to the places that are still referencing it.
+export interface ReferencedDeprecationsByAPI {
+  [key: string]: { deprecatedApi: ApiDeclaration; references: ApiReference[] };
+}
+
+export interface ApiStats {
+  missingComments: ApiDeclaration[];
+  isAnyType: ApiDeclaration[];
+  noReferences: ApiDeclaration[];
+  apiCount: number;
+  missingExports: number;
+  deprecatedAPIsReferencedCount: number;
+}
+
+export type PluginMetaInfo = ApiStats & {
+  owner: { name: string; githubTeam?: string };
+  description?: string;
+};

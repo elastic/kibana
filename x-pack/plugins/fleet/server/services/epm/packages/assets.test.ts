@@ -43,7 +43,7 @@ const tests = [
       name: 'coredns',
       version: '1.0.1',
     },
-    // Non existant dataset
+    // Non existent dataset
     dataset: 'foo',
     filter: (path: string) => {
       return true;

@@ -53,3 +53,14 @@ export const CPU_CHART_TITLE = i18n.translate('xpack.infra.nodeDetails.metrics.f
 export const LOAD_CHART_TITLE = i18n.translate('xpack.infra.nodeDetails.metrics.charts.loadTitle', {
   defaultMessage: 'Load',
 });
+
+export const LOG_RATE_METRIC_NAME = i18n.translate('xpack.infra.nodeDetails.metrics.logRate', {
+  defaultMessage: 'Log Rate',
+});
+
+export const LOG_RATE_CHART_TITLE = i18n.translate(
+  'xpack.infra.nodeDetails.metrics.charts.logRateTitle',
+  {
+    defaultMessage: 'Log Rate',
+  }
+);

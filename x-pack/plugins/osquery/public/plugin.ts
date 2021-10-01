@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
 import {
   AppMountParameters,
   CoreSetup,
@@ -13,39 +12,23 @@ import {
   PluginInitializerContext,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
-  AppStatus,
-  AppUpdater,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,
-  // SetupPlugins,
   StartPlugins,
   AppPluginStartDependencies,
 } from './types';
-import { PLUGIN_NAME } from '../common';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
 import {
-  LazyOsqueryManagedEmptyCreatePolicyExtension,
-  LazyOsqueryManagedEmptyEditPolicyExtension,
+  LazyOsqueryManagedPolicyCreateImportExtension,
+  LazyOsqueryManagedPolicyEditExtension,
+  LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
-// import { getActionType } from './osquery_action_type';
-
-export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreStart['http']) {
-  http.fetch('/api/fleet/epm/packages', { query: { experimental: true } }).then(({ response }) => {
-    const installed = response.find(
-      // @ts-expect-error update types
-      (integration) =>
-        integration?.name === 'osquery_elastic_managed' && integration?.status === 'installed'
-    );
-    updater$.next(() => ({
-      status: installed ? AppStatus.accessible : AppStatus.inaccessible,
-    }));
-  });
-}
+import { getLazyOsqueryAction } from './shared_components';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
-  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private kibanaVersion: string;
   private storage = new Storage(localStorage);
 
@@ -53,11 +36,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
-  public setup(
-    core: CoreSetup
-    // plugins: SetupPlugins
-  ): OsqueryPluginSetup {
-    const config = this.initializerContext.config.get<{ enabled: boolean }>();
+  public setup(core: CoreSetup): OsqueryPluginSetup {
+    const config = this.initializerContext.config.get<{
+      enabled: boolean;
+      actionEnabled: boolean;
+      scheduledQueries: boolean;
+      savedQueries: boolean;
+      packs: boolean;
+    }>();
 
     if (!config.enabled) {
       return {};
@@ -70,7 +56,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       id: 'osquery',
       title: PLUGIN_NAME,
       order: 9030,
-      updater$: this.appUpdater$,
       category: DEFAULT_APP_CATEGORIES.management,
       async mount(params: AppMountParameters) {
         // Get start services as specified in kibana.json
@@ -88,14 +73,18 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    // plugins.triggersActionsUi.actionTypeRegistry.register(getActionType());
-
     // Return methods that should be available to other plugins
     return {};
   }
 
   public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
-    const config = this.initializerContext.config.get<{ enabled: boolean }>();
+    const config = this.initializerContext.config.get<{
+      enabled: boolean;
+      actionEnabled: boolean;
+      scheduledQueries: boolean;
+      savedQueries: boolean;
+      packs: boolean;
+    }>();
 
     if (!config.enabled) {
       return {};
@@ -104,32 +93,33 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
-      toggleOsqueryPlugin(this.appUpdater$, core.http);
-
       registerExtension({
-        package: 'osquery_elastic_managed',
+        package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-create',
-        component: LazyOsqueryManagedEmptyCreatePolicyExtension,
+        Component: LazyOsqueryManagedPolicyCreateImportExtension,
       });
 
       registerExtension({
-        package: 'osquery_elastic_managed',
+        package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-edit',
-        component: LazyOsqueryManagedEmptyEditPolicyExtension,
+        Component: LazyOsqueryManagedPolicyEditExtension,
       });
 
-      // registerExtension({
-      //   package: 'osquery_elastic_managed',
-      //   view: 'package-detail-custom',
-      //   component: LazyOsqueryManagedCustomExtension,
-      // });
-    } else {
-      this.appUpdater$.next(() => ({
-        status: AppStatus.inaccessible,
-      }));
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-detail-custom',
+        Component: LazyOsqueryManagedCustomButtonExtension,
+      });
     }
 
-    return {};
+    return {
+      OsqueryAction: getLazyOsqueryAction({
+        ...core,
+        ...plugins,
+        storage: this.storage,
+        kibanaVersion: this.kibanaVersion,
+      }),
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

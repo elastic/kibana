@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
@@ -43,7 +43,16 @@ export function kibanaOverviewRoute(server) {
       try {
         const [clusterStatus, metrics] = await Promise.all([
           getKibanaClusterStatus(req, kbnIndexPattern, { clusterUuid }),
-          getMetrics(req, kbnIndexPattern, metricSet),
+          getMetrics(req, kbnIndexPattern, metricSet, [
+            {
+              bool: {
+                should: [
+                  { term: { type: 'kibana_stats' } },
+                  { term: { 'metricset.name': 'stats' } },
+                ],
+              },
+            },
+          ]),
         ]);
 
         return {

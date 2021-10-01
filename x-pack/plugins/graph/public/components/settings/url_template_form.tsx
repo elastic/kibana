@@ -216,15 +216,18 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             value={currentTemplate.url}
             onChange={(e) => {
               setValue('url', e.target.value);
-              setAutoformatUrl(false);
+              if (
+                (e.nativeEvent as InputEvent)?.inputType !== 'insertFromPaste' ||
+                !isKibanaUrl(e.target.value)
+              ) {
+                setAutoformatUrl(false);
+              }
             }}
             onPaste={(e) => {
-              e.preventDefault();
               const pastedUrl = e.clipboardData.getData('text/plain');
               if (isKibanaUrl(pastedUrl)) {
                 setAutoformatUrl(true);
               }
-              setValue('url', pastedUrl);
             }}
             isInvalid={urlPlaceholderMissing || (touched.url && !currentTemplate.url)}
           />

@@ -64,6 +64,10 @@ export async function renderTemplates({
     hasServer: !!answers.server,
     hasUi: !!answers.ui,
 
+    ownerName: answers.ownerName,
+    githubTeam: answers.githubTeam,
+    description: answers.description,
+
     camelCase,
     snakeCase,
     upperCamelCase,
@@ -84,7 +88,7 @@ export async function renderTemplates({
         answers.ui ? [] : 'public/**/*',
         answers.ui && !answers.internal ? [] : ['translations/**/*', 'i18nrc.json'],
         answers.server ? [] : 'server/**/*',
-        !answers.internal ? [] : ['eslintrc.js', 'tsconfig.json', 'package.json', '.gitignore']
+        !answers.internal ? [] : ['.eslintrc.js', 'tsconfig.json', 'package.json', '.gitignore']
       )
     ),
 

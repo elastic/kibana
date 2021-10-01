@@ -8,10 +8,11 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiTable } from '@elastic/eui';
+import { EuiTable, EuiTableBody } from '@elastic/eui';
 
 import { ResultSettingsLogic } from '..';
 
+import { ColumnHeaders } from './column_headers';
 import { DisabledFieldsBody } from './disabled_fields_body';
 import { DisabledFieldsHeader } from './disabled_fields_header';
 import { NonTextFieldsBody } from './non_text_fields_body';
@@ -28,23 +29,24 @@ export const ResultSettingsTable: React.FC = () => {
   // to alleviate the issue.
   return (
     <EuiTable className="resultSettingsTable" responsive={false}>
+      <ColumnHeaders />
       {!!Object.keys(textResultFields).length && (
-        <>
+        <EuiTableBody>
           <TextFieldsHeader />
           <TextFieldsBody />
-        </>
+        </EuiTableBody>
       )}
       {!!Object.keys(nonTextResultFields).length && (
-        <>
+        <EuiTableBody className="resultSettingsTable__subHeader">
           <NonTextFieldsHeader />
           <NonTextFieldsBody />
-        </>
+        </EuiTableBody>
       )}
       {!!Object.keys(schemaConflicts).length && (
-        <>
+        <EuiTableBody className="resultSettingsTable__subHeader">
           <DisabledFieldsHeader />
           <DisabledFieldsBody />
-        </>
+        </EuiTableBody>
       )}
     </EuiTable>
   );

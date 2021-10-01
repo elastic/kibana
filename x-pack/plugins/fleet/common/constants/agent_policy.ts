@@ -5,44 +5,9 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../types';
-
-import { defaultPackages } from './epm';
-
 export const AGENT_POLICY_SAVED_OBJECT_TYPE = 'ingest-agent-policies';
 export const AGENT_POLICY_INDEX = '.fleet-policies';
 export const agentPolicyStatuses = {
   Active: 'active',
   Inactive: 'inactive',
 } as const;
-
-export const DEFAULT_AGENT_POLICY: Omit<
-  AgentPolicy,
-  'id' | 'updated_at' | 'updated_by' | 'revision'
-> = {
-  name: 'Default policy',
-  namespace: 'default',
-  description: 'Default agent policy created by Kibana',
-  status: agentPolicyStatuses.Active,
-  package_policies: [],
-  is_default: true,
-  is_managed: false,
-  monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
-};
-
-export const DEFAULT_FLEET_SERVER_AGENT_POLICY: Omit<
-  AgentPolicy,
-  'id' | 'updated_at' | 'updated_by' | 'revision'
-> = {
-  name: 'Default Fleet Server policy',
-  namespace: 'default',
-  description: 'Default Fleet Server agent policy created by Kibana',
-  status: agentPolicyStatuses.Active,
-  package_policies: [],
-  is_default: false,
-  is_default_fleet_server: true,
-  is_managed: false,
-  monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
-};
-
-export const DEFAULT_AGENT_POLICIES_PACKAGES = [defaultPackages.System];

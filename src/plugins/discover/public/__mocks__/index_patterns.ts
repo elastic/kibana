@@ -9,7 +9,7 @@
 import { IndexPatternsService } from '../../../data/common';
 import { indexPatternMock } from './index_pattern';
 
-export const indexPatternsMock = ({
+export const indexPatternsMock = {
   getCache: () => {
     return [indexPatternMock];
   },
@@ -18,4 +18,5 @@ export const indexPatternsMock = ({
       return indexPatternMock;
     }
   },
-} as unknown) as IndexPatternsService;
+  updateSavedObject: jest.fn(),
+} as unknown as jest.Mocked<IndexPatternsService>;

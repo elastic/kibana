@@ -10,7 +10,7 @@ import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../co
 import {
   Collector,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage_collection/server/mocks';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import {
@@ -116,10 +116,15 @@ describe('telemetry_application_usage', () => {
                   minutesOnScreen: 10,
                   numberOfClicks: 10,
                 },
+                type: opts.type,
+                references: [],
+                score: 0,
               },
             ],
             total: 1,
-          } as any;
+            per_page: 10,
+            page: 1,
+          };
         case SAVED_OBJECTS_DAILY_TYPE:
           return {
             saved_objects: [
@@ -131,9 +136,21 @@ describe('telemetry_application_usage', () => {
                   minutesOnScreen: 0.5,
                   numberOfClicks: 1,
                 },
+                type: opts.type,
+                references: [],
+                score: 0,
               },
             ],
             total: 1,
+            per_page: 10,
+            page: 1,
+          };
+        default:
+          return {
+            saved_objects: [],
+            total: 0,
+            per_page: 10,
+            page: 1,
           };
       }
     });

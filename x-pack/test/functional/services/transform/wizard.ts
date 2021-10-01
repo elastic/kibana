@@ -10,9 +10,19 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import type { CanvasElementColorStats } from '../canvas_element';
+
+export type HistogramCharts = Array<{
+  chartAvailable: boolean;
+  id: string;
+  legend?: string;
+  colorStats?: CanvasElementColorStats;
+}>;
+
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const canvasElement = getService('canvasElement');
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -87,28 +97,31 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await testSubjects.missingOrFail('transformPivotPreviewHistogramButton');
     },
 
-    async parseEuiDataGrid(tableSubj: string) {
+    async parseEuiDataGrid(tableSubj: string, maxColumnsToParse: number) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
 
-      // find columns to help determine number of rows
-      const columns = $('.euiDataGridHeaderCell__content')
-        .toArray()
-        .map((cell) => $(cell).text());
-
-      // Get the content of each cell and divide them up into rows
+      // Get the content of each cell and divide them up into rows.
+      // Virtualized cells outside the view area are not present in the DOM until they
+      // are scroilled into view, so we're limiting the number of parsed columns.
+      // To determine row and column of a cell, we're utilizing the screen reader
+      // help text, which enumerates the rows and columns 1-based.
       const cells = $.findTestSubjects('dataGridRowCell')
-        .find('.euiDataGridRowCell__truncate')
         .toArray()
-        .map((cell) =>
-          $(cell)
-            .text()
-            .trim()
-            .replace(/Row: \d+, Column: \d+:$/g, '')
-        );
+        .map((cell) => {
+          const cellText = $(cell).text();
+          const pattern = /^(.*)Row: (\d+); Column: (\d+)$/;
+          const matches = cellText.match(pattern);
+          expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
+          return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };
+        })
+        .filter((cell) => cell?.column <= maxColumnsToParse)
+        .sort(function (a, b) {
+          return a.row - b.row || a.column - b.column;
+        })
+        .map((cell) => cell.text);
 
-      const rows = chunk(cells, columns.length);
-
+      const rows = chunk(cells, maxColumnsToParse);
       return rows;
     },
 
@@ -117,9 +130,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       column: number,
       expectedColumnValues: string[]
     ) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await this.parseEuiDataGrid(tableSubj);
+        // only parse columns up to the one we want to assert
+        const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -138,9 +152,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await this.parseEuiDataGrid(tableSubj);
+        // only parse columns up to the one we want to assert
+        const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -156,9 +171,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
-        const rowsData = await this.parseEuiDataGrid('transformIndexPreview');
+        // only parse the first column as this is sufficient to get assert the row count
+        const rowsData = await this.parseEuiDataGrid('transformIndexPreview', 1);
 
         expect(rowsData).to.length(
           expectedNumberOfRows,
@@ -224,17 +240,24 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       );
     },
 
-    async assertIndexPreviewHistogramCharts(
-      expectedHistogramCharts: Array<{
-        chartAvailable: boolean;
-        id: string;
-        legend?: string;
-        colorStats?: any[];
-      }>
-    ) {
+    async assertIndexPreviewHistogramCharts(expectedHistogramCharts: HistogramCharts) {
+      if (process.env.TEST_CLOUD) {
+        log.warning('Not running color assertions in cloud');
+        return;
+      }
+
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
+        const table = await testSubjects.find(`~transformIndexPreview`);
+        const $ = await table.parseDomContent();
+        const actualColumnLength = $('.euiDataGridHeaderCell__content').toArray().length;
+
+        expect(actualColumnLength).to.eql(
+          expectedHistogramCharts.length,
+          `Number of index preview column charts should be '${expectedHistogramCharts.length}' (got '${actualColumnLength}')`
+        );
+
         for (const expected of expectedHistogramCharts.values()) {
           const id = expected.id;
           await testSubjects.existOrFail(`mlDataGridChart-${id}`);
@@ -244,19 +267,25 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
 
             if (expected.colorStats !== undefined) {
               const sortedExpectedColorStats = [...expected.colorStats].sort((a, b) =>
-                a.key.localeCompare(b.key)
+                a.color.localeCompare(b.color)
               );
 
               const actualColorStats = await canvasElement.getColorStats(
                 `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
                 sortedExpectedColorStats,
                 undefined,
-                4
+                10
               );
 
               expect(actualColorStats.length).to.eql(
                 sortedExpectedColorStats.length,
-                `Expected and actual color stats for column '${expected.id}' should have the same amount of elements. Expected: ${sortedExpectedColorStats.length} (got ${actualColorStats.length})`
+                `Expected and actual color stats for column '${
+                  expected.id
+                }' should have the same amount of elements. Expected: ${
+                  sortedExpectedColorStats.length
+                } '${JSON.stringify(sortedExpectedColorStats)}' (got ${
+                  actualColorStats.length
+                } '${JSON.stringify(actualColorStats)}')`
               );
               expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
                 true,
@@ -361,9 +390,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async assertRuntimeMappingsEditorContent(expectedContent: string[]) {
       await this.assertRuntimeMappingsEditorExists();
 
-      const runtimeMappingsEditorString = await aceEditor.getValue(
-        'transformAdvancedRuntimeMappingsEditor'
-      );
+      const wrapper = await testSubjects.find('transformAdvancedRuntimeMappingsEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const runtimeMappingsEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.
@@ -600,7 +629,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertAdvancedPivotEditorContent(expectedValue: string[]) {
-      const advancedEditorString = await aceEditor.getValue('transformAdvancedPivotEditor');
+      const wrapper = await testSubjects.find('transformAdvancedPivotEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const advancedEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.

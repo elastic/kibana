@@ -24,6 +24,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           >
             <span
               className="euiButtonContent__icon"
+              color="inherit"
               data-euiicon-type="grid"
               size="m"
             />
@@ -51,6 +52,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="arrowLeft"
             size="m"
           />
@@ -89,6 +91,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="arrowRight"
             size="m"
           />
@@ -112,6 +115,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
           >
             <span
               className="euiButtonContent__icon"
+              color="inherit"
               data-euiicon-type="editorCodeBlock"
               size="m"
             />
@@ -152,6 +156,7 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
           >
             <span
               className="euiButtonContent__icon"
+              color="inherit"
               data-euiicon-type="grid"
               size="m"
             />
@@ -179,6 +184,7 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="arrowLeft"
             size="m"
           />
@@ -217,6 +223,7 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="arrowRight"
             size="m"
           />

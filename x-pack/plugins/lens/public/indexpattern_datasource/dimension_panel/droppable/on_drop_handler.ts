@@ -10,6 +10,7 @@ import {
   deleteColumn,
   getColumnOrder,
   reorderByGroups,
+  copyColumn,
 } from '../../operations';
 import { mergeLayer } from '../../state_helpers';
 import { isDraggedField } from '../../utils';
@@ -109,47 +110,23 @@ function onMoveCompatible(
 ) {
   const layer = state.layers[layerId];
   const sourceColumn = layer.columns[droppedItem.columnId];
+  const indexPattern = state.indexPatterns[layer.indexPatternId];
 
-  const newColumns = {
-    ...layer.columns,
-    [columnId]: { ...sourceColumn },
-  };
-  if (shouldDeleteSource) {
-    delete newColumns[droppedItem.columnId];
-  }
+  const modifiedLayer = copyColumn({
+    layer,
+    targetId: columnId,
+    sourceColumnId: droppedItem.columnId,
+    sourceColumn,
+    shouldDeleteSource,
+    indexPattern,
+  });
 
-  const newColumnOrder = [...layer.columnOrder];
-
-  if (shouldDeleteSource) {
-    const sourceIndex = newColumnOrder.findIndex((c) => c === droppedItem.columnId);
-    const targetIndex = newColumnOrder.findIndex((c) => c === columnId);
-
-    if (targetIndex === -1) {
-      // for newly created columns, remove the old entry and add the last one to the end
-      newColumnOrder.splice(sourceIndex, 1);
-      newColumnOrder.push(columnId);
-    } else {
-      // for drop to replace, reuse the same index
-      newColumnOrder[sourceIndex] = columnId;
-    }
-  } else {
-    // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
-    // then reorder based on dimension groups if necessary
-    const insertionIndex = sourceColumn.isBucketed
-      ? newColumnOrder.findIndex((id) => !newColumns[id].isBucketed)
-      : newColumnOrder.length;
-    newColumnOrder.splice(insertionIndex, 0, columnId);
-  }
-
-  const newLayer = {
-    ...layer,
-    columnOrder: newColumnOrder,
-    columns: newColumns,
-  };
-
-  const updatedColumnOrder = getColumnOrder(newLayer);
-
-  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
+  const updatedColumnOrder = reorderByGroups(
+    dimensionGroups,
+    groupId,
+    getColumnOrder(modifiedLayer),
+    columnId
+  );
 
   // Time to replace
   setState(
@@ -158,7 +135,7 @@ function onMoveCompatible(
       layerId,
       newLayer: {
         columnOrder: updatedColumnOrder,
-        columns: newColumns,
+        columns: modifiedLayer.columns,
       },
     })
   );
@@ -238,6 +215,7 @@ function onMoveIncompatible(
     field: sourceField,
     visualizationGroups: dimensionGroups,
     targetGroup: groupId,
+    shouldResetLabel: true,
   });
 
   trackUiEvent('drop_onto_dimension');
@@ -289,6 +267,7 @@ function onSwapIncompatible({
       op: newOperationForSource,
       field: sourceField,
       visualizationGroups: dimensionGroups,
+      shouldResetLabel: true,
     }),
     columnId: droppedItem.columnId,
     indexPattern,
@@ -296,6 +275,7 @@ function onSwapIncompatible({
     field: targetField,
     visualizationGroups: dimensionGroups,
     targetGroup: droppedItem.groupId,
+    shouldResetLabel: true,
   });
 
   trackUiEvent('drop_onto_dimension');
@@ -339,8 +319,8 @@ function onSwapCompatible({
   newColumns[targetId] = sourceColumn;
   newColumns[sourceId] = targetColumn;
 
-  const updatedColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
-  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
+  let updatedColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
+  updatedColumnOrder = reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
   // Time to replace
   setState(

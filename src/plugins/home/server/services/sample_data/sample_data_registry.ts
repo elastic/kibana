@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Joi from 'joi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { SavedObject } from 'src/core/public';
 import {
@@ -22,20 +21,54 @@ import { createListRoute, createInstallRoute } from './routes';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
-
-const flightsSampleDataset = flightsSpecProvider();
-const logsSampleDataset = logsSpecProvider();
-const ecommerceSampleDataset = ecommerceSpecProvider();
+import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
+import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
-  private readonly sampleDatasets: SampleDatasetSchema[] = [
-    flightsSampleDataset,
-    logsSampleDataset,
-    ecommerceSampleDataset,
-  ];
+  private readonly sampleDatasets: SampleDatasetSchema[] = [];
 
-  public setup(core: CoreSetup, usageCollections: UsageCollectionSetup | undefined) {
+  private registerSampleDataSet(
+    specProvider: SampleDatasetProvider,
+    core: CoreSetup,
+    customIntegrations?: CustomIntegrationsPluginSetup
+  ) {
+    let value: SampleDatasetSchema;
+    try {
+      value = sampleDataSchema.validate(specProvider());
+    } catch (error) {
+      throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
+    }
+
+    if (customIntegrations && core) {
+      registerSampleDatasetWithIntegration(customIntegrations, core, value);
+    }
+
+    const defaultIndexSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
+      return savedObjectJson.type === 'index-pattern' && savedObjectJson.id === value.defaultIndex;
+    });
+    if (!defaultIndexSavedObjectJson) {
+      throw new Error(
+        `Unable to register sample dataset spec, defaultIndex: "${value.defaultIndex}" does not exist in savedObjects list.`
+      );
+    }
+
+    const dashboardSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
+      return savedObjectJson.type === 'dashboard' && savedObjectJson.id === value.overviewDashboard;
+    });
+    if (!dashboardSavedObjectJson) {
+      throw new Error(
+        `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObject list.`
+      );
+    }
+    this.sampleDatasets.push(value);
+  }
+
+  public setup(
+    core: CoreSetup,
+    usageCollections: UsageCollectionSetup | undefined,
+    customIntegrations?: CustomIntegrationsPluginSetup
+  ) {
     if (usageCollections) {
       makeSampleDataUsageCollector(usageCollections, this.initContext);
     }
@@ -53,36 +86,11 @@ export class SampleDataRegistry {
     );
     createUninstallRoute(router, this.sampleDatasets, usageTracker);
 
+    this.registerSampleDataSet(flightsSpecProvider, core, customIntegrations);
+    this.registerSampleDataSet(logsSpecProvider, core, customIntegrations);
+    this.registerSampleDataSet(ecommerceSpecProvider, core, customIntegrations);
+
     return {
-      registerSampleDataset: (specProvider: SampleDatasetProvider) => {
-        const { error, value } = Joi.validate(specProvider(), sampleDataSchema);
-
-        if (error) {
-          throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
-        }
-        const defaultIndexSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
-          return (
-            savedObjectJson.type === 'index-pattern' && savedObjectJson.id === value.defaultIndex
-          );
-        });
-        if (!defaultIndexSavedObjectJson) {
-          throw new Error(
-            `Unable to register sample dataset spec, defaultIndex: "${value.defaultIndex}" does not exist in savedObjects list.`
-          );
-        }
-
-        const dashboardSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
-          return (
-            savedObjectJson.type === 'dashboard' && savedObjectJson.id === value.overviewDashboard
-          );
-        });
-        if (!dashboardSavedObjectJson) {
-          throw new Error(
-            `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObject list.`
-          );
-        }
-        this.sampleDatasets.push(value);
-      },
       getSampleDatasets: () => this.sampleDatasets,
 
       addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject[]) => {
@@ -142,12 +150,16 @@ export class SampleDataRegistry {
           reference.type = embeddableType;
           reference.id = embeddableId;
 
+          const referenceName = reference.name.includes(':')
+            ? reference.name.split(':')[1]
+            : reference.name;
+
           const panels = JSON.parse(dashboard.attributes.panelsJSON);
           const panel = panels.find((panelItem: any) => {
-            return panelItem.panelRefName === reference.name;
+            return panelItem.panelRefName === referenceName;
           });
           if (!panel) {
-            throw new Error(`Unable to find panel for reference: ${reference.name}`);
+            throw new Error(`Unable to find panel for reference: ${referenceName}`);
           }
           panel.embeddableConfig = embeddableConfig;
           dashboard.attributes.panelsJSON = JSON.stringify(panels);

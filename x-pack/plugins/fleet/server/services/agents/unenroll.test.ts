@@ -9,92 +9,208 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 import type { SavedObject } from 'kibana/server';
 
 import type { AgentPolicy } from '../../types';
-import { AgentUnenrollmentError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { unenrollAgent, unenrollAgents } from './unenroll';
 
-const agentInManagedDoc = {
-  _id: 'agent-in-managed-policy',
-  _source: { policy_id: 'managed-agent-policy' },
+const agentInHostedDoc = {
+  _id: 'agent-in-hosted-policy',
+  _source: { policy_id: 'hosted-agent-policy' },
 };
-const agentInUnmanagedDoc = {
-  _id: 'agent-in-unmanaged-policy',
-  _source: { policy_id: 'unmanaged-agent-policy' },
+const agentInRegularDoc = {
+  _id: 'agent-in-regular-policy',
+  _source: { policy_id: 'regular-agent-policy' },
 };
-const agentInUnmanagedDoc2 = {
-  _id: 'agent-in-unmanaged-policy2',
-  _source: { policy_id: 'unmanaged-agent-policy' },
+const agentInRegularDoc2 = {
+  _id: 'agent-in-regular-policy2',
+  _source: { policy_id: 'regular-agent-policy' },
 };
-const unmanagedAgentPolicySO = {
-  id: 'unmanaged-agent-policy',
+const regularAgentPolicySO = {
+  id: 'regular-agent-policy',
   attributes: { is_managed: false },
 } as SavedObject<AgentPolicy>;
-const managedAgentPolicySO = {
-  id: 'managed-agent-policy',
+const hostedAgentPolicySO = {
+  id: 'hosted-agent-policy',
   attributes: { is_managed: true },
 } as SavedObject<AgentPolicy>;
 
 describe('unenrollAgent (singular)', () => {
-  it('can unenroll from unmanaged policy', async () => {
+  it('can unenroll from regular agent policy', async () => {
     const { soClient, esClient } = createClientMock();
-    await unenrollAgent(soClient, esClient, agentInUnmanagedDoc._id);
+    await unenrollAgent(soClient, esClient, agentInRegularDoc._id);
 
     // calls ES update with correct values
     expect(esClient.update).toBeCalledTimes(1);
     const calledWith = esClient.update.mock.calls[0];
-    expect(calledWith[0]?.id).toBe(agentInUnmanagedDoc._id);
+    expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
     expect(calledWith[0]?.body).toHaveProperty('doc.unenrollment_started_at');
   });
 
-  it('cannot unenroll from managed policy', async () => {
+  it('cannot unenroll from hosted agent policy by default', async () => {
     const { soClient, esClient } = createClientMock();
-    await expect(unenrollAgent(soClient, esClient, agentInManagedDoc._id)).rejects.toThrowError(
-      AgentUnenrollmentError
+    await expect(unenrollAgent(soClient, esClient, agentInHostedDoc._id)).rejects.toThrowError(
+      HostedAgentPolicyRestrictionRelatedError
     );
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
   });
+
+  it('cannot unenroll from hosted agent policy with revoke=true', async () => {
+    const { soClient, esClient } = createClientMock();
+    await expect(
+      unenrollAgent(soClient, esClient, agentInHostedDoc._id, { revoke: true })
+    ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+    // does not call ES update
+    expect(esClient.update).toBeCalledTimes(0);
+  });
+
+  it('can unenroll from hosted agent policy with force=true', async () => {
+    const { soClient, esClient } = createClientMock();
+    await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true });
+    // calls ES update with correct values
+    expect(esClient.update).toBeCalledTimes(1);
+    const calledWith = esClient.update.mock.calls[0];
+    expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
+    expect(calledWith[0]?.body).toHaveProperty('doc.unenrollment_started_at');
+  });
+
+  it('can unenroll from hosted agent policy with force=true and revoke=true', async () => {
+    const { soClient, esClient } = createClientMock();
+    await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true, revoke: true });
+    // calls ES update with correct values
+    expect(esClient.update).toBeCalledTimes(1);
+    const calledWith = esClient.update.mock.calls[0];
+    expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
+    expect(calledWith[0]?.body).toHaveProperty('doc.unenrolled_at');
+  });
 });
 
 describe('unenrollAgents (plural)', () => {
-  it('can unenroll from an unmanaged policy', async () => {
+  it('can unenroll from an regular agent policy', async () => {
     const { soClient, esClient } = createClientMock();
-    const idsToUnenroll = [agentInUnmanagedDoc._id, agentInUnmanagedDoc2._id];
+    const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = calledWith?.body
-      .filter((i: any) => i.update !== undefined)
+      ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
-    expect(ids).toHaveLength(2);
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
     expect(ids).toEqual(idsToUnenroll);
-    for (const doc of docs) {
+    for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrollment_started_at');
     }
   });
-  it('cannot unenroll from a managed policy', async () => {
+  it('cannot unenroll from a hosted agent policy by default', async () => {
     const { soClient, esClient } = createClientMock();
 
-    const idsToUnenroll = [
-      agentInUnmanagedDoc._id,
-      agentInManagedDoc._id,
-      agentInUnmanagedDoc2._id,
-    ];
+    const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
 
     // calls ES update with correct values
-    const onlyUnmanaged = [agentInUnmanagedDoc._id, agentInUnmanagedDoc2._id];
+    const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
     const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = calledWith?.body
-      .filter((i: any) => i.update !== undefined)
+      ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
-    expect(ids).toHaveLength(onlyUnmanaged.length);
-    expect(ids).toEqual(onlyUnmanaged);
-    for (const doc of docs) {
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
+    expect(ids).toEqual(onlyRegular);
+    for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrollment_started_at');
+    }
+  });
+
+  it('cannot unenroll from a hosted agent policy with revoke=true', async () => {
+    const { soClient, esClient } = createClientMock();
+
+    const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
+
+    const unenrolledResponse = await unenrollAgents(soClient, esClient, {
+      agentIds: idsToUnenroll,
+      revoke: true,
+    });
+
+    expect(unenrolledResponse.items).toMatchObject([
+      {
+        id: 'agent-in-regular-policy',
+        success: true,
+      },
+      {
+        id: 'agent-in-hosted-policy',
+        success: false,
+      },
+      {
+        id: 'agent-in-regular-policy2',
+        success: true,
+      },
+    ]);
+
+    // calls ES update with correct values
+    const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
+    const calledWith = esClient.bulk.mock.calls[0][0];
+    const ids = calledWith?.body
+      ?.filter((i: any) => i.update !== undefined)
+      .map((i: any) => i.update._id);
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
+    expect(ids).toEqual(onlyRegular);
+    for (const doc of docs!) {
+      expect(doc).toHaveProperty('unenrolled_at');
+    }
+  });
+
+  it('can unenroll from hosted agent policy with force=true', async () => {
+    const { soClient, esClient } = createClientMock();
+    const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
+    await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll, force: true });
+
+    // calls ES update with correct values
+    const calledWith = esClient.bulk.mock.calls[1][0];
+    const ids = calledWith?.body
+      ?.filter((i: any) => i.update !== undefined)
+      .map((i: any) => i.update._id);
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
+    expect(ids).toEqual(idsToUnenroll);
+    for (const doc of docs!) {
+      expect(doc).toHaveProperty('unenrollment_started_at');
+    }
+  });
+
+  it('can unenroll from hosted agent policy with force=true and revoke=true', async () => {
+    const { soClient, esClient } = createClientMock();
+
+    const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
+
+    const unenrolledResponse = await unenrollAgents(soClient, esClient, {
+      agentIds: idsToUnenroll,
+      revoke: true,
+      force: true,
+    });
+
+    expect(unenrolledResponse.items).toMatchObject([
+      {
+        id: 'agent-in-regular-policy',
+        success: true,
+      },
+      {
+        id: 'agent-in-hosted-policy',
+        success: true,
+      },
+      {
+        id: 'agent-in-regular-policy2',
+        success: true,
+      },
+    ]);
+
+    // calls ES update with correct values
+    const calledWith = esClient.bulk.mock.calls[0][0];
+    const ids = calledWith?.body
+      ?.filter((i: any) => i.update !== undefined)
+      .map((i: any) => i.update._id);
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
+    expect(ids).toEqual(idsToUnenroll);
+    for (const doc of docs!) {
+      expect(doc).toHaveProperty('unenrolled_at');
     }
   });
 });
@@ -116,10 +232,10 @@ function createClientMock() {
 
   soClientMock.get.mockImplementation(async (_, id) => {
     switch (id) {
-      case unmanagedAgentPolicySO.id:
-        return unmanagedAgentPolicySO;
-      case managedAgentPolicySO.id:
-        return managedAgentPolicySO;
+      case regularAgentPolicySO.id:
+        return regularAgentPolicySO;
+      case hostedAgentPolicySO.id:
+        return hostedAgentPolicySO;
       default:
         throw new Error('not found');
     }
@@ -135,12 +251,12 @@ function createClientMock() {
   // @ts-expect-error
   esClientMock.get.mockImplementation(async ({ id }) => {
     switch (id) {
-      case agentInManagedDoc._id:
-        return { body: agentInManagedDoc };
-      case agentInUnmanagedDoc2._id:
-        return { body: agentInUnmanagedDoc2 };
-      case agentInUnmanagedDoc._id:
-        return { body: agentInUnmanagedDoc };
+      case agentInHostedDoc._id:
+        return { body: agentInHostedDoc };
+      case agentInRegularDoc2._id:
+        return { body: agentInRegularDoc2 };
+      case agentInRegularDoc._id:
+        return { body: agentInRegularDoc };
       default:
         throw new Error('not found');
     }
@@ -155,12 +271,12 @@ function createClientMock() {
     // @ts-expect-error
     const docs = params?.body.docs.map(({ _id }) => {
       switch (_id) {
-        case agentInManagedDoc._id:
-          return agentInManagedDoc;
-        case agentInUnmanagedDoc2._id:
-          return agentInUnmanagedDoc2;
-        case agentInUnmanagedDoc._id:
-          return agentInUnmanagedDoc;
+        case agentInHostedDoc._id:
+          return agentInHostedDoc;
+        case agentInRegularDoc2._id:
+          return agentInRegularDoc2;
+        case agentInRegularDoc._id:
+          return agentInRegularDoc;
         default:
           throw new Error('not found');
       }

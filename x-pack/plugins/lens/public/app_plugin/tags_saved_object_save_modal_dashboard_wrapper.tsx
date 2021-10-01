@@ -9,7 +9,8 @@ import React, { FC, useState, useMemo, useCallback } from 'react';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import {
   SaveModalDashboardProps,
-  SavedObjectSaveModalDashboard,
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
 } from '../../../../../src/plugins/presentation_util/public';
 import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
@@ -29,43 +30,41 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
   onSave: (props: DashboardSaveProps) => void;
 };
 
-export const TagEnhancedSavedObjectSaveModalDashboard: FC<TagEnhancedSavedObjectSaveModalDashboardProps> = ({
-  initialTags,
-  onSave,
-  savedObjectsTagging,
-  ...otherProps
-}) => {
-  const [selectedTags, setSelectedTags] = useState(initialTags);
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
-  const tagSelectorOption = useMemo(
-    () =>
-      savedObjectsTagging ? (
-        <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-          initialSelection={initialTags}
-          onTagsSelected={setSelectedTags}
-        />
-      ) : undefined,
-    [savedObjectsTagging, initialTags]
-  );
+export const TagEnhancedSavedObjectSaveModalDashboard: FC<TagEnhancedSavedObjectSaveModalDashboardProps> =
+  ({ initialTags, onSave, savedObjectsTagging, ...otherProps }) => {
+    const [selectedTags, setSelectedTags] = useState(initialTags);
 
-  const tagEnhancedOptions = <>{tagSelectorOption}</>;
+    const tagSelectorOption = useMemo(
+      () =>
+        savedObjectsTagging ? (
+          <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+            initialSelection={initialTags}
+            onTagsSelected={setSelectedTags}
+          />
+        ) : undefined,
+      [savedObjectsTagging, initialTags]
+    );
 
-  const tagEnhancedOnSave: SaveModalDashboardProps['onSave'] = useCallback(
-    (saveOptions) => {
-      onSave({
-        ...saveOptions,
-        returnToOrigin: false,
-        newTags: selectedTags,
-      });
-    },
-    [onSave, selectedTags]
-  );
+    const tagEnhancedOptions = <>{tagSelectorOption}</>;
 
-  return (
-    <SavedObjectSaveModalDashboard
-      {...otherProps}
-      onSave={tagEnhancedOnSave}
-      tagOptions={tagEnhancedOptions}
-    />
-  );
-};
+    const tagEnhancedOnSave: SaveModalDashboardProps['onSave'] = useCallback(
+      (saveOptions) => {
+        onSave({
+          ...saveOptions,
+          returnToOrigin: false,
+          newTags: selectedTags,
+        });
+      },
+      [onSave, selectedTags]
+    );
+
+    return (
+      <SavedObjectSaveModalDashboard
+        {...otherProps}
+        onSave={tagEnhancedOnSave}
+        tagOptions={tagEnhancedOptions}
+      />
+    );
+  };

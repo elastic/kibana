@@ -19,12 +19,15 @@ import {
   registerDeleteRoute,
 } from './routes/api';
 
+import { handleEsError } from './shared_imports';
+
 export interface RemoteClustersPluginSetup {
   isUiEnabled: boolean;
 }
 
 export class RemoteClustersServerPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, any, any> {
+  implements Plugin<RemoteClustersPluginSetup, void, any, any>
+{
   licenseStatus: LicenseStatus;
   log: Logger;
   config: ConfigType;
@@ -43,6 +46,9 @@ export class RemoteClustersServerPlugin
       getLicenseStatus: () => this.licenseStatus,
       config: {
         isCloudEnabled: Boolean(cloud?.isCloudEnabled),
+      },
+      lib: {
+        handleEsError,
       },
     };
 

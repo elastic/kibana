@@ -7,12 +7,14 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues } from '../../../../../__mocks__';
+import { setMockValues } from '../../../../../__mocks__/kea_logic';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
+
+import { EuiText } from '@elastic/eui';
 
 import { ExampleResultDetailCard } from './example_result_detail_card';
 
@@ -35,5 +37,19 @@ describe('ExampleResultDetailCard', () => {
     const wrapper = shallow(<ExampleResultDetailCard />);
 
     expect(wrapper.find('[data-test-subj="DefaultUrlLabel"]')).toHaveLength(1);
+  });
+
+  it('shows formatted value when date can be parsed', () => {
+    const date = '2021-06-28';
+    setMockValues({
+      ...exampleResult,
+      searchResultConfig: { detailFields: [{ fieldName: 'date', label: 'Date' }] },
+      exampleDocuments: [{ date }],
+    });
+    const wrapper = shallow(<ExampleResultDetailCard />);
+
+    expect(wrapper.find(EuiText).children().text()).toContain(
+      new Date(Date.parse(date)).toLocaleString()
+    );
   });
 });

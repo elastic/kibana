@@ -28,11 +28,7 @@ export async function runFpm(
   const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(linux, ...paths);
 
   const pickLicense = () => {
-    if (build.isOss()) {
-      return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
-    } else {
-      return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
-    }
+    return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
   };
 
   const envFolder = type === 'rpm' ? 'sysconfig' : 'default';
@@ -57,7 +53,7 @@ export async function runFpm(
 
     // general info about the package
     '--name',
-    build.isOss() ? 'kibana-oss' : 'kibana',
+    'kibana',
     '--description',
     'Explore and visualize your Elasticsearch data',
     '--version',
@@ -70,10 +66,6 @@ export async function runFpm(
     'Kibana Team <info@elastic.co>',
     '--license',
     pickLicense(),
-
-    // prevent installing kibana if installing kibana-oss and vice versa
-    '--conflicts',
-    build.isOss() ? 'kibana' : 'kibana-oss',
 
     // define install/uninstall scripts
     '--after-install',
@@ -131,6 +123,7 @@ export async function runFpm(
     `${resolveWithTrailingSlash(fromBuild('.'))}=/usr/share/kibana/`,
 
     // copy the config directory to /etc/kibana
+    `${config.resolveFromRepo('build/os_packages/config/kibana.yml')}=/etc/kibana/kibana.yml`,
     `${resolveWithTrailingSlash(fromBuild('config'))}=/etc/kibana/`,
 
     // copy the data directory at /var/lib/kibana

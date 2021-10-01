@@ -30,6 +30,7 @@ describe('EventLogService', () => {
         logEntries,
         indexEntries,
       },
+      kibanaVersion: '1.0.1',
     });
   }
 
@@ -75,6 +76,7 @@ describe('EventLogService', () => {
         logEntries: true,
         indexEntries: true,
       },
+      kibanaVersion: '1.0.1',
     };
 
     const service = new EventLogService(params);
@@ -113,6 +115,7 @@ describe('EventLogService', () => {
         logEntries: true,
         indexEntries: true,
       },
+      kibanaVersion: '1.0.1',
     };
     const service = new EventLogService(params);
     const eventLogger = service.getLogger({});
@@ -131,6 +134,7 @@ describe('EventLogService', () => {
           logEntries: true,
           indexEntries: true,
         },
+        kibanaVersion: '1.0.1',
       };
       const service = new EventLogService(params);
       const provider = jest.fn();

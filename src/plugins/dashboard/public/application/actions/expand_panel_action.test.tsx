@@ -12,6 +12,8 @@ import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helper
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { isErrorEmbeddable } from '../../services/embeddable';
+import { getStubPluginServices } from '../../../../presentation_util/public';
+
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
@@ -45,6 +47,7 @@ beforeEach(async () => {
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreMock.createStart().http,
+    presentationUtil: getStubPluginServices(),
   };
   const input = getSampleDashboardInput({
     panels: {

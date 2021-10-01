@@ -5,70 +5,90 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiSpacer,
+  EuiSteps,
   EuiText,
+  EuiPageHeader,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiLink,
+  EuiPageBody,
+  EuiPageContent,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useAppContext } from '../../app_context';
-import { LoadingErrorBanner } from '../error_banner';
-import { UpgradeAssistantTabProps } from '../types';
-import { Steps } from './steps';
+import { getReviewLogsStep } from './review_logs_step';
+import { getFixDeprecationLogsStep } from './fix_deprecation_logs_step';
+import { getUpgradeStep } from './upgrade_step';
 
-export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) => {
-  const { kibanaVersionInfo } = useAppContext();
+export const Overview: FunctionComponent = () => {
+  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
+  useEffect(() => {
+    async function sendTelemetryData() {
+      await api.sendPageTelemetryData({
+        overview: true,
+      });
+    }
+
+    sendTelemetryData();
+  }, [api]);
+
+  useEffect(() => {
+    breadcrumbs.setBreadcrumbs('overview');
+  }, [breadcrumbs]);
+
   return (
-    <>
-      <EuiSpacer />
+    <EuiPageBody restrictWidth={true}>
+      <EuiPageContent horizontalPosition="center" color="transparent" paddingSize="none">
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
+            defaultMessage: 'Upgrade Assistant',
+          })}
+          description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
+            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
+          })}
+          rightSideItems={[
+            <EuiButtonEmpty
+              href={docLinks.links.upgradeAssistant}
+              target="_blank"
+              iconType="help"
+              data-test-subj="documentationLink"
+            >
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.documentationLinkText"
+                defaultMessage="Documentation"
+              />
+            </EuiButtonEmpty>,
+          ]}
+        >
+          <EuiText data-test-subj="whatsNewLink">
+            <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.whatsNewLink"
+                defaultMessage="What's new in version {nextMajor}.0?"
+                values={{ nextMajor }}
+              />
+            </EuiLink>
+          </EuiText>
+        </EuiPageHeader>
 
-      <EuiText data-test-subj="upgradeAssistantOverviewTabDetail" grow={false}>
-        <p>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.overviewTab.tabDetail"
-            defaultMessage="This assistant helps you prepare your cluster and indices for Elasticsearch
-           {nextEsVersion} For other issues that need your attention, see the Elasticsearch logs."
-            values={{
-              nextEsVersion: `${nextMajor}.x`,
-            }}
-          />
-        </p>
-      </EuiText>
+        <EuiSpacer size="l" />
 
-      <EuiSpacer />
-
-      {props.alertBanner && (
-        <>
-          {props.alertBanner}
-
-          <EuiSpacer />
-        </>
-      )}
-
-      <EuiPageContent>
-        <EuiPageContentBody>
-          {props.isLoading && (
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-
-          {props.checkupData && <Steps {...props} />}
-
-          {props.loadingError && <LoadingErrorBanner loadingError={props.loadingError} />}
-        </EuiPageContentBody>
+        <EuiSteps
+          steps={[
+            getReviewLogsStep({ nextMajor }),
+            getFixDeprecationLogsStep(),
+            getUpgradeStep({ docLinks, nextMajor }),
+          ]}
+        />
       </EuiPageContent>
-    </>
+    </EuiPageBody>
   );
 };

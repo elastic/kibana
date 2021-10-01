@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { APMRequestHandlerContext } from '../../routes/typings';
+import { uniq } from 'lodash';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
-export function getApmIndexPatternTitle(context: APMRequestHandlerContext) {
-  return context.config['apm_oss.indexPattern'];
+export function getApmIndexPatternTitle(apmIndicesConfig: ApmIndicesConfig) {
+  return uniq([
+    apmIndicesConfig['apm_oss.transactionIndices'],
+    apmIndicesConfig['apm_oss.spanIndices'],
+    apmIndicesConfig['apm_oss.errorIndices'],
+    apmIndicesConfig['apm_oss.metricsIndices'],
+  ]).join(',');
 }

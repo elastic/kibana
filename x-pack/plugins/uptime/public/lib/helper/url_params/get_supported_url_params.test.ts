@@ -58,11 +58,13 @@ describe('getSupportedUrlParams', () => {
       autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,
+      excludedFilters: '',
       filters: FILTERS,
       focusConnectorField: false,
       pagination: undefined,
       search: SEARCH,
       statusFilter: STATUS_FILTER,
+      query: '',
     });
   });
 

@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
 import { Table, renderFieldName } from './table';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
-} as IIndexPattern;
+} as IndexPattern;
 
 const items: IndexedFieldItem[] = [
   {
@@ -25,8 +25,8 @@ const items: IndexedFieldItem[] = [
     type: 'name',
     kbnType: 'string',
     excluded: false,
-    format: '',
     isMapped: true,
+    hasRuntime: false,
   },
   {
     name: 'timestamp',
@@ -35,8 +35,8 @@ const items: IndexedFieldItem[] = [
     kbnType: 'date',
     info: [],
     excluded: false,
-    format: 'YYYY-MM-DD',
     isMapped: true,
+    hasRuntime: false,
   },
   {
     name: 'conflictingField',
@@ -45,8 +45,8 @@ const items: IndexedFieldItem[] = [
     kbnType: 'conflict',
     info: [],
     excluded: false,
-    format: '',
     isMapped: true,
+    hasRuntime: false,
   },
   {
     name: 'customer',
@@ -56,6 +56,7 @@ const items: IndexedFieldItem[] = [
     info: [],
     excluded: false,
     isMapped: false,
+    hasRuntime: true,
   },
 ];
 
@@ -121,6 +122,7 @@ describe('Table', () => {
       kbnType: 'string',
       type: 'keyword',
       isMapped: true,
+      hasRuntime: false,
     };
 
     expect(renderFieldName(mappedField)).toMatchSnapshot();
@@ -132,6 +134,7 @@ describe('Table', () => {
       kbnType: 'string',
       type: 'keyword',
       isMapped: false,
+      hasRuntime: true,
     };
 
     expect(renderFieldName(runtimeField)).toMatchSnapshot();

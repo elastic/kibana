@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
-import { esTestConfig, kbnTestConfig } from '@kbn/test';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { format as formatUrl } from 'url';
-import { pageObjects } from '../functional/page_objects'; // Reporting APIs depend on UI functionality
-import { services } from './services';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
+  const apiConfig = await readConfigFile(require.resolve('./reporting_and_security.config'));
 
   return {
-    apps: { reporting: { pathname: '/app/management/insightsAndAlerting/reporting' } },
-    servers: apiConfig.get('servers'),
-    junit: { reportName: 'X-Pack Reporting Without Security API Integration Tests' },
+    ...apiConfig.getAll(),
+    junit: { reportName: 'X-Pack Reporting API Integration Tests Without Security Enabled' },
     testFiles: [require.resolve('./reporting_without_security')],
-    services,
-    pageObjects,
-    esArchiver: apiConfig.get('esArchiver'),
     esTestCluster: {
       ...apiConfig.get('esTestCluster'),
       serverArgs: [
@@ -33,15 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
-      serverArgs: [
-        `--elasticsearch.hosts=${formatUrl(esTestConfig.getUrlParts())}`,
-        `--logging.json=false`,
-        `--server.maxPayloadBytes=1679958`,
-        `--server.port=${kbnTestConfig.getPort()}`,
-        `--xpack.reporting.capture.maxAttempts=1`,
-        `--xpack.reporting.csv.maxSizeBytes=2850`,
-        `--xpack.security.enabled=false`,
-      ],
+      serverArgs: [...apiConfig.get('kbnTestServer.serverArgs'), `--xpack.security.enabled=false`],
     },
   };
 }

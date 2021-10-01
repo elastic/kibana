@@ -65,59 +65,6 @@ describe('#get', () => {
 
     expect(configAdapter.get('logging')).toMatchSnapshot();
   });
-
-  test('correctly handles server config.', () => {
-    const configAdapter = new LegacyObjectToConfigAdapter({
-      server: {
-        name: 'kibana-hostname',
-        autoListen: true,
-        basePath: '/abc',
-        cors: false,
-        customResponseHeaders: { 'custom-header': 'custom-value' },
-        host: 'host',
-        maxPayloadBytes: 1000,
-        keepaliveTimeout: 5000,
-        socketTimeout: 2000,
-        port: 1234,
-        publicBaseUrl: 'https://myhost.com/abc',
-        rewriteBasePath: false,
-        ssl: { enabled: true, keyPassphrase: 'some-phrase', someNewValue: 'new' },
-        compression: { enabled: true },
-        someNotSupportedValue: 'val',
-        xsrf: {
-          disableProtection: false,
-          allowlist: [],
-        },
-      },
-    });
-
-    const configAdapterWithDisabledSSL = new LegacyObjectToConfigAdapter({
-      server: {
-        name: 'kibana-hostname',
-        autoListen: true,
-        basePath: '/abc',
-        cors: false,
-        customResponseHeaders: { 'custom-header': 'custom-value' },
-        host: 'host',
-        maxPayloadBytes: 1000,
-        keepaliveTimeout: 5000,
-        socketTimeout: 2000,
-        port: 1234,
-        publicBaseUrl: 'http://myhost.com/abc',
-        rewriteBasePath: false,
-        ssl: { enabled: false, certificate: 'cert', key: 'key' },
-        compression: { enabled: true },
-        someNotSupportedValue: 'val',
-        xsrf: {
-          disableProtection: false,
-          allowlist: [],
-        },
-      },
-    });
-
-    expect(configAdapter.get('server')).toMatchSnapshot('default');
-    expect(configAdapterWithDisabledSSL.get('server')).toMatchSnapshot('disabled ssl');
-  });
 });
 
 describe('#set', () => {

@@ -10,9 +10,15 @@ import { defaults } from 'lodash';
 
 import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { SavedObjectsErrorHelpers } from '../../saved_objects/';
-import { Logger } from '../../logging';
+import { Logger, LogMeta } from '../../logging';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
+
+interface ConfigLogMeta extends LogMeta {
+  kibana: {
+    config: { prevVersion: string; newVersion: string };
+  };
+}
 
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
@@ -60,9 +66,13 @@ export async function createOrUpgradeSavedConfig(
   }
 
   if (upgradeableConfig) {
-    log.debug(`Upgrade config from ${upgradeableConfig.id} to ${version}`, {
-      prevVersion: upgradeableConfig.id,
-      newVersion: version,
+    log.debug<ConfigLogMeta>(`Upgrade config from ${upgradeableConfig.id} to ${version}`, {
+      kibana: {
+        config: {
+          prevVersion: upgradeableConfig.id,
+          newVersion: version,
+        },
+      },
     });
   }
 }

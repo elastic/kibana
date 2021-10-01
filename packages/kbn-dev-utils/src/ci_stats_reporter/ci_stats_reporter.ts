@@ -10,7 +10,8 @@ import { inspect } from 'util';
 import Os from 'os';
 import Fs from 'fs';
 import Path from 'path';
-
+import crypto from 'crypto';
+import execa from 'execa';
 import Axios from 'axios';
 
 import { ToolingLog } from '../tooling_log';
@@ -80,6 +81,15 @@ export class CiStatsReporter {
     const timings = options.timings;
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
+    let email;
+
+    try {
+      const { stdout } = await execa('git', ['config', 'user.email']);
+      email = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
     const defaultMetadata = {
       osPlatform: Os.platform(),
       osRelease: Os.release(),
@@ -89,8 +99,14 @@ export class CiStatsReporter {
       cpuSpeed: Os.cpus()[0]?.speed,
       freeMem: Os.freemem(),
       totalMem: Os.totalmem(),
+      committerHash: email
+        ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
+        : undefined,
+      isElasticCommitter: email ? email.endsWith('@elastic.co') : undefined,
       kibanaUuid,
     };
+
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMetadata.committerHash);
 
     return await this.req({
       auth: !!buildId,
@@ -199,7 +215,7 @@ export class CiStatsReporter {
           throw error;
         }
 
-        if (error?.response && error.response.status < 502) {
+        if (error?.response && error.response.status < 500) {
           // error response from service was received so warn the user and move on
           this.log.warning(
             `error reporting ${bodyDesc} [status=${error.response.status}] [resp=${inspect(
@@ -221,11 +237,12 @@ export class CiStatsReporter {
           ? `${error.response.status} response`
           : 'no response';
 
+        const seconds = attempt * 10;
         this.log.warning(
-          `failed to reach ci-stats service [reason=${reason}], retrying in ${attempt} seconds`
+          `failed to reach ci-stats service, retrying in ${seconds} seconds, [reason=${reason}], [error=${error.message}]`
         );
 
-        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
       }
     }
   }

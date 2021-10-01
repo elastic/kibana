@@ -15,11 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
   const monacoEditor = getService('monacoEditor');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
     before(async function () {
+      await PageObjects.visualize.initTests();
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
@@ -36,14 +36,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         log.debug('Add value to advanced JSON input');
         await PageObjects.visEditor.toggleAdvancedParams('2');
-        await testSubjects.setValue('codeEditorContainer', '{ "missing": 10 }');
+        await PageObjects.visEditor.inputValueInCodeEditor('{ "missing": 10 }');
         await PageObjects.visEditor.clickGo();
 
         await inspector.open();
         await inspector.openInspectorRequestsView();
         const requestTab = await inspector.getOpenRequestDetailRequestButton();
         await requestTab.click();
-        const requestJSON = JSON.parse(await monacoEditor.getCodeEditorValue());
+        const requestJSON = JSON.parse(await monacoEditor.getCodeEditorValue(1));
 
         expect(requestJSON.aggs['2'].max).property('missing', 10);
       });

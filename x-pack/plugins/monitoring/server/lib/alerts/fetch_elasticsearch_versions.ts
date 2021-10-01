@@ -6,17 +6,18 @@
  */
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
-import { ElasticsearchSource } from '../../../common/types/es';
+import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
 
 export async function fetchElasticsearchVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertVersions[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.cluster_stats.nodes.versions',
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',
@@ -60,8 +61,18 @@ export async function fetchElasticsearchVersions(
     },
   };
 
-  const { body: response } = await esClient.search<ElasticsearchSource>(params);
-  return response.hits.hits.map((hit) => {
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
+
+  const result = await esClient.search<ElasticsearchSource>(params);
+  const response: ElasticsearchResponse = result.body as ElasticsearchResponse;
+  return (response.hits?.hits ?? []).map((hit) => {
     const versions = hit._source!.cluster_stats?.nodes?.versions ?? [];
     return {
       versions,

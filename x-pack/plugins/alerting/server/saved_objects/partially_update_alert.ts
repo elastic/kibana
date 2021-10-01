@@ -40,7 +40,12 @@ export async function partiallyUpdateAlert(
 ): Promise<void> {
   // ensure we only have the valid attributes excluded from AAD
   const attributeUpdates = pick(attributes, AlertAttributesExcludedFromAAD);
-  const updateOptions: SavedObjectsUpdateOptions = pick(options, 'namespace', 'version', 'refresh');
+  const updateOptions: SavedObjectsUpdateOptions<RawAlert> = pick(
+    options,
+    'namespace',
+    'version',
+    'refresh'
+  );
 
   try {
     await savedObjectsClient.update<RawAlert>('alert', id, attributeUpdates, updateOptions);

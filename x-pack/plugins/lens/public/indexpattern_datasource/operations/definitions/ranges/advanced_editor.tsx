@@ -22,7 +22,8 @@ import {
   htmlIdGenerator,
   keys,
 } from '@elastic/eui';
-import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
+import { useDebounceWithOptions } from '../../../../shared_components';
+import { IFieldFormat } from '../../../../../../../../src/plugins/field_formats/common';
 import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import {
@@ -31,7 +32,7 @@ import {
   DraggableBucketContainer,
   LabelInput,
 } from '../shared_components';
-import { isValidNumber, useDebounceWithOptions } from '../helpers';
+import { isValidNumber } from '../helpers';
 
 const generateId = htmlIdGenerator();
 

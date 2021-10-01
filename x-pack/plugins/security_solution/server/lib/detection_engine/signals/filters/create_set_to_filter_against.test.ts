@@ -14,7 +14,7 @@ import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock'
 
 describe('createSetToFilterAgainst', () => {
   let listClient = listMock.getListClient();
-  let events = [sampleDocWithSortId('123', '1.1.1.1')];
+  let events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,7 +27,7 @@ describe('createSetToFilterAgainst', () => {
         }))
       )
     );
-    events = [sampleDocWithSortId('123', '1.1.1.1')];
+    events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
   });
 
   afterEach(() => {
@@ -49,7 +49,7 @@ describe('createSetToFilterAgainst', () => {
   });
 
   test('it returns 1 field if the list returns a single item', async () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1')];
+    events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
     const field = await createSetToFilterAgainst({
       events,
       field: 'source.ip',
@@ -68,7 +68,10 @@ describe('createSetToFilterAgainst', () => {
   });
 
   test('it returns 2 fields if the list returns 2 items', async () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1'), sampleDocWithSortId('123', '2.2.2.2')];
+    events = [
+      sampleDocWithSortId('123', undefined, '1.1.1.1'),
+      sampleDocWithSortId('123', undefined, '2.2.2.2'),
+    ];
     const field = await createSetToFilterAgainst({
       events,
       field: 'source.ip',
@@ -87,7 +90,10 @@ describe('createSetToFilterAgainst', () => {
   });
 
   test('it returns 0 fields if the field does not match up to a valid field within the event', async () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1'), sampleDocWithSortId('123', '2.2.2.2')];
+    events = [
+      sampleDocWithSortId('123', undefined, '1.1.1.1'),
+      sampleDocWithSortId('123', undefined, '2.2.2.2'),
+    ];
     const field = await createSetToFilterAgainst({
       events,
       field: 'nonexistent.field', // field does not exist

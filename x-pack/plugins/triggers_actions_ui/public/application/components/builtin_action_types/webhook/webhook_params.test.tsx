@@ -21,6 +21,13 @@ describe('WebhookParamsFields renders', () => {
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
       />
     );
     expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();

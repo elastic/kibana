@@ -1,0 +1,11 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "myfakeindex-3",
+    "source": {
+      "message": "hello world 3",
+      "@timestamp": "2020-12-16T15:16:18.570Z"
+    },
+    "type": "_doc"
+  }
+}

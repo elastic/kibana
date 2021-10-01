@@ -22,7 +22,8 @@ export interface RemoteClustersPluginSetup {
 }
 
 export class RemoteClustersUIPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any> {
+  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(
@@ -60,13 +61,14 @@ export class RemoteClustersUIPlugin
           initNotification(toasts, fatalErrors);
           initHttp(http);
 
-          const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+          const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
+          const cloudBaseUrl: string = cloud?.baseUrl ?? '';
 
           const { renderApp } = await import('./application');
           const unmountAppCallback = await renderApp(
             element,
             i18nContext,
-            { isCloudEnabled },
+            { isCloudEnabled, cloudBaseUrl },
             history
           );
 

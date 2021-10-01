@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Aggregate, TermsAggregate } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   PaginationInputPaginated,
@@ -20,6 +20,9 @@ import {
   Group,
   AgentOptionValue,
   AggregationDataPoint,
+  AgentSelection,
+  GroupOptionValue,
+  GroupOption,
 } from './types';
 
 export type InspectResponse = Inspect & { response: string[] };
@@ -37,17 +40,18 @@ export const getNumOverlapped = (
   });
   return sum;
 };
-export const processAggregations = (aggs: Record<string, Aggregate>) => {
+export const processAggregations = (aggs: Record<string, estypes.AggregationsAggregate>) => {
   const platforms: Group[] = [];
   const overlap: Overlap = {};
-  const platformTerms = aggs.platforms as TermsAggregate<AggregationDataPoint>;
-  const policyTerms = aggs.policies as TermsAggregate<AggregationDataPoint>;
+  const platformTerms = aggs.platforms as estypes.AggregationsTermsAggregate<AggregationDataPoint>;
+  const policyTerms = aggs.policies as estypes.AggregationsTermsAggregate<AggregationDataPoint>;
 
-  const policies = policyTerms?.buckets.map((o) => ({ name: o.key, size: o.doc_count })) ?? [];
+  const policies =
+    policyTerms?.buckets.map((o) => ({ name: o.key, id: o.key, size: o.doc_count })) ?? [];
 
   if (platformTerms?.buckets) {
     for (const { key, doc_count: size, policies: platformPolicies } of platformTerms.buckets) {
-      platforms.push({ name: key, size });
+      platforms.push({ name: key, id: key, size });
       if (platformPolicies?.buckets && policies.length > 0) {
         overlap[key] = platformPolicies.buckets.reduce((acc: { [key: string]: number }, pol) => {
           acc[pol.key] = pol.doc_count;
@@ -96,17 +100,72 @@ export const generateAgentCheck = (selectedGroups: SelectedGroups) => {
   };
 };
 
+export const generateAgentSelection = (selection: GroupOption[]) => {
+  const newAgentSelection: AgentSelection = {
+    agents: [],
+    allAgentsSelected: false,
+    platformsSelected: [],
+    policiesSelected: [],
+  };
+  // parse through the selections to be able to determine how many are actually selected
+  const selectedAgents: AgentOptionValue[] = [];
+  const selectedGroups: SelectedGroups = {
+    policy: {},
+    platform: {},
+  };
+
+  for (const opt of selection) {
+    const groupType = opt.value?.groupType;
+    // best effort to get the proper identity
+    const key = opt.key ?? opt.value?.id ?? opt.label;
+    let value;
+    switch (groupType) {
+      case AGENT_GROUP_KEY.All:
+        newAgentSelection.allAgentsSelected = true;
+        break;
+      case AGENT_GROUP_KEY.Platform:
+        value = opt.value as GroupOptionValue;
+        if (!newAgentSelection.allAgentsSelected) {
+          // we don't need to calculate diffs when all agents are selected
+          selectedGroups.platform[key] = value.size;
+        }
+        newAgentSelection.platformsSelected.push(key);
+        break;
+      case AGENT_GROUP_KEY.Policy:
+        value = opt.value as GroupOptionValue;
+        if (!newAgentSelection.allAgentsSelected) {
+          // we don't need to calculate diffs when all agents are selected
+          selectedGroups.policy[key] = value.size;
+        }
+        newAgentSelection.policiesSelected.push(key);
+        break;
+      case AGENT_GROUP_KEY.Agent:
+        value = opt.value as AgentOptionValue;
+        if (!newAgentSelection.allAgentsSelected) {
+          // we don't need to count how many agents are selected if they are all selected
+          selectedAgents.push(value);
+        }
+        newAgentSelection.agents.push(key);
+        break;
+      default:
+        // this should never happen!
+        // eslint-disable-next-line no-console
+        console.error(`unknown group type ${groupType}`);
+    }
+  }
+  return { newAgentSelection, selectedGroups, selectedAgents };
+};
+
 export const generateTablePaginationOptions = (
   activePage: number,
-  limit: number,
-  isBucketSort?: boolean
+  limit: number
 ): PaginationInputPaginated => {
   const cursorStart = activePage * limit;
   return {
     activePage,
     cursorStart,
     fakePossibleCount: 4 <= activePage && activePage > 0 ? limit * (activePage + 2) : limit * 5,
-    querySize: isBucketSort ? limit : limit + cursorStart,
+    querySize: limit,
   };
 };
 

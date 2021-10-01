@@ -7,6 +7,7 @@
  */
 
 export { coreDeprecationProvider } from './deprecation';
+export { ensureValidConfiguration } from './ensure_valid_configuration';
 
 export {
   ConfigService,

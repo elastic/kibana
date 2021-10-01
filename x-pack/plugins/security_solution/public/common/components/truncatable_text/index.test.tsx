@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import { TruncatableText } from '.';
 
 describe('TruncatableText', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<TruncatableText>{'Hiding in plain sight'}</TruncatableText>);
+    const wrapper = mount(<TruncatableText>{'Hiding in plain sight'}</TruncatableText>);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -32,5 +32,12 @@ describe('TruncatableText', () => {
     const wrapper = mount(<TruncatableText>{'Who stopped the beats?'}</TruncatableText>);
 
     expect(wrapper).toHaveStyleRule('white-space', 'nowrap');
+  });
+
+  test('it can add tooltip', () => {
+    const testText = 'Some really really really really really long text.';
+    const wrapper = mount(<TruncatableText tooltipContent={testText}>{testText}</TruncatableText>);
+
+    expect(wrapper.find('EuiToolTip').text()).toEqual(testText);
   });
 });

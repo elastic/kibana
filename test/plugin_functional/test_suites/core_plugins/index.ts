@@ -12,14 +12,17 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('core plugins', () => {
     loadTestFile(require.resolve('./applications'));
     loadTestFile(require.resolve('./elasticsearch_client'));
+    loadTestFile(require.resolve('./execution_context'));
     loadTestFile(require.resolve('./server_plugins'));
     loadTestFile(require.resolve('./ui_plugins'));
     loadTestFile(require.resolve('./ui_settings'));
     loadTestFile(require.resolve('./top_nav'));
     loadTestFile(require.resolve('./application_leave_confirm'));
     loadTestFile(require.resolve('./application_status'));
+    loadTestFile(require.resolve('./application_deep_links'));
     loadTestFile(require.resolve('./rendering'));
     loadTestFile(require.resolve('./chrome_help_menu_links'));
     loadTestFile(require.resolve('./history_block'));
+    loadTestFile(require.resolve('./http'));
   });
 }

@@ -11,12 +11,11 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
 } from '../../screens/fields_browser';
 import {
-  HEADER_SUBTITLE,
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
   INSPECT_MODAL,
+  SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
-import { HEADERS_GROUP } from '../../screens/timeline';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from '../../tasks/fields_browser';
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -24,7 +23,6 @@ import { openEvents } from '../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
   addsHostGeoCountryNameToHeader,
-  dragAndDropColumn,
   openEventsViewerFieldsBrowser,
   opensInspectQueryModal,
   waitsForEventsToBeLoaded,
@@ -133,38 +131,12 @@ describe('Events Viewer', () => {
 
     it('filters the events by applying filter criteria from the search bar at the top of the page', () => {
       const filterInput = 'aa7ca589f1b8220002f2fc61c64cfbf1'; // this will never match real data
-      cy.get(HEADER_SUBTITLE)
+      cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((initialNumberOfEvents) => {
           kqlSearch(`${filterInput}{enter}`);
-          cy.get(HEADER_SUBTITLE).should('not.have.text', initialNumberOfEvents);
+          cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', initialNumberOfEvents);
         });
-    });
-  });
-
-  context('Events columns', () => {
-    before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
-      openEvents();
-      cy.scrollTo('bottom');
-      waitsForEventsToBeLoaded();
-    });
-
-    afterEach(() => {
-      openEventsViewerFieldsBrowser();
-      resetFields();
-    });
-
-    it('re-orders columns via drag and drop', () => {
-      const originalColumnOrder =
-        '@timestamp1messagehost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
-      const expectedOrderAfterDragAndDrop =
-        'message@timestamp1host.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
-
-      cy.get(HEADERS_GROUP).should('have.text', originalColumnOrder);
-      dragAndDropColumn({ column: 0, newPosition: 0 });
-      cy.get(HEADERS_GROUP).should('have.text', expectedOrderAfterDragAndDrop);
     });
   });
 });

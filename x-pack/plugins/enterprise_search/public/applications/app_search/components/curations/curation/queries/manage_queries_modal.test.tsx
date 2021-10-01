@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton, EuiModal } from '@elastic/eui';
 
-import { CurationQueries } from '../../components';
+import { MultiInputRows } from '../../../multi_input_rows';
 
 import { ManageQueriesModal } from './';
 
@@ -66,13 +66,13 @@ describe('ManageQueriesModal', () => {
       expect(wrapper.find(EuiModal)).toHaveLength(0);
     });
 
-    it('renders the CurationQueries form component', () => {
-      expect(wrapper.find(CurationQueries)).toHaveLength(1);
-      expect(wrapper.find(CurationQueries).prop('queries')).toEqual(['hello', 'world']);
+    it('renders the MultiInputRows component with curation queries', () => {
+      expect(wrapper.find(MultiInputRows)).toHaveLength(1);
+      expect(wrapper.find(MultiInputRows).prop('initialValues')).toEqual(['hello', 'world']);
     });
 
-    it('calls updateCuration and closes the modal on CurationQueries form submit', () => {
-      wrapper.find(CurationQueries).simulate('submit', ['new', 'queries']);
+    it('calls updateCuration and closes the modal on MultiInputRows form submit', () => {
+      wrapper.find(MultiInputRows).simulate('submit', ['new', 'queries']);
 
       expect(actions.updateQueries).toHaveBeenCalledWith(['new', 'queries']);
       expect(wrapper.find(EuiModal)).toHaveLength(0);

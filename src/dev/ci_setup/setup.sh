@@ -21,10 +21,6 @@ cp "src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
 echo "# Appended by src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
 echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
 
-if [[ "$BUILD_TS_REFS_CACHE_ENABLE" != "true" ]]; then
-  export BUILD_TS_REFS_CACHE_ENABLE=false
-fi
-
 ###
 ### install dependencies
 ###

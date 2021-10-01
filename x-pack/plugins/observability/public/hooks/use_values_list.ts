@@ -5,32 +5,142 @@
  * 2.0.
  */
 
-import { IIndexPattern } from '../../../../../src/plugins/data/common';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { useFetcher } from './use_fetcher';
-import { ESFilter } from '../../../../../typings/elasticsearch';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { capitalize, union } from 'lodash';
+import { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import { ESFilter } from '../../../../../src/core/types/elasticsearch';
+import { createEsParams, useEsSearch } from './use_es_search';
 
-interface Props {
+export interface Props {
   sourceField: string;
   query?: string;
-  indexPattern: IIndexPattern;
+  indexPatternTitle?: string;
   filters?: ESFilter[];
+  time?: { from: string; to: string };
+  keepHistory?: boolean;
+  cardinalityField?: string;
 }
 
-export const useValuesList = ({ sourceField, indexPattern, query, filters }: Props) => {
-  const {
-    services: { data },
-  } = useKibana<{ data: DataPublicPluginStart }>();
+export interface ListItem {
+  label: string;
+  count: number;
+}
 
-  const { data: values, status } = useFetcher(() => {
-    return data.autocomplete.getValueSuggestions({
-      indexPattern,
-      query: query || '',
-      field: indexPattern.fields.find(({ name }) => name === sourceField)!,
-      boolFilter: filters ?? [],
-    });
-  }, [sourceField, query, data.autocomplete, indexPattern, filters]);
+export const useValuesList = ({
+  sourceField,
+  indexPatternTitle,
+  query = '',
+  filters,
+  time,
+  keepHistory,
+  cardinalityField,
+}: Props): { values: ListItem[]; loading?: boolean } => {
+  const [debouncedQuery, setDebounceQuery] = useState<string>(query);
+  const [values, setValues] = useState<ListItem[]>([]);
 
-  return { values, loading: status === 'loading' || status === 'pending' };
+  const { from, to } = time ?? {};
+
+  let includeClause = '';
+
+  if (query) {
+    if (query[0].toLowerCase() === query[0]) {
+      // if first letter is lowercase we also add the capitalize option
+      includeClause = `(${query}|${capitalize(query)}).*`;
+    } else {
+      // otherwise we add lowercase option prefix
+      includeClause = `(${query}|${query.toLowerCase()}).*`;
+    }
+  }
+
+  useDebounce(
+    () => {
+      setDebounceQuery(query);
+    },
+    350,
+    [query]
+  );
+
+  useEffect(() => {
+    if (!query) {
+      // in case query is cleared, we don't wait for debounce
+      setDebounceQuery(query);
+    }
+  }, [query]);
+
+  const { data, loading } = useEsSearch(
+    createEsParams({
+      index: indexPatternTitle!,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              ...(filters ?? []),
+              ...(from && to
+                ? [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: from,
+                          lte: to,
+                        },
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        },
+        size: 0,
+        aggs: {
+          values: {
+            terms: {
+              field: sourceField,
+              size: 50,
+              ...(query ? { include: includeClause } : {}),
+            },
+            ...(cardinalityField
+              ? {
+                  aggs: {
+                    count: {
+                      cardinality: {
+                        field: cardinalityField,
+                      },
+                    },
+                  },
+                }
+              : {}),
+          },
+        },
+      },
+    }),
+    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle]
+  );
+
+  useEffect(() => {
+    const newValues =
+      data?.aggregations?.values.buckets.map(
+        ({ key: value, doc_count: count, count: aggsCount }) => {
+          if (aggsCount) {
+            return {
+              count: aggsCount.value,
+              label: String(value),
+            };
+          }
+          return {
+            count,
+            label: String(value),
+          };
+        }
+      ) ?? [];
+
+    if (keepHistory && query) {
+      setValues((prevState) => {
+        return union(newValues, prevState);
+      });
+    } else {
+      setValues(newValues);
+    }
+  }, [data, keepHistory, loading, query]);
+
+  return { values, loading };
 };

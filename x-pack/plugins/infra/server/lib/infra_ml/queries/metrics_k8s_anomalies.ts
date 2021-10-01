@@ -83,7 +83,7 @@ export const createMetricsK8sAnomaliesQuery = ({
   const sortOptions = [
     { [sortToMlFieldMap[field]]: querySortDirection },
     { [TIEBREAKER_FIELD]: querySortDirection }, // Tiebreaker
-  ] as const;
+  ];
 
   const resultsQuery = {
     ...defaultRequestParameters,

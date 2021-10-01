@@ -8,6 +8,7 @@
 
 import { SavedObjectReference } from '../../../../../core/types';
 import { VisParams } from '../../../common';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/public';
 
 const isControlsVis = (visType: string) => visType === 'input_control_vis';
 
@@ -25,7 +26,7 @@ export const extractControlsReferences = (
       control.indexPatternRefName = `${prefix}_${i}_index_pattern`;
       references.push({
         name: control.indexPatternRefName,
-        type: 'index-pattern',
+        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
         id: control.indexPattern,
       });
       delete control.indexPattern;

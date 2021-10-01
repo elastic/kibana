@@ -11,8 +11,8 @@ import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
   ESSearchRequest,
   ESFilter,
-} from '../../../../../../../../typings/elasticsearch';
-import { APMEventESSearchRequest } from '.';
+} from '../../../../../../../../src/core/types/elasticsearch';
+import { APMEventESSearchRequest, APMEventESTermsEnumRequest } from '.';
 import {
   ApmIndicesConfig,
   ApmIndicesName,
@@ -28,7 +28,7 @@ const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
 };
 
 export function unpackProcessorEvents(
-  request: APMEventESSearchRequest,
+  request: APMEventESSearchRequest | APMEventESTermsEnumRequest,
   indices: ApmIndicesConfig
 ) {
   const { apm, ...params } = request;

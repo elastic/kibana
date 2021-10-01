@@ -74,7 +74,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -94,7 +96,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -143,7 +147,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -184,7 +190,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFields,
       rowsFields.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -232,12 +240,57 @@ describe('Discover grid cell rendering', function () {
     `);
   });
 
+  it('limits amount of rendered items', () => {
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFields,
+      rowsFields.map((row) => indexPatternMock.flattenHit(row)),
+      true,
+      [],
+      // this is the number of rendered items
+      1
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="_source"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component).toMatchInlineSnapshot(`
+      <EuiDescriptionList
+        className="dscDiscoverGrid__descriptionList"
+        compressed={true}
+        type="inline"
+      >
+        <EuiDescriptionListTitle>
+          extension
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="dscDiscoverGrid__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": Array [
+                ".gz",
+              ],
+            }
+          }
+        />
+      </EuiDescriptionList>
+    `);
+  });
+
   it('renders fields-based column correctly when isDetails is set to true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFields,
       rowsFields.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -283,7 +336,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -322,7 +377,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -360,7 +417,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -389,7 +448,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
-      true
+      true,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -417,7 +478,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -437,7 +500,9 @@ describe('Discover grid cell rendering', function () {
       indexPatternMock,
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
-      false
+      false,
+      [],
+      100
     );
     const component = shallow(
       <DiscoverGridCellValue

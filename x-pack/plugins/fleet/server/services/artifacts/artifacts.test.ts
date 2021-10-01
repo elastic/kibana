@@ -125,6 +125,7 @@ describe('When using the artifacts services', () => {
       expect(esClientMock.delete).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
         id: '123',
+        refresh: 'wait_for',
       });
     });
 
@@ -152,6 +153,7 @@ describe('When using the artifacts services', () => {
       expect(esClientMock.search).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
         sort: 'created:asc',
+        ignore_unavailable: true,
         q: '',
         from: 0,
         size: 20,
@@ -184,6 +186,7 @@ describe('When using the artifacts services', () => {
         index: FLEET_SERVER_ARTIFACTS_INDEX,
         sort: 'identifier:desc',
         q: 'packageName:endpoint',
+        ignore_unavailable: true,
         from: 450,
         size: 50,
       });

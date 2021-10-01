@@ -9,15 +9,52 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { createRoutes } from './routes/create_routes';
 import { url } from './saved_objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
+import { UrlService } from '../common/url_service';
+import { ServerUrlService, ServerShortUrlClientFactory } from './url_service';
+import { registerUrlServiceRoutes } from './url_service/http/register_url_service_routes';
+import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 
-export class SharePlugin implements Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+/** @public */
+export interface SharePluginSetup {
+  url: ServerUrlService;
+}
+
+/** @public */
+export interface SharePluginStart {
+  url: ServerUrlService;
+}
+
+export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
+  private url?: ServerUrlService;
+  private version: string;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.version = initializerContext.env.packageInfo.version;
+  }
 
   public setup(core: CoreSetup) {
-    createRoutes(core, this.initializerContext.logger.get());
+    this.url = new UrlService({
+      baseUrl: core.http.basePath.publicBaseUrl || core.http.basePath.serverBasePath,
+      version: this.initializerContext.env.packageInfo.version,
+      navigate: async () => {
+        throw new Error('Locator .navigate() is not supported on the server.');
+      },
+      getUrl: async () => {
+        throw new Error('Locator .getUrl() currently is not supported on the server.');
+      },
+      shortUrls: new ServerShortUrlClientFactory({
+        currentVersion: this.version,
+      }),
+    });
+
+    this.url.locators.create(new LegacyShortUrlLocatorDefinition());
+
+    const router = core.http.createRouter();
+
+    registerUrlServiceRoutes(core, router, this.url);
+
     core.savedObjects.registerType(url);
     core.uiSettings.register({
       [CSV_SEPARATOR_SETTING]: {
@@ -41,10 +78,18 @@ export class SharePlugin implements Plugin {
         schema: schema.boolean(),
       },
     });
+
+    return {
+      url: this.url,
+    };
   }
 
   public start() {
     this.initializerContext.logger.get().debug('Starting plugin');
+
+    return {
+      url: this.url!,
+    };
   }
 
   public stop() {

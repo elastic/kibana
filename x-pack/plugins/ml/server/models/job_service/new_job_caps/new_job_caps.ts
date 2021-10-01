@@ -7,12 +7,8 @@
 
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { _DOC_COUNT } from '../../../../common/constants/field_types';
-import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
+import { Aggregation, Field, NewJobCapsResponse } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
-
-export interface NewJobCapsResponse {
-  [indexPattern: string]: NewJobCaps;
-}
 
 export function newJobCapsProvider(client: IScopedClusterClient) {
   async function newJobCaps(

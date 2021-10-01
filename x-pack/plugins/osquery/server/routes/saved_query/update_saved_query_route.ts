@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
@@ -18,22 +18,25 @@ export const updateSavedQueryRoute = (router: IRouter) => {
         params: schema.object({}, { unknowns: 'allow' }),
         body: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
       // @ts-expect-error update types
-      const { name, description, platform, query } = request.body;
+      const { id, description, platform, query, version, interval } = request.body;
 
       const savedQuerySO = await savedObjectsClient.update(
         savedQuerySavedObjectType,
         // @ts-expect-error update types
         request.params.id,
         {
-          name,
+          id,
           description,
           platform,
           query,
+          version,
+          interval,
         }
       );
 

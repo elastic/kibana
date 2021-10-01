@@ -21,11 +21,11 @@ export const telemetrySavedObjectType: SavedObjectsType = {
             type: 'long',
             null_value: 0,
           },
-          cluster: {
+          elasticsearch: {
             type: 'long',
             null_value: 0,
           },
-          indices: {
+          kibana: {
             type: 'long',
             null_value: 0,
           },

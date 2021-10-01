@@ -61,13 +61,16 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     }
   );
 
+  if ((messageVariables?.length ?? 0) === 0) {
+    return <></>;
+  }
+
   return (
     <EuiPopover
       button={
         <EuiButtonIcon
           id={`${paramsProperty}AddVariableButton`}
           data-test-subj={`${paramsProperty}AddVariableButton`}
-          isDisabled={(messageVariables?.length ?? 0) === 0}
           title={addVariableButtonTitle}
           onClick={() => setIsVariablesPopoverOpen(true)}
           iconType="indexOpen"

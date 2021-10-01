@@ -8,10 +8,8 @@
 import React, { FC, Fragment, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 import {
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -38,7 +36,7 @@ import { JobMap } from '../job_map';
 import { usePageUrlState } from '../../../util/url_state';
 import { ListingPageUrlState } from '../../../../../common/types/common';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
 
@@ -80,18 +78,6 @@ export const Page: FC = () => {
                   <FormattedMessage
                     id="xpack.ml.dataframe.analyticsList.title"
                     defaultMessage="Data frame analytics"
-                  />
-                  <span>&nbsp;</span>
-                  <EuiBetaBadge
-                    label={i18n.translate('xpack.ml.dataframe.analyticsList.betaBadgeLabel', {
-                      defaultMessage: 'Beta',
-                    })}
-                    tooltipContent={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.betaBadgeTooltipContent',
-                      {
-                        defaultMessage: `Data frame analytics are a beta feature. We'd love to hear your feedback.`,
-                      }
-                    )}
                   />
                 </h1>
               </EuiTitle>

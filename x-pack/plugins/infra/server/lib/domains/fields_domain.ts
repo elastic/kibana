@@ -18,17 +18,14 @@ export class InfraFieldsDomain {
   public async getFields(
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
-    indexType: 'LOGS' | 'METRICS'
+    indexType: 'METRICS'
   ): Promise<InfraSourceIndexField[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext.core.savedObjects.client,
       sourceId
     );
 
-    const fields = await this.adapter.getIndexFields(
-      requestContext,
-      indexType === 'LOGS' ? configuration.logAlias : configuration.metricAlias
-    );
+    const fields = await this.adapter.getIndexFields(requestContext, configuration.metricAlias);
 
     return fields;
   }

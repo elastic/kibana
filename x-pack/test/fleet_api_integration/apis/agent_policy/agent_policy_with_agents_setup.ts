@@ -8,15 +8,17 @@
 import expect from '@kbn/expect';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents, getSupertestWithoutAuth } from '../agents/services';
-import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../../plugins/fleet/common';
+import { setupFleetAndAgents } from '../agents/services';
+import {
+  AGENT_POLICY_INDEX,
+  AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS,
+} from '../../../../plugins/fleet/common';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
-  const kibanaServer = getService('kibanaServer');
+  const esClient = getService('es');
 
   async function getEnrollmentKeyForPolicyId(policyId: string) {
     const listRes = await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
@@ -32,41 +34,23 @@ export default function (providerContext: FtrProviderContext) {
     return res.body.item;
   }
 
-  // Enroll an agent to get the actions for an agent as encrypted saved object are not expose otherwise
-  async function getAgentActionsForEnrollmentKey(enrollmentAPIToken: string) {
-    const kibanaVersionAccessor = kibanaServer.version;
-    const kibanaVersion = await kibanaVersionAccessor.get();
-
-    const { body: enrollmentResponse } = await supertestWithoutAuth
-      .post(`/api/ingest_manager/fleet/agents/enroll`)
-      .set('kbn-xsrf', 'xxx')
-      .set('Authorization', `ApiKey ${enrollmentAPIToken}`)
-      .send({
-        type: 'PERMANENT',
-        metadata: {
-          local: {
-            elastic: { agent: { version: kibanaVersion } },
+  async function hasFleetServerPoliciesForPolicy(policyId: string) {
+    const res = await esClient.search({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      body: {
+        query: {
+          term: {
+            policy_id: policyId,
           },
-          user_provided: {},
         },
-      })
-      .expect(200);
+        size: 1,
+        sort: [{ revision_idx: { order: 'desc' } }],
+      },
+    });
 
-    const agentAccessAPIKey = enrollmentResponse.item.access_api_key;
-
-    // Agent checkin
-    const { body: checkinApiResponse } = await supertestWithoutAuth
-      .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
-      .set('kbn-xsrf', 'xx')
-      .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
-      .send({
-        events: [],
-      })
-      .expect(200);
-
-    expect(checkinApiResponse.actions).length(1);
-
-    return checkinApiResponse.actions[0];
+    // @ts-expect-error TotalHit
+    return res.body.hits.total.value !== 0;
   }
 
   // Test all the side effect that should occurs when we create|update an agent policy
@@ -74,14 +58,14 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
       // Wait before agent status is updated
       return new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     setupFleetAndAgents(providerContext);
@@ -103,15 +87,7 @@ export default function (providerContext: FtrProviderContext) {
         const enrollmentKey = await getEnrollmentKeyForPolicyId(policyId);
         expect(enrollmentKey).not.empty();
 
-        const action = await getAgentActionsForEnrollmentKey(enrollmentKey.api_key);
-
-        expect(action.type).to.be('POLICY_CHANGE');
-        const agentPolicy = action.data.policy;
-        expect(agentPolicy.id).to.be(policyId);
-        // should have system inputs
-        expect(agentPolicy.inputs).length(3);
-        // should have default output
-        expect(agentPolicy.outputs.default).not.empty();
+        expect(await hasFleetServerPoliciesForPolicy(policyId)).to.be(true);
       });
     });
 
@@ -134,9 +110,7 @@ export default function (providerContext: FtrProviderContext) {
         const enrollmentKey = await getEnrollmentKeyForPolicyId(policyId);
         expect(enrollmentKey).not.empty();
 
-        const action = await getAgentActionsForEnrollmentKey(enrollmentKey.api_key);
-        expect(action.type).to.be('POLICY_CHANGE');
-        expect(action.data.policy.id).to.be(policyId);
+        expect(await hasFleetServerPoliciesForPolicy(policyId)).to.be(true);
       });
     });
   });

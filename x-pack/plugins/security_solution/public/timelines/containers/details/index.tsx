@@ -20,11 +20,16 @@ import {
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
+import { EntityType } from '../../../../../timelines/common';
+
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
 
 export interface UseTimelineEventsDetailsProps {
+  entityType?: EntityType;
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
@@ -32,24 +37,23 @@ export interface UseTimelineEventsDetailsProps {
 }
 
 export const useTimelineEventsDetails = ({
+  entityType = EntityType.EVENTS,
   docValueFields,
   indexName,
   eventId,
   skip,
 }: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    timelineDetailsRequest,
-    setTimelineDetailsRequest,
-  ] = useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const [timelineDetailsRequest, setTimelineDetailsRequest] =
+    useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const { addError, addWarning } = useAppToasts();
 
-  const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
-    null
-  );
+  const [timelineDetailsResponse, setTimelineDetailsResponse] =
+    useState<EventsArgs['detailsData']>(null);
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
@@ -65,7 +69,7 @@ export const useTimelineEventsDetails = ({
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
             request,
             {
-              strategy: 'securitySolutionTimelineSearchStrategy',
+              strategy: 'timelineSearchStrategy',
               abortSignal: abortCtrl.current.signal,
             }
           )
@@ -77,14 +81,13 @@ export const useTimelineEventsDetails = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning('An error has occurred');
+                addWarning(i18n.FAIL_TIMELINE_DETAILS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({ title: 'Failed to run search', text: msg.message });
+              addError(msg, { title: i18n.FAIL_TIMELINE_SEARCH_DETAILS });
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -94,7 +97,7 @@ export const useTimelineEventsDetails = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
@@ -102,6 +105,7 @@ export const useTimelineEventsDetails = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         docValueFields,
+        entityType,
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
@@ -111,7 +115,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [docValueFields, eventId, indexName]);
+  }, [docValueFields, entityType, eventId, indexName]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);

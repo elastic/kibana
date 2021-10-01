@@ -10,7 +10,7 @@ import { difference } from 'lodash';
 import { EventManager } from './event_manager';
 import type { MlClient } from '../../lib/ml_client';
 
-type ScheduledEvent = estypes.ScheduledEvent;
+type ScheduledEvent = estypes.MlCalendarEvent;
 
 interface BasicCalendar {
   job_ids: string[];
@@ -47,8 +47,7 @@ export class CalendarManager {
   }
 
   async getAllCalendars() {
-    // @ts-expect-error missing size argument
-    const { body } = await this._mlClient.getCalendars({ size: 1000 });
+    const { body } = await this._mlClient.getCalendars({ body: { page: { from: 0, size: 1000 } } });
 
     const events: ScheduledEvent[] = await this._eventManager.getAllEvents();
     const calendars: Calendar[] = body.calendars as Calendar[];
@@ -69,7 +68,7 @@ export class CalendarManager {
    * @param calendarIds
    * @returns {Promise<*>}
    */
-  async getCalendarsByIds(calendarIds: string) {
+  async getCalendarsByIds(calendarIds: string[]) {
     const calendars: Calendar[] = await this.getAllCalendars();
     return calendars.filter((calendar) => calendarIds.includes(calendar.calendar_id));
   }

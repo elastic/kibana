@@ -78,4 +78,7 @@ export const nonBasicIssuesMessages = [
   {
     id: 'missing_summary_count_field_name',
   },
+  {
+    id: 'datafeed_preview_failed',
+  },
 ];

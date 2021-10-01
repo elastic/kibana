@@ -74,6 +74,7 @@ export function getScoresByRecord(
                             timestamp: {
                               gte: earliestMs,
                               lte: latestMs,
+                              // @ts-ignore
                               format: 'epoch_millis',
                             },
                           },

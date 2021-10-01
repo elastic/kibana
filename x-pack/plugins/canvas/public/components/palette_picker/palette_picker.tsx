@@ -7,11 +7,22 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
-import { palettes, ColorPalette } from '../../../common/lib/palettes';
-import { ComponentStrings } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
 
-const { PalettePicker: strings } = ComponentStrings;
+import { palettes, ColorPalette } from '../../../common/lib/palettes';
+
+const strings = {
+  getEmptyPaletteLabel: () =>
+    i18n.translate('xpack.canvas.palettePicker.emptyPaletteLabel', {
+      defaultMessage: 'None',
+    }),
+  getNoPaletteFoundErrorTitle: () =>
+    i18n.translate('xpack.canvas.palettePicker.noPaletteFoundErrorTitle', {
+      defaultMessage: 'Color palette not found',
+    }),
+};
 
 interface RequiredProps {
   id?: string;
@@ -28,6 +39,15 @@ interface ClearableProps {
 }
 
 type Props = RequiredProps | ClearableProps;
+
+const findPalette = (colorPalette: ColorPalette | null, colorPalettes: ColorPalette[] = []) => {
+  const palette = colorPalettes.filter((cp) => cp.id === colorPalette?.id)[0] ?? null;
+  if (palette === null) {
+    return colorPalettes.filter((cp) => isEqual(cp.colors, colorPalette?.colors))[0] ?? null;
+  }
+
+  return palette;
+};
 
 export const PalettePicker: FC<Props> = (props) => {
   const colorPalettes: EuiColorPalettePickerPaletteProps[] = palettes.map((item) => ({
@@ -51,13 +71,15 @@ export const PalettePicker: FC<Props> = (props) => {
       onChange(canvasPalette || null);
     };
 
+    const foundPalette = findPalette(palette, palettes);
+
     return (
       <EuiColorPalettePicker
         id={props.id}
         compressed={true}
         palettes={colorPalettes}
         onChange={onPickerChange}
-        valueOfSelected={palette ? palette.id : 'clear'}
+        valueOfSelected={foundPalette?.id ?? 'clear'}
       />
     );
   }
@@ -74,13 +96,15 @@ export const PalettePicker: FC<Props> = (props) => {
     onChange(canvasPalette);
   };
 
+  const foundPalette = findPalette(palette, palettes);
+
   return (
     <EuiColorPalettePicker
       id={props.id}
       compressed={true}
       palettes={colorPalettes}
       onChange={onPickerChange}
-      valueOfSelected={palette.id}
+      valueOfSelected={foundPalette?.id}
     />
   );
 };

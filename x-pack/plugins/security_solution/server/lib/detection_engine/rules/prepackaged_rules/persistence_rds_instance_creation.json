@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation of an Amazon Relational Database Service (RDS) Aurora database instance.",
+  "false_positives": [
+    "A database instance may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Instances creations from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS RDS Instance Creation",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.action:CreateDBInstance and event.outcome:success\n",
+  "references": [
+    "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "f30f3443-4fbb-4c27-ab89-c3ad49d62315",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Asset Visibility"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

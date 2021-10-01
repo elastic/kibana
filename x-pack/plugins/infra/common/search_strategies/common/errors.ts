@@ -25,11 +25,11 @@ export type GenericSearchStrategyError = rt.TypeOf<typeof genericSearchStrategyE
 const shardFailureSearchStrategyErrorRT = rt.type({
   type: rt.literal('shardFailure'),
   shardInfo: rt.type({
-    shard: rt.number,
-    index: rt.string,
-    node: rt.string,
+    shard: rt.union([rt.number, rt.null]),
+    index: rt.union([rt.string, rt.null]),
+    node: rt.union([rt.string, rt.null]),
   }),
-  message: rt.string,
+  message: rt.union([rt.string, rt.null]),
 });
 
 export type ShardFailureSearchStrategyError = rt.TypeOf<typeof shardFailureSearchStrategyErrorRT>;

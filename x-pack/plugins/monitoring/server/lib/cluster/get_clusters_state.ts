@@ -54,8 +54,8 @@ export function getClustersState(
   checkParam(esIndexPattern, 'esIndexPattern in cluster/getClustersHealth');
 
   const clusterUuids = clusters
-    .filter((cluster) => !cluster.cluster_state)
-    .map((cluster) => cluster.cluster_uuid);
+    .filter((cluster) => !cluster.cluster_state || !cluster.elasticsearch?.cluster?.stats?.state)
+    .map((cluster) => cluster.cluster_uuid || cluster.elasticsearch?.cluster?.id);
 
   // we only need to fetch the cluster state if we don't already have it
   //  newer documents (those from the version 6 schema and later already have the cluster state with cluster stats)
@@ -66,11 +66,12 @@ export function getClustersState(
   const params = {
     index: esIndexPattern,
     size: clusterUuids.length,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._source.cluster_state',
-      'hits.hits._source.cluster_state',
+      'hits.hits._source.elasticsearch.cluster.stats.state',
     ],
     body: {
       query: {

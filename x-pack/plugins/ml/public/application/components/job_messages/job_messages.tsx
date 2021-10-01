@@ -7,9 +7,16 @@
 
 import React, { FC } from 'react';
 
-import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiSpacer,
+  EuiInMemoryTable,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 import { JobMessage } from '../../../../common/types/audit_message';
@@ -21,14 +28,21 @@ interface JobMessagesProps {
   loading: boolean;
   error: string;
   refreshMessage?: React.MouseEventHandler<HTMLButtonElement>;
+  actionHandler?: (message: JobMessage) => void;
 }
 
 /**
  * Component for rendering job messages for anomaly detection
  * and data frame analytics jobs.
  */
-export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error, refreshMessage }) => {
-  const columns = [
+export const JobMessages: FC<JobMessagesProps> = ({
+  messages,
+  loading,
+  error,
+  refreshMessage,
+  actionHandler,
+}) => {
+  const columns: Array<EuiBasicTableColumn<JobMessage>> = [
     {
       name: refreshMessage ? (
         <EuiToolTip
@@ -75,10 +89,44 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error, re
     },
   ];
 
+  if (typeof actionHandler === 'function') {
+    columns.push({
+      name: i18n.translate('xpack.ml.jobMessages.actionsLabel', {
+        defaultMessage: 'Actions',
+      }),
+      width: '10%',
+      actions: [
+        {
+          render: (message: JobMessage) => {
+            return (
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.jobMessages.toggleInChartTooltipText"
+                    defaultMessage="Toggle in chart"
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  size="xs"
+                  aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
+                    defaultMessage: 'Toggle in chart',
+                  })}
+                  iconType="visAreaStacked"
+                  onClick={() => actionHandler(message)}
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+      ],
+    });
+  }
+
   const defaultSorting = {
     sort: {
       field: 'timestamp' as const,
-      direction: 'asc' as const,
+      direction: 'desc' as const,
     },
   };
 
@@ -93,6 +141,8 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error, re
         compressed={true}
         loading={loading}
         error={error}
+        pagination={true}
+        data-test-subj={'mlAnalyticsDetailsJobMessagesTable'}
       />
     </>
   );

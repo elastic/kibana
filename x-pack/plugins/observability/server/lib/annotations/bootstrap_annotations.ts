@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, PluginInitializerContext, KibanaRequest } from 'kibana/server';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  KibanaRequest,
+  RequestHandlerContext,
+} from 'kibana/server';
+import { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
 import { PromiseReturnType } from '../../../typings/common';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
-import type { ObservabilityRequestHandlerContext } from '../../types';
 
 interface Params {
   index: string;
@@ -35,7 +40,7 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
 
   return {
     getScopedAnnotationsClient: (
-      requestContext: ObservabilityRequestHandlerContext,
+      requestContext: RequestHandlerContext & { licensing: LicensingApiRequestHandlerContext },
       request: KibanaRequest
     ) => {
       return createAnnotationsClient({

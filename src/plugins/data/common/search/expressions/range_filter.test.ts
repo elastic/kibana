@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createMockContext } from '../../../../expressions/common/mocks';
+import { createMockContext } from '../../../../expressions/common';
 import { functionWrapper } from './utils';
 import { rangeFilterFunction } from './range_filter';
 
@@ -24,6 +24,7 @@ describe('interpreter/functions#rangeFilter', () => {
         "meta": Object {
           "alias": null,
           "disabled": false,
+          "field": "test",
           "index": undefined,
           "negate": false,
           "params": Object {},

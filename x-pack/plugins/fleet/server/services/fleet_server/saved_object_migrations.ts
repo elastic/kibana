@@ -23,20 +23,17 @@ import type {
 } from '../../../common';
 import { listEnrollmentApiKeys, getEnrollmentAPIKey } from '../api_keys/enrollment_api_key_so';
 import { appContextService } from '../app_context';
-import { isAgentsSetup } from '../agents';
 import { agentPolicyService } from '../agent_policy';
 import { invalidateAPIKeys } from '../api_keys';
+import { settingsService } from '..';
 
 export async function runFleetServerMigration() {
-  // If Agents are not setup skip as there is nothing to migrate
-  if (!(await isAgentsSetup(getInternalUserSOClient()))) {
-    return;
-  }
+  await settingsService.settingsSetup(getInternalUserSOClient());
   await Promise.all([migrateEnrollmentApiKeys(), migrateAgentPolicies(), migrateAgents()]);
 }
 
 function getInternalUserSOClient() {
-  const fakeRequest = ({
+  const fakeRequest = {
     headers: {},
     getBasePath: () => '',
     path: '/',
@@ -49,7 +46,7 @@ function getInternalUserSOClient() {
         url: '/',
       },
     },
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 
   return appContextService.getInternalUserSOClient(fakeRequest);
 }
@@ -59,6 +56,9 @@ async function migrateAgents() {
   const soClient = getInternalUserSOClient();
   const logger = appContextService.getLogger();
   let hasMore = true;
+
+  let hasAgents = false;
+
   while (hasMore) {
     const res = await soClient.find({
       type: AGENT_SAVED_OBJECT_TYPE,
@@ -68,12 +68,13 @@ async function migrateAgents() {
 
     if (res.total === 0) {
       hasMore = false;
+    } else {
+      hasAgents = true;
     }
+
     for (const so of res.saved_objects) {
       try {
-        const {
-          attributes,
-        } = await appContextService
+        const { attributes } = await appContextService
           .getEncryptedSavedObjects()
           .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, so.id);
 
@@ -119,6 +120,13 @@ async function migrateAgents() {
         }
       }
     }
+  }
+
+  // Update settings to show migration modal
+  if (hasAgents) {
+    await settingsService.saveSettings(soClient, {
+      has_seen_fleet_migration_notice: false,
+    });
   }
 }
 
@@ -177,15 +185,12 @@ async function migrateAgentPolicies() {
         index: AGENT_POLICY_INDEX,
         q: `policy_id:${agentPolicy.id}`,
         track_total_hits: true,
+        ignore_unavailable: true,
       });
 
       // @ts-expect-error value is number | TotalHits
       if (res.body.hits.total.value === 0) {
-        return agentPolicyService.createFleetPolicyChangeFleetServer(
-          soClient,
-          esClient,
-          agentPolicy.id
-        );
+        return agentPolicyService.createFleetServerPolicy(soClient, agentPolicy.id);
       }
     })
   );

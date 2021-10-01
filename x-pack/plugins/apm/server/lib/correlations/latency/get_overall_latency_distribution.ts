@@ -11,8 +11,12 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { getMaxLatency } from './get_max_latency';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
+import { Setup } from '../../helpers/setup_request';
 
 export const INTERVAL_BUCKETS = 15;
+interface Options extends CorrelationsOptions {
+  setup: Setup;
+}
 
 export function getDistributionAggregation(
   maxLatency: number,
@@ -37,9 +41,7 @@ export function getDistributionAggregation(
   };
 }
 
-export async function getOverallLatencyDistribution(
-  options: CorrelationsOptions
-) {
+export async function getOverallLatencyDistribution(options: Options) {
   const { setup } = options;
   const filters = getCorrelationsFilters(options);
 
@@ -71,8 +73,9 @@ export async function getOverallLatencyDistribution(
       },
     };
 
-    const response = await withApmSpan('get_terms_distribution', () =>
-      apmEventClient.search(params)
+    const response = await apmEventClient.search(
+      'get_terms_distribution',
+      params
     );
 
     if (!response.aggregations) {

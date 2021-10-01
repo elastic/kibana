@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import '../../index.scss';
+import '../../_index.scss';
 export * from '../../embeddable/map_embeddable';
 export * from '../../kibana_services';
 export { renderApp } from '../../render_app';

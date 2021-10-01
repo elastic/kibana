@@ -128,7 +128,7 @@ export class CcrShard extends PureComponent {
     const { stat, oldestStat, formattedLeader, alerts } = this.props;
 
     return (
-      <EuiPage style={{ backgroundColor: 'white' }}>
+      <EuiPage>
         <EuiPageBody>
           <EuiPanel>
             <Status

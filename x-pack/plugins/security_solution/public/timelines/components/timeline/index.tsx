@@ -11,14 +11,15 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { isTab, TimelineContext } from '../../../../../timelines/public';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { isTab } from '../../../common/components/accessibility/helpers';
+import { CellValueElementProps } from './cell_rendering';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
-import { TimelineType, TimelineId } from '../../../../common/types/timeline';
+import { TimelineType, TimelineId, RowRenderer } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
@@ -36,10 +37,12 @@ const TimelineTemplateBadge = styled.div`
 `;
 
 export interface Props {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   timelineId: TimelineId;
 }
 
-const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
+const TimelineSavingProgressComponent: React.FC<{ timelineId: TimelineId }> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const isSaving = useShallowEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isSaving
@@ -50,14 +53,18 @@ const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
 
 const TimelineSavingProgress = React.memo(TimelineSavingProgressComponent);
 
-const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
+const StatefulTimelineComponent: React.FC<Props> = ({
+  renderCellValue,
+  rowRenderers,
+  timelineId,
+}) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
-  const { graphEventId, savedObjectId, timelineType } = useDeepEqualSelector((state) =>
+  const { graphEventId, savedObjectId, timelineType, description } = useDeepEqualSelector((state) =>
     pick(
-      ['graphEventId', 'savedObjectId', 'timelineType'],
+      ['graphEventId', 'savedObjectId', 'timelineType', 'description'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -111,32 +118,41 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+  const timelineContext = useMemo(() => ({ timelineId }), [timelineId]);
 
   return (
-    <TimelineContainer
-      data-test-subj="timeline"
-      data-timeline-id={timelineId}
-      onKeyDown={onKeyDown}
-      ref={containerElement}
-    >
-      <TimelineSavingProgress timelineId={timelineId} />
-      {timelineType === TimelineType.template && (
-        <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
-      )}
+    <TimelineContext.Provider value={timelineContext}>
+      <TimelineContainer
+        data-test-subj="timeline"
+        data-timeline-id={timelineId}
+        onKeyDown={onKeyDown}
+        ref={containerElement}
+      >
+        <TimelineSavingProgress timelineId={timelineId} />
+        {timelineType === TimelineType.template && (
+          <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
+        )}
 
-      <HideShowContainer $isVisible={!timelineFullScreen}>
-        <FlyoutHeaderPanel timelineId={timelineId} />
-        <FlyoutHeader timelineId={timelineId} />
-      </HideShowContainer>
+        <HideShowContainer
+          $isVisible={!timelineFullScreen}
+          data-test-subj="timeline-hide-show-container"
+        >
+          <FlyoutHeaderPanel timelineId={timelineId} />
+          <FlyoutHeader timelineId={timelineId} />
+        </HideShowContainer>
 
-      <TabsContent
-        graphEventId={graphEventId}
-        setTimelineFullScreen={setTimelineFullScreen}
-        timelineId={timelineId}
-        timelineType={timelineType}
-        timelineFullScreen={timelineFullScreen}
-      />
-    </TimelineContainer>
+        <TabsContent
+          graphEventId={graphEventId}
+          renderCellValue={renderCellValue}
+          rowRenderers={rowRenderers}
+          setTimelineFullScreen={setTimelineFullScreen}
+          timelineId={timelineId}
+          timelineType={timelineType}
+          timelineDescription={description}
+          timelineFullScreen={timelineFullScreen}
+        />
+      </TimelineContainer>
+    </TimelineContext.Provider>
   );
 };
 

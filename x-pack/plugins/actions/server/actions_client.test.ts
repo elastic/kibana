@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import moment from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionsClient } from './actions_client';
@@ -18,6 +20,7 @@ import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '../../licensing/server/mocks';
 import { httpServerMock } from '../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../security/server/audit/index.mock';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
 import {
   elasticsearchServiceMock,
@@ -26,7 +29,12 @@ import {
 import { actionExecutorMock } from './lib/action_executor.mock';
 import uuid from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
+import {
+  getAuthorizationModeBySource,
+  AuthorizationMode,
+} from './authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
+import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
 
@@ -36,14 +44,33 @@ jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => (
   },
 }));
 
+jest.mock('./lib/track_legacy_rbac_exemption', () => ({
+  trackLegacyRBACExemption: jest.fn(),
+}));
+
+jest.mock('./authorization/get_authorization_mode_by_source', () => {
+  return {
+    getAuthorizationModeBySource: jest.fn(() => {
+      return 1;
+    }),
+    AuthorizationMode: {
+      Legacy: 0,
+      RBAC: 1,
+    },
+  };
+});
+
 const defaultKibanaIndex = '.kibana';
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
+const ephemeralExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditServiceMock.create().asScoped(request);
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 const mockTaskManager = taskManagerMock.createSetup();
 
@@ -75,9 +102,11 @@ beforeEach(() => {
     preconfiguredActions: [],
     actionExecutor,
     executionEnqueuer,
+    ephemeralExecutionEnqueuer,
     request,
-    authorization: (authorization as unknown) as ActionsAuthorization,
+    authorization: authorization as unknown as ActionsAuthorization,
     auditLogger,
+    usageCounter: mockUsageCounter,
   });
 });
 
@@ -90,6 +119,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -121,6 +151,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -160,6 +191,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -197,6 +229,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -248,6 +281,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {},
       },
       references: [],
@@ -272,6 +306,7 @@ describe('create()', () => {
       isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
       config: {},
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -281,6 +316,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -345,6 +381,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {
           a: true,
           b: true,
@@ -371,6 +408,7 @@ describe('create()', () => {
       isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
       config: {
         a: true,
         b: true,
@@ -388,6 +426,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -403,9 +442,24 @@ describe('create()', () => {
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
       allowedHosts: ['*'],
+      preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
-      proxyRejectUnauthorizedCertificates: true,
-      rejectUnauthorized: true,
+      proxyRejectUnauthorizedCertificates: true, // legacy
+      rejectUnauthorized: true, // legacy
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+      maxResponseContentLength: new ByteSizeValue(1000000),
+      responseTimeout: moment.duration('60s'),
+      cleanupFailedExecutionsTask: {
+        enabled: true,
+        cleanupInterval: schema.duration().validate('5m'),
+        idleInterval: schema.duration().validate('1h'),
+        pageSize: 100,
+      },
+      ssl: {
+        verificationMode: 'full',
+        proxyVerificationMode: 'full',
+      },
     });
 
     const localActionTypeRegistryParams = {
@@ -426,8 +480,9 @@ describe('create()', () => {
       preconfiguredActions: [],
       actionExecutor,
       executionEnqueuer,
+      ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
     });
 
     const savedObjectCreateResult = {
@@ -436,6 +491,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {},
       },
       references: [],
@@ -469,6 +525,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {},
       },
       references: [],
@@ -505,6 +562,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -523,8 +581,9 @@ describe('get()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -553,6 +612,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -577,8 +637,9 @@ describe('get()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -615,6 +676,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -640,6 +702,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -691,8 +754,9 @@ describe('get()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
+      ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -760,8 +824,9 @@ describe('getAll()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -808,6 +873,7 @@ describe('getAll()', () => {
             type: 'type',
             attributes: {
               name: 'test',
+              isMissingSecrets: false,
               config: {
                 foo: 'bar',
               },
@@ -868,6 +934,7 @@ describe('getAll()', () => {
           type: 'type',
           attributes: {
             name: 'test',
+            isMissingSecrets: false,
             config: {
               foo: 'bar',
             },
@@ -895,8 +962,9 @@ describe('getAll()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
+      ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -919,6 +987,7 @@ describe('getAll()', () => {
         config: {
           foo: 'bar',
         },
+        isMissingSecrets: false,
         referencedByCount: 6,
       },
       {
@@ -946,6 +1015,7 @@ describe('getBulk()', () => {
               config: {
                 foo: 'bar',
               },
+              isMissingSecrets: false,
             },
             references: [],
           },
@@ -968,8 +1038,9 @@ describe('getBulk()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
+        ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -1017,6 +1088,7 @@ describe('getBulk()', () => {
               config: {
                 foo: 'bar',
               },
+              isMissingSecrets: false,
             },
             references: [],
           },
@@ -1075,6 +1147,7 @@ describe('getBulk()', () => {
             config: {
               foo: 'bar',
             },
+            isMissingSecrets: false,
           },
           references: [],
         },
@@ -1097,8 +1170,9 @@ describe('getBulk()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
+      ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -1130,6 +1204,7 @@ describe('getBulk()', () => {
           foo: 'bar',
         },
         id: '1',
+        isMissingSecrets: false,
         isPreconfigured: false,
         name: 'test',
       },
@@ -1218,6 +1293,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
       },
       references: [],
     });
@@ -1226,6 +1302,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1306,6 +1383,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
       },
       references: [],
     });
@@ -1314,6 +1392,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1332,6 +1411,7 @@ describe('update()', () => {
       id: 'my-action',
       isPreconfigured: false,
       actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
       name: 'my name',
       config: {},
     });
@@ -1342,6 +1422,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -1357,6 +1438,70 @@ describe('update()', () => {
       Array [
         "action",
         "my-action",
+      ]
+    `);
+  });
+
+  test('updates an action with isMissingSecrets "true" (set true as the import result), to isMissingSecrets', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        isMissingSecrets: true,
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        isMissingSecrets: true,
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    const result = await actionsClient.update({
+      id: 'my-action',
+      action: {
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+    });
+    expect(result).toEqual({
+      id: 'my-action',
+      isPreconfigured: false,
+      actionTypeId: 'my-action-type',
+      isMissingSecrets: true,
+      name: 'my name',
+      config: {},
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        Object {
+          "actionTypeId": "my-action-type",
+          "config": Object {},
+          "isMissingSecrets": false,
+          "name": "my name",
+          "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
+          "references": Array [],
+        },
       ]
     `);
   });
@@ -1415,6 +1560,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: true,
         name: 'my name',
         config: {
           a: true,
@@ -1441,6 +1587,7 @@ describe('update()', () => {
       id: 'my-action',
       isPreconfigured: false,
       actionTypeId: 'my-action-type',
+      isMissingSecrets: true,
       name: 'my name',
       config: {
         a: true,
@@ -1459,6 +1606,7 @@ describe('update()', () => {
             "b": true,
             "c": true,
           },
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -1494,6 +1642,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1516,6 +1665,9 @@ describe('update()', () => {
 describe('execute()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to excecute actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       await actionsClient.execute({
         actionId: 'action-id',
         params: {
@@ -1526,6 +1678,9 @@ describe('execute()', () => {
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to execute all actions`)
       );
@@ -1540,6 +1695,21 @@ describe('execute()', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+
+    test('tracks legacy RBAC', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.Legacy;
+      });
+
+      await actionsClient.execute({
+        actionId: 'action-id',
+        params: {
+          name: 'my name',
+        },
+      });
+
+      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith('execute', mockUsageCounter);
     });
   });
 
@@ -1562,12 +1732,79 @@ describe('execute()', () => {
         name: 'my name',
       },
     });
+
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            typeId: 'some-type-id',
+            type: 'some-type',
+          },
+        ],
+      })
+    ).resolves.toMatchObject({ status: 'ok', actionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          typeId: 'some-type-id',
+          type: 'some-type',
+        },
+      ],
+    });
+
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            typeId: 'some-type-id',
+            type: 'some-type',
+            namespace: 'some-namespace',
+          },
+        ],
+      })
+    ).resolves.toMatchObject({ status: 'ok', actionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          typeId: 'some-type-id',
+          type: 'some-type',
+          namespace: 'some-namespace',
+        },
+      ],
+    });
   });
 });
 
 describe('enqueueExecution()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to excecute actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       await actionsClient.enqueueExecution({
         id: uuid.v4(),
         params: {},
@@ -1578,6 +1815,9 @@ describe('enqueueExecution()', () => {
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to execute all actions`)
       );
@@ -1592,6 +1832,24 @@ describe('enqueueExecution()', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+
+    test('tracks legacy RBAC', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.Legacy;
+      });
+
+      await actionsClient.enqueueExecution({
+        id: uuid.v4(),
+        params: {},
+        spaceId: 'default',
+        apiKey: null,
+      });
+
+      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
+        'enqueueExecution',
+        mockUsageCounter
+      );
     });
   });
 
@@ -1633,5 +1891,67 @@ describe('isActionTypeEnabled()', () => {
     expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
       notifyUsage: true,
     });
+  });
+});
+
+describe('isPreconfigured()', () => {
+  test('should return true if connector id is in list of preconfigured connectors', () => {
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
+
+    expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
+  });
+
+  test('should return false if connector id is not in list of preconfigured connectors', () => {
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
+
+    expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);
   });
 });

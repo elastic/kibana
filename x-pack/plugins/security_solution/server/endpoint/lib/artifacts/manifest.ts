@@ -7,11 +7,12 @@
 
 import { flatMap, isEqual } from 'lodash';
 import semver from 'semver';
-import { validate } from '../../../../common';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   InternalArtifactSchema,
   InternalManifestSchema,
   InternalManifestEntrySchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
 import {
   ManifestSchemaVersion,
@@ -56,10 +57,7 @@ export class Manifest {
   private readonly policySpecificEntries: Map<string, Map<string, ManifestEntry>>;
   private version: ManifestVersion;
 
-  constructor(
-    version?: Partial<ManifestVersion>,
-    private readonly isFleetServerEnabled: boolean = false
-  ) {
+  constructor(version?: Partial<ManifestVersion>) {
     this.allEntries = new Map();
     this.defaultEntries = new Map();
     this.policySpecificEntries = new Map();
@@ -78,8 +76,8 @@ export class Manifest {
     this.version = validated;
   }
 
-  public static getDefault(schemaVersion?: ManifestSchemaVersion, isFleetServerEnabled?: boolean) {
-    return new Manifest({ schemaVersion, semanticVersion: '1.0.0' }, isFleetServerEnabled);
+  public static getDefault(schemaVersion?: ManifestSchemaVersion) {
+    return new Manifest({ schemaVersion, semanticVersion: '1.0.0' });
   }
 
   public bumpSemanticVersion() {
@@ -107,7 +105,7 @@ export class Manifest {
     const descriptor = {
       isDefaultEntry: existingDescriptor?.isDefaultEntry || policyId === undefined,
       specificTargetPolicies: addValueToSet(existingDescriptor?.specificTargetPolicies, policyId),
-      entry: existingDescriptor?.entry || new ManifestEntry(artifact, this.isFleetServerEnabled),
+      entry: existingDescriptor?.entry || new ManifestEntry(artifact),
     };
 
     this.allEntries.set(descriptor.entry.getDocId(), descriptor);
@@ -140,6 +138,27 @@ export class Manifest {
 
   public getArtifactTargetPolicies(artifact: InternalArtifactSchema): Set<string> | undefined {
     return this.allEntries.get(getArtifactId(artifact))?.specificTargetPolicies;
+  }
+
+  /**
+   * Replaces an artifact from all the collections.
+   *
+   * @param artifact An InternalArtifactCompleteSchema representing the artifact.
+   */
+  public replaceArtifact(artifact: InternalArtifactCompleteSchema) {
+    const existingEntry = this.allEntries.get(getArtifactId(artifact));
+    if (existingEntry) {
+      existingEntry.entry = new ManifestEntry(artifact);
+
+      this.allEntries.set(getArtifactId(artifact), existingEntry);
+      this.defaultEntries.set(getArtifactId(artifact), existingEntry.entry);
+
+      existingEntry.specificTargetPolicies.forEach((policyId) => {
+        const entries = this.policySpecificEntries.get(policyId) || new Map();
+        entries.set(existingEntry.entry.getDocId(), existingEntry.entry);
+        this.policySpecificEntries.set(policyId, entries);
+      });
+    }
   }
 
   public diff(manifest: Manifest): ManifestDiff {

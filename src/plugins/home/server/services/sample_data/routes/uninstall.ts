@@ -28,11 +28,7 @@ export function createUninstallRoute(
     async (
       {
         core: {
-          elasticsearch: {
-            legacy: {
-              client: { callAsCurrentUser },
-            },
-          },
+          elasticsearch: { client: esClient },
           savedObjects: { getClient: getSavedObjectsClient, typeRegistry },
         },
       },
@@ -50,7 +46,9 @@ export function createUninstallRoute(
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         try {
-          await callAsCurrentUser('indices.delete', { index });
+          await esClient.asCurrentUser.indices.delete({
+            index,
+          });
         } catch (err) {
           return response.customError({
             statusCode: err.status,

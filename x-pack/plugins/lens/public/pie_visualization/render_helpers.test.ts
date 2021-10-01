@@ -33,10 +33,10 @@ describe('render helpers', () => {
             meta: { type: 'number' },
           }
         )
-      ).toEqual(-100);
+      ).toEqual(0);
     });
 
-    it('returns epsilon when metric is 0 without fallback', () => {
+    it('returns 0 when metric value is 0', () => {
       expect(
         getSliceValue(
           { a: 'Cat', b: 'Home', c: 0 },
@@ -46,7 +46,20 @@ describe('render helpers', () => {
             meta: { type: 'number' },
           }
         )
-      ).toEqual(Number.EPSILON);
+      ).toEqual(0);
+    });
+
+    it('returns 0 when metric value is infinite', () => {
+      expect(
+        getSliceValue(
+          { a: 'Cat', b: 'Home', c: Number.POSITIVE_INFINITY },
+          {
+            id: 'c',
+            name: 'C',
+            meta: { type: 'number' },
+          }
+        )
+      ).toEqual(0);
     });
   });
 
@@ -66,7 +79,16 @@ describe('render helpers', () => {
       };
       expect(
         getFilterContext(
-          [{ groupByRollup: 'Test', value: 100, depth: 1, path: [], sortIndex: 1 }],
+          [
+            {
+              groupByRollup: 'Test',
+              value: 100,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+          ],
           ['a'],
           table
         )
@@ -98,7 +120,16 @@ describe('render helpers', () => {
       };
       expect(
         getFilterContext(
-          [{ groupByRollup: 'Test', value: 100, depth: 1, path: [], sortIndex: 1 }],
+          [
+            {
+              groupByRollup: 'Test',
+              value: 100,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+          ],
           ['a', 'b'],
           table
         )
@@ -131,8 +162,22 @@ describe('render helpers', () => {
       expect(
         getFilterContext(
           [
-            { groupByRollup: 'Test', value: 100, depth: 1, path: [], sortIndex: 1 },
-            { groupByRollup: 'Two', value: 5, depth: 1, path: [], sortIndex: 1 },
+            {
+              groupByRollup: 'Test',
+              value: 100,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+            {
+              groupByRollup: 'Two',
+              value: 5,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
           ],
           ['a', 'b'],
           table

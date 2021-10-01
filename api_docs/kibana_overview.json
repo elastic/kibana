@@ -1,0 +1,110 @@
+{
+  "id": "kibanaOverview",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "kibanaOverview",
+      "id": "def-public.KibanaOverviewPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "KibanaOverviewPluginSetup",
+      "description": [],
+      "path": "src/plugins/kibana_overview/public/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "kibanaOverview",
+      "id": "def-public.KibanaOverviewPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "KibanaOverviewPluginStart",
+      "description": [],
+      "path": "src/plugins/kibana_overview/public/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "kibanaOverview",
+        "id": "def-common.PLUGIN_ICON",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ICON",
+        "description": [],
+        "signature": [
+          "\"logoKibana\""
+        ],
+        "path": "src/plugins/kibana_overview/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaOverview",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"kibanaOverview\""
+        ],
+        "path": "src/plugins/kibana_overview/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaOverview",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Overview\""
+        ],
+        "path": "src/plugins/kibana_overview/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaOverview",
+        "id": "def-common.PLUGIN_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/kibana_overview\""
+        ],
+        "path": "src/plugins/kibana_overview/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

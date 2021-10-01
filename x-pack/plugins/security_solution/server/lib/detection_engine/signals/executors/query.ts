@@ -7,48 +7,60 @@
 
 import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
-import { RefreshTypes } from '../../types';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { QueryRuleAttributes, RuleRangeTuple } from '../types';
+import { AlertAttributes, RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
+import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 
 export const queryExecutor = async ({
   rule,
-  tuples,
+  tuple,
   listClient,
   exceptionItems,
+  experimentalFeatures,
   services,
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
-  rule: SavedObject<QueryRuleAttributes>;
-  tuples: RuleRangeTuple[];
+  rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
+  experimentalFeatures: ExperimentalFeatures;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
+
   const esFilter = await getFilter({
     type: ruleParams.type,
     filters: ruleParams.filters,
@@ -61,10 +73,10 @@ export const queryExecutor = async ({
   });
 
   return searchAfterAndBulkCreate({
-    tuples,
+    tuple,
     listClient,
     exceptionsList: exceptionItems,
-    ruleParams,
+    ruleSO: rule,
     services,
     logger,
     eventsTelemetry,
@@ -72,18 +84,10 @@ export const queryExecutor = async ({
     inputIndexPattern: inputIndex,
     signalsIndex: ruleParams.outputIndex,
     filter: esFilter,
-    actions: rule.attributes.actions,
-    name: rule.attributes.name,
-    createdBy: rule.attributes.createdBy,
-    createdAt: rule.attributes.createdAt,
-    updatedBy: rule.attributes.updatedBy,
-    updatedAt: rule.updated_at ?? '',
-    interval: rule.attributes.schedule.interval,
-    enabled: rule.attributes.enabled,
     pageSize: searchAfterSize,
-    refresh,
-    tags: rule.attributes.tags,
-    throttle: rule.attributes.throttle,
+    buildReasonMessage: buildReasonMessageForQueryAlert,
     buildRuleMessage,
+    bulkCreate,
+    wrapHits,
   });
 };

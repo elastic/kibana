@@ -43,40 +43,24 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const ossBuild = new Build(config, true);
-const defaultBuild = new Build(config, false);
-
-describe('#isOss()', () => {
-  it('returns true for oss', () => {
-    expect(ossBuild.isOss()).toBe(true);
-  });
-
-  it('returns false for default build', () => {
-    expect(defaultBuild.isOss()).toBe(false);
-  });
-});
+const defaultBuild = new Build(config);
 
 describe('#getName()', () => {
   it('returns kibana for default build', () => {
     expect(defaultBuild.getName()).toBe('kibana');
-  });
-
-  it('returns kibana-oss for oss', () => {
-    expect(ossBuild.getName()).toBe('kibana-oss');
   });
 });
 
 describe('#getLogTag()', () => {
   it('returns string with build name in it', () => {
     expect(defaultBuild.getLogTag()).toContain(defaultBuild.getName());
-    expect(ossBuild.getLogTag()).toContain(ossBuild.getName());
   });
 });
 
 describe('#resolvePath()', () => {
   it('uses passed config to resolve a path relative to the repo', () => {
-    expect(ossBuild.resolvePath('bar')).toMatchInlineSnapshot(
-      `<absolute path>/build/kibana-oss/bar`
+    expect(defaultBuild.resolvePath('bar')).toMatchInlineSnapshot(
+      `<absolute path>/build/kibana/bar`
     );
   });
 
@@ -89,28 +73,27 @@ describe('#resolvePath()', () => {
 
 describe('#resolvePathForPlatform()', () => {
   it('uses config.resolveFromRepo(), config.getBuildVersion(), and platform.getBuildName() to create path', () => {
-    expect(ossBuild.resolvePathForPlatform(linuxPlatform, 'foo', 'bar')).toMatchInlineSnapshot(
-      `<absolute path>/build/oss/kibana-8.0.0-linux-x86_64/foo/bar`
+    expect(defaultBuild.resolvePathForPlatform(linuxPlatform, 'foo', 'bar')).toMatchInlineSnapshot(
+      `<absolute path>/build/default/kibana-8.0.0-linux-x86_64/foo/bar`
     );
   });
 });
 
 describe('#getPlatformArchivePath()', () => {
   it('creates correct path for different platforms', () => {
-    expect(ossBuild.getPlatformArchivePath(linuxPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/kibana-oss-8.0.0-linux-x86_64.tar.gz`
+    expect(defaultBuild.getPlatformArchivePath(linuxPlatform)).toMatchInlineSnapshot(
+      `<absolute path>/target/kibana-8.0.0-linux-x86_64.tar.gz`
     );
-    expect(ossBuild.getPlatformArchivePath(linuxArmPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/kibana-oss-8.0.0-linux-aarch64.tar.gz`
+    expect(defaultBuild.getPlatformArchivePath(linuxArmPlatform)).toMatchInlineSnapshot(
+      `<absolute path>/target/kibana-8.0.0-linux-aarch64.tar.gz`
     );
-    expect(ossBuild.getPlatformArchivePath(windowsPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/kibana-oss-8.0.0-windows-x86_64.zip`
+    expect(defaultBuild.getPlatformArchivePath(windowsPlatform)).toMatchInlineSnapshot(
+      `<absolute path>/target/kibana-8.0.0-windows-x86_64.zip`
     );
   });
 
   describe('#getRootDirectory()', () => {
     it('creates correct root directory name', () => {
-      expect(ossBuild.getRootDirectory()).toMatchInlineSnapshot(`"kibana-oss-8.0.0"`);
       expect(defaultBuild.getRootDirectory()).toMatchInlineSnapshot(`"kibana-8.0.0"`);
     });
   });

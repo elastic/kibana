@@ -255,7 +255,7 @@ describe('ExpressionRenderer', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
 
-    const newData = {};
+    const result = {};
     const inspectData = {};
     const onData$ = jest.fn();
 
@@ -275,11 +275,11 @@ describe('ExpressionRenderer', () => {
     expect(onData$).toHaveBeenCalledTimes(0);
 
     act(() => {
-      dataSubject.next(newData);
+      dataSubject.next({ result });
     });
 
     expect(onData$).toHaveBeenCalledTimes(1);
-    expect(onData$.mock.calls[0][0]).toBe(newData);
+    expect(onData$.mock.calls[0][0]).toBe(result);
     expect(onData$.mock.calls[0][1]).toBe(inspectData);
   });
 

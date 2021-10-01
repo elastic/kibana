@@ -13,9 +13,13 @@ import { OverviewDescriptionList } from '../../../../common/components/overview_
 import { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-import { EndpointFields, HostPolicyResponseActionStatus } from '../../../../graphql/types';
-
 import * as i18n from './translations';
+import {
+  EndpointFields,
+  HostPolicyResponseActionStatus,
+} from '../../../../../common/search_strategy/security_solution/hosts';
+import { AgentStatus } from '../../../../common/components/endpoint/agent_status';
+import { EndpointHostIsolationStatus } from '../../../../common/components/endpoint/host_isolation';
 
 interface Props {
   contextID?: string;
@@ -71,7 +75,24 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
               : getEmptyTagValue(),
         },
       ],
-      [], // needs 4 columns for design
+      [
+        {
+          title: i18n.FLEET_AGENT_STATUS,
+          description:
+            data != null && data.elasticAgentStatus ? (
+              <>
+                <AgentStatus hostStatus={data.elasticAgentStatus} />
+                <EndpointHostIsolationStatus
+                  isIsolated={Boolean(data.isolation)}
+                  pendingIsolate={data.pendingActions?.isolate ?? 0}
+                  pendingUnIsolate={data.pendingActions?.unisolate ?? 0}
+                />
+              </>
+            ) : (
+              getEmptyTagValue()
+            ),
+        },
+      ],
     ],
     [data, getDefaultRenderer]
   );

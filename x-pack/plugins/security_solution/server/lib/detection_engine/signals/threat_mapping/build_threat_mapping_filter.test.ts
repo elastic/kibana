@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  ThreatMapping,
-  ThreatMappingEntries,
-} from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { ThreatMapping, ThreatMappingEntries } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
   filterThreatMapping,

@@ -7,12 +7,11 @@
 
 import { mapKeys, snakeCase } from 'lodash/fp';
 import { AlertInstance } from '../../../../../alerting/server';
-import { SignalSource } from '../signals/types';
-import { RuleTypeParams } from '../types';
+import { RuleParams } from '../schemas/rule_schemas';
 
-export type NotificationRuleTypeParams = RuleTypeParams & {
-  name: string;
+export type NotificationRuleTypeParams = RuleParams & {
   id: string;
+  name: string;
 };
 
 interface ScheduleNotificationActions {
@@ -20,7 +19,7 @@ interface ScheduleNotificationActions {
   signalsCount: number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
-  signals: SignalSource[];
+  signals: unknown[];
 }
 
 export const scheduleNotificationActions = ({

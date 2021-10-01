@@ -9,7 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/lens'],
-
-  // TODO: migrate to "jest-environment-jsdom" https://github.com/elastic/kibana/issues/95202
-  testEnvironment: 'jest-environment-jsdom-thirteen',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/lens',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/lens/{common,public,server}/**/*.{ts,tsx}'],
 };

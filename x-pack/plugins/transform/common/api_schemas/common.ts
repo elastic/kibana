@@ -17,6 +17,7 @@ export const transformIdsSchema = schema.arrayOf(
 
 export type TransformIdsSchema = TypeOf<typeof transformIdsSchema>;
 
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 export const transformStateSchema = schema.oneOf([
   schema.literal(TRANSFORM_STATE.ABORTING),
   schema.literal(TRANSFORM_STATE.FAILED),
@@ -24,6 +25,7 @@ export const transformStateSchema = schema.oneOf([
   schema.literal(TRANSFORM_STATE.STARTED),
   schema.literal(TRANSFORM_STATE.STOPPED),
   schema.literal(TRANSFORM_STATE.STOPPING),
+  schema.literal(TRANSFORM_STATE.WAITING),
 ]);
 
 export const indexPatternTitleSchema = schema.object({
@@ -65,6 +67,7 @@ export const runtimeMappingsSchema = schema.maybe(
         schema.literal('date'),
         schema.literal('ip'),
         schema.literal('boolean'),
+        schema.literal('geo_point'),
       ]),
       script: schema.maybe(
         schema.oneOf([

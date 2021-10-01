@@ -41,7 +41,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
 
   const invalidateApiKeyPrompt: InvalidateApiKeys = (keys, onSuccess = () => undefined) => {
     if (!keys || !keys.length) {
-      throw new Error('No API key IDs specified for invalidation');
+      throw new Error('No API key IDs specified for deletion');
     }
     setIsModalOpen(true);
     setApiKeys(keys);
@@ -75,16 +75,16 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
         const hasMultipleSuccesses = itemsInvalidated.length > 1;
         const successMessage = hasMultipleSuccesses
           ? i18n.translate(
-              'xpack.security.management.apiKeys.invalidateApiKey.successMultipleNotificationTitle',
+              'xpack.security.management.apiKeys.deleteApiKey.successMultipleNotificationTitle',
               {
-                defaultMessage: 'Invalidated {count} API keys',
+                defaultMessage: 'Deleted {count} API keys',
                 values: { count: itemsInvalidated.length },
               }
             )
           : i18n.translate(
-              'xpack.security.management.apiKeys.invalidateApiKey.successSingleNotificationTitle',
+              'xpack.security.management.apiKeys.deleteApiKey.successSingleNotificationTitle',
               {
-                defaultMessage: "Invalidated API key '{name}'",
+                defaultMessage: "Deleted API key '{name}'",
                 values: { name: itemsInvalidated[0].name },
               }
             );
@@ -102,7 +102,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
       const hasMultipleErrors = (errors && errors.length > 1) || (error && apiKeys.length > 1);
       const errorMessage = hasMultipleErrors
         ? i18n.translate(
-            'xpack.security.management.apiKeys.invalidateApiKey.errorMultipleNotificationTitle',
+            'xpack.security.management.apiKeys.deleteApiKey.errorMultipleNotificationTitle',
             {
               defaultMessage: 'Error deleting {count} apiKeys',
               values: {
@@ -111,7 +111,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
             }
           )
         : i18n.translate(
-            'xpack.security.management.apiKeys.invalidateApiKey.errorSingleNotificationTitle',
+            'xpack.security.management.apiKeys.deleteApiKey.errorSingleNotificationTitle',
             {
               defaultMessage: "Error deleting API key '{name}'",
               values: { name: (errors && errors[0].name) || apiKeys[0].name },
@@ -130,19 +130,20 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
 
     return (
       <EuiConfirmModal
+        role="dialog"
         title={
           isSingle
             ? i18n.translate(
-                'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateSingleTitle',
+                'xpack.security.management.apiKeys.deleteApiKey.confirmModal.deleteSingleTitle',
                 {
-                  defaultMessage: "Invalidate API key '{name}'?",
+                  defaultMessage: "Delete API key '{name}'?",
                   values: { name: apiKeys[0].name },
                 }
               )
             : i18n.translate(
-                'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleTitle',
+                'xpack.security.management.apiKeys.deleteApiKey.confirmModal.deleteMultipleTitle',
                 {
-                  defaultMessage: 'Invalidate {count} API keys?',
+                  defaultMessage: 'Delete {count} API keys?',
                   values: { count: apiKeys.length },
                 }
               )
@@ -150,13 +151,13 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
         onCancel={closeModal}
         onConfirm={invalidateApiKey}
         cancelButtonText={i18n.translate(
-          'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.cancelButtonLabel',
+          'xpack.security.management.apiKeys.deleteApiKey.confirmModal.cancelButtonLabel',
           { defaultMessage: 'Cancel' }
         )}
         confirmButtonText={i18n.translate(
-          'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.confirmButtonLabel',
+          'xpack.security.management.apiKeys.deleteApiKey.confirmModal.confirmButtonLabel',
           {
-            defaultMessage: 'Invalidate {count, plural, one {API key} other {API keys}}',
+            defaultMessage: 'Delete {count, plural, one {API key} other {API keys}}',
             values: { count: apiKeys.length },
           }
         )}
@@ -167,8 +168,8 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
           <Fragment>
             <p>
               {i18n.translate(
-                'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleListDescription',
-                { defaultMessage: 'You are about to invalidate these API keys:' }
+                'xpack.security.management.apiKeys.deleteApiKey.confirmModal.deleteMultipleListDescription',
+                { defaultMessage: 'You are about to delete these API keys:' }
               )}
             </p>
             <ul>

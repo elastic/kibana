@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109904
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export * from './constants';
 export * from './es_query';
-export * from './field_formats';
-export * from './index_patterns';
+export * from './data_views';
 export * from './kbn_field_types';
 export * from './query';
 export * from './search';
@@ -18,8 +20,9 @@ export * from './utils';
 export * from './exports';
 
 /**
- * Use data plugin interface instead
- * @deprecated
+ *
+ * @deprecated Use data plugin interface instead
+ * @removeBy 8.1
  */
 
 export { IndexPatternAttributes } from './types';

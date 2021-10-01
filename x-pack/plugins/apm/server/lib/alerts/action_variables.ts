@@ -13,28 +13,28 @@ export const apmActionVariables = {
       'xpack.apm.alerts.action_variables.serviceName',
       { defaultMessage: 'The service the alert is created for' }
     ),
-    name: 'serviceName',
+    name: 'serviceName' as const,
   },
   transactionType: {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.transactionType',
       { defaultMessage: 'The transaction type the alert is created for' }
     ),
-    name: 'transactionType',
+    name: 'transactionType' as const,
   },
   environment: {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.environment',
       { defaultMessage: 'The transaction type the alert is created for' }
     ),
-    name: 'environment',
+    name: 'environment' as const,
   },
   threshold: {
     description: i18n.translate('xpack.apm.alerts.action_variables.threshold', {
       defaultMessage:
         'Any trigger value above this value will cause the alert to fire',
     }),
-    name: 'threshold',
+    name: 'threshold' as const,
   },
   triggerValue: {
     description: i18n.translate(
@@ -44,7 +44,7 @@ export const apmActionVariables = {
           'The value that breached the threshold and triggered the alert',
       }
     ),
-    name: 'triggerValue',
+    name: 'triggerValue' as const,
   },
   interval: {
     description: i18n.translate(
@@ -54,6 +54,6 @@ export const apmActionVariables = {
           'The length and unit of the time period where the alert conditions were met',
       }
     ),
-    name: 'interval',
+    name: 'interval' as const,
   },
 };

@@ -28,6 +28,7 @@ export const FlyoutBody = (props: Props) => {
       previewLayers: props.previewLayers,
       mapColors: props.mapColors,
       currentStepId: props.currentStepId,
+      isOnFinalStep: props.isOnFinalStep,
       enableNextBtn: props.enableNextBtn,
       disableNextBtn: props.disableNextBtn,
       startStepLoading: props.startStepLoading,

@@ -288,7 +288,7 @@ export class DataRecognizer {
       body: searchBody,
     });
 
-    // @ts-expect-error fix search response
+    // @ts-expect-error incorrect search response type
     return body.hits.total.value > 0;
   }
 
@@ -589,9 +589,8 @@ export class DataRecognizer {
         const jobStatsJobs: JobStat[] = [];
         if (body.jobs && body.jobs.length > 0) {
           const foundJobIds = body.jobs.map((job) => job.job_id);
-          const latestBucketTimestampsByJob = await this._resultsService.getLatestBucketTimestampByJob(
-            foundJobIds
-          );
+          const latestBucketTimestampsByJob =
+            await this._resultsService.getLatestBucketTimestampByJob(foundJobIds);
 
           body.jobs.forEach((job) => {
             const jobStat = {
@@ -776,10 +775,11 @@ export class DataRecognizer {
         this._request
       );
       if (canCreateGlobalJobs === true) {
-        await this._jobSavedObjectService.assignJobsToSpaces(
+        await this._jobSavedObjectService.updateJobsSpaces(
           'anomaly-detector',
           jobs.map((j) => j.id),
-          ['*']
+          ['*'], // spacesToAdd
+          [] // spacesToRemove
         );
       }
     }
@@ -1120,8 +1120,8 @@ export class DataRecognizer {
     if (estimateMML && this._jobsForModelMemoryEstimation.length > 0) {
       try {
         // Checks if all jobs in the module have the same time field configured
-        const firstJobTimeField = this._jobsForModelMemoryEstimation[0].job.config.data_description
-          .time_field;
+        const firstJobTimeField =
+          this._jobsForModelMemoryEstimation[0].job.config.data_description.time_field;
         const isSameTimeFields = this._jobsForModelMemoryEstimation.every(
           ({ job }) => job.config.data_description.time_field === firstJobTimeField
         );
@@ -1130,10 +1130,10 @@ export class DataRecognizer {
           // In case of time range is not provided and the time field is the same
           // set the fallback range for all jobs
           // as there may not be a common query, we use a match_all
-          const {
-            start: fallbackStart,
-            end: fallbackEnd,
-          } = await this._getFallbackTimeRange(firstJobTimeField, { match_all: {} });
+          const { start: fallbackStart, end: fallbackEnd } = await this._getFallbackTimeRange(
+            firstJobTimeField,
+            { match_all: {} }
+          );
           start = fallbackStart;
           end = fallbackEnd;
         }
@@ -1181,13 +1181,13 @@ export class DataRecognizer {
       return;
     }
 
-    // @ts-expect-error
+    // @ts-expect-error numeral missing value
     const maxBytes: number = numeral(maxMml.toUpperCase()).value();
 
     for (const job of moduleConfig.jobs) {
       const mml = job.config?.analysis_limits?.model_memory_limit;
       if (mml !== undefined) {
-        // @ts-expect-error
+        // @ts-expect-error numeral missing value
         const mmlBytes: number = numeral(mml.toUpperCase()).value();
         if (mmlBytes > maxBytes) {
           // if the job's mml is over the max,
@@ -1306,7 +1306,7 @@ export class DataRecognizer {
       const job = jobs.find((j) => j.id === `${jobPrefix}${jobSpecificOverride.job_id}`);
       if (job !== undefined) {
         // delete the job_id in the override as this shouldn't be overridden
-        // @ts-expect-error
+        // @ts-expect-error missing job_id
         delete jobSpecificOverride.job_id;
         merge(job.config, jobSpecificOverride);
         processArrayValues(job.config, jobSpecificOverride);

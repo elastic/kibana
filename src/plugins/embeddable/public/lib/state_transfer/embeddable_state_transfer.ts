@@ -115,6 +115,7 @@ export class EmbeddableStateTransfer {
     appId: string,
     options?: {
       path?: string;
+      openInNewTab?: boolean;
       state: EmbeddableEditorState;
     }
   ): Promise<void> {
@@ -162,7 +163,7 @@ export class EmbeddableStateTransfer {
   private async navigateToWithState<OutgoingStateType = unknown>(
     appId: string,
     key: string,
-    options?: { path?: string; state?: OutgoingStateType }
+    options?: { path?: string; state?: OutgoingStateType; openInNewTab?: boolean }
   ): Promise<void> {
     const existingAppState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key] || {};
     const stateObject = {
@@ -173,6 +174,6 @@ export class EmbeddableStateTransfer {
       },
     };
     this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateObject);
-    await this.navigateToApp(appId, { path: options?.path });
+    await this.navigateToApp(appId, { path: options?.path, openInNewTab: options?.openInNewTab });
   }
 }

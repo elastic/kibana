@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -25,8 +24,10 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId: string;
     let packagePolicyId2: string;
     before(async () => {
-      await getService('esArchiver').load('empty_kibana');
-      await getService('esArchiver').load('fleet/empty_fleet_server');
+      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').load(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
     });
 
     before(async function () {
@@ -47,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test managed policy',
+          name: 'Test hosted agent policy',
           namespace: 'default',
           is_managed: true,
         });
@@ -111,34 +112,13 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      await getService('esArchiver').unload('fleet/empty_fleet_server');
-      await getService('esArchiver').unload('empty_kibana');
+      await getService('esArchiver').unload(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
+      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
-    it('should fail on managed agent policies', async function () {
-      const { body } = await supertest
-        .put(`/api/fleet/package_policies/${packagePolicyId}`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'filetest-1',
-          description: '',
-          namespace: 'updated_namespace',
-          policy_id: managedAgentPolicyId,
-          enabled: true,
-          output_id: '',
-          inputs: [],
-          package: {
-            name: 'filetest',
-            title: 'For File Tests',
-            version: '0.1.0',
-          },
-        })
-        .expect(400);
-
-      expect(body.message).to.contain('Cannot update integrations of managed policy');
-    });
-
-    it('should work with valid values', async function () {
+    it('should work with valid values on "regular" policies', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
@@ -147,6 +127,26 @@ export default function (providerContext: FtrProviderContext) {
           description: '',
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        });
+    });
+
+    it('should work with valid values on hosted policies', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: managedAgentPolicyId,
           enabled: true,
           output_id: '',
           inputs: [],
@@ -177,6 +177,43 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(500);
+    });
+
+    it('should work with frozen input vars', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [
+            {
+              enabled: true,
+              type: 'test-input',
+              streams: [],
+              vars: {
+                frozen_var: {
+                  type: 'text',
+                  value: 'abc',
+                  frozen: true,
+                },
+                unfrozen_var: {
+                  type: 'text',
+                  value: 'def',
+                },
+              },
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        });
     });
   });
 }

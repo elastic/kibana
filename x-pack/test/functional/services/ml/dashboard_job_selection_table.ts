@@ -6,7 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+export type MlDashboardJobSelectionTable = ProvidedType<
+  typeof MachineLearningDashboardJobSelectionTableProvider
+>;
 
 export function MachineLearningDashboardJobSelectionTableProvider({
   getService,
@@ -16,8 +21,8 @@ export function MachineLearningDashboardJobSelectionTableProvider({
 
   return {
     async assertJobSelectionTableExists(): Promise<void> {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlCustomSelectionTable');
+      await retry.tryForTime(20 * 1000, async () => {
+        await testSubjects.existOrFail('mlCustomSelectionTable', { timeout: 2000 });
       });
     },
 

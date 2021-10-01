@@ -8,24 +8,22 @@
 import { format } from 'url';
 import supertest from 'supertest';
 import request from 'superagent';
-import { MaybeParams } from '../../../plugins/apm/server/routes/typings';
 import { parseEndpoint } from '../../../plugins/apm/common/apm_api/parse_endpoint';
-import { APMAPI } from '../../../plugins/apm/server/routes/create_apm_api';
-import type { APIReturnType } from '../../../plugins/apm/public/services/rest/createCallApmApi';
+import type {
+  APIReturnType,
+  APIClientRequestParamsOf,
+} from '../../../plugins/apm/public/services/rest/createCallApmApi';
+import type { APIEndpoint } from '../../../plugins/apm/server';
 
-export function createApmApiSupertest(st: supertest.SuperTest<supertest.Test>) {
-  return async <TPath extends keyof APMAPI['_S']>(
+export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
+  return async <TEndpoint extends APIEndpoint>(
     options: {
-      endpoint: TPath;
-    } & MaybeParams<APMAPI['_S'], TPath>
-  ): Promise<{
-    status: number;
-    body: APIReturnType<TPath>;
-  }> => {
+      endpoint: TEndpoint;
+    } & APIClientRequestParamsOf<TEndpoint> & { params?: { query?: { _inspect?: boolean } } }
+  ): Promise<SupertestReturnType<TEndpoint>> => {
     const { endpoint } = options;
 
-    // @ts-expect-error
-    const params = 'params' in options ? options.params : {};
+    const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
     const { method, pathname } = parseEndpoint(endpoint, params?.path);
     const url = format({ pathname, query: params?.query });
@@ -43,6 +41,8 @@ export function createApmApiSupertest(st: supertest.SuperTest<supertest.Test>) {
   };
 }
 
+export type ApmApiSupertest = ReturnType<typeof createApmApiClient>;
+
 export class ApmApiError extends Error {
   res: request.Response;
 
@@ -56,4 +56,9 @@ Body: ${JSON.stringify(res.body)}`
 
     this.res = res;
   }
+}
+
+export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
+  status: number;
+  body: APIReturnType<TEndpoint>;
 }

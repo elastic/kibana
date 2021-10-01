@@ -22,20 +22,29 @@ import {
   EuiFormRow,
   EuiText,
   EuiCallOut,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type {
+  ExceptionListType,
+  OsTypeArray,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  ExceptionListType,
-} from '../../../../../public/lists_plugin_deps';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import {
+  hasEqlSequenceQuery,
+  isEqlRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { ExceptionBuilder } from '../../../../../public/shared_imports';
+
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { ExceptionBuilderComponent } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -50,9 +59,10 @@ import {
   entryHasListType,
   entryHasNonEcsType,
   retrieveAlertOsTypes,
+  filterIndexPatterns,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
+import { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
@@ -128,17 +138,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
-    signalIndexName,
-  ]);
-  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
-    memoSignalIndexName
+  const memoSignalIndexName = useMemo(
+    () => (signalIndexName !== null ? [signalIndexName] : []),
+    [signalIndexName]
   );
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
+    useFetchIndex(memoSignalIndexName);
 
-  const memoMlJobIds = useMemo(
-    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
-    [maybeRule]
-  );
+  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
 
   const memoRuleIndices = useMemo(() => {
@@ -291,6 +298,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
+  const hasAlertData = useMemo((): boolean => {
+    return alertData !== undefined;
+  }, [alertData]);
+
+  const [selectedOs, setSelectedOs] = useState<OsTypeArray | undefined>();
+
+  const osTypesSelection = useMemo((): OsTypeArray => {
+    return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
+  }, [hasAlertData, alertData, selectedOs]);
+
   const enrichExceptionItems = useCallback((): Array<
     ExceptionListItemSchema | CreateExceptionListItemSchema
   > => {
@@ -300,11 +317,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichNewExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = retrieveAlertOsTypes(alertData);
+      const osTypes = osTypesSelection;
       enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
-  }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
+  }, [comment, exceptionItemsToAdd, exceptionListType, osTypesSelection]);
 
   const onAddExceptionConfirm = useCallback((): void => {
     if (addOrUpdateExceptionItems != null) {
@@ -341,10 +358,59 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return false;
   }, [maybeRule]);
 
+  const OsOptions: Array<EuiComboBoxOptionOption<OsTypeArray>> = useMemo((): Array<
+    EuiComboBoxOptionOption<OsTypeArray>
+  > => {
+    return [
+      {
+        label: sharedI18n.OPERATING_SYSTEM_WINDOWS,
+        value: ['windows'],
+      },
+      {
+        label: sharedI18n.OPERATING_SYSTEM_MAC,
+        value: ['macos'],
+      },
+      {
+        label: sharedI18n.OPERATING_SYSTEM_LINUX,
+        value: ['linux'],
+      },
+      {
+        label: sharedI18n.OPERATING_SYSTEM_WINDOWS_AND_MAC,
+        value: ['windows', 'macos'],
+      },
+    ];
+  }, []);
+
+  const handleOSSelectionChange = useCallback(
+    (selectedOptions): void => {
+      setSelectedOs(selectedOptions[0].value);
+    },
+    [setSelectedOs]
+  );
+
+  const selectedOStoOptions = useMemo((): Array<EuiComboBoxOptionOption<OsTypeArray>> => {
+    return OsOptions.filter((option) => {
+      return selectedOs === option.value;
+    });
+  }, [selectedOs, OsOptions]);
+
+  const singleSelectionOptions = useMemo(() => {
+    return { asPlainText: true };
+  }, []);
+
+  const hasOsSelection = useMemo(() => {
+    return exceptionListType === 'endpoint' && !hasAlertData;
+  }, [exceptionListType, hasAlertData]);
+
+  const isExceptionBuilderFormDisabled = useMemo(() => {
+    return hasOsSelection && selectedOs === undefined;
+  }, [hasOsSelection, selectedOs]);
+
   return (
     <Modal onClose={onCancel} data-test-subj="add-exception-modal">
       <ModalHeader>
         <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
+        <EuiSpacer size="xs" />
         <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
           {ruleName}
         </ModalHeaderSubtitle>
@@ -393,23 +459,43 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              <ExceptionBuilderComponent
-                httpService={http}
-                autocompleteService={data.autocomplete}
-                exceptionListItems={initialExceptionItems}
-                listType={exceptionListType}
-                listId={ruleExceptionList.list_id}
-                listNamespaceType={ruleExceptionList.namespace_type}
-                ruleName={ruleName}
-                indexPatterns={indexPatterns}
-                isOrDisabled={false}
-                isAndDisabled={false}
-                isNestedDisabled={false}
-                data-test-subj="alert-exception-builder"
-                id-aria="alert-exception-builder"
-                onChange={handleBuilderOnChange}
-                ruleType={maybeRule?.type}
-              />
+              {exceptionListType === 'endpoint' && !hasAlertData && (
+                <>
+                  <EuiFormRow label={sharedI18n.OPERATING_SYSTEM_LABEL}>
+                    <EuiComboBox
+                      placeholder={i18n.OPERATING_SYSTEM_PLACEHOLDER}
+                      singleSelection={singleSelectionOptions}
+                      options={OsOptions}
+                      selectedOptions={selectedOStoOptions}
+                      onChange={handleOSSelectionChange}
+                      isClearable={false}
+                      data-test-subj="os-selection-dropdown"
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="l" />
+                </>
+              )}
+              {ExceptionBuilder.getExceptionBuilderComponentLazy({
+                allowLargeValueLists:
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                httpService: http,
+                autocompleteService: data.autocomplete,
+                exceptionListItems: initialExceptionItems,
+                listType: exceptionListType,
+                osTypes: osTypesSelection,
+                listId: ruleExceptionList.list_id,
+                listNamespaceType: ruleExceptionList.namespace_type,
+                listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+                ruleName,
+                indexPatterns,
+                isOrDisabled: isExceptionBuilderFormDisabled,
+                isAndDisabled: isExceptionBuilderFormDisabled,
+                isNestedDisabled: isExceptionBuilderFormDisabled,
+                dataTestSubj: 'alert-exception-builder',
+                idAria: 'alert-exception-builder',
+                onChange: handleBuilderOnChange,
+                isDisabled: isExceptionBuilderFormDisabled,
+              })}
 
               <EuiSpacer />
 
@@ -445,7 +531,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               </EuiFormRow>
               {exceptionListType === 'endpoint' && (
                 <>
-                  <EuiSpacer />
+                  <EuiSpacer size="s" />
                   <EuiText data-test-subj="add-exception-endpoint-text" color="subdued" size="s">
                     {i18n.ENDPOINT_QUARANTINE_TEXT}
                   </EuiText>

@@ -35,7 +35,7 @@ import { ItemsGrid } from '../../../components/items_grid';
 import { NavigationMenu } from '../../../components/navigation_menu';
 import { isValidFilterListId, saveFilterList } from './utils';
 import { ml } from '../../../services/ml_api_service';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
 

@@ -6,32 +6,24 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import React from 'react';
-import styled from 'styled-components';
 
-import { TooltipWithKeyboardShortcut } from '../../components/accessibility/tooltip_with_keyboard_shortcut';
+import React from 'react';
+
+import { TooltipWithKeyboardShortcut } from '../../components/accessibility';
 import * as i18n from '../../components/drag_and_drop/translations';
 
 import { Clipboard } from './clipboard';
-
-const WithCopyToClipboardContainer = styled.div`
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  user-select: text;
-`;
-
-WithCopyToClipboardContainer.displayName = 'WithCopyToClipboardContainer';
 
 /**
  * Renders `children` with an adjacent icon that when clicked, copies `text` to
  * the clipboard and displays a confirmation toast
  */
 export const WithCopyToClipboard = React.memo<{
+  isHoverAction?: boolean;
   keyboardShortcut?: string;
   text: string;
   titleSummary?: string;
-}>(({ keyboardShortcut = '', text, titleSummary, children }) => (
+}>(({ isHoverAction, keyboardShortcut = '', text, titleSummary }) => (
   <EuiToolTip
     content={
       <TooltipWithKeyboardShortcut
@@ -42,10 +34,12 @@ export const WithCopyToClipboard = React.memo<{
       />
     }
   >
-    <WithCopyToClipboardContainer>
-      <>{children}</>
-      <Clipboard content={text} titleSummary={titleSummary} toastLifeTimeMs={800} />
-    </WithCopyToClipboardContainer>
+    <Clipboard
+      content={text}
+      isHoverAction={isHoverAction}
+      titleSummary={titleSummary}
+      toastLifeTimeMs={800}
+    />
   </EuiToolTip>
 ));
 

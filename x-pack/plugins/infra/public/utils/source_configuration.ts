@@ -31,3 +31,15 @@ export const isTimestampLogColumnConfiguration = (
   logColumnConfiguration: LogColumnConfiguration
 ): logColumnConfiguration is TimestampLogColumnConfiguration =>
   logColumnConfiguration != null && 'timestampColumn' in logColumnConfiguration;
+
+export const getLogColumnConfigurationId = (
+  logColumnConfiguration: LogColumnConfiguration
+): string => {
+  if (isTimestampLogColumnConfiguration(logColumnConfiguration)) {
+    return logColumnConfiguration.timestampColumn.id;
+  } else if (isMessageLogColumnConfiguration(logColumnConfiguration)) {
+    return logColumnConfiguration.messageColumn.id;
+  } else {
+    return logColumnConfiguration.fieldColumn.id;
+  }
+};

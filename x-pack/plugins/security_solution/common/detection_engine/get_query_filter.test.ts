@@ -1143,6 +1143,16 @@ describe('get_filter', () => {
               ],
             },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
         },
       });
     });
@@ -1161,8 +1171,8 @@ describe('get_filter', () => {
       expect(request).toEqual({
         method: 'POST',
         path: `/testindex1,testindex2/_eql/search?allow_no_indices=true`,
-        event_category_field: 'event.other_category',
         body: {
+          event_category_field: 'event.other_category',
           size: 100,
           query: 'process where true',
           filter: {
@@ -1180,6 +1190,20 @@ describe('get_filter', () => {
               ],
             },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: 'event.ingested',
+              format: 'strict_date_optional_time',
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
         },
       });
     });
@@ -1262,6 +1286,16 @@ describe('get_filter', () => {
               ],
             },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
         },
       });
     });

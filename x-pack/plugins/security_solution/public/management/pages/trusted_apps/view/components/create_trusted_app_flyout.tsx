@@ -44,6 +44,7 @@ import { ABOUT_TRUSTED_APPS, CREATE_TRUSTED_APP_ERROR } from '../translations';
 import { defaultNewTrustedApp } from '../../store/builders';
 import { getTrustedAppsListPath } from '../../../../common/routing';
 import { useToasts } from '../../../../../common/lib/kibana';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -65,14 +66,6 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
-    const creationErrorsMessage = useMemo<string | undefined>(
-      () =>
-        creationErrors
-          ? CREATE_TRUSTED_APP_ERROR[creationErrors.message.replace(/(\[(.*)\]\: )/, '')] ||
-            creationErrors.message
-          : undefined,
-      [creationErrors]
-    );
     const policies = useMemo<CreateTrustedAppFormProps['policies']>(() => {
       return {
         // Casting is needed due to the use of `Immutable<>` on the return value from the selector above
@@ -81,14 +74,37 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       };
     }, [isLoadingPolicies, policyList]);
 
-    const getTestId = useCallback(
-      (suffix: string): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
-    );
+    const creationErrorsMessage = useMemo<string | undefined>(() => {
+      let errorMessage = creationErrors
+        ? CREATE_TRUSTED_APP_ERROR[creationErrors.message.replace(/(\[(.*)\]\: )/, '')] ||
+          creationErrors.message
+        : undefined;
+
+      if (
+        creationErrors &&
+        creationErrors.attributes &&
+        creationErrors.attributes.type === 'TrustedApps/PolicyNotFound'
+      ) {
+        policies.options.forEach((policy) => {
+          errorMessage = errorMessage?.replace(policy.id, policy.name);
+        });
+      } else if (
+        creationErrors &&
+        creationErrors.attributes &&
+        creationErrors.attributes.type === 'EndpointLicenseError'
+      ) {
+        errorMessage = i18n.translate(
+          'xpack.securitySolution.trustedapps.createTrustedAppFlyout.byPolicyLicenseError',
+          {
+            defaultMessage:
+              'Your Kibana license has been downgraded. As such, individual policy configuration is no longer supported.',
+          }
+        );
+      }
+      return errorMessage;
+    }, [creationErrors, policies]);
+
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const handleCancelClick = useCallback(() => {
       if (creationInProgress) {
@@ -167,11 +183,21 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
+          <EuiText size="xs">
+            <h3>
+              {i18n.translate('xpack.securitySolution.trustedApps.detailsSectionTitle', {
+                defaultMessage: 'Details',
+              })}
+            </h3>
+          </EuiText>
+          <EuiSpacer size="xs" />
           {!isEditMode && (
-            <EuiText color="subdued" size="xs">
-              <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
+            <>
+              <EuiText size="s">
+                <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
+              </EuiText>
               <EuiSpacer size="m" />
-            </EuiText>
+            </>
           )}
           <CreateTrustedAppForm
             fullWidth

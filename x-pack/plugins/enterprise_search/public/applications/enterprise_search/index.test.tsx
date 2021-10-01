@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { setMockValues, rerender } from '../__mocks__';
+import { setMockValues } from '../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
+
+import { rerender } from '../test_helpers';
 
 import { ErrorConnecting } from './components/error_connecting';
 import { ProductSelector } from './components/product_selector';

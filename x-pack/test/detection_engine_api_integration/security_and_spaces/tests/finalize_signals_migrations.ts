@@ -21,7 +21,7 @@ import {
   getIndexNameFromLoad,
   waitFor,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 interface StatusResponse {
   index: string;
@@ -57,10 +57,10 @@ export default ({ getService }: FtrProviderContext): void => {
       createdMigrations = [];
       await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/legacy_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
       outdatedSignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/outdated_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
       ({
@@ -75,8 +75,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await esArchiver.unload('signals/outdated_signals_index');
-      await esArchiver.unload('signals/legacy_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteMigrations({
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),

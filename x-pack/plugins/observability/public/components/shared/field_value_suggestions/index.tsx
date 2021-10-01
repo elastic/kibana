@@ -6,48 +6,69 @@
  */
 
 import React, { useState } from 'react';
-
-import { useDebounce } from 'react-use';
 import { useValuesList } from '../../../hooks/use_values_list';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldValueSelection } from './field_value_selection';
-
-export interface FieldValueSuggestionsProps {
-  value?: string;
-  label: string;
-  indexPattern: IIndexPattern;
-  sourceField: string;
-  onChange: (val?: string) => void;
-}
+import { FieldValueSuggestionsProps } from './types';
+import { FieldValueCombobox } from './field_value_combobox';
 
 export function FieldValueSuggestions({
+  fullWidth,
   sourceField,
   label,
-  indexPattern,
-  value,
+  indexPatternTitle,
+  selectedValue,
+  excludedValue,
+  filters,
+  button,
+  time,
+  width,
+  forceOpen,
+  setForceOpen,
+  anchorPosition,
+  singleSelection,
+  compressed,
+  asFilterButton,
+  allowAllValuesSelection,
+  cardinalityField,
+  allowExclusions,
+  asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
-  const [debouncedValue, setDebouncedValue] = useState('');
 
-  const { values, loading } = useValuesList({ indexPattern, query, sourceField });
+  const { values, loading } = useValuesList({
+    indexPatternTitle,
+    query,
+    sourceField,
+    filters,
+    time,
+    cardinalityField,
+    keepHistory: true,
+  });
 
-  useDebounce(
-    () => {
-      setQuery(debouncedValue);
-    },
-    400,
-    [debouncedValue]
-  );
+  const SelectionComponent = asCombobox ? FieldValueCombobox : FieldValueSelection;
 
   return (
-    <FieldValueSelection
-      values={values as string[]}
+    <SelectionComponent
+      fullWidth={fullWidth}
+      singleSelection={singleSelection}
+      values={values}
       label={label}
       onChange={onSelectionChange}
-      setQuery={setDebouncedValue}
+      query={query}
+      setQuery={setQuery}
       loading={loading}
-      value={value}
+      selectedValue={selectedValue}
+      excludedValue={excludedValue}
+      button={button}
+      forceOpen={forceOpen}
+      setForceOpen={setForceOpen}
+      anchorPosition={anchorPosition}
+      width={width}
+      compressed={compressed}
+      asFilterButton={asFilterButton}
+      allowAllValuesSelection={allowAllValuesSelection}
+      allowExclusions={allowExclusions}
     />
   );
 }

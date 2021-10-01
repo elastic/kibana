@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
 import { IngestPipelinesPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new IngestPipelinesPlugin(initializerContext);
+export function plugin() {
+  return new IngestPipelinesPlugin();
 }

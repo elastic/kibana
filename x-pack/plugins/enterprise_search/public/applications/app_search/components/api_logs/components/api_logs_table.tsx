@@ -15,16 +15,18 @@ import {
   EuiBadge,
   EuiHealth,
   EuiButtonEmpty,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n/react';
 
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 
+import { ApiLogLogic } from '../api_log';
 import { ApiLogsLogic } from '../index';
 import { ApiLog } from '../types';
 import { getStatusColor } from '../utils';
+
+import { EmptyState } from './';
 
 import './api_logs_table.scss';
 
@@ -34,6 +36,7 @@ interface Props {
 export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
   const { dataLoading, apiLogs, meta } = useValues(ApiLogsLogic);
   const { onPaginate } = useActions(ApiLogsLogic);
+  const { openFlyout } = useActions(ApiLogLogic);
 
   const columns: Array<EuiBasicTableColumn<ApiLog>> = [
     {
@@ -81,7 +84,7 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
           size="s"
           className="apiLogDetailButton"
           data-test-subj="ApiLogsTableDetailsButton"
-          // TODO: flyout onclick
+          onClick={() => openFlyout(apiLog)}
         >
           {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.detailsButtonLabel', {
             defaultMessage: 'Details',
@@ -107,25 +110,7 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
       items={apiLogs}
       responsive
       loading={dataLoading}
-      noItemsMessage={
-        <EuiEmptyPrompt
-          iconType="clock"
-          title={
-            <h3>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.emptyTitle', {
-                defaultMessage: 'No recent logs',
-              })}
-            </h3>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.emptyDescription', {
-                defaultMessage: "Check back after you've performed some API calls.",
-              })}
-            </p>
-          }
-        />
-      }
+      noItemsMessage={<EmptyState />}
       {...paginationProps}
     />
   );

@@ -79,9 +79,7 @@ export const relativeHref: (
  * Returns a map of ecs category name to urls for use in panel navigation.
  * @deprecated use `useLinkProps`
  */
-export const relatedEventsRelativeHrefs: (
-  state: ResolverUIState
-) => (
+export const relatedEventsRelativeHrefs: (state: ResolverUIState) => (
   categories: Record<string, number> | undefined,
   nodeID: string
   // eslint-disable-next-line @typescript-eslint/no-shadow

@@ -67,6 +67,7 @@ export function registerExploreRoute({
                 cause.reason.includes('No support for examining floating point') ||
                 cause.reason.includes('Sample diversifying key must be a single valued-field') ||
                 cause.reason.includes('Failed to parse query') ||
+                cause.reason.includes('Text fields are not optimised for operations') ||
                 cause.type === 'parsing_exception'
               );
             });

@@ -18,7 +18,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('disable', () => {
@@ -48,7 +48,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
         await getScheduledTask(createdAlert.scheduledTaskId);
         throw new Error('Should have removed scheduled task');
       } catch (e) {
-        expect(e.status).to.eql(404);
+        expect(e.meta.statusCode).to.eql(404);
       }
 
       // Ensure AAD isn't broken
@@ -93,7 +93,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           await getScheduledTask(createdAlert.scheduledTaskId);
           throw new Error('Should have removed scheduled task');
         } catch (e) {
-          expect(e.status).to.eql(404);
+          expect(e.meta.statusCode).to.eql(404);
         }
 
         // Ensure AAD isn't broken

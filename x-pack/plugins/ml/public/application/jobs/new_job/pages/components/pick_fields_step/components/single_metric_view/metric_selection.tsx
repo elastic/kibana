@@ -10,7 +10,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
@@ -94,7 +94,6 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
           null,
           cs.intervalMs,
           jobCreator.runtimeMappings,
-          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         );
         if (resp[DTR_IDX] !== undefined) {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -46,6 +46,7 @@ export interface SavedObjectMetaData<T = unknown> {
   getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
   getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
+  getSavedObjectSubType?(savedObject: SimpleSavedObject<T>): string;
   includeFields?: string[];
 }
 
@@ -115,7 +116,7 @@ class SavedObjectFinderUi extends React.Component<
 
   private isComponentMounted: boolean = false;
 
-  private debouncedFetch = _.debounce(async (query: string) => {
+  private debouncedFetch = debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
 
     const fields = Object.values(metaDataMap)

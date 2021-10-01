@@ -10,7 +10,10 @@ import { securityMock } from '../../../../plugins/security/server/mocks';
 import { ActionsAuthorization } from './actions_authorization';
 import { actionsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { ActionsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
-import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  ACTION_SAVED_OBJECT_TYPE,
+  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+} from '../constants/saved_objects';
 import { AuthenticatedUser } from '../../../security/server';
 import { AuthorizationMode } from './get_authorization_mode_by_source';
 
@@ -25,9 +28,11 @@ function mockSecurity() {
   const authorization = security.authz;
   const authentication = security.authc;
   // typescript is having trouble inferring jest's automocking
-  (authorization.actions.savedObject.get as jest.MockedFunction<
-    typeof authorization.actions.savedObject.get
-  >).mockImplementation(mockAuthorizationAction);
+  (
+    authorization.actions.savedObject.get as jest.MockedFunction<
+      typeof authorization.actions.savedObject.get
+    >
+  ).mockImplementation(mockAuthorizationAction);
   authorization.mode.useRbacForRequest.mockReturnValue(true);
   return { authorization, authentication };
 }
@@ -212,9 +217,9 @@ describe('ensureAuthorized', () => {
       authorizationMode: AuthorizationMode.Legacy,
     });
 
-    authentication.getCurrentUser.mockReturnValueOnce(({
+    authentication.getCurrentUser.mockReturnValueOnce({
       username: 'some-user',
-    } as unknown) as AuthenticatedUser);
+    } as unknown as AuthenticatedUser);
 
     await actionsAuthorization.ensureAuthorized('execute', 'myType');
 

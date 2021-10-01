@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, ReactChild } from 'react';
+
+export type FlashMessageTypes = 'success' | 'info' | 'warning' | 'error';
+export type FlashMessageColors = 'success' | 'primary' | 'warning' | 'danger';
 
 export interface IFlashMessage {
-  type: 'success' | 'info' | 'warning' | 'error';
+  type: FlashMessageTypes;
   message: ReactNode;
   description?: ReactNode;
+}
+
+// @see EuiGlobalToastListToast for more props
+export interface ToastOptions {
+  text?: ReactChild; // Additional text below the message/title, same as IFlashMessage['description']
+  toastLifeTimeMs?: number; // Allows customing per-toast timeout
+  id?: string;
 }

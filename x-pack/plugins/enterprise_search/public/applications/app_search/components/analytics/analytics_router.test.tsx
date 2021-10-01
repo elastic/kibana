@@ -18,7 +18,7 @@ import { AnalyticsRouter } from './';
 describe('AnalyticsRouter', () => {
   // Detailed route testing is better done via E2E tests
   it('renders', () => {
-    const wrapper = shallow(<AnalyticsRouter engineBreadcrumb={['Engines', 'some-engine']} />);
+    const wrapper = shallow(<AnalyticsRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
     expect(wrapper.find(Route)).toHaveLength(9);

@@ -1,6 +1,4 @@
 .visEditor--default {
-  // height: 1px is in place to make editor children take their height in the parent
-  height: 1px;
   flex: 1 1 auto;
   display: flex;
 }
@@ -80,6 +78,7 @@
 
   .visEditor__collapsibleSidebar {
     width: 100% !important; // force the editor to take 100% width
+    flex-grow: 0;
   }
 
   .visEditor__collapsibleSidebar-isClosed {
@@ -91,8 +90,10 @@
   }
 
   .visEditor__visualization__wrapper {
-    // force the visualization to take 100% width and height.
+    // force the visualization to take 100% width.
     width: 100% !important;
-    height: 100% !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 }

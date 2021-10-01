@@ -9,10 +9,10 @@ import { Position, ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
 import { Unit } from '@elastic/datemath';
 
+import { Type, Language } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
-import { Type, Language } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { FieldValueQueryBar } from '../query_bar';
 import { ESQuery } from '../../../../../common/typed_json';

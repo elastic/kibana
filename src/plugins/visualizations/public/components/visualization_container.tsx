@@ -6,19 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode, Suspense } from 'react';
+import React, { ReactNode, Suspense, lazy } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import { VisualizationNoResults } from './visualization_noresults';
+
 import { IInterpreterRenderHandlers } from '../../../expressions/common';
 
-interface VisualizationContainerProps {
+export interface VisualizationContainerProps {
   'data-test-subj'?: string;
   className?: string;
   children: ReactNode;
   handlers: IInterpreterRenderHandlers;
   showNoResult?: boolean;
+  error?: string;
 }
+
+const VisualizationNoResults = lazy(() => import('./visualization_noresults'));
+const VisualizationError = lazy(() => import('./visualization_error'));
 
 export const VisualizationContainer = ({
   'data-test-subj': dataTestSubj = '',
@@ -26,6 +30,7 @@ export const VisualizationContainer = ({
   children,
   handlers,
   showNoResult = false,
+  error,
 }: VisualizationContainerProps) => {
   const classes = classNames('visualization', className);
 
@@ -38,7 +43,13 @@ export const VisualizationContainer = ({
   return (
     <div data-test-subj={dataTestSubj} className={classes}>
       <Suspense fallback={fallBack}>
-        {showNoResult ? <VisualizationNoResults onInit={() => handlers.done()} /> : children}
+        {error ? (
+          <VisualizationError onInit={() => handlers.done()} error={error} />
+        ) : showNoResult ? (
+          <VisualizationNoResults onInit={() => handlers.done()} />
+        ) : (
+          children
+        )}
       </Suspense>
     </div>
   );

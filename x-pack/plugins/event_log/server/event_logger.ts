@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { merge } from 'lodash';
 
+import { coerce } from 'semver';
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { EventLogService } from './event_log_service';
@@ -74,6 +75,7 @@ export class EventLogger implements IEventLogger {
       },
       kibana: {
         server_uuid: this.eventLogService.kibanaUUID,
+        version: coerce(this.eventLogService.kibanaVersion)?.version,
       },
     };
 
@@ -88,7 +90,7 @@ export class EventLogger implements IEventLogger {
     try {
       validatedEvent = validateEvent(this.eventLogService, event);
     } catch (err) {
-      this.systemLogger.warn(`invalid event logged: ${err.message}`);
+      this.systemLogger.warn(`invalid event logged: ${err.message}; ${JSON.stringify(event)})`);
       return;
     }
 

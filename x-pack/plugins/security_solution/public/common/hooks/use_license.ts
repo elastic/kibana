@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseService } from '../../../common/license/license';
+import { LicenseService } from '../../../common/license';
 
 export const licenseService = new LicenseService();
 

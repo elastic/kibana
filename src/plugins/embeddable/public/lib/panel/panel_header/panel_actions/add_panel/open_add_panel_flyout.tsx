@@ -12,6 +12,7 @@ import { EmbeddableStart } from '../../../../../plugin';
 import { toMountPoint } from '../../../../../../../kibana_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
+import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
 
 export function openAddPanelFlyout(options: {
   embeddable: IContainer;
@@ -20,6 +21,8 @@ export function openAddPanelFlyout(options: {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
+  showCreateNewMenu?: boolean;
+  reportUiCounter?: UsageCollectionStart['reportUiCounter'];
 }): OverlayRef {
   const {
     embeddable,
@@ -28,6 +31,8 @@ export function openAddPanelFlyout(options: {
     overlays,
     notifications,
     SavedObjectFinder,
+    showCreateNewMenu,
+    reportUiCounter,
   } = options;
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
@@ -41,7 +46,9 @@ export function openAddPanelFlyout(options: {
         getFactory={getFactory}
         getAllFactories={getAllFactories}
         notifications={notifications}
+        reportUiCounter={reportUiCounter}
         SavedObjectFinder={SavedObjectFinder}
+        showCreateNewMenu={showCreateNewMenu}
       />
     ),
     {

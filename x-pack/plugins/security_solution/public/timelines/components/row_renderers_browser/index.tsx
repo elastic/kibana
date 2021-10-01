@@ -115,7 +115,7 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
       </EuiToolTip>
 
       {show && (
-        <StyledEuiModal onClose={hideFieldBrowser}>
+        <StyledEuiModal onClose={hideFieldBrowser} data-test-subj="row-renderers-modal">
           <EuiModalHeader>
             <EuiFlexGroup
               alignItems="center"

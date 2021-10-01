@@ -5,26 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../../common/types';
 import { ResponseError } from '../lib/api';
-
-export interface UpgradeAssistantTabProps {
-  alertBanner?: React.ReactNode;
-  checkupData?: UpgradeAssistantStatus | null;
-  deprecations?: EnrichedDeprecationInfo[];
-  refreshCheckupData: () => void;
-  loadingError: ResponseError | null;
-  isLoading: boolean;
-  setSelectedTabIndex: (tabIndex: number) => void;
-}
-
-// eslint-disable-next-line react/prefer-stateless-function
-export class UpgradeAssistantTabComponent<
-  T extends UpgradeAssistantTabProps = UpgradeAssistantTabProps,
-  S = {}
-> extends React.Component<T, S> {}
 
 export enum LoadingState {
   Loading,
@@ -32,10 +13,7 @@ export enum LoadingState {
   Error,
 }
 
-export enum LevelFilterOption {
-  all = 'all',
-  critical = 'critical',
-}
+export type LevelFilterOption = 'all' | 'critical';
 
 export enum GroupByOption {
   message = 'message',
@@ -43,7 +21,21 @@ export enum GroupByOption {
   node = 'node',
 }
 
-export enum TelemetryState {
-  Running,
-  Complete,
+export type DeprecationTableColumns =
+  | 'type'
+  | 'index'
+  | 'message'
+  | 'correctiveAction'
+  | 'isCritical';
+
+export type Status = 'in_progress' | 'complete' | 'idle' | 'error';
+export interface DeprecationLoggingPreviewProps {
+  isDeprecationLogIndexingEnabled: boolean;
+  onlyDeprecationLogWritingEnabled: boolean;
+  isLoading: boolean;
+  isUpdating: boolean;
+  fetchError: ResponseError | null;
+  updateError: ResponseError | undefined;
+  resendRequest: () => void;
+  toggleLogging: () => void;
 }

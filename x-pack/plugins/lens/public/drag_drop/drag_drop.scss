@@ -5,7 +5,7 @@
   user-select: none;
   transition: $euiAnimSpeedFast ease-in-out;
   transition-property: background-color, border-color, opacity;
-  z-index: $euiZLevel1;
+  z-index: $lnsZLevel1;
 }
 
 .lnsDragDrop_ghost {
@@ -18,9 +18,17 @@
   left: 0;
   opacity: .9;
   transform: translate(-12px, 8px);
-  z-index: $euiZLevel3;
+  z-index: $lnsZLevel3;
   pointer-events: none;
-  box-shadow: 0 0 0 $euiFocusRingSize $euiFocusRingColor;
+
+  @include kbnThemeStyle('v7') {
+    box-shadow: 0 0 0 $euiFocusRingSize $euiFocusRingColor;
+  }
+
+  @include kbnThemeStyle('v8') {
+    outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
+    outline-style: auto; // Chrome
+  }
 }
 
 // Draggable item
@@ -58,7 +66,7 @@
 
 // Drop area while hovering with item
 .lnsDragDrop-isActiveDropTarget {
-  z-index: $euiZLevel3;
+  z-index: $lnsZLevel3;
   @include lnsDroppableActiveHover;
 }
 
@@ -90,7 +98,7 @@
   height: 100%;
 
   &.lnsDragDrop__container-active {
-    z-index: $euiZLevel3;
+    z-index: $lnsZLevel3;
   }
 }
 
@@ -111,7 +119,7 @@
   }
 
   .lnsDragDrop-isActiveDropTarget {
-    z-index: $euiZLevel3;
+    z-index: $lnsZLevel3;
   }
 }
 
@@ -119,7 +127,7 @@
   transform: translateY(0);
   transition: transform $euiAnimSpeedFast ease-in-out;
   position: relative;
-  z-index: $euiZLevel1;
+  z-index: $lnsZLevel1;
 }
 
 .lnsDragDrop__keyboardHandler {
@@ -133,6 +141,7 @@
   &:focus-within {
     @include euiFocusRing;
     pointer-events: none;
+    z-index: $lnsZLevel2;
   }
 }
 
@@ -151,7 +160,7 @@
   opacity: 0;
   visibility: hidden;
   position: absolute;
-  z-index: $euiZLevel2;
+  z-index: $lnsZLevel2;
   right: calc(100% + #{$euiSizeS});
   top: 0;
   transition: opacity $euiAnimSpeedFast ease-in-out;
@@ -168,7 +177,7 @@
   width: 30%;
   top: 0;
   left: -$euiSize;
-  z-index: $euiZLevel0;
+  z-index: $lnsZLevel0;
 }
 
 .lnsDragDrop__extraDropWrapper {

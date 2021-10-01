@@ -11,30 +11,38 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { RowRendererId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-} from '../../../../common/components/accessibility/helpers';
+} from '../../../../../../timelines/public';
+import { CellValueElementProps } from '../cell_rendering';
+import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
+import {
+  ColumnHeaderOptions,
+  ControlColumnProps,
+  RowRendererId,
+  RowRenderer,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, State } from '../../../../common/store';
-import { useManageTimeline } from '../../manage_timeline';
-import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
+import { TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { OnRowSelected, OnSelectAll } from '../events';
 import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
-import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 interface OwnProps {
   activePage: number;
@@ -44,6 +52,10 @@ interface OwnProps {
   isEventViewer?: boolean;
   sort: Sort[];
   refetch: inputsModel.Refetch;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  leadingControlColumns: ControlColumnProps[];
+  trailingControlColumns: ControlColumnProps[];
   tabType: TimelineTabs;
   totalPages: number;
   onRuleChange?: () => void;
@@ -83,16 +95,19 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     onRuleChange,
     showCheckboxes,
     refetch,
+    renderCellValue,
+    rowRenderers,
     sort,
     tabType,
     totalPages,
+    leadingControlColumns = [],
+    trailingControlColumns = [],
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const { getManageTimelineById } = useManageTimeline();
-    const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
-      getManageTimelineById,
-      id,
-    ]);
+    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+    const { queryFields, selectAll } = useDeepEqualSelector((state) =>
+      getManageTimeline(state, id)
+    );
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
@@ -141,7 +156,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       if (!excludedRowRendererIds) return rowRenderers;
 
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-    }, [excludedRowRendererIds]);
+    }, [excludedRowRendererIds, rowRenderers]);
 
     const actionsColumnWidth = useMemo(
       () =>
@@ -157,11 +172,42 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const columnWidths = useMemo(
       () =>
-        columnHeaders.reduce((totalWidth, header) => totalWidth + header.width, actionsColumnWidth),
-      [actionsColumnWidth, columnHeaders]
+        columnHeaders.reduce(
+          (totalWidth, header) => totalWidth + (header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH),
+          0
+        ),
+      [columnHeaders]
     );
 
+    const leadingActionColumnsWidth = useMemo(() => {
+      return leadingControlColumns
+        ? leadingControlColumns.reduce(
+            (totalWidth, header) =>
+              header.width ? totalWidth + header.width : totalWidth + actionsColumnWidth,
+            0
+          )
+        : 0;
+    }, [actionsColumnWidth, leadingControlColumns]);
+
+    const trailingActionColumnsWidth = useMemo(() => {
+      return trailingControlColumns
+        ? trailingControlColumns.reduce(
+            (totalWidth, header) =>
+              header.width ? totalWidth + header.width : totalWidth + actionsColumnWidth,
+            0
+          )
+        : 0;
+    }, [actionsColumnWidth, trailingControlColumns]);
+
+    const totalWidth = useMemo(() => {
+      return columnWidths + leadingActionColumnsWidth + trailingActionColumnsWidth;
+    }, [columnWidths, leadingActionColumnsWidth, trailingActionColumnsWidth]);
+
     const [lastFocusedAriaColindex] = useState(FIRST_ARIA_INDEX);
+
+    const columnCount = useMemo(() => {
+      return columnHeaders.length + trailingControlColumns.length + leadingControlColumns.length;
+    }, [columnHeaders, trailingControlColumns, leadingControlColumns]);
 
     const onKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
@@ -183,9 +229,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
           <EventsTable
             $activePage={activePage}
-            $columnCount={columnHeaders.length + 1}
+            $columnCount={columnCount}
             data-test-subj={`${tabType}-events-table`}
-            columnWidths={columnWidths}
+            columnWidths={totalWidth}
             onKeyDown={onKeyDown}
             $rowCount={data.length}
             $totalPages={totalPages}
@@ -202,6 +248,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               sort={sort}
               tabType={tabType}
               timelineId={id}
+              leadingControlColumns={leadingControlColumns}
+              trailingControlColumns={trailingControlColumns}
             />
 
             <Events
@@ -209,7 +257,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               actionsColumnWidth={actionsColumnWidth}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
-              columnRenderers={columnRenderers}
               data={data}
               eventIdToNoteIds={eventIdToNoteIds}
               id={id}
@@ -219,10 +266,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               onRowSelected={onRowSelected}
               pinnedEventIds={pinnedEventIds}
               refetch={refetch}
+              renderCellValue={renderCellValue}
               rowRenderers={enabledRowRenderers}
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
+              leadingControlColumns={leadingControlColumns}
+              trailingControlColumns={trailingControlColumns}
               tabType={tabType}
             />
           </EventsTable>
@@ -244,6 +294,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
+    prevProps.renderCellValue === nextProps.renderCellValue &&
+    prevProps.rowRenderers === nextProps.rowRenderers &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
     prevProps.tabType === nextProps.tabType
 );

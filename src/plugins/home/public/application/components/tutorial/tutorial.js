@@ -67,7 +67,6 @@ class TutorialUi extends React.Component {
 
   async componentDidMount() {
     const tutorial = await this.props.getTutorial(this.props.tutorialId);
-
     if (!this._isMounted) {
       return;
     }
@@ -172,15 +171,39 @@ class TutorialUi extends React.Component {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
     const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
 
-    if (esHitsCheckConfig) {
-      const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
+    //Checks if a custom status check callback  was registered in the CLIENT
+    //that matches the same name registered in the SERVER (customStatusCheckName)
+    const customStatusCheckCallback = getServices().tutorialService.getCustomStatusCheck(
+      this.state.tutorial.customStatusCheckName
+    );
 
-      this.setState((prevState) => ({
-        statusCheckStates: {
-          ...prevState.statusCheckStates,
-          [instructionSetIndex]: statusCheckState,
-        },
-      }));
+    const [esHitsStatusCheck, customStatusCheck] = await Promise.all([
+      ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),
+      ...(customStatusCheckCallback
+        ? [this.fetchCustomStatusCheck(customStatusCheckCallback)]
+        : []),
+    ]);
+
+    const nextStatusCheckState =
+      esHitsStatusCheck === StatusCheckStates.HAS_DATA ||
+      customStatusCheck === StatusCheckStates.HAS_DATA
+        ? StatusCheckStates.HAS_DATA
+        : StatusCheckStates.NO_DATA;
+
+    this.setState((prevState) => ({
+      statusCheckStates: {
+        ...prevState.statusCheckStates,
+        [instructionSetIndex]: nextStatusCheckState,
+      },
+    }));
+  };
+
+  fetchCustomStatusCheck = async (customStatusCheckCallback) => {
+    try {
+      const response = await customStatusCheckCallback();
+      return response ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
+    } catch (e) {
+      return StatusCheckStates.ERROR;
     }
   };
 
@@ -278,6 +301,7 @@ class TutorialUi extends React.Component {
           setParameter={this.setParameter}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
           key={index}
+          isCloudEnabled={this.props.isCloudEnabled}
         />
       );
     });

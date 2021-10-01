@@ -6,6 +6,7 @@
  */
 
 import type { RouteDefinitionParams } from '../';
+import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineGetApiKeysRoutes } from './get';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
@@ -14,6 +15,7 @@ import { defineCheckPrivilegesRoutes } from './privileges';
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);
   defineGetApiKeysRoutes(params);
+  defineCreateApiKeyRoutes(params);
   defineCheckPrivilegesRoutes(params);
   defineInvalidateApiKeysRoutes(params);
 }

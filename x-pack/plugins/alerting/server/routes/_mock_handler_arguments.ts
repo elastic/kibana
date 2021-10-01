@@ -8,26 +8,23 @@
 import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedClusterClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
-import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
+import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
 import { AlertsHealth, AlertType } from '../../common';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(
   {
-    alertsClient = alertsClientMock.create(),
+    rulesClient = rulesClientMock.create(),
     listTypes: listTypesRes = [],
-    esClient = elasticsearchServiceMock.createScopedClusterClient(),
     getFrameworkHealth,
+    areApiKeysEnabled,
   }: {
-    alertsClient?: AlertsClientMock;
+    rulesClient?: RulesClientMock;
     listTypes?: AlertType[];
-    esClient?: jest.Mocked<ScopedClusterClientMock>;
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
+    areApiKeysEnabled?: () => Promise<boolean>;
   },
   req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -38,16 +35,16 @@ export function mockHandlerArguments(
 ] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
-    ({
-      core: { elasticsearch: { client: esClient } },
+    {
       alerting: {
         listTypes,
-        getAlertsClient() {
-          return alertsClient || alertsClientMock.create();
+        getRulesClient() {
+          return rulesClient || rulesClientMock.create();
         },
         getFrameworkHealth,
+        areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
       },
-    } as unknown) as AlertingRequestHandlerContext,
+    } as unknown as AlertingRequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
@@ -62,5 +59,5 @@ export const mockResponseFactory = (resToMock: Array<MethodKeysOf<KibanaResponse
       });
     }
   });
-  return (factory as unknown) as KibanaResponseFactory;
+  return factory as unknown as KibanaResponseFactory;
 };

@@ -10,18 +10,29 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { exportList, useDeleteList, useFindLists, ListSchema } from '../../../shared_imports';
+import { useDeleteList, useFindLists } from '@kbn/securitysolution-list-hooks';
+import { exportList } from '@kbn/securitysolution-list-api';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { TestProviders } from '../../../common/mock';
 import { ValueListsModal } from './modal';
 
-jest.mock('../../../shared_imports', () => {
-  const actual = jest.requireActual('../../../shared_imports');
+jest.mock('@kbn/securitysolution-list-hooks', () => {
+  const actual = jest.requireActual('@kbn/securitysolution-list-hooks');
+
+  return {
+    ...actual,
+    useDeleteList: jest.fn(),
+    useFindLists: jest.fn(),
+  };
+});
+
+jest.mock('@kbn/securitysolution-list-api', () => {
+  const actual = jest.requireActual('@kbn/securitysolution-list-api');
 
   return {
     ...actual,
     exportList: jest.fn(),
-    useDeleteList: jest.fn(),
-    useFindLists: jest.fn(),
   };
 });
 

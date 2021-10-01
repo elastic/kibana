@@ -180,7 +180,6 @@ export async function executor(
     return successResult(actionId, data);
   } else {
     const { error } = result;
-
     if (error.response) {
       const {
         status,
@@ -209,6 +208,10 @@ export async function executor(
       return errorResultInvalid(actionId, message);
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
+      logger.error(`error on ${actionId} webhook event: ${message}`);
+      return errorResultRequestFailed(actionId, message);
+    } else if (error.isAxiosError) {
+      const message = `${error.message}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     }

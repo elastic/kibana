@@ -1,0 +1,11 @@
+{
+  "ml.put_filter": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ml/filters/{filter_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-filter.html"
+  }
+}

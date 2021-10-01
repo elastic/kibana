@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import { inflate as _inflate } from 'zlib';
+import { promisify } from 'util';
 import { SavedObjectsClient, Logger } from 'kibana/server';
 import { EndpointArtifactClientInterface } from '../../services';
-import { InternalArtifactCompleteSchema } from '../../schemas';
+import { InternalArtifactCompleteSchema, InternalArtifactSchema } from '../../schemas';
 import { ArtifactConstants } from './common';
 
 class ArtifactMigrationError extends Error {
   constructor(message: string, public readonly meta?: unknown) {
     super(message);
   }
+}
+
+const inflateAsync = promisify(_inflate);
+
+function isCompressed(artifact: InternalArtifactSchema) {
+  return artifact.compressionAlgorithm === 'zlib';
 }
 
 /**
@@ -23,44 +31,47 @@ class ArtifactMigrationError extends Error {
 export const migrateArtifactsToFleet = async (
   soClient: SavedObjectsClient,
   endpointArtifactClient: EndpointArtifactClientInterface,
-  logger: Logger,
-  isFleetServerEnabled: boolean
+  logger: Logger
 ): Promise<void> => {
-  if (!isFleetServerEnabled) {
-    logger.info('Skipping Artifacts migration to fleet. [fleetServerEnabled] flag is off');
-    return;
-  }
-
   let totalArtifactsMigrated = -1;
   let hasMore = true;
 
   try {
     while (hasMore) {
       // Retrieve list of artifact records
-      const {
-        saved_objects: artifactList,
-        total,
-      } = await soClient.find<InternalArtifactCompleteSchema>({
-        type: ArtifactConstants.SAVED_OBJECT_TYPE,
-        page: 1,
-        perPage: 10,
-      });
+      const { saved_objects: artifactList, total } =
+        await soClient.find<InternalArtifactCompleteSchema>({
+          type: ArtifactConstants.SAVED_OBJECT_TYPE,
+          page: 1,
+          perPage: 10,
+        });
 
       if (totalArtifactsMigrated === -1) {
         totalArtifactsMigrated = total;
         if (total > 0) {
-          logger.info(`Migrating artifacts from SavedObject to Fleet`);
+          logger.info(`Migrating artifacts from SavedObject`);
         }
       }
 
       // If nothing else to process, then exit out
       if (total === 0) {
         hasMore = false;
-        logger.info(`Total Artifacts migrated to Fleet: ${totalArtifactsMigrated}`);
+        if (totalArtifactsMigrated > 0) {
+          logger.info(`Total Artifacts migrated: ${totalArtifactsMigrated}`);
+        }
         return;
       }
 
       for (const artifact of artifactList) {
+        if (isCompressed(artifact.attributes)) {
+          artifact.attributes = {
+            ...artifact.attributes,
+            body: (await inflateAsync(Buffer.from(artifact.attributes.body, 'base64'))).toString(
+              'base64'
+            ),
+          };
+        }
+
         // Create new artifact in fleet index
         await endpointArtifactClient.createArtifact(artifact.attributes);
         // Delete old artifact from SO and if there are errors here, then ignore 404's
@@ -78,7 +89,7 @@ export const migrateArtifactsToFleet = async (
       }
     }
   } catch (e) {
-    const error = new ArtifactMigrationError('Artifact SO migration to fleet failed', e);
+    const error = new ArtifactMigrationError('Artifact SO migration failed', e);
     logger.error(error);
     throw error;
   }

@@ -36,6 +36,7 @@ export const useDataGrid = (
 ): UseDataGridReturnType => {
   const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: defaultPageSize };
 
+  const [ccsWarning, setCcsWarning] = useState(false);
   const [noDataMessage, setNoDataMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
@@ -152,6 +153,7 @@ export const useDataGrid = (
   }, [chartsVisible, rowCount, rowCountRelation]);
 
   return {
+    ccsWarning,
     chartsVisible,
     chartsButtonVisible: true,
     columnsWithCharts,
@@ -166,6 +168,7 @@ export const useDataGrid = (
     rowCount,
     rowCountRelation,
     setColumnCharts,
+    setCcsWarning,
     setErrorMessage,
     setNoDataMessage,
     setPagination,

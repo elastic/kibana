@@ -22,12 +22,12 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import { Threshold, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import {
@@ -50,11 +50,11 @@ const NoteDescriptionContainer = styled(EuiFlexItem)`
 
 export const isNotEmptyArray = (values: string[]) => !isEmpty(values.join(''));
 
-const EuiBadgeWrap = (styled(EuiBadge)`
+const EuiBadgeWrap = styled(EuiBadge)`
   .euiBadge__text {
     white-space: pre-wrap !important;
   }
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 const Query = styled.div`
   white-space: pre-wrap;

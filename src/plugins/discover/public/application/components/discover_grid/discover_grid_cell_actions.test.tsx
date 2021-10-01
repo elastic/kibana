@@ -9,14 +9,21 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { FilterInBtn, FilterOutBtn } from './discover_grid_cell_actions';
+import { FilterInBtn, FilterOutBtn, buildCellActions } from './discover_grid_cell_actions';
 import { DiscoverGridContext } from './discover_grid_context';
 
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { esHits } from '../../../__mocks__/es_hits';
 import { EuiButton } from '@elastic/eui';
+import { IndexPatternField } from 'src/plugins/data/common';
 
 describe('Discover cell actions ', function () {
+  it('should not show cell actions for unfilterable fields', async () => {
+    expect(
+      buildCellActions({ name: 'foo', filterable: false } as IndexPatternField)
+    ).toBeUndefined();
+  });
+
   it('triggers filter function when FilterInBtn is clicked', async () => {
     const contextMock = {
       expanded: undefined,
@@ -25,11 +32,14 @@ describe('Discover cell actions ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterInBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}
@@ -50,11 +60,14 @@ describe('Discover cell actions ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterOutBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}

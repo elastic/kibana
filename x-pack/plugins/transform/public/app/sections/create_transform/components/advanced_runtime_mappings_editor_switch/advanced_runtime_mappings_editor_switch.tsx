@@ -8,35 +8,58 @@
 import React, { FC } from 'react';
 import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StepDefineFormHook } from '../step_define';
+import { SwitchModal } from './switch_modal';
+import { useAdvancedRuntimeMappingsEditor } from '../step_define/hooks/use_advanced_runtime_mappings_editor';
 
-export const AdvancedRuntimeMappingsEditorSwitch: FC<
-  StepDefineFormHook['runtimeMappingsEditor']
-> = (props) => {
+type Props = ReturnType<typeof useAdvancedRuntimeMappingsEditor>;
+export const AdvancedRuntimeMappingsEditorSwitch: FC<Props> = (props) => {
   const {
-    actions: { setRuntimeMappingsUpdated, toggleRuntimeMappingsEditor },
-    state: { isRuntimeMappingsEditorEnabled },
+    actions: { toggleRuntimeMappingsEditor, setRuntimeMappingsEditorSwitchModalVisible },
+    state: {
+      isRuntimeMappingsEditorEnabled,
+      isRuntimeMappingsEditorSwitchModalVisible,
+      advancedEditorRuntimeMappingsLastApplied,
+      advancedRuntimeMappingsConfig,
+    },
   } = props;
 
   // If switching to KQL after updating via editor - reset search
   const toggleEditorHandler = (reset = false) => {
-    if (reset === true) {
-      setRuntimeMappingsUpdated(false);
-    }
     toggleRuntimeMappingsEditor(reset);
   };
 
   return (
-    <EuiSwitch
-      label={i18n.translate(
-        'xpack.transform.stepDefineForm.advancedEditorRuntimeMappingsSwitchLabel',
-        {
-          defaultMessage: 'Edit runtime mappings',
-        }
+    <>
+      <EuiSwitch
+        label={i18n.translate(
+          'xpack.transform.stepDefineForm.advancedEditorRuntimeFieldsSwitchLabel',
+          {
+            defaultMessage: 'Edit runtime fields',
+          }
+        )}
+        checked={isRuntimeMappingsEditorEnabled}
+        onChange={() => {
+          if (
+            isRuntimeMappingsEditorEnabled &&
+            advancedRuntimeMappingsConfig !== advancedEditorRuntimeMappingsLastApplied
+          ) {
+            setRuntimeMappingsEditorSwitchModalVisible(true);
+            return;
+          }
+
+          toggleEditorHandler();
+        }}
+        data-test-subj="transformAdvancedRuntimeMappingsEditorSwitch"
+      />
+      {isRuntimeMappingsEditorSwitchModalVisible && (
+        <SwitchModal
+          onCancel={() => setRuntimeMappingsEditorSwitchModalVisible(false)}
+          onConfirm={() => {
+            setRuntimeMappingsEditorSwitchModalVisible(false);
+            toggleEditorHandler(true);
+          }}
+        />
       )}
-      checked={isRuntimeMappingsEditorEnabled}
-      onChange={() => toggleEditorHandler()}
-      data-test-subj="transformAdvancedRuntimeMappingsEditorSwitch"
-    />
+    </>
   );
 };

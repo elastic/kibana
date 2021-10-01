@@ -12,22 +12,16 @@ import {
   Stackframe as StackframeType,
   StackframeWithLineContext,
 } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import {
-  borderRadius,
-  fontFamilyCode,
-  fontSize,
-} from '../../../style/variables';
 import { Context } from './Context';
-import { FrameHeading } from './FrameHeading';
+import { FrameHeading } from './frame_heading';
 import { Variables } from './Variables';
-import { px, units } from '../../../style/variables';
 
 const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
   position: relative;
-  font-family: ${fontFamilyCode};
-  font-size: ${fontSize};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  border-radius: ${borderRadius};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
   background: ${({ isLibraryFrame, theme }) =>
     isLibraryFrame
       ? theme.eui.euiColorEmptyShade
@@ -36,7 +30,7 @@ const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
 
 // Indent the non-context frames the same amount as the accordion control
 const NoContextFrameHeadingWrapper = euiStyled.div`
-  margin-left: ${px(units.unit + units.half + units.quarter)};
+  margin-left: 28px;
 `;
 
 interface Props {

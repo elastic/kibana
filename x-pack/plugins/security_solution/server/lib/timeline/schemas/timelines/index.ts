@@ -6,5 +6,6 @@
  */
 export * from './create_timelines_schema';
 export * from './export_timelines_schema';
-export * from './get_timeline_by_id_schema';
+export * from './get_timeline_schema';
+export * from './get_timelines_schema';
 export * from './patch_timelines_schema';

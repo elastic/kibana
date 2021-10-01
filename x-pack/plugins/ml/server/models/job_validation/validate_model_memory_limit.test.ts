@@ -86,10 +86,10 @@ describe('ML - validateModelMemoryLimit', () => {
       fieldCaps: () => Promise.resolve({ body: fieldCapsResponse }),
     };
 
-    return ({
+    return {
       asCurrentUser: callAs,
       asInternalUser: callAs,
-    } as unknown) as IScopedClusterClient;
+    } as unknown as IScopedClusterClient;
   };
 
   const getMockMlClient = ({
@@ -105,7 +105,7 @@ describe('ML - validateModelMemoryLimit', () => {
   };
 
   function getJobConfig(influencers: string[] = [], detectors: Detector[] = []) {
-    return ({
+    return {
       analysis_config: { detectors, influencers },
       data_description: { time_field: '@timestamp' },
       datafeed_config: {
@@ -114,7 +114,7 @@ describe('ML - validateModelMemoryLimit', () => {
       analysis_limits: {
         model_memory_limit: '20mb',
       },
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
   }
 
   // create a specified number of mock detectors
@@ -216,7 +216,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-expect-error
+    // @ts-expect-error incorrect type on purpose for test
     delete mlInfoResponse.limits.max_model_memory_limit;
     job.analysis_limits!.model_memory_limit = '10mb';
 
