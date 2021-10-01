@@ -32,7 +32,7 @@ import {
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../../../common/constants';
-import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_rotuer';
+import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { ArtifactEntryCollapsableCardProps } from '../../../../../components/artifact_entry_card';
 
 export const PolicyTrustedAppsList = memo(() => {

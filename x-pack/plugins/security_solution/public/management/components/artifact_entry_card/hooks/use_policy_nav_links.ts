@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { EffectScopeProps } from '../components/effect_scope';
 import { ArtifactInfo, MenuItemPropsByPolicyId } from '../types';
-import { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
+import { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support/context_menu_item_nav_by_router';
 
 /**
  * creates the policy links for each policy listed in the artifact record by grabbing the
