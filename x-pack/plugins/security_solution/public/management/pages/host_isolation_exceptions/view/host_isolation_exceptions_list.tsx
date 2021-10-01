@@ -113,7 +113,7 @@ export const HostIsolationExceptionsList = () => {
         )}
       />
       <EuiSpacer size="l" />
-      {itemToDelete ? <HostIsolationExceptionDeleteModal /> : ''}
+      {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
       <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
         items={listItems}
         ItemComponent={ArtifactEntryCard}
