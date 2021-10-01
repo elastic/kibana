@@ -6,16 +6,57 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './fields';
-export * from './types';
+export {
+  RUNTIME_FIELD_TYPES,
+  FLEET_ASSETS_TO_IGNORE,
+  META_FIELDS,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+} from './constants';
+export type { IFieldType, IIndexPatternFieldList } from './fields';
+export { isFilterable, isNestedField, fieldList, DataViewField, IndexPatternField } from './fields';
+export type {
+  FieldFormatMap,
+  RuntimeType,
+  RuntimeField,
+  IIndexPattern,
+  DataViewAttributes,
+  IndexPatternAttributes,
+  FieldAttrs,
+  FieldAttrSet,
+  OnNotification,
+  OnError,
+  UiSettingsCommon,
+  SavedObjectsClientCommonFindArgs,
+  SavedObjectsClientCommon,
+  GetFieldsOptions,
+  GetFieldsOptionsTimePattern,
+  IDataViewsApiClient,
+  IIndexPatternsApiClient,
+  SavedObject,
+  AggregationRestrictions,
+  TypeMeta,
+  FieldSpecConflictDescriptions,
+  FieldSpecExportFmt,
+  FieldSpec,
+  DataViewFieldMap,
+  IndexPatternFieldMap,
+  DataViewSpec,
+  IndexPatternSpec,
+  SourceFilter,
+} from './types';
+export { DataViewType, IndexPatternType } from './types';
 export {
   IndexPatternsService,
   IndexPatternsContract,
   DataViewsService,
   DataViewsContract,
 } from './data_views';
-// todo was trying to export this as type but wasn't working
 export { IndexPattern, IndexPatternListItem, DataView, DataViewListItem } from './data_views';
-export * from './errors';
-export * from './expressions';
+export { DuplicateDataViewError, DataViewSavedObjectConflictError } from './errors';
+export type {
+  IndexPatternExpressionType,
+  IndexPatternLoadStartDependencies,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from './expressions';
+export { getIndexPatternLoadMeta } from './expressions';
