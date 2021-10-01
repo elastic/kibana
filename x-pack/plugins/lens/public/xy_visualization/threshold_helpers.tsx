@@ -154,8 +154,6 @@ function computeStaticValueForGroup(
       return defaultThresholdFactor;
     }
 
-    const isStacked = dataLayers.some(({ seriesType }) => isStackedChart(seriesType));
-
     const accessorMap = new Set(accessorIds);
     const tableIds = Object.keys(activeData)
       .map((key) => ({
@@ -163,21 +161,33 @@ function computeStaticValueForGroup(
         accessors: activeData[key].columns.filter(({ id }) => accessorMap.has(id)),
       }))
       .filter(({ accessors }) => accessors.length);
+
+    // Compute the max and min bounds here for all involved layers
+    // * for stacked series type compute the sum of it
+    // * for no stacked series just check min/max
+    // Collect the results at the end
     let columnMax = -Infinity;
     let columnMin = Infinity;
     for (const { tableId, accessors } of tableIds) {
+      let tableMax = -Infinity;
+      let tableMin = Infinity;
+      const isStacked = isStackedChart(
+        dataLayers.find(({ layerId }) => layerId === tableId)!.seriesType
+      );
       for (const row of activeData[tableId].rows) {
         if (!isStacked) {
           for (const { id } of accessors) {
-            columnMax = Math.max(row[id], columnMax);
-            columnMin = Math.min(row[id], columnMin);
+            tableMax = Math.max(row[id], tableMax);
+            tableMin = Math.min(row[id], tableMin);
           }
         } else {
           const value = accessors.reduce((v, { id }) => v + (row[id] || 0), 0);
-          columnMax = Math.max(value, columnMax);
-          columnMin = Math.min(value, columnMin);
+          tableMax = Math.max(value, columnMax);
+          tableMin = Math.min(value, columnMin);
         }
       }
+      columnMax = Math.max(tableMax, columnMax);
+      columnMin = Math.min(tableMin, columnMin);
     }
     if (isFinite(columnMin) && isFinite(columnMax)) {
       // Custom axis bounds can go below 0, so consider also lower values than 0
