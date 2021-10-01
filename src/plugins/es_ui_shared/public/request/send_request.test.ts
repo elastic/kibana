@@ -33,4 +33,20 @@ describe('sendRequest function', () => {
     sinon.assert.calledOnce(getSendRequestSpy());
     expect(error).toEqual(getErrorResponse());
   });
+
+  it('applies errorInterceptors to errors', async () => {
+    const { sendErrorRequest, getSendRequestSpy } = helpers;
+    const errorInterceptors = [
+      (error: any) => ['Error is:', error.statusText],
+      (interceptedError: string[]) => interceptedError.join(' '),
+    ];
+
+    // For some reason sinon isn't throwing an error on rejection, as an awaited Promise normally would.
+    const error = await sendErrorRequest(errorInterceptors);
+    sinon.assert.calledOnce(getSendRequestSpy());
+    expect(error).toEqual({
+      data: null,
+      error: 'Error is: Error message',
+    });
+  });
 });

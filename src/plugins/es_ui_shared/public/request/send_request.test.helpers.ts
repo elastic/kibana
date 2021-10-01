@@ -19,7 +19,9 @@ export interface SendRequestHelpers {
   getSendRequestSpy: () => sinon.SinonStub;
   sendSuccessRequest: () => Promise<SendRequestResponse>;
   getSuccessResponse: () => SendRequestResponse;
-  sendErrorRequest: () => Promise<SendRequestResponse>;
+  sendErrorRequest: (
+    errorInterceptors?: SendRequestConfig['errorInterceptors']
+  ) => Promise<SendRequestResponse>;
   getErrorResponse: () => SendRequestResponse;
 }
 
@@ -62,7 +64,8 @@ export const createSendRequestHelpers = (): SendRequestHelpers => {
       })
     )
     .rejects(errorResponse);
-  const sendErrorRequest = () => sendRequest({ ...errorRequest });
+  const sendErrorRequest = (errorInterceptors?: SendRequestConfig['errorInterceptors']) =>
+    sendRequest({ ...errorRequest, errorInterceptors });
   const getErrorResponse = () => ({
     data: null,
     error: errorResponse.response.data,
