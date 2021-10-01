@@ -7,11 +7,13 @@
  */
 
 import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
+import { createFailError } from '@kbn/dev-utils';
 
 export class File {
   private path: string;
   private relativePath: string;
   private ext: string;
+  private fileReader: undefined | (() => Promise<string>);
 
   constructor(path: string) {
     this.path = resolve(path);
@@ -55,6 +57,11 @@ export class File {
     );
   }
 
+  // Virtual files cannot be read as usual, an helper is needed
+  public isVirtual() {
+    return this.fileReader !== undefined;
+  }
+
   public getRelativeParentDirs() {
     const parents: string[] = [];
 
@@ -80,5 +87,16 @@ export class File {
 
   public toJSON() {
     return this.relativePath;
+  }
+
+  public setFileReader(fileReader: () => Promise<string>) {
+    this.fileReader = fileReader;
+  }
+
+  public getContent() {
+    if (this.fileReader) {
+      return this.fileReader();
+    }
+    throw createFailError('getContent() was invoked on a non-virtual File');
   }
 }
