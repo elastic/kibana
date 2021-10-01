@@ -8,7 +8,7 @@
 
 import { CustomIntegrationRegistry } from './custom_integration_registry';
 import { loggerMock, MockedLogger } from '@kbn/logging/mocks';
-import { CustomIntegration } from '../common';
+import { IntegrationCategory, CustomIntegration } from '../common';
 
 describe('CustomIntegrationsRegistry', () => {
   let mockLogger: MockedLogger;
@@ -44,6 +44,27 @@ describe('CustomIntegrationsRegistry', () => {
         expect(mockLogger.debug.mock.calls.length).toBe(1);
       });
     });
+
+    test('should strip unsupported categories', () => {
+      const registry = new CustomIntegrationRegistry(mockLogger, true);
+      registry.registerCustomIntegration({
+        ...integration,
+        categories: ['upload_file', 'foobar'] as IntegrationCategory[],
+      });
+      expect(registry.getAppendCustomIntegrations()).toEqual([
+        {
+          categories: ['upload_file'],
+          description: 'test integration',
+          icons: [],
+          id: 'foo',
+          isBeta: false,
+          shipper: 'tests',
+          title: 'Foo',
+          type: 'ui_link',
+          uiInternalPath: '/path/to/foo',
+        },
+      ]);
+    });
   });
 
   describe('getAppendCustomCategories', () => {
@@ -76,7 +97,7 @@ describe('CustomIntegrationsRegistry', () => {
         },
       ]);
     });
-    test('should ignore duplicate ids', () => {
+    test('should filter duplicate ids', () => {
       const registry = new CustomIntegrationRegistry(mockLogger, true);
       registry.registerCustomIntegration(integration);
       registry.registerCustomIntegration(integration);
@@ -94,7 +115,7 @@ describe('CustomIntegrationsRegistry', () => {
         },
       ]);
     });
-    test('should ignore integrations without category', () => {
+    test('should filter integrations without category', () => {
       const registry = new CustomIntegrationRegistry(mockLogger, true);
       registry.registerCustomIntegration(integration);
       registry.registerCustomIntegration({ ...integration, id: 'bar', categories: [] });
@@ -112,6 +133,45 @@ describe('CustomIntegrationsRegistry', () => {
           uiInternalPath: '/path/to/foo',
         },
       ]);
+    });
+
+    test('should filter integrations that need to replace EPR packages', () => {
+      const registry = new CustomIntegrationRegistry(mockLogger, true);
+      registry.registerCustomIntegration({ ...integration, id: 'bar', eprOverlap: 'aws' });
+      expect(registry.getAppendCustomIntegrations()).toEqual([]);
+    });
+  });
+
+  describe('getReplacementCustomIntegrations', () => {
+    test('should only return integrations with corresponding epr package ', () => {
+      const registry = new CustomIntegrationRegistry(mockLogger, true);
+      registry.registerCustomIntegration(integration);
+      registry.registerCustomIntegration({ ...integration, id: 'bar', eprOverlap: 'aws' });
+      expect(registry.getReplacementCustomIntegrations()).toEqual([
+        {
+          categories: ['upload_file'],
+          description: 'test integration',
+          icons: [],
+          id: 'bar',
+          isBeta: false,
+          shipper: 'tests',
+          title: 'Foo',
+          type: 'ui_link',
+          uiInternalPath: '/path/to/foo',
+          eprOverlap: 'aws',
+        },
+      ]);
+    });
+
+    test('should filter registrations without valid categories', () => {
+      const registry = new CustomIntegrationRegistry(mockLogger, true);
+      registry.registerCustomIntegration({
+        ...integration,
+        id: 'bar',
+        eprOverlap: 'aws',
+        categories: ['foobar'] as unknown as IntegrationCategory[],
+      });
+      expect(registry.getReplacementCustomIntegrations()).toEqual([]);
     });
   });
 });

@@ -25,7 +25,6 @@ describe('CustomIntegrationsPlugin', () => {
     test('wires up tutorials provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
       const setup = new CustomIntegrationsPlugin(initContext).setup(mockCoreSetup);
       expect(setup).toHaveProperty('registerCustomIntegration');
-      expect(setup).toHaveProperty('getAppendCustomIntegrations');
     });
   });
 });
