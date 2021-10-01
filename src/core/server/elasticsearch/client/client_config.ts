@@ -10,7 +10,6 @@ import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
 import { Duration } from 'moment';
 import { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
-import { AgentOptions } from '@elastic/elasticsearch/lib/Connection';
 import { ElasticsearchConfig } from '../elasticsearch_config';
 import { DEFAULT_HEADERS } from '../default_headers';
 
