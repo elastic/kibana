@@ -7,6 +7,16 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPanel,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+
 import { KibanaTemplate } from './kibana_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
@@ -17,15 +27,6 @@ import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { useCharts } from '../../hooks/use_charts';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
 
 const KibanaOverview = ({ data }: { data: any }) => {
   const { zoomInfo, onBrush } = useCharts();
@@ -85,7 +86,7 @@ export const KibanaOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
         inKibana: true,
       });
     }
-  }, [cluster]);
+  }, [cluster, generateBreadcrumbs]);
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
