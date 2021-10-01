@@ -7,7 +7,7 @@
  */
 
 import { DeprecatedConfigDetails } from './types';
-import { configDeprecationsMock } from './deprecations.mocks';
+import { configDeprecationsMock } from './deprecations.mock';
 import { configDeprecationFactory } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
