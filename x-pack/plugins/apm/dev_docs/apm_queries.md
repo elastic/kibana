@@ -18,8 +18,7 @@ A single transaction with a latency of 2ms
 or
 
 #### Aggregated (metric) document:
-
-A pre-aggregated document with 2 transactions with a combined latency of 5ms
+A pre-aggregated document where `_doc_count` is the number of original transactions. 
 
 ```json
 {
@@ -80,14 +79,16 @@ Please note: `metricset.name: transaction` was only recently introduced. To reta
 
 ### Throughput
 
-Throughput is the rate of transactions for a given time period. This can be calculated using transaction events or metric events.
+Throughput is the number of transactions per minute. This can be calculated using transaction events or metric events.
 
 Note-worthy fields: None (based on doc count)
 
-```json
+```js
 {
   "size": 0,
-  "query": {},
+  "query": {
+    // same filters as for latency
+  },
   "aggs": {
     "throughput": { "rate": { "unit": "minute" } }
   }
@@ -96,7 +97,7 @@ Note-worthy fields: None (based on doc count)
 
 ### Failed transaction rate
 
-The rate of transactions with `event.outcome=failure` in a given time range.
+The number of transactions with `event.outcome=failure` per minute.
 Note-worthy fields: `event.outcome`
 
 ```json
@@ -204,15 +205,50 @@ Note-worthy fields: `system.memory.actual.free`, `system.memory.total`,
 
 Above example is overly simplified. In reality [we do a bit more](https://github.com/elastic/kibana/blob/fe9b5332e157fd456f81aecfd4ffa78d9e511a66/x-pack/plugins/apm/server/lib/metrics/by_agent/shared/memory/index.ts#L51-L71) to properly calculate memory usage inside containers
 
-# Breakdown metrics
+# Transaction breakdown metrics
 
-tbd
+A pre-aggregations of transaction documents where `transaction.breakdown.count` is the number of original transactions.
+
+Note-worthy fields: `transaction.type`
+
+#### Sample document
+
+```json
+  {
+    "@timestamp": "2021-09-27T21:59:59.828Z",
+    "processor.event": "metric",
+    "metricset.name": "transaction_breakdown",
+    "transaction.breakdown.count": 12,
+    "transaction.type": "request"
+  }
+}
+```
+
+# Span breakdown metrics
+
+A pre-aggregations of span documents where `span.self_time.count` is the number of original spans.
+
+Note-worthy fields: `span.type`, `span.subtype`, `span.self_time.*`
+
+#### Sample document
+
+```json
+{
+  "@timestamp": "2021-09-27T21:59:59.828Z",
+  "processor.event": "metric",
+  "metricset.name": "span_breakdown",
+  "span.self_time.sum.us": 1028,
+  "span.self_time.count": 12,
+  "span.type": "db",
+  "span.subtype": "elasticsearch"
+}
+```
 
 # Service destination metrics
 
-Aggregations of span documents, with the dimensions `span.destination.service.*`.
+Pre-aggregations of span documents, where `span.destination.service.response_time.count` is the number of original spans.
 
-Note-worthy fields: `span.destination.service.resource`, `span.destination.service.response_time.count`, `span.destination.service.response_time.sum.us`
+Note-worthy fields: `span.destination.service.*`
 
 #### Sample document
 
