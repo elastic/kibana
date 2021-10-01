@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Logger } from 'src/core/server';
 
 import type { SecurityLicense } from '../../common/licensing';
 import type {
@@ -17,8 +18,9 @@ import type { AuthorizationServiceSetupInternal, ElasticsearchRole } from '../au
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
 export const getPrivilegeDeprecationsServices = (
-  authz: AuthorizationServiceSetupInternal,
-  license: SecurityLicense
+  authz: Pick<AuthorizationServiceSetupInternal, 'applicationName'>,
+  license: SecurityLicense,
+  logger: Logger
 ) => {
   const getKibanaRolesByFeatureId = async ({
     context,
@@ -62,6 +64,18 @@ export const getPrivilegeDeprecationsServices = (
               },
             }
           );
+
+      if (isUnauthorized) {
+        logger.warn(
+          `Failed to retrieve roles when checking for deprecations: the manage_security cluster privilege is required`
+        );
+      } else {
+        logger.error(
+          `Failed to retrieve roles when checking for deprecations, unexpected error: ${getDetailedErrorMessage(
+            e
+          )}`
+        );
+      }
 
       return {
         errors: [

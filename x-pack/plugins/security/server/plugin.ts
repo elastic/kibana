@@ -89,7 +89,7 @@ export interface SecurityPluginSetup {
   /**
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
-  privilegeDeprecationServices: PrivilegeDeprecationsServices;
+  privilegeDeprecationsServicess: PrivilegeDeprecationsServices;
 }
 
 /**
@@ -337,9 +337,10 @@ export class SecurityPlugin
         mode: this.authorizationSetup.mode,
       },
       license,
-      privilegeDeprecationServices: getPrivilegeDeprecationsServices(
+      privilegeDeprecationsServicess: getPrivilegeDeprecationsServices(
         this.authorizationSetup,
-        license
+        license,
+        this.logger.get('deprecations')
       ),
     });
   }
