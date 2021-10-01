@@ -14,13 +14,11 @@ export class VisualizeOptions {
   }
 
   get upstreamJson() {
-    const json = {
+    return {
       rangeFrom: this.rangeFrom,
       rangeTo: this.rangeTo,
-      timezone: this.timezone,
       interval: this.interval,
+      timezone: this.timezone,
     };
-
-    return json;
   }
 }
