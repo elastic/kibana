@@ -43,13 +43,15 @@ export function getFirstUnusedSymbol(iconStops) {
   return firstUnusedSymbol ? firstUnusedSymbol.value : DEFAULT_ICON;
 }
 
-export function IconStops({ field, getValueSuggestions, iconStops, onChange }) {
-  return iconStops.map(({ stop, icon }, index) => {
-    const onIconSelect = (selectedIconId) => {
+export function IconStops({ field, getValueSuggestions, iconStops, onChange, onCustomIconsChange, customIcons }) {
+  return iconStops.map(({ stop, icon, svg, label }, index) => {
+    const onIconSelect = ({ selectedIconId, svg, label }) => {
       const newIconStops = [...iconStops];
       newIconStops[index] = {
         ...iconStops[index],
         icon: selectedIconId,
+        svg,
+        label,
       };
       onChange({ customStops: newIconStops });
     };
@@ -146,7 +148,7 @@ export function IconStops({ field, getValueSuggestions, iconStops, onChange }) {
             {stopInput}
           </EuiFlexItem>
           <EuiFlexItem>
-            <IconSelect onChange={onIconSelect} value={icon} append={iconStopButtons} />
+            <IconSelect onCustomIconsChange={onCustomIconsChange} customIcons={customIcons} onChange={onIconSelect} icon={{ value: icon, svg, label }} append={iconStopButtons} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { IconStops } from './icon_stops';
 // @ts-expect-error
 import { getIconPaletteOptions, PREFERRED_ICONS } from '../../symbol_utils';
-import { IconDynamicOptions, IconStop } from '../../../../../../common/descriptor_types';
+import { CustomIcon, IconDynamicOptions, IconStop } from '../../../../../../common/descriptor_types';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const CUSTOM_MAP_ID = 'CUSTOM_MAP_ID';
@@ -32,6 +32,8 @@ interface StyleOptionChanges {
 interface Props {
   customIconStops?: IconStop[];
   iconPaletteId: string | null;
+  customIcons?: CustomIcon[];
+  onCustomIconsChange?: (customIcons: CustomIcon[]) => void;
   onChange: ({ customIconStops, iconPaletteId, useCustomIconMap }: StyleOptionChanges) => void;
   styleProperty: IDynamicStyleProperty<IconDynamicOptions>;
   useCustomIconMap?: boolean;
@@ -86,6 +88,8 @@ export class IconMapSelect extends Component<Props, State> {
         getValueSuggestions={this.props.styleProperty.getValueSuggestions}
         iconStops={this.state.customIconStops}
         onChange={this._onCustomMapChange}
+        onCustomIconsChange={this.props.onCustomIconsChange}
+        customIcons={this.props.customIcons}
       />
     );
   }

@@ -60,6 +60,8 @@ export type CategoryColorStop = {
 export type IconStop = {
   stop: string | null;
   icon: string;
+  svg?: string;
+  label?: string;
 };
 
 export type ColorDynamicOptions = {

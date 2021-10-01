@@ -26,20 +26,21 @@ import { IconStaticOptions } from '../../../../../common/descriptor_types';
 export class StaticIconProperty extends StaticStyleProperty<IconStaticOptions> {
   syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
     const { value: symbolId, svg } = this._options;
-    const customIconCheck = () => {
-      return new Promise<void>(async (resolve) => {
-        if (!mbMap.hasImage(symbolId)) {
-          const imageData = await createSdfIcon(svg);
-          mbMap.addImage(symbolId, imageData, { pixelRatio: 4, sdf: true });
-        }
-        resolve();
-      });
-    };
     if (symbolId.startsWith(CUSTOM_ICON_PREFIX) && svg) {
-      customIconCheck().then(() => mbMap.setLayoutProperty(symbolLayerId, 'icon-image', symbolId));
+      this._customIconCheck(mbMap).then(() =>
+        mbMap.setLayoutProperty(symbolLayerId, 'icon-image', symbolId)
+      );
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', getMakiIconId(symbolId, iconPixelSize));
+    }
+  }
+
+  async _customIconCheck(mbMap: MbMap) {
+    const { value: symbolId, svg } = this._options;
+    if (!mbMap.hasImage(symbolId)) {
+      const imageData = await createSdfIcon(svg);
+      mbMap.addImage(symbolId, imageData, { pixelRatio: 4, sdf: true });
     }
   }
 }

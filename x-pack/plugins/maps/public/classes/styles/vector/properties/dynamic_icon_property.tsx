@@ -11,7 +11,7 @@ import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 // @ts-expect-error
-import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
+import { createSdfIcon, CUSTOM_ICON_PREFIX, getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { LegendProps } from './style_property';
@@ -33,11 +33,13 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
 
   syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
     if (this._isIconDynamicConfigComplete()) {
-      mbMap.setLayoutProperty(
-        symbolLayerId,
-        'icon-image',
-        this._getMbIconImageExpression(iconPixelSize)
-      );
+      this._getMbIconImageExpression(iconPixelSize, mbMap).then((expr) => {
+        mbMap.setLayoutProperty(
+          symbolLayerId,
+          'icon-image',
+          expr
+        );
+      });
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
@@ -45,14 +47,22 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     }
   }
 
+  async _customIconCheck(symbolId: string, svg: string, mbMap: MbMap) {
+    if (!mbMap.hasImage(symbolId)) {
+      const imageData = await createSdfIcon(svg);
+      mbMap.addImage(symbolId, imageData, { pixelRatio: 4, sdf: true });
+    }
+  }
+
   _getPaletteStops() {
     if (this._options.useCustomIconMap && this._options.customIconStops) {
       const stops = [];
       for (let i = 1; i < this._options.customIconStops.length; i++) {
-        const { stop, icon } = this._options.customIconStops[i];
+        const { stop, icon, svg } = this._options.customIconStops[i];
         stops.push({
           stop,
           style: icon,
+          svg,
         });
       }
 
@@ -69,7 +79,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     });
   }
 
-  _getMbIconImageExpression(iconPixelSize: number) {
+  async _getMbIconImageExpression(iconPixelSize: number, mbMap: MbMap) {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallbackSymbolId) {
@@ -78,10 +88,18 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     }
 
     const mbStops = [];
-    stops.forEach(({ stop, style }) => {
+    const addIconsToMap: Promise<void>[] = [];
+    stops.forEach(({ stop, style, svg }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(getMakiIconId(style, iconPixelSize));
+      if (style.startsWith(CUSTOM_ICON_PREFIX) && svg) {
+        addIconsToMap.push(this._customIconCheck(style, svg, mbMap));
+        mbStops.push(style);
+      } else {
+        mbStops.push(getMakiIconId(style, iconPixelSize));
+      }
     });
+
+    await Promise.all(addIconsToMap);
 
     if (fallbackSymbolId) {
       mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); // last item is fallback style for anything that does not match provided stops
