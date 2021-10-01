@@ -11,13 +11,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
   CERTIFICATES_ROUTE,
+  MAPPING_ERROR_ROUTE,
   MONITOR_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
   SYNTHETIC_CHECK_STEPS_ROUTE,
 } from '../common/constants';
-import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
+import { MappingErrorPage, MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
 import { OverviewPageComponent } from './pages/overview';
@@ -140,6 +141,26 @@ const Routes: RouteProps[] = [
     pageHeader: {
       pageTitle: MONITORING_OVERVIEW_LABEL,
       rightSideItems: [<UptimeDatePicker />],
+    },
+  },
+  {
+    title: i18n.translate('xpack.uptime.mappingErrorRoute.title', {
+      defaultMessage: 'Synthetics | mapping error',
+    }),
+    path: MAPPING_ERROR_ROUTE,
+    component: MappingErrorPage,
+    dataTestSubj: 'uptimeMappingErrorPage',
+    telemetryId: UptimePage.MappingError,
+    pageHeader: {
+      pageTitle: (
+        <div>
+          <FormattedMessage
+            id="xpack.uptime.mappingErrorRoute.pageHeader.title"
+            defaultMessage="Mapping error"
+          />
+        </div>
+      ),
+      rightSideItems: [],
     },
   },
 ];

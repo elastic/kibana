@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 
 import {
   EuiButton,
@@ -19,8 +19,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { ReindexStatus } from '../../../../../../../common/types';
+import {
+  uiMetricService,
+  UIM_REINDEX_START_CLICK,
+  UIM_REINDEX_STOP_CLICK,
+} from '../../../../../lib/ui_metric';
 import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
@@ -70,10 +76,63 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 }> = ({ closeFlyout, reindexState, startReindex, cancelReindex, renderGlobalCallouts }) => {
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
+  const isCompleted = status === ReindexStatus.completed;
+  const hasFetchFailed = status === ReindexStatus.fetchFailed;
+  const hasReindexingFailed = status === ReindexStatus.failed;
+
+  const onStartReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
+    startReindex();
+  }, [startReindex]);
+
+  const onStopReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_STOP_CLICK);
+    cancelReindex();
+  }, [cancelReindex]);
 
   return (
     <Fragment>
       <EuiFlyoutBody>
+        {hasRequiredPrivileges === false && (
+          <Fragment>
+            <EuiSpacer />
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
+                  defaultMessage="You do not have sufficient privileges to reindex this index"
+                />
+              }
+              color="danger"
+              iconType="alert"
+            />
+          </Fragment>
+        )}
+        {(hasFetchFailed || hasReindexingFailed) && (
+          <>
+            <EuiSpacer />
+            <EuiCallOut
+              color="danger"
+              iconType="alert"
+              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
+              title={
+                hasFetchFailed ? (
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.fetchFailedCalloutTitle"
+                    defaultMessage="Reindex status not available"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingFailedCalloutTitle"
+                    defaultMessage="Reindexing error"
+                  />
+                )
+              }
+            >
+              {reindexState.errorMessage}
+            </EuiCallOut>
+          </>
+        )}
         {renderGlobalCallouts()}
         <EuiCallOut
           title={
@@ -100,21 +159,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </p>
         </EuiCallOut>
-        {!hasRequiredPrivileges && (
-          <Fragment>
-            <EuiSpacer />
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
-                  defaultMessage="You do not have sufficient privileges to reindex this index"
-                />
-              }
-              color="danger"
-              iconType="alert"
-            />
-          </Fragment>
-        )}
         <EuiSpacer />
         <EuiTitle size="xs">
           <h3>
@@ -124,7 +168,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </h3>
         </EuiTitle>
-        <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
+        <ReindexProgress reindexState={reindexState} cancelReindex={onStopReindex} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -136,15 +180,16 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {status !== ReindexStatus.completed && (
+          {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
                 color={status === ReindexStatus.paused ? 'warning' : 'primary'}
                 iconType={status === ReindexStatus.paused ? 'play' : undefined}
-                onClick={startReindex}
+                onClick={onStartReindex}
                 isLoading={loading}
                 disabled={loading || !hasRequiredPrivileges}
+                data-test-subj="startReindexingButton"
               >
                 {buttonLabel(status)}
               </EuiButton>

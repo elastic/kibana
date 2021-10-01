@@ -31,6 +31,9 @@ export enum ReindexStatus {
   failed,
   paused,
   cancelled,
+  // Used by the UI to differentiate if there was a failure retrieving
+  // the status from the server API
+  fetchFailed,
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
@@ -138,41 +141,12 @@ export interface UIReindex {
   stop: boolean;
 }
 
-export interface UpgradeAssistantTelemetrySavedObject {
-  ui_open: {
-    overview: number;
-    elasticsearch: number;
-    kibana: number;
-  };
-  ui_reindex: {
-    close: number;
-    open: number;
-    start: number;
-    stop: number;
-  };
-}
-
 export interface UpgradeAssistantTelemetry {
-  ui_open: {
-    overview: number;
-    elasticsearch: number;
-    kibana: number;
-  };
-  ui_reindex: {
-    close: number;
-    open: number;
-    start: number;
-    stop: number;
-  };
   features: {
     deprecation_logging: {
       enabled: boolean;
     };
   };
-}
-
-export interface UpgradeAssistantTelemetrySavedObjectAttributes {
-  [key: string]: any;
 }
 
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';

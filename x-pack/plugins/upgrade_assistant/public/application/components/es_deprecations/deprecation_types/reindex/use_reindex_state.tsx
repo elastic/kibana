@@ -100,7 +100,8 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       setReindexState({
         ...reindexState,
         loadingState: LoadingState.Error,
-        status: ReindexStatus.failed,
+        errorMessage: error.message.toString(),
+        status: ReindexStatus.fetchFailed,
       });
       return;
     }
@@ -131,14 +132,13 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       cancelLoadingState: undefined,
     });
 
-    api.sendReindexTelemetryData({ start: true });
-
     const { data, error } = await api.startReindexTask(indexName);
 
     if (error) {
       setReindexState({
         ...reindexState,
         loadingState: LoadingState.Error,
+        errorMessage: error.message.toString(),
         status: ReindexStatus.failed,
       });
       return;
@@ -149,8 +149,6 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
   }, [api, indexName, reindexState, updateStatus]);
 
   const cancelReindex = useCallback(async () => {
-    api.sendReindexTelemetryData({ stop: true });
-
     const { error } = await api.cancelReindexTask(indexName);
 
     setReindexState({

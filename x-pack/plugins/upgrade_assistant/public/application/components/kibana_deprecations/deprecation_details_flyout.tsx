@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButtonEmpty,
@@ -24,6 +25,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
 import { DeprecationBadge } from '../shared';
 
@@ -134,6 +136,11 @@ export const DeprecationDetailsFlyout = ({
   const isCurrent = deprecationResolutionState?.id === deprecation.id;
   const isResolved = isCurrent && deprecationResolutionState?.resolveDeprecationStatus === 'ok';
 
+  const onResolveDeprecation = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_KIBANA_QUICK_RESOLVE_CLICK);
+    resolveDeprecation(deprecation);
+  }, [deprecation, resolveDeprecation]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -196,16 +203,26 @@ export const DeprecationDetailsFlyout = ({
               <h3>{i18nTexts.manualFixTitle}</h3>
             </EuiTitle>
 
-            <EuiSpacer />
+            <EuiSpacer size="s" />
 
             <EuiText>
-              <ol data-test-subj="manualStepsList">
-                {correctiveActions.manualSteps.map((step, stepIndex) => (
-                  <li key={`step-${stepIndex}`} className="upgResolveStep eui-textBreakWord">
-                    {step}
-                  </li>
-                ))}
-              </ol>
+              {correctiveActions.manualSteps.length === 1 ? (
+                <p data-test-subj="manualStep" className="eui-textBreakWord">
+                  {correctiveActions.manualSteps[0]}
+                </p>
+              ) : (
+                <ol data-test-subj="manualStepsList">
+                  {correctiveActions.manualSteps.map((step, stepIndex) => (
+                    <li
+                      data-test-subj="manualStepsListItem"
+                      key={`step-${stepIndex}`}
+                      className="upgResolveStep eui-textBreakWord"
+                    >
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              )}
             </EuiText>
           </div>
         )}
@@ -225,7 +242,7 @@ export const DeprecationDetailsFlyout = ({
               <EuiButton
                 fill
                 data-test-subj="resolveButton"
-                onClick={() => resolveDeprecation(deprecation)}
+                onClick={onResolveDeprecation}
                 isLoading={Boolean(
                   deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'
                 )}

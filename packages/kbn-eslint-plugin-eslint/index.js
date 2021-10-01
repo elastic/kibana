@@ -15,5 +15,6 @@ module.exports = {
     no_export_all: require('./rules/no_export_all'),
     no_async_promise_body: require('./rules/no_async_promise_body'),
     no_async_foreach: require('./rules/no_async_foreach'),
+    no_trailing_import_slash: require('./rules/no_trailing_import_slash'),
   },
 };
