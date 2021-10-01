@@ -103,8 +103,8 @@ const ReasonCell: React.FC<{
           {value}
           <h4>{i18n.EVENT_RENDERER_POPOVER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>
           <EuiSpacer size="xs" />
-          <EuiPanel color="subdued" data-test-subj="reason-cell-renderer">
-            {rowRender}
+          <EuiPanel color="subdued" className="eui-xScroll" data-test-subj="reason-cell-renderer">
+            <div className="eui-displayInlineBlock">{rowRender}</div>
           </EuiPanel>
         </>
       ) : (
