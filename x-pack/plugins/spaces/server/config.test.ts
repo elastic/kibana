@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { applyDeprecations, ConfigDeprecationContext, configDeprecationFactory } from '@kbn/config';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import type { ConfigDeprecationContext } from '@kbn/config';
 import { deepFreeze } from '@kbn/std';
 
 import { spacesConfigDeprecationProvider } from './config';
