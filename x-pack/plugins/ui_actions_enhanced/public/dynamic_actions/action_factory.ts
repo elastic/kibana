@@ -37,7 +37,8 @@ export class ActionFactory<
 > implements
     Omit<Presentable<FactoryContext>, 'getHref'>,
     Configurable<Config, FactoryContext>,
-    PersistableState<SerializedEvent> {
+    PersistableState<SerializedEvent>
+{
   public readonly id: string;
   public readonly isBeta: boolean;
   public readonly minimalLicense?: LicenseType;

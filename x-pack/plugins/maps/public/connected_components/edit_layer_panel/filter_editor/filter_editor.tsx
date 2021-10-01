@@ -240,7 +240,7 @@ export class FilterEditor extends Component<Props, State> {
 
         <GlobalFilterCheckbox
           label={i18n.translate('xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel', {
-            defaultMessage: `Apply global filter to layer data`,
+            defaultMessage: `Apply global search to layer data`,
           })}
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}

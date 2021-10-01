@@ -2,9 +2,7 @@
 
 ## Overview
 
-This plugin provides beta Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
-
-> :warning: The Kibana interface for Enterprise Search is a beta feature. It is subject to change and is not covered by the same level of support as generally available features. This interface will become the sole management panel for Enterprise Search with the 8.0 release. Until then, the standalone Enterprise Search UI remains available and supported.
+This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 ### App Search
 

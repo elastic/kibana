@@ -6263,6 +6263,48 @@
             "description": "How many times this API has been called by a non-Kibana client in a custom space."
           }
         },
+        "apiCalls.savedObjectsBulkResolve.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.default.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.custom.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
+        },
         "apiCalls.savedObjectsBulkUpdate.total": {
           "type": "long",
           "_meta": {
@@ -7386,6 +7428,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "metrics:allowStringIndices": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "query:allowLeadingWildcards": {
           "type": "boolean",
           "_meta": {
@@ -7581,14 +7629,14 @@
             "description": "Non-default value of setting."
           }
         },
-        "apm:enableSignificantTerms": {
+        "observability:enableInspectEsQueries": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableInspectEsQueries": {
-          "type": "boolean",
+        "observability:maxSuggestions": {
+          "type": "integer",
           "_meta": {
             "description": "Non-default value of setting."
           }
@@ -9039,6 +9087,12 @@
           "type": "long",
           "_meta": {
             "description": "Number of TSVB visualizations using \"last value\" as a time range"
+          }
+        },
+        "timeseries_table_use_aggregate_function": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of TSVB table visualizations using aggregate function"
           }
         }
       }

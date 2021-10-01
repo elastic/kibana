@@ -26,9 +26,8 @@ export const getMonitorDetailsAction = createAsyncAction<
   MonitorDetailsState
 >('GET_MONITOR_DETAILS');
 
-export const getMonitorLocationsAction = createAction<MonitorLocationsPayload>(
-  'GET_MONITOR_LOCATIONS'
-);
+export const getMonitorLocationsAction =
+  createAction<MonitorLocationsPayload>('GET_MONITOR_LOCATIONS');
 export const getMonitorLocationsActionSuccess = createAction<MonitorLocations>(
   'GET_MONITOR_LOCATIONS_SUCCESS'
 );

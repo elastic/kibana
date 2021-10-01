@@ -165,8 +165,9 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     }
     const savedObjectsClient = context.core.savedObjects.client;
     const coreStart = await resources.core.start();
-    const esClient = coreStart.elasticsearch.client.asScoped(resources.request)
-      .asCurrentUser;
+    const esClient = coreStart.elasticsearch.client.asScoped(
+      resources.request
+    ).asCurrentUser;
     const cloudPluginSetup = plugins.cloud?.setup;
     const fleetPluginStart = await plugins.fleet.start();
     const securityPluginStart = await plugins.security.start();

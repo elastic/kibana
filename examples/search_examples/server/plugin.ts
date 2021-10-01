@@ -33,7 +33,8 @@ export class SearchExamplesPlugin
       SearchExamplesPluginStart,
       SearchExamplesPluginSetupDeps,
       SearchExamplesPluginStartDeps
-    > {
+    >
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

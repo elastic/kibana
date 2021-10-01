@@ -35,7 +35,8 @@ export interface SecurityOssPluginStart {
 }
 
 export class SecurityOssPlugin
-  implements Plugin<SecurityOssPluginSetup, SecurityOssPluginStart, {}, {}> {
+  implements Plugin<SecurityOssPluginSetup, SecurityOssPluginStart, {}, {}>
+{
   private readonly config: ConfigType;
   private readonly insecureClusterService: InsecureClusterService;
   private readonly appStateService = new AppStateService();

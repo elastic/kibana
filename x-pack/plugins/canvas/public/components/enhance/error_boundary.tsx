@@ -38,10 +38,12 @@ export const errorBoundaryHoc = compose<ComponentProps, Pick<ComponentProps, 'ch
   withState('error', 'setError', null),
   withState('errorInfo', 'setErrorInfo', null),
   withHandlers<Pick<Props, 'setError' | 'setErrorInfo'>, Pick<Props, 'resetErrorState'>>({
-    resetErrorState: ({ setError, setErrorInfo }) => () => {
-      setError(null);
-      setErrorInfo(null);
-    },
+    resetErrorState:
+      ({ setError, setErrorInfo }) =>
+      () => {
+        setError(null);
+        setErrorInfo(null);
+      },
   }),
   lifecycle<Props, Props>({
     componentDidCatch(error, errorInfo) {

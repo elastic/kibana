@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
@@ -19,9 +19,11 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';
+import { CustomIntegrationsPluginSetup } from '../../custom_integrations/server';
 
-interface HomeServerPluginSetupDependencies {
+export interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
+  customIntegrations?: CustomIntegrationsPluginSetup;
 }
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
@@ -30,8 +32,11 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   }
   private readonly tutorialsRegistry = new TutorialsRegistry();
   private readonly sampleDataRegistry: SampleDataRegistry;
+  private customIntegrations?: CustomIntegrationsPluginSetup;
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
+    this.customIntegrations = plugins.customIntegrations;
+
     core.capabilities.registerProvider(capabilitiesProvider);
     core.savedObjects.registerType(sampleDataTelemetry);
 
@@ -39,14 +44,16 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     registerRoutes(router);
 
     return {
-      tutorials: { ...this.tutorialsRegistry.setup(core) },
-      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
+      tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
+      sampleData: {
+        ...this.sampleDataRegistry.setup(core, plugins.usageCollection, plugins.customIntegrations),
+      },
     };
   }
 
-  public start(): HomeServerPluginStart {
+  public start(core: CoreStart): HomeServerPluginStart {
     return {
-      tutorials: { ...this.tutorialsRegistry.start() },
+      tutorials: { ...this.tutorialsRegistry.start(core, this.customIntegrations) },
       sampleData: { ...this.sampleDataRegistry.start() },
     };
   }

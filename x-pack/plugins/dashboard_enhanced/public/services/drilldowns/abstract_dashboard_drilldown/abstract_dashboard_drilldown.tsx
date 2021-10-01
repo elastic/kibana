@@ -34,7 +34,8 @@ export interface Params {
 }
 
 export abstract class AbstractDashboardDrilldown<Context extends object = object>
-  implements Drilldown<Config, Context> {
+  implements Drilldown<Config, Context>
+{
   constructor(protected readonly params: Params) {
     this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
     this.CollectConfig = reactToUiComponent(this.ReactCollectConfig);

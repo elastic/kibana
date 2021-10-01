@@ -31,7 +31,8 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 export class DashboardContainerFactoryDefinition
   implements
-    EmbeddableFactoryDefinition<DashboardContainerInput, ContainerOutput, DashboardContainer> {
+    EmbeddableFactoryDefinition<DashboardContainerInput, ContainerOutput, DashboardContainer>
+{
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
   private readonly persistableStateService: EmbeddablePersistableStateService;

@@ -22,13 +22,13 @@ interface RangeProps {
   lt: number;
 }
 
-dataMock.fieldFormats = ({
+dataMock.fieldFormats = {
   deserialize: jest.fn(() => ({
     convert: jest.fn((s: RangeProps) => {
       return `≥ ${s.gte} and < ${s.lt}`;
     }),
   })),
-} as unknown) as DataPublicPluginStart['fieldFormats'];
+} as unknown as DataPublicPluginStart['fieldFormats'];
 
 export const getPaletteRegistry = () => {
   const mockPalette1: jest.Mocked<PaletteDefinition> = {
@@ -58,7 +58,7 @@ export const getPaletteRegistry = () => {
 
 describe('computeColor', () => {
   it('should return the correct color based on the parent sortIndex', () => {
-    const d = ({
+    const d = {
       dataName: 'ES-Air',
       depth: 1,
       sortIndex: 0,
@@ -67,7 +67,7 @@ describe('computeColor', () => {
         depth: 0,
         sortIndex: 0,
       },
-    } as unknown) as ShapeTreeNode;
+    } as unknown as ShapeTreeNode;
     const color = computeColor(
       d,
       false,
@@ -83,7 +83,7 @@ describe('computeColor', () => {
   });
 
   it('slices with the same label should have the same color for small multiples', () => {
-    const d = ({
+    const d = {
       dataName: 'ES-Air',
       depth: 1,
       sortIndex: 0,
@@ -92,7 +92,7 @@ describe('computeColor', () => {
         depth: 0,
         sortIndex: 0,
       },
-    } as unknown) as ShapeTreeNode;
+    } as unknown as ShapeTreeNode;
     const color = computeColor(
       d,
       true,
@@ -107,7 +107,7 @@ describe('computeColor', () => {
     expect(color).toEqual('color3');
   });
   it('returns the overwriteColor if exists', () => {
-    const d = ({
+    const d = {
       dataName: 'ES-Air',
       depth: 1,
       sortIndex: 0,
@@ -116,7 +116,7 @@ describe('computeColor', () => {
         depth: 0,
         sortIndex: 0,
       },
-    } as unknown) as ShapeTreeNode;
+    } as unknown as ShapeTreeNode;
     const color = computeColor(
       d,
       true,
@@ -132,7 +132,7 @@ describe('computeColor', () => {
   });
 
   it('returns the overwriteColor for older visualizations with formatted values', () => {
-    const d = ({
+    const d = {
       dataName: {
         gte: 1000,
         lt: 2000,
@@ -157,7 +157,7 @@ describe('computeColor', () => {
         depth: 0,
         sortIndex: 0,
       },
-    } as unknown) as ShapeTreeNode;
+    } as unknown as ShapeTreeNode;
     const visParamsNew = {
       ...visParams,
       distinctColors: true,

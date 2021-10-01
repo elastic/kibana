@@ -33,7 +33,8 @@ export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
  */
 export class ExploreDataContextMenuAction
   extends AbstractExploreDataAction<EmbeddableQueryContext>
-  implements Action<EmbeddableQueryContext> {
+  implements Action<EmbeddableQueryContext>
+{
   public readonly id = ACTION_EXPLORE_DATA;
 
   public readonly type = ACTION_EXPLORE_DATA;

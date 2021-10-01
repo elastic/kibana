@@ -28,7 +28,7 @@ const stories: Meta<Args> = {
   component: Popover,
   decorators: [
     (StoryComponent) => {
-      const coreMock = ({
+      const coreMock = {
         http: {
           get: () => {
             return {
@@ -44,7 +44,7 @@ const stories: Meta<Args> = {
         },
         notifications: { toasts: { add: () => {} } },
         uiSettings: { get: () => ({}) },
-      } as unknown) as CoreStart;
+      } as unknown as CoreStart;
 
       const KibanaReactContext = createKibanaReactContext(coreMock);
 

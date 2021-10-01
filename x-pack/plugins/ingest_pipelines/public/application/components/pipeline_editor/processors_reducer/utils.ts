@@ -100,7 +100,7 @@ export const unsafeProcessorMove = (
     sourceProcessors.splice(sourceIndex, 1);
 
     // If onFailure is empty, delete the array.
-    if (!sourceProcessors.length && !((sourceProcessor as unknown) as State).isRoot) {
+    if (!sourceProcessors.length && !(sourceProcessor as unknown as State).isRoot) {
       delete sourceProcessor.onFailure;
     }
   } else {

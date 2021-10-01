@@ -12,7 +12,7 @@ import {
 import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
-import { createV2SearchResponse } from '../../routes/metadata/support/test_support';
+import { legacyMetadataSearchResponse } from '../../routes/metadata/support/test_support';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { getESQueryHostMetadataByFleetAgentIds } from '../../routes/metadata/query_builders';
 import { EndpointError } from '../../errors';
@@ -38,7 +38,7 @@ describe('EndpointMetadataService', () => {
       endpointMetadataDoc = new EndpointDocGenerator().generateHostMetadata();
       esClient.search.mockReturnValue(
         elasticsearchServiceMock.createSuccessTransportRequestPromise(
-          createV2SearchResponse(endpointMetadataDoc)
+          legacyMetadataSearchResponse(endpointMetadataDoc)
         )
       );
     });

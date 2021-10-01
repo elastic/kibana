@@ -97,14 +97,14 @@ describe('useAppToasts', () => {
     });
 
     it('works normally with a bsearch type error', async () => {
-      const error = ({
+      const error = {
         message: 'some message',
         attributes: {}, // empty object and should not show up in the output
         err: {
           statusCode: 400,
           innerMessages: { somethingElse: 'message' },
         },
-      } as unknown) as IEsError;
+      } as unknown as IEsError;
       const { result } = renderHook(() => useAppToasts());
 
       result.current.addError(error, { title: 'title' });
@@ -113,14 +113,14 @@ describe('useAppToasts', () => {
     });
 
     it('parses a bsearch correctly in the stack and name', async () => {
-      const error = ({
+      const error = {
         message: 'some message',
         attributes: {}, // empty object and should not show up in the output
         err: {
           statusCode: 400,
           innerMessages: { somethingElse: 'message' },
         },
-      } as unknown) as IEsError;
+      } as unknown as IEsError;
       const { result } = renderHook(() => useAppToasts());
       result.current.addError(error, { title: 'title' });
       const errorObj = addErrorMock.mock.calls[0][0];
@@ -177,27 +177,27 @@ describe('useAppToasts', () => {
     });
 
     it('works normally with a bsearch type error', async () => {
-      const error = ({
+      const error = {
         message: 'some message',
         attributes: {}, // empty object and should not show up in the output
         err: {
           statusCode: 400,
           innerMessages: { somethingElse: 'message' },
         },
-      } as unknown) as IEsError;
+      } as unknown as IEsError;
       const result = errorToErrorStackAdapter(error);
       expect(result).toEqual(Error('some message (400)'));
     });
 
     it('parses a bsearch correctly in the stack and name', async () => {
-      const error = ({
+      const error = {
         message: 'some message',
         attributes: {}, // empty object and should not show up in the output
         err: {
           statusCode: 400,
           innerMessages: { somethingElse: 'message' },
         },
-      } as unknown) as IEsError;
+      } as unknown as IEsError;
       const result = errorToErrorStackAdapter(error);
       const parsedStack = JSON.parse(result.stack ?? '');
       expect(parsedStack).toEqual({

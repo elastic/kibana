@@ -26,93 +26,97 @@ const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
 });
 const moduleName = 'apm';
 
-export const tutorialProvider = ({
-  apmConfig,
-  apmIndices,
-  cloud,
-  isFleetPluginEnabled,
-}: {
-  apmConfig: APMConfig;
-  apmIndices: ApmIndicesConfig;
-  cloud?: CloudSetup;
-  isFleetPluginEnabled: boolean;
-}) => () => {
-  const indexPatternTitle = getApmIndexPatternTitle(apmIndices);
+export const tutorialProvider =
+  ({
+    apmConfig,
+    apmIndices,
+    cloud,
+    isFleetPluginEnabled,
+  }: {
+    apmConfig: APMConfig;
+    apmIndices: ApmIndicesConfig;
+    cloud?: CloudSetup;
+    isFleetPluginEnabled: boolean;
+  }) =>
+  () => {
+    const indexPatternTitle = getApmIndexPatternTitle(apmIndices);
 
-  const savedObjects = [
-    {
-      ...apmIndexPattern,
-      id: APM_STATIC_INDEX_PATTERN_ID,
-      attributes: {
-        ...apmIndexPattern.attributes,
-        title: indexPatternTitle,
-      },
-    },
-  ];
-
-  const artifacts: ArtifactsSchema = {
-    dashboards: [
+    const savedObjects = [
       {
-        id: '8d3ed660-7828-11e7-8c47-65b845b5cfb3',
-        linkLabel: i18n.translate(
-          'xpack.apm.tutorial.specProvider.artifacts.dashboards.linkLabel',
+        ...apmIndexPattern,
+        id: APM_STATIC_INDEX_PATTERN_ID,
+        attributes: {
+          ...apmIndexPattern.attributes,
+          title: indexPatternTitle,
+        },
+      },
+    ];
+
+    const artifacts: ArtifactsSchema = {
+      dashboards: [
+        {
+          id: '8d3ed660-7828-11e7-8c47-65b845b5cfb3',
+          linkLabel: i18n.translate(
+            'xpack.apm.tutorial.specProvider.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'APM dashboard',
+            }
+          ),
+          isOverview: true,
+        },
+      ],
+    };
+
+    if (apmConfig['xpack.apm.ui.enabled']) {
+      // @ts-expect-error artifacts.application is readonly
+      artifacts.application = {
+        path: '/app/apm',
+        label: i18n.translate(
+          'xpack.apm.tutorial.specProvider.artifacts.application.label',
           {
-            defaultMessage: 'APM dashboard',
+            defaultMessage: 'Launch APM',
           }
         ),
-        isOverview: true,
-      },
-    ],
-  };
+      };
+    }
 
-  if (apmConfig['xpack.apm.ui.enabled']) {
-    // @ts-expect-error artifacts.application is readonly
-    artifacts.application = {
-      path: '/app/apm',
-      label: i18n.translate(
-        'xpack.apm.tutorial.specProvider.artifacts.application.label',
+    return {
+      id: 'apm',
+      name: i18n.translate('xpack.apm.tutorial.specProvider.name', {
+        defaultMessage: 'APM',
+      }),
+      moduleName,
+      category: TutorialsCategory.OTHER,
+      shortDescription: apmIntro,
+      longDescription: i18n.translate(
+        'xpack.apm.tutorial.specProvider.longDescription',
         {
-          defaultMessage: 'Launch APM',
-        }
-      ),
-    };
-  }
-
-  return {
-    id: 'apm',
-    name: i18n.translate('xpack.apm.tutorial.specProvider.name', {
-      defaultMessage: 'APM',
-    }),
-    moduleName,
-    category: TutorialsCategory.OTHER,
-    shortDescription: apmIntro,
-    longDescription: i18n.translate(
-      'xpack.apm.tutorial.specProvider.longDescription',
-      {
-        defaultMessage:
-          'Application Performance Monitoring (APM) collects in-depth \
+          defaultMessage:
+            'Application Performance Monitoring (APM) collects in-depth \
 performance metrics and errors from inside your application. \
 It allows you to monitor the performance of thousands of applications in real time. \
 [Learn more]({learnMoreLink}).',
-        values: {
-          learnMoreLink:
-            '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
-        },
-      }
-    ),
-    euiIconType: 'apmApp',
-    artifacts,
-    customStatusCheckName: 'apm_fleet_server_status_check',
-    onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),
-    elasticCloud: createElasticCloudInstructions(cloud),
-    previewImagePath: '/plugins/apm/assets/apm.png',
-    savedObjects,
-    savedObjectsInstallMsg: i18n.translate(
-      'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
-      {
-        defaultMessage:
-          'An APM index pattern is required for some features in the APM UI.',
-      }
-    ),
-  } as TutorialSchema;
-};
+          values: {
+            learnMoreLink:
+              '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
+          },
+        }
+      ),
+      euiIconType: 'apmApp',
+      eprPackageOverlap: 'apm',
+      integrationBrowserCategories: ['web'],
+      artifacts,
+      customStatusCheckName: 'apm_fleet_server_status_check',
+      onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),
+      elasticCloud: createElasticCloudInstructions(cloud),
+      previewImagePath: '/plugins/apm/assets/apm.png',
+      savedObjects,
+      savedObjectsInstallMsg: i18n.translate(
+        'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
+        {
+          defaultMessage:
+            'An APM index pattern is required for some features in the APM UI.',
+        }
+      ),
+    } as TutorialSchema;
+  };

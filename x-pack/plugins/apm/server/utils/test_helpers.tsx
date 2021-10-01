@@ -22,8 +22,6 @@ interface Options {
 }
 
 interface MockSetup {
-  start: number;
-  end: number;
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
@@ -64,8 +62,6 @@ export async function inspectSearchParams(
   let error;
 
   const mockSetup = {
-    start: 1528113600000,
-    end: 1528977600000,
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
     config: new Proxy(
@@ -83,12 +79,6 @@ export async function inspectSearchParams(
 
             case 'xpack.apm.metricsInterval':
               return 30;
-
-            case 'xpack.apm.maxServiceEnvironments':
-              return 100;
-
-            case 'xpack.apm.maxServiceSelection':
-              return 50;
           }
         },
       }
