@@ -60,6 +60,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
 import { DeferredSpinner } from './shared';
+import { IndexPatternEditorStart } from '../../index_pattern_editor/target/types/public';
 import { ViewSavedSearchAction } from './application/embeddable/view_saved_search_action';
 
 declare module '../../share/public' {
@@ -189,6 +190,7 @@ export interface DiscoverStartPlugins {
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  indexPatternEditor: IndexPatternEditorStart;
 }
 
 /**

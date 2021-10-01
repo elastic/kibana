@@ -1,0 +1,23 @@
+.decorated {
+  overflow: hidden;
+  text-align: center;
+}
+.decorated > span {
+  position: relative;
+  display: inline-block;
+}
+.decorated > span:before, .decorated > span:after {
+  content: '';
+  position: absolute;
+  top: 49%;
+  border-bottom: 1px solid;
+  width: 100vw; /* half of limiter*/
+  margin: 0 20px;
+  color: $euiColorMediumShade;
+}
+.decorated > span:before {
+  right: 100%;
+}
+.decorated > span:after {
+  left: 100%;
+}

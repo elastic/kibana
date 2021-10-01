@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { TimestampField } from './timestamp_field';
-export { TypeField } from './type_field';
-export { TitleField } from './title_field';
-export { DescriptionField } from './description_field';
+export { DiscoverHomeRoute } from './discover_home_route';

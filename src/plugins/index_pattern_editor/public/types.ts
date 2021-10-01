@@ -162,6 +162,7 @@ export enum INDEX_PATTERN_TYPE {
 
 export interface IndexPatternConfig {
   title: string;
+  description?: string;
   timestampField?: EuiComboBoxOptionOption<string>;
   allowHidden: boolean;
   id?: string;

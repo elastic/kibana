@@ -11,6 +11,7 @@
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import moment from 'moment';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '../..';
 
 import { createDataViewCache } from '.';
@@ -373,6 +374,7 @@ export class DataViewsService {
       version,
       attributes: {
         title,
+        description,
         timeFieldName,
         intervalName,
         fields,
@@ -383,9 +385,9 @@ export class DataViewsService {
         type,
         fieldAttrs,
         allowNoIndex,
+        createdAt,
       },
     } = savedObject;
-
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
@@ -399,6 +401,7 @@ export class DataViewsService {
       id,
       version,
       title,
+      description,
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -409,6 +412,7 @@ export class DataViewsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
+      createdAt,
     };
   };
 
@@ -567,6 +571,7 @@ export class DataViewsService {
     }
 
     const body = indexPattern.getAsSavedObjectBody();
+    body.createdAt = moment(Date.now()).toISOString();
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
       DATA_VIEW_SAVED_OBJECT_TYPE,
       body,

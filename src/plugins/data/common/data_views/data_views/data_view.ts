@@ -10,6 +10,7 @@
 
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import moment from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '../..';
 import type { RuntimeField } from '../types';
@@ -40,6 +41,7 @@ interface SavedObjectBody {
   fieldFormatMap?: string;
   typeMeta?: string;
   type?: string;
+  createdAt?: string;
 }
 
 type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
@@ -64,6 +66,10 @@ export class DataView implements IIndexPattern {
    * Type is used to identify rollup index patterns
    */
   public type: string | undefined;
+  /**
+   * Optional description of an index pattern
+   */
+  public description: string | undefined;
   public formatHit: {
     (hit: Record<string, any>, type?: string): any;
     formatField: FormatFieldFn;
@@ -81,6 +87,7 @@ export class DataView implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
   private runtimeFieldMap: Record<string, RuntimeField>;
+  private createdAt?: string;
 
   /**
    * prevents errors when index pattern exists before indices
@@ -110,6 +117,7 @@ export class DataView implements IIndexPattern {
     this.version = spec.version;
 
     this.title = spec.title || '';
+    this.description = spec.description || '';
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
     this.fields.replaceAll(Object.values(spec.fields || {}));
@@ -119,12 +127,20 @@ export class DataView implements IIndexPattern {
     this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.createdAt = spec.createdAt;
   }
 
   /**
    * Get last saved saved object fields
    */
   getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
+
+  getCreatedAt = () => {
+    if (!this.createdAt) {
+      return 'Unknown time';
+    }
+    return moment(this.createdAt).format('MMM DD, YYYY HH:mm:ss');
+  };
 
   /**
    * Reset last saved saved object fields. used after saving
@@ -208,6 +224,7 @@ export class DataView implements IIndexPattern {
       version: this.version,
 
       title: this.title,
+      description: this.description,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
@@ -218,6 +235,7 @@ export class DataView implements IIndexPattern {
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
+      createdAt: this.createdAt,
     };
   }
 
@@ -329,6 +347,7 @@ export class DataView implements IIndexPattern {
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
+      description: this.description,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
@@ -338,6 +357,7 @@ export class DataView implements IIndexPattern {
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
+      createdAt: this.createdAt,
     };
   }
 

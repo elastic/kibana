@@ -98,11 +98,13 @@ export async function onSaveSearch({
     newCopyOnSave,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
+    newDescription,
   }: {
     newTitle: string;
     newCopyOnSave: boolean;
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
+    newDescription?: string;
   }) => {
     const currentTitle = savedSearch.title;
     savedSearch.title = newTitle;
@@ -112,6 +114,7 @@ export async function onSaveSearch({
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     };
+    savedSearch.description = newDescription;
     const response = await saveDataSource({
       indexPattern,
       saveOptions,
@@ -140,9 +143,9 @@ export async function onSaveSearch({
       })}
       description={i18n.translate('discover.localMenu.saveSaveSearchDescription', {
         defaultMessage:
-          'Save your Discover search so you can use it in visualizations and dashboards',
+          '[Add a description to your Discover search so you can more easily understand what it relates to]',
       })}
-      showDescription={false}
+      showDescription={true}
     />
   );
   showSaveModal(saveModal, services.core.i18n.Context);

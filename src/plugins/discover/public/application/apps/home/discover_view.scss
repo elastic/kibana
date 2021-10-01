@@ -1,0 +1,27 @@
+.discoverLogo__icon {
+  margin-top: 8px !important;
+}
+
+.editIndexPattern__icon {
+  margin-top: 8px !important;
+  cursor: pointer;
+}
+
+.discoverHome__sectionNavigation__button {
+  background-color: rgba(0, 119, 204, .1) !important;
+  color: #0061A6;
+
+  .euiCard__titleButton {
+    color: #0061A6;
+  }
+}
+.discoverHome__lastRecently__card {
+  background-color: #D6EDE4 !important;
+}
+.discoverHome__lastRecently__item {
+  min-height: 118px !important;
+}
+
+.discoverView__noDescription, .indexPatternView__noDescription {
+  color: $euiColorMediumShade;
+}

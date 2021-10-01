@@ -10,6 +10,7 @@ import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import type { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/public';
 import { IndexPatternAttributes, SavedObject } from 'src/plugins/data/common';
+import moment from 'moment';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { getState } from './services/discover_state';
@@ -73,6 +74,23 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
       return indexPatternData;
     }
 
+    async function updateSavedSearch(toUpdate: SavedSearch) {
+      const client = core.savedObjects.client;
+      toUpdate.accessed_at = moment().toISOString();
+      client
+        .update('search', savedSearchId, { accessed_at: moment().toISOString() }, {})
+        .then((resp) => {
+          // TODO: handle success
+          // eslint-disable-next-line no-console
+          console.dir(resp);
+        })
+        .catch(async (err) => {
+          // TODO: handle error
+          // eslint-disable-next-line no-console
+          console.dir(err);
+        });
+    }
+
     async function loadSavedSearch() {
       try {
         // force a refresh if a given saved search without id was saved
@@ -84,6 +102,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         }
         setSavedSearch(loadedSavedSearch);
         if (savedSearchId) {
+          await updateSavedSearch(loadedSavedSearch);
           chrome.recentlyAccessed.add(
             (loadedSavedSearch as unknown as SavedObjectDeprecated).getFullPath(),
             loadedSavedSearch.title,
@@ -121,6 +140,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     id,
     services,
     toastNotifications,
+    core.savedObjects.client,
   ]);
 
   useEffect(() => {

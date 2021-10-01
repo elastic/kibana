@@ -23,6 +23,7 @@ import {
   TimefilterContract,
   IndexPatternsContract,
   DataPublicPluginStart,
+  ISearchStart,
 } from 'src/plugins/data/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { SharePluginStart } from 'src/plugins/share/public';
@@ -36,6 +37,8 @@ import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { SavedObjectsStart } from '../../saved_objects/public';
+import { IndexPatternEditorStart } from '../../index_pattern_editor/target/types/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -58,10 +61,16 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
+  findSavedSearches: (
+    size: number
+  ) => Promise<{ total: number; hits: Array<Record<string, unknown>> }>;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  indexPatternEditor: IndexPatternEditorStart;
   http: HttpStart;
+  searchSourceService: ISearchStart;
+  savedObjects: SavedObjectsStart;
 }
 
 export function buildServices(
@@ -74,7 +83,7 @@ export function buildServices(
     savedObjects: plugins.savedObjects,
   };
   const savedObjectService = createSavedSearchesLoader(services);
-  const { usageCollection } = plugins;
+  const { usageCollection, data } = plugins;
 
   return {
     addBasePath: core.http.basePath.prepend,
@@ -87,6 +96,7 @@ export function buildServices(
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
+    findSavedSearches: async (size: number) => savedObjectService.find('', size),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,
@@ -102,6 +112,9 @@ export function buildServices(
     uiSettings: core.uiSettings,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    indexPatternEditor: plugins.indexPatternEditor,
     http: core.http,
+    savedObjects: plugins.savedObjects,
+    searchSourceService: data.search,
   };
 }
