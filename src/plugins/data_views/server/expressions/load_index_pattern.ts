@@ -14,7 +14,7 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternLoadStartDependencies,
 } from '../../common/expressions';
-import { DataViewPluginStartDependencies, DataViewPluginStart } from '../plugin';
+import { DataViewPluginStartDependencies, DataViewPluginStart } from '../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

@@ -10,7 +10,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { StartServicesAccessor } from 'src/core/server';
 import { DataViewsService } from '../common';
 import { SavedObjectsClient } from '../../../core/server';
-import { DataViewPluginStartDependencies, DataViewPluginStart } from './plugin';
+import { DataViewPluginStartDependencies, DataViewPluginStart } from './types';
 
 interface CountSummary {
   min?: number;
