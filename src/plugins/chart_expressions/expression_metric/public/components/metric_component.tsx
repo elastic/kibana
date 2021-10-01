@@ -10,7 +10,7 @@ import { last, findIndex, isNaN } from 'lodash';
 import React, { Component } from 'react';
 import { isColorDark } from '@elastic/eui';
 import { MetricVisValue } from './metric_value';
-import { MetricInput, VisParams, Metric } from '../../common/types';
+import { MetricInput, VisParams, MetricOptions } from '../../common/types';
 import type { FieldFormatsContentType, IFieldFormat } from '../../../../field_formats/common';
 import { Datatable } from '../../../../expressions/public';
 import { getHeatmapColors } from '../../../../charts/public';
@@ -114,7 +114,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     const max = last(config.colorsRange)?.to ?? 0;
     const colors = this.getColors();
     const labels = this.getLabels();
-    const metrics: Metric[] = [];
+    const metrics: MetricOptions[] = [];
 
     let bucketColumnId: string;
     let bucketFormatter: IFieldFormat;
@@ -157,7 +157,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     return metrics;
   }
 
-  private filterBucket = (metric: Metric) => {
+  private filterBucket = (metric: MetricOptions) => {
     const dimensions = this.props.visParams.dimensions;
     if (!dimensions.bucket) {
       return;
@@ -177,7 +177,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     });
   };
 
-  private renderMetric = (metric: Metric, index: number) => {
+  private renderMetric = (metric: MetricOptions, index: number) => {
     return (
       <MetricVisValue
         key={index}

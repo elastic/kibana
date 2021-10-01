@@ -9,12 +9,12 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import type { Metric } from '../../common/types';
+import type { MetricOptions } from '../../common/types';
 
 interface MetricVisValueProps {
-  metric: Metric;
+  metric: MetricOptions;
   fontSize: number;
-  onFilter?: (metric: Metric) => void;
+  onFilter?: (metric: MetricOptions) => void;
   showLabel?: boolean;
 }
 

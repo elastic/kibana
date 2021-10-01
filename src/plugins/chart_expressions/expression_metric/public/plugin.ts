@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { VisualizationsSetup } from '../../../visualizations/public';
 
-import { metricFunction } from '../common/expression_functions';
+import { metricFunction } from '../common';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { setFormatService } from './format_service';
 import { metricRenderer } from './expression_renderers';

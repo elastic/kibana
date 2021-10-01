@@ -36,7 +36,7 @@ export interface VisParams {
   type: typeof visType;
 }
 
-export interface Metric {
+export interface MetricOptions {
   value: any;
   label: string;
   color?: string;
