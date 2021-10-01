@@ -87,7 +87,7 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 };
 
 export const WatchVisualization = () => {
-  const { createTimeBuckets, theme, uiSettings, kibanaVersion } = useAppContext();
+  const { createTimeBuckets, theme, uiSettings } = useAppContext();
   const { watch } = useContext(WatchContext);
   const chartsTheme = theme.useChartsTheme();
   const {
@@ -112,15 +112,12 @@ export const WatchVisualization = () => {
   const timeBuckets = createTimeBuckets();
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
-  const visualizeOptions = new VisualizeOptions(
-    {
-      rangeFrom: domain.min,
-      rangeTo: domain.max,
-      interval,
-      timezone: getTimezone(uiSettings),
-    },
-    kibanaVersion
-  );
+  const visualizeOptions = new VisualizeOptions({
+    rangeFrom: domain.min,
+    rangeTo: domain.max,
+    interval,
+    timezone: getTimezone(uiSettings),
+  });
 
   // Fetching visualization data is independent of watch actions
   const watchWithoutActions = new ThresholdWatch({ ...watch, actions: [] });

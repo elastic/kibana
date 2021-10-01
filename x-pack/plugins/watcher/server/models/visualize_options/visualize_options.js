@@ -9,8 +9,7 @@ export class VisualizeOptions {
   constructor(props) {
     this.rangeFrom = props.rangeFrom;
     this.rangeTo = props.rangeTo;
-    this.interval = props.interval; // Only used in 7.x, will be undefined in 8.x
-    this.fixed_interval = props.fixed_interval; // Used from 8.x
+    this.interval = props.interval;
     this.timezone = props.timezone;
   }
 

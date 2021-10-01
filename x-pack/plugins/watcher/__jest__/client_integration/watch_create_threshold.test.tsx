@@ -807,15 +807,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             threshold: 1000,
           });
 
-          if (kibanaVersion.major < 8) {
-            // In 7.x we use the deprecated "interval" parameter
-            expect(requestBody.options.interval).toBeDefined();
-            expect(requestBody.options.fixed_interval).not.toBeDefined();
-          } else {
-            // From 8.x we use the more precise "fixed_interval" to get visualize data
-            expect(requestBody.options.interval).not.toBeDefined();
-            expect(requestBody.options.fixed_interval).toBeDefined();
-          }
+          expect(requestBody.options.interval).toBeDefined();
         });
       });
 

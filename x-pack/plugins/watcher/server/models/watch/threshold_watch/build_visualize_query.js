@@ -6,8 +6,12 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { SemVer } from 'semver';
+
 import { buildInput } from '../../../../common/lib/serialization';
-import { AGG_TYPES } from '../../../../common/constants';
+import { AGG_TYPES, MAJOR_VERSION } from '../../../../common/constants';
+
+const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 /*
 input.search.request.body.query.bool.filter.range
@@ -109,12 +113,17 @@ export function buildVisualizeQuery(watch, visualizeOptions) {
   const dateAgg = {
     date_histogram: {
       field: watch.timeField,
-      interval: visualizeOptions.interval, // Only used in 7.x, it will be undefined in 8.x
-      fixed_interval: visualizeOptions.fixed_interval, // Used from 8.x
+      fixed_interval: visualizeOptions.interval,
       time_zone: visualizeOptions.timezone,
       min_doc_count: 1,
     },
   };
+
+  if (kibanaVersion.major < 8) {
+    // In 7.x we use the deprecated "interval" in date_histogram agg
+    delete dateAgg.date_histogram.fixed_interval;
+    dateAgg.date_histogram.interval = visualizeOptions.interval;
+  }
 
   // override the query range
   body.query.bool.filter.range = buildRange({

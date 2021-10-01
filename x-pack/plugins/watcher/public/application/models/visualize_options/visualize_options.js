@@ -6,12 +6,11 @@
  */
 
 export class VisualizeOptions {
-  constructor(props = {}, kibanaVersion) {
+  constructor(props = {}) {
     this.rangeFrom = props.rangeFrom;
     this.rangeTo = props.rangeTo;
     this.interval = props.interval;
     this.timezone = props.timezone;
-    this.kibanaVersion = kibanaVersion;
   }
 
   get upstreamJson() {
@@ -19,15 +18,8 @@ export class VisualizeOptions {
       rangeFrom: this.rangeFrom,
       rangeTo: this.rangeTo,
       timezone: this.timezone,
+      interval: this.interval,
     };
-
-    if (this.kibanaVersion < 8) {
-      // In 7.x we still use the deprecated "interval" option
-      json.interval = this.interval;
-    } else {
-      // From 8.x we use the more precise "fixed_interval"
-      json.fixed_interval = this.interval;
-    }
 
     return json;
   }
