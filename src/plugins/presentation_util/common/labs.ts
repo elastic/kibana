@@ -44,7 +44,6 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     }),
     isActive: false,
     isDisplayed: true,
-    category: 'Discover',
     environments: ['kibana', 'browser'],
     description: i18n.translate('presentationUtil.labs.enableNewTableDescription', {
       defaultMessage:
