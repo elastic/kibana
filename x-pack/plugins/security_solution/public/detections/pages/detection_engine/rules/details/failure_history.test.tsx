@@ -6,17 +6,8 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { nextTick } from '@kbn/test/jest';
-
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-} from '../../../../../common/mock';
+import { shallow } from 'enzyme';
+import { TestProviders } from '../../../../../common/mock';
 import { FailureHistory } from './failure_history';
 import { useRuleStatus } from '../../../../containers/detection_engine/rules';
 jest.mock('../../../../containers/detection_engine/rules');
