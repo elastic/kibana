@@ -12,11 +12,13 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DataViewsService } from '../common';
 import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 
+type ServiceFactory = (
+  savedObjectsClient: SavedObjectsClientContract,
+  elasticsearchClient: ElasticsearchClient
+) => Promise<DataViewsService>;
 export interface IndexPatternsServiceStart {
-  indexPatternsServiceFactory: (
-    savedObjectsClient: SavedObjectsClientContract,
-    elasticsearchClient: ElasticsearchClient
-  ) => Promise<DataViewsService>;
+  dataViewsServiceFactory: ServiceFactory;
+  indexPatternsServiceFactory: ServiceFactory;
 }
 
 export interface IndexPatternsServiceSetupDeps {

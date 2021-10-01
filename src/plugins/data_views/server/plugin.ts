@@ -53,12 +53,15 @@ export class DataViewServerPlugin
   }
 
   public start({ uiSettings }: CoreStart, { fieldFormats }: DataViewPluginStartDependencies) {
+    const serviceFactory = dataViewsServiceFactory({
+      logger: this.logger.get('indexPatterns'),
+      uiSettings,
+      fieldFormats,
+    });
+
     return {
-      indexPatternsServiceFactory: dataViewsServiceFactory({
-        logger: this.logger.get('indexPatterns'),
-        uiSettings,
-        fieldFormats,
-      }),
+      indexPatternsServiceFactory: serviceFactory,
+      dataViewsServiceFactory: serviceFactory,
     };
   }
 
