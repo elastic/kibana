@@ -157,7 +157,6 @@ locations for a Debian-based system:
   | Configuration files including `kibana.yml`
   | /etc/kibana
   | <<settings,KBN_PATH_CONF>>
- d|
 
 | data
   | The location of the data files written to disk by Kibana and its plugins
