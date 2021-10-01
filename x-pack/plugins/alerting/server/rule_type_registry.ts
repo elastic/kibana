@@ -25,6 +25,7 @@ import {
   getBuiltinActionGroups,
   RecoveredActionGroupId,
   ActionGroup,
+  validateDurationSchema,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
@@ -172,6 +173,44 @@ export class RuleTypeRegistry {
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
 
+    // validate defaultInterval here
+    if (alertType.defaultInterval) {
+      const invalidDefaultTimeout = validateDurationSchema(alertType.defaultInterval);
+      if (invalidDefaultTimeout) {
+        throw new Error(
+          i18n.translate(
+            'xpack.alerting.ruleTypeRegistry.register.invalidDefaultTimeoutAlertTypeError',
+            {
+              defaultMessage: 'Rule type "{id}" has invalid default interval: {errorMessage}.',
+              values: {
+                id: alertType.id,
+                errorMessage: invalidDefaultTimeout,
+              },
+            }
+          )
+        );
+      }
+    }
+
+    // validate minimumInterval here
+    if (alertType.minimumInterval) {
+      const invalidMinimumTimeout = validateDurationSchema(alertType.minimumInterval);
+      if (invalidMinimumTimeout) {
+        throw new Error(
+          i18n.translate(
+            'xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutAlertTypeError',
+            {
+              defaultMessage: 'Rule type "{id}" has invalid minumum interval: {errorMessage}.',
+              values: {
+                id: alertType.id,
+                errorMessage: invalidMinimumTimeout,
+              },
+            }
+          )
+        );
+      }
+    }
+
     const normalizedAlertType = augmentActionGroupsWithReserved<
       Params,
       ExtractedParams,
@@ -270,6 +309,8 @@ export class RuleTypeRegistry {
             producer,
             minimumLicenseRequired,
             isExportable,
+            minimumInterval,
+            defaultInterval,
           },
         ]: [string, UntypedNormalizedAlertType]) => ({
           id,
@@ -281,6 +322,8 @@ export class RuleTypeRegistry {
           producer,
           minimumLicenseRequired,
           isExportable,
+          minimumInterval,
+          defaultInterval,
           enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(
             id,
             name,

@@ -40,6 +40,7 @@ import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
+  parseDuration,
 } from '../../../../../alerting/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { AlertReducerAction, InitialAlert } from './alert_reducer';
@@ -74,10 +75,14 @@ import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
 import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
+import { DEFAULT_ALERT_INTERVAL } from '../../constants';
 
 const ENTER_KEY = 13;
 
-export function validateBaseProperties(alertObject: InitialAlert): ValidationResult {
+export function validateBaseProperties(
+  alertObject: InitialAlert,
+  serverAlertType?: AlertType<string, string>
+): ValidationResult {
   const validationResult = { errors: {} };
   const errors = {
     name: new Array<string>(),
@@ -99,7 +104,21 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
         defaultMessage: 'Check interval is required.',
       })
     );
+  } else if (serverAlertType?.minimumInterval) {
+    const duration = parseDuration(alertObject.schedule.interval);
+    const minimumDuration = parseDuration(serverAlertType.minimumInterval);
+    if (duration < minimumDuration) {
+      errors.interval.push(
+        i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.belowMinimumText', {
+          defaultMessage: 'Interval is below minimum ({minimum}) for this rule type',
+          values: {
+            minimum: serverAlertType.minimumInterval,
+          },
+        })
+      );
+    }
   }
+
   if (!alertObject.alertTypeId) {
     errors.alertTypeId.push(
       i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredRuleTypeIdText', {
@@ -121,11 +140,15 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   return validationResult;
 }
 
-export function getAlertErrors(alert: Alert, alertTypeModel: AlertTypeModel | null) {
+export function getAlertErrors(
+  alert: Alert,
+  alertTypeModel: AlertTypeModel | null,
+  serverAlertType?: AlertType<string, string>
+) {
   const alertParamsErrors: IErrorObject = alertTypeModel
     ? alertTypeModel.validate(alert.params).errors
     : [];
-  const alertBaseErrors = validateBaseProperties(alert).errors as IErrorObject;
+  const alertBaseErrors = validateBaseProperties(alert, serverAlertType).errors as IErrorObject;
   const alertErrors = {
     ...alertParamsErrors,
     ...alertBaseErrors,
@@ -186,6 +209,9 @@ interface AlertFormProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
 }
 
+const defaultInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
+const defaultIntervalUnit = getDurationUnitValue(DEFAULT_ALERT_INTERVAL);
+
 export const AlertForm = ({
   alert,
   canChangeTrigger = true,
@@ -212,10 +238,10 @@ export const AlertForm = ({
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
 
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
-    alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : undefined
+    alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : defaultInterval
   );
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>(
-    alert.schedule.interval ? getDurationUnitValue(alert.schedule.interval) : 'm'
+    alert.schedule.interval ? getDurationUnitValue(alert.schedule.interval) : defaultIntervalUnit
   );
   const [alertThrottle, setAlertThrottle] = useState<number | null>(
     alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
@@ -291,6 +317,20 @@ export const AlertForm = ({
       setDefaultActionGroupId(alertTypesIndex.get(alert.alertTypeId)!.defaultActionGroupId);
     }
   }, [alert, alert.alertTypeId, alertTypesIndex, ruleTypeRegistry]);
+
+  useEffect(() => {
+    if (alert.schedule.interval) {
+      const interval = getDurationNumberInItsUnit(alert.schedule.interval);
+      const intervalUnit = getDurationUnitValue(alert.schedule.interval);
+
+      if (interval !== defaultInterval) {
+        setAlertInterval(interval);
+      }
+      if (intervalUnit !== defaultIntervalUnit) {
+        setAlertIntervalUnit(intervalUnit);
+      }
+    }
+  }, [alert.schedule.interval]);
 
   const setAlertProperty = useCallback(
     <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {

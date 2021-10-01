@@ -43,6 +43,7 @@ export const AlertEdit = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
+  alertType: serverAlertType,
 }: AlertEditProps) => {
   const onSaveHandler = onSave ?? reloadAlerts;
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
@@ -77,7 +78,8 @@ export const AlertEdit = ({
 
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    alertType
+    alertType,
+    serverAlertType
   );
 
   const checkForChangesAndCloseFlyout = () => {

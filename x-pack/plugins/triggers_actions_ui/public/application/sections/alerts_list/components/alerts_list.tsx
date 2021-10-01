@@ -895,6 +895,7 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          alertTypesIndex={alertTypesState.data}
           onSave={loadAlertsData}
         />
       )}
@@ -906,6 +907,7 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          alertTypesIndex={alertTypesState.data}
           onSave={loadAlertsData}
         />
       )}

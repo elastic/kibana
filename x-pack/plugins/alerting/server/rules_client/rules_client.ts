@@ -847,6 +847,17 @@ export class RulesClient {
     );
     await this.validateActions(ruleType, data.actions);
 
+    // Validate intervals, if configured
+    if (ruleType.minimumInterval) {
+      const intervalInMs = parseDuration(data.schedule.interval);
+      const minimumIntervalInMs = parseDuration(ruleType.minimumInterval);
+      if (intervalInMs < minimumIntervalInMs) {
+        throw Boom.badRequest(
+          `Error updating rule: the interval is less than the minimum interval of ${ruleType.minimumInterval}`
+        );
+      }
+    }
+
     // Extract saved object references for this rule
     const {
       references,

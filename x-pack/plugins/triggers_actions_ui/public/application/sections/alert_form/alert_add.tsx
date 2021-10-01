@@ -30,6 +30,7 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
+import { DEFAULT_ALERT_INTERVAL } from '../../constants';
 
 const AlertAdd = ({
   consumer,
@@ -42,23 +43,24 @@ const AlertAdd = ({
   reloadAlerts,
   onSave,
   metadata,
+  alertTypesIndex,
 }: AlertAddProps) => {
   const onSaveHandler = onSave ?? reloadAlerts;
-  const initialAlert: InitialAlert = useMemo(
-    () => ({
+
+  const initialAlert: InitialAlert = useMemo(() => {
+    return {
       params: {},
       consumer,
       alertTypeId,
       schedule: {
-        interval: '1m',
+        interval: DEFAULT_ALERT_INTERVAL,
       },
       actions: [],
       tags: [],
       notifyWhen: 'onActionGroupChange',
       ...(initialValues ? initialValues : {}),
-    }),
-    [alertTypeId, consumer, initialValues]
-  );
+    };
+  }, [alertTypeId, consumer, initialValues]);
 
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
@@ -115,6 +117,15 @@ const AlertAdd = ({
     })();
   }, [alert, actionTypeRegistry]);
 
+  useEffect(() => {
+    if (alert.alertTypeId) {
+      const type = alertTypesIndex.get(alert.alertTypeId);
+      if (type?.defaultInterval) {
+        setAlertProperty('schedule', { interval: type.defaultInterval });
+      }
+    }
+  }, [alert.alertTypeId, alertTypesIndex]);
+
   const checkForChangesAndCloseFlyout = () => {
     if (
       hasAlertChanged(alert, initialAlert, false) ||
@@ -138,9 +149,11 @@ const AlertAdd = ({
   };
 
   const alertType = alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null;
+
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    alertType
+    alertType,
+    alert.alertTypeId ? alertTypesIndex.get(alert.alertTypeId) : undefined
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this alert
