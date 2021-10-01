@@ -28,12 +28,11 @@ export type PipelineCreateFromCsvTestBed = TestBed<PipelineCreateFromCsvTestSubj
   actions: ReturnType<typeof createFromCsvActions>;
 };
 const createFromCsvActions = (testBed: TestBed) => {
-  
   // User Actions
 
   const selectCsvForUpload = (file?: File) => {
     const { component } = testBed;
-    let csv = [file ? file : 'foo'] as any;
+    const csv = [file ? file : 'foo'] as any;
     component.find(EuiFilePicker).prop('onChange')!(csv);
   };
 
@@ -55,7 +54,7 @@ const createFromCsvActions = (testBed: TestBed) => {
   return {
     selectCsvForUpload,
     clickProcessCsv,
-    uploadFile
+    uploadFile,
   };
 };
 
@@ -78,5 +77,4 @@ export type PipelineCreateFromCsvTestSubjects =
   | 'pipelineMappingsJSONEditor'
   | 'continueToCreate'
   | 'copyToClipboard'
-  | 'downloadJson'
-  ;
+  | 'downloadJson';

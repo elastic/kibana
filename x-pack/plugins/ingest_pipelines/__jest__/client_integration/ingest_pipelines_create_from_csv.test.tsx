@@ -15,7 +15,7 @@ import { PipelineCreateFromCsvTestBed } from './helpers/pipelines_create_from_cs
 const { setup } = pageHelpers.pipelinesCreateFromCsv;
 
 describe('<PipelinesCreateFromCsv />', () => {
-  const { server, httpRequestsMockHelpers} = setupEnvironment();
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: PipelineCreateFromCsvTestBed;
 
   afterAll(() => {
@@ -31,7 +31,6 @@ describe('<PipelinesCreateFromCsv />', () => {
   });
 
   describe('on component mount', () => {
-    
     test('should render the correct page header and documentation link', () => {
       const { exists, find } = testBed;
 
@@ -59,7 +58,7 @@ describe('<PipelinesCreateFromCsv />', () => {
       const mockFile = {
         name: 'foo.csv',
         path: '/home/foo.csv',
-        size: 100
+        size: 100,
       } as unknown as File;
 
       beforeEach(async () => {
@@ -106,27 +105,20 @@ describe('<PipelinesCreateFromCsv />', () => {
 
         actions.selectCsvForUpload(mockFile);
         await actions.clickProcessCsv();
-        
+
         expect(exists('errorCallout')).toBe(true);
         expect(find('errorCallout').text()).toContain(errorTitle);
         expect(find('errorCallout').text()).toContain(errorDetails);
       });
-      
 
       describe('results', () => {
-        const mockFile = {
-          name: 'foo.csv',
-          path: '/home/foo.csv',
-          size: 100
-        } as unknown as File;
-  
         beforeEach(async () => {
           await act(async () => {
             testBed = await setup();
           });
-  
+
           testBed.component.update();
-        });  
+        });
 
         test('result buttons', async () => {
           const { exists, find } = testBed;
@@ -134,9 +126,11 @@ describe('<PipelinesCreateFromCsv />', () => {
           await testBed.actions.uploadFile(mockFile);
 
           expect(exists('pipelineMappingsJSONEditor')).toBe(true);
-          
+
           expect(exists('continueToCreate')).toBe(true);
-          expect(find('continueToCreate').text()).toContain('Continue to create ingest node pipeline');
+          expect(find('continueToCreate').text()).toContain(
+            'Continue to create ingest node pipeline'
+          );
 
           expect(exists('copyToClipboard')).toBe(true);
           expect(find('copyToClipboard').text()).toContain('Copy JSON to clipboard');
@@ -144,7 +138,7 @@ describe('<PipelinesCreateFromCsv />', () => {
           expect(exists('downloadJson')).toBe(true);
           expect(find('downloadJson').text()).toContain('Download JSON');
         });
-      });  
+      });
     });
   });
 });

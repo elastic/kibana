@@ -20,5 +20,5 @@ export const pageHelpers = {
   pipelinesCreate: { setup: pipelinesCreateSetup },
   pipelinesClone: { setup: pipelinesCloneSetup },
   pipelinesEdit: { setup: pipelinesEditSetup },
-  pipelinesCreateFromCsv: { setup: pipelinesCreateFromCsvSetup }
+  pipelinesCreateFromCsv: { setup: pipelinesCreateFromCsvSetup },
 };

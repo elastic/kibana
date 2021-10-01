@@ -11,7 +11,7 @@ export class FileReaderService {
       if (file && file.size) {
         const reader = new FileReader();
         reader.readAsArrayBuffer(file);
-  
+
         reader.onload = (() => {
           return () => {
             const decoder = new TextDecoder();
@@ -20,7 +20,7 @@ export class FileReaderService {
               return reject();
             }
             const fileContents = decoder.decode(data.slice(0, maxFileSizeBytes));
-  
+
             if (fileContents === '') {
               reject();
             } else {
@@ -34,5 +34,5 @@ export class FileReaderService {
     });
   }
 }
-  
+
 export const fileReaderService = new FileReaderService();

@@ -9,7 +9,13 @@ import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 
 import { StartDependencies } from '../types';
-import { documentationService, uiMetricService, apiService, breadcrumbService, fileReaderService } from './services';
+import {
+  documentationService,
+  uiMetricService,
+  apiService,
+  breadcrumbService,
+  fileReaderService,
+} from './services';
 import { renderApp } from '.';
 
 export async function mountManagementSection(

@@ -511,9 +511,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should map and create a pipeline', async () => {
-        
-      });
+      it('should map and create a pipeline', async () => {});
     });
   });
 }

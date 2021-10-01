@@ -16,7 +16,7 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   scopedHistoryMock,
-  uiSettingsServiceMock
+  uiSettingsServiceMock,
 } from '../../../../../../src/core/public/mocks';
 
 import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
@@ -43,7 +43,7 @@ const appServices = {
   documentation: documentationService,
   api: apiService,
   fileReader: {
-    readFile: jest.fn().mockResolvedValue('')
+    readFile: jest.fn().mockResolvedValue(''),
   },
   notifications: notificationServiceMock.createSetupContract(),
   history,
@@ -55,8 +55,8 @@ const appServices = {
   },
   fileUpload: {
     getMaxBytes: jest.fn().mockReturnValue(100),
-    getMaxBytesFormatted: jest.fn().mockReturnValue('100')
-  }
+    getMaxBytesFormatted: jest.fn().mockReturnValue('100'),
+  },
 };
 
 export const setupEnvironment = () => {

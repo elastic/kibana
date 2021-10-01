@@ -116,11 +116,7 @@ export const PipelinesPreview: FC<Props> = ({
 
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={onClickToCreatePipeline}
-              data-test-subj="continueToCreate"
-            >
+            <EuiButton fill onClick={onClickToCreatePipeline} data-test-subj="continueToCreate">
               <FormattedMessage
                 id="xpack.ingestPipelines.createFromCsv.preview.createPipeline"
                 defaultMessage="Continue to create ingest node pipeline"
