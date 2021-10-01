@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { LensEmbeddableInput, TypedLensByValueInput } from '../../../../../../../lens/public';
 import { ObservabilityAppServices } from '../../../../../application/types';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { AddToCaseAction } from '../../header/add_to_case_action';
 
 export function ExpViewActionMenuContent({
   timeRange,
@@ -35,6 +36,9 @@ export function ExpViewActionMenuContent({
         responsive={false}
         style={{ paddingRight: 20 }}
       >
+        <EuiFlexItem grow={false}>
+          <AddToCaseAction lensAttributes={lensAttributes} timeRange={timeRange} />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             iconType="lensApp"

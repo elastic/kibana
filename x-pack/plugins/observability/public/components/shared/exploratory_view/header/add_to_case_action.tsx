@@ -54,6 +54,7 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
   return (
     <>
       <EuiButton
+        size="s"
         isLoading={isSaving}
         fullWidth={false}
         isDisabled={lensAttributes === null}

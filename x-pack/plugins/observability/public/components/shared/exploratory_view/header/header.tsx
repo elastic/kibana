@@ -14,7 +14,6 @@ import { useSeriesStorage } from '../hooks/use_series_storage';
 import { LastUpdated } from './last_updated';
 import { combineTimeRanges } from '../lens_embeddable';
 import { ExpViewActionMenu } from '../components/action_menu';
-import { AddToCaseAction } from './add_to_case_action';
 
 interface Props {
   seriesId?: number;
@@ -50,9 +49,6 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes, lastUpdated }:
               />
             </h2>
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AddToCaseAction lensAttributes={lensAttributes} timeRange={timeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LastUpdated lastUpdated={lastUpdated} />
