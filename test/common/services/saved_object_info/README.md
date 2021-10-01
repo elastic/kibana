@@ -1,6 +1,70 @@
-# Tips for using the SO INFO SVC CLI with JQ
+# Tips for using the SO INFO SVC 
 
-## Myriad ways to use jq to discern discrete info from the svc
+## From an FTR test
+```
+  ...
+  const soInfo = getService('savedObjectInfo');
+  const log = getService('log');
+
+  describe('some test suite', function () {
+    ...
+
+    after(async () => {
+      // "Normal" logging, without JQ
+      await soInfo.logSoTypes(log);
+      // Without a title, using JQ
+      await soInfo.filterSoTypes(log, '.[] | .key'); 
+      // With a title, using JQ
+      await soInfo.filterSoTypes(
+        log,
+        'reduce .[].doc_count as $item (0; . + $item)',
+        'TOTAL count of ALL Saved Object types'
+      );
+      // With a title, using JQ
+      await soInfo.filterSoTypes(
+        log,
+        '.[] | select(.key =="canvas-workpad-template") | .doc_count',
+        'TOTAL count of canvas-workpad-template'
+      );
+    });
+```
+
+## From the CLI
+
+Run the cli
+> the **--esUrl** arg is required; tells the svc which elastic search endpoint to use
+
+```shell
+ λ node scripts/saved_objs_info.js --esUrl http://elastic:changeme@localhost:9220 --soTypes
+```
+
+Result
+
+```shell
+      ### types:
+
+      [
+        {
+          doc_count: 5,
+          key: 'canvas-workpad-template'
+        },
+        {
+          doc_count: 1,
+          key: 'apm-telemetry'
+        },
+        {
+          doc_count: 1,
+          key: 'config'
+        },
+        {
+          doc_count: 1,
+          key: 'space'
+        }
+      ]
+```
+
+
+### Myriad ways to use JQ to discern discrete info from the svc
 Below, I will leave out the so types call, which is:
 `node scripts/saved_objs_info.js --esUrl http://elastic:changeme@localhost:9220 --soTypes --json`
 
