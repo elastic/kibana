@@ -46,9 +46,9 @@ export default async function ({ readConfigFile }) {
 
         // to be re-enabled once kibana/issues/102552 is completed
         '--xpack.security.enabled=false',
-        '--monitoring.enabled=false',
+        '--monitoring.enabled=true',
         '--xpack.reporting.enabled=false',
-        '--enterpriseSearch.enabled=false',
+        '--enterpriseSearch.enabled=true',
       ],
     },
 
