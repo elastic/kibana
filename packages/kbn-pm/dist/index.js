@@ -9118,7 +9118,7 @@ class CiStatsReporter {
       freeMem: _os.default.freemem(),
       isElasticCommitter,
       kibanaUuid,
-      nestedTiming: process.env.CI_STATS_NESTED_TIMING,
+      nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
       osArch: _os.default.arch(),
       osPlatform: _os.default.platform(),
       osRelease: _os.default.release(),
