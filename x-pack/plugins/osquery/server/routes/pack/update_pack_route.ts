@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, transform, set, unset, has, difference, filter, find, map } from 'lodash';
+import { transform, set, unset, has, difference, filter, find, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
@@ -109,12 +109,18 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       await Promise.all(
         agentPolicyIdsToAdd.map((agentPolicyId) => {
           const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+
+          console.log('packagePolicy', JSON.stringify(packagePolicy));
+
           return packagePolicyService?.update(
             savedObjectsClient,
             esClient,
             packagePolicy.id,
             produce(packagePolicy, (draft) => {
               delete packagePolicy.id;
+              if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
+                set(draft, 'inputs[0].streams', []);
+              }
               set(draft, `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`, {
                 queries: transform(
                   queries,

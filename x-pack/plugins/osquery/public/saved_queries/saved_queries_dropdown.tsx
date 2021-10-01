@@ -89,7 +89,7 @@ const SavedQueriesDropdownComponent = forwardRef<
       );
 
       if (selectedSavedQuery) {
-        onChange(selectedSavedQuery.attributes);
+        onChange({ ...selectedSavedQuery.attributes, savedObjectId: selectedSavedQuery.id });
       }
       setSelectedOptions(newSelectedOptions);
     },

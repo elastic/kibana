@@ -33,6 +33,8 @@ import { ECSMappingEditorField, ECSMappingEditorFieldRef } from './lazy_ecs_mapp
 
 const CommonUseField = getUseField({ component: Field });
 
+const GhostFormField = () => <></>;
+
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
   defaultValue?: UsePackQueryFormProps['defaultValue'] | undefined;
@@ -81,8 +83,11 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         return reset();
       }
 
+      console.error('savedQuery', savedQuery);
+
       setFieldValue('id', savedQuery.id);
       setFieldValue('query', savedQuery.query);
+      setFieldValue('savedObjectId', savedQuery.savedObjectId);
 
       if (savedQuery.description) {
         setFieldValue('description', savedQuery.description);
@@ -98,6 +103,10 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
       if (savedQuery.version) {
         setFieldValue('version', [savedQuery.version]);
+      }
+
+      if (savedQuery.ecs_mapping) {
+        setFieldValue('ecs_mapping', [savedQuery.ecs_mapping]);
       }
     },
     [setFieldValue, reset]
@@ -193,6 +202,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <CommonUseField path="savedObjectId" component={GhostFormField} />
         </Form>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
