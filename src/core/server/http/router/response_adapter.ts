@@ -72,6 +72,9 @@ export class HapiResponseAdapter {
   }
 
   private toHapiResponse(kibanaResponse: KibanaResponse) {
+    if (this.isAlreadyAborted()) {
+      return this.responseToolkit.close;
+    }
     if (kibanaResponse.options.bypassErrorFormat) {
       return this.toSuccess(kibanaResponse);
     }
@@ -144,6 +147,13 @@ export class HapiResponseAdapter {
     }
 
     return error;
+  }
+
+  private isAlreadyAborted() {
+    return (
+      this.responseToolkit.request.raw.req.aborted === true &&
+      this.responseToolkit.request.active() === false
+    );
   }
 }
 
