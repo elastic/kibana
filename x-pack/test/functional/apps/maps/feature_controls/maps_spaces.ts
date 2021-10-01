@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
 
   // FLAKY: https://github.com/elastic/kibana/issues/38414
-  describe.skip('spaces feature controls', () => {
+  describe.only('spaces feature controls', () => {
     before(async () => {
       PageObjects.maps.setBasePath('/s/custom_space');
     });
