@@ -634,17 +634,31 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Syntax help',
       }
     ),
-    'euiMarkdownEditorFooter.descriptionPrefix': i18n.translate(
-      'core.euiMarkdownEditorFooter.descriptionPrefix',
+    'euiMarkdownEditorFooter.mdSyntaxLink': i18n.translate(
+      'core.euiMarkdownEditorFooter.mdSyntaxLink',
       {
-        defaultMessage: 'This editor uses',
+        defaultMessage: 'GitHub flavored markdown',
       }
     ),
-    'euiMarkdownEditorFooter.descriptionSuffix': i18n.translate(
-      'core.euiMarkdownEditorFooter.descriptionSuffix',
+    'euiMarkdownEditorFooter.syntaxModalDescriptionPrefix': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxModalDescriptionPrefix',
+      {
+        defaultMessage:
+          'This editor uses',
+      }
+    ),
+    'euiMarkdownEditorFooter.syntaxModalDescriptionSuffix': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxModalDescriptionSuffix',
       {
         defaultMessage:
           'You can also utilize these additional syntax plugins to add rich content to your text.',
+      }
+    ),
+    'euiMarkdownEditorFooter.syntaxPopoverDescription': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxPopoverDescription',
+      {
+        defaultMessage:
+          'This editor uses',
       }
     ),
     'euiMarkdownEditorToolbar.editor': i18n.translate('core.euiMarkdownEditorToolbar.editor', {
