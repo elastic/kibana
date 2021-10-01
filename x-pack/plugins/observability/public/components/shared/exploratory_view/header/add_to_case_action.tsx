@@ -17,7 +17,7 @@ import { Case, SubCase } from '../../../../../../cases/common';
 import { observabilityFeatureId } from '../../../../../common';
 
 export interface AddToCaseProps {
-  timeRange: { from: string; to: string };
+  timeRange?: { from: string; to: string };
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
