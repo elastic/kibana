@@ -20,11 +20,6 @@ export const useSourceConfigurationFormState = (
               name: configuration.name,
               description: configuration.description,
               metricAlias: configuration.metricAlias,
-              containerField: configuration.fields.container,
-              hostField: configuration.fields.host,
-              podField: configuration.fields.pod,
-              tiebreakerField: configuration.fields.tiebreaker,
-              timestampField: configuration.fields.timestamp,
               anomalyThreshold: configuration.anomalyThreshold,
             }
           : undefined,
@@ -56,13 +51,6 @@ export const useSourceConfigurationFormState = (
       name: indicesConfigurationFormState.formState.name,
       description: indicesConfigurationFormState.formState.description,
       metricAlias: indicesConfigurationFormState.formState.metricAlias,
-      fields: {
-        container: indicesConfigurationFormState.formState.containerField,
-        host: indicesConfigurationFormState.formState.hostField,
-        pod: indicesConfigurationFormState.formState.podField,
-        tiebreaker: indicesConfigurationFormState.formState.tiebreakerField,
-        timestamp: indicesConfigurationFormState.formState.timestampField,
-      },
       anomalyThreshold: indicesConfigurationFormState.formState.anomalyThreshold,
     }),
     [indicesConfigurationFormState.formState]
@@ -73,13 +61,6 @@ export const useSourceConfigurationFormState = (
       name: indicesConfigurationFormState.formStateChanges.name,
       description: indicesConfigurationFormState.formStateChanges.description,
       metricAlias: indicesConfigurationFormState.formStateChanges.metricAlias,
-      fields: {
-        container: indicesConfigurationFormState.formStateChanges.containerField,
-        host: indicesConfigurationFormState.formStateChanges.hostField,
-        pod: indicesConfigurationFormState.formStateChanges.podField,
-        tiebreaker: indicesConfigurationFormState.formStateChanges.tiebreakerField,
-        timestamp: indicesConfigurationFormState.formStateChanges.timestampField,
-      },
       anomalyThreshold: indicesConfigurationFormState.formStateChanges.anomalyThreshold,
     }),
     [indicesConfigurationFormState.formStateChanges]

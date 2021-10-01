@@ -123,17 +123,6 @@ export const SourceConfigurationSettings = ({
         />
       </EuiPanel>
       <EuiSpacer />
-      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
-        <FieldsConfigurationPanel
-          containerFieldProps={indicesConfigurationProps.containerField}
-          hostFieldProps={indicesConfigurationProps.hostField}
-          isLoading={isLoading}
-          podFieldProps={indicesConfigurationProps.podField}
-          readOnly={!isWriteable}
-          timestampFieldProps={indicesConfigurationProps.timestampField}
-        />
-      </EuiPanel>
-      <EuiSpacer />
       {hasInfraMLCapabilities && (
         <>
           <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
