@@ -591,7 +591,7 @@ const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: 
   const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
 
   return {
-    resolvedTimelineSO: convertSavedObjectToSavedTimeline(populatedTimeline),
+    resolvedTimelineSavedObject: convertSavedObjectToSavedTimeline(populatedTimeline),
     ...resolveAttributes,
   };
 };
@@ -599,15 +599,16 @@ const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: 
 const resolveSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
 
-  const { resolvedTimelineSO, ...resolveAttributes } = await resolveBasicSavedTimeline(
+  const { resolvedTimelineSavedObject, ...resolveAttributes } = await resolveBasicSavedTimeline(
     request,
     timelineId
   );
 
+  console.log('RESOLVE TIMELINE SO: ', resolvedTimelineSavedObject); // eslint-disable-line
   const timelineWithNotesAndPinnedEvents = await Promise.all([
-    note.getNotesByTimelineId(request, resolvedTimelineSO.savedObjectId),
-    pinnedEvent.getAllPinnedEventsByTimelineId(request, resolvedTimelineSO.savedObjectId),
-    Promise.resolve(resolvedTimelineSO),
+    note.getNotesByTimelineId(request, resolvedTimelineSavedObject.savedObjectId),
+    pinnedEvent.getAllPinnedEventsByTimelineId(request, resolvedTimelineSavedObject.savedObjectId),
+    resolvedTimelineSavedObject,
   ]);
 
   const [notes, pinnedEvents, timeline] = timelineWithNotesAndPinnedEvents;
