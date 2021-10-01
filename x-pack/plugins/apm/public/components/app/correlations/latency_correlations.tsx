@@ -53,6 +53,9 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
+import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
+import { CorrelationsContextPopover } from './context_popover';
+import { IndexPatternField } from '../../../../../../../src/plugins/data/common';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
@@ -73,6 +76,13 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     response,
     progress.isRunning
   );
+
+  const fieldStats: Map<string, FieldStats> | undefined = useMemo(() => {
+    return response.fieldStats?.reduce((map, field) => {
+      map.set(field.fieldName, field);
+      return map;
+    }, new Map<string, FieldStats>());
+  }, [response?.fieldStats]);
 
   useEffect(() => {
     if (isErrorMessage(progress.error)) {
@@ -103,6 +113,32 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
+
+  const onAddFilter = useCallback(
+    (
+      field: IndexPatternField | string,
+      value: string | number,
+      type: '+' | '-'
+    ) => {
+      if (type === '+') {
+        push(history, {
+          query: {
+            kuery: `${field}:"${value}"`,
+          },
+        });
+        trackApmEvent({ metric: 'correlations_term_include_filter' });
+      } else {
+        push(history, {
+          query: {
+            kuery: `not ${field}:"${value}"`,
+          },
+        });
+        trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+      }
+      onFilter();
+    },
+    [onFilter, history, trackApmEvent]
+  );
 
   const mlCorrelationColumns: Array<EuiBasicTableColumn<LatencyCorrelation>> =
     useMemo(
@@ -147,6 +183,16 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
             { defaultMessage: 'Field name' }
           ),
+          render: (_, { fieldName, fieldValue }) => (
+            <>
+              {fieldName}
+              <CorrelationsContextPopover
+                fieldName={fieldName}
+                stats={fieldStats?.get(fieldName)}
+                onAddFilter={onAddFilter}
+              />
+            </>
+          ),
           sortable: true,
         },
         {
@@ -173,13 +219,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               icon: 'plusInCircle',
               type: 'icon',
               onClick: (term: LatencyCorrelation) => {
-                push(history, {
-                  query: {
-                    kuery: `${term.fieldName}:"${term.fieldValue}"`,
-                  },
-                });
-                onFilter();
-                trackApmEvent({ metric: 'correlations_term_include_filter' });
+                onAddFilter(term.fieldName, term.fieldValue, '+');
               },
             },
             {
@@ -194,13 +234,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               icon: 'minusInCircle',
               type: 'icon',
               onClick: (term: LatencyCorrelation) => {
-                push(history, {
-                  query: {
-                    kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
-                  },
-                });
-                onFilter();
-                trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+                onAddFilter(term.fieldName, term.fieldValue, '-');
               },
             },
           ],
@@ -210,7 +244,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           ),
         },
       ],
-      [history, onFilter, trackApmEvent]
+      [fieldStats, onAddFilter]
     );
 
   const [sortField, setSortField] =

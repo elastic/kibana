@@ -11,6 +11,7 @@ import {
   RawResponseBase,
   SearchStrategyClientParams,
 } from '../types';
+import { FieldStats } from '../field_stats_types';
 
 export interface LatencyCorrelation extends FieldValuePair {
   correlation: number;
@@ -40,4 +41,5 @@ export interface LatencyCorrelationsRawResponse extends RawResponseBase {
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;
   latencyCorrelations?: LatencyCorrelation[];
+  fieldStats?: FieldStats[];
 }
