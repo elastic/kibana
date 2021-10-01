@@ -164,7 +164,9 @@ const createRunLogger = () => {
   });
 };
 
-const fetchEndpointPolicies = (kbnClient: KbnClient): AxiosResponse<GetPolicyListResponse> => {
+const fetchEndpointPolicies = (
+  kbnClient: KbnClient
+): Promise<AxiosResponse<GetPolicyListResponse>> => {
   return kbnClient.request<GetPolicyListResponse>({
     method: 'GET',
     path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
