@@ -100,7 +100,7 @@ export const integrations: LanguageIntegration[] = [
     title: i18n.translate('custom_integrations.languageclients.PerlTitle', {
       defaultMessage: 'Elasticsearch Perl Client',
     }),
-    icon: 'php.svg',
+    icon: 'perl.svg',
     description: i18n.translate('custom_integrations.languageclients.PerlDescription', {
       defaultMessage:
         'Start building your custom application on top of Elasticsearch with the official Perl client.',
