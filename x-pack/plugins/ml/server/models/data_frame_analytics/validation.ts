@@ -448,7 +448,7 @@ export async function validateAnalyticsJob(
 ) {
   const messages = await getValidationCheckMessages(
     client.asCurrentUser,
-    job.analyzed_fields.includes,
+    job?.analyzed_fields?.includes || [],
     job.analysis,
     job.source
   );

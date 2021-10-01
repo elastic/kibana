@@ -21,14 +21,20 @@ export interface CallOutProps {
   id: string;
   messages: ErrorMessage[];
   type: NonNullable<ErrorMessage['errorType']>;
+  hasLicenseError: boolean;
 }
 
-const CallOutComponent = ({ handleButtonClick, id, messages, type }: CallOutProps) => {
-  const handleCallOut = useCallback((e) => handleButtonClick(e, id, type), [
-    handleButtonClick,
-    id,
-    type,
-  ]);
+const CallOutComponent = ({
+  handleButtonClick,
+  id,
+  messages,
+  type,
+  hasLicenseError,
+}: CallOutProps) => {
+  const handleCallOut = useCallback(
+    (e) => handleButtonClick(e, id, type),
+    [handleButtonClick, id, type]
+  );
 
   const isCaseClosed = useMemo(
     () => messages.map((m) => m.id).includes(CLOSED_CASE_PUSH_ERROR_ID),
@@ -40,6 +46,8 @@ const CallOutComponent = ({ handleButtonClick, id, messages, type }: CallOutProp
       title={
         isCaseClosed
           ? i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE
+          : hasLicenseError
+          ? i18n.PUSH_DISABLE_BY_LICENSE_TITLE
           : i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE
       }
       color={type}
@@ -48,7 +56,7 @@ const CallOutComponent = ({ handleButtonClick, id, messages, type }: CallOutProp
       size="s"
     >
       <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
-      {!isCaseClosed && (
+      {!isCaseClosed && !hasLicenseError && (
         <EuiButton
           data-test-subj={`callout-onclick-${id}`}
           color={type === 'success' ? 'secondary' : type}

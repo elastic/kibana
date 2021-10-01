@@ -12,8 +12,8 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
-import { OperationMetadata, Visualization } from '../types';
-import { HeatmapVisualizationState } from './types';
+import type { OperationMetadata, Visualization } from '../types';
+import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
   CHART_NAMES,
@@ -27,9 +27,11 @@ import {
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
 import { LensIconChartHeatmap } from '../assets/chart_heatmap';
-import { CustomPaletteParams, CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
+import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
+import type { CustomPaletteParams } from '../../common';
+import { layerTypes } from '../../common';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',
@@ -62,12 +64,14 @@ export const isCellValueSupported = (op: OperationMetadata) => {
   return !isBucketed(op) && (op.scale === 'ordinal' || op.scale === 'ratio') && isNumericMetric(op);
 };
 
-function getInitialState(): Omit<HeatmapVisualizationState, 'layerId'> {
+function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerType'> {
   return {
     shape: CHART_SHAPES.HEATMAP,
     legend: {
       isVisible: true,
       position: Position.Right,
+      maxLines: 1,
+      shouldTruncate: true,
       type: LEGEND_FUNCTION,
     },
     gridConfig: {
@@ -137,6 +141,7 @@ export const getHeatmapVisualization = ({
     return (
       state || {
         layerId: addNewLayer(),
+        layerType: layerTypes.DATA,
         title: 'Empty Heatmap chart',
         ...getInitialState(),
       }
@@ -153,16 +158,12 @@ export const getHeatmapVisualization = ({
       return { groups: [] };
     }
 
-    const { displayStops, activePalette } = state.valueAccessor
-      ? getSafePaletteParams(
-          paletteService,
-          frame.activeData?.[state.layerId],
-          state.valueAccessor,
-          state?.palette && state.palette.accessor === state.valueAccessor
-            ? state.palette
-            : undefined
-        )
-      : { displayStops: [], activePalette: {} as HeatmapVisualizationState['palette'] };
+    const { displayStops, activePalette } = getSafePaletteParams(
+      paletteService,
+      frame.activeData?.[state.layerId],
+      state.valueAccessor,
+      state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
+    );
 
     return {
       groups: [
@@ -194,11 +195,21 @@ export const getHeatmapVisualization = ({
           }),
           accessors: state.valueAccessor
             ? [
-                {
-                  columnId: state.valueAccessor,
-                  triggerIcon: 'colorBy',
-                  palette: getStopsForFixedMode(displayStops, activePalette?.params?.colorStops),
-                },
+                // When data is not available and the range type is numeric, return a placeholder while refreshing
+                displayStops.length &&
+                (frame.activeData || activePalette?.params?.rangeType !== 'number')
+                  ? {
+                      columnId: state.valueAccessor,
+                      triggerIcon: 'colorBy',
+                      palette: getStopsForFixedMode(
+                        displayStops,
+                        activePalette?.params?.colorStops
+                      ),
+                    }
+                  : {
+                      columnId: state.valueAccessor,
+                      triggerIcon: 'none',
+                    },
               ]
             : [],
           filterOperations: isCellValueSupported,
@@ -260,6 +271,23 @@ export const getHeatmapVisualization = ({
       </I18nProvider>,
       domElement
     );
+  },
+
+  getSupportedLayers() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.heatmap.addLayer', {
+          defaultMessage: 'Add visualization layer',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(layerId, state) {
+    if (state?.layerId === layerId) {
+      return state.layerType;
+    }
   },
 
   toExpression(state, datasourceLayers, attributes): Ast | null {

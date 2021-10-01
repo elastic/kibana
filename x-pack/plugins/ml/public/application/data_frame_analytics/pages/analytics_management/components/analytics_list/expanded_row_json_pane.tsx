@@ -7,7 +7,9 @@
 
 import React, { FC } from 'react';
 
-import { EuiCodeEditor, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   json: object;
@@ -19,14 +21,23 @@ export const ExpandedRowJsonPane: FC<Props> = ({ json, dataTestSubj }) => {
     <EuiFlexGroup data-test-subj={dataTestSubj}>
       <EuiFlexItem>
         <EuiSpacer size="s" />
-        <EuiCodeEditor
-          value={JSON.stringify(json, null, 2)}
-          readOnly={true}
-          mode="json"
+        <EuiCodeBlock
+          aria-label={i18n.translate(
+            'xpack.ml.dataframe.analyticsList.analyticsDetails.expandedRowJsonPane',
+            {
+              defaultMessage: 'JSON of data frame analytics configuration',
+            }
+          )}
           style={{ width: '100%' }}
-          theme="textmate"
+          language="json"
+          fontSize="s"
+          paddingSize="s"
+          overflowHeight={300}
+          isCopyable
           data-test-subj={`mlAnalyticsDetailsJsonPreview`}
-        />
+        >
+          {JSON.stringify(json, null, 2)}
+        </EuiCodeBlock>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>
     </EuiFlexGroup>

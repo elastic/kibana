@@ -131,7 +131,6 @@ export const AnomalyDetectionSettings: FC = () => {
                 <EuiButtonEmpty
                   data-test-subj="mlCalendarsMngButton"
                   flush="left"
-                  size="l"
                   color="primary"
                   onClick={redirectToCalendarList}
                   isDisabled={canGetCalendars === false}
@@ -146,7 +145,6 @@ export const AnomalyDetectionSettings: FC = () => {
                 <EuiButtonEmpty
                   data-test-subj="mlCalendarsCreateButton"
                   flush="left"
-                  size="l"
                   color="primary"
                   onClick={redirectToNewCalendarPage}
                   isDisabled={canCreateCalendar === false}
@@ -199,7 +197,6 @@ export const AnomalyDetectionSettings: FC = () => {
                 <EuiButtonEmpty
                   data-test-subj="mlFilterListsMngButton"
                   flush="left"
-                  size="l"
                   color="primary"
                   onClick={redirectToFilterLists}
                   isDisabled={canGetFilters === false}
@@ -213,7 +210,6 @@ export const AnomalyDetectionSettings: FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="mlFilterListsCreateButton"
-                  size="l"
                   color="primary"
                   onClick={redirectToNewFilterListPage}
                   isDisabled={canCreateFilter === false}

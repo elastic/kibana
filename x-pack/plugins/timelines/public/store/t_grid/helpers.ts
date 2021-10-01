@@ -12,7 +12,11 @@ import type { ToggleDetailPanel } from './actions';
 import { TGridPersistInput, TimelineById, TimelineId } from './types';
 import type { TGridModel, TGridModelSettings } from './model';
 
-import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../common/types/timeline';
+import type {
+  ColumnHeaderOptions,
+  DataProvider,
+  SortColumnTimeline,
+} from '../../../common/types/timeline';
 import { getTGridManageDefaults, tGridDefaults } from './defaults';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -156,20 +160,24 @@ export const setInitializeTgridSettings = ({
 }: InitializeTgridParams): TimelineById => {
   const timeline = timelineById[id];
 
-  return {
-    ...timelineById,
-    [id]: {
-      ...tGridDefaults,
-      ...timeline,
-      ...getTGridManageDefaults(id),
-      ...tGridSettingsProps,
-      ...(!timeline || (isEmpty(timeline.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
-        ? { columns: tGridSettingsProps.defaultColumns }
-        : {}),
-      sort: tGridDefaults.sort,
-      loadingEventIds: tGridDefaults.loadingEventIds,
-    },
-  };
+  return !timeline?.initialized
+    ? {
+        ...timelineById,
+        [id]: {
+          ...tGridDefaults,
+          ...getTGridManageDefaults(id),
+          ...timeline,
+          ...tGridSettingsProps,
+          ...(!timeline ||
+          (isEmpty(timeline.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
+            ? { columns: tGridSettingsProps.defaultColumns }
+            : {}),
+          sort: tGridSettingsProps.sort ?? tGridDefaults.sort,
+          loadingEventIds: tGridDefaults.loadingEventIds,
+          initialized: true,
+        },
+      }
+    : timelineById;
 };
 
 interface ApplyDeltaToTimelineColumnWidth {
@@ -420,4 +428,36 @@ export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
     : {
         [expandedTabType]: {},
       };
+};
+
+export const addProviderToTimelineHelper = (
+  id: string,
+  provider: DataProvider,
+  timelineById: TimelineById
+): TimelineById => {
+  const timeline = timelineById[id];
+  const alreadyExistsAtIndex = timeline.dataProviders.findIndex((p) => p.id === provider.id);
+
+  if (alreadyExistsAtIndex > -1 && !isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)) {
+    provider.id = `${provider.id}-${
+      timeline.dataProviders.filter((p) => p.id === provider.id).length
+    }`;
+  }
+
+  const dataProviders =
+    alreadyExistsAtIndex > -1 && isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)
+      ? [
+          ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
+          provider,
+          ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
+        ]
+      : [...timeline.dataProviders, provider];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders,
+    },
+  };
 };

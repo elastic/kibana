@@ -34,7 +34,8 @@ import { CrossClusterReplicationPageProvider } from './cross_cluster_replication
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 import { LensPageProvider } from './lens_page';
-import { InfraMetricExplorerProvider } from './infra_metric_explorer';
+import { InfraMetricsExplorerProvider } from './infra_metrics_explorer';
+import { InfraSavedViewsProvider } from './infra_saved_views';
 import { RoleMappingsPageProvider } from './role_mappings_page';
 import { SpaceSelectorPageObject } from './space_selector_page';
 import { EndpointPageProvider } from './endpoint_page';
@@ -60,8 +61,9 @@ export const pageObjects = {
   reporting: ReportingPageObject,
   spaceSelector: SpaceSelectorPageObject,
   infraHome: InfraHomePageProvider,
-  infraMetricExplorer: InfraMetricExplorerProvider,
+  infraMetricsExplorer: InfraMetricsExplorerProvider,
   infraLogs: InfraLogsPageProvider,
+  infraSavedViews: InfraSavedViewsProvider,
   maps: GisPageObject,
   statusPage: StatusPageObject,
   upgradeAssistant: UpgradeAssistantPageObject,

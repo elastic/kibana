@@ -1,5 +1,5 @@
 # Contributing to Kibana
 
-We understand that you may not have days at a time to work on Kibana. We ask that you read our [developer guide](https://www.elastic.co/guide/en/kibana/master/development.html) carefully so that you spend less time, overall, struggling to push your PR through our code review processes.
+If you are an employee at Elastic, please check out our Developer Guide [here](https://docs.elastic.dev/kibana-dev-docs/welcome).
 
-Our developer guide is written in asciidoc and located under [./docs/developer](./docs/developer) if you want to make edits or access it in raw form.
+If you are an external developer, we have a legacy developer guide [here](https://www.elastic.co/guide/en/kibana/master/development.html), or you can view the raw docs from our new, internal Developer Guide [here](./dev_docs/getting_started/dev_welcome.mdx). Eventually, our internal Developer Guide will be opened for public consumption.

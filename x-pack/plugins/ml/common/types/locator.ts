@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from 'src/plugins/share/public';
 import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';
@@ -237,8 +237,7 @@ export type ExpandablePanels =
 export type ExplorationPageUrlState = {
   queryText: string;
   queryLanguage: SearchQueryLanguage;
-} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'> &
-  { [key in ExpandablePanels]: boolean };
+} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'> & { [key in ExpandablePanels]: boolean };
 
 /**
  * Union type of ML URL state based on page
@@ -253,6 +252,6 @@ export type MlLocatorState =
   | FilterEditUrlState
   | MlGenericUrlState;
 
-export type MlLocatorParams = MlLocatorState & SerializableState;
+export type MlLocatorParams = MlLocatorState & SerializableRecord;
 
 export type MlLocator = LocatorPublic<MlLocatorParams>;

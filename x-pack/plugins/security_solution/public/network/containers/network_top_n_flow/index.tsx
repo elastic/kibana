@@ -77,10 +77,8 @@ export const useNetworkTopNFlow = ({
   const [loading, setLoading] = useState(false);
   const { getTransformChangesIfTheyExist } = useTransforms();
 
-  const [
-    networkTopNFlowRequest,
-    setTopNFlowRequest,
-  ] = useState<NetworkTopNFlowRequestOptions | null>(null);
+  const [networkTopNFlowRequest, setTopNFlowRequest] =
+    useState<NetworkTopNFlowRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {

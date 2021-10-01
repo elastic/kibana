@@ -34,7 +34,7 @@ interface Opts {
   securityEnabled?: boolean;
 }
 
-const spaces = (deepFreeze([
+const spaces = deepFreeze([
   {
     id: 'default',
     name: 'Default Space',
@@ -50,7 +50,7 @@ const spaces = (deepFreeze([
     name: 'Sales Space',
     disabledFeatures: [],
   },
-]) as unknown) as Space[];
+]) as unknown as Space[];
 
 const setup = ({ securityEnabled = false }: Opts = {}) => {
   const baseClient = spacesClientMock.create();
@@ -70,19 +70,19 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
   });
   authorization.mode.useRbacForRequest.mockReturnValue(securityEnabled);
 
-  const legacyAuditLogger = ({
+  const legacyAuditLogger = {
     spacesAuthorizationFailure: jest.fn(),
     spacesAuthorizationSuccess: jest.fn(),
-  } as unknown) as jest.Mocked<LegacySpacesAuditLogger>;
+  } as unknown as jest.Mocked<LegacySpacesAuditLogger>;
   const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
   const request = httpServerMock.createKibanaRequest();
 
   const forbiddenError = new Error('Mock ForbiddenError');
-  const errors = ({
+  const errors = {
     decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
     // other errors exist but are not needed for these test cases
-  } as unknown) as jest.Mocked<SavedObjectsClientContract['errors']>;
+  } as unknown as jest.Mocked<SavedObjectsClientContract['errors']>;
 
   const wrapper = new SecureSpacesClientWrapper(
     baseClient,
@@ -269,16 +269,10 @@ describe('SecureSpacesClientWrapper', () => {
       describe(`with purpose='${scenario.purpose}'`, () => {
         test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {
           const username = 'some-user';
-          const {
-            authorization,
-            wrapper,
-            baseClient,
-            request,
-            auditLogger,
-            legacyAuditLogger,
-          } = setup({
-            securityEnabled: true,
-          });
+          const { authorization, wrapper, baseClient, request, auditLogger, legacyAuditLogger } =
+            setup({
+              securityEnabled: true,
+            });
 
           const privileges = scenario.expectedPrivilege(authorization);
 
@@ -315,16 +309,10 @@ describe('SecureSpacesClientWrapper', () => {
 
         test(`returns spaces that the user is authorized for`, async () => {
           const username = 'some-user';
-          const {
-            authorization,
-            wrapper,
-            baseClient,
-            request,
-            auditLogger,
-            legacyAuditLogger,
-          } = setup({
-            securityEnabled: true,
-          });
+          const { authorization, wrapper, baseClient, request, auditLogger, legacyAuditLogger } =
+            setup({
+              securityEnabled: true,
+            });
 
           const privileges = scenario.expectedPrivilege(authorization);
 

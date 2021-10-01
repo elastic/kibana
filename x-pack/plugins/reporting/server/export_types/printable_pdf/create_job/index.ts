@@ -5,40 +5,28 @@
  * 2.0.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDF, TaskPayloadPDF } from '../types';
-// @ts-ignore no module def (deprecated module)
-import { compatibilityShimFactory } from './compatibility_shim';
+import { JobParamsPDF, JobParamsPDFLegacy, TaskPayloadPDF } from '../types';
+import { compatibilityShim } from './compatibility_shim';
 
+/*
+ * Incoming job params can be `JobParamsPDF` or `JobParamsPDFLegacy` depending
+ * on the version that the POST URL was copied from.
+ */
 export const createJobFnFactory: CreateJobFnFactory<
-  CreateJobFn<JobParamsPDF, TaskPayloadPDF>
-> = function createJobFactoryFn(reporting, logger) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
-  const compatibilityShim = compatibilityShimFactory(logger);
-
-  // 7.x and below only
+  CreateJobFn<JobParamsPDF | JobParamsPDFLegacy, TaskPayloadPDF>
+> = function createJobFactoryFn(_reporting, logger) {
   return compatibilityShim(async function createJobFn(
-    { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,
-    context: RequestHandlerContext,
-    req: KibanaRequest
+    { relativeUrls, ...jobParams }: JobParamsPDF // relativeUrls does not belong in the payload of PDFV1
   ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
-
     validateUrls(relativeUrls);
 
+    // return the payload
     return {
-      headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req, logger),
-      browserTimezone,
+      ...jobParams,
       forceNow: new Date().toISOString(),
-      layout,
-      objects: relativeUrls.map((u) => ({ relativeUrl: u })), // 7.x only: `objects` in the payload
-      title,
-      objectType,
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
-  });
+  }, logger);
 };

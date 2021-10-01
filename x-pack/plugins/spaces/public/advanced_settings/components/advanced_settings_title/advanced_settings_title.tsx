@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../../../common';
 import { getSpaceAvatarComponent } from '../../../space_avatar';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.

@@ -12,6 +12,7 @@ import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { EndpointAction } from './action';
 import { endpointListReducer } from './reducer';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
+import { createUninitialisedResourceState } from '../../../state';
 
 describe('EndpointList store concerns', () => {
   let store: Store<EndpointState>;
@@ -42,13 +43,19 @@ describe('EndpointList store concerns', () => {
         loading: false,
         error: undefined,
         endpointDetails: {
-          flyoutView: undefined,
           activityLog: {
             paging: {
               disabled: false,
               page: 1,
               pageSize: 50,
+              startDate: 'now-1d',
+              endDate: 'now',
               isInvalidDateRange: false,
+              autoRefreshOptions: {
+                enabled: false,
+                duration: DEFAULT_POLL_INTERVAL,
+              },
+              recentlyUsedDateRanges: [],
             },
             logData: { type: 'UninitialisedResourceState' },
           },
@@ -88,6 +95,7 @@ describe('EndpointList store concerns', () => {
           data: new Map(),
           type: 'LoadedResourceState',
         },
+        metadataTransformStats: createUninitialisedResourceState(),
       });
     });
 

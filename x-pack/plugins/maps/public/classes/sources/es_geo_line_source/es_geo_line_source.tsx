@@ -10,6 +10,7 @@ import React from 'react';
 
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from 'src/plugins/data/public';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -38,6 +39,8 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+
+type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
 
 const MAX_TRACKS = 250;
 
@@ -98,7 +101,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     );
   }
 
-  getSyncMeta() {
+  getSyncMeta(): ESGeoLineSourceSyncMeta {
     return {
       splitField: this._descriptor.splitField,
       sortField: this._descriptor.sortField,
@@ -202,6 +205,15 @@ export class ESGeoLineSource extends AbstractESAggSource {
         terms: addFieldToDSL(termsAgg, splitField),
       },
     });
+    if (splitField.type === 'string') {
+      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(splitField, '', indexPattern);
+      entityIsNotEmptyFilter.meta.negate = true;
+      entitySearchSource.setField('filter', [
+        ...(entitySearchSource.getField('filter') as Filter[]),
+        entityIsNotEmptyFilter,
+      ]);
+    }
+
     const entityResp = await this._runEsQuery({
       requestId: `${this.getId()}_entities`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {

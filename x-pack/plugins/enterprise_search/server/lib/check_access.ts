@@ -17,7 +17,7 @@ import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 interface CheckAccess {
   request: KibanaRequest;
   security?: SecurityPluginSetup;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
 }

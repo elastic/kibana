@@ -99,7 +99,7 @@ describe('spacesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Spaces' },
-      { text: 'Create' },
+      { href: '/create', text: 'Create' },
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>

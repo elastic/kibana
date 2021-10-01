@@ -62,8 +62,8 @@ export async function getServiceInstancesSystemMetricStatistics<
   end: number;
   numBuckets?: number;
   serviceNodeIds?: string[];
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   size?: number;
   isComparisonSearch: T;
 }): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {

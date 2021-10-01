@@ -5,71 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_ID,
-  ALERT_START,
-} from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_START } from '@kbn/rule-data-utils';
 import { modifyUrl } from '@kbn/std';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/function';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
-import {
-  ComparatorToi18nMap,
-  logThresholdRuleDataRT,
-  logThresholdRuleDataSerializedParamsKey,
-  ratioAlertParamsRT,
-} from '../../../common/alerting/logs/log_threshold';
 
-export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
-  const reason = pipe(
-    logThresholdRuleDataRT.decode(fields),
-    fold(
-      () =>
-        i18n.translate('xpack.infra.logs.alerting.threshold.unknownReasonDescription', {
-          defaultMessage: 'unknown reason',
-        }),
-      (logThresholdRuleData) => {
-        const params = logThresholdRuleData[logThresholdRuleDataSerializedParamsKey][0];
-
-        const actualCount = fields[ALERT_EVALUATION_VALUE];
-        const groupName = fields[ALERT_ID];
-        const isGrouped = (params.groupBy?.length ?? 0) > 0;
-        const isRatio = ratioAlertParamsRT.is(params);
-        const thresholdCount = fields[ALERT_EVALUATION_THRESHOLD];
-        const translatedComparator = ComparatorToi18nMap[params.count.comparator];
-
-        if (isRatio) {
-          return i18n.translate('xpack.infra.logs.alerting.threshold.ratioAlertReasonDescription', {
-            defaultMessage:
-              '{isGrouped, select, true{{groupName}: } false{}}The log entries ratio is {actualCount} ({translatedComparator} {thresholdCount}).',
-            values: {
-              actualCount,
-              translatedComparator,
-              groupName,
-              isGrouped,
-              thresholdCount,
-            },
-          });
-        } else {
-          return i18n.translate('xpack.infra.logs.alerting.threshold.countAlertReasonDescription', {
-            defaultMessage:
-              '{isGrouped, select, true{{groupName}: } false{}}{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries} } ({translatedComparator} {thresholdCount}) match the configured conditions.',
-            values: {
-              actualCount,
-              translatedComparator,
-              groupName,
-              isGrouped,
-              thresholdCount,
-            },
-          });
-        }
-      }
-    )
-  );
-
+export const formatRuleData: ObservabilityRuleTypeFormatter = ({ fields }) => {
+  const reason = fields[ALERT_REASON] ?? '';
   const alertStartDate = fields[ALERT_START];
   const timestamp = alertStartDate != null ? new Date(alertStartDate).valueOf() : null;
   const link = modifyUrl('/app/logs/link-to/default/logs', ({ query, ...otherUrlParts }) => ({

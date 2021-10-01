@@ -25,8 +25,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { MapsEmsConfig, LayerConfig } from '../config';
-
-export * from '../common';
+export { TMS_IN_YML_ID } from '../common';
 
 export interface MapsEmsPluginSetup {
   config: MapsEmsConfig;

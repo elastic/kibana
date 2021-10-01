@@ -21,8 +21,8 @@ import React, { Component, lazy, Suspense } from 'react';
 import type { InjectedIntl } from '@kbn/i18n/react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import type { ApplicationStart, Capabilities } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';

@@ -64,7 +64,8 @@ export interface ISavedObjectsPointInTimeFinder<T, A> {
  * @internal
  */
 export class PointInTimeFinder<T = unknown, A = unknown>
-  implements ISavedObjectsPointInTimeFinder<T, A> {
+  implements ISavedObjectsPointInTimeFinder<T, A>
+{
   readonly #log: Logger;
   readonly #client: PointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions;
@@ -139,7 +140,9 @@ export class PointInTimeFinder<T = unknown, A = unknown>
 
   private async open() {
     try {
-      const { id } = await this.#client.openPointInTimeForType(this.#findOptions.type);
+      const { id } = await this.#client.openPointInTimeForType(this.#findOptions.type, {
+        namespaces: this.#findOptions.namespaces,
+      });
       this.#pitId = id;
       this.#open = true;
     } catch (e) {

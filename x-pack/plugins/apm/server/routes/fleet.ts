@@ -138,10 +138,12 @@ const getMigrationCheckRoute = createApmServerRoute({
     const fleetPluginStart = await plugins.fleet.start();
     const securityPluginStart = await plugins.security.start();
     const hasRequiredRole = isSuperuser({ securityPluginStart, request });
-    const cloudAgentPolicy = await getCloudAgentPolicy({
-      savedObjectsClient,
-      fleetPluginStart,
-    });
+    const cloudAgentPolicy = hasRequiredRole
+      ? await getCloudAgentPolicy({
+          savedObjectsClient,
+          fleetPluginStart,
+        })
+      : undefined;
     return {
       has_cloud_agent_policy: !!cloudAgentPolicy,
       has_cloud_apm_package_policy: !!getApmPackagePolicy(cloudAgentPolicy),
@@ -163,8 +165,9 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     }
     const savedObjectsClient = context.core.savedObjects.client;
     const coreStart = await resources.core.start();
-    const esClient = coreStart.elasticsearch.client.asScoped(resources.request)
-      .asCurrentUser;
+    const esClient = coreStart.elasticsearch.client.asScoped(
+      resources.request
+    ).asCurrentUser;
     const cloudPluginSetup = plugins.cloud?.setup;
     const fleetPluginStart = await plugins.fleet.start();
     const securityPluginStart = await plugins.security.start();

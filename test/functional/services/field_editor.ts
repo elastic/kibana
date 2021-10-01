@@ -12,8 +12,11 @@ export class FieldEditorService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
-  public async setName(name: string) {
-    await this.testSubjects.setValue('nameField > input', name);
+  public async setName(name: string, clearFirst = false, typeCharByChar = false) {
+    await this.testSubjects.setValue('nameField > input', name, {
+      clearWithKeyboard: clearFirst,
+      typeCharByChar,
+    });
   }
   public async enableCustomLabel() {
     await this.testSubjects.setEuiSwitch('customLabelRow > toggle', 'check');
@@ -28,9 +31,9 @@ export class FieldEditorService extends FtrService {
     await this.testSubjects.setEuiSwitch('valueRow > toggle', 'uncheck');
   }
   public async typeScript(script: string) {
-    const editor = await (await this.testSubjects.find('valueRow')).findByClassName(
-      'react-monaco-editor-container'
-    );
+    const editor = await (
+      await this.testSubjects.find('valueRow')
+    ).findByClassName('react-monaco-editor-container');
     const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
 
     await textarea.click();

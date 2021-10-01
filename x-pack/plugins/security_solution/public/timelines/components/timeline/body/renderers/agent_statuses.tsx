@@ -18,32 +18,35 @@ export const AgentStatuses = React.memo(
     fieldName,
     contextId,
     eventId,
+    isDraggable,
     value,
   }: {
     fieldName: string;
     contextId: string;
     eventId: string;
+    isDraggable: boolean;
     value: string;
   }) => {
-    const {
-      isIsolated,
-      agentStatus,
-      pendingIsolation,
-      pendingUnisolation,
-    } = useHostIsolationStatus({ agentId: value });
+    const { isIsolated, agentStatus, pendingIsolation, pendingUnisolation } =
+      useHostIsolationStatus({ agentId: value });
     const isolationFieldName = 'host.isolation';
     return (
       <EuiFlexGroup gutterSize="none">
         {agentStatus !== undefined ? (
           <EuiFlexItem grow={false}>
-            <DefaultDraggable
-              field={fieldName}
-              id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-              tooltipContent={fieldName}
-              value={`${agentStatus}`}
-            >
+            {isDraggable ? (
+              <DefaultDraggable
+                field={fieldName}
+                id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+                isDraggable={isDraggable}
+                tooltipContent={fieldName}
+                value={`${agentStatus}`}
+              >
+                <AgentStatus hostStatus={agentStatus} />
+              </DefaultDraggable>
+            ) : (
               <AgentStatus hostStatus={agentStatus} />
-            </DefaultDraggable>
+            )}
           </EuiFlexItem>
         ) : (
           <EuiText>
@@ -54,6 +57,7 @@ export const AgentStatuses = React.memo(
           <DefaultDraggable
             field={isolationFieldName}
             id={`event-details-value-default-draggable-${contextId}-${eventId}-${isolationFieldName}-${value}`}
+            isDraggable={isDraggable}
             tooltipContent={isolationFieldName}
             value={`${isIsolated}`}
           >

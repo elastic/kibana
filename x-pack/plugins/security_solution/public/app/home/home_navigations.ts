@@ -24,7 +24,9 @@ import {
   APP_ENDPOINTS_PATH,
   APP_TRUSTED_APPS_PATH,
   APP_EVENT_FILTERS_PATH,
+  APP_UEBA_PATH,
   SecurityPageName,
+  APP_HOST_ISOLATION_EXCEPTIONS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -70,6 +72,13 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'network',
   },
+  [SecurityPageName.ueba]: {
+    id: SecurityPageName.ueba,
+    name: i18n.UEBA,
+    href: APP_UEBA_PATH,
+    disabled: false,
+    urlKey: 'ueba',
+  },
   [SecurityPageName.timelines]: {
     id: SecurityPageName.timelines,
     name: i18n.TIMELINES,
@@ -109,6 +118,13 @@ export const navTabs: SecurityNav = {
     id: SecurityPageName.eventFilters,
     name: i18n.EVENT_FILTERS,
     href: APP_EVENT_FILTERS_PATH,
+    disabled: false,
+    urlKey: 'administration',
+  },
+  [SecurityPageName.hostIsolationExceptions]: {
+    id: SecurityPageName.hostIsolationExceptions,
+    name: i18n.HOST_ISOLATION_EXCEPTIONS,
+    href: APP_HOST_ISOLATION_EXCEPTIONS_PATH,
     disabled: false,
     urlKey: 'administration',
   },

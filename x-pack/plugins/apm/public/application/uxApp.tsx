@@ -10,7 +10,8 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router } from 'react-router-dom';
+import { Route as ReactRouterRoute } from 'react-router-dom';
+import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
@@ -21,7 +22,10 @@ import {
 } from '../../../../../src/plugins/kibana_react/public';
 import { APMRouteDefinition } from '../application/routes';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
+import {
+  RumHome,
+  DASHBOARD_LABEL,
+} from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { ConfigSchema } from '../index';
@@ -32,13 +36,15 @@ import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 import { redirectTo } from '../components/routing/redirect_to';
 import { useBreadcrumbs } from '../../../observability/public';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { InspectorContextProvider } from '../context/inspector/inspector_context';
 
 export const uxRoutes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
     render: redirectTo('/ux'),
-    breadcrumb: UX_LABEL,
+    breadcrumb: DASHBOARD_LABEL,
   },
 ];
 
@@ -49,10 +55,15 @@ function UxApp() {
   const basePath = core.http.basePath.get();
 
   useBreadcrumbs([
-    { text: UX_LABEL, href: basePath + '/app/ux' },
     {
-      text: i18n.translate('xpack.apm.ux.overview', {
-        defaultMessage: 'Overview',
+      text: i18n.translate('xpack.apm.ux.breadcrumbs.root', {
+        defaultMessage: 'User Experience',
+      }),
+      href: basePath + '/app/ux',
+    },
+    {
+      text: i18n.translate('xpack.apm.ux.breadcrumbs.dashboard', {
+        defaultMessage: 'Dashboard',
       }),
     },
   ]);
@@ -65,20 +76,26 @@ function UxApp() {
         darkMode,
       })}
     >
-      <div data-test-subj="csmMainContainer" role="main">
-        <Route component={ScrollToTopOnPathChange} />
+      <div
+        className={APP_WRAPPER_CLASS}
+        data-test-subj="csmMainContainer"
+        role="main"
+      >
+        <ReactRouterRoute component={ScrollToTopOnPathChange} />
         <RumHome />
       </div>
     </ThemeProvider>
   );
 }
 
+const uxRouter = createRouter([]);
+
 export function UXAppRoot({
   appMountParameters,
   core,
   deps,
   config,
-  corePlugins: { embeddable, maps, observability, data },
+  corePlugins: { embeddable, inspector, maps, observability, data },
   observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
@@ -95,24 +112,30 @@ export function UXAppRoot({
     appMountParameters,
     config,
     core,
+    inspector,
     plugins,
     observability,
     observabilityRuleTypeRegistry,
   };
 
   return (
-    <RedirectAppLinks application={core.application}>
+    <RedirectAppLinks
+      className={APP_WRAPPER_CLASS}
+      application={core.application}
+    >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider
           services={{ ...core, ...plugins, embeddable, data }}
         >
           <i18nCore.Context>
-            <Router history={history}>
-              <UrlParamsProvider>
-                <UxApp />
-                <UXActionMenu appMountParameters={appMountParameters} />
-              </UrlParamsProvider>
-            </Router>
+            <RouterProvider history={history} router={uxRouter}>
+              <InspectorContextProvider>
+                <UrlParamsProvider>
+                  <UxApp />
+                  <UXActionMenu appMountParameters={appMountParameters} />
+                </UrlParamsProvider>
+              </InspectorContextProvider>
+            </RouterProvider>
           </i18nCore.Context>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>

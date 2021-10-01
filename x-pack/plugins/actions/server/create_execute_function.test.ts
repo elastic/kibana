@@ -76,7 +76,15 @@ describe('execute()', () => {
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
-      {}
+      {
+        references: [
+          {
+            id: '123',
+            name: 'actionRef',
+            type: 'action',
+          },
+        ],
+      }
     );
     expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
       notifyUsage: true,
@@ -128,14 +136,27 @@ describe('execute()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         relatedSavedObjects: [
           {
-            id: 'some-id',
+            id: 'related_some-type_0',
             namespace: 'some-namespace',
             type: 'some-type',
             typeId: 'some-typeId',
           },
         ],
       },
-      {}
+      {
+        references: [
+          {
+            id: '123',
+            name: 'actionRef',
+            type: 'action',
+          },
+          {
+            id: 'some-id',
+            name: 'related_some-type_0',
+            type: 'some-type',
+          },
+        ],
+      }
     );
   });
 
@@ -208,6 +229,102 @@ describe('execute()', () => {
             id: source.id,
             name: 'source',
             type: source.type,
+          },
+        ],
+      }
+    );
+  });
+
+  test('schedules the action with all given parameters with a preconfigured action and relatedSavedObjects', async () => {
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      preconfiguredActions: [
+        {
+          id: '123',
+          actionTypeId: 'mock-action-preconfigured',
+          config: {},
+          isPreconfigured: true,
+          name: 'x',
+          secrets: {},
+        },
+      ],
+    });
+    const source = { type: 'alert', id: uuid.v4() };
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+    await executeFn(savedObjectsClient, {
+      id: '123',
+      params: { baz: false },
+      spaceId: 'default',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      source: asSavedObjectExecutionSource(source),
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          namespace: 'some-namespace',
+          type: 'some-type',
+          typeId: 'some-typeId',
+        },
+      ],
+    });
+    expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "params": Object {
+                  "actionTaskParamsId": "234",
+                  "spaceId": "default",
+                },
+                "scope": Array [
+                  "actions",
+                ],
+                "state": Object {},
+                "taskType": "actions:mock-action-preconfigured",
+              },
+            ]
+        `);
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'action_task_params',
+      {
+        actionId: '123',
+        params: { baz: false },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        relatedSavedObjects: [
+          {
+            id: 'related_some-type_0',
+            namespace: 'some-namespace',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+        ],
+      },
+      {
+        references: [
+          {
+            id: source.id,
+            name: 'source',
+            type: source.type,
+          },
+          {
+            id: 'some-id',
+            name: 'related_some-type_0',
+            type: 'some-type',
           },
         ],
       }

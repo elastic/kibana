@@ -5,65 +5,58 @@
  * 2.0.
  */
 
-import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18n from '../translations';
 
 export const FILTER_OPEN: Status = 'open';
 export const FILTER_CLOSED: Status = 'closed';
-export const FILTER_IN_PROGRESS: Status = 'in-progress';
+export const FILTER_ACKNOWLEDGED: Status = 'acknowledged';
 
 interface Props {
+  status: Status;
   onFilterGroupChanged: (filterGroup: Status) => void;
 }
 
-const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged }) => {
-  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+const AlertsTableFilterGroupComponent: React.FC<Props> = ({
+  status = FILTER_OPEN,
+  onFilterGroupChanged,
+}) => {
+  const options: EuiButtonGroupOptionProps[] = [
+    {
+      id: 'open',
+      label: i18n.OPEN_ALERTS,
+      'data-test-subj': 'openAlerts',
+    },
+    {
+      id: 'acknowledged',
+      label: i18n.ACKNOWLEDGED_ALERTS,
+      'data-test-subj': 'acknowledgedAlerts',
+    },
+    {
+      id: 'closed',
+      label: i18n.CLOSED_ALERTS,
+      'data-test-subj': 'closedAlerts',
+    },
+  ];
 
-  const onClickOpenFilterCallback = useCallback(() => {
-    setFilterGroup(FILTER_OPEN);
-    onFilterGroupChanged(FILTER_OPEN);
-  }, [setFilterGroup, onFilterGroupChanged]);
-
-  const onClickCloseFilterCallback = useCallback(() => {
-    setFilterGroup(FILTER_CLOSED);
-    onFilterGroupChanged(FILTER_CLOSED);
-  }, [setFilterGroup, onFilterGroupChanged]);
-
-  const onClickInProgressFilterCallback = useCallback(() => {
-    setFilterGroup(FILTER_IN_PROGRESS);
-    onFilterGroupChanged(FILTER_IN_PROGRESS);
-  }, [setFilterGroup, onFilterGroupChanged]);
+  const onChange = useCallback(
+    (id: string) => {
+      onFilterGroupChanged(id as Status);
+    },
+    [onFilterGroupChanged]
+  );
 
   return (
-    <EuiFilterGroup data-test-subj="alerts-table-filter-group">
-      <EuiFilterButton
-        data-test-subj="openAlerts"
-        hasActiveFilters={filterGroup === FILTER_OPEN}
-        onClick={onClickOpenFilterCallback}
-        withNext
-      >
-        {i18n.OPEN_ALERTS}
-      </EuiFilterButton>
-
-      <EuiFilterButton
-        data-test-subj="inProgressAlerts"
-        hasActiveFilters={filterGroup === FILTER_IN_PROGRESS}
-        onClick={onClickInProgressFilterCallback}
-        withNext
-      >
-        {i18n.IN_PROGRESS_ALERTS}
-      </EuiFilterButton>
-
-      <EuiFilterButton
-        data-test-subj="closedAlerts"
-        hasActiveFilters={filterGroup === FILTER_CLOSED}
-        onClick={onClickCloseFilterCallback}
-      >
-        {i18n.CLOSED_ALERTS}
-      </EuiFilterButton>
-    </EuiFilterGroup>
+    <EuiButtonGroup
+      legend="filter status"
+      color="primary"
+      options={options}
+      idSelected={status}
+      data-test-subj="alerts-table-filter-group"
+      onChange={onChange}
+    />
   );
 };
 

@@ -7,10 +7,11 @@
 
 import { Moment } from 'moment';
 
-import { CombinedJob, CombinedJobWithStats } from './combined_job';
-import { MlAnomalyDetectionAlertRule } from '../alerts';
-export { Datafeed } from './datafeed';
-export { DatafeedStats } from './datafeed_stats';
+import type { CombinedJob, CombinedJobWithStats } from './combined_job';
+import type { MlAnomalyDetectionAlertRule } from '../alerts';
+import type { MlJobBlocked } from './job';
+export type { Datafeed } from './datafeed';
+export type { DatafeedStats } from './datafeed_stats';
 
 export interface MlSummaryJob {
   id: string;
@@ -31,7 +32,7 @@ export interface MlSummaryJob {
   auditMessage?: Partial<AuditMessage>;
   isSingleMetricViewerJob: boolean;
   isNotSingleMetricViewerJobMessage?: string;
-  deleting?: boolean;
+  blocked?: MlJobBlocked;
   latestTimestampSortValue?: number;
   earliestStartTimestampMs?: number;
   awaitingNodeAssignment: boolean;
@@ -42,10 +43,10 @@ export interface MlSummaryJob {
 export interface AuditMessage {
   job_id: string;
   msgTime: number;
-  level: string;
+  level?: string;
   highestLevel: string;
   highestLevelText: string;
-  text: string;
+  text?: string;
   cleared?: boolean;
 }
 

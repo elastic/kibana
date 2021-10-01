@@ -7,3 +7,4 @@
  */
 
 export * from './function_wrapper';
+export * from './test_styles';

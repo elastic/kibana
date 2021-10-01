@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
   ElasticsearchServiceStart,
@@ -15,6 +16,7 @@ import {
 } from '../../../../../../src/core/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
+import { SecurityPluginStart } from '../../../../security/server';
 
 import { ReindexStatus } from '../../../common/types';
 
@@ -45,6 +47,7 @@ interface CreateReindexWorker {
   credentialStore: CredentialStore;
   savedObjects: SavedObjectsClient;
   licensing: LicensingPluginSetup;
+  security: SecurityPluginStart;
 }
 
 export function createReindexWorker({
@@ -53,9 +56,10 @@ export function createReindexWorker({
   credentialStore,
   savedObjects,
   licensing,
+  security,
 }: CreateReindexWorker) {
   const esClient = elasticsearchService.client;
-  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing);
+  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing, security);
 }
 
 const mapAnyErrorToKibanaHttpResponse = (e: any) => {
@@ -79,11 +83,19 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
       // nothing matched
     }
   }
+
   throw e;
 };
 
 export function registerReindexIndicesRoutes(
-  { credentialStore, router, licensing, log }: RouteDependencies,
+  {
+    credentialStore,
+    router,
+    licensing,
+    log,
+    getSecurityPlugin,
+    lib: { handleEsError },
+  }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
   const BASE_PATH = `${API_BASE_PATH}/reindex`;
@@ -117,8 +129,9 @@ export function registerReindexIndicesRoutes(
             indexName,
             log,
             licensing,
-            headers: request.headers,
+            request,
             credentialStore,
+            security: getSecurityPlugin(),
           });
 
           // Kick the worker on this node to immediately pickup the new reindex operation.
@@ -127,8 +140,11 @@ export function registerReindexIndicesRoutes(
           return response.ok({
             body: result,
           });
-        } catch (e) {
-          return mapAnyErrorToKibanaHttpResponse(e);
+        } catch (error) {
+          if (error instanceof ResponseError) {
+            return handleEsError({ error, response });
+          }
+          return mapAnyErrorToKibanaHttpResponse(error);
         }
       }
     )
@@ -162,8 +178,11 @@ export function registerReindexIndicesRoutes(
         return response.ok({
           body: result,
         });
-      } catch (e) {
-        return mapAnyErrorToKibanaHttpResponse(e);
+      } catch (error) {
+        if (error instanceof ResponseError) {
+          return handleEsError({ error, response });
+        }
+        return mapAnyErrorToKibanaHttpResponse(error);
       }
     }
   );
@@ -202,11 +221,12 @@ export function registerReindexIndicesRoutes(
               indexName,
               log,
               licensing,
-              headers: request.headers,
+              request,
               credentialStore,
               reindexOptions: {
                 enqueue: true,
               },
+              security: getSecurityPlugin(),
             });
             results.enqueued.push(result);
           } catch (e) {
@@ -271,8 +291,11 @@ export function registerReindexIndicesRoutes(
               hasRequiredPrivileges,
             },
           });
-        } catch (e) {
-          return mapAnyErrorToKibanaHttpResponse(e);
+        } catch (error) {
+          if (error instanceof ResponseError) {
+            return handleEsError({ error, response });
+          }
+          return mapAnyErrorToKibanaHttpResponse(error);
         }
       }
     )
@@ -314,8 +337,12 @@ export function registerReindexIndicesRoutes(
           await reindexService.cancelReindexing(indexName);
 
           return response.ok({ body: { acknowledged: true } });
-        } catch (e) {
-          return mapAnyErrorToKibanaHttpResponse(e);
+        } catch (error) {
+          if (error instanceof ResponseError) {
+            return handleEsError({ error, response });
+          }
+
+          return mapAnyErrorToKibanaHttpResponse(error);
         }
       }
     )

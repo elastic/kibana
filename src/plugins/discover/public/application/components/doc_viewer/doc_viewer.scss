@@ -44,8 +44,12 @@
   padding: $euiSizeXS;
 }
 
+.kbnDocViewer__tableValueCell {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .kbnDocViewer__value {
-  display: inline-block;
   word-break: break-all;
   word-wrap: break-word;
   white-space: pre-wrap;

@@ -38,6 +38,7 @@ import { isUnremovablePackage, getInstallation, getInstallationObject } from './
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
+import { removeOldAssets } from './cleanup';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -153,7 +154,7 @@ export async function handleInstallPackageFailure({
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
     if (installType === 'install' || installType === 'reinstall') {
-      logger.error(`uninstalling ${pkgkey} after error installing`);
+      logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     }
 
@@ -267,10 +268,16 @@ async function installPackageFromRegistry({
       installType,
       installSource: 'registry',
     })
-      .then((assets) => {
+      .then(async (assets) => {
+        await removeOldAssets({
+          soClient: savedObjectsClient,
+          pkgName: packageInfo.name,
+          currentVersion: packageInfo.version,
+        });
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {
+        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`);
         await handleInstallPackageFailure({
           savedObjectsClient,
           error: err,

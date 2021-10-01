@@ -16,7 +16,15 @@ export interface DomainDeprecationDetails extends DeprecationsDetails {
 }
 
 export interface DeprecationsDetails {
-  /* The message to be displayed for the deprecation. */
+  /**
+   * The title of the deprecation.
+   * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
+   */
+  title: string;
+  /**
+   * The description message to be displayed for the deprecation.
+   * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
+   */
   message: string;
   /**
    * levels:
@@ -37,6 +45,8 @@ export interface DeprecationsDetails {
   deprecationType?: 'config' | 'feature';
   /* (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
+  /* (optional) specify the fix for this deprecation requires a full kibana restart. */
+  requireRestart?: boolean;
   /* corrective action needed to fix this deprecation. */
   correctiveActions: {
     /**
@@ -58,6 +68,7 @@ export interface DeprecationsDetails {
      * Specify a list of manual steps users need to follow to
      * fix the deprecation before upgrade. Required even if an API
      * corrective action is set in case the API fails.
+     * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
      */
     manualSteps: string[];
   };

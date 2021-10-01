@@ -2,5 +2,9 @@
   "id": "kibanaLegacy",
   "version": "kibana",
   "server": true,
-  "ui": true
+  "ui": true,
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
 }

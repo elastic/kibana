@@ -26,7 +26,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 5,
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -34,18 +34,6 @@ export const columns: Array<
     id: 'signal.rule.name',
     initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
     linkField: 'signal.rule.id',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    displayAsText: i18n.ALERTS_HEADERS_VERSION,
-    id: 'signal.rule.version',
-    initialWidth: 95,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    displayAsText: i18n.ALERTS_HEADERS_METHOD,
-    id: 'signal.rule.type',
-    initialWidth: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -57,45 +45,36 @@ export const columns: Array<
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_RISK_SCORE,
     id: 'signal.rule.risk_score',
-    initialWidth: 115,
+    initialWidth: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'event.module',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    linkField: 'rule.reference',
-  },
-  {
-    aggregatable: true,
-    category: 'event',
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.action',
-    initialWidth: 140,
-    type: 'string',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.category',
-    initialWidth: 150,
+    displayAsText: i18n.ALERTS_HEADERS_REASON,
+    id: 'signal.reason',
+    initialWidth: 450,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'host.name',
-    initialWidth: 120,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'user.name',
-    initialWidth: 120,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'process.name',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'file.name',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'source.ip',
-    initialWidth: 120,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
-    initialWidth: 140,
   },
 ];

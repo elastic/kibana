@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
@@ -18,22 +19,9 @@ import {
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
+  isDelegatedModule,
   getModulePath,
 } from './webpack_helpers';
-
-function tryToResolveRewrittenPath(from: string, toResolve: string) {
-  try {
-    return require.resolve(toResolve);
-  } catch (error) {
-    if (error.code === 'MODULE_NOT_FOUND') {
-      throw new Error(
-        `attempted to rewrite bazel-out path [${from}] to [${toResolve}] but couldn't find the rewrite target`
-      );
-    }
-
-    throw error;
-  }
-}
 
 /**
  * sass-loader creates about a 40% overhead on the overall optimizer runtime, and
@@ -43,6 +31,20 @@ function tryToResolveRewrittenPath(from: string, toResolve: string) {
  * across mulitple workers on machines with lots of cores.
  */
 const EXTRA_SCSS_WORK_UNITS = 100;
+
+const isBazelPackageCache = new Map<string, boolean>();
+function isBazelPackage(pkgJsonPath: string) {
+  const cached = isBazelPackageCache.get(pkgJsonPath);
+  if (typeof cached === 'boolean') {
+    return cached;
+  }
+
+  const path = parseFilePath(Fs.realpathSync(pkgJsonPath, 'utf-8'));
+  const match = !!path.matchDirs('bazel-out', /-fastbuild$/, 'bin', 'packages');
+  isBazelPackageCache.set(pkgJsonPath, match);
+
+  return match;
+}
 
 export class PopulateBundleCachePlugin {
   constructor(private readonly workerConfig: WorkerConfig, private readonly bundle: Bundle) {}
@@ -71,42 +73,14 @@ export class PopulateBundleCachePlugin {
             let path = getModulePath(module);
             let parsedPath = parseFilePath(path);
 
-            const bazelOut = parsedPath.matchDirs(
-              'bazel-out',
-              /-fastbuild$/,
-              'bin',
-              'packages',
-              /.*/,
-              'target'
-            );
-
-            // if the module is referenced from one of our packages and resolved to the `bazel-out` dir
-            // we should rewrite our reference to point to the source file so that we can track the
-            // modified time of that file rather than the built output which is rebuilt all the time
-            // without actually changing
-            if (bazelOut) {
-              const packageDir = parsedPath.dirs[bazelOut.endIndex - 1];
-              const subDirs = parsedPath.dirs.slice(bazelOut.endIndex + 1);
-              path = tryToResolveRewrittenPath(
-                path,
-                Path.join(
-                  workerConfig.repoRoot,
-                  'packages',
-                  packageDir,
-                  'src',
-                  ...subDirs,
-                  parsedPath.filename
-                    ? Path.basename(parsedPath.filename, Path.extname(parsedPath.filename))
-                    : ''
-                )
+            const bazelOutIndex = parsedPath.dirs.indexOf('bazel-out');
+            if (bazelOutIndex >= 0) {
+              path = Path.resolve(
+                this.workerConfig.repoRoot,
+                ...parsedPath.dirs.slice(bazelOutIndex),
+                parsedPath.filename ?? ''
               );
               parsedPath = parseFilePath(path);
-            }
-
-            if (parsedPath.matchDirs('bazel-out')) {
-              throw new Error(
-                `a bazel-out dir is being referenced by module [${path}] and not getting rewritten to its source location`
-              );
             }
 
             if (!parsedPath.dirs.includes('node_modules')) {
@@ -125,13 +99,13 @@ export class PopulateBundleCachePlugin {
 
             const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
             const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
-            referencedFiles.add(
-              Path.join(
-                parsedPath.root,
-                ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
-                'package.json'
-              )
+            const pkgJsonPath = Path.join(
+              parsedPath.root,
+              ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
+              'package.json'
             );
+
+            referencedFiles.add(isBazelPackage(pkgJsonPath) ? path : pkgJsonPath);
             continue;
           }
 
@@ -145,7 +119,7 @@ export class PopulateBundleCachePlugin {
             continue;
           }
 
-          if (isExternalModule(module) || isIgnoredModule(module)) {
+          if (isExternalModule(module) || isIgnoredModule(module) || isDelegatedModule(module)) {
             continue;
           }
 

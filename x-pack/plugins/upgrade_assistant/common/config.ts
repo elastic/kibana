@@ -14,7 +14,7 @@ export const configSchema = schema.object({
    * In readonly mode, the user will not be able to perform any actions in the UI
    * and will be presented with a message indicating as such.
    */
-  readonly: schema.boolean({ defaultValue: true }),
+  readonly: schema.boolean({ defaultValue: false }),
 });
 
 export type Config = TypeOf<typeof configSchema>;

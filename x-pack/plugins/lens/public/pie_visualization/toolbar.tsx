@@ -15,10 +15,10 @@ import {
   EuiRange,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { Position } from '@elastic/charts';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { Position } from '@elastic/charts';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieVisualizationState, SharedPieLayerState } from './types';
+import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';
@@ -218,6 +218,21 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           setState({
             ...state,
             layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
+          });
+        }}
+        shouldTruncate={layer.truncateLegend ?? true}
+        onTruncateLegendChange={() => {
+          const current = layer.truncateLegend ?? true;
+          setState({
+            ...state,
+            layers: [{ ...layer, truncateLegend: !current }],
+          });
+        }}
+        maxLines={layer?.legendMaxLines}
+        onMaxLinesChange={(val) => {
+          setState({
+            ...state,
+            layers: [{ ...layer, legendMaxLines: val }],
           });
         }}
       />

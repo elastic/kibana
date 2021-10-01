@@ -9,22 +9,21 @@ import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-
+import { apiService } from './application/lib/api';
+import { breadcrumbService } from './application/lib/breadcrumbs';
+import { uiMetricService } from './application/lib/ui_metric';
+import { SetupDependencies, StartDependencies, AppDependencies } from './types';
 import { Config } from '../common/config';
 
-interface Dependencies {
-  management: ManagementSetup;
-}
-
-export class UpgradeAssistantUIPlugin implements Plugin {
+export class UpgradeAssistantUIPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   constructor(private ctx: PluginInitializerContext) {}
-  setup(coreSetup: CoreSetup, { management }: Dependencies) {
-    const { enabled, readonly } = this.ctx.config.get<Config>();
-
-    if (!enabled) {
-      return;
-    }
+  setup(
+    coreSetup: CoreSetup<StartDependencies>,
+    { management, cloud, share, usageCollection }: SetupDependencies
+  ) {
+    const { readonly } = this.ctx.config.get<Config>();
 
     const appRegistrar = management.sections.section.stack;
     const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
@@ -36,16 +35,19 @@ export class UpgradeAssistantUIPlugin implements Plugin {
     };
 
     const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
-      defaultMessage: '{version} Upgrade Assistant',
-      values: { version: `${kibanaVersionInfo.nextMajor}.0` },
+      defaultMessage: 'Upgrade Assistant',
     });
+
+    if (usageCollection) {
+      uiMetricService.setup(usageCollection);
+    }
 
     appRegistrar.registerApp({
       id: 'upgrade_assistant',
       title: pluginName,
       order: 1,
       async mount(params) {
-        const [coreStart] = await coreSetup.getStartServices();
+        const [coreStart, { data, ...plugins }] = await coreSetup.getStartServices();
 
         const {
           chrome: { docTitle },
@@ -53,13 +55,28 @@ export class UpgradeAssistantUIPlugin implements Plugin {
 
         docTitle.change(pluginName);
 
-        const { mountManagementSection } = await import('./application/mount_management_section');
-        const unmountAppCallback = await mountManagementSection(
-          coreSetup,
-          params,
+        const appDependencies: AppDependencies = {
           kibanaVersionInfo,
-          readonly
-        );
+          isReadOnlyMode: readonly,
+          plugins: {
+            cloud,
+            share,
+            // Infra plugin doesnt export anything as a public interface. So the only
+            // way we have at this stage for checking if the plugin is available or not
+            // is by checking if the startServices has the `infra` key.
+            infra: plugins.hasOwnProperty('infra') ? {} : undefined,
+          },
+          services: {
+            core: coreStart,
+            data,
+            history: params.history,
+            api: apiService,
+            breadcrumbs: breadcrumbService,
+          },
+        };
+
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const unmountAppCallback = mountManagementSection(params, appDependencies);
 
         return () => {
           docTitle.reset();

@@ -52,54 +52,51 @@ interface Props {
 }
 
 export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSettings }: Props) => {
-  const {
-    parsedDefaultValue,
-    multipleMappingsDeclared,
-    mappingsType,
-  } = useMemo<MappingsEditorParsedMetadata>(() => {
-    const mappingsDefinition = extractMappingsDefinition(value);
+  const { parsedDefaultValue, multipleMappingsDeclared, mappingsType } =
+    useMemo<MappingsEditorParsedMetadata>(() => {
+      const mappingsDefinition = extractMappingsDefinition(value);
 
-    if (mappingsDefinition === null) {
-      return { multipleMappingsDeclared: true };
-    }
+      if (mappingsDefinition === null) {
+        return { multipleMappingsDeclared: true };
+      }
 
-    const {
-      _source,
-      _meta,
-      _routing,
-      dynamic,
-      properties,
-      runtime,
-      /* eslint-disable @typescript-eslint/naming-convention */
-      numeric_detection,
-      date_detection,
-      dynamic_date_formats,
-      dynamic_templates,
-    } = mappingsDefinition.mappings;
-
-    const parsed = {
-      configuration: {
+      const {
         _source,
         _meta,
         _routing,
         dynamic,
+        properties,
+        runtime,
+        /* eslint-disable @typescript-eslint/naming-convention */
         numeric_detection,
         date_detection,
         dynamic_date_formats,
-      },
-      fields: properties,
-      templates: {
         dynamic_templates,
-      },
-      runtime,
-    };
+      } = mappingsDefinition.mappings;
 
-    return {
-      parsedDefaultValue: parsed,
-      multipleMappingsDeclared: false,
-      mappingsType: mappingsDefinition.type,
-    };
-  }, [value]);
+      const parsed = {
+        configuration: {
+          _source,
+          _meta,
+          _routing,
+          dynamic,
+          numeric_detection,
+          date_detection,
+          dynamic_date_formats,
+        },
+        fields: properties,
+        templates: {
+          dynamic_templates,
+        },
+        runtime,
+      };
+
+      return {
+        parsedDefaultValue: parsed,
+        multipleMappingsDeclared: false,
+        mappingsType: mappingsDefinition.type,
+      };
+    }, [value]);
 
   /**
    * Hook that will listen to:

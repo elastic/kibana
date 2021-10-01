@@ -9,16 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../..';
 import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { omitBlockedHeaders } from '../../export_types/common';
+import { omitBlockedHeaders, generatePngObservableFactory } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
-import { generatePngObservableFactory } from '../../export_types/png/lib/generate_png';
 import { LevelLogger as Logger } from '../../lib';
-import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { DiagnosticResponse } from './';
 
 export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
-  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
   router.post(
@@ -26,7 +24,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       path: `${API_DIAGNOSE_URL}/screenshot`,
       validate: {},
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
       const generatePngObservable = await generatePngObservableFactory(reporting);
       const config = reporting.getConfig();
       const decryptedHeaders = req.headers as Record<string, string>;

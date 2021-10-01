@@ -6,6 +6,7 @@
  */
 
 import { Action } from 'redux';
+import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import {
   HostResultList,
   HostInfo,
@@ -15,7 +16,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { EndpointIndexUIQueryParams, EndpointState } from '../types';
+import { EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ServerReturnedEndpointList {
@@ -161,8 +162,27 @@ export interface EndpointDetailsActivityLogUpdatePaging {
     disabled?: boolean;
     page: number;
     pageSize: number;
-    startDate?: string;
-    endDate?: string;
+    startDate: string;
+    endDate: string;
+  };
+}
+
+export interface UserUpdatedActivityLogRefreshOptions {
+  type: 'userUpdatedActivityLogRefreshOptions';
+  payload: {
+    autoRefreshOptions: { enabled: boolean; duration: number };
+  };
+}
+
+export interface UserUpdatedActivityLogRecentlyUsedDateRanges {
+  type: 'userUpdatedActivityLogRecentlyUsedDateRanges';
+  payload: EuiSuperDatePickerRecentRange[];
+}
+
+export interface EndpointDetailsLoad {
+  type: 'endpointDetailsLoad';
+  payload: {
+    endpointId: string;
   };
 }
 
@@ -173,10 +193,11 @@ export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
   };
 }
 
-export interface EndpointDetailsFlyoutTabChanged {
-  type: 'endpointDetailsFlyoutTabChanged';
-  payload: { flyoutView: EndpointIndexUIQueryParams['show'] };
-}
+export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
+
+export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
+  payload: EndpointState['metadataTransformStats'];
+};
 
 export type EndpointAction =
   | ServerReturnedEndpointList
@@ -185,8 +206,10 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointDetails
   | EndpointDetailsActivityLogUpdatePaging
   | EndpointDetailsActivityLogUpdateIsInvalidDateRange
-  | EndpointDetailsFlyoutTabChanged
   | EndpointDetailsActivityLogChanged
+  | UserUpdatedActivityLogRefreshOptions
+  | UserUpdatedActivityLogRecentlyUsedDateRanges
+  | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
@@ -208,4 +231,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
   | EndpointIsolationRequestStateChange
-  | EndpointPendingActionsStateChanged;
+  | EndpointPendingActionsStateChanged
+  | LoadMetadataTransformStats
+  | MetadataTransformStatsChanged;

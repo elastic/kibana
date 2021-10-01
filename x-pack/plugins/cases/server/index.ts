@@ -12,7 +12,11 @@ import { CasePlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
-  deprecations: ({ renameFromRoot }) => [
+  exposeToBrowser: {
+    markdownPlugins: true,
+  },
+  deprecations: ({ deprecate, renameFromRoot }) => [
+    deprecate('enabled', '8.0.0'),
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
   ],
 };

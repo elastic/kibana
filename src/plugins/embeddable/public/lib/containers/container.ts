@@ -30,7 +30,8 @@ export abstract class Container<
     TContainerOutput extends ContainerOutput = ContainerOutput
   >
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput>
+{
   public readonly isContainer: boolean = true;
   public readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
@@ -51,6 +52,22 @@ export abstract class Container<
       .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
+  }
+
+  public setChildLoaded(embeddable: IEmbeddable) {
+    // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
+    if (!this.input.panels[embeddable.id]) {
+      embeddable.destroy();
+      return;
+    }
+
+    this.children[embeddable.id] = embeddable;
+    this.updateOutput({
+      embeddableLoaded: {
+        ...this.output.embeddableLoaded,
+        [embeddable.id]: true,
+      },
+    } as Partial<TContainerOutput>);
   }
 
   public updateInputForChild<EEI extends EmbeddableInput = EmbeddableInput>(
@@ -134,13 +151,13 @@ export abstract class Container<
       explicitFiltered[key] = explicitInput[key];
     });
 
-    return ({
+    return {
       ...containerInput,
       ...explicitFiltered,
       // Typescript has difficulties with inferring this type but it is accurate with all
       // tests I tried. Could probably be revisted with future releases of TS to see if
       // it can accurately infer the type.
-    } as unknown) as TEmbeddableInput;
+    } as unknown as TEmbeddableInput;
   }
 
   public destroy() {
@@ -307,19 +324,9 @@ export abstract class Container<
     // switch over to inline creation we can probably clean this up, and force EmbeddableFactory.create to always
     // return an embeddable, or throw an error.
     if (embeddable) {
-      // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
-      if (!this.input.panels[panel.explicitInput.id]) {
-        embeddable.destroy();
-        return;
+      if (!embeddable.deferEmbeddableLoad) {
+        this.setChildLoaded(embeddable);
       }
-
-      this.children[embeddable.id] = embeddable;
-      this.updateOutput({
-        embeddableLoaded: {
-          ...this.output.embeddableLoaded,
-          [panel.explicitInput.id]: true,
-        },
-      } as Partial<TContainerOutput>);
     } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
     }

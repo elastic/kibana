@@ -12,6 +12,7 @@ import { rgba } from 'polished';
 import { i18n } from '@kbn/i18n';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { map } from 'lodash';
+import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, UrlFilter } from '../../types';
@@ -20,7 +21,6 @@ import { useValuesList } from '../../../../../hooks/use_values_list';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';
-import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 
 interface Props {
   seriesId: string;
@@ -57,9 +57,8 @@ export function FilterExpanded({
     if (qFilter.query) {
       queryFilters.push(qFilter.query);
     }
-    const asExistFilter = qFilter as ExistsFilter;
-    if (asExistFilter?.exists) {
-      queryFilters.push({ exists: asExistFilter.exists } as QueryDslQueryContainer);
+    if (isExistsFilter(qFilter)) {
+      queryFilters.push({ exists: qFilter.exists } as QueryDslQueryContainer);
     }
   });
 

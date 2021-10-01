@@ -8,6 +8,8 @@ import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Outlet } from '@kbn/typed-react-router-config';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { environmentRt } from '../../../../common/environment_rt';
 import { ServiceOverview } from '../../app/service_overview';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
@@ -18,9 +20,11 @@ import { ErrorGroupDetails } from '../../app/error_group_details';
 import { ServiceMetrics } from '../../app/service_metrics';
 import { ServiceNodeOverview } from '../../app/service_node_overview';
 import { ServiceNodeMetrics } from '../../app/service_node_metrics';
-import { ServiceMap } from '../../app/service_map';
+import { ServiceMapServiceDetail } from '../../app/service_map';
 import { TransactionDetails } from '../../app/transaction_details';
 import { ServiceProfiling } from '../../app/service_profiling';
+import { ServiceDependencies } from '../../app/service_dependencies';
+import { ServiceLogs } from '../../app/service_logs';
 
 function page<TPath extends string>({
   path,
@@ -34,6 +38,7 @@ function page<TPath extends string>({
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
+    showKueryBar?: boolean;
     showTransactionTypeSelector?: boolean;
     showTimeComparison?: boolean;
     hidden?: boolean;
@@ -57,7 +62,7 @@ function page<TPath extends string>({
 }
 
 export const serviceDetail = {
-  path: '/services/:serviceName',
+  path: '/services/{serviceName}',
   element: <ApmServiceWrapper />,
   params: t.intersection([
     t.type({
@@ -65,22 +70,34 @@ export const serviceDetail = {
         serviceName: t.string,
       }),
     }),
-    t.partial({
-      query: t.partial({
-        environment: t.string,
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        comparisonEnabled: t.string,
-        comparisonType: t.string,
-        latencyAggregationType: t.string,
-        transactionType: t.string,
-        kuery: t.string,
-      }),
+    t.type({
+      query: t.intersection([
+        environmentRt,
+        t.type({
+          rangeFrom: t.string,
+          rangeTo: t.string,
+          kuery: t.string,
+        }),
+        t.partial({
+          comparisonEnabled: t.string,
+          comparisonType: t.string,
+          latencyAggregationType: t.string,
+          transactionType: t.string,
+        }),
+      ]),
     }),
   ]),
+  defaults: {
+    query: {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      kuery: '',
+      environment: ENVIRONMENT_ALL.value,
+    },
+  },
   children: [
     page({
-      path: '/overview',
+      path: '/services/{serviceName}/overview',
       element: <ServiceOverview />,
       tab: 'overview',
       title: i18n.translate('xpack.apm.views.overview.title', {
@@ -93,7 +110,7 @@ export const serviceDetail = {
     }),
     {
       ...page({
-        path: '/transactions',
+        path: '/services/{serviceName}/transactions',
         tab: 'transactions',
         title: i18n.translate('xpack.apm.views.transactions.title', {
           defaultMessage: 'Transactions',
@@ -101,11 +118,12 @@ export const serviceDetail = {
         element: <Outlet />,
         searchBarOptions: {
           showTransactionTypeSelector: true,
+          showTimeComparison: true,
         },
       }),
       children: [
         {
-          path: '/view',
+          path: '/services/{serviceName}/transactions/view',
           element: <TransactionDetails />,
           params: t.type({
             query: t.intersection([
@@ -120,14 +138,25 @@ export const serviceDetail = {
           }),
         },
         {
-          path: '/',
+          path: '/services/{serviceName}/transactions',
           element: <TransactionOverview />,
         },
       ],
     },
+    page({
+      path: '/services/{serviceName}/dependencies',
+      element: <ServiceDependencies />,
+      tab: 'dependencies',
+      title: i18n.translate('xpack.apm.views.dependencies.title', {
+        defaultMessage: 'Dependencies',
+      }),
+      searchBarOptions: {
+        showTimeComparison: true,
+      },
+    }),
     {
       ...page({
-        path: '/errors',
+        path: '/services/{serviceName}/errors',
         tab: 'errors',
         title: i18n.translate('xpack.apm.views.errors.title', {
           defaultMessage: 'Errors',
@@ -144,7 +173,7 @@ export const serviceDetail = {
       }),
       children: [
         {
-          path: '/:groupId',
+          path: '/services/{serviceName}/errors/{groupId}',
           element: <ErrorGroupDetails />,
           params: t.type({
             path: t.type({
@@ -153,13 +182,13 @@ export const serviceDetail = {
           }),
         },
         {
-          path: '/',
+          path: '/services/{serviceName}/errors',
           element: <ErrorGroupOverview />,
         },
       ],
     },
     page({
-      path: '/metrics',
+      path: '/services/{serviceName}/metrics',
       tab: 'metrics',
       title: i18n.translate('xpack.apm.views.metrics.title', {
         defaultMessage: 'Metrics',
@@ -168,7 +197,7 @@ export const serviceDetail = {
     }),
     {
       ...page({
-        path: '/nodes',
+        path: '/services/{serviceName}/nodes',
         tab: 'nodes',
         title: i18n.translate('xpack.apm.views.nodes.title', {
           defaultMessage: 'JVMs',
@@ -177,7 +206,7 @@ export const serviceDetail = {
       }),
       children: [
         {
-          path: '/:serviceNodeName/metrics',
+          path: '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
           element: <ServiceNodeMetrics />,
           params: t.type({
             path: t.type({
@@ -186,7 +215,7 @@ export const serviceDetail = {
           }),
         },
         {
-          path: '/',
+          path: '/services/{serviceName}/nodes',
           element: <ServiceNodeOverview />,
           params: t.partial({
             query: t.partial({
@@ -200,18 +229,29 @@ export const serviceDetail = {
       ],
     },
     page({
-      path: '/service-map',
+      path: '/services/{serviceName}/service-map',
       tab: 'service-map',
       title: i18n.translate('xpack.apm.views.serviceMap.title', {
         defaultMessage: 'Service Map',
       }),
-      element: <ServiceMap />,
+      element: <ServiceMapServiceDetail />,
       searchBarOptions: {
         hidden: true,
       },
     }),
     page({
-      path: '/profiling',
+      path: '/services/{serviceName}/logs',
+      tab: 'logs',
+      title: i18n.translate('xpack.apm.views.logs.title', {
+        defaultMessage: 'Logs',
+      }),
+      element: <ServiceLogs />,
+      searchBarOptions: {
+        showKueryBar: false,
+      },
+    }),
+    page({
+      path: '/services/{serviceName}/profiling',
       tab: 'profiling',
       title: i18n.translate('xpack.apm.views.serviceProfiling.title', {
         defaultMessage: 'Profiling',
@@ -219,7 +259,7 @@ export const serviceDetail = {
       element: <ServiceProfiling />,
     }),
     {
-      path: '/',
+      path: '/services/{serviceName}/',
       element: <RedirectToDefaultServiceRouteView />,
     },
   ],

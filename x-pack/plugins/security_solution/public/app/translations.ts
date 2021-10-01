@@ -19,12 +19,16 @@ export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network
   defaultMessage: 'Network',
 });
 
+export const UEBA = i18n.translate('xpack.securitySolution.navigation.ueba', {
+  defaultMessage: 'Users & Entities',
+});
+
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
   defaultMessage: 'Rules',
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Exception list',
+  defaultMessage: 'Exceptions',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
@@ -58,6 +62,12 @@ export const EVENT_FILTERS = i18n.translate(
   }
 );
 
+export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.search.administration.hostIsolationExceptions',
+  {
+    defaultMessage: 'Host Isolation Exceptions',
+  }
+);
 export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
   defaultMessage: 'Detect',
 });

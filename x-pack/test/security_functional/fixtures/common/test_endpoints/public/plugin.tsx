@@ -11,10 +11,13 @@ import React from 'react';
 
 export class TestEndpointsPlugin implements Plugin {
   public setup(core: CoreSetup) {
+    // Prevent auto-logout on server `401` errors.
+    core.http.anonymousPaths.register('/authentication/app');
     core.application.register({
       id: 'authentication_app',
       title: 'Authentication app',
       appRoute: '/authentication/app',
+      chromeless: true,
       async mount({ element }) {
         ReactDOM.render(
           <div data-test-subj="testEndpointsAuthenticationApp">Authenticated!</div>,

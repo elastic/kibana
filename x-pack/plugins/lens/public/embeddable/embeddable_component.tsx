@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { CoreStart } from 'kibana/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import type { CoreStart } from 'kibana/public';
+import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
@@ -23,9 +23,8 @@ import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
 import type { XYState } from '../xy_visualization/types';
-import type { PieVisualizationState } from '../pie_visualization/types';
+import type { PieVisualizationState, MetricState } from '../../common/expressions';
 import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
-import type { MetricState } from '../metric_visualization/types';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,

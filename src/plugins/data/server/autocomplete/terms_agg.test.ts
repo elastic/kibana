@@ -12,16 +12,18 @@ import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ApiResponse } from '@elastic/elasticsearch';
 import { termsAggSuggestions } from './terms_agg';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { duration } from 'moment';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
 let esClientMock: DeeplyMockedKeys<ElasticsearchClient>;
-const configMock = ({
+const configMock = {
   autocomplete: {
     valueSuggestions: { timeout: duration(4513), terminateAfter: duration(98430) },
   },
-} as unknown) as ConfigSchema;
+} as unknown as ConfigSchema;
+
+// @ts-expect-error not full interface
 const mockResponse = {
   body: {
     aggregations: {
@@ -30,9 +32,9 @@ const mockResponse = {
       },
     },
   },
-} as ApiResponse<SearchResponse<any>>;
+} as ApiResponse<estypes.SearchResponse<any>>;
 
-jest.mock('../index_patterns');
+jest.mock('../data_views');
 
 describe('terms agg suggestions', () => {
   beforeEach(() => {

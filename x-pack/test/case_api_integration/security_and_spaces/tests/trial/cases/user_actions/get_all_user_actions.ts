@@ -24,6 +24,7 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '../../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+import { getCreateConnectorUrl } from '../../../../../../../plugins/cases/common/utils/connectors_api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -49,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it(`on new push to service, user action: 'push-to-service' should be called with actionFields: ['pushed']`, async () => {
       const { body: connector } = await supertest
-        .post('/api/actions/connector')
+        .post(getCreateConnectorUrl())
         .set('kbn-xsrf', 'true')
         .send({
           ...getServiceNowConnector(),
@@ -107,8 +108,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body[1].action_field).to.eql(['pushed']);
       expect(body[1].action).to.eql('push-to-service');
       expect(body[1].old_value).to.eql(null);
+      expect(body[1].old_val_connector_id).to.eql(null);
+      expect(body[1].new_val_connector_id).to.eql(configure.connector.id);
       const newValue = JSON.parse(body[1].new_value);
-      expect(newValue.connector_id).to.eql(configure.connector.id);
+      expect(newValue).to.not.have.property('connector_id');
       expect(newValue.pushed_by).to.eql(defaultUser);
     });
   });

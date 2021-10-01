@@ -9,11 +9,10 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
-import { NumericField, SelectField } from '../../../../../../../shared_imports';
+import { NumericField } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
-import { ROLLOVER_FORM_PATHS } from '../../../../constants';
-
-import { maxSizeStoredUnits } from '../constants';
+import { byteSizeUnits, ROLLOVER_FORM_PATHS } from '../../../../constants';
+import { UnitField } from '../../shared_fields/unit_field';
 
 const i18nTexts = {
   deprecationMessage: i18n.translate(
@@ -32,14 +31,15 @@ const i18nTexts = {
 
 export const MaxIndexSizeField: FunctionComponent = () => {
   return (
-    <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-      <EuiFlexItem style={{ maxWidth: 188 }}>
+    <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+      <EuiFlexItem style={{ maxWidth: 400 }}>
         <UseField
           path={ROLLOVER_FORM_PATHS.maxSize}
           component={NumericField}
           componentProps={{
             euiFieldProps: {
               'data-test-subj': 'hot-selectedMaxSizeStored',
+              min: 1,
               prepend: (
                 <EuiIconTip
                   type="alert"
@@ -47,22 +47,16 @@ export const MaxIndexSizeField: FunctionComponent = () => {
                   content={i18nTexts.deprecationMessage}
                 />
               ),
-              min: 1,
-            },
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem style={{ maxWidth: 188 }}>
-        <UseField
-          key="_meta.hot.customRollover.maxStorageSizeUnit"
-          path="_meta.hot.customRollover.maxStorageSizeUnit"
-          component={SelectField}
-          componentProps={{
-            'data-test-subj': `hot-selectedMaxSizeStoredUnits`,
-            hasEmptyLabelSpace: true,
-            euiFieldProps: {
-              options: maxSizeStoredUnits,
-              'aria-label': i18nTexts.maxSizeUnit.ariaLabel,
+              append: (
+                <UnitField
+                  path="_meta.hot.customRollover.maxStorageSizeUnit"
+                  options={byteSizeUnits}
+                  euiFieldProps={{
+                    'data-test-subj': 'hot-selectedMaxSizeStoredUnits',
+                    'aria-label': i18nTexts.maxSizeUnit.ariaLabel,
+                  }}
+                />
+              ),
             },
           }}
         />

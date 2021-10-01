@@ -74,9 +74,9 @@ export class ReportingNotifierStreamHandler {
 
       // no download link available
       for (const job of failedJobs) {
-        const { content } = await this.apiClient.getError(job.id);
+        const errorText = await this.apiClient.getError(job.id);
         this.notifications.toasts.addDanger(
-          getFailureToast(content, job, this.apiClient.getManagementLink)
+          getFailureToast(errorText, job, this.apiClient.getManagementLink)
         );
       }
       return { completed: completedJobs, failed: failedJobs };

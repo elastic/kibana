@@ -8,7 +8,7 @@
 import { PluginSetupContract as AlertingPluginSetup } from '../../../../alerting/server';
 import {
   createLifecycleExecutor,
-  RuleDataClient,
+  IRuleDataClient,
   RuleRegistryPluginSetupContract,
 } from '../../../../rule_registry/server';
 
@@ -24,7 +24,7 @@ export interface RulesServiceStartDeps {}
 
 export interface RulesServiceSetup {
   createLifecycleRuleExecutor: LifecycleRuleExecutorCreator;
-  ruleDataClient: RuleDataClient;
+  ruleDataClient: IRuleDataClient;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

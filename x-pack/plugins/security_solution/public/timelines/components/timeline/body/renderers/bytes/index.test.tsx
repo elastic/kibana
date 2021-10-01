@@ -22,7 +22,13 @@ describe('Bytes', () => {
   test('it renders the expected formatted bytes', () => {
     const wrapper = mount(
       <TestProviders>
-        <Bytes contextId="test" eventId="abc" fieldName="network.bytes" value={`1234567`} />
+        <Bytes
+          contextId="test"
+          eventId="abc"
+          fieldName="network.bytes"
+          isDraggable={true}
+          value={`1234567`}
+        />
       </TestProviders>
     );
     expect(wrapper.find(PreferenceFormattedBytes).first().text()).toEqual('1.2MB');

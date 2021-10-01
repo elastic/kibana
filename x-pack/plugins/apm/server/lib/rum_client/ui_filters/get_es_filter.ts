@@ -12,6 +12,7 @@ import {
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { UxUIFilters } from '../../../../typings/ui_filters';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 export function getEsFilter(uiFilters: UxUIFilters, exclude?: boolean) {
   const localFilterValues = uiFilters;
@@ -34,5 +35,10 @@ export function getEsFilter(uiFilters: UxUIFilters, exclude?: boolean) {
       };
     }) as ESFilter[];
 
-  return [...mappedFilters, ...environmentQuery(uiFilters.environment)];
+  return [
+    ...mappedFilters,
+    ...(exclude
+      ? []
+      : environmentQuery(uiFilters.environment || ENVIRONMENT_ALL.value)),
+  ];
 }

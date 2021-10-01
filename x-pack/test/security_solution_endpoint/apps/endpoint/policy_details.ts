@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/100296
+  // FLAKY https://github.com/elastic/kibana/issues/100296
   describe.skip('When on the Endpoint Policy Details Page', function () {
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {
@@ -299,10 +299,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 logging: { file: 'info' },
                 advanced: { agent: { connection_delay: 'true' } },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -310,10 +315,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -329,11 +339,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                memory_protection: { mode: 'prevent', supported: true },
+                behavior_protection: { mode: 'prevent', supported: true },
                 ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  memory_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
+                  },
+                  behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
                   },
                   ransomware: {
                     enabled: true,
@@ -503,10 +523,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 logging: { file: 'info' },
                 advanced: { agent: { connection_delay: 'true' } },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -514,10 +539,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -533,11 +563,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                memory_protection: { mode: 'prevent', supported: true },
+                behavior_protection: { mode: 'prevent', supported: true },
                 ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  memory_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
+                  },
+                  behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
                   },
                   ransomware: {
                     enabled: true,
@@ -704,10 +744,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -715,10 +760,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -734,11 +784,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                memory_protection: { mode: 'prevent', supported: true },
+                behavior_protection: { mode: 'prevent', supported: true },
                 ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  memory_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
+                  },
+                  behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
                   },
                   ransomware: {
                     enabled: true,
@@ -819,6 +879,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.packagePolicy.id
         );
         expect(await testSubjects.isSelected('policyWindowsEvent_dns')).to.be(wasSelected);
+      });
+
+      it('should show trusted apps card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('fleetTrustedAppsCard');
+        await (await testSubjects.find('linkToTrustedApps')).click();
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
     });
   });

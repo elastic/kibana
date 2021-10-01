@@ -8,7 +8,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { SUPPORTED_CONNECTORS } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
@@ -94,9 +95,10 @@ const ConfigureCasesComponent: React.FC<Omit<ConfigureCasesProps, 'owner'>> = ({
     setEditFlyoutVisibility(true);
   }, []);
 
-  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
-    setAddFlyoutVisibility,
-  ]);
+  const onCloseAddFlyout = useCallback(
+    () => setAddFlyoutVisibility(false),
+    [setAddFlyoutVisibility]
+  );
 
   const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), []);
 
@@ -192,7 +194,17 @@ const ConfigureCasesComponent: React.FC<Omit<ConfigureCasesProps, 'owner'>> = ({
             iconType="help"
             data-test-subj="configure-cases-warning-callout"
           >
-            {i18n.WARNING_NO_CONNECTOR_MESSAGE}
+            <FormattedMessage
+              defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+              id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+              values={{
+                appropriateLicense: (
+                  <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                    {i18n.LINK_APPROPRIATE_LICENSE}
+                  </EuiLink>
+                ),
+              }}
+            />
           </EuiCallOut>
         </SectionWrapper>
       )}
@@ -205,6 +217,7 @@ const ConfigureCasesComponent: React.FC<Omit<ConfigureCasesProps, 'owner'>> = ({
       </SectionWrapper>
       <SectionWrapper>
         <Connectors
+          actionTypes={actionTypes}
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           handleShowEditFlyout={onClickUpdateConnector}

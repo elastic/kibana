@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiCodeEditor } from '../../shared_imports';
 
 export function EventOutput({ value }) {
   return (

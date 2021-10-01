@@ -20,6 +20,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import styled from 'styled-components';
+
 import type {
   AgentPolicy,
   PackageInfo,
@@ -34,6 +36,15 @@ import { useStartServices } from '../../../hooks';
 import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputVarField } from './components';
+
+// on smaller screens, fields should be displayed in one column
+const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
+  @media (max-width: 767px) {
+    .euiFlexGroup--responsive {
+      align-items: flex-start;
+    }
+  }
+`;
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
@@ -113,7 +124,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy, integrationToEnable]);
 
     return validationResults ? (
-      <EuiDescribedFormGroup
+      <FormGroupResponsiveFields
         title={
           <h4>
             <FormattedMessage
@@ -161,22 +172,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
                   defaultMessage="Description"
-                />
-              }
-              helpText={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                  defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
-                  values={{
-                    learnMore: (
-                      <EuiLink href={docLinks.links.fleet.datastreamsNamingScheme} target="_blank">
-                        {i18n.translate(
-                          'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
-                          { defaultMessage: 'Learn more' }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
                 />
               }
               labelAppend={
@@ -275,6 +270,25 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         defaultMessage="Namespace"
                       />
                     }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
+                        defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
+                        values={{
+                          learnMore: (
+                            <EuiLink
+                              href={docLinks.links.fleet.datastreamsNamingScheme}
+                              target="_blank"
+                            >
+                              {i18n.translate(
+                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
+                                { defaultMessage: 'Learn more' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    }
                   >
                     <EuiComboBox
                       noSuggestions
@@ -326,7 +340,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-      </EuiDescribedFormGroup>
+      </FormGroupResponsiveFields>
     ) : (
       <Loading />
     );

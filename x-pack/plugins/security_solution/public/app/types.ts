@@ -17,7 +17,7 @@ import {
   CombinedState,
 } from 'redux';
 import { RouteProps } from 'react-router-dom';
-import { AppMountParameters, AppDeepLink } from '../../../../../src/core/public';
+import { AppMountParameters } from '../../../../../src/core/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { StartedSubPlugins, StartServices } from '../types';
 
@@ -35,7 +35,7 @@ import { State, SubPluginsInitReducer } from '../common/store';
 import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
 import { TimelineState } from '../timelines/store/timeline/types';
-import { SecurityPageName } from '../../common/constants';
+
 export { SecurityPageName } from '../../common/constants';
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
@@ -54,26 +54,11 @@ export interface SecuritySubPlugin {
 export type SecuritySubPluginKeyStore =
   | 'hosts'
   | 'network'
+  | 'ueba'
   | 'timeline'
   | 'hostList'
   | 'alertList'
   | 'management';
-
-export type SecurityDeepLinkName =
-  | SecurityPageName.overview
-  | SecurityPageName.detections
-  | SecurityPageName.hosts
-  | SecurityPageName.network
-  | SecurityPageName.timelines
-  | SecurityPageName.case
-  | SecurityPageName.administration;
-
-interface SecurityDeepLink {
-  base: AppDeepLink[];
-  premium?: AppDeepLink[];
-}
-
-export type SecurityDeepLinks = { [key in SecurityDeepLinkName]: SecurityDeepLink };
 
 /**
  * Returned by the various 'SecuritySubPlugin' classes from the `start` method.

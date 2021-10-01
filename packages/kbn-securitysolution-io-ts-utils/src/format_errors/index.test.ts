@@ -60,7 +60,7 @@ describe('utils', () => {
   });
 
   test('will use message before context if it is set', () => {
-    const context: t.Context = ([{ key: 'some string key' }] as unknown) as t.Context;
+    const context: t.Context = [{ key: 'some string key' }] as unknown as t.Context;
     const validationError1: t.ValidationError = {
       value: 'Some existing error 1',
       context,
@@ -72,7 +72,7 @@ describe('utils', () => {
   });
 
   test('will use context entry of a single string', () => {
-    const context: t.Context = ([{ key: 'some string key' }] as unknown) as t.Context;
+    const context: t.Context = [{ key: 'some string key' }] as unknown as t.Context;
     const validationError1: t.ValidationError = {
       value: 'Some existing error 1',
       context,
@@ -83,10 +83,10 @@ describe('utils', () => {
   });
 
   test('will use two context entries of two strings', () => {
-    const context: t.Context = ([
+    const context: t.Context = [
       { key: 'some string key 1' },
       { key: 'some string key 2' },
-    ] as unknown) as t.Context;
+    ] as unknown as t.Context;
     const validationError1: t.ValidationError = {
       value: 'Some existing error 1',
       context,
@@ -99,10 +99,7 @@ describe('utils', () => {
   });
 
   test('will filter out and not use any strings of numbers', () => {
-    const context: t.Context = ([
-      { key: '5' },
-      { key: 'some string key 2' },
-    ] as unknown) as t.Context;
+    const context: t.Context = [{ key: '5' }, { key: 'some string key 2' }] as unknown as t.Context;
     const validationError1: t.ValidationError = {
       value: 'Some existing error 1',
       context,
@@ -115,10 +112,10 @@ describe('utils', () => {
   });
 
   test('will filter out and not use null', () => {
-    const context: t.Context = ([
+    const context: t.Context = [
       { key: null },
       { key: 'some string key 2' },
-    ] as unknown) as t.Context;
+    ] as unknown as t.Context;
     const validationError1: t.ValidationError = {
       value: 'Some existing error 1',
       context,
@@ -131,10 +128,7 @@ describe('utils', () => {
   });
 
   test('will filter out and not use empty strings', () => {
-    const context: t.Context = ([
-      { key: '' },
-      { key: 'some string key 2' },
-    ] as unknown) as t.Context;
+    const context: t.Context = [{ key: '' }, { key: 'some string key 2' }] as unknown as t.Context;
     const validationError1: t.ValidationError = {
       value: 'Some existing error 1',
       context,
@@ -147,10 +141,10 @@ describe('utils', () => {
   });
 
   test('will use a name context if it cannot find a keyContext', () => {
-    const context: t.Context = ([
+    const context: t.Context = [
       { key: '' },
       { key: '', type: { name: 'someName' } },
-    ] as unknown) as t.Context;
+    ] as unknown as t.Context;
     const validationError1: t.ValidationError = {
       value: 'Some existing error 1',
       context,
@@ -161,7 +155,7 @@ describe('utils', () => {
   });
 
   test('will return an empty string if name does not exist but type does', () => {
-    const context: t.Context = ([{ key: '' }, { key: '', type: {} }] as unknown) as t.Context;
+    const context: t.Context = [{ key: '' }, { key: '', type: {} }] as unknown as t.Context;
     const validationError1: t.ValidationError = {
       value: 'Some existing error 1',
       context,
@@ -172,10 +166,7 @@ describe('utils', () => {
   });
 
   test('will stringify an error value', () => {
-    const context: t.Context = ([
-      { key: '' },
-      { key: 'some string key 2' },
-    ] as unknown) as t.Context;
+    const context: t.Context = [{ key: '' }, { key: 'some string key 2' }] as unknown as t.Context;
     const validationError1: t.ValidationError = {
       value: { foo: 'some error' },
       context,

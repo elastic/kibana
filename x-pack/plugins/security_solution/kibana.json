@@ -1,5 +1,9 @@
 {
   "id": "securitySolution",
+  "owner": {
+    "name": "Security solution",
+    "githubTeam": "security-solution"
+  },
   "version": "8.0.0",
   "extraPublicDirs": ["common"],
   "kibanaVersion": "kibana",
@@ -30,6 +34,7 @@
     "security",
     "spaces",
     "usageCollection",
+    "lens",
     "lists",
     "home",
     "telemetry",

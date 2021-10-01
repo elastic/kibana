@@ -7,73 +7,63 @@
 
 import {
   EuiCard,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import type { Story } from '@storybook/react';
 import React from 'react';
 import { AGENT_NAMES } from '../../../../common/agent_name';
-import { useTheme } from '../../../hooks/use_theme';
 import { getAgentIcon } from './get_agent_icon';
 import { AgentIcon } from './index';
 
 export default {
-  title: 'shared/icons',
+  title: 'shared/AgentIcon',
   component: AgentIcon,
 };
 
-export function AgentIcons() {
-  const theme = useTheme();
+export const List: Story = (_args, { globals }) => {
+  const darkMode = globals.euiTheme.includes('dark');
 
   return (
-    <>
-      <EuiCodeBlock language="html" isCopyable paddingSize="m">
-        {'<AgentIcon agentName="dotnet" />'}
-      </EuiCodeBlock>
-
-      <EuiSpacer />
-
-      <EuiFlexGroup gutterSize="l" wrap={true}>
-        {AGENT_NAMES.map((agentName) => {
-          return (
-            <EuiFlexItem key={agentName} grow={false}>
-              <EuiCard
-                icon={
-                  <>
-                    <p>
-                      <EuiToolTip
-                        position="top"
-                        content="Icon rendered with `EuiImage`"
-                      >
-                        <EuiImage
-                          size="s"
-                          hasShadow
-                          alt={agentName}
-                          src={getAgentIcon(agentName, theme.darkMode)}
-                        />
-                      </EuiToolTip>
-                    </p>
-                  </>
-                }
-                title={agentName}
-                description={
-                  <div>
+    <EuiFlexGroup gutterSize="l" wrap={true}>
+      {AGENT_NAMES.map((agentName) => {
+        return (
+          <EuiFlexItem key={agentName} grow={false}>
+            <EuiCard
+              icon={
+                <>
+                  <p>
                     <EuiToolTip
-                      position="bottom"
-                      content="Icon rendered with `AgentIcon`"
+                      position="top"
+                      content="Icon rendered with `EuiImage`"
                     >
-                      <AgentIcon agentName={agentName} />
+                      <EuiImage
+                        size="s"
+                        hasShadow
+                        alt={agentName}
+                        src={getAgentIcon(agentName, darkMode)}
+                      />
                     </EuiToolTip>
-                  </div>
-                }
-              />
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
-    </>
+                  </p>
+                </>
+              }
+              title={agentName}
+              description={
+                <div>
+                  <EuiToolTip
+                    position="bottom"
+                    content="Icon rendered with `AgentIcon`"
+                  >
+                    <AgentIcon agentName={agentName} />
+                  </EuiToolTip>
+                </div>
+              }
+            />
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
-}
+};

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="attach-alert-to-case-button"]';
-
 export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
 
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
@@ -103,3 +101,5 @@ export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
 export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteConfirmationModal"]';
 
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+
+export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';

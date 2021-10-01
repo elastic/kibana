@@ -25,10 +25,11 @@ export const contentSources = [
     allowsReauth: true,
     boost: 1,
     activities: [],
+    isOauth1: false,
   },
   {
     id: '124',
-    serviceType: 'jira',
+    serviceType: 'jira_cloud',
     searchable: true,
     supportedByLicense: true,
     status: 'synced',
@@ -40,8 +41,27 @@ export const contentSources = [
     allowsReauth: true,
     boost: 0.5,
     activities: [],
+    isOauth1: true,
   },
 ];
+
+const defaultIndexing = {
+  enabled: true,
+  defaultAction: 'include',
+  rules: [],
+  schedule: {
+    intervals: [],
+    blocked: [],
+  },
+  features: {
+    contentExtraction: {
+      enabled: true,
+    },
+    thumbnails: {
+      enabled: true,
+    },
+  },
+};
 
 export const fullContentSources = [
   {
@@ -66,8 +86,11 @@ export const fullContentSources = [
         type: 'summary',
       },
     ],
+    indexing: defaultIndexing,
     groups,
     custom: false,
+    isIndexedSource: true,
+    areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'myLink',
     titleField: 'heading',
@@ -85,7 +108,10 @@ export const fullContentSources = [
     details: [],
     summary: [],
     groups: [],
+    indexing: defaultIndexing,
     custom: true,
+    isIndexedSource: true,
+    areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'url',
     titleField: 'title',
@@ -279,6 +305,7 @@ export const sourceConfigData = {
   privateSourcesEnabled: false,
   categories: ['wiki', 'atlassian', 'intranet'],
   configuredFields: {
+    isOauth1: false,
     clientId: 'CyztADsSECRETCSAUCEh1a',
     clientSecret: 'GSjJxqSECRETCSAUCEksHk',
     baseUrl: 'https://mine.atlassian.net',

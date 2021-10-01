@@ -23,7 +23,7 @@ export interface Config {
    * A collection of choices to display in the dropdown
    * @default []
    */
-  choices: string[];
+  choices: Array<[string, string]>;
   filterGroup: string;
 }
 
@@ -47,7 +47,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
   render(domNode, config, handlers) {
     let filterExpression = handlers.getFilter();
 
-    if (filterExpression === undefined || filterExpression.indexOf('exactly')) {
+    if (filterExpression === undefined || !filterExpression.includes('exactly')) {
       filterExpression = '';
       handlers.setFilter(filterExpression);
     } else if (filterExpression !== '') {
@@ -88,7 +88,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
       <DropdownFilter
         commit={commit}
         choices={config.choices || []}
-        value={getFilterValue(filterExpression)}
+        initialValue={getFilterValue(filterExpression)}
       />,
       domNode,
       () => handlers.done()

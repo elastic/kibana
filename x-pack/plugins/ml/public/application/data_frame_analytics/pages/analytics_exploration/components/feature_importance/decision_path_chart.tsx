@@ -43,7 +43,6 @@ const baselineStyle: LineAnnotationStyle = {
   details: {
     fontFamily: 'Arial',
     fontSize: 10,
-    fontStyle: 'bold',
     fill: euiColorMediumShade,
     padding: 0,
   },

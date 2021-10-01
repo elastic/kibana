@@ -96,7 +96,7 @@ export const MetricsExplorerChart = ({
       : dataDomain;
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: 24 }} data-test-subj="metricsExplorer-chart">
       {options.groupBy ? (
         <EuiTitle size="xs">
           <EuiFlexGroup alignItems="center">
@@ -132,7 +132,7 @@ export const MetricsExplorerChart = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <div className="infrastructureChart" style={{ height, width }}>
+      <div className="metricsExplorerChart" style={{ height, width }}>
         {metrics.length && series.rows.length > 0 ? (
           <Chart>
             {metrics.map((metric, id) => (

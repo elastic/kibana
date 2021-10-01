@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default index', function describeIndexTests() {
@@ -29,6 +30,31 @@ export default function ({ getService, getPageObjects }) {
         });
     });
 
+    describe('can open and close editor', function () {
+      it('without creating index pattern', async function () {
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickAddNewIndexPatternButton();
+        await testSubjects.click('closeFlyoutButton');
+        await testSubjects.find('createIndexPatternButton');
+      });
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/107831
+    describe.skip('validation', function () {
+      it('can display errors', async function () {
+        await PageObjects.settings.clickAddNewIndexPatternButton();
+        await PageObjects.settings.setIndexPatternField('log*');
+        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+        await find.byClassName('euiFormErrorText');
+      });
+
+      it('can resolve errors and submit', async function () {
+        await PageObjects.settings.selectTimeFieldOption('@timestamp');
+        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+        await PageObjects.settings.removeIndexPattern();
+      });
+    });
+
     describe('special character handling', () => {
       it('should handle special charaters in template input', async () => {
         await PageObjects.settings.clickAddNewIndexPatternButton();
@@ -38,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('createIndexPatternStatusMessage')).to.contain(
-            `The index pattern you've entered doesn't match any indices`
+            `The index pattern you entered doesn\'t match any data streams, indices, or index aliases.`
           );
         });
       });

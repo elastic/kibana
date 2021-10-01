@@ -37,7 +37,8 @@ export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
 export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
 export class DataEnhancedPlugin
-  implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
+  implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies>
+{
   private config!: ConfigSchema;
   private readonly storage = new Storage(window.localStorage);
   private usageCollector?: SearchUsageCollector;
@@ -51,7 +52,12 @@ export class DataEnhancedPlugin
     this.config = this.initializerContext.config.get<ConfigSchema>();
     if (this.config.search.sessions.enabled) {
       const sessionsConfig = this.config.search.sessions;
-      registerSearchSessionsMgmt(core, sessionsConfig, { data, management });
+      registerSearchSessionsMgmt(
+        core,
+        sessionsConfig,
+        this.initializerContext.env.packageInfo.version,
+        { data, management }
+      );
     }
 
     this.usageCollector = data.search.usageCollector;

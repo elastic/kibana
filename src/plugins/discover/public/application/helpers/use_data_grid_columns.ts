@@ -7,9 +7,9 @@
  */
 
 import { useMemo } from 'react';
+import type { IndexPattern, IndexPatternsContract } from 'src/plugins/data/common';
 
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import { IndexPattern, IndexPatternsContract } from '../../kibana_services';
 import {
   AppState as DiscoverState,
   GetStateReturn as DiscoverGetStateReturn,
@@ -17,8 +17,8 @@ import {
 import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
-} from '../angular/context_state';
-import { getStateColumnActions } from '../angular/doc_table/actions/columns';
+} from '../apps/context/services/context_state';
+import { getStateColumnActions } from '../apps/main/components/doc_table/actions/columns';
 
 interface UseDataGridColumnsProps {
   capabilities: Capabilities;

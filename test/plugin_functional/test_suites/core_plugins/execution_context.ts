@@ -25,13 +25,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           await browser.execute(async () => {
             const coreStart = window._coreProvider.start.core;
 
-            const context = coreStart.executionContext.create({
-              type: 'execution_context_app',
-              name: 'Execution context app',
-              id: '42',
+            const context = {
+              type: 'visualization',
+              name: 'execution_context_app',
               // add a non-ASCII symbols to make sure it doesn't break the context propagation mechanism
+              id: 'Visualization☺漢字',
               description: 'какое-то странное описание',
-            });
+            };
 
             const result = await coreStart.http.get('/execution_context/pass', {
               context,
@@ -39,7 +39,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
             return result['x-opaque-id'];
           })
-        ).to.contain('kibana:execution_context_app:42');
+        ).to.contain(
+          'kibana:visualization:execution_context_app:Visualization%E2%98%BA%E6%BC%A2%E5%AD%97'
+        );
       });
     });
   });

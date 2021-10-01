@@ -14,6 +14,7 @@ import {
   Append,
   Bytes,
   Circle,
+  CommunityId,
   Convert,
   CSV,
   DateProcessor,
@@ -124,6 +125,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
         },
+      }),
+  },
+  community_id: {
+    FieldsComponent: CommunityId,
+    docLinkPath: '/community-id-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.communityId', {
+      defaultMessage: 'Community ID',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.communityId', {
+      defaultMessage: 'Computes the Community ID for network flow data.',
+    }),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.communityId', {
+        defaultMessage: 'Computes the Community ID for network flow data.',
       }),
   },
   convert: {
@@ -629,14 +644,25 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.set', {
       defaultMessage: 'Sets the value of a field.',
     }),
-    getDefaultDescription: ({ field, value }) =>
-      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.set', {
+    getDefaultDescription: ({ field, value, copy_from: copyFrom }) => {
+      if (copyFrom) {
+        return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.setCopyFrom', {
+          defaultMessage: 'Sets value of "{field}" to the value of "{copyFrom}"',
+          values: {
+            field,
+            copyFrom,
+          },
+        });
+      }
+
+      return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.set', {
         defaultMessage: 'Sets value of "{field}" to "{value}"',
         values: {
           field,
           value,
         },
-      }),
+      });
+    },
   },
   set_security_user: {
     FieldsComponent: SetSecurityUser,

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-export { LargeShardSizeAlert } from './large_shard_size_alert';
-export { CCRReadExceptionsAlert } from './ccr_read_exceptions_alert';
-export { BaseAlert } from './base_alert';
-export { CpuUsageAlert } from './cpu_usage_alert';
-export { MissingMonitoringDataAlert } from './missing_monitoring_data_alert';
-export { DiskUsageAlert } from './disk_usage_alert';
-export { ThreadPoolSearchRejectionsAlert } from './thread_pool_search_rejections_alert';
-export { ThreadPoolWriteRejectionsAlert } from './thread_pool_write_rejections_alert';
-export { MemoryUsageAlert } from './memory_usage_alert';
-export { ClusterHealthAlert } from './cluster_health_alert';
-export { LicenseExpirationAlert } from './license_expiration_alert';
-export { NodesChangedAlert } from './nodes_changed_alert';
-export { ElasticsearchVersionMismatchAlert } from './elasticsearch_version_mismatch_alert';
-export { KibanaVersionMismatchAlert } from './kibana_version_mismatch_alert';
-export { LogstashVersionMismatchAlert } from './logstash_version_mismatch_alert';
+export { LargeShardSizeRule } from './large_shard_size_rule';
+export { CCRReadExceptionsRule } from './ccr_read_exceptions_rule';
+export { BaseRule } from './base_rule';
+export { CpuUsageRule } from './cpu_usage_rule';
+export { MissingMonitoringDataRule } from './missing_monitoring_data_rule';
+export { DiskUsageRule } from './disk_usage_rule';
+export { ThreadPoolSearchRejectionsRule } from './thread_pool_search_rejections_rule';
+export { ThreadPoolWriteRejectionsRule } from './thread_pool_write_rejections_rule';
+export { MemoryUsageRule } from './memory_usage_rule';
+export { ClusterHealthRule } from './cluster_health_rule';
+export { LicenseExpirationRule } from './license_expiration_rule';
+export { NodesChangedRule } from './nodes_changed_rule';
+export { ElasticsearchVersionMismatchRule } from './elasticsearch_version_mismatch_rule';
+export { KibanaVersionMismatchRule } from './kibana_version_mismatch_rule';
+export { LogstashVersionMismatchRule } from './logstash_version_mismatch_rule';
 export { AlertsFactory } from './alerts_factory';

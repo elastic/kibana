@@ -6,7 +6,9 @@
  */
 
 import type React from 'react';
-import { ColumnHeaderOptions } from '../../../../../../common';
+
+import { BrowserFields, ColumnHeaderOptions, RowRenderer } from '../../../../../../common';
+import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 
 export interface ColumnRenderer {
@@ -15,6 +17,7 @@ export interface ColumnRenderer {
     columnName,
     eventId,
     field,
+    isDraggable,
     timelineId,
     truncate,
     values,
@@ -23,9 +26,13 @@ export interface ColumnRenderer {
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
+    isDraggable?: boolean;
     timelineId: string;
     truncate?: boolean;
     values: string[] | null | undefined;
     linkValues?: string[] | null | undefined;
+    ecsData?: Ecs;
+    rowRenderers?: RowRenderer[];
+    browserFields?: BrowserFields;
   }) => React.ReactNode;
 }

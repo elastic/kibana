@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
   EuiModalBody,
@@ -18,8 +19,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-
 import { withSuspense } from '../../../../../../../src/plugins/presentation_util/public';
 import { LazyErrorComponent } from '../../../../../../../src/plugins/expression_error/public';
 import { Datatable } from '../../datatable';

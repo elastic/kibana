@@ -6,15 +6,27 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'src/core/server';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     write: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
-    index: schema.string({ defaultValue: '.alerts' }),
+    unsafe: schema.object({
+      legacyMultiTenancy: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      indexUpgrade: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
 };
 
 export type RuleRegistryPluginConfig = TypeOf<typeof config.schema>;
+
+export const INDEX_PREFIX = '.alerts' as const;
+export const INDEX_PREFIX_FOR_BACKING_INDICES = '.internal.alerts' as const;

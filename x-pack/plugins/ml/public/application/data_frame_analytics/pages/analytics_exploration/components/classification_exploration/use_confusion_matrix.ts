@@ -9,9 +9,11 @@ import { useState, useEffect } from 'react';
 
 import {
   isClassificationEvaluateResponse,
+  ClassificationEvaluateResponse,
   ConfusionMatrix,
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
+  ClassificationMetricItem,
 } from '../../../../common/analytics';
 import { isKeywordAndTextType } from '../../../../common/fields';
 
@@ -25,6 +27,37 @@ import {
 
 import { isTrainingFilter } from './is_training_filter';
 
+function getEvalutionMetricsItems(evalMetrics?: ClassificationEvaluateResponse['classification']) {
+  if (evalMetrics === undefined) return [];
+
+  const accuracyMetrics = evalMetrics.accuracy?.classes || [];
+  const recallMetrics = evalMetrics.recall?.classes || [];
+
+  const metricsMap = accuracyMetrics.reduce((acc, accuracyMetric) => {
+    acc[accuracyMetric.class_name] = {
+      className: accuracyMetric.class_name,
+      accuracy: accuracyMetric.value,
+    };
+    return acc;
+  }, {} as Record<string, ClassificationMetricItem>);
+
+  recallMetrics.forEach((recallMetric) => {
+    if (metricsMap[recallMetric.class_name] !== undefined) {
+      metricsMap[recallMetric.class_name] = {
+        recall: recallMetric.value,
+        ...metricsMap[recallMetric.class_name],
+      };
+    } else {
+      metricsMap[recallMetric.class_name] = {
+        className: recallMetric.class_name,
+        recall: recallMetric.value,
+      };
+    }
+  });
+
+  return Object.values(metricsMap);
+}
+
 export const useConfusionMatrix = (
   jobConfig: DataFrameAnalyticsConfig,
   searchQuery: ResultsSearchQuery
@@ -32,6 +65,9 @@ export const useConfusionMatrix = (
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
   const [overallAccuracy, setOverallAccuracy] = useState<null | number>(null);
   const [avgRecall, setAvgRecall] = useState<null | number>(null);
+  const [evaluationMetricsItems, setEvaluationMetricsItems] = useState<ClassificationMetricItem[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
@@ -81,6 +117,7 @@ export const useConfusionMatrix = (
         setConfusionMatrixData(confusionMatrix || []);
         setAvgRecall(evalData.eval?.classification?.recall?.avg_recall || null);
         setOverallAccuracy(evalData.eval?.classification?.accuracy?.overall_accuracy || null);
+        setEvaluationMetricsItems(getEvalutionMetricsItems(evalData.eval?.classification));
         setIsLoading(false);
       } else {
         setIsLoading(false);
@@ -98,5 +135,13 @@ export const useConfusionMatrix = (
     loadConfusionMatrixData();
   }, [JSON.stringify([jobConfig, searchQuery])]);
 
-  return { avgRecall, confusionMatrixData, docsCount, error, isLoading, overallAccuracy };
+  return {
+    avgRecall,
+    confusionMatrixData,
+    docsCount,
+    error,
+    isLoading,
+    overallAccuracy,
+    evaluationMetricsItems,
+  };
 };

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { render, screen } from '@testing-library/react';
 
 import '../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
@@ -17,6 +18,7 @@ import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock } from '../../containers/configure/mock';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
+import * as i18n from './translations';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -140,6 +142,7 @@ describe('usePushToService', () => {
         enabledInConfig: false,
       },
     }));
+
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
         () => usePushToService(defaultArgs),
@@ -148,6 +151,7 @@ describe('usePushToService', () => {
         }
       );
       await waitForNextUpdate();
+
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
       expect(errorsMsg[0].id).toEqual('kibana-config-error');
@@ -172,10 +176,15 @@ describe('usePushToService', () => {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
+
       await waitForNextUpdate();
+
+      render(result.current.pushCallouts ?? <></>);
+      // getByText will thrown an error if the element is not found.
+      screen.getByText(i18n.CONFIGURE_CONNECTOR);
+
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('connector-missing-error');
     });
   });
 
@@ -196,10 +205,15 @@ describe('usePushToService', () => {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
+
       await waitForNextUpdate();
+
+      render(result.current.pushCallouts ?? <></>);
+      // getByText will thrown an error if the element is not found.
+      screen.getByText(i18n.CONFIGURE_CONNECTOR);
+
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('connector-not-selected-error');
     });
   });
 

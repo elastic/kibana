@@ -11,8 +11,9 @@ import { timerangeToAst } from './timerange_to_ast';
 describe('timerangeToAst', () => {
   it('returns an object with the correct structure', () => {
     const actual = timerangeToAst({ from: 'now', to: 'now-7d', mode: 'absolute' });
-    expect(actual).toHaveProperty('name', 'timerange');
-    expect(actual).toHaveProperty('arguments', {
+
+    expect(actual).toHaveProperty('chain.0.function', 'timerange');
+    expect(actual).toHaveProperty('chain.0.arguments', {
       from: ['now'],
       mode: ['absolute'],
       to: ['now-7d'],

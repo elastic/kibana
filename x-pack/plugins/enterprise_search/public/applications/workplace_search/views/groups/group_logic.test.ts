@@ -24,13 +24,8 @@ describe('GroupLogic', () => {
   const { mount } = new LogicMounter(GroupLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    setSuccessMessage,
-    setQueuedSuccessMessage,
-    setQueuedErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setQueuedErrorMessage } =
+    mockFlashMessageHelpers;
 
   const group = groups[0];
   const sourceIds = ['123', '124'];
@@ -115,7 +110,7 @@ describe('GroupLogic', () => {
         GroupLogic.actions.onGroupSourcesSaved(group);
 
         expect(GroupLogic.values.group).toEqual(group);
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(false);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
         expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
         expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
@@ -131,11 +126,11 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('hideSharedSourcesModal', () => {
+    describe('hideOrgSourcesModal', () => {
       it('sets reducers', () => {
-        GroupLogic.actions.hideSharedSourcesModal(group);
+        GroupLogic.actions.hideOrgSourcesModal(group);
 
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(false);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
       });
     });
@@ -186,7 +181,7 @@ describe('GroupLogic', () => {
         http.get.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.initializeGroup(sourceIds[0]);
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/groups/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/groups/123');
         await nextTick();
         expect(onInitializeGroupSpy).toHaveBeenCalledWith(group);
       });
@@ -220,13 +215,11 @@ describe('GroupLogic', () => {
         http.delete.mockReturnValue(Promise.resolve(true));
 
         GroupLogic.actions.deleteGroup();
-        expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/groups/123');
+        expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/groups/123');
 
         await nextTick();
         expect(navigateToUrl).toHaveBeenCalledWith(GROUPS_PATH);
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
-          'Group "group" was successfully deleted.'
-        );
+        expect(flashSuccessToast).toHaveBeenCalledWith('Group "group" was successfully deleted.');
       });
 
       it('handles error', async () => {
@@ -249,13 +242,13 @@ describe('GroupLogic', () => {
         http.put.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.updateGroupName();
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/groups/123', {
+        expect(http.put).toHaveBeenCalledWith('/internal/workplace_search/groups/123', {
           body: JSON.stringify({ group: { name: 'new name' } }),
         });
 
         await nextTick();
         expect(onGroupNameChangedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully renamed this group to "group".'
         );
       });
@@ -280,14 +273,14 @@ describe('GroupLogic', () => {
         http.post.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.saveGroupSources();
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/123/share', {
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/groups/123/share', {
           body: JSON.stringify({ content_source_ids: sourceIds }),
         });
 
         await nextTick();
         expect(onGroupSourcesSavedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
-          'Successfully updated shared content sources.'
+        expect(flashSuccessToast).toHaveBeenCalledWith(
+          'Successfully updated organizational content sources.'
         );
       });
 
@@ -313,7 +306,7 @@ describe('GroupLogic', () => {
         http.put.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.saveGroupSourcePrioritization();
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/groups/123/boosts', {
+        expect(http.put).toHaveBeenCalledWith('/internal/workplace_search/groups/123/boosts', {
           body: JSON.stringify({
             content_source_boosts: [
               [sourceIds[0], 1],
@@ -323,8 +316,8 @@ describe('GroupLogic', () => {
         });
 
         await nextTick();
-        expect(setSuccessMessage).toHaveBeenCalledWith(
-          'Successfully updated shared source prioritization.'
+        expect(flashSuccessToast).toHaveBeenCalledWith(
+          'Successfully updated organizational source prioritization.'
         );
         expect(onGroupPrioritiesChangedSpy).toHaveBeenCalledWith(group);
       });
@@ -348,11 +341,11 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('showSharedSourcesModal', () => {
+    describe('showOrgSourcesModal', () => {
       it('sets reducer and clears flash messages', () => {
-        GroupLogic.actions.showSharedSourcesModal();
+        GroupLogic.actions.showOrgSourcesModal();
 
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(true);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(true);
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });

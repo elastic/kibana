@@ -12,24 +12,16 @@ import { FieldMapping, FieldMappingProps } from './field_mapping';
 import { mappings } from './__mock__';
 import { TestProviders } from '../../common/mock';
 import { FieldMappingRowStatic } from './field_mapping_row_static';
-import { useKibana } from '../../common/lib/kibana';
-
-jest.mock('../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('FieldMappingRow', () => {
   let wrapper: ReactWrapper;
   const props: FieldMappingProps = {
+    actionTypeName: 'ServiceNow ITSM',
     isLoading: false,
     mappings,
-    connectorActionTypeId: '.servicenow',
   };
 
   beforeAll(() => {
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: '.servicenow',
-      iconClass: 'logoSecurity',
-    });
     wrapper = mount(<FieldMapping {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -60,5 +52,14 @@ describe('FieldMappingRow', () => {
       expect(row.prop('selectedActionType')).toEqual(mappings[index].actionType);
       expect(row.prop('selectedThirdParty')).toEqual(mappings[index].target);
     });
+  });
+
+  test('displays the label of the second column correctly', () => {
+    expect(
+      wrapper
+        .find('[data-test-subj="case-configure-field-mappings-second-col-label"]')
+        .first()
+        .text()
+    ).toBe('ServiceNow ITSM field');
   });
 });

@@ -79,6 +79,7 @@ export async function mountApp({
     urlForwarding,
     data: dataStart,
     share: shareStart,
+    spaces: spacesApi,
     embeddable: embeddableStart,
     kibanaLegacy: { dashboardConfig },
     savedObjectsTaggingOss,
@@ -86,7 +87,6 @@ export async function mountApp({
     presentationUtil,
   } = pluginsStart;
 
-  const spacesApi = pluginsStart.spacesOss?.isSpacesAvailable ? pluginsStart.spacesOss : undefined;
   const activeSpaceId =
     spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
@@ -114,8 +114,8 @@ export async function mountApp({
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-    allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
-      .allowByValueEmbeddables,
+    allowByValueEmbeddables:
+      initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
     dashboardCapabilities: {
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       show: Boolean(coreStart.application.capabilities.dashboard.show),

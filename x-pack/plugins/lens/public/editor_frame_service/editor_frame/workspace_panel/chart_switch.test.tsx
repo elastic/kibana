@@ -11,6 +11,7 @@ import {
   createMockVisualization,
   createMockFramePublicAPI,
   createMockDatasource,
+  mockDatasourceStates,
 } from '../../../mocks';
 import { mountWithProvider } from '../../../mocks';
 
@@ -128,14 +129,14 @@ describe('chart_switch', () => {
       datasourceLayers: layers.reduce(
         (acc, layerId) => ({
           ...acc,
-          [layerId]: ({
+          [layerId]: {
             getTableSpec: jest.fn(() => {
               return [{ columnId: 2 }];
             }),
             getOperationForColumnId() {
               return {};
             },
-          } as unknown) as DatasourcePublicAPI,
+          } as unknown as DatasourcePublicAPI,
         }),
         {} as Record<string, unknown>
       ),
@@ -160,15 +161,6 @@ describe('chart_switch', () => {
     datasource.getLayers.mockReturnValue(['a']);
     return {
       testDatasource: datasource,
-    };
-  }
-
-  function mockDatasourceStates() {
-    return {
-      testDatasource: {
-        state: {},
-        isLoading: false,
-      },
     };
   }
 

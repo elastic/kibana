@@ -10,14 +10,16 @@ import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
 
-// @ts-expect-error
-import stubbedLogstashFields from '../../../../../__fixtures__/logstash_fields';
 import { DiscoverField } from './discover_field';
-import { coreMock } from '../../../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../../../data/public';
-import { getStubIndexPattern } from '../../../../../../../data/public/test_utils';
+import { stubIndexPattern } from '../../../../../../../data/common/stubs';
 
 jest.mock('../../../../../kibana_services', () => ({
+  getUiActions: jest.fn(() => {
+    return {
+      getTriggerCompatibleActions: jest.fn(() => []),
+    };
+  }),
   getServices: () => ({
     history: () => ({
       location: {
@@ -48,14 +50,6 @@ function getComponent({
   showDetails?: boolean;
   field?: IndexPatternField;
 }) {
-  const indexPattern = getStubIndexPattern(
-    'logstash-*',
-    (cfg: unknown) => cfg,
-    'time',
-    stubbedLogstashFields(),
-    coreMock.createSetup()
-  );
-
   const finalField =
     field ??
     new IndexPatternField({
@@ -70,7 +64,7 @@ function getComponent({
     });
 
   const props = {
-    indexPattern,
+    indexPattern: stubIndexPattern,
     field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
     onAddFilter: jest.fn(),
@@ -130,5 +124,14 @@ describe('discover sidebar field', function () {
     });
     const dscField = findTestSubject(comp, 'field-troubled_field-showDetails');
     expect(dscField.find('.kbnFieldButton__infoIcon').length).toEqual(1);
+  });
+  it('should not execute getDetails when rendered, since it can be expensive', function () {
+    const { props } = getComponent({});
+    expect(props.getDetails.mock.calls.length).toEqual(0);
+  });
+  it('should execute getDetails when show details is requested', function () {
+    const { props, comp } = getComponent({});
+    findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
+    expect(props.getDetails.mock.calls.length).toEqual(1);
   });
 });

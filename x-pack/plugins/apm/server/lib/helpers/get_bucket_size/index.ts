@@ -12,7 +12,7 @@ import { calculateAuto } from './calculate_auto';
 export function getBucketSize({
   start,
   end,
-  numBuckets = 100,
+  numBuckets = 50,
   minBucketSize,
 }: {
   start: number;

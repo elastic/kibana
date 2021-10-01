@@ -13,12 +13,10 @@ import { Query } from '@elastic/eui';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
-import type {
-  SpacesAvailableStartContract,
-  SpacesContextProps,
-} from 'src/plugins/spaces_oss/public';
+import type { SpacesApi, SpacesContextProps } from '../../../../../x-pack/plugins/spaces/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
@@ -42,8 +40,8 @@ const SavedObjectsTablePage = ({
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
   taggingApi?: SavedObjectsTaggingApi;
-  spacesApi?: SpacesAvailableStartContract;
-  allowedTypes: string[];
+  spacesApi?: SpacesApi;
+  allowedTypes: SavedObjectManagementTypeInfo[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -106,7 +104,9 @@ const SavedObjectsTablePage = ({
         }}
         canGoInApp={(savedObject) => {
           const { inAppUrl } = savedObject.meta;
-          return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
+          if (!inAppUrl) return false;
+          if (!inAppUrl.uiCapabilitiesPath) return true;
+          return Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath));
         }}
       />
     </ContextWrapper>

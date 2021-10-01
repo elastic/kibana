@@ -145,6 +145,7 @@ Below is a document in the expected structure, with descriptions of the fields:
         type: " saved object type",
       },
     ],
+    version: "7.15.0"
   },
 }
 ```

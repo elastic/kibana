@@ -32,9 +32,13 @@ import { fromQuery } from '../../shared/Links/url_helpers';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { uiSettingsServiceMock } from '../../../../../../../src/core/public/mocks';
 
+const uiSettings = uiSettingsServiceMock.create().setup({} as any);
+
 const KibanaReactContext = createKibanaReactContext({
+  notifications: { toasts: { add: () => {} } },
+  uiSettings,
   usageCollection: { reportUiCounter: () => {} },
-} as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 const mockParams = {
   rangeFrom: 'now-15m',
@@ -47,10 +51,8 @@ const location = {
   search: fromQuery(mockParams),
 };
 
-const uiSettings = uiSettingsServiceMock.create().setup({} as any);
-
 function Wrapper({ children }: { children?: ReactNode }) {
-  const value = ({
+  const value = {
     ...mockApmPluginContextValue,
     core: {
       ...mockApmPluginContextValue.core,
@@ -59,15 +61,11 @@ function Wrapper({ children }: { children?: ReactNode }) {
         get: () => {},
       },
     },
-  } as unknown) as ApmPluginContextValue;
+  } as unknown as ApmPluginContextValue;
 
   return (
     <MemoryRouter initialEntries={[location]}>
-      <KibanaReactContext.Provider
-        services={{
-          uiSettings,
-        }}
-      >
+      <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper value={value}>
           <MockUrlParamsContextProvider params={mockParams}>
             {children}
@@ -104,13 +102,17 @@ describe('ServiceOverview', () => {
       'GET /api/apm/services/{serviceName}/error_groups/main_statistics': {
         error_groups: [] as any[],
       },
-      'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics': {
-        transactionGroups: [] as any[],
-        totalTransactionGroups: 0,
-        isAggregationAccurate: true,
+      'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics':
+        {
+          transactionGroups: [] as any[],
+          totalTransactionGroups: 0,
+          isAggregationAccurate: true,
+        },
+      'GET /api/apm/services/{serviceName}/dependencies': {
+        serviceDependencies: [],
       },
-      'GET /api/apm/services/{serviceName}/dependencies': [],
-      'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics': [],
+      'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics':
+        [],
       'GET /api/apm/services/{serviceName}/transactions/charts/latency': {
         currentPeriod: {
           overallAvgDuration: null,
@@ -139,6 +141,9 @@ describe('ServiceOverview', () => {
       },
       'GET /api/apm/services/{serviceName}/annotation/search': {
         annotations: [],
+      },
+      'GET /api/apm/fallback_to_transactions': {
+        fallbackToTransactions: false,
       },
     };
     /* eslint-enable @typescript-eslint/naming-convention */

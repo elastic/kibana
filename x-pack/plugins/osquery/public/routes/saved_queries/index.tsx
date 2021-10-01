@@ -12,15 +12,22 @@ import { QueriesPage } from './list';
 import { NewSavedQueryPage } from './new';
 import { EditSavedQueryPage } from './edit';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
+import { MissingPrivileges } from '../components';
+import { useKibana } from '../../common/lib/kibana';
 
 const SavedQueriesComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('saved_queries');
   const match = useRouteMatch();
+
+  if (!permissions.readSavedQueries) {
+    return <MissingPrivileges />;
+  }
 
   return (
     <Switch>
       <Route path={`${match.url}/new`}>
-        <NewSavedQueryPage />
+        {permissions.writeSavedQueries ? <NewSavedQueryPage /> : <MissingPrivileges />}
       </Route>
       <Route path={`${match.url}/:savedQueryId`}>
         <EditSavedQueryPage />

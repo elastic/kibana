@@ -42,6 +42,52 @@ exports[`TableListView render default empty prompt 1`] = `
 </KibanaPageTemplate>
 `;
 
+exports[`TableListView render default empty prompt with create action when createItem supplied 1`] = `
+<KibanaPageTemplate
+  data-test-subj="testLandingPage"
+  isEmptyState={true}
+  pageBodyProps={
+    Object {
+      "aria-labelledby": undefined,
+    }
+  }
+>
+  <EuiEmptyPrompt
+    actions={
+      <EuiButton
+        data-test-subj="newItemButton"
+        fill={true}
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Create {entityName}"
+          id="kibana-react.tableListView.listing.createNewItemButtonLabel"
+          values={
+            Object {
+              "entityName": "test",
+            }
+          }
+        />
+      </EuiButton>
+    }
+    title={
+      <h1>
+        <FormattedMessage
+          defaultMessage="No {entityNamePlural} available."
+          id="kibana-react.tableListView.listing.noAvailableItemsMessage"
+          values={
+            Object {
+              "entityNamePlural": "tests",
+            }
+          }
+        />
+      </h1>
+    }
+  />
+</KibanaPageTemplate>
+`;
+
 exports[`TableListView render list view 1`] = `
 <KibanaPageTemplate
   data-test-subj="testLandingPage"

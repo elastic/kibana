@@ -29,6 +29,7 @@ describe('Transaction', () => {
       provider: 'gcp',
       region: 'europe-west1',
     },
+    event: { outcome: 'unknown' },
     http: {
       request: { method: 'GET' },
       response: { status_code: 200 },
@@ -86,6 +87,7 @@ describe('Span', () => {
       provider: 'gcp',
       region: 'europe-west1',
     },
+    event: { outcome: 'unknown' },
     processor: {
       name: 'transaction',
       event: 'span',

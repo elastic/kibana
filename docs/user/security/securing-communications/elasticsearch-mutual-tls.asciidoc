@@ -32,7 +32,7 @@ To configure {kib} and {es} to use mutual TLS authentication:
 
 . <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features} with a username and password>>.
 
-. <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
+. {ref}/security-basic-setup-https.html#encrypt-kibana-elasticsearch[Encrypt traffic between {kib} and {es}].
 +
 This entails generating a "server certificate" for {es} to use on the HTTP layer.
 

@@ -17,7 +17,7 @@ import {
   IndexPatternSpec,
 } from '../../../data/public';
 import { FailedImport } from './process_import_response';
-import { DuplicateIndexPatternError, IndexPattern } from '../../../data/public';
+import { DuplicateDataViewError, IndexPattern } from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -64,15 +64,8 @@ async function importIndexPattern(
   openConfirm: OverlayStart['openConfirm']
 ) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
-  const {
-    title,
-    timeFieldName,
-    fields,
-    fieldFormatMap,
-    sourceFilters,
-    type,
-    typeMeta,
-  } = doc._source;
+  const { title, timeFieldName, fields, fieldFormatMap, sourceFilters, type, typeMeta } =
+    doc._source;
   const indexPatternSpec: IndexPatternSpec = {
     id: doc._id,
     title,
@@ -89,7 +82,7 @@ async function importIndexPattern(
   try {
     emptyPattern = await indexPatterns.createAndSave(indexPatternSpec, overwriteAll, true);
   } catch (err) {
-    if (err instanceof DuplicateIndexPatternError) {
+    if (err instanceof DuplicateDataViewError) {
       // We can override and we want to prompt for confirmation
       const isConfirmed = await openConfirm(
         i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteLabel', {

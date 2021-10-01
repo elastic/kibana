@@ -349,27 +349,33 @@ export class Authenticator {
     assertRequest(request);
 
     const existingSessionValue = await this.getSessionValue(request);
-    const suggestedProviderName =
-      existingSessionValue?.provider.name ??
-      request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
-
     if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
-      this.logger.debug('Redirecting request to Login Selector.');
+      const providerNameSuggestedByHint = request.url.searchParams.get(
+        AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER
+      );
+      this.logger.debug(
+        `Redirecting request to Login Selector (provider hint: ${
+          providerNameSuggestedByHint ?? 'n/a'
+        }).`
+      );
       return AuthenticationResult.redirectTo(
         `${
           this.options.basePath.serverBasePath
         }/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
           `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
         )}${
-          suggestedProviderName && !existingSessionValue
+          providerNameSuggestedByHint
             ? `&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                suggestedProviderName
+                providerNameSuggestedByHint
               )}`
             : ''
         }`
       );
     }
 
+    const suggestedProviderName =
+      existingSessionValue?.provider.name ??
+      request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
     for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =

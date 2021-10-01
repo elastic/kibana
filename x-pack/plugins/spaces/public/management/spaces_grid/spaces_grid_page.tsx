@@ -26,10 +26,10 @@ import type {
   NotificationsStart,
   ScopedHistory,
 } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
 import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
@@ -153,7 +153,7 @@ export class SpacesGridPage extends Component<Props, State> {
       >
         <FormattedMessage
           id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
-          defaultMessage="Create a space"
+          defaultMessage="Create space"
         />
       </EuiButton>
     );

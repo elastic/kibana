@@ -103,11 +103,11 @@ module.exports = {
   // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage
   collectCoverageFrom: [
     '**/*.{js,mjs,jsx,ts,tsx}',
-    '!**/{__test__,__snapshots__,__examples__,mocks,tests,test_helpers,integration_tests,types}/**/*',
-    '!**/*mock*.ts',
-    '!**/*.test.ts',
+    '!**/{__test__,__snapshots__,__examples__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
+    '!**/*mock*.{ts,tsx}',
+    '!**/*.test.{ts,tsx}',
     '!**/*.d.ts',
-    '!**/index.{js,ts}',
+    '!**/index.{js,ts,tsx}',
   ],
 
   // A custom resolver to preserve symlinks by default

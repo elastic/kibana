@@ -52,13 +52,12 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
 
   const ignorePaths = [
     /[\\\/](\..*|node_modules|bower_components|target|public|__[a-z0-9_]+__|coverage)([\\\/]|$)/,
-    /\.test\.(js|tsx?)$/,
+    /\.(test|spec)\.(js|ts|tsx)$/,
     /\.(md|sh|txt)$/,
     /debug\.log$/,
     ...pluginInternalDirsIgnore,
     fromRoot('x-pack/plugins/reporting/chromium'),
     fromRoot('x-pack/plugins/security_solution/cypress'),
-    fromRoot('x-pack/plugins/apm/e2e'),
     fromRoot('x-pack/plugins/apm/scripts'),
     fromRoot('x-pack/plugins/canvas/canvas_plugin_src'), // prevents server from restarting twice for Canvas plugin changes,
     fromRoot('x-pack/plugins/cases/server/scripts'),

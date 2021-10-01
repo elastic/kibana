@@ -11,8 +11,8 @@ import { useTrackPageview } from '../../../../observability/public';
 export function TrackPageview({ children }: { children: React.ReactElement }) {
   const routePath = useRoutePath();
 
-  useTrackPageview({ app: 'apm', path: routePath });
-  useTrackPageview({ app: 'apm', path: routePath, delay: 15000 });
+  useTrackPageview({ app: 'apm', path: routePath }, [routePath]);
+  useTrackPageview({ app: 'apm', path: routePath, delay: 15000 }, [routePath]);
 
   return children;
 }

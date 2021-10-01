@@ -15,7 +15,7 @@ const errors = getFunctionErrors().timefilter;
 
 let clock = null;
 
-beforeEach(function () {
+beforeEach(async function () {
   clock = sinon.useFakeTimers();
 });
 

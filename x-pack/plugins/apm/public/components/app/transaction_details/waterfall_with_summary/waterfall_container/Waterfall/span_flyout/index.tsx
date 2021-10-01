@@ -8,6 +8,7 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
+import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/Summary/CompositeSpanDurationSummaryItem';
 import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -33,8 +35,9 @@ import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/http_info_
 import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { SyncBadge } from '../sync_badge';
-import { DatabaseContext } from './database_context';
-import { StickySpanProperties } from './StickySpanProperties';
+import { SpanDatabase } from './span_db';
+import { StickySpanProperties } from './sticky_span_properties';
+import { FailureBadge } from '../failure_badge';
 
 function formatType(type: string) {
   switch (type) {
@@ -71,13 +74,11 @@ function getSpanTypes(span: Span) {
   };
 }
 
-const SpanBadge = euiStyled(EuiBadge)`
-  display: inline-block;
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
-const HttpInfoContainer = euiStyled('div')`
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+const ContainerWithMarginRight = euiStyled.div`
+  /* add margin to all direct descendants */
+  & > * {
+    margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+  }
 `;
 
 interface Props {
@@ -99,7 +100,7 @@ export function SpanFlyout({
 
   const stackframes = span.span.stacktrace;
   const codeLanguage = parentTransaction?.service.language?.name;
-  const dbContext = span.span.db;
+  const spanDb = span.span.db;
   const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
   const spanHttpStatusCode = httpContext?.response?.status_code;
@@ -123,7 +124,6 @@ export function SpanFlyout({
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-
             <EuiFlexItem grow={false}>
               <DiscoverSpanLink span={span}>
                 <EuiButtonEmpty iconType="discoverApp">
@@ -137,6 +137,21 @@ export function SpanFlyout({
               </DiscoverSpanLink>
             </EuiFlexItem>
           </EuiFlexGroup>
+          {span.span.composite && (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiCallOut color="warning" iconType="gear" size="s">
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
+                    {
+                      defaultMessage:
+                        'This is a sample document for a group of consecutive, similar spans',
+                    }
+                  )}
+                </EuiCallOut>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <StickySpanProperties span={span} transaction={parentTransaction} />
@@ -144,20 +159,26 @@ export function SpanFlyout({
           <Summary
             items={[
               <TimestampTooltip time={span.timestamp.us / 1000} />,
-              <DurationSummaryItem
-                duration={span.span.duration.us}
-                totalDuration={totalDuration}
-                parentType="transaction"
-              />,
               <>
+                <DurationSummaryItem
+                  duration={span.span.duration.us}
+                  totalDuration={totalDuration}
+                  parentType="transaction"
+                />
+                {span.span.composite && (
+                  <CompositeSpanDurationSummaryItem
+                    count={span.span.composite.count}
+                    durationSum={span.span.composite.sum.us}
+                  />
+                )}
+              </>,
+              <ContainerWithMarginRight>
                 {spanHttpUrl && (
-                  <HttpInfoContainer>
-                    <HttpInfoSummaryItem
-                      method={spanHttpMethod}
-                      url={spanHttpUrl}
-                      status={spanHttpStatusCode}
-                    />
-                  </HttpInfoContainer>
+                  <HttpInfoSummaryItem
+                    method={spanHttpMethod}
+                    url={spanHttpUrl}
+                    status={spanHttpStatusCode}
+                  />
                 )}
                 <EuiToolTip
                   content={i18n.translate(
@@ -165,7 +186,7 @@ export function SpanFlyout({
                     { defaultMessage: 'Type' }
                   )}
                 >
-                  <SpanBadge color="hollow">{spanTypes.spanType}</SpanBadge>
+                  <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
                 </EuiToolTip>
                 {spanTypes.spanSubtype && (
                   <EuiToolTip
@@ -174,9 +195,7 @@ export function SpanFlyout({
                       { defaultMessage: 'Subtype' }
                     )}
                   >
-                    <SpanBadge color="hollow">
-                      {spanTypes.spanSubtype}
-                    </SpanBadge>
+                    <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
                   </EuiToolTip>
                 )}
                 {spanTypes.spanAction && (
@@ -186,15 +205,18 @@ export function SpanFlyout({
                       { defaultMessage: 'Action' }
                     )}
                   >
-                    <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
+                    <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
                   </EuiToolTip>
                 )}
+
+                <FailureBadge outcome={span.event?.outcome} />
+
                 <SyncBadge sync={span.span.sync} />
-              </>,
+              </ContainerWithMarginRight>,
             ]}
           />
           <EuiHorizontalRule />
-          <DatabaseContext dbContext={dbContext} />
+          <SpanDatabase spanDb={spanDb} />
           <EuiTabbedContent
             tabs={[
               {

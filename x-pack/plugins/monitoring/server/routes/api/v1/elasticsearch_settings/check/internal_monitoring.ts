@@ -14,10 +14,10 @@ import {
   INDEX_PATTERN_LOGSTASH,
 } from '../../../../../../common/constants';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../../common/ccs_utils';
 // @ts-ignore
 import { handleError } from '../../../../../lib/errors';
-import { RouteDependencies } from '../../../../../types';
+import { RouteDependencies, LegacyServer } from '../../../../../types';
 
 const queryBody = {
   size: 0,
@@ -70,10 +70,7 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
   return counts;
 };
 
-export function internalMonitoringCheckRoute(
-  server: { config: () => unknown },
-  npRoute: RouteDependencies
-) {
+export function internalMonitoringCheckRoute(server: LegacyServer, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',

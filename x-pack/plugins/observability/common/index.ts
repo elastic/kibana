@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export type { AsDuration, AsPercent } from './utils/formatters';
+export { enableInspectEsQueries, maxSuggestions } from './ui_settings_keys';
+
 export const casesFeatureId = 'observabilityCases';
 
 // The ID of the observability app. Should more appropriately be called

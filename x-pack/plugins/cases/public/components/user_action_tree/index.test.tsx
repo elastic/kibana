@@ -57,6 +57,7 @@ const defaultProps = {
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 jest.mock('../../containers/use_update_comment');
 jest.mock('./user_action_timestamp');
+jest.mock('../../common/lib/kibana');
 
 const patchComment = jest.fn();
 
@@ -429,7 +430,7 @@ describe(`UserActionTree`, () => {
       );
       await waitFor(() => {
         expect(
-          wrapper.find(`[data-test-subj="endpoint-action"]`).first().prop('timelineIcon')
+          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
         ).toBe('lock');
       });
     });
@@ -448,7 +449,7 @@ describe(`UserActionTree`, () => {
       );
       await waitFor(() => {
         expect(
-          wrapper.find(`[data-test-subj="endpoint-action"]`).first().prop('timelineIcon')
+          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
         ).toBe('lockOpen');
       });
     });

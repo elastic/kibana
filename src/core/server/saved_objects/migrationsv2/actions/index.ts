@@ -98,6 +98,12 @@ export { searchForOutdatedDocuments } from './search_for_outdated_documents';
 export type { BulkOverwriteTransformedDocumentsParams } from './bulk_overwrite_transformed_documents';
 export { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
 
+export type {
+  CalculateExcludeFiltersParams,
+  CalculatedExcludeFilter,
+} from './calculate_exclude_filters';
+export { calculateExcludeFilters } from './calculate_exclude_filters';
+
 export { pickupUpdatedMappings, waitForTask, waitForIndexStatusYellow };
 export type { AliasNotFound, RemoveIndexNotAConcreteIndex };
 
@@ -112,6 +118,10 @@ export interface WaitForReindexTaskFailure {
 
 export interface TargetIndexHadWriteBlock {
   type: 'target_index_had_write_block';
+}
+
+export interface RequestEntityTooLargeException {
+  type: 'request_entity_too_large_exception';
 }
 
 /** @internal */
@@ -130,6 +140,7 @@ export interface ActionErrorTypeMap {
   alias_not_found_exception: AliasNotFound;
   remove_index_not_a_concrete_index: RemoveIndexNotAConcreteIndex;
   documents_transform_failed: DocumentsTransformFailed;
+  request_entity_too_large_exception: RequestEntityTooLargeException;
 }
 
 /**

@@ -29,7 +29,7 @@ const renderOptions = {
 };
 
 function getTransaction() {
-  return ({
+  return {
     labels: { someKey: 'labels value' },
     http: { someKey: 'http value' },
     host: { someKey: 'host value' },
@@ -51,7 +51,7 @@ function getTransaction() {
         queue: { name: 'queue name' },
       },
     },
-  } as unknown) as Transaction;
+  } as unknown as Transaction;
 }
 
 describe('TransactionMetadata', () => {

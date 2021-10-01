@@ -42,22 +42,10 @@ export const LogRetentionPanel: React.FC = () => {
       <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.title', {
-            defaultMessage: 'Log Retention',
+            defaultMessage: 'Log retention',
           })}
         </h2>
       </EuiTitle>
-      <EuiText>
-        <p>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.description', {
-            defaultMessage: 'Manage the default write settings for API Logs and Analytics.',
-          })}{' '}
-          <EuiLink href={`${DOCS_PREFIX}/logs.html`} target="_blank">
-            {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.learnMore', {
-              defaultMessage: 'Learn more about retention settings.',
-            })}
-          </EuiLink>
-        </p>
-      </EuiText>
       <EuiSpacer size="m" />
       <EuiText>
         <EuiSwitch
@@ -67,7 +55,7 @@ export const LogRetentionPanel: React.FC = () => {
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.analytics.label',
                   {
-                    defaultMessage: 'Analytics Logs',
+                    defaultMessage: 'Log analytics events',
                   }
                 )}
               </strong>
@@ -94,7 +82,7 @@ export const LogRetentionPanel: React.FC = () => {
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.api.label',
                   {
-                    defaultMessage: 'API Logs',
+                    defaultMessage: 'Log API events',
                   }
                 )}
               </strong>
@@ -111,6 +99,20 @@ export const LogRetentionPanel: React.FC = () => {
           disabled={isLogRetentionUpdating}
           data-test-subj="LogRetentionPanelAPISwitch"
         />
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiText size="xs" color="subdued">
+        <p>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.description', {
+            defaultMessage: 'Log retention is determined by the ILM policies for your deployment.',
+          })}
+          <br />
+          <EuiLink href={`${DOCS_PREFIX}/logs.html`} target="_blank">
+            {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.learnMore', {
+              defaultMessage: 'Learn more about log retention for Enterprise Search.',
+            })}
+          </EuiLink>
+        </p>
       </EuiText>
     </EuiPanel>
   );

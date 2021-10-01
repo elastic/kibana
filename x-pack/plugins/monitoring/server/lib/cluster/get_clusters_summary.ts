@@ -16,7 +16,7 @@ import { calculateOverallStatus } from '../calculate_overall_status';
 // @ts-ignore
 import { MonitoringLicenseError } from '../errors/custom_errors';
 
-type EnhancedClusters = ElasticsearchModifiedSource & {
+export type EnhancedClusters = ElasticsearchModifiedSource & {
   license: ElasticsearchLegacySource['license'];
   [key: string]: any;
 };

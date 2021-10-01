@@ -9,6 +9,14 @@
 ```typescript
 readonly links: {
         readonly settings: string;
+        readonly apm: {
+            readonly kibanaSettings: string;
+            readonly supportedServiceMaps: string;
+            readonly customLinks: string;
+            readonly droppedTransactionSpans: string;
+            readonly upgrading: string;
+            readonly metaData: string;
+        };
         readonly canvas: {
             readonly guide: string;
         };
@@ -124,10 +132,14 @@ readonly links: {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
+            readonly privileges: string;
             readonly guide: string;
             readonly gettingStarted: string;
             readonly ml: string;
@@ -141,6 +153,7 @@ readonly links: {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
+            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -178,7 +191,16 @@ readonly links: {
             timeUnits: string;
             updateTransform: string;
         }>;
-        readonly observability: Record<string, string>;
+        readonly observability: Readonly<{
+            guide: string;
+            infrastructureThreshold: string;
+            logsThreshold: string;
+            metricsThreshold: string;
+            monitorStatus: string;
+            monitorUptime: string;
+            tlsCertificate: string;
+            uptimeDurationAnomaly: string;
+        }>;
         readonly alerting: Record<string, string>;
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;

@@ -26,11 +26,10 @@ type ErrorFactory = (message: string) => Error;
 
 export const createPlainError = (message: string) => new Error(message);
 
-export const decodeOrThrow = <A, O, I>(
-  runtimeType: rt.Type<A, O, I>,
-  createError: ErrorFactory = createPlainError
-) => (inputValue: I) =>
-  pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+export const decodeOrThrow =
+  <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
+  (inputValue: I) =>
+    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 export const validateTimelines = (): Transform =>
   createMapStream((obj: ImportTimelineResponse) =>

@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { argv } from 'yargs';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { cypressRunTests } from './cypress_start';
 
+const specArg = argv.spec as string | undefined;
+
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
-  const cypressConfig = await readConfigFile(require.resolve('./config.ts'));
+  const kibanaConfig = await readConfigFile(require.resolve('./config.ts'));
   return {
-    ...cypressConfig.getAll(),
-    testRunner: cypressRunTests,
+    ...kibanaConfig.getAll(),
+    testRunner: cypressRunTests(specArg),
   };
 }
 

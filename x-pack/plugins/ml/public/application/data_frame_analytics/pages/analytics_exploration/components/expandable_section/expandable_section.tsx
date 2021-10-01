@@ -82,7 +82,6 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
             <EuiButtonEmpty
               onClick={toggleExpanded}
               iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-              size="l"
               iconSide="right"
               flush="left"
             >

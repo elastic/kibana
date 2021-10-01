@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -257,8 +258,8 @@ export function SchemaOverviewHeading() {
             ),
             dataStreamsDocLink: (
               <ElasticDocsLink
-                section="/elasticsearch/reference"
-                path="/data-streams.html"
+                section="/apm/server"
+                path="/apm-integration-data-streams.html"
                 target="_blank"
               >
                 {i18n.translate(
@@ -270,6 +271,30 @@ export function SchemaOverviewHeading() {
           }}
         />
       </EuiText>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem />
+        <EuiFlexItem grow={2}>
+          <EuiCallOut
+            size="s"
+            title={i18n.translate(
+              'xpack.apm.settings.schema.descriptionText.betaCalloutTitle',
+              { defaultMessage: 'Data streams are beta in APM' }
+            )}
+            iconType="alert"
+            color="warning"
+          >
+            {i18n.translate(
+              'xpack.apm.settings.schema.descriptionText.betaCalloutMessage',
+              {
+                defaultMessage:
+                  'This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+              }
+            )}
+          </EuiCallOut>
+        </EuiFlexItem>
+        <EuiFlexItem />
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
     </>
   );

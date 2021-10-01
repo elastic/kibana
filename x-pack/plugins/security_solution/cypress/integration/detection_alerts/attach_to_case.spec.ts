@@ -16,7 +16,7 @@ import { login, loginAndWaitForPage, waitForPageWithoutDateRange } from '../../t
 import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { ATTACH_ALERT_TO_CASE_BUTTON } from '../../screens/alerts_detection_rules';
+import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../screens/alerts';
 
 const loadDetectionsPage = (role: ROLES) => {
   waitForPageWithoutDateRange(ALERTS_URL, role);
@@ -44,6 +44,7 @@ describe('Alerts timeline', () => {
     });
 
     it('should not allow user with read only privileges to attach alerts to cases', () => {
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).should('not.exist');
     });
   });
@@ -54,6 +55,7 @@ describe('Alerts timeline', () => {
     });
 
     it('should allow a user with crud privileges to attach alerts to cases', () => {
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('not.be.disabled');
     });
   });

@@ -127,8 +127,7 @@ export const sampleAttribute = {
                       min: 0,
                     },
                     name: 'divide',
-                    text:
-                      "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                    text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                     type: 'function',
                   },
                 },
@@ -154,6 +153,7 @@ export const sampleAttribute = {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           seriesType: 'line',
           yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
           xAccessor: 'x-axis-column-layer0',

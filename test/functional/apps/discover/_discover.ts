@@ -11,7 +11,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const savedObjectInfo = getService('savedObjectInfo');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -31,9 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load kibana index with default index pattern');
 
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
-      log.info(
-        `\n### SAVED OBJECT TYPES IN index: [.kibana]: \n\t${await savedObjectInfo.types()}`
-      );
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -96,15 +92,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickHistogramBar();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
-        expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
+        expect(time.start).to.be('Sep 21, 2015 @ 12:00:00.000');
+        expect(time.end).to.be('Sep 21, 2015 @ 15:00:00.000');
         await retry.waitForWithTimeout(
           'doc table to contain the right search result',
           1000,
           async () => {
             const rowData = await PageObjects.discover.getDocTableField(1);
             log.debug(`The first timestamp value in doc table: ${rowData}`);
-            return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
+            return rowData.includes('Sep 21, 2015 @ 14:59:08.840');
           }
         );
       });
@@ -112,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should modify the time range when the histogram is brushed', async function () {
         // this is the number of renderings of the histogram needed when new data is fetched
         // this needs to be improved
-        const renderingCountInc = 1;
+        const renderingCountInc = 2;
         const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -155,13 +151,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualInterval).to.be(expectedInterval);
       });
 
-      it('should show Auto chart interval', async function () {
-        const expectedChartInterval = 'Auto';
-
-        const actualInterval = await PageObjects.discover.getChartInterval();
-        expect(actualInterval).to.be(expectedChartInterval);
-      });
-
       it('should not show "no results"', async () => {
         const isVisible = await PageObjects.discover.hasNoResults();
         expect(isVisible).to.be(false);
@@ -176,6 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // reset to persisted state
+        await queryBar.clearQuery();
         await PageObjects.discover.clickResetSavedSearchButton();
         const expectedHitCount = '14,004';
         await retry.try(async function () {
@@ -233,10 +223,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           await PageObjects.discover.loadSavedSearch(expected.title);
-          const {
-            title,
-            description,
-          } = await PageObjects.common.getSharedItemTitleAndDescription();
+          const { title, description } =
+            await PageObjects.common.getSharedItemTitleAndDescription();
           expect(title).to.eql(expected.title);
           expect(description).to.eql(expected.description);
         });
@@ -297,8 +285,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
-
-        expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
+        await retry.waitFor('number of fetches to be 1', async () => {
+          const nrOfFetches = await PageObjects.discover.getNrOfFetches();
+          return nrOfFetches === 1;
+        });
       });
     });
 
@@ -324,8 +314,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.awaitKibanaChrome();
         const initialTimeString = await PageObjects.discover.getChartTimespan();
         await queryBar.submitQuery();
-        const refreshedTimeString = await PageObjects.discover.getChartTimespan();
-        expect(refreshedTimeString).not.to.be(initialTimeString);
+
+        await retry.waitFor('chart timespan to have changed', async () => {
+          const refreshedTimeString = await PageObjects.discover.getChartTimespan();
+          log.debug(
+            `Timestamp before: ${initialTimeString}, Timestamp after: ${refreshedTimeString}`
+          );
+          return refreshedTimeString !== initialTimeString;
+        });
       });
     });
 
@@ -337,7 +333,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
-        await PageObjects.discover.clickFieldListItemAdd('_score');
+        await PageObjects.discover.clickFieldListItemRemove('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
       });

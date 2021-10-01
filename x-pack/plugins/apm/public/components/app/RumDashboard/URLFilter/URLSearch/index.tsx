@@ -61,15 +61,12 @@ export function URLSearch({
 }: Props) {
   const { uxUiFilters, urlParams } = useUrlParams();
 
-  const {
-    transactionUrl,
-    transactionUrlExcluded,
-    ...restFilters
-  } = uxUiFilters;
+  const { transactionUrl, transactionUrlExcluded, ...restFilters } =
+    uxUiFilters;
 
   const { searchTerm, percentile } = urlParams;
 
-  const [popoverIsOpen, setPopoverIsOpen] = useState<boolean | undefined>();
+  const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false);
 
   const [searchValue, setSearchValue] = useState(searchTerm ?? '');
 

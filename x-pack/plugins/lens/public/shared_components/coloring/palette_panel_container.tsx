@@ -7,6 +7,7 @@
 
 import './palette_panel_container.scss';
 
+import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, MutableRefObject } from 'react';
 import {
   EuiFlyoutHeader,
@@ -20,8 +21,6 @@ import {
   EuiOutsideClickDetector,
   EuiPortal,
 } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
 
 export function PalettePanelContainer({
   isOpen,
@@ -60,12 +59,7 @@ export function PalettePanelContainer({
             className="lnsPalettePanelContainer"
           >
             <EuiFlyoutHeader hasBorder className="lnsPalettePanelContainer__header">
-              <EuiFlexGroup
-                gutterSize="none"
-                alignItems="center"
-                className="lnsPalettePanelContainer__headerLink"
-                onClick={closeFlyout}
-              >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     color="text"
@@ -78,6 +72,7 @@ export function PalettePanelContainer({
                     })}
                   />
                 </EuiFlexItem>
+
                 <EuiFlexItem>
                   <EuiTitle size="xs">
                     <h2
@@ -94,9 +89,9 @@ export function PalettePanelContainer({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutHeader>
-            <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
-              {children}
-            </EuiFlexItem>
+
+            <div className="lnsPalettePanelContainer__content">{children}</div>
+
             <EuiFlyoutFooter className="lnsPalettePanelContainer__footer">
               <EuiButtonEmpty flush="left" size="s" iconType="sortLeft" onClick={closeFlyout}>
                 {i18n.translate('xpack.lens.table.palettePanelContainer.back', {

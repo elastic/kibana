@@ -432,7 +432,7 @@ describe('Log threshold executor', () => {
           {
             actionGroup: 'logs.threshold.fired',
             context: {
-              conditions: ' numericField more than 10',
+              conditions: 'numericField more than 10',
               group: null,
               matchingDocuments: 10,
               isRatio: false,
@@ -497,7 +497,7 @@ describe('Log threshold executor', () => {
           {
             actionGroup: 'logs.threshold.fired',
             context: {
-              conditions: ' numericField more than 10',
+              conditions: 'numericField more than 10',
               group: 'i-am-a-host-name-1, i-am-a-dataset-1',
               matchingDocuments: 10,
               isRatio: false,
@@ -512,7 +512,7 @@ describe('Log threshold executor', () => {
           {
             actionGroup: 'logs.threshold.fired',
             context: {
-              conditions: ' numericField more than 10',
+              conditions: 'numericField more than 10',
               group: 'i-am-a-host-name-3, i-am-a-dataset-3',
               matchingDocuments: 20,
               isRatio: false,

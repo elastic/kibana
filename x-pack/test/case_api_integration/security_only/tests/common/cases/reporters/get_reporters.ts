@@ -28,6 +28,10 @@ import {
   superUserDefaultSpaceAuth,
   obsSecDefaultSpaceAuth,
 } from '../../../../utils';
+import { UserInfo } from '../../../../../common/lib/authentication/types';
+
+const sortReporters = (reporters: UserInfo[]) =>
+  reporters.sort((a, b) => a.username.localeCompare(b.username));
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -79,7 +83,10 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(reporters).to.eql(scenario.expectedReporters);
+        // sort reporters to prevent order failure
+        expect(sortReporters(reporters as unknown as UserInfo[])).to.eql(
+          sortReporters(scenario.expectedReporters)
+        );
       }
     });
 

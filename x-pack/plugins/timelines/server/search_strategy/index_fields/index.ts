@@ -12,9 +12,8 @@ import {
   IndexPatternsFetcher,
   ISearchStrategy,
   SearchStrategyDependencies,
+  FieldDescriptor,
 } from '../../../../../../src/plugins/data/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FieldDescriptor } from '../../../../../../src/plugins/data/server/index_patterns';
 
 // TODO cleanup path
 import {
@@ -46,7 +45,9 @@ export const requestIndexFieldSearch = async (
   { esClient }: SearchStrategyDependencies,
   beatFields: BeatFields
 ): Promise<IndexFieldsStrategyResponse> => {
-  const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
+
   const dedupeIndices = dedupeIndexName(request.indices);
 
   const responsesIndexFields = await Promise.all(
@@ -63,9 +64,15 @@ export const requestIndexFieldSearch = async (
           });
           return get(searchResponse, 'body.hits.total.value', 0) > 0;
         } else {
-          return indexPatternsFetcher.getFieldsForWildcard({
-            pattern: index,
-          });
+          if (index.startsWith('.alerts-observability')) {
+            return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+              pattern: index,
+            });
+          } else {
+            return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
+              pattern: index,
+            });
+          }
         }
       })
       .map((p) => p.catch((e) => false))

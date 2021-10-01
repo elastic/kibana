@@ -6,6 +6,10 @@
  */
 
 import rison, { RisonValue } from 'rison-node';
+import {
+  API_GET_ILM_POLICY_STATUS,
+  API_MIGRATE_ILM_POLICY_URL,
+} from '../../../plugins/reporting/common/constants';
 import { JobParamsCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
 import { JobParamsPNG } from '../../../plugins/reporting/server/export_types/png/types';
@@ -113,7 +117,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send(job);
   };
   const generatePdf = async (username: string, password: string, job: JobParamsPDF) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/printablePdf`)
       .auth(username, password)
@@ -121,15 +125,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams });
   };
   const generatePng = async (username: string, password: string, job: JobParamsPNG) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/png`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generateCsv = async (username: string, password: string, job: JobParamsCSV) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+  const generateCsv = async (job: JobParamsCSV, username = 'elastic', password = 'changeme') => {
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)
       .auth(username, password)
@@ -152,6 +156,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return body.path;
   };
 
+  const getCompletedJobOutput = async (downloadReportPath: string) => {
+    const response = await supertest.get(downloadReportPath);
+    return response.text as unknown;
+  };
+
   const deleteAllReports = async () => {
     log.debug('ReportingAPI.deleteAllReports');
 
@@ -166,8 +175,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const checkIlmMigrationStatus = async () => {
     log.debug('ReportingAPI.checkIlmMigrationStatus');
-    const { body } = await supertestWithoutAuth
-      .get('/api/reporting/ilm_policy_status')
+    const { body } = await supertest
+      .get(API_GET_ILM_POLICY_STATUS)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
     return body.status;
@@ -175,15 +184,12 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const migrateReportingIndices = async () => {
     log.debug('ReportingAPI.migrateReportingIndices');
-    await supertestWithoutAuth
-      .put('/api/reporting/deprecations/migrate_ilm_policy')
-      .set('kbn-xsrf', 'xxx')
-      .expect(200);
+    await supertest.put(API_MIGRATE_ILM_POLICY_URL).set('kbn-xsrf', 'xxx').expect(200);
   };
 
   const makeAllReportingIndicesUnmanaged = async () => {
     log.debug('ReportingAPI.makeAllReportingIndicesUnmanaged');
-    const settings: any = {
+    const settings = {
       'index.lifecycle.name': null,
     };
     await esSupertest
@@ -201,6 +207,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     DATA_ANALYST_PASSWORD,
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
+    routes: {
+      API_GET_ILM_POLICY_STATUS,
+      API_MIGRATE_ILM_POLICY_URL,
+    },
     createDataAnalystRole,
     createDataAnalyst,
     createTestReportingUserRole,
@@ -211,6 +221,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     generateCsv,
     postJob,
     postJobJSON,
+    getCompletedJobOutput,
     deleteAllReports,
     checkIlmMigrationStatus,
     migrateReportingIndices,

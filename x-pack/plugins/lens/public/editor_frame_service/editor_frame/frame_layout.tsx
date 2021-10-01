@@ -11,20 +11,22 @@ import React from 'react';
 import { EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
+import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
   configPanel?: React.ReactNode;
   suggestionsPanel?: React.ReactNode;
   workspacePanel?: React.ReactNode;
-  isFullscreen?: boolean;
 }
 
 export function FrameLayout(props: FrameLayoutProps) {
+  const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
+
   return (
     <EuiPage
       className={classNames('lnsFrameLayout', {
-        'lnsFrameLayout-isFullscreen': props.isFullscreen,
+        'lnsFrameLayout-isFullscreen': isFullscreen,
       })}
     >
       <EuiPageBody
@@ -48,7 +50,7 @@ export function FrameLayout(props: FrameLayoutProps) {
         <section
           className={classNames('lnsFrameLayout__pageBody', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            'lnsFrameLayout__pageBody-isFullscreen': props.isFullscreen,
+            'lnsFrameLayout__pageBody-isFullscreen': isFullscreen,
           })}
           aria-labelledby="workspaceId"
         >
@@ -65,7 +67,7 @@ export function FrameLayout(props: FrameLayoutProps) {
         <section
           className={classNames('lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            'lnsFrameLayout__sidebar-isFullscreen': props.isFullscreen,
+            'lnsFrameLayout__sidebar-isFullscreen': isFullscreen,
           })}
           aria-labelledby="configPanel"
         >

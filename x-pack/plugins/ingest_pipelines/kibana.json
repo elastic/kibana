@@ -3,6 +3,10 @@
   "version": "kibana",
   "server": true,
   "ui": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
   "requiredPlugins": ["management", "features", "share"],
   "optionalPlugins": ["security", "usageCollection"],
   "configPath": ["xpack", "ingest_pipelines"],

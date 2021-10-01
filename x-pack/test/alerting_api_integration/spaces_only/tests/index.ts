@@ -15,6 +15,7 @@ export default function alertingApiIntegrationTests({ loadTestFile }: FtrProvide
 
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./alerting'));
+    loadTestFile(require.resolve('./action_task_params'));
   });
 }
 

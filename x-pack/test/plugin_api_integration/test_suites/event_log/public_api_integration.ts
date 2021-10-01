@@ -199,6 +199,7 @@ export default function ({ getService }: FtrProviderContext) {
             .map(([key, val]) => `${key}=${val}`)
             .join('&')}`
     }`;
+    await delay(1000); // wait for buffer to be written
     log.debug(`Finding Events for Saved Object with ${url}`);
     return await supertest.get(url).set('kbn-xsrf', 'foo').expect(200);
   }
@@ -212,7 +213,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(omit(foundEvent!.event ?? {}, 'start', 'end', 'duration')).to.eql(
           expectedEvents[index]!.event
         );
-        expect(omit(foundEvent!.kibana ?? {}, 'server_uuid')).to.eql(expectedEvents[index]!.kibana);
+        expect(omit(foundEvent!.kibana ?? {}, 'server_uuid', 'version')).to.eql(
+          expectedEvents[index]!.kibana
+        );
         expect(foundEvent!.message).to.eql(expectedEvents[index]!.message);
       });
     } catch (ex) {

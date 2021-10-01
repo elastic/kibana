@@ -7,17 +7,16 @@
 
 import React from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { I18nStart, ScopedHistory } from 'src/core/public';
-import { AppContextProvider, ContextValue, useAppContext } from './app_context';
-import { ComingSoonPrompt } from './components/coming_soon_prompt';
-import { EsDeprecationsContent } from './components/es_deprecations';
-import { KibanaDeprecationsContent } from './components/kibana_deprecations';
-import { DeprecationsOverview } from './components/overview';
+import { ScopedHistory } from 'src/core/public';
 
-export interface AppDependencies extends ContextValue {
-  i18n: I18nStart;
-  history: ScopedHistory;
-}
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import { APP_WRAPPER_CLASS, GlobalFlyout, AuthorizationProvider } from '../shared_imports';
+import { AppDependencies } from '../types';
+import { API_BASE_PATH } from '../../common/constants';
+import { AppContextProvider, useAppContext } from './app_context';
+import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from './components';
+
+const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const App: React.FunctionComponent = () => {
   const { isReadOnlyMode } = useAppContext();
@@ -29,9 +28,9 @@ const App: React.FunctionComponent = () => {
 
   return (
     <Switch>
-      <Route exact path="/overview" component={DeprecationsOverview} />
-      <Route exact path="/es_deprecations/:tabName" component={EsDeprecationsContent} />
-      <Route exact path="/kibana_deprecations" component={KibanaDeprecationsContent} />
+      <Route exact path="/overview" component={Overview} />
+      <Route exact path="/es_deprecations" component={EsDeprecations} />
+      <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
       <Redirect from="/" to="/overview" />
     </Switch>
   );
@@ -45,12 +44,23 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
   );
 };
 
-export const RootComponent = ({ i18n, history, ...contextValue }: AppDependencies) => {
+export const RootComponent = (dependencies: AppDependencies) => {
+  const {
+    history,
+    core: { i18n, application, http },
+  } = dependencies.services;
+
   return (
-    <i18n.Context>
-      <AppContextProvider value={contextValue}>
-        <AppWithRouter history={history} />
-      </AppContextProvider>
-    </i18n.Context>
+    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
+      <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}/privileges`}>
+        <i18n.Context>
+          <AppContextProvider value={dependencies}>
+            <GlobalFlyoutProvider>
+              <AppWithRouter history={history} />
+            </GlobalFlyoutProvider>
+          </AppContextProvider>
+        </i18n.Context>
+      </AuthorizationProvider>
+    </RedirectAppLinks>
   );
 };

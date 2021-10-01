@@ -15,10 +15,11 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { removeEmptyCoordinates, roundNumber } from '../../utils';
 
-type TransactionsGroupsDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
+type TransactionsGroupsDetailedStatistics =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -39,6 +40,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               latencyAggregationType: 'avg',
               transactionType: 'request',
               transactionNames: JSON.stringify(transactionNames),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -64,16 +67,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               latencyAggregationType: 'avg',
               transactionNames: JSON.stringify(transactionNames),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
 
         expect(response.status).to.be(200);
 
-        const {
-          currentPeriod,
-          previousPeriod,
-        } = response.body as TransactionsGroupsDetailedStatistics;
+        const { currentPeriod, previousPeriod } =
+          response.body as TransactionsGroupsDetailedStatistics;
 
         expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
 
@@ -104,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(removeEmptyCoordinates(errorRate).length).to.be.greaterThan(0);
         expectSnapshot(errorRate).toMatch();
 
-        expectSnapshot(roundNumber(impact)).toMatchInline(`"93.93"`);
+        expectSnapshot(roundNumber(impact)).toMatchInline(`"98.49"`);
       });
 
       it('returns the correct data for latency aggregation 99th percentile', async () => {
@@ -118,16 +121,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               latencyAggregationType: 'p99',
               transactionNames: JSON.stringify(transactionNames),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
 
         expect(response.status).to.be(200);
 
-        const {
-          currentPeriod,
-          previousPeriod,
-        } = response.body as TransactionsGroupsDetailedStatistics;
+        const { currentPeriod, previousPeriod } =
+          response.body as TransactionsGroupsDetailedStatistics;
 
         expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
 
@@ -166,6 +169,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               latencyAggregationType: 'avg',
               transactionNames: JSON.stringify(['foo']),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -190,6 +195,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -280,8 +287,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const currentPeriodFirstItem = currentPeriodItems[0];
           const previousPeriodFirstItem = previousPeriodItems[0];
 
-          expectSnapshot(roundNumber(currentPeriodFirstItem.impact)).toMatchInline(`"21.75"`);
-          expectSnapshot(roundNumber(previousPeriodFirstItem.impact)).toMatchInline(`"96.94"`);
+          expectSnapshot(roundNumber(currentPeriodFirstItem.impact)).toMatchInline(`"59.04"`);
+          expectSnapshot(roundNumber(previousPeriodFirstItem.impact)).toMatchInline(`"99.05"`);
         });
       });
     }

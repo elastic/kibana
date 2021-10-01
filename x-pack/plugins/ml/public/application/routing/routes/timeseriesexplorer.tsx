@@ -97,10 +97,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 }) => {
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
-  const [
-    timeSeriesExplorerUrlState,
-    setTimeSeriesExplorerUrlState,
-  ] = useTimeSeriesExplorerUrlState();
+  const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
+    useTimeSeriesExplorerUrlState();
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);
@@ -118,6 +116,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         setGlobalState('time', {
           from: start,
           to: end,
+          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
         });
       }
     }
@@ -142,10 +141,10 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       // Only if both min/max bounds are valid moment times set the bounds.
       // An invalid string restored from globalState might return `undefined`.
       if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
-        setBounds(timefilterBounds);
+        setBounds(timefilter.getBounds());
       }
     }
-  }, [lastRefresh, globalState?.time?.from, globalState?.time?.to]);
+  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
   // Sort selectedJobIds so we can be sure comparison works when stringifying.
@@ -309,7 +308,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           );
         });
     }
-  }, [boundsMinMs, boundsMaxMs, selectedJob, selectedForecastId, autoZoomDuration]);
+  }, [selectedForecastId]);
 
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();

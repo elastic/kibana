@@ -21,52 +21,42 @@ const querySchema = schema.object({
   include_type_name: schema.maybe(schema.string()),
 });
 
-export function registerUpdateRoute({ router, lib }: RouteDependencies) {
+export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/index_templates/{name}'),
       validate: { body: bodySchema, params: paramsSchema, query: querySchema },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const { name } = req.params as typeof paramsSchema.type;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { name } = request.params as typeof paramsSchema.type;
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { include_type_name } = req.query as TypeOf<typeof querySchema>;
-      const template = req.body as TemplateDeserialized;
-      const {
-        _kbnMeta: { isLegacy },
-      } = template;
-
-      // Verify the template exists (ES will throw 404 if not)
-      const doesExist = await doesTemplateExist({ name, callAsCurrentUser, isLegacy });
-
-      if (!doesExist) {
-        return res.notFound();
-      }
+      const { include_type_name } = request.query as TypeOf<typeof querySchema>;
+      const template = request.body as TemplateDeserialized;
 
       try {
+        const {
+          _kbnMeta: { isLegacy },
+        } = template;
+
+        // Verify the template exists (ES will throw 404 if not)
+        const { body: templateExists } = await doesTemplateExist({ name, client, isLegacy });
+
+        if (!templateExists) {
+          return response.notFound();
+        }
+
         // Next, update index template
-        const response = await saveTemplate({
+        const { body: responseBody } = await saveTemplate({
           template,
-          callAsCurrentUser,
+          client,
           isLegacy,
-          include_type_name,
+          include_type_name: include_type_name === 'true',
         });
 
-        return res.ok({ body: response });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          const error = lib.parseEsError(e.response);
-          return res.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: error.message,
-              attributes: error,
-            },
-          });
-        }
-        // Case: default
-        throw e;
+        return response.ok({ body: responseBody });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

@@ -38,10 +38,10 @@ export interface EditDrilldownFormProps {
 export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ eventId }) => {
   const isMounted = useMountedState();
   const drilldowns = useDrilldownManager();
-  const drilldownState = React.useMemo(() => drilldowns.createEventDrilldownState(eventId), [
-    drilldowns,
-    eventId,
-  ]);
+  const drilldownState = React.useMemo(
+    () => drilldowns.createEventDrilldownState(eventId),
+    [drilldowns, eventId]
+  );
   const [disabled, setDisabled] = React.useState(false);
 
   if (!drilldownState) return null;

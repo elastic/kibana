@@ -7,9 +7,9 @@
 
 import chroma from 'chroma-js';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { isColorDark } from '@elastic/eui';
-import { Datatable } from 'src/plugins/expressions/public';
+import type { Datatable } from 'src/plugins/expressions/public';
 import {
   CUSTOM_PALETTE,
   defaultPaletteParams,
@@ -17,7 +17,7 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from './constants';
-import { CustomPaletteParams, ColorStop } from './types';
+import type { CustomPaletteParams, ColorStop } from '../../../common';
 
 /**
  * Some name conventions here:
@@ -269,11 +269,10 @@ export function getColorStops(
   palettes: PaletteRegistry,
   colorStops: Required<CustomPaletteParams>['stops'],
   activePalette: PaletteOutput<CustomPaletteParams>,
-  dataBounds: { min: number; max: number },
-  defaultPalette?: string
+  dataBounds: { min: number; max: number }
 ) {
   // just forward the current stops if custom
-  if (activePalette?.name === CUSTOM_PALETTE) {
+  if (activePalette?.name === CUSTOM_PALETTE && colorStops?.length) {
     return colorStops;
   }
   // for predefined palettes create some stops, then drop the last one.
@@ -294,7 +293,12 @@ export function getColorStops(
 export function getContrastColor(color: string, isDarkTheme: boolean) {
   const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorInk;
   const lightColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorGhost;
-  return isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
+  const backgroundColor = isDarkTheme
+    ? euiDarkVars.euiPageBackgroundColor
+    : euiLightVars.euiPageBackgroundColor;
+  const finalColor =
+    chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
+  return isColorDark(...finalColor.rgb()) ? lightColor : darkColor;
 }
 
 /**

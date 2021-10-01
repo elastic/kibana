@@ -356,8 +356,7 @@ describe('Lens Attribute', () => {
                   min: 0,
                 },
                 name: 'divide',
-                text:
-                  "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                 type: 'function',
               },
             },
@@ -380,6 +379,7 @@ describe('Lens Attribute', () => {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
@@ -418,6 +418,7 @@ describe('Lens Attribute', () => {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           palette: undefined,
           seriesType: 'line',
           splitAccessor: 'breakdown-column-layer0',
@@ -562,8 +563,7 @@ describe('Lens Attribute', () => {
                   min: 0,
                 },
                 name: 'divide',
-                text:
-                  "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                 type: 'function',
               },
             },

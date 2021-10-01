@@ -71,6 +71,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       }),
       pollInterval
     ).subscribe();
@@ -104,6 +105,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       }),
       pollInterval,
       retryDelay
@@ -148,6 +150,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       })
     ).toPromise();
 
@@ -178,6 +181,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       })
     ).toPromise();
 
@@ -208,11 +212,12 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       })
     ).toPromise();
 
-    expect(status.level).toEqual(ServiceStatusLevels.unavailable);
-    expect(status.summary).toEqual('Alerting framework is unavailable');
+    expect(status.level).toEqual(ServiceStatusLevels.degraded);
+    expect(status.summary).toEqual('Alerting framework is degraded');
     expect(status.meta).toBeUndefined();
   });
 
@@ -235,6 +240,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       }),
       retryDelay
     ).subscribe((status) => {
@@ -265,11 +271,12 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       }),
       retryDelay
     ).subscribe((status) => {
-      expect(status.level).toEqual(ServiceStatusLevels.unavailable);
-      expect(status.summary).toEqual('Alerting framework is unavailable');
+      expect(status.level).toEqual(ServiceStatusLevels.degraded);
+      expect(status.summary).toEqual('Alerting framework is degraded');
       expect(status.meta).toEqual({ error: err });
     });
 
@@ -301,6 +308,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       })
     ).toPromise();
 

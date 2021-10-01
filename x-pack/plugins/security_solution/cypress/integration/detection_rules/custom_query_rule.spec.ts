@@ -13,14 +13,7 @@ import {
   getEditedRule,
   getNewOverrideRule,
 } from '../../objects/rule';
-import {
-  ALERT_RULE_METHOD,
-  ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
-  ALERT_RULE_VERSION,
-  NUMBER_OF_ALERTS,
-} from '../../screens/alerts';
+import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -88,6 +81,7 @@ import {
 import {
   changeRowsPerPageTo100,
   deleteFirstRule,
+  deleteRuleFromDetailsPage,
   deleteSelectedRules,
   editFirstRule,
   filterByCustomRules,
@@ -220,12 +214,10 @@ describe('Custom detection rules creation', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text()).to.be.gte(1));
-    cy.get(ALERT_RULE_NAME).first().should('have.text', this.rule.name);
-    cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
-    cy.get(ALERT_RULE_METHOD).first().should('have.text', 'query');
-    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', this.rule.severity.toLowerCase());
-    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', this.rule.riskScore);
+    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
+    cy.get(ALERT_GRID_CELL).eq(3).contains(this.rule.name);
+    cy.get(ALERT_GRID_CELL).eq(4).contains(this.rule.severity.toLowerCase());
+    cy.get(ALERT_GRID_CELL).eq(5).contains(this.rule.riskScore);
   });
 });
 
@@ -237,6 +229,7 @@ describe('Custom detection rules deletion and edition', () => {
       goToManageAlertsDetectionRules();
       waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(getNewRule(), 'rule1');
+
       createCustomRuleActivated(getNewOverrideRule(), 'rule2');
       createCustomRuleActivated(getExistingRule(), 'rule3');
       reload();
@@ -300,6 +293,38 @@ describe('Custom detection rules deletion and edition', () => {
           );
         });
     });
+
+    it('Deletes one rule from detail page', () => {
+      cy.get(RULES_TABLE)
+        .find(RULES_ROW)
+        .then((rules) => {
+          const initialNumberOfRules = rules.length;
+          const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
+
+          goToRuleDetails();
+          cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
+
+          deleteRuleFromDetailsPage();
+
+          cy.waitFor('@deleteRule').then(() => {
+            cy.get(RULES_TABLE).should('exist');
+            cy.get(RULES_TABLE).then(($table) => {
+              cy.wrap($table.find(RULES_ROW).length).should(
+                'eql',
+                expectedNumberOfRulesAfterDeletion
+              );
+            });
+            cy.get(SHOWING_RULES_TEXT).should(
+              'have.text',
+              `Showing ${expectedNumberOfRulesAfterDeletion} rules`
+            );
+            cy.get(CUSTOM_RULES_BTN).should(
+              'have.text',
+              `Custom rules (${expectedNumberOfRulesAfterDeletion})`
+            );
+          });
+        });
+    });
   });
 
   context('Edition', () => {
@@ -321,7 +346,7 @@ describe('Custom detection rules deletion and edition', () => {
     it('Only modifies rule active status on enable/disable', () => {
       activatesRule();
 
-      cy.intercept('GET', `/api/detection_engine/rules?id=`).as('fetchRuleDetails');
+      cy.intercept('GET', `/api/detection_engine/rules?id=*`).as('fetchRuleDetails');
 
       goToRuleDetails();
 
@@ -333,7 +358,8 @@ describe('Custom detection rules deletion and edition', () => {
       });
     });
 
-    it('Allows a rule to be edited', () => {
+    // TODO: Remove when https://github.com/elastic/kibana/pull/111251 is merged
+    it.skip('Allows a rule to be edited', () => {
       editFirstRule();
       waitForKibana();
 
@@ -384,7 +410,7 @@ describe('Custom detection rules deletion and edition', () => {
       cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
       fillAboutRule(getEditedRule());
 
-      cy.intercept('GET', '/api/detection_engine/rules?id').as('getRule');
+      cy.intercept('GET', '/api/detection_engine/rules?id*').as('getRule');
 
       saveEditedRule();
 

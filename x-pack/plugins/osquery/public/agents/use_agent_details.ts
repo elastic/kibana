@@ -8,24 +8,29 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { GetOneAgentResponse, agentRouteService } from '../../../fleet/common';
+import { GetOneAgentResponse } from '../../../fleet/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
 interface UseAgentDetails {
-  agentId: string;
+  agentId?: string;
+  silent?: boolean;
+  skip?: boolean;
 }
 
-export const useAgentDetails = ({ agentId }: UseAgentDetails) => {
+export const useAgentDetails = ({ agentId, silent, skip }: UseAgentDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
-  return useQuery<GetOneAgentResponse>(
+  return useQuery<GetOneAgentResponse, unknown, GetOneAgentResponse['item']>(
     ['agentDetails', agentId],
-    () => http.get(agentRouteService.getInfoPath(agentId)),
+    () => http.get(`/internal/osquery/fleet_wrapper/agents/${agentId}`),
     {
-      enabled: agentId.length > 0,
+      enabled: !skip,
+      retry: false,
+      select: (response: GetOneAgentResponse) => response?.item,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
+        !silent &&
         setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agentDetails.fetchError', {
             defaultMessage: 'Error while fetching agent details',

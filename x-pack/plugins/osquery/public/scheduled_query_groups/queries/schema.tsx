@@ -12,15 +12,19 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FIELD_TYPES } from '../../shared_imports';
 
-import { idFieldValidations, intervalFieldValidation, queryFieldValidation } from './validations';
+import {
+  createIdFieldValidations,
+  intervalFieldValidation,
+  queryFieldValidation,
+} from './validations';
 
-export const formSchema = {
+export const createFormSchema = (ids: Set<string>) => ({
   id: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.idFieldLabel', {
       defaultMessage: 'ID',
     }),
-    validations: idFieldValidations.map((validator) => ({ validator })),
+    validations: createIdFieldValidations(ids).map((validator) => ({ validator })),
   },
   description: {
     type: FIELD_TYPES.TEXT,
@@ -57,7 +61,7 @@ export const formSchema = {
   version: {
     defaultValue: [],
     type: FIELD_TYPES.COMBO_BOX,
-    label: ((
+    label: (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <FormattedMessage
@@ -66,7 +70,7 @@ export const formSchema = {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    ) as unknown) as string,
+    ) as unknown as string,
     validations: [],
   },
-};
+});

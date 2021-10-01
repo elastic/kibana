@@ -70,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
           messageText: 'updated transform.',
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'pivot',
             mode: 'batch',
             progress: '100',
           },
@@ -85,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
           messageText: 'updated transform.',
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'latest',
             mode: 'batch',
             progress: '100',
           },
@@ -112,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should show the edit flyout');
-          await transform.table.clickTransformRowAction('Edit');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Edit');
           await transform.editFlyout.assertTransformEditFlyoutExists();
         });
 
@@ -170,6 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.originalConfig.id, {
             id: testData.originalConfig.id,
             description: testData.transformDescription,
+            type: testData.expected.row.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

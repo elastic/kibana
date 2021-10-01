@@ -8,6 +8,7 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
       <EuiToolTip
         content="All actions"
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <Styled(EuiButtonIcon)
@@ -42,6 +43,7 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
           >
             <EuiToolTip
               delay="regular"
+              display="inlineBlock"
               position="left"
             >
               <React.Fragment>

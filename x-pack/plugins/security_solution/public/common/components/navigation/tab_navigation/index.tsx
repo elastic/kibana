@@ -11,7 +11,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 
-import { useNavigation } from '../../../lib/kibana/hooks';
+import { useNavigation } from '../../../lib/kibana';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { TabNavigationProps, TabNavigationItemProps } from './types';
 
@@ -84,7 +84,6 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
     () =>
       Object.values(navTabs).map((tab) => {
         const isSelected = selectedTabId === tab.id;
-
         return (
           <TabNavigationItem
             key={`navigation-${tab.id}`}

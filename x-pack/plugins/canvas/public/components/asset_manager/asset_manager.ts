@@ -8,12 +8,11 @@
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-
-import { getId } from '../../lib/get_id';
 // @ts-expect-error untyped local
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../../../../src/plugins/presentation_util/public';
+import { getId } from '../../lib/get_id';
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../lib/elements_registry';
 // @ts-expect-error untyped local

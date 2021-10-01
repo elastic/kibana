@@ -17,43 +17,39 @@ import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_template
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDependencies) {
-  router.get({ path: addBasePath('/index_templates'), validate: false }, async (ctx, req, res) => {
-    const { callAsCurrentUser } = ctx.dataManagement!.client;
+export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+  router.get(
+    { path: addBasePath('/index_templates'), validate: false },
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
 
-    try {
-      const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
+      try {
+        const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
 
-      const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate', {
-        include_type_name: true,
-      });
-      const { index_templates: templatesEs } = await callAsCurrentUser(
-        'dataManagement.getComposableIndexTemplates'
-      );
-
-      const legacyTemplates = deserializeLegacyTemplateList(
-        legacyTemplatesEs,
-        cloudManagedTemplatePrefix
-      );
-      const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
-
-      const body = {
-        templates,
-        legacyTemplates,
-      };
-
-      return res.ok({ body });
-    } catch (error) {
-      if (isEsError(error)) {
-        return res.customError({
-          statusCode: error.statusCode,
-          body: error,
+        const { body: legacyTemplatesEs } = await client.asCurrentUser.indices.getTemplate({
+          include_type_name: true,
         });
+        const {
+          body: { index_templates: templatesEs },
+        } = await client.asCurrentUser.indices.getIndexTemplate();
+
+        const legacyTemplates = deserializeLegacyTemplateList(
+          legacyTemplatesEs,
+          cloudManagedTemplatePrefix
+        );
+        const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
+
+        const body = {
+          templates,
+          legacyTemplates,
+        };
+
+        return response.ok({ body });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-      // Case: default
-      throw error;
     }
-  });
+  );
 }
 
 const paramsSchema = schema.object({
@@ -65,29 +61,28 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerGetOneRoute({ router, lib }: RouteDependencies) {
+export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/index_templates/{name}'),
       validate: { params: paramsSchema, query: querySchema },
     },
-    async (ctx, req, res) => {
-      const { name } = req.params as TypeOf<typeof paramsSchema>;
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-
-      const isLegacy = (req.query as TypeOf<typeof querySchema>).legacy === 'true';
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { name } = request.params as TypeOf<typeof paramsSchema>;
+      const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
 
       try {
-        const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
+        const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
 
         if (isLegacy) {
-          const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', {
+          const { body: indexTemplateByName } = await client.asCurrentUser.indices.getTemplate({
             name,
             include_type_name: true,
           });
 
           if (indexTemplateByName[name]) {
-            return res.ok({
+            return response.ok({
               body: deserializeLegacyTemplate(
                 { ...indexTemplateByName[name], name },
                 cloudManagedTemplatePrefix
@@ -96,11 +91,11 @@ export function registerGetOneRoute({ router, lib }: RouteDependencies) {
           }
         } else {
           const {
-            index_templates: indexTemplates,
-          } = await callAsCurrentUser('dataManagement.getComposableIndexTemplate', { name });
+            body: { index_templates: indexTemplates },
+          } = await client.asCurrentUser.indices.getIndexTemplate({ name });
 
           if (indexTemplates.length > 0) {
-            return res.ok({
+            return response.ok({
               body: deserializeTemplate(
                 { ...indexTemplates[0].index_template, name },
                 cloudManagedTemplatePrefix
@@ -109,16 +104,9 @@ export function registerGetOneRoute({ router, lib }: RouteDependencies) {
           }
         }
 
-        return res.notFound();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        return response.notFound();
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

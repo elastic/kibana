@@ -30,10 +30,11 @@ const setupDeps = {
   executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 
-beforeEach(() => {
+beforeEach(async () => {
   logger = loggingSystemMock.create();
 
   server = createHttpServer({ logger });
+  await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
 afterEach(async () => {
@@ -244,9 +245,11 @@ describe('KibanaRequest', () => {
       });
 
       it('does not complete before response has been sent', async () => {
-        const { server: innerServer, createRouter, registerOnPreAuth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerOnPreAuth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();

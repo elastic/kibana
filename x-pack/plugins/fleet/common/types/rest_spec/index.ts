@@ -13,7 +13,6 @@ export * from './agent_policy';
 export * from './fleet_setup';
 export * from './epm';
 export * from './enrollment_api_key';
-export * from './ingest_setup';
 export * from './output';
 export * from './settings';
 export * from './app';

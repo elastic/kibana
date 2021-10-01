@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
+import { JsonObject } from '@kbn/utility-types';
 import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
 import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
 import { LogEntryBeforeCursor } from '../../../../common/log_entry';
@@ -43,34 +44,32 @@ export const useLogEntriesBeforeRequest = ({
   sourceId: string;
   startTimestamp: number;
 }) => {
-  const {
-    search: fetchLogEntriesBefore,
-    requests$: logEntriesBeforeSearchRequests$,
-  } = useDataSearch({
-    getRequest: useCallback(
-      (cursor: LogEntryBeforeCursor['before'], params: { size: number; extendTo?: number }) => {
-        return !!sourceId
-          ? {
-              request: {
-                params: logEntriesSearchRequestParamsRT.encode({
-                  before: cursor,
-                  columns: columnOverrides,
-                  endTimestamp,
-                  highlightPhrase,
-                  query,
-                  size: params.size,
-                  sourceId,
-                  startTimestamp: params.extendTo ?? startTimestamp,
-                }),
-              },
-              options: { strategy: LOG_ENTRIES_SEARCH_STRATEGY },
-            }
-          : null;
-      },
-      [columnOverrides, endTimestamp, highlightPhrase, query, sourceId, startTimestamp]
-    ),
-    parseResponses: parseLogEntriesBeforeSearchResponses,
-  });
+  const { search: fetchLogEntriesBefore, requests$: logEntriesBeforeSearchRequests$ } =
+    useDataSearch({
+      getRequest: useCallback(
+        (cursor: LogEntryBeforeCursor['before'], params: { size: number; extendTo?: number }) => {
+          return !!sourceId
+            ? {
+                request: {
+                  params: logEntriesSearchRequestParamsRT.encode({
+                    before: cursor,
+                    columns: columnOverrides,
+                    endTimestamp,
+                    highlightPhrase,
+                    query: query as JsonObject,
+                    size: params.size,
+                    sourceId,
+                    startTimestamp: params.extendTo ?? startTimestamp,
+                  }),
+                },
+                options: { strategy: LOG_ENTRIES_SEARCH_STRATEGY },
+              }
+            : null;
+        },
+        [columnOverrides, endTimestamp, highlightPhrase, query, sourceId, startTimestamp]
+      ),
+      parseResponses: parseLogEntriesBeforeSearchResponses,
+    });
 
   return {
     fetchLogEntriesBefore,
@@ -88,13 +87,8 @@ export const useLogEntriesBeforeResponse = <Request extends IKibanaSearchRequest
     flattenLogEntriesBeforeSearchResponse
   );
 
-  const {
-    cancelRequest,
-    isRequestRunning,
-    isResponsePartial,
-    loaded,
-    total,
-  } = useDataSearchResponseState(logEntriesBeforeSearchResponse$);
+  const { cancelRequest, isRequestRunning, isResponsePartial, loaded, total } =
+    useDataSearchResponseState(logEntriesBeforeSearchResponse$);
 
   return {
     cancelRequest,

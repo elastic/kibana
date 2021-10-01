@@ -7,31 +7,32 @@
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/dom';
-import { render, mockCore, mockAppIndexPattern } from './rtl_helpers';
+import { render, mockAppIndexPattern } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
-import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/test_utils';
 import * as obsvInd from './utils/observability_index_patterns';
+import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
 
 describe('ExploratoryView', () => {
   mockAppIndexPattern();
 
   beforeEach(() => {
-    const indexPattern = getStubIndexPattern(
-      'apm-*',
-      () => {},
-      '@timestamp',
-      [
-        {
-          name: '@timestamp',
-          type: 'date',
-          esTypes: ['date'],
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
+    const indexPattern = createStubIndexPattern({
+      spec: {
+        id: 'apm-*',
+        title: 'apm-*',
+        timeFieldName: '@timestamp',
+        fields: {
+          '@timestamp': {
+            name: '@timestamp',
+            type: 'date',
+            esTypes: ['date'],
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
         },
-      ],
-      mockCore() as any
-    );
+      },
+    });
 
     jest.spyOn(obsvInd, 'ObservabilityIndexPatterns').mockReturnValue({
       getIndexPattern: jest.fn().mockReturnValue(indexPattern),

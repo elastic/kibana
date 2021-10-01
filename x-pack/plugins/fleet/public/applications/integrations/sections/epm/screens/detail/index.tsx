@@ -79,6 +79,13 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
 `;
 
+// to limit size of iconpanel, making the header too big
+const FlexItemWithMaxHeight = styled(EuiFlexItem)`
+  @media (min-width: 768px) {
+    max-height: 60px;
+  }
+`;
+
 function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
   useBreadcrumbs('integration_details_overview', { pkgTitle: packageTitle });
   return null;
@@ -117,9 +124,11 @@ export function Detail() {
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
   // Fetch package info
-  const { data: packageInfoData, error: packageInfoError, isLoading } = useGetPackageInfoByKey(
-    pkgkey
-  );
+  const {
+    data: packageInfoData,
+    error: packageInfoError,
+    isLoading,
+  } = useGetPackageInfoByKey(pkgkey);
 
   const showCustomTab =
     useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
@@ -173,7 +182,7 @@ export function Detail() {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem grow={false}>
+            <FlexItemWithMaxHeight grow={false}>
               {isLoading || !packageInfo ? (
                 <LoadingIconPanel />
               ) : (
@@ -184,7 +193,7 @@ export function Detail() {
                   icons={integrationInfo?.icons || packageInfo.icons}
                 />
               )}
-            </EuiFlexItem>
+            </FlexItemWithMaxHeight>
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
                 <FlexItemWithMinWidth grow={false}>
@@ -235,22 +244,18 @@ export function Detail() {
         redirectToPath = [
           PLUGIN_ID,
           {
-            path: `#${
-              pagePathGetters.policy_details({
-                policyId: agentPolicyIdFromContext,
-              })[1]
-            }`,
+            path: pagePathGetters.policy_details({
+              policyId: agentPolicyIdFromContext,
+            })[1],
           },
         ];
       } else {
         redirectToPath = [
           INTEGRATIONS_PLUGIN_ID,
           {
-            path: `#${
-              pagePathGetters.integration_details_policies({
-                pkgkey,
-              })[1]
-            }`,
+            path: pagePathGetters.integration_details_policies({
+              pkgkey,
+            })[1],
           },
         ];
       }
@@ -260,16 +265,16 @@ export function Detail() {
         onCancelNavigateTo: [
           INTEGRATIONS_PLUGIN_ID,
           {
-            path: currentPath,
+            path: pagePathGetters.integration_details_overview({
+              pkgkey,
+            })[1],
           },
         ],
         onCancelUrl: currentPath,
       };
 
       services.application.navigateToApp(PLUGIN_ID, {
-        // Necessary because of Fleet's HashRouter. Can be changed when
-        // https://github.com/elastic/kibana/issues/96134 is resolved
-        path: `#${path}`,
+        path,
         state: redirectBackRouteState,
       });
     },
@@ -300,7 +305,7 @@ export function Detail() {
                   <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem>{packageInfo.version}</EuiFlexItem>
                     {updateAvailable ? (
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false}>
                         <UpdateIcon />
                       </EuiFlexItem>
                     ) : null}

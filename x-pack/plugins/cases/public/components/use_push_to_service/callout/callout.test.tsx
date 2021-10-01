@@ -25,6 +25,7 @@ describe('Callout', () => {
       },
     ],
     handleButtonClick,
+    hasLicenseError: false,
   };
 
   beforeEach(() => {
@@ -86,11 +87,30 @@ describe('Callout', () => {
         },
       ],
     };
+
     const wrapper = mount(
       <TestProviders>
         <CallOut {...props} />
       </TestProviders>
     );
+
+    expect(wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).exists()).toEqual(
+      false
+    );
+  });
+
+  it('does not show the button when license error is present', () => {
+    const props = {
+      ...defaultProps,
+      hasLicenseError: true,
+    };
+
+    const wrapper = mount(
+      <TestProviders>
+        <CallOut {...props} />
+      </TestProviders>
+    );
+
     expect(wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).exists()).toEqual(
       false
     );

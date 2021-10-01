@@ -42,8 +42,10 @@ import {
   ACTIVATE_RULE_BULK_BTN,
   DEACTIVATE_RULE_BULK_BTN,
   EXPORT_RULE_BULK_BTN,
+  RULE_DETAILS_DELETE_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 export const activateRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
@@ -70,7 +72,7 @@ export const duplicateFirstRule = () => {
  * flake.
  */
 export const duplicateRuleFromMenu = () => {
-  cy.get(ALL_ACTIONS).should('be.visible');
+  cy.get(LOADING_INDICATOR).should('not.exist');
   cy.root()
     .pipe(($el) => {
       $el.find(ALL_ACTIONS).trigger('click');
@@ -105,6 +107,21 @@ export const deleteRule = () => {
 export const deleteSelectedRules = () => {
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DELETE_RULE_BULK_BTN).click();
+};
+
+export const deleteRuleFromDetailsPage = () => {
+  cy.get(ALL_ACTIONS).should('be.visible');
+  // We cannot use cy.root().pipe($el) withing this function and instead have to use a cy.wait()
+  // for the click handler to be registered. If you see flake here because of click handler issues
+  // increase the cy.wait(). The reason we cannot use cypress pipe is because multiple clicks on ALL_ACTIONS
+  // causes the pop up to show and then the next click for it to hide. Multiple clicks can cause
+  // the DOM to queue up and once we detect that the element is visible it can then become invisible later
+  cy.wait(1000);
+  cy.get(ALL_ACTIONS).click();
+  cy.get(RULE_DETAILS_DELETE_BTN).should('be.visible');
+  cy.get(RULE_DETAILS_DELETE_BTN)
+    .pipe(($el) => $el.trigger('click'))
+    .should(($el) => expect($el).to.be.not.visible);
 };
 
 export const duplicateSelectedRules = () => {
@@ -143,7 +160,7 @@ export const goToCreateNewRule = () => {
 };
 
 export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).click({ force: true });
+  cy.get(RULE_NAME).first().click({ force: true });
 };
 
 export const loadPrebuiltDetectionRules = () => {

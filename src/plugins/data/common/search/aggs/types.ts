@@ -8,7 +8,7 @@
 
 import { Assign } from '@kbn/utility-types';
 import { DatatableColumn } from 'src/plugins/expressions';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../..';
 import {
   aggAvg,
   aggBucketAvg,
@@ -95,7 +95,6 @@ export { IAggType } from './agg_type';
 export { AggParam, AggParamOption } from './agg_params';
 export { IFieldParamType } from './param_types';
 export { IMetricAggType } from './metrics/metric_agg_type';
-export { DateRangeKey } from './buckets/lib/date_range';
 export { IpRangeKey } from './buckets/lib/ip_range';
 export { OptionedValueProp } from './param_types/optioned';
 
@@ -142,9 +141,8 @@ export interface AggExpressionType {
 }
 
 /** @internal */
-export type AggExpressionFunctionArgs<
-  Name extends keyof AggParamsMapping
-> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+export type AggExpressionFunctionArgs<Name extends keyof AggParamsMapping> =
+  AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
 
 /**
  * A global list of the param interfaces for each agg type.

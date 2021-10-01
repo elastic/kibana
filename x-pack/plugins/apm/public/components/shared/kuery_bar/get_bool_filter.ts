@@ -13,20 +13,23 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { UIProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { IUrlParams } from '../../../context/url_params_context/types';
+import { ApmUrlParams } from '../../../context/url_params_context/types';
 
 export function getBoolFilter({
   groupId,
   processorEvent,
   serviceName,
+  environment,
   urlParams,
 }: {
   groupId?: string;
   processorEvent?: UIProcessorEvent;
   serviceName?: string;
-  urlParams: IUrlParams;
+  environment?: string;
+  urlParams: ApmUrlParams;
 }) {
   const boolFilter: ESFilter[] = [];
 
@@ -36,7 +39,7 @@ export function getBoolFilter({
     });
   }
 
-  boolFilter.push(...environmentQuery(urlParams.environment));
+  boolFilter.push(...environmentQuery(environment ?? ENVIRONMENT_ALL.value));
 
   if (urlParams.transactionType) {
     boolFilter.push({

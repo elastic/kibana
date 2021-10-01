@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export function healthRoute(
   router: AlertingRouter,
   licenseState: ILicenseState,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  usageCounter?: UsageCounter
 ) {
   router.get(
     {
@@ -26,12 +29,23 @@ export function healthRoute(
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
+      trackLegacyRouteUsage('health', usageCounter);
       try {
+        const isEsSecurityEnabled: boolean | null = licenseState.getIsSecurityEnabled();
         const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
         const areApiKeysEnabled = await context.alerting.areApiKeysEnabled();
 
+        let isSufficientlySecure;
+        if (isEsSecurityEnabled === null) {
+          isSufficientlySecure = false;
+        } else {
+          // if isEsSecurityEnabled = true, then areApiKeysEnabled must be true to enable alerting
+          // if isEsSecurityEnabled = false, then it does not matter what areApiKeysEnabled is
+          isSufficientlySecure = !isEsSecurityEnabled || (isEsSecurityEnabled && areApiKeysEnabled);
+        }
+
         const frameworkHealth: AlertingFrameworkHealth = {
-          isSufficientlySecure: areApiKeysEnabled,
+          isSufficientlySecure,
           hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
           alertingFrameworkHeath,
         };

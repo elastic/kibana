@@ -7,9 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
-import glob from 'glob';
+import del from 'del';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
@@ -19,15 +17,8 @@ import type { Root } from '../../../root';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_kibana_nodes';
 
-const asyncUnlink = Util.promisify(Fs.unlink);
-
 async function removeLogFiles() {
-  glob(Path.join(__dirname, `${LOG_FILE_PREFIX}_*.log`), (err, files) => {
-    files.forEach(async (file) => {
-      // ignore errors if it doesn't exist
-      await asyncUnlink(file).catch(() => void 0);
-    });
-  });
+  await del([Path.join(__dirname, `${LOG_FILE_PREFIX}_*.log`)], { force: true });
 }
 
 function extractSortNumberFromId(id: string): number {
@@ -67,8 +58,8 @@ interface CreateRootConfig {
   logFileName: string;
 }
 
-function createRoot({ logFileName }: CreateRootConfig) {
-  return kbnTestServer.createRoot({
+async function createRoot({ logFileName }: CreateRootConfig) {
+  const root = kbnTestServer.createRoot({
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
       username: kibanaServerTestUser.username,
@@ -102,6 +93,10 @@ function createRoot({ logFileName }: CreateRootConfig) {
       ],
     },
   });
+
+  await root.preboot();
+
+  return root;
 }
 
 describe('migration v2', () => {
@@ -133,13 +128,13 @@ describe('migration v2', () => {
   beforeEach(async () => {
     await removeLogFiles();
 
-    rootA = createRoot({
+    rootA = await createRoot({
       logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}_A.log`),
     });
-    rootB = createRoot({
+    rootB = await createRoot({
       logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}_B.log`),
     });
-    rootC = createRoot({
+    rootC = await createRoot({
       logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}_C.log`),
     });
 

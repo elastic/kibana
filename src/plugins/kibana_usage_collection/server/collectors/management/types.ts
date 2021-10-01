@@ -12,6 +12,7 @@ export interface UsageStats {
    */
   'timelion:quandl.key': string;
   'securitySolution:defaultIndex': string;
+  'securitySolution:defaultThreatIndex': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
@@ -25,8 +26,8 @@ export interface UsageStats {
    */
   'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
+  'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
-  'visualization:visualize:legacyChartsLibrary': boolean;
   'visualization:visualize:legacyPieChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
@@ -34,9 +35,8 @@ export interface UsageStats {
   'discover:showMultiFields': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
-  'apm:enableSignificantTerms': boolean;
-  'apm:enableServiceOverview': boolean;
   'observability:enableInspectEsQueries': boolean;
+  'observability:maxSuggestions': number;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -45,14 +45,12 @@ export interface UsageStats {
   'visualization:tileMap:maxPrecision': number;
   'csv:separator': string;
   'visualization:tileMap:WMSdefaults': string;
+  'timelion:legacyChartsLibrary': boolean;
   'timelion:target_buckets': number;
   'timelion:max_buckets': number;
   'timelion:es.timefield': string;
   'timelion:min_interval': string;
-  'timelion:default_rows': number;
-  'timelion:default_columns': number;
   'timelion:es.default_index': string;
-  'timelion:showTutorial': boolean;
   'securitySolution:timeDefaults': string;
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;

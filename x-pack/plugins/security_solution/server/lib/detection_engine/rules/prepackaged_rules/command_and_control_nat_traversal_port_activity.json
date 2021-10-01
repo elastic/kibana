@@ -8,6 +8,7 @@
   ],
   "from": "now-9m",
   "index": [
+    "auditbeat-*",
     "filebeat-*",
     "packetbeat-*",
     "logs-endpoint.events.*"
@@ -24,7 +25,8 @@
     "Host",
     "Network",
     "Threat Detection",
-    "Command and Control"
+    "Command and Control",
+    "Host"
   ],
   "threat": [
     {
@@ -39,5 +41,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

@@ -34,12 +34,16 @@ export class Plugin implements InfraClientPluginClass {
       registerFeatures(pluginsSetup.home);
     }
 
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createInventoryMetricAlertType()
+    );
+
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdAlertType()
     );
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
-
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createMetricThresholdAlertType()
+    );
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_logs',
       hasData: getLogsHasDataFetcher(core.getStartServices),
@@ -55,33 +59,39 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts */
     pluginsSetup.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
-        map(([{ application: { capabilities } }]) => [
-          ...(capabilities.logs.show
-            ? [
-                {
-                  label: 'Logs',
-                  sortKey: 200,
-                  entries: [
-                    { label: 'Stream', app: 'logs', path: '/stream' },
-                    { label: 'Anomalies', app: 'logs', path: '/anomalies' },
-                    { label: 'Categories', app: 'logs', path: '/log-categories' },
-                  ],
-                },
-              ]
-            : []),
-          ...(capabilities.infrastructure.show
-            ? [
-                {
-                  label: 'Metrics',
-                  sortKey: 300,
-                  entries: [
-                    { label: 'Inventory', app: 'metrics', path: '/inventory' },
-                    { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-                  ],
-                },
-              ]
-            : []),
-        ])
+        map(
+          ([
+            {
+              application: { capabilities },
+            },
+          ]) => [
+            ...(capabilities.logs.show
+              ? [
+                  {
+                    label: 'Logs',
+                    sortKey: 200,
+                    entries: [
+                      { label: 'Stream', app: 'logs', path: '/stream' },
+                      { label: 'Anomalies', app: 'logs', path: '/anomalies' },
+                      { label: 'Categories', app: 'logs', path: '/log-categories' },
+                    ],
+                  },
+                ]
+              : []),
+            ...(capabilities.infrastructure.show
+              ? [
+                  {
+                    label: 'Metrics',
+                    sortKey: 300,
+                    entries: [
+                      { label: 'Inventory', app: 'metrics', path: '/inventory' },
+                      { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+                    ],
+                  },
+                ]
+              : []),
+          ]
+        )
       )
     );
 

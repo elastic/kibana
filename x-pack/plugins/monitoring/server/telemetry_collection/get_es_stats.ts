@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
@@ -70,8 +69,8 @@ export async function fetchElasticsearchStats(
     },
   };
 
-  const { body: response } = await callCluster.search(params);
-  return response as SearchResponse<ESClusterStats>;
+  const { body: response } = await callCluster.search<ESClusterStats>(params);
+  return response;
 }
 
 export interface ESClusterStats {
@@ -86,8 +85,8 @@ export interface ESClusterStats {
 /**
  * Extract the cluster stats for each cluster.
  */
-export function handleElasticsearchStats(response: SearchResponse<ESClusterStats>) {
+export function handleElasticsearchStats(response: estypes.SearchResponse<ESClusterStats>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.map((cluster) => cluster._source);
+  return clusters.map((cluster) => cluster._source!);
 }

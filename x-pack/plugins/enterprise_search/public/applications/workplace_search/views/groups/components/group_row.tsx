@@ -12,6 +12,7 @@ import moment from 'moment';
 import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { MANAGE_BUTTON_LABEL } from '../../../../shared/constants';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { getGroupPath } from '../../../routes';
@@ -24,7 +25,7 @@ const DAYS_CUTOFF = 8;
 export const NO_SOURCES_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.noSourcesMessage',
   {
-    defaultMessage: 'No shared content sources',
+    defaultMessage: 'No organizational content sources',
   }
 );
 export const NO_USERS_MESSAGE = i18n.translate(
@@ -70,7 +71,7 @@ export const GroupRow: React.FC<Group> = ({ id, name, updatedAt, contentSources 
       </EuiTableRowCell>
       <EuiTableRowCell align="right">
         <strong>
-          <EuiLinkTo to={getGroupPath(id)}>
+          <EuiLinkTo aria-label={MANAGE_BUTTON_LABEL} to={getGroupPath(id)}>
             <EuiIcon type="pencil" />
           </EuiLinkTo>
         </strong>

@@ -11,7 +11,7 @@ import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_se
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
-import { ORIGIN } from '../../maps_ems/public';
+import { ORIGIN } from '../../maps_ems/common';
 
 export function createRegionMapVisualization({
   regionmapsConfig,

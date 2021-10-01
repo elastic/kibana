@@ -33,9 +33,6 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       },
       connector: {
         properties: {
-          id: {
-            type: 'keyword',
-          },
           name: {
             type: 'text',
           },

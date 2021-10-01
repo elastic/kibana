@@ -9,9 +9,27 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { css, CSSObject } from '@emotion/react';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
-import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
-import './reveal_image.scss';
+import { isValidUrl } from '../../../presentation_util/public';
+
+const revealImageParentStyle = css`
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+`;
+
+const revealImageAlignerStyle: CSSObject = {
+  backgroundSize: 'contain',
+  backgroundRepeat: 'no-repeat',
+};
+
+const revealImageStyle: CSSObject = {
+  userSelect: 'none',
+};
 
 interface RevealImageComponentProps extends RevealImageRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];
@@ -19,8 +37,8 @@ interface RevealImageComponentProps extends RevealImageRendererConfig {
 }
 
 interface ImageStyles {
-  width?: string;
-  height?: string;
+  width?: number | string;
+  height?: number | string;
   clipPath?: string;
 }
 
@@ -48,6 +66,7 @@ function RevealImageComponent({
 
   // modify the top-level container class
   parentNode.className = 'revealImage';
+  parentNode.setAttribute('style', revealImageParentStyle.styles);
 
   // set up the overlay image
   const updateImageView = useCallback(() => {
@@ -89,43 +108,46 @@ function RevealImageComponent({
     };
 
     if (imgDimensions.ratio > domNodeDimensions.ratio) {
-      imgStyles.height = `${domNodeDimensions.height}px`;
+      imgStyles.height = domNodeDimensions.height;
       imgStyles.width = 'initial';
     } else {
-      imgStyles.width = `${domNodeDimensions.width}px`;
+      imgStyles.width = domNodeDimensions.width;
       imgStyles.height = 'initial';
     }
 
     return imgStyles;
   }
 
-  const imgSrc = isValidUrl(image ?? '') ? image : elasticOutline;
-
-  const alignerStyles: AlignerStyles = {};
+  const additionaAlignerStyles: AlignerStyles = {};
 
   if (isValidUrl(emptyImage ?? '')) {
     // only use empty image if one is provided
-    alignerStyles.backgroundImage = `url(${emptyImage})`;
+    additionaAlignerStyles.backgroundImage = `url(${emptyImage})`;
   }
 
-  let imgStyles: ImageStyles = {};
-  if (imgRef.current && loaded) imgStyles = getImageSizeStyle();
+  let additionalImgStyles: ImageStyles = {};
+  if (imgRef.current && loaded) additionalImgStyles = getImageSizeStyle();
 
-  imgStyles.clipPath = getClipPath(percent, origin);
+  additionalImgStyles.clipPath = getClipPath(percent, origin);
   if (imgRef.current && loaded) {
     imgRef.current.style.setProperty('-webkit-clip-path', getClipPath(percent, origin));
   }
 
   return (
-    <div className="revealImageAligner" style={alignerStyles}>
+    <div
+      className="revealImageAligner"
+      css={css({
+        ...revealImageAlignerStyle,
+        ...additionaAlignerStyles,
+      })}
+    >
       <img
         ref={imgRef}
         onLoad={updateImageView}
-        className="revealImage__image"
-        src={imgSrc ?? ''}
+        css={css({ ...revealImageStyle, ...additionalImgStyles })}
+        src={image}
         alt=""
         role="presentation"
-        style={imgStyles}
       />
     </div>
   );

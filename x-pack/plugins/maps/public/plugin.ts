@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import type { DashboardStart } from 'src/plugins/dashboard/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -48,6 +50,7 @@ import {
   createLayerDescriptors,
   registerLayerWizard,
   registerSource,
+  MapsSetupApi,
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
@@ -71,6 +74,7 @@ import {
   MapsAppRegionMapLocatorDefinition,
   MapsAppTileMapLocatorDefinition,
 } from './locators';
+import { SecurityPluginStart } from '../../security/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -80,6 +84,7 @@ export interface MapsPluginSetupDependencies {
   mapsEms: MapsEmsPluginSetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -97,6 +102,7 @@ export interface MapsPluginStartDependencies {
   dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  security: SecurityPluginStart;
 }
 
 /**
@@ -115,14 +121,15 @@ export class MapsPlugin
       MapsPluginStart,
       MapsPluginSetupDependencies,
       MapsPluginStartDependencies
-    > {
+    >
+{
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
 
   constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -166,10 +173,17 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
+        const UsageTracker =
+          plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(params);
+        return renderApp(params, UsageTracker);
       },
     });
+
+    return {
+      registerLayerWizard,
+      registerSource,
+    };
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
@@ -187,8 +201,6 @@ export class MapsPlugin
 
     return {
       createLayerDescriptors,
-      registerLayerWizard,
-      registerSource,
       suggestEMSTermJoinConfig,
     };
   }

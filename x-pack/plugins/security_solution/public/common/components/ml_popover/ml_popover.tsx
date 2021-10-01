@@ -96,9 +96,12 @@ export const MlPopover = React.memo(() => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-  const { isMlAdmin, isLicensed, loading: isLoadingSecurityJobs, jobs } = useSecurityJobs(
-    refreshToggle
-  );
+  const {
+    isMlAdmin,
+    isLicensed,
+    loading: isLoadingSecurityJobs,
+    jobs,
+  } = useSecurityJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
   const docLinks = useKibana().services.docLinks;
   const handleJobStateChange = useCallback(
@@ -197,7 +200,7 @@ export const MlPopover = React.memo(() => {
                     values={{
                       mlDocs: (
                         <a
-                          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/machine-learning.html`}
+                          href={`${docLinks.links.siem.ml}`}
                           rel="noopener noreferrer"
                           target="_blank"
                         >

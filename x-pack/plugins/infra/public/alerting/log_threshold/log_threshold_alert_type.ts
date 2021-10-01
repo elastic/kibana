@@ -12,7 +12,7 @@ import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
   PartialAlertParams,
 } from '../../../common/alerting/logs/log_threshold/types';
-import { formatReason } from './rule_data_formatters';
+import { formatRuleData } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
 export function createLogThresholdAlertType(): ObservabilityRuleTypeModel<PartialAlertParams> {
@@ -23,7 +23,7 @@ export function createLogThresholdAlertType(): ObservabilityRuleTypeModel<Partia
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/logs-threshold-alert.html`;
+      return `${docLinks.links.observability.logsThreshold}`;
     },
     alertParamsExpression: React.lazy(() => import('./components/expression_editor/editor')),
     validate: validateExpression,
@@ -34,6 +34,6 @@ export function createLogThresholdAlertType(): ObservabilityRuleTypeModel<Partia
       }
     ),
     requiresAppContext: false,
-    format: formatReason,
+    format: formatRuleData,
   };
 }

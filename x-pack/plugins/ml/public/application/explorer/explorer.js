@@ -429,7 +429,10 @@ export class ExplorerUI extends React.Component {
                   <EuiAccordion
                     id={this.htmlIdGen()}
                     buttonContent={
-                      <EuiTitle className="panel-title">
+                      <EuiTitle
+                        className="panel-title"
+                        data-test-subj="mlAnomalyExplorerAnnotationsPanelButton"
+                      >
                         <h2>
                           <FormattedMessage
                             id="xpack.ml.explorer.annotationsTitle"
@@ -495,7 +498,10 @@ export class ExplorerUI extends React.Component {
                   </EuiFlexItem>
                   {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
                     <EuiFlexItem grow={false}>
-                      <CheckboxShowCharts />
+                      <CheckboxShowCharts
+                        showCharts={showCharts}
+                        setShowCharts={explorerService.setShowCharts}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

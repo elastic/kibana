@@ -23,13 +23,15 @@ function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
-> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput> {
+> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput>
+{
   static runtimeId: number = 0;
 
   public readonly runtimeId = Embeddable.runtimeId++;
 
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
+  public readonly deferEmbeddableLoad: boolean = false;
   public abstract readonly type: string;
   public readonly id: string;
   public fatalError?: Error;
@@ -46,7 +48,7 @@ export abstract class Embeddable<
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
-  private destroyed: boolean = false;
+  protected destroyed: boolean = false;
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
@@ -196,6 +198,16 @@ export abstract class Embeddable<
     return;
   }
 
+  /**
+   * communicate to the parent embeddable that this embeddable's initialization is finished.
+   * This only applies to embeddables which defer their loading state with deferEmbeddableLoad.
+   */
+  protected setInitializationFinished() {
+    if (this.deferEmbeddableLoad && this.parent?.isContainer) {
+      this.parent.setChildLoaded(this);
+    }
+  }
+
   protected updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
     const newOutput = {
       ...this.output,
@@ -210,6 +222,11 @@ export abstract class Embeddable<
   protected onFatalError(e: Error) {
     this.fatalError = e;
     this.output$.error(e);
+    // if the container is waiting for this embeddable to complete loading,
+    // a fatal error counts as complete.
+    if (this.deferEmbeddableLoad && this.parent?.isContainer) {
+      this.parent.setChildLoaded(this);
+    }
   }
 
   private onResetInput(newInput: TEmbeddableInput) {

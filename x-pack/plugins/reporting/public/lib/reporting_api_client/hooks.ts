@@ -10,9 +10,11 @@ import { IlmPolicyStatusResponse } from '../../../common/types';
 
 import { API_GET_ILM_POLICY_STATUS } from '../../../common/constants';
 
-import { useInternalApiClient } from './context';
+import { useKibana } from '../../shared_imports';
 
 export const useCheckIlmPolicyStatus = (): UseRequestResponse<IlmPolicyStatusResponse> => {
-  const { http } = useInternalApiClient();
+  const {
+    services: { http },
+  } = useKibana();
   return useRequest(http, { path: API_GET_ILM_POLICY_STATUS, method: 'get' });
 };

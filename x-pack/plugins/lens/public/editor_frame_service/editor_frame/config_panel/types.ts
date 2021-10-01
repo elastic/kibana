@@ -8,43 +8,24 @@
 import {
   Visualization,
   FramePublicAPI,
-  Datasource,
   DatasourceDimensionEditorProps,
   VisualizationDimensionGroupConfig,
+  DatasourceMap,
+  VisualizationMap,
 } from '../../../types';
 export interface ConfigPanelWrapperProps {
-  activeDatasourceId: string;
-  visualizationState: unknown;
-  visualizationMap: Record<string, Visualization>;
-  activeVisualizationId: string | null;
   framePublicAPI: FramePublicAPI;
-  datasourceMap: Record<string, Datasource>;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
-  isFullscreen: boolean;
 }
 
 export interface LayerPanelProps {
-  activeDatasourceId: string;
   visualizationState: unknown;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   activeVisualization: Visualization;
   framePublicAPI: FramePublicAPI;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
   core: DatasourceDimensionEditorProps['core'];
-  isFullscreen: boolean;
 }
 
 export interface LayerDatasourceDropProps {

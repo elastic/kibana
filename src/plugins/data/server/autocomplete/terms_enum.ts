@@ -9,9 +9,8 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import { IFieldType } from '../../common';
-import { findIndexPatternById, getFieldByName } from '../index_patterns';
+import { findIndexPatternById, getFieldByName } from '../data_views';
 import { shimAbortSignal } from '../search';
-import { getKbnServerError } from '../../../kibana_utils/server';
 import { ConfigSchema } from '../../config';
 
 export async function termsEnumSuggestions(
@@ -31,32 +30,26 @@ export async function termsEnumSuggestions(
     field = indexPattern && getFieldByName(fieldName, indexPattern);
   }
 
-  try {
-    const promise = esClient.transport.request({
-      method: 'POST',
-      path: encodeURI(`/${index}/_terms_enum`),
-      body: {
-        field: field?.name ?? fieldName,
-        string: query,
-        index_filter: {
-          bool: {
-            must: [
-              ...(filters ?? []),
-              {
-                terms: {
-                  _tier: tiers,
-                },
+  const promise = esClient.termsEnum({
+    index,
+    body: {
+      field: field?.name ?? fieldName,
+      string: query,
+      index_filter: {
+        bool: {
+          must: [
+            ...(filters ?? []),
+            {
+              terms: {
+                _tier: tiers,
               },
-            ],
-          },
+            },
+          ],
         },
       },
-    });
+    },
+  });
 
-    const result = await shimAbortSignal(promise, abortSignal);
-
-    return result.body.terms;
-  } catch (e) {
-    throw getKbnServerError(e);
-  }
+  const result = await shimAbortSignal(promise, abortSignal);
+  return result.body.terms;
 }

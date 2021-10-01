@@ -12,6 +12,7 @@ import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-g
 
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { SetEventsLoading, SetEventsDeleted } from '../../../../../../../timelines/common';
 import {
   ColumnHeaderOptions,
   CellValueElementProps,
@@ -76,6 +77,8 @@ interface DataDrivenColumnProps {
   toggleShowNotes: () => void;
   trailingControlColumns: ControlColumnProps[];
   leadingControlColumns: ControlColumnProps[];
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
 }
 
 const SPACE = ' ';
@@ -150,6 +153,8 @@ const TgridActionTdCell = ({
   tabType,
   timelineId,
   toggleShowNotes,
+  setEventsLoading,
+  setEventsDeleted,
 }: ActionProps & {
   columnId: string;
   hasRowRenderers: boolean;
@@ -201,6 +206,8 @@ const TgridActionTdCell = ({
                 showNotes={showNotes}
                 timelineId={timelineId}
                 toggleShowNotes={toggleShowNotes}
+                setEventsLoading={setEventsLoading}
+                setEventsDeleted={setEventsDeleted}
               />
             )}
           </>
@@ -303,6 +310,8 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
     toggleShowNotes,
     trailingControlColumns,
     leadingControlColumns,
+    setEventsLoading,
+    setEventsDeleted,
   }) => {
     const trailingActionCells = useMemo(
       () =>
@@ -349,6 +358,8 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
                 tabType={tabType}
                 timelineId={timelineId}
                 toggleShowNotes={toggleShowNotes}
+                setEventsLoading={setEventsLoading}
+                setEventsDeleted={setEventsDeleted}
               />
             )
           );
@@ -379,6 +390,8 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
         timelineId,
         toggleShowNotes,
         trailingActionCells,
+        setEventsLoading,
+        setEventsDeleted,
       ]
     );
     const ColumnHeaders = useMemo(

@@ -1,0 +1,64 @@
+{
+  "id": "regionMap",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "regionMap",
+        "id": "def-public.RegionMapsConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegionMapsConfigType",
+        "description": [],
+        "path": "src/plugins/region_map/public/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "regionMap",
+            "id": "def-public.RegionMapsConfigType.includeElasticMapsService",
+            "type": "boolean",
+            "tags": [],
+            "label": "includeElasticMapsService",
+            "description": [],
+            "path": "src/plugins/region_map/public/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "regionMap",
+            "id": "def-public.RegionMapsConfigType.layers",
+            "type": "Array",
+            "tags": [],
+            "label": "layers",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "src/plugins/region_map/public/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

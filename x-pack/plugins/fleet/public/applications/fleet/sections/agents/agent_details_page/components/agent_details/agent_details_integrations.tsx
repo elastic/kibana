@@ -107,6 +107,9 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
                 logQuery: getLogsQueryByInputType(inputType),
               })}
               iconType="editorAlignLeft"
+              aria-label={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
+                defaultMessage: 'View logs',
+              })}
             />
           </EuiToolTip>
         );

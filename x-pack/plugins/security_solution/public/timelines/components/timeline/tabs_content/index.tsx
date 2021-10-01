@@ -6,6 +6,7 @@
  */
 
 import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -59,6 +60,7 @@ interface BasicTimelineTab {
   timelineId: TimelineId;
   timelineType: TimelineType;
   graphEventId?: string;
+  timelineDescription: string;
 }
 
 const QueryTab: React.FC<{
@@ -222,6 +224,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineFullScreen,
   timelineType,
   graphEventId,
+  timelineDescription,
 }) => {
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
@@ -233,6 +236,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
+
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
   );
@@ -253,8 +257,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [globalTimelineNoteIds, eventIdToNoteIds]);
 
   const numberOfNotes = useMemo(
-    () => appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length,
-    [appNotes, allTimelineNoteIds]
+    () =>
+      appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length +
+      (isEmpty(timelineDescription) ? 0 : 1),
+    [appNotes, allTimelineNoteIds, timelineDescription]
   );
 
   const setQueryAsActiveTab = useCallback(() => {
@@ -362,6 +368,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         rowRenderers={rowRenderers}
         timelineId={timelineId}
         timelineType={timelineType}
+        timelineDescription={timelineDescription}
       />
     </>
   );

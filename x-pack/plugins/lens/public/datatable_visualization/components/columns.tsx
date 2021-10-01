@@ -13,8 +13,8 @@ import {
   EuiListGroupItemProps,
 } from '@elastic/eui';
 import type { Datatable, DatatableColumn, DatatableColumnMeta } from 'src/plugins/expressions';
-import type { FormatFactory } from '../../types';
-import { ColumnConfig } from './table_basic';
+import type { FormatFactory } from '../../../common';
+import type { ColumnConfig } from '../../../common/expressions';
 
 export const createGridColumns = (
   bucketColumns: string[],
