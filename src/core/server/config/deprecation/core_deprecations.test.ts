@@ -273,36 +273,27 @@ describe('core deprecations', () => {
     });
   });
 
-  describe('logging.events.request and logging.events.response', () => {
-    it('warns when request and response events are used', () => {
-      const { messages } = applyCoreDeprecations({
-        logging: { events: { request: '*', response: '*' } },
-      });
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
-        ]
-      `);
-    });
-
-    it('warns when only request event is used', () => {
+  describe('logging.events.request', () => {
+    it('warns when request event is used', () => {
       const { messages } = applyCoreDeprecations({
         logging: { events: { request: '*' } },
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+          "\\"logging.events.request\\" has been deprecated and will be removed in 8.0. To access request data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });
+  });
 
-    it('warns when only response event is used', () => {
+  describe('logging.events.response', () => {
+    it('warns when response event is used', () => {
       const { messages } = applyCoreDeprecations({
         logging: { events: { response: '*' } },
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+          "\\"logging.events.response\\" has been deprecated and will be removed in 8.0. To access response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { GetConfigFn } from '../../types';
 import { IndexPattern } from '../..';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
@@ -1153,7 +1153,7 @@ describe('SearchSource', () => {
           },
         };
 
-        searchSourceDependencies.search = jest.fn().mockReturnValue(of(Promise.reject('aaaaa')));
+        searchSourceDependencies.search = jest.fn().mockReturnValue(throwError('aaaaa'));
 
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);

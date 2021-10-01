@@ -46,7 +46,8 @@ Changing these settings may disable features of the APM App.
 [cols="2*<"]
 |===
 | `xpack.apm.enabled`
-  | Set to `false` to disable the APM app. Defaults to `true`.
+  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
+  Set to `false` to disable the APM app. Defaults to `true`.
 
 | `xpack.apm.maxServiceEnvironments`
   | Maximum number of unique service environments recognized by the UI. Defaults to `100`.

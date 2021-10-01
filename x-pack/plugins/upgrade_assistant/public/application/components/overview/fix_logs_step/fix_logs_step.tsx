@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiSpacer, EuiPanel, EuiLink, EuiCallOut } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiPanel, EuiLink, EuiCallOut, EuiCode } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { useAppContext } from '../../../app_context';
@@ -19,6 +18,8 @@ import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';
+import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
+import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
 
 const i18nTexts = {
   identifyStepTitle: i18n.translate('xpack.upgradeAssistant.overview.identifyStepTitle', {
@@ -71,13 +72,40 @@ const i18nTexts = {
         'Go to your logs directory to view the deprecation logs or enable log collecting to see them in the UI.',
     }
   ),
+  deniedPrivilegeTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeTitle',
+    {
+      defaultMessage: 'You require index privileges to analyze the deprecation logs',
+    }
+  ),
+  deniedPrivilegeDescription: (privilegesMissing: MissingPrivileges) => (
+    // NOTE: hardcoding the missing privilege because the WithPrivileges HOC
+    // doesnt provide a way to retrieve which specific privileges an index
+    // is missing.
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription"
+      defaultMessage="The deprecation logs will continue to be indexed, but you won't be able to analyze them until you have the read index {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
+      values={{
+        missingPrivileges: (
+          <EuiCode transparentBackground={true}>{privilegesMissing?.index?.join(', ')}</EuiCode>
+        ),
+        privilegesCount: privilegesMissing?.index?.length,
+      }}
+    />
+  ),
 };
 
 interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
+  hasPrivileges: boolean;
+  privilegesMissing: MissingPrivileges;
 }
 
-const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
+const FixLogsStep: FunctionComponent<Props> = ({
+  setIsComplete,
+  hasPrivileges,
+  privilegesMissing,
+}) => {
   const state = useDeprecationLogging();
   const {
     services: {
@@ -123,7 +151,21 @@ const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
         </>
       )}
 
-      {state.isDeprecationLogIndexingEnabled && (
+      {!hasPrivileges && state.isDeprecationLogIndexingEnabled && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            iconType="help"
+            color="warning"
+            title={i18nTexts.deniedPrivilegeTitle}
+            data-test-subj="noIndexPermissionsCallout"
+          >
+            <p>{i18nTexts.deniedPrivilegeDescription(privilegesMissing)}</p>
+          </EuiCallOut>
+        </>
+      )}
+
+      {hasPrivileges && state.isDeprecationLogIndexingEnabled && (
         <>
           <EuiSpacer size="xl" />
           <EuiText data-test-subj="externalLinksTitle">
@@ -168,6 +210,16 @@ export const getFixLogsStep = ({ isComplete, setIsComplete }: OverviewStepProps)
     status,
     title: i18nTexts.identifyStepTitle,
     'data-test-subj': `fixLogsStep-${status}`,
-    children: <FixLogsStep setIsComplete={setIsComplete} />,
+    children: (
+      <WithPrivileges privileges={`index.${DEPRECATION_LOGS_INDEX}`}>
+        {({ hasPrivileges, privilegesMissing, isLoading }) => (
+          <FixLogsStep
+            setIsComplete={setIsComplete}
+            hasPrivileges={!isLoading && hasPrivileges}
+            privilegesMissing={privilegesMissing}
+          />
+        )}
+      </WithPrivileges>
+    ),
   };
 };
