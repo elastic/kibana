@@ -11,13 +11,20 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FieldStats } from '../../../../../common/search_strategies/field_stats_types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  FieldStats,
+  isTopValuesStats,
+} from '../../../../../common/search_strategies/field_stats_types';
 import { TopValues } from './top_values';
 import { IndexPatternField } from '../../../../../../../../src/plugins/data/common';
+import { useTheme } from '../../../../hooks/use_theme';
 
 export function CorrelationsContextPopover({
   fieldName,
@@ -33,7 +40,9 @@ export function CorrelationsContextPopover({
   ) => void;
 }) {
   const [infoIsOpen, setOpen] = useState(false);
+  const theme = useTheme();
 
+  if (!isTopValuesStats(stats)) return null;
   const popoverTitle = (
     <EuiPopoverTitle
       style={{ textTransform: 'none' }}
@@ -63,6 +72,7 @@ export function CorrelationsContextPopover({
             }
           )}
           data-test-subj={'apmCorrelationsContextPopoverButton'}
+          style={{ marginLeft: theme.eui.paddingSizes.xs }}
         />
       }
       isOpen={infoIsOpen}
@@ -82,7 +92,23 @@ export function CorrelationsContextPopover({
         </h5>
       </EuiTitle>
       {infoIsOpen ? (
-        <TopValues stats={stats} onAddFilter={onAddFilter} />
+        <>
+          <TopValues stats={stats} onAddFilter={onAddFilter} />
+          {stats.topValuesSampleSize !== undefined && (
+            <Fragment>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" textAlign={'center'}>
+                <FormattedMessage
+                  id="xpack.apm.correlations.fieldContextPopover.calculatedFromSampleDescription"
+                  defaultMessage="Calculated from sample of {sampleSize} documents"
+                  values={{
+                    sampleSize: stats.topValuesSampleSize,
+                  }}
+                />
+              </EuiText>
+            </Fragment>
+          )}
+        </>
       ) : null}
     </EuiPopover>
   );

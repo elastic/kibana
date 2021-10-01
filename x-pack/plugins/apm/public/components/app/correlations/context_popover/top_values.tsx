@@ -18,14 +18,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternField } from '../../../../../../../../src/plugins/data/common';
-import {
-  FieldStats,
-  isTopValuesStats,
-} from '../../../../../common/search_strategies/field_stats_types';
+import { TopValuesStats } from '../../../../../common/search_strategies/field_stats_types';
 import { asPercent } from '../../../../../common/utils/formatters';
+import { useTheme } from '../../../../hooks/use_theme';
 
 interface Props {
-  stats: FieldStats | undefined;
+  stats: TopValuesStats;
   barColor?: 'primary' | 'secondary' | 'danger' | 'subdued' | 'accent';
   compressed?: boolean;
   onAddFilter?: (
@@ -36,7 +34,6 @@ interface Props {
 }
 
 export function TopValues({ stats, barColor, onAddFilter }: Props) {
-  if (!isTopValuesStats(stats)) return null;
   const {
     topValues,
     topValuesSampleSize,
@@ -45,6 +42,8 @@ export function TopValues({ stats, barColor, onAddFilter }: Props) {
     isTopValuesSampled,
     fieldName,
   } = stats;
+  const theme = useTheme();
+  const filterPaddingSize = theme.eui.paddingSizes.xs / 2;
 
   const progressBarMax = topValuesSampleSize ?? count;
   return (
@@ -52,7 +51,7 @@ export function TopValues({ stats, barColor, onAddFilter }: Props) {
       {Array.isArray(topValues) &&
         topValues.map((value) => (
           <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
-            <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
+            <EuiFlexItem data-test-subj="apmCorrelationsContextPopoverTopValueBar">
               <EuiProgress
                 value={value.doc_count}
                 max={progressBarMax}
@@ -87,18 +86,18 @@ export function TopValues({ stats, barColor, onAddFilter }: Props) {
                     );
                   }}
                   aria-label={i18n.translate(
-                    'xpack.dataVisualizer.dataGrid.field.addFilterAriaLabel',
+                    'xpack.apm.correlations.fieldContextPopover.addFilterAriaLabel',
                     {
                       defaultMessage: 'Filter for {fieldName}: "{value}"',
                       values: { fieldName, value: value.key },
                     }
                   )}
-                  data-test-subj={`dvFieldDataTopValuesAddFilterButton-${value.key}-${value.key}`}
+                  data-test-subj={`apmFieldContextTopValuesAddFilterButton-${value.key}-${value.key}`}
                   style={{
                     minHeight: 'auto',
                     minWidth: 'auto',
-                    paddingRight: 2,
-                    paddingLeft: 2,
+                    paddingRight: filterPaddingSize,
+                    paddingLeft: filterPaddingSize,
                     paddingTop: 0,
                     paddingBottom: 0,
                   }}
@@ -116,20 +115,20 @@ export function TopValues({ stats, barColor, onAddFilter }: Props) {
                     );
                   }}
                   aria-label={i18n.translate(
-                    'xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel',
+                    'xpack.apm.correlations.fieldContextPopover.removeFilterAriaLabel',
                     {
                       defaultMessage: 'Filter out {fieldName}: "{value}"',
                       values: { fieldName, value: value.key },
                     }
                   )}
-                  data-test-subj={`dvFieldDataTopValuesExcludeFilterButton-${value.key}-${value.key}`}
+                  data-test-subj={`apmFieldContextTopValuesExcludeFilterButton-${value.key}-${value.key}`}
                   style={{
                     minHeight: 'auto',
                     minWidth: 'auto',
                     paddingTop: 0,
                     paddingBottom: 0,
-                    paddingRight: 2,
-                    paddingLeft: 2,
+                    paddingRight: filterPaddingSize,
+                    paddingLeft: filterPaddingSize,
                   }}
                 />
               </>
@@ -141,7 +140,7 @@ export function TopValues({ stats, barColor, onAddFilter }: Props) {
           <EuiSpacer size="xs" />
           <EuiText size="xs" textAlign={'center'}>
             <FormattedMessage
-              id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription"
+              id="xpack.apm.correlations.fieldContextPopover.topValues.calculatedFromSampleDescription"
               defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
               values={{
                 topValuesSamplerShardSize,
