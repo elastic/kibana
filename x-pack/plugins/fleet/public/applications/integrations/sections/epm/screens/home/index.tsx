@@ -281,8 +281,7 @@ const AvailablePackages: React.FC = memo(() => {
     [allCategoryPackagesRes]
   );
 
-  const { loading: isLoadingReplacementCustomIntegrations, value: replacementCustomIntegrations } =
-    useGetReplacementCustomIntegrations();
+  const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(

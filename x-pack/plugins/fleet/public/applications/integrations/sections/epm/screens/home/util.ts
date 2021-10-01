@@ -10,8 +10,6 @@ import type {
   IntegrationCategory,
 } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
-import type { PackageListItem } from '../../../../../../../common/types/models';
-
 import type { CategoryFacet } from './category_facets';
 
 export function mergeAndReplaceCategoryCounts(
