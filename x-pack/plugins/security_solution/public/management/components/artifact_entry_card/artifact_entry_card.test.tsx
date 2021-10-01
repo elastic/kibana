@@ -11,11 +11,11 @@ import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card
 import { act, fireEvent, getByTestId } from '@testing-library/react';
 import { AnyArtifact } from './types';
 import { isTrustedApp } from './utils';
-import { getTrustedAppProvider, getExceptionProvider } from './test_utils';
+import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 
 describe.each([
-  ['trusted apps', getTrustedAppProvider],
-  ['exceptions/event filters', getExceptionProvider],
+  ['trusted apps', getTrustedAppProviderMock],
+  ['exceptions/event filters', getExceptionProviderMock],
 ])('when using the ArtifactEntryCard component with %s', (_, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;

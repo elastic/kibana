@@ -5,57 +5,18 @@
  * 2.0.
  */
 
-import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
-import { cloneDeep } from 'lodash';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import React from 'react';
 import { ArtifactCardGrid, ArtifactCardGridProps } from './artifact_card_grid';
-
-// FIXME:PT refactor helpers below after merge of PR https://github.com/elastic/kibana/pull/113363
-
-const getCommonItemDataOverrides = () => {
-  return {
-    name: 'some internal app',
-    description: 'this app is trusted by the company',
-    created_at: new Date('2021-07-01').toISOString(),
-  };
-};
-
-const getTrustedAppProvider = () =>
-  new TrustedAppGenerator('seed').generate(getCommonItemDataOverrides());
-
-const getExceptionProvider = () => {
-  // cloneDeep needed because exception mock generator uses state across instances
-  return cloneDeep(
-    getExceptionListItemSchemaMock({
-      ...getCommonItemDataOverrides(),
-      os_types: ['windows'],
-      updated_at: new Date().toISOString(),
-      created_by: 'Justa',
-      updated_by: 'Mara',
-      entries: [
-        {
-          field: 'process.hash.*',
-          operator: 'included',
-          type: 'match',
-          value: '1234234659af249ddf3e40864e9fb241',
-        },
-        {
-          field: 'process.executable.caseless',
-          operator: 'included',
-          type: 'match',
-          value: '/one/two/three',
-        },
-      ],
-      tags: ['policy:all'],
-    })
-  );
-};
+import { fireEvent, act } from '@testing-library/react';
+import {
+  getExceptionProviderMock,
+  getTrustedAppProviderMock,
+} from '../artifact_entry_card/test_utils';
 
 describe.each([
-  ['trusted apps', getTrustedAppProvider],
-  ['exceptions/event filters', getExceptionProvider],
+  ['trusted apps', getTrustedAppProviderMock],
+  ['exceptions/event filters', getExceptionProviderMock],
 ])('when using the ArtifactCardGrid component %s', (_, generateItem) => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -103,13 +64,19 @@ describe.each([
     ['name column', 'testGrid-header-layout-title'],
     ['description column', 'testGrid-header-layout-description'],
     ['description column', 'testGrid-header-layout-cardActionsPlaceholder'],
-  ])('should display the Grid Header - %s', (__, selector) => {
+  ])('should display the Grid Header - %s', (__, testSubjId) => {
     render();
 
-    expect(renderResult.getByTestId(selector)).not.toBeNull();
+    expect(renderResult.getByTestId(testSubjId)).not.toBeNull();
   });
 
-  it.todo('should call onPageChange callback when paginating');
+  it.todo('should call onPageChange callback when paginating', async () => {
+    items = Array.from({ length: 15 }, () => generateItem());
+    render();
+    await act(async () => {
+      await fireEvent.click(renderResult.getByTestId('pagination-button-next'));
+    });
+  });
 
   it.todo('should use the props provided by cardComponentProps callback');
 

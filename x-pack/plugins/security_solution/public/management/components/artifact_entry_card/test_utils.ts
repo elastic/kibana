@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
-export const getCommonItemDataOverrides = () => {
+const getCommonItemDataOverrides = () => {
   return {
     name: 'some internal app',
     description: 'this app is trusted by the company',
@@ -17,10 +17,10 @@ export const getCommonItemDataOverrides = () => {
   };
 };
 
-export const getTrustedAppProvider = () =>
+export const getTrustedAppProviderMock = () =>
   new TrustedAppGenerator('seed').generate(getCommonItemDataOverrides());
 
-export const getExceptionProvider = () => {
+export const getExceptionProviderMock = () => {
   // cloneDeep needed because exception mock generator uses state across instances
   return cloneDeep(
     getExceptionListItemSchemaMock({
