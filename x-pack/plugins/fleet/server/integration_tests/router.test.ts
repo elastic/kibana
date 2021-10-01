@@ -19,7 +19,6 @@ import * as kbnTestServer from '../../../../../src/test_utils/kbn_server';
 function createXPackRoot(config: {} = {}) {
   return kbnTestServer.createRoot({
     plugins: {
-      scanDirs: [],
       paths: [
         resolve(__dirname, '../../../../../x-pack/plugins/encrypted_saved_objects'),
         resolve(__dirname, '../../../../../x-pack/plugins/fleet'),
