@@ -26,14 +26,14 @@ export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = ({ cluste
   const ccs = globalState.ccs;
   const [data, setData] = useState({} as any);
 
-  const title = i18n.translate('xpack.monitoring.elasticsearch.node.advanced.routeTitle', {
+  const title = i18n.translate('xpack.monitoring.elasticsearch.node.advanced.title', {
     defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Advanced',
     values: {
       nodeName: data?.nodeSummary?.name,
     },
   });
 
-  const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.node.overview.pageTitle', {
+  const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.node.advanced.pageTitle', {
     defaultMessage: 'Elasticsearch node: {nodeName}',
     values: {
       nodeName: data?.nodeSummary?.name,

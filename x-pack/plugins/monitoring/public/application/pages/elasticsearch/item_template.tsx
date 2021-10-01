@@ -18,14 +18,14 @@ export const ItemTemplate: React.FC<ItemTemplateProps> = (props) => {
   const tabs: TabMenuItem[] = [
     {
       id: 'overview',
-      label: i18n.translate('xpack.monitoring.esNavigation.overviewLinkText', {
+      label: i18n.translate('xpack.monitoring.esItemNavigation.overviewLinkText', {
         defaultMessage: 'Overview',
       }),
       route: `/elasticsearch/${pageType}/${id}`,
     },
     {
       id: 'advanced',
-      label: i18n.translate('xpack.monitoring.esNavigation.nodesLinkText', {
+      label: i18n.translate('xpack.monitoring.esItemNavigation.advancedLinkText', {
         defaultMessage: 'Advanced',
       }),
       route: `/elasticsearch/${pageType}/${id}/advanced`,
