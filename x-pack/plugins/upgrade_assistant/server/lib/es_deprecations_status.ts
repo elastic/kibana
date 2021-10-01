@@ -14,6 +14,10 @@ import { indexSettingDeprecations } from '../../common/constants';
 import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
+import {
+  getESSystemIndicesUpgradeStatus,
+  esSystemIndicesToFlatArray,
+} from '../lib/es_system_indices_upgrade';
 
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient
@@ -22,10 +26,22 @@ export async function getESUpgradeStatus(
 
   const getCombinedDeprecations = async () => {
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
+    const systemIndices = await getESSystemIndicesUpgradeStatus(dataClient.asCurrentUser);
+    const systemIndicesList = [
+      ...esSystemIndicesToFlatArray(systemIndices.features),
+      '.security-6',
+    ];
 
     return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
       if (deprecationType === 'index_settings') {
-        combinedDeprecations = combinedDeprecations.concat(indices);
+        const filteredIndices = indices.filter((index) => {
+          const isReindexOp = index.correctiveAction?.type === 'reindex';
+          const isSystemIndex = systemIndicesList.includes(index.index!);
+
+          return !(isReindexOp && isSystemIndex);
+        });
+
+        combinedDeprecations = combinedDeprecations.concat(filteredIndices);
       } else {
         const deprecationsByType = deprecations[
           deprecationType as keyof MigrationDeprecationInfoResponse
