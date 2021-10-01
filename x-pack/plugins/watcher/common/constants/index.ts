@@ -14,7 +14,7 @@ export { ES_SCROLL_SETTINGS } from './es_scroll_settings';
 export { INDEX_NAMES } from './index_names';
 export { LISTS } from './lists';
 export { PAGINATION } from './pagination';
-export { PLUGIN, MAJOR_VERSION } from './plugin';
+export { PLUGIN } from './plugin';
 export { REFRESH_INTERVALS } from './refresh_intervals';
 export { ROUTES } from './routes';
 export { SORT_ORDERS } from './sort_orders';

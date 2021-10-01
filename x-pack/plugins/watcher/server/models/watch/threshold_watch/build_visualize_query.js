@@ -6,12 +6,9 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { SemVer } from 'semver';
 
 import { buildInput } from '../../../../common/lib/serialization';
-import { AGG_TYPES, MAJOR_VERSION } from '../../../../common/constants';
-
-const kibanaVersion = new SemVer(MAJOR_VERSION);
+import { AGG_TYPES } from '../../../../common/constants';
 
 /*
 input.search.request.body.query.bool.filter.range
@@ -86,7 +83,7 @@ function buildAggs(body, { aggType, termField }, dateAgg) {
   }
 }
 
-export function buildVisualizeQuery(watch, visualizeOptions) {
+export function buildVisualizeQuery(watch, visualizeOptions, kibanaVersion) {
   const {
     index,
     timeWindowSize,
