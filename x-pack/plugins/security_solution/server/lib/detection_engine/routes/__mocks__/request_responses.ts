@@ -87,6 +87,13 @@ export const getReadRequest = () =>
     query: { rule_id: 'rule-1' },
   });
 
+export const getReadRequestWithId = (id: string) =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { id },
+  });
+
 export const getFindRequest = () =>
   requestMock.create({
     method: 'get',
