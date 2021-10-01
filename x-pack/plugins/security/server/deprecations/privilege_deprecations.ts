@@ -37,7 +37,7 @@ export const getPrivilegeDeprecationsServices = (
       >();
       kibanaRoles = Object.entries(elasticsearchRoles).map(([roleName, elasticsearchRole]) =>
         transformElasticsearchRoleToRole(
-          // @ts-expect-error @elastic/elasticsearch `XPackRole` type doesn't define `applications` and `transient_metadata`.
+          // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
           elasticsearchRole,
           roleName,
           authz.applicationName
