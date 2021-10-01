@@ -16,7 +16,6 @@ import {
   TimelineSavedObject,
   TimelineType,
   TimelineStatus,
-  ResolvedTimelineSavedObject,
 } from '../../../../../common/types/timeline';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10

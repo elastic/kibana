@@ -19,7 +19,7 @@ import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
 import {
   AllTimelinesResponse,
-  ResolvedTimelineSavedObject,
+  ResolvedTimelineWithOutcomeSavedObject,
 } from '../../../../../common/types/timeline';
 import {
   mockResolvedSavedObject,
@@ -265,7 +265,7 @@ describe('saved_object', () => {
   describe('resolveTimelineOrNull', () => {
     let mockResolveSavedObject: jest.Mock;
     let mockRequest: FrameworkRequest;
-    let result: ResolvedTimelineSavedObject | null = null;
+    let result: ResolvedTimelineWithOutcomeSavedObject | null = null;
     beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockResolvedTimeline);
       mockResolveSavedObject = jest.fn().mockReturnValue(mockResolvedSavedObject);

@@ -304,14 +304,11 @@ export const installPrepackedTimelines = async (): Promise<ImportTimelineResultS
 };
 
 export const getTimeline = async (id: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(
-    TIMELINE_RESOLVE_URL,
-    {
-      query: {
-        id,
-      },
-    }
-  );
+  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(TIMELINE_URL, {
+    query: {
+      id,
+    },
+  });
 
   return decodeSingleTimelineResponse(response);
 };
