@@ -19,6 +19,7 @@ import {
   mockSetAbsoluteRangeDatePicker,
   mockSetRelativeRangeDatePicker,
   testCases,
+  getMockProps,
 } from './test_dependencies';
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
@@ -59,6 +60,14 @@ jest.mock('../../lib/kibana', () => ({
     get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
   },
 }));
+
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => jest.fn(),
+  };
+});
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -215,6 +224,56 @@ describe('UrlStateContainer', () => {
       mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
       expect(mockHistory.replace).not.toHaveBeenCalled();
+    });
+
+    it('it removes empty AppQuery state from URL', () => {
+      mockProps = {
+        ...getMockProps(
+          {
+            hash: '',
+            pathname: '/network',
+            search: "?query=(query:'')",
+            state: '',
+          },
+          CONSTANTS.networkPage,
+          null,
+          SecurityPageName.network,
+          undefined
+        ),
+      };
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+      });
+
+      mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
+
+      expect(mockHistory.replace.mock.calls[0][0].search).not.toContain('query=');
+    });
+
+    it('it removes empty timeline state from URL', () => {
+      mockProps = {
+        ...getMockProps(
+          {
+            hash: '',
+            pathname: '/network',
+            search: "?timeline=(id:'',isOpen:!t)",
+            state: '',
+          },
+          CONSTANTS.networkPage,
+          null,
+          SecurityPageName.network,
+          undefined
+        ),
+      };
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+      });
+
+      mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
+
+      expect(mockHistory.replace.mock.calls[0][0].search).not.toContain('timeline=');
     });
   });
 
