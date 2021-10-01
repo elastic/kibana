@@ -56,7 +56,6 @@ const uploadPipeline = (pipelineContent) => {
 
     if (
       await doAnyChangesMatch([
-        /^.buildkite\//, // TODO remove me after testing
         /^x-pack\/plugins\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
