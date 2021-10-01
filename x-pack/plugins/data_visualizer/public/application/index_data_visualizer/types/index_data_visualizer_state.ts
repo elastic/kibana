@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import { Query } from '../../../../../../../src/plugins/data/common/query';
 import { SearchQueryLanguage } from './combined_query';
 
@@ -25,4 +26,5 @@ export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlSta
   showDistributions?: boolean;
   showAllFields?: boolean;
   showEmptyFields?: boolean;
+  filters?: Filter[];
 }
