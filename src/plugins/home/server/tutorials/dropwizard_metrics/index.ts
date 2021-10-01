@@ -56,5 +56,6 @@ export function dropwizardMetricsSpecProvider(context: TutorialContext): Tutoria
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['elastic_stack', 'datastore'],
   };
 }
