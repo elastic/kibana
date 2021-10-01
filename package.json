@@ -82,6 +82,7 @@
     "**/pdfkit/crypto-js": "4.0.0",
     "**/react-syntax-highlighter": "^15.3.1",
     "**/react-syntax-highlighter/**/highlight.js": "^10.4.1",
+    "**/refractor/prismjs": "~1.25.0",
     "**/trim": "1.0.1",
     "**/typescript": "4.1.3",
     "**/underscore": "^1.13.1"
@@ -439,6 +440,7 @@
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.0.0",
+    "@elastic/synthetics": "^1.0.0-beta.12",
     "@emotion/babel-preset-css-prop": "^11.2.0",
     "@emotion/jest": "^11.3.0",
     "@istanbuljs/schema": "^0.1.2",
@@ -769,6 +771,7 @@
     "multimatch": "^4.0.0",
     "mutation-observer": "^1.0.3",
     "ncp": "^2.0.0",
+    "node-jq": "2.0.0",
     "node-sass": "^6.0.1",
     "null-loader": "^3.0.0",
     "nyc": "^15.0.1",

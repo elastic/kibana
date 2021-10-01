@@ -35,6 +35,7 @@ import {
   TrustedAppPolicyNotExistsError,
 } from './errors';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { EndpointLicenseError } from '../../errors';
 
 const getBodyAfterFeatureFlagCheck = (
   body: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest,
@@ -85,6 +86,11 @@ const errorHandler = <E extends Error>(
   if (error instanceof TrustedAppPolicyNotExistsError) {
     logger.error(error);
     return res.badRequest({ body: { message: error.message, attributes: { type: error.type } } });
+  }
+
+  if (error instanceof EndpointLicenseError) {
+    logger.error(error);
+    return res.badRequest({ body: { message: error.message, attributes: { type: error.name } } });
   }
 
   if (error instanceof TrustedAppVersionConflictError) {
@@ -177,7 +183,8 @@ export const getTrustedAppsCreateRouteHandler = (
           exceptionListClientFromContext(context),
           context.core.savedObjects.client,
           packagePolicyClientFromEndpointContext(endpointAppContext),
-          body
+          body,
+          endpointAppContext.service.getLicenseService().isAtLeast('platinum')
         ),
       });
     } catch (error) {
@@ -206,7 +213,8 @@ export const getTrustedAppsUpdateRouteHandler = (
           context.core.savedObjects.client,
           packagePolicyClientFromEndpointContext(endpointAppContext),
           req.params.id,
-          body
+          body,
+          endpointAppContext.service.getLicenseService().isAtLeast('platinum')
         ),
       });
     } catch (error) {
