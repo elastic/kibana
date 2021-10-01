@@ -32,29 +32,22 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
     const max = last(colorsRange)?.to ?? 1;
-    const labels: string[] = [];
 
-    colorsRange.forEach((range: any) => {
+    return colorsRange.map((range: any) => {
       const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
       const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
-      labels.push(`${from} - ${to}`);
+      return `${from} - ${to}`;
     });
-    return labels;
   }
 
   private getColors() {
-    const config = this.props.visParams.metric;
-    const invertColors = config.invertColors;
-    const colorSchema = config.colorSchema;
-    const colorsRange = config.colorsRange;
-    const labels = this.getLabels();
-    const colors: any = {};
-    for (let i = 0; i < labels.length; i += 1) {
+    const { invertColors, colorSchema, colorsRange } = this.props.visParams.metric;
+    return this.getLabels().reduce<Record<string, string>>((colors, label, index) => {
       const divider = Math.max(colorsRange.length - 1, 1);
-      const val = invertColors ? 1 - i / divider : i / divider;
-      colors[labels[i]] = getHeatmapColors(val, colorSchema);
-    }
-    return colors;
+      const val = invertColors ? 1 - index / divider : index / divider;
+      colors[label] = getHeatmapColors(val, colorSchema);
+      return colors;
+    }, {});
   }
 
   private getBucket(val: number) {
