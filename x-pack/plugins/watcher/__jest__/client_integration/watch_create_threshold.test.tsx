@@ -12,13 +12,7 @@ import axios from 'axios';
 
 import { getExecuteDetails } from '../../__fixtures__';
 import { WATCH_TYPES } from '../../common/constants';
-import {
-  setupEnvironment,
-  pageHelpers,
-  wrapBodyResponse,
-  unwrapBodyResponse,
-  kibanaVersion,
-} from './helpers';
+import { setupEnvironment, pageHelpers, wrapBodyResponse, unwrapBodyResponse } from './helpers';
 import { WatchCreateThresholdTestBed } from './helpers/watch_create_threshold.helpers';
 
 const WATCH_NAME = 'my_test_watch';
