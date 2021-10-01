@@ -6,14 +6,12 @@
  */
 
 import { config } from './index';
-import { applyDeprecations, configDeprecationFactory, ConfigDeprecationContext } from '@kbn/config';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.task_manager';
 
-const deprecationContext: ConfigDeprecationContext = {
-  version: '8.0.0',
-  branch: 'master',
-};
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);

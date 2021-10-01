@@ -8,14 +8,12 @@
 
 import { cloneDeep } from 'lodash';
 
-import { applyDeprecations, configDeprecationFactory, ConfigDeprecationContext } from '@kbn/config';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '../../../core/server/mocks';
 
 import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
-const deprecationContext: ConfigDeprecationContext = {
-  branch: 'master',
-  version: '8.0.0',
-};
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = autocompleteConfigDeprecationProvider(configDeprecationFactory);

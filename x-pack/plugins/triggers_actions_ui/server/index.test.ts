@@ -5,13 +5,11 @@
  * 2.0.
  */
 import { config } from './index';
-import { applyDeprecations, ConfigDeprecationContext, configDeprecationFactory } from '@kbn/config';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.trigger_actions_ui';
-const deprecationContext: ConfigDeprecationContext = {
-  version: '8.0.0',
-  branch: 'master',
-};
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);

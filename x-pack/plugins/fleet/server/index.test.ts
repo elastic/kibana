@@ -6,14 +6,11 @@
  */
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import type { ConfigDeprecationContext } from '@kbn/config';
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 
 import { config } from '.';
 
-const deprecationContext: ConfigDeprecationContext = {
-  version: '8.0.0',
-  branch: 'master',
-};
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   if (!config.deprecations) {

@@ -8,8 +8,9 @@
 import { set } from '@elastic/safer-lodash-set';
 import type { ConfigDeprecationProvider, ConfigDeprecationContext } from '@kbn/config';
 import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
+import { configDeprecationsMock } from './mocks';
 
-const defaultContext: ConfigDeprecationContext = { version: '8.0.0', branch: 'master' };
+const defaultContext = configDeprecationsMock.createContext();
 
 function collectDeprecations(
   provider: ConfigDeprecationProvider,

@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { DeprecatedConfigDetails, ConfigDeprecationContext } from './types';
+import { DeprecatedConfigDetails } from './types';
+import { configDeprecationsMock } from './deprecations.mocks';
 import { configDeprecationFactory } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
   const { deprecate, deprecateFromRoot, rename, renameFromRoot, unused, unusedFromRoot } =
     configDeprecationFactory;
-  const context: ConfigDeprecationContext = {
-    branch: 'master',
-    version: '8.0.0',
-  };
+  const context = configDeprecationsMock.createContext();
 
   const addDeprecation = jest.fn<void, [DeprecatedConfigDetails]>();
 

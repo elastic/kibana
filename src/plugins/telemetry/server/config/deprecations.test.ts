@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ConfigDeprecationContext } from '@kbn/config';
+import { configDeprecationsMock } from '../../../../core/server/mocks';
 import { deprecateEndpointConfigs } from './deprecations';
 import type { TelemetryConfigType } from './config';
 import { TELEMETRY_ENDPOINT } from '../../common/constants';
@@ -14,10 +14,7 @@ import { TELEMETRY_ENDPOINT } from '../../common/constants';
 describe('deprecateEndpointConfigs', () => {
   const fromPath = 'telemetry';
   const mockAddDeprecation = jest.fn();
-  const deprecationContext: ConfigDeprecationContext = {
-    branch: 'master',
-    version: '8.0.0',
-  };
+  const deprecationContext = configDeprecationsMock.createContext();
 
   beforeEach(() => {
     jest.clearAllMocks();
