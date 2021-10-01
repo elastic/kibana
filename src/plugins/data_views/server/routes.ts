@@ -19,7 +19,7 @@ import { registerPutScriptedFieldRoute } from './routes/scripted_fields/put_scri
 import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scripted_field';
 import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
 import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
-import type { DataViewPluginStart, DataViewPluginStartDependencies } from './plugin';
+import type { DataViewPluginStart, DataViewPluginStartDependencies } from './types';
 import { registerManageDefaultIndexPatternRoutes } from './routes/default_index_pattern';
 import { registerCreateRuntimeFieldRoute } from './routes/runtime_fields/create_runtime_field';
 import { registerGetRuntimeFieldRoute } from './routes/runtime_fields/get_runtime_field';

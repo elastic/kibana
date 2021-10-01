@@ -37,7 +37,7 @@ export class DataViewServerPlugin
   }
 
   public setup(
-    core: CoreSetup<DataViewPluginStart, DataViewPluginStart>,
+    core: CoreSetup<DataViewPluginStartDependencies, DataViewPluginStart>,
     { expressions, usageCollection }: DataViewPluginSetupDependencies
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
