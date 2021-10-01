@@ -36,39 +36,40 @@ import { parseValue } from '../../../timelines/components/timeline/body/renderer
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { useKibana } from '../kibana';
+import * as i18n from './translations';
 
 export const COLUMNS_WITH_LINKS = [
   {
     columnId: HOST_NAME_FIELD_NAME,
-    label: 'View host summary',
+    label: i18n.VIEW_HOST_SUMMARY,
   },
   {
     fieldType: IP_FIELD_TYPE,
-    label: 'Expand ip details',
+    label: i18n.EXPAND_IP_DETAILS,
   },
   {
     columnId: SIGNAL_RULE_NAME_FIELD_NAME,
-    label: 'View rule details',
+    label: i18n.VIEW_RULE_DETAILS,
   },
   ...PORT_NAMES.map((p) => ({
     columnId: p,
-    label: 'View port details',
+    label: i18n.VIEW_PORT_DETAILS,
   })),
   {
     columnId: RULE_REFERENCE_FIELD_NAME,
-    label: 'View rule reference',
+    label: i18n.VIEW_RULE_REFERENCE,
   },
   {
     columnId: REFERENCE_URL_FIELD_NAME,
-    label: 'View rule reference',
+    label: i18n.VIEW_RULE_REFERENCE,
   },
   {
     columnId: EVENT_URL_FIELD_NAME,
-    label: 'View even reference',
+    label: i18n.VIEW_EVENT_REFERENCE,
   },
   {
     columnId: INDICATOR_REFERENCE,
-    label: 'View indicator reference',
+    label: i18n.VIEW_INDICATOR_REFERENCE,
   },
 ];
 
