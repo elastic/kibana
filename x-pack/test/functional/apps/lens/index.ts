@@ -49,14 +49,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       // has to be last one in the suite because it overrides saved objects
       loadTestFile(require.resolve('./rollup'));
     });
-  });
 
-  describe('', function () {
-    this.tags(['ciGroup16', 'skipFirefox']);
+    describe('', function () {
+      this.tags(['ciGroup16', 'skipFirefox']);
 
-    loadTestFile(require.resolve('./add_to_dashboard'));
-    loadTestFile(require.resolve('./table'));
-    loadTestFile(require.resolve('./runtime_fields'));
-    loadTestFile(require.resolve('./dashboard'));
+      loadTestFile(require.resolve('./add_to_dashboard'));
+      loadTestFile(require.resolve('./table'));
+      loadTestFile(require.resolve('./runtime_fields'));
+      loadTestFile(require.resolve('./dashboard'));
+    });
   });
 }
