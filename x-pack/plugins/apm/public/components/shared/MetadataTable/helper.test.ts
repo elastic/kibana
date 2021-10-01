@@ -15,7 +15,7 @@ describe('MetadataTable Helper', () => {
     HTTP,
     { ...SERVICE, properties: ['environment'] },
   ];
-  const apmDoc = ({
+  const apmDoc = {
     http: {
       headers: {
         Connection: 'close',
@@ -27,7 +27,7 @@ describe('MetadataTable Helper', () => {
       framework: { name: 'express' },
       environment: 'production',
     },
-  } as unknown) as Transaction;
+  } as unknown as Transaction;
   const metadataItems = getSectionsWithRows(sections, apmDoc);
 
   it('returns flattened data and required section', () => {

@@ -37,6 +37,8 @@ describe('getServiceAnnotations', () => {
             environment: 'bar',
             searchAggregatedTransactions: false,
             serviceVersionPerServiceNode: false,
+            start: 0,
+            end: 50000,
           }),
         {
           mockResponse: () =>
@@ -64,6 +66,8 @@ describe('getServiceAnnotations', () => {
             environment: 'bar',
             searchAggregatedTransactions: false,
             serviceVersionPerServiceNode: false,
+            start: 0,
+            end: 50000,
           }),
         {
           mockResponse: () =>
@@ -96,10 +100,12 @@ describe('getServiceAnnotations', () => {
             environment: 'bar',
             searchAggregatedTransactions: false,
             serviceVersionPerServiceNode: false,
+            start: 1528113600000,
+            end: 1528977600000,
           }),
         {
           mockResponse: () =>
-            (responses.shift() as unknown) as ESSearchResponse<
+            responses.shift() as unknown as ESSearchResponse<
               unknown,
               ESSearchRequest,
               {
@@ -143,6 +149,8 @@ describe('getServiceAnnotations', () => {
             environment: 'bar',
             searchAggregatedTransactions: false,
             serviceVersionPerServiceNode: true,
+            start: 1528113600000,
+            end: 1528977600000,
           }),
         {
           mockResponse: () =>

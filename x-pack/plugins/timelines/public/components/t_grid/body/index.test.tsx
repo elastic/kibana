@@ -41,8 +41,9 @@ jest.mock('../../../hooks/use_selector', () => ({
 
 jest.mock(
   'react-visibility-sensor',
-  () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-    children({ isVisible: true })
+  () =>
+    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
+      children({ isVisible: true })
 );
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
@@ -60,7 +61,7 @@ describe('Body', () => {
   const props: StatefulBodyProps = {
     activePage: 0,
     browserFields: mockBrowserFields,
-    clearSelected: (jest.fn() as unknown) as StatefulBodyProps['clearSelected'],
+    clearSelected: jest.fn() as unknown as StatefulBodyProps['clearSelected'],
     columnHeaders: defaultHeaders,
     data: mockTimelineData,
     excludedRowRendererIds: [],
@@ -74,7 +75,7 @@ describe('Body', () => {
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
     selectedEventIds: {},
-    setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
+    setSelected: jest.fn() as unknown as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
     tabType: TimelineTabs.query,

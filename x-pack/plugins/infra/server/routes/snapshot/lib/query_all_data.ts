@@ -9,25 +9,23 @@ import { MetricsAPIRequest, MetricsAPIResponse } from '../../../../common/http_a
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { query } from '../../../lib/metrics';
 
-const handleResponse = (
-  client: ESSearchClient,
-  options: MetricsAPIRequest,
-  previousResponse?: MetricsAPIResponse
-) => async (resp: MetricsAPIResponse): Promise<MetricsAPIResponse> => {
-  const combinedResponse = previousResponse
-    ? {
-        ...previousResponse,
-        series: [...previousResponse.series, ...resp.series],
-        info: resp.info,
-      }
-    : resp;
-  if (resp.info.afterKey) {
-    return query(client, { ...options, afterKey: resp.info.afterKey }).then(
-      handleResponse(client, options, combinedResponse)
-    );
-  }
-  return combinedResponse;
-};
+const handleResponse =
+  (client: ESSearchClient, options: MetricsAPIRequest, previousResponse?: MetricsAPIResponse) =>
+  async (resp: MetricsAPIResponse): Promise<MetricsAPIResponse> => {
+    const combinedResponse = previousResponse
+      ? {
+          ...previousResponse,
+          series: [...previousResponse.series, ...resp.series],
+          info: resp.info,
+        }
+      : resp;
+    if (resp.info.afterKey) {
+      return query(client, { ...options, afterKey: resp.info.afterKey }).then(
+        handleResponse(client, options, combinedResponse)
+      );
+    }
+    return combinedResponse;
+  };
 
 export const queryAllData = (client: ESSearchClient, options: MetricsAPIRequest) => {
   return query(client, options).then(handleResponse(client, options));

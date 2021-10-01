@@ -22,10 +22,9 @@ import { getRequestBase } from './get_request_base';
 export const getTransactionDurationRangesRequest = (
   params: SearchStrategyParams,
   rangesSteps: number[],
-  fieldName?: FieldValuePair['fieldName'],
-  fieldValue?: FieldValuePair['fieldValue']
+  termFilters?: FieldValuePair[]
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldName, fieldValue });
+  const query = getQueryWithParams({ params, termFilters });
 
   const ranges = rangesSteps.reduce(
     (p, to) => {
@@ -60,16 +59,10 @@ export const fetchTransactionDurationRanges = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   rangesSteps: number[],
-  fieldName?: FieldValuePair['fieldName'],
-  fieldValue?: FieldValuePair['fieldValue']
+  termFilters?: FieldValuePair[]
 ): Promise<Array<{ key: number; doc_count: number }>> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationRangesRequest(
-      params,
-      rangesSteps,
-      fieldName,
-      fieldValue
-    )
+    getTransactionDurationRangesRequest(params, rangesSteps, termFilters)
   );
 
   if (resp.body.aggregations === undefined) {
@@ -78,11 +71,13 @@ export const fetchTransactionDurationRanges = async (
     );
   }
 
-  return (resp.body.aggregations
-    .logspace_ranges as estypes.AggregationsMultiBucketAggregate<{
-    from: number;
-    doc_count: number;
-  }>).buckets
+  return (
+    resp.body.aggregations
+      .logspace_ranges as estypes.AggregationsMultiBucketAggregate<{
+      from: number;
+      doc_count: number;
+    }>
+  ).buckets
     .map((d) => ({
       key: d.from,
       doc_count: d.doc_count,

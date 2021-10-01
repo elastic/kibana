@@ -9,7 +9,7 @@
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 
 /**
- * Any embeddable that implements this interface will be able to use input that is
+ * All embeddables that implement this interface will be able to use input that is
  * either by reference (backed by a saved object) OR by value, (provided
  * by the container).
  * @public

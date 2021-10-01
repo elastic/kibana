@@ -9,6 +9,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { DependencyList } from 'react';
 import { PersistableState } from 'src/plugins/kibana_utils/common';
+import type { FormatSearchParamsOptions } from './redirect';
 
 /**
  * URL locator registry.
@@ -52,6 +53,8 @@ export interface LocatorDefinition<P extends SerializableRecord>
  * Public interface of a registered locator.
  */
 export interface LocatorPublic<P extends SerializableRecord> extends PersistableState<P> {
+  readonly id: string;
+
   /**
    * Returns a reference to a Kibana client-side location.
    *
@@ -62,10 +65,23 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
   /**
    * Returns a URL as a string.
    *
+   * @deprecated Use `getRedirectUrl` instead. `getRedirectUrl` will preserve
+   * the location state, whereas the `getUrl` just return the URL without
+   * the location state.
+   *
    * @param params URL locator parameters.
    * @param getUrlParams URL construction parameters.
    */
   getUrl(params: P, getUrlParams?: LocatorGetUrlParams): Promise<string>;
+
+  /**
+   * Returns a URL to the redirect endpoint, which will redirect the user to
+   * the final destination.
+   *
+   * @param params URL locator parameters.
+   * @param options URL serialization options.
+   */
+  getRedirectUrl(params: P, options?: FormatSearchParamsOptions): string;
 
   /**
    * Navigate using the `core.application.navigateToApp()` method to a Kibana

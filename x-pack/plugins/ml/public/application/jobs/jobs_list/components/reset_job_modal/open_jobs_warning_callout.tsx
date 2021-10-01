@@ -17,9 +17,10 @@ interface Props {
 }
 
 export const OpenJobsWarningCallout: FC<Props> = ({ jobs }) => {
-  const openJobsCount = useMemo(() => jobs.filter((j) => j.jobState !== JOB_STATE.CLOSED).length, [
-    jobs,
-  ]);
+  const openJobsCount = useMemo(
+    () => jobs.filter((j) => j.jobState !== JOB_STATE.CLOSED).length,
+    [jobs]
+  );
 
   if (openJobsCount === 0) {
     return null;

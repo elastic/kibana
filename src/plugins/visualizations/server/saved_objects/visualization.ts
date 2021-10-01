@@ -20,9 +20,6 @@ export const visualizationSavedObjectType: SavedObjectsType = {
     getTitle(obj) {
       return obj.attributes.title;
     },
-    getEditUrl(obj) {
-      return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
-    },
     getInAppUrl(obj) {
       return {
         path: `/app/visualize#/edit/${encodeURIComponent(obj.id)}`,

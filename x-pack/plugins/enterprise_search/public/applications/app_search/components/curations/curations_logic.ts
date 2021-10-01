@@ -23,10 +23,13 @@ import { EngineLogic, generateEnginePath } from '../engine';
 import { DELETE_MESSAGE, SUCCESS_MESSAGE } from './constants';
 import { Curation, CurationsAPIResponse } from './types';
 
+type CurationsPageTabs = 'overview' | 'settings';
+
 interface CurationsValues {
   dataLoading: boolean;
   curations: Curation[];
   meta: Meta;
+  selectedPageTab: CurationsPageTabs;
 }
 
 interface CurationsActions {
@@ -35,6 +38,7 @@ interface CurationsActions {
   loadCurations(): void;
   deleteCuration(id: string): string;
   createCuration(queries: Curation['queries']): Curation['queries'];
+  onSelectPageTab(pageTab: CurationsPageTabs): { pageTab: CurationsPageTabs };
 }
 
 export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsActions>>({
@@ -45,8 +49,15 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     loadCurations: true,
     deleteCuration: (id) => id,
     createCuration: (queries) => queries,
+    onSelectPageTab: (pageTab) => ({ pageTab }),
   }),
   reducers: () => ({
+    selectedPageTab: [
+      'overview',
+      {
+        onSelectPageTab: (_, { pageTab }) => pageTab,
+      },
+    ],
     dataLoading: [
       true,
       {

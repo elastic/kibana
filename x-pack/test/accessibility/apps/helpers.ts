@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { asyncForEach } from '@kbn/std';
+
 // This function clears all pipelines to ensure that there in an empty state before starting each test.
 export async function deleteAllPipelines(client: any, logger: any) {
   const pipelines = await client.ingest.getPipeline();
   const pipeLineIds = Object.keys(pipelines.body);
   await logger.debug(pipelines);
   if (pipeLineIds.length > 0) {
-    pipeLineIds.forEach(async (newId: any) => {
+    await asyncForEach(pipeLineIds, async (newId: any) => {
       await client.ingest.deletePipeline({ id: newId });
     });
   }

@@ -31,7 +31,7 @@ describe('UI Extension services', () => {
 
     it('should store an extension points', () => {
       const LazyCustomView = lazy<PackagePolicyEditExtensionComponent>(async () => {
-        return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
+        return { default: (() => {}) as unknown as PackagePolicyEditExtensionComponent };
       });
       register({
         view: 'package-policy-edit',
@@ -48,10 +48,10 @@ describe('UI Extension services', () => {
 
     it('should throw if extension point has already registered', () => {
       const LazyCustomView = lazy<PackagePolicyEditExtensionComponent>(async () => {
-        return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
+        return { default: (() => {}) as unknown as PackagePolicyEditExtensionComponent };
       });
       const LazyCustomView2 = lazy<PackagePolicyEditExtensionComponent>(async () => {
-        return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
+        return { default: (() => {}) as unknown as PackagePolicyEditExtensionComponent };
       });
 
       register({

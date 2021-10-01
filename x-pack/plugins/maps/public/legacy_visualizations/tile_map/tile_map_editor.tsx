@@ -23,7 +23,7 @@ export function TileMapEditor(props: VisEditorOptionsProps) {
 
     const query = getData().query;
     locator.navigate({
-      ...extractLayerDescriptorParams((props.vis as unknown) as Vis<TileMapVisParams>),
+      ...extractLayerDescriptorParams(props.vis as unknown as Vis<TileMapVisParams>),
       filters: query.filterManager.getFilters(),
       query: query.queryString.getQuery(),
       timeRange: query.timefilter.timefilter.getTime(),

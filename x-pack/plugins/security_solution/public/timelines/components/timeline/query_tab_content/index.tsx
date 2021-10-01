@@ -14,7 +14,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -60,6 +60,7 @@ import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { defaultControlColumn } from '../body/control_columns';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -193,12 +194,25 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererScope(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
-  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
+
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? '')
+  );
+
+  const filterManager = useMemo(
+    () => activeFilterManager ?? new FilterManager(uiSettings),
+    [activeFilterManager, uiSettings]
+  );
+
   const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
-  } = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [kqlQueryExpression]);
+  } = useMemo(
+    () => ({ query: kqlQueryExpression.trim(), language: 'kuery' }),
+    [kqlQueryExpression]
+  );
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -256,25 +270,23 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         id: timelineId,
       })
     );
-  }, [filterManager, timelineId, dispatch]);
+  }, [activeFilterManager, dispatch, filterManager, timelineId, uiSettings]);
 
-  const [
-    isQueryLoading,
-    { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: end,
-    id: timelineId,
-    indexNames: selectedPatterns,
-    fields: getTimelineQueryFields(),
-    language: kqlQuery.language,
-    limit: itemsPerPage,
-    filterQuery: combinedQueries?.filterQuery,
-    startDate: start,
-    skip: !canQueryTimeline,
-    sort: timelineQuerySortField,
-    timerangeKind,
-  });
+  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      docValueFields,
+      endDate: end,
+      id: timelineId,
+      indexNames: selectedPatterns,
+      fields: getTimelineQueryFields(),
+      language: kqlQuery.language,
+      limit: itemsPerPage,
+      filterQuery: combinedQueries?.filterQuery,
+      startDate: start,
+      skip: !canQueryTimeline,
+      sort: timelineQuerySortField,
+      timerangeKind,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, timelineId });

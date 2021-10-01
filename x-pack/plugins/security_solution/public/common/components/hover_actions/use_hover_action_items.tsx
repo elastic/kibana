@@ -20,6 +20,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
@@ -74,7 +75,7 @@ export const useHoverActionItems = ({
   values,
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
-  const { timelines } = kibana.services;
+  const { timelines, uiSettings } = kibana.services;
   // Common actions used by the alert table and alert flyout
   const {
     getAddToTimelineButton,
@@ -84,17 +85,20 @@ export const useHoverActionItems = ({
     getFilterOutValueButton,
     getOverflowButton,
   } = timelines.getHoverActions();
-
-  const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
-    kibana.services.data.query.filterManager,
-  ]);
+  const filterManagerBackup = useMemo(
+    () => kibana.services.data.query.filterManager,
+    [kibana.services.data.query.filterManager]
+  );
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { filterManager: activeFilterMananager } = useDeepEqualSelector((state) =>
+  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getManageTimeline(state, timelineId ?? '')
   );
   const filterManager = useMemo(
-    () => (timelineId === TimelineId.active ? activeFilterMananager : filterManagerBackup),
-    [timelineId, activeFilterMananager, filterManagerBackup]
+    () =>
+      timelineId === TimelineId.active
+        ? activeFilterManager ?? new FilterManager(uiSettings)
+        : filterManagerBackup,
+    [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
   );
 
   //  Regarding data from useManageTimeline:

@@ -78,10 +78,8 @@ export const useAuthentications = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    authenticationsRequest,
-    setAuthenticationsRequest,
-  ] = useState<HostAuthenticationsRequestOptions | null>(null);
+  const [authenticationsRequest, setAuthenticationsRequest] =
+    useState<HostAuthenticationsRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 

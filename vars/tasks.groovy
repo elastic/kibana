@@ -39,7 +39,7 @@ def test() {
 }
 
 def ossCiGroups() {
-  def ciGroups = 1..12
+  def ciGroups = 1..11
   tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
 }
 
@@ -153,6 +153,15 @@ def functionalXpack(Map params = [:]) {
         task(kibanaPipeline.functionalTestProcess('xpack-APMCypress', './test/scripts/jenkins_apm_cypress.sh'))
       }
     }
+
+    whenChanged([
+      'x-pack/plugins/uptime/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
+      }
+    }
+
   }
 }
 

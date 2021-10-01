@@ -41,9 +41,7 @@ export class LegacyCoreEditor implements CoreEditor {
 
     const session = this.editor.getSession();
     session.setMode(new InputMode.Mode());
-    ((session as unknown) as { setFoldStyle: (style: string) => void }).setFoldStyle(
-      'markbeginend'
-    );
+    (session as unknown as { setFoldStyle: (style: string) => void }).setFoldStyle('markbeginend');
     session.setTabSize(2);
     session.setUseWrapMode(true);
 
@@ -74,7 +72,7 @@ export class LegacyCoreEditor implements CoreEditor {
         // torn down, e.g. by closing the History tab, and we don't need to do anything further.
         if (session.bgTokenizer) {
           // Wait until the bgTokenizer is done running before executing the callback.
-          if (((session.bgTokenizer as unknown) as { running: boolean }).running) {
+          if ((session.bgTokenizer as unknown as { running: boolean }).running) {
             setTimeout(check, checkInterval);
           } else {
             resolve();
@@ -225,8 +223,8 @@ export class LegacyCoreEditor implements CoreEditor {
 
   isCompleterActive() {
     return Boolean(
-      ((this.editor as unknown) as { completer: { activated: unknown } }).completer &&
-        ((this.editor as unknown) as { completer: { activated: unknown } }).completer.activated
+      (this.editor as unknown as { completer: { activated: unknown } }).completer &&
+        (this.editor as unknown as { completer: { activated: unknown } }).completer.activated
     );
   }
 

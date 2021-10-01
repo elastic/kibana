@@ -132,9 +132,8 @@ export const AlertNotifyWhen = ({
 }: AlertNotifyWhenProps) => {
   const [alertThrottle, setAlertThrottle] = useState<number>(throttle || 1);
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
-  const [notifyWhenValue, setNotifyWhenValue] = useState<AlertNotifyWhenType>(
-    DEFAULT_NOTIFY_WHEN_VALUE
-  );
+  const [notifyWhenValue, setNotifyWhenValue] =
+    useState<AlertNotifyWhenType>(DEFAULT_NOTIFY_WHEN_VALUE);
 
   useEffect(() => {
     if (alert.notifyWhen) {
