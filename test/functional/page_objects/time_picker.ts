@@ -116,7 +116,7 @@ export class TimePickerPageObject extends FtrService {
   public async setAbsoluteRange(fromTime: string, toTime: string) {
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.showStartEndTimes();
-    let panel;
+    let panel!: WebElementWrapper;
 
     // set to time
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
