@@ -23,7 +23,7 @@ export class HostIsolationExceptionGenerator extends BaseDataGenerator<CreateExc
       description: `Description ${this.randomString(5)}`,
       entries: [
         {
-          field: 'ip',
+          field: 'destination.ip',
           operator: 'included',
           type: 'match',
           value: this.randomIP(),
