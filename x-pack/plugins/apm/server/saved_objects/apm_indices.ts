@@ -7,6 +7,7 @@
 
 import { SavedObjectsType } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
+import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
 
 export const apmIndices: SavedObjectsType = {
   name: 'apm-indices',
@@ -33,24 +34,6 @@ export const apmIndices: SavedObjectsType = {
       'xpack.apm.metricsIndices': {
         type: 'keyword',
       },
-      'apm_oss.sourcemapIndices': {
-        type: 'keyword',
-      },
-      'apm_oss.errorIndices': {
-        type: 'keyword',
-      },
-      'apm_oss.onboardingIndices': {
-        type: 'keyword',
-      },
-      'apm_oss.spanIndices': {
-        type: 'keyword',
-      },
-      'apm_oss.transactionIndices': {
-        type: 'keyword',
-      },
-      'apm_oss.metricsIndices': {
-        type: 'keyword',
-      },
     },
   },
   management: {
@@ -60,5 +43,11 @@ export const apmIndices: SavedObjectsType = {
       i18n.translate('xpack.apm.apmSettings.index', {
         defaultMessage: 'APM Settings - Index',
       }),
+  },
+  migrations: {
+    '7.16.0': (doc) => {
+      const attributes = updateApmOssIndexPaths(doc.attributes);
+      return { ...doc, attributes };
+    },
   },
 };
