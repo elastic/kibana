@@ -6,12 +6,12 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon, EuiRange } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State } from '../types';
+import { State, XYState } from '../types';
 import { FormatFactory } from '../../../common';
 import { YConfig } from '../../../common/expressions';
 import { LineStyle, FillStyle } from '../../../common/expressions/xy_chart';
@@ -116,29 +116,35 @@ export const ThresholdPanel = (
   }
 ) => {
   const { state, setState, layerId, accessor } = props;
-  const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index];
+
+  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
+    value: state,
+    onChange: setState,
+  });
+
+  const index = localState.layers.findIndex((l) => l.layerId === layerId);
+  const layer = localState.layers[index];
 
   const setYConfig = useCallback(
     (yConfig: Partial<YConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
-      setState((currState) => {
-        const currLayer = currState.layers[index];
-        const newYConfigs = [...(currLayer.yConfig || [])];
-        const existingIndex = newYConfigs.findIndex(
-          (yAxisConfig) => yAxisConfig.forAccessor === accessor
-        );
-        if (existingIndex !== -1) {
-          newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
-        } else {
-          newYConfigs.push({ forAccessor: accessor, ...yConfig });
-        }
-        return updateLayer(currState, { ...currLayer, yConfig: newYConfigs }, index);
-      });
+      const newYConfigs = [...(layer.yConfig || [])];
+      const existingIndex = newYConfigs.findIndex(
+        (yAxisConfig) => yAxisConfig.forAccessor === accessor
+      );
+      if (existingIndex !== -1) {
+        newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
+      } else {
+        newYConfigs.push({
+          forAccessor: accessor,
+          ...yConfig,
+        });
+      }
+      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
     },
-    [accessor, index, setState]
+    [accessor, index, localState, layer, setLocalState]
   );
 
   const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
@@ -291,35 +297,38 @@ const LineThicknessSlider = ({
   value: number;
   onChange: (value: number) => void;
 }) => {
-  const onChangeWrapped = useCallback(
-    (newValue) => {
-      if (Number.isInteger(newValue)) {
-        onChange(getSafeValue(newValue, newValue, minRange, maxRange));
-      }
-    },
-    [onChange]
-  );
-  const { inputValue, handleInputChange } = useDebouncedValue<number | ''>(
-    { value, onChange: onChangeWrapped },
-    { allowFalsyValue: true }
-  );
+  const [unsafeValue, setUnsafeValue] = useState<string>(String(value));
 
   return (
     <EuiRange
       fullWidth
       data-test-subj="lnsXY_lineThickness"
-      value={inputValue}
+      value={unsafeValue}
       showInput
       min={minRange}
       max={maxRange}
       step={1}
       compressed
-      onChange={(e) => {
-        const newValue = e.currentTarget.value;
-        handleInputChange(newValue === '' ? '' : Number(newValue));
+      onChange={({ currentTarget: { value: newValue } }) => {
+        setUnsafeValue(newValue);
+        const convertedValue = newValue === '' ? '' : Number(newValue);
+        const safeValue = getSafeValue(Number(newValue), Number(newValue), minRange, maxRange);
+        // only update onChange is the value is valid and in range
+        if (convertedValue === safeValue) {
+          onChange(safeValue);
+        }
       }}
       onBlur={() => {
-        handleInputChange(getSafeValue(inputValue, value, minRange, maxRange));
+        if (unsafeValue !== String(value)) {
+          const safeValue = getSafeValue(
+            unsafeValue === '' ? unsafeValue : Number(unsafeValue),
+            value,
+            minRange,
+            maxRange
+          );
+          onChange(safeValue);
+          setUnsafeValue(String(safeValue));
+        }
       }}
     />
   );

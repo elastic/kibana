@@ -12,15 +12,33 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('get list of append integrations', () => {
-    it('should return list of custom integrations that can be appended', async () => {
-      const resp = await supertest
-        .get(`/api/customIntegrations/appendCustomIntegrations`)
-        .set('kbn-xsrf', 'kibana')
-        .expect(200);
+  describe('customIntegrations', () => {
+    describe('get list of append integrations', () => {
+      it('should return list of custom integrations that can be appended', async () => {
+        const resp = await supertest
+          .get(`/internal/customIntegrations/appendCustomIntegrations`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
 
-      expect(resp.body).to.be.an('array');
-      expect(resp.body.length).to.be.above(0);
+        expect(resp.body).to.be.an('array');
+        expect(resp.body.length).to.be.above(2); // Should at least have registered the three sample data-sets
+
+        ['flights', 'logs', 'ecommerce'].forEach((sampleData) => {
+          expect(resp.body.findIndex((c: { id: string }) => c.id === sampleData)).to.be.above(-1);
+        });
+      });
+    });
+
+    describe('get list of replacement integrations', () => {
+      it('should return list of custom integrations that can be used to replace EPR packages', async () => {
+        const resp = await supertest
+          .get(`/internal/customIntegrations/replacementCustomIntegrations`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
+
+        expect(resp.body).to.be.an('array');
+        expect(resp.body.length).to.be.above(2); // Should have at least a few beats registered
+      });
     });
   });
 }

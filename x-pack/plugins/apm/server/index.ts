@@ -7,11 +7,12 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  PluginInitializerContext,
   PluginConfigDescriptor,
+  PluginInitializerContext,
 } from 'src/core/server';
-import { APMPlugin } from './plugin';
+import { maxSuggestions } from '../../observability/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
+import { APMPlugin } from './plugin';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -39,8 +40,6 @@ const configSchema = schema.object({
   ),
   telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   metricsInterval: schema.number({ defaultValue: 30 }),
-  maxServiceEnvironments: schema.number({ defaultValue: 100 }),
-  maxServiceSelection: schema.number({ defaultValue: 50 }),
   profilingEnabled: schema.boolean({ defaultValue: false }),
   agent: schema.object({
     migrations: schema.object({
@@ -84,6 +83,14 @@ export const config: PluginConfigDescriptor<APMXPackConfig> = {
     deprecateFromRoot('apm_oss.enabled', '8.0.0'),
     unusedFromRoot('apm_oss.fleetMode'),
     unusedFromRoot('apm_oss.indexPattern'),
+    renameFromRoot(
+      'xpack.apm.maxServiceEnvironments',
+      `uiSettings.overrides[${maxSuggestions}]`
+    ),
+    renameFromRoot(
+      'xpack.apm.maxServiceSelections',
+      `uiSettings.overrides[${maxSuggestions}]`
+    ),
   ],
   exposeToBrowser: {
     serviceMapEnabled: true,
@@ -126,8 +133,6 @@ export function mergeConfigs(apmConfig: APMXPackConfig) {
     'xpack.apm.serviceMapMaxTracesPerRequest':
       apmConfig.serviceMapMaxTracesPerRequest,
     'xpack.apm.ui.enabled': apmConfig.ui.enabled,
-    'xpack.apm.maxServiceEnvironments': apmConfig.maxServiceEnvironments,
-    'xpack.apm.maxServiceSelection': apmConfig.maxServiceSelection,
     'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
     'xpack.apm.ui.transactionGroupBucketSize':
       apmConfig.ui.transactionGroupBucketSize,
