@@ -13,7 +13,7 @@ import { TextValueDisplay } from './text_value_display';
 import { EffectScope } from './effect_scope';
 import { CardActionsFlexItem } from './card_actions_flex_item';
 import { ArtifactInfo } from '../types';
-import { ArtifactEntryCollapsableCardProps } from '../artifact_entry_collapsable_card';
+import { ArtifactEntryCollapsibleCardProps } from '../artifact_entry_collapsible_card';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useCollapsedCssClassNames } from '../hooks/use_collapsed_css_class_names';
 import { usePolicyNavLinks } from '../hooks/use_policy_nav_links';
@@ -22,7 +22,7 @@ import { getEmptyValue } from '../../../../common/components/empty_value';
 export interface CardCompressedHeaderProps
   extends Pick<CommonProps, 'data-test-subj'>,
     Pick<
-      ArtifactEntryCollapsableCardProps,
+      ArtifactEntryCollapsibleCardProps,
       'onExpandCollapse' | 'expanded' | 'actions' | 'policies'
     > {
   artifact: ArtifactInfo;

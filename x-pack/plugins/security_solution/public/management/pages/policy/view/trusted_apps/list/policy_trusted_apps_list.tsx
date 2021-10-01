@@ -33,7 +33,7 @@ import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/type
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../../../common/constants';
 import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
-import { ArtifactEntryCollapsableCardProps } from '../../../../../components/artifact_entry_card';
+import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
 
 export const PolicyTrustedAppsList = memo(() => {
   const history = useHistory();
@@ -86,11 +86,11 @@ export const PolicyTrustedAppsList = memo(() => {
 
     for (const trustedApp of trustedAppItems) {
       const viewUrlPath = getTrustedAppsListPath({ id: trustedApp.id, show: 'edit' });
-      const assignedPoliciesMenuItems: ArtifactEntryCollapsableCardProps['policies'] =
+      const assignedPoliciesMenuItems: ArtifactEntryCollapsibleCardProps['policies'] =
         trustedApp.effectScope.type === 'global'
           ? undefined
           : trustedApp.effectScope.policies.reduce<
-              Required<ArtifactEntryCollapsableCardProps>['policies']
+              Required<ArtifactEntryCollapsibleCardProps>['policies']
             >((byIdPolicies, trustedAppAssignedPolicyId) => {
               if (!allPoliciesById[trustedAppAssignedPolicyId]) {
                 byIdPolicies[trustedAppAssignedPolicyId] = { children: trustedAppAssignedPolicyId };

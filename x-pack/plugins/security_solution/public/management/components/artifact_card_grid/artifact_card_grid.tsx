@@ -8,8 +8,8 @@
 import React, { ComponentType, memo, useCallback, useMemo } from 'react';
 import {
   AnyArtifact,
-  ArtifactEntryCollapsableCard,
-  ArtifactEntryCollapsableCardProps,
+  ArtifactEntryCollapsibleCard,
+  ArtifactEntryCollapsibleCardProps,
 } from '../artifact_entry_card';
 import { PaginatedContent as _PaginatedContent, PaginatedContentProps } from '../paginated_content';
 import { GridHeader } from './components/grid_header';
@@ -20,7 +20,7 @@ const PaginatedContent: ArtifactsPaginatedComponent = _PaginatedContent;
 
 type ArtifactsPaginatedContentProps = PaginatedContentProps<
   AnyArtifact,
-  typeof ArtifactEntryCollapsableCard
+  typeof ArtifactEntryCollapsibleCard
 >;
 
 type ArtifactsPaginatedComponent = ComponentType<ArtifactsPaginatedContentProps>;
@@ -31,7 +31,7 @@ interface CardExpandCollapseState {
 }
 
 export type ArtifactCardGridCardComponentProps = Omit<
-  ArtifactEntryCollapsableCardProps,
+  ArtifactEntryCollapsibleCardProps,
   'onExpandCollapse' | 'item'
 >;
 export type ArtifactCardGridProps = Omit<
@@ -47,7 +47,7 @@ export type ArtifactCardGridProps = Omit<
   onExpandCollapse: (state: CardExpandCollapseState) => void;
 
   /**
-   * Callback to provide additional props for the `ArtifactEntryCollapsableCard`
+   * Callback to provide additional props for the `ArtifactEntryCollapsibleCard`
    */
   cardComponentProps?: (item: MaybeImmutable<AnyArtifact>) => ArtifactCardGridCardComponentProps;
 };
@@ -101,7 +101,7 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
     );
 
     // Full list of card props that includes the actual artifact and the callbacks
-    type FullCardProps = Map<AnyArtifact, ArtifactEntryCollapsableCardProps>;
+    type FullCardProps = Map<AnyArtifact, ArtifactEntryCollapsibleCardProps>;
     const fullCardProps = useMemo<FullCardProps>(() => {
       const newFullCardProps: FullCardProps = new Map();
 
@@ -118,7 +118,7 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
     }, [callerDefinedCardProps, getTestId, handleCardExpandCollapse]);
 
     const handleItemComponentProps = useCallback(
-      (item: AnyArtifact): ArtifactEntryCollapsableCardProps => {
+      (item: AnyArtifact): ArtifactEntryCollapsibleCardProps => {
         return fullCardProps.get(item)!;
       },
       [fullCardProps]
@@ -132,7 +132,7 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
           {...paginatedContentProps}
           data-test-subj={dataTestSubj}
           items={items}
-          ItemComponent={ArtifactEntryCollapsableCard}
+          ItemComponent={ArtifactEntryCollapsibleCard}
           itemComponentProps={handleItemComponentProps}
           onChange={onPageChange}
         />

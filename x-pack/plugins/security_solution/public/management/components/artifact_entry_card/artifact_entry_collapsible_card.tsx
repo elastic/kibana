@@ -15,12 +15,12 @@ import { CardSectionPanel } from './components/card_section_panel';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 import { CardCompressedHeader } from './components/card_compressed_header';
 
-export interface ArtifactEntryCollapsableCardProps extends ArtifactEntryCardProps {
+export interface ArtifactEntryCollapsibleCardProps extends ArtifactEntryCardProps {
   onExpandCollapse: () => void;
   expanded?: boolean;
 }
 
-export const ArtifactEntryCollapsableCard = memo<ArtifactEntryCollapsableCardProps>(
+export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardProps>(
   ({
     item,
     onExpandCollapse,
@@ -62,4 +62,4 @@ export const ArtifactEntryCollapsableCard = memo<ArtifactEntryCollapsableCardPro
     );
   }
 );
-ArtifactEntryCollapsableCard.displayName = 'ArtifactEntryCollapsableCard';
+ArtifactEntryCollapsibleCard.displayName = 'ArtifactEntryCollapsibleCard';
