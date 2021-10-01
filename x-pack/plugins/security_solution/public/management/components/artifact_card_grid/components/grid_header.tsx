@@ -13,6 +13,7 @@ import { CardCompressedHeaderLayout, CardSectionPanel } from '../../artifact_ent
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const GridHeaderContainer = styled(CardSectionPanel)`
+  padding-top: 0;
   padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
@@ -31,6 +32,7 @@ export const GridHeader = memo<GridHeaderProps>(({ 'data-test-subj': dataTestSub
         expanded={false}
         expandToggle={expandToggleElement}
         data-test-subj={getTestId('layout')}
+        flushTop={true}
         name={
           <EuiText size="xs" data-test-subj={getTestId('name')}>
             <strong>

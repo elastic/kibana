@@ -89,6 +89,14 @@ const ButtonIconPlaceHolder = styled.div`
   height: ${({ theme }) => theme.eui.euiIconSizes.large};
 `;
 
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  &.flushTop,
+  .flushTop {
+    padding-top: 0;
+    margin-top: 0;
+  }
+`;
+
 /**
  * Layout used for the compressed card header. Used also in the ArtifactGrid for creating the grid header row
  */
@@ -100,6 +108,11 @@ export interface CardCompressedHeaderLayoutProps extends Pick<CommonProps, 'data
   effectScope: ReactNode;
   /** If no menu is shown, but you want the space for it be preserved, set prop to `false` */
   actionMenu?: ReactNode | false;
+  /**
+   * When set to `true`, all padding and margin values will be set to zero for the top of the header
+   * layout, so that all content is flushed to the top
+   */
+  flushTop?: boolean;
 }
 
 export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
@@ -111,38 +124,59 @@ export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
     actionMenu,
     description,
     'data-test-subj': dataTestSubj,
+    flushTop,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const cssClassNames = useCollapsedCssClassNames(expanded);
+    const flushTopCssClassname = flushTop ? ' flushTop' : '';
 
     return (
-      <EuiFlexGroup responsive={false} alignItems="center" data-test-subj={dataTestSubj}>
-        <EuiFlexItem grow={false}>{expandToggle}</EuiFlexItem>
-        <EuiFlexItem className={cssClassNames}>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={2} className={cssClassNames} data-test-subj={getTestId('title')}>
+      <StyledEuiFlexGroup
+        responsive={false}
+        alignItems="center"
+        data-test-subj={dataTestSubj}
+        className={flushTopCssClassname}
+      >
+        <EuiFlexItem grow={false} className={flushTopCssClassname}>
+          {expandToggle}
+        </EuiFlexItem>
+        <EuiFlexItem className={cssClassNames + flushTopCssClassname}>
+          <EuiFlexGroup alignItems="center" className={flushTopCssClassname}>
+            <EuiFlexItem
+              grow={2}
+              className={cssClassNames + flushTopCssClassname}
+              data-test-subj={getTestId('title')}
+            >
               {name}
             </EuiFlexItem>
             <EuiFlexItem
               grow={3}
-              className={cssClassNames}
+              className={cssClassNames + flushTopCssClassname}
               data-test-subj={getTestId('description')}
             >
               {description}
             </EuiFlexItem>
-            <EuiFlexItem grow={1} data-test-subj={getTestId('effectScope')}>
+            <EuiFlexItem
+              grow={1}
+              data-test-subj={getTestId('effectScope')}
+              className={flushTopCssClassname}
+            >
               {effectScope}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         {actionMenu === false ? (
-          <EuiFlexItem grow={false} data-test-subj={getTestId('cardActionsPlaceholder')}>
+          <EuiFlexItem
+            grow={false}
+            data-test-subj={getTestId('cardActionsPlaceholder')}
+            className={flushTopCssClassname}
+          >
             <ButtonIconPlaceHolder />
           </EuiFlexItem>
         ) : (
           actionMenu
         )}
-      </EuiFlexGroup>
+      </StyledEuiFlexGroup>
     );
   }
 );

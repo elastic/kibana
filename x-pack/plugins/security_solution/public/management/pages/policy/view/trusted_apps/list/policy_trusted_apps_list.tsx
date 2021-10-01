@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiLoadingSpinner, Pagination } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiText, Pagination } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
@@ -80,6 +80,14 @@ export const PolicyTrustedAppsList = memo(() => {
     },
     []
   );
+
+  const totalItemsCountLabel = useMemo<string>(() => {
+    return i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.list.totalCount', {
+      defaultMessage:
+        'Showing {totalItemsCount, plural, one {# trusted application} other {# trusted applications}}',
+      values: { totalItemsCount: pagination.totalItemCount },
+    });
+  }, [pagination.totalItemCount]);
 
   const cardProps = useMemo<Map<Immutable<TrustedApp>, ArtifactCardGridCardComponentProps>>(() => {
     const newCardProps = new Map();
@@ -163,6 +171,12 @@ export const PolicyTrustedAppsList = memo(() => {
 
   return (
     <>
+      <EuiText color="subdued" size="xs" data-test-subj="policyDetailsTrustedAppsCount">
+        {totalItemsCountLabel}
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
       <ArtifactCardGrid
         items={trustedAppItems}
         onPageChange={handlePageChange}
