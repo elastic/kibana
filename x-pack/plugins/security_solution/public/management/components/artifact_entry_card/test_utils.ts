@@ -6,8 +6,10 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { TrustedApp } from '../../../../common/endpoint/types';
 
 const getCommonItemDataOverrides = () => {
   return {
@@ -17,10 +19,10 @@ const getCommonItemDataOverrides = () => {
   };
 };
 
-export const getTrustedAppProviderMock = () =>
+export const getTrustedAppProviderMock = (): TrustedApp =>
   new TrustedAppGenerator('seed').generate(getCommonItemDataOverrides());
 
-export const getExceptionProviderMock = () => {
+export const getExceptionProviderMock = (): ExceptionListItemSchema => {
   // cloneDeep needed because exception mock generator uses state across instances
   return cloneDeep(
     getExceptionListItemSchemaMock({
