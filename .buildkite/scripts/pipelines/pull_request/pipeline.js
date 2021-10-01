@@ -75,7 +75,6 @@ const uploadPipeline = (pipelineContent) => {
     //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
     // }
 
-    // TODO add dynamic steps here
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     uploadPipeline(pipeline.join('\n'));
