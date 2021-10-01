@@ -38,7 +38,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
-    parallelism: 12
+    parallelism: 11
     agents:
       queue: n2-2
     depends_on: build
