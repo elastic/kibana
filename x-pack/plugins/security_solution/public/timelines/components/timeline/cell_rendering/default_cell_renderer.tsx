@@ -51,8 +51,10 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           browserFields,
           className,
           columnName: header.id,
+          ecsData,
           eventId,
           field: header,
+          isDetails,
           isDraggable,
           linkValues,
           timelineId,
@@ -62,8 +64,6 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
             fieldName: header.id,
           }),
           rowRenderers,
-          ecsData,
-          isDetails,
         })}
       </StyledContent>
       {isDetails && browserFields && hasCellActions(header.id) && (

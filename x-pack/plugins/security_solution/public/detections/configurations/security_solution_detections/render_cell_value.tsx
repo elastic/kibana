@@ -22,9 +22,10 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     columnId,
     data,
     eventId,
-    isDraggable,
+    globalFilters,
     header,
     isDetails,
+    isDraggable,
     isExpandable,
     isExpanded,
     linkValues,
@@ -40,6 +41,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
       columnId={columnId}
       data={data}
       eventId={eventId}
+      globalFilters={globalFilters}
       isDraggable={isDraggable}
       header={header}
       isDetails={isDetails}

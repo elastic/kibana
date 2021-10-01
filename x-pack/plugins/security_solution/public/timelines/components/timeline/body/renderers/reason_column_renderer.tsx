@@ -22,42 +22,41 @@ export const reasonColumnRenderer: ColumnRenderer = {
   isInstance: isEqual(REASON_FIELD_NAME),
 
   renderColumn: ({
+    browserFields,
     columnName,
+    ecsData,
     eventId,
     field,
+    isDetails,
     isDraggable = true,
+    linkValues,
+    rowRenderers = [],
     timelineId,
     truncate,
     values,
-    linkValues,
-    ecsData,
-    rowRenderers = [],
-    browserFields,
-    isDetails,
   }: {
+    browserFields?: BrowserFields;
     columnName: string;
+    ecsData?: Ecs;
     eventId: string;
     field: ColumnHeaderOptions;
+    isDetails: boolean;
     isDraggable?: boolean;
+    linkValues?: string[] | null | undefined;
+    rowRenderers?: RowRenderer[];
     timelineId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
-    linkValues?: string[] | null | undefined;
-
-    ecsData?: Ecs;
-    rowRenderers?: RowRenderer[];
-    browserFields?: BrowserFields;
-    isDetails: boolean;
   }) => {
     if (isDetails && values && ecsData && rowRenderers && browserFields) {
       return values.map((value, i) => (
         <ReasonCell
+          browserFields={browserFields}
+          ecsData={ecsData}
           key={`reason-column-renderer-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+          rowRenderers={rowRenderers}
           timelineId={timelineId}
           value={value}
-          ecsData={ecsData}
-          rowRenderers={rowRenderers}
-          browserFields={browserFields}
         />
       ));
     } else {
@@ -65,12 +64,12 @@ export const reasonColumnRenderer: ColumnRenderer = {
         columnName,
         eventId,
         field,
+        isDetails,
         isDraggable,
+        linkValues,
         timelineId,
         truncate,
         values,
-        linkValues,
-        isDetails,
       });
     }
   },

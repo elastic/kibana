@@ -8,7 +8,7 @@
 import { ReactNode } from 'react';
 
 import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/common';
+import { IFieldSubType } from '../../../../../../../src/plugins/data/common';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { TimelineNonEcsData } from '../../../search_strategy/timeline';
 import { Ecs } from '../../../ecs';
@@ -47,7 +47,6 @@ export type TGridCellAction = ({
   browserFields,
   data,
   ecsData,
-  globalFilters,
   header,
   pageSize,
   timelineId,
@@ -56,7 +55,6 @@ export type TGridCellAction = ({
   /** each row of data is represented as one TimelineNonEcsData[] */
   data: TimelineNonEcsData[][];
   ecsData: Ecs[];
-  globalFilters?: Filter[];
   header?: ColumnHeaderOptions;
   pageSize: number;
   timelineId: string;

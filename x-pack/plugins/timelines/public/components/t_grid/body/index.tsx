@@ -650,7 +650,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               browserFields,
               data: data.map((row) => row.data),
               ecsData: data.map((row) => row.ecs),
-              globalFilters: filters,
               header: columnHeaders.find((h) => h.id === header.id),
               pageSize,
               timelineId: id,
@@ -663,7 +662,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               : undefined,
           };
         }),
-      [columnHeaders, defaultCellActions, browserFields, data, filters, pageSize, id]
+      [columnHeaders, defaultCellActions, browserFields, data, pageSize, id]
     );
 
     const renderTGridCellValue = useMemo(() => {
@@ -700,6 +699,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           data: rowData,
           ecsData: ecs,
           eventId,
+          globalFilters: filters,
           header,
           isDetails,
           isDraggable: false,
@@ -714,14 +714,15 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       };
       return Cell;
     }, [
-      pageSize,
-      data,
-      columnHeaders,
-      renderCellValue,
       browserFields,
+      columnHeaders,
+      data,
+      filters,
+      id,
+      pageSize,
+      renderCellValue,
       rowRenderers,
       tabType,
-      id,
       theme,
     ]);
 

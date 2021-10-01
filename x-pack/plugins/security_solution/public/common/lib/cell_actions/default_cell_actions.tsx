@@ -8,7 +8,6 @@
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import type {
   BrowserFields,
@@ -100,7 +99,6 @@ const cellActionLink = [
       browserFields,
       data,
       ecsData,
-      globalFilters,
       header,
       timelineId,
       pageSize,
@@ -108,7 +106,6 @@ const cellActionLink = [
       browserFields: BrowserFields;
       data: TimelineNonEcsData[][];
       ecsData: Ecs[];
-      globalFilters?: Filter[];
       header?: ColumnHeaderOptions;
       timelineId: string;
       pageSize: number;
