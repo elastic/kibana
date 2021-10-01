@@ -17,10 +17,11 @@ import {
   AlertFlyoutCloseReason,
   IErrorObject,
   AlertAddProps,
+  AlertTypeIndex,
 } from '../../../types';
 import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
-import { createAlert } from '../../lib/alert_api';
+import { createAlert, loadAlertTypes } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmAlertSave } from './confirm_alert_save';
 import { ConfirmAlertClose } from './confirm_alert_close';
@@ -40,10 +41,11 @@ const AlertAdd = ({
   canChangeTrigger,
   alertTypeId,
   initialValues,
+
   reloadAlerts,
   onSave,
   metadata,
-  alertTypesIndex,
+  ...props
 }: AlertAddProps) => {
   const onSaveHandler = onSave ?? reloadAlerts;
 
@@ -69,6 +71,9 @@ const AlertAdd = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
+  const [alertTypeIndex, setAlertTypeIndex] = useState<AlertTypeIndex | undefined>(
+    props.alertTypeIndex
+  );
 
   const setAlert = (value: InitialAlert) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
@@ -91,6 +96,19 @@ const AlertAdd = ({
       setAlertProperty('alertTypeId', alertTypeId);
     }
   }, [alertTypeId]);
+
+  useEffect(() => {
+    if (!props.alertTypeIndex) {
+      (async () => {
+        const alertTypes = await loadAlertTypes({ http });
+        const index: AlertTypeIndex = new Map();
+        for (const alertType of alertTypes) {
+          index.set(alertType.id, alertType);
+        }
+        setAlertTypeIndex(index);
+      })();
+    }
+  }, [props.alertTypeIndex, http]);
 
   useEffect(() => {
     if (isEmpty(alert.params) && !isEmpty(initialAlertParams)) {
@@ -118,13 +136,13 @@ const AlertAdd = ({
   }, [alert, actionTypeRegistry]);
 
   useEffect(() => {
-    if (alert.alertTypeId) {
-      const type = alertTypesIndex.get(alert.alertTypeId);
+    if (alert.alertTypeId && alertTypeIndex) {
+      const type = alertTypeIndex.get(alert.alertTypeId);
       if (type?.defaultInterval) {
         setAlertProperty('schedule', { interval: type.defaultInterval });
       }
     }
-  }, [alert.alertTypeId, alertTypesIndex]);
+  }, [alert.alertTypeId, alertTypeIndex]);
 
   const checkForChangesAndCloseFlyout = () => {
     if (
@@ -153,7 +171,7 @@ const AlertAdd = ({
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
     alertType,
-    alert.alertTypeId ? alertTypesIndex.get(alert.alertTypeId) : undefined
+    alert.alertTypeId ? alertTypeIndex?.get(alert.alertTypeId) : undefined
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this alert

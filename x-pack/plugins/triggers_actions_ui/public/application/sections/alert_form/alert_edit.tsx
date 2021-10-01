@@ -24,10 +24,16 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Alert, AlertFlyoutCloseReason, AlertEditProps, IErrorObject } from '../../../types';
+import {
+  Alert,
+  AlertFlyoutCloseReason,
+  AlertEditProps,
+  IErrorObject,
+  AlertType,
+} from '../../../types';
 import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
-import { updateAlert } from '../../lib/alert_api';
+import { updateAlert, loadAlertTypes } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
@@ -43,7 +49,7 @@ export const AlertEdit = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
-  alertType: serverAlertType,
+  ...props
 }: AlertEditProps) => {
   const onSaveHandler = onSave ?? reloadAlerts;
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
@@ -56,6 +62,9 @@ export const AlertEdit = ({
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
   const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [serverAlertType, setServerAlertType] = useState<AlertType<string, string> | undefined>(
+    props.alertType
+  );
 
   const {
     http,
@@ -75,6 +84,19 @@ export const AlertEdit = ({
       setIsLoading(false);
     })();
   }, [alert, actionTypeRegistry]);
+
+  useEffect(() => {
+    if (!props.alertType && !serverAlertType) {
+      (async () => {
+        const serverAlertTypes = await loadAlertTypes({ http });
+        for (const _serverAlertType of serverAlertTypes) {
+          if (alertType.id === _serverAlertType.id) {
+            setServerAlertType(_serverAlertType);
+          }
+        }
+      })();
+    }
+  }, [props.alertType, alertType.id, serverAlertType, http]);
 
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,

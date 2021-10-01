@@ -287,7 +287,7 @@ export interface AlertEditProps<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
-  alertType: AlertType<string, string>;
+  alertType?: AlertType<string, string>;
 }
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
@@ -302,5 +302,5 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
-  alertTypesIndex: AlertTypeIndex;
+  alertTypeIndex?: AlertTypeIndex;
 }

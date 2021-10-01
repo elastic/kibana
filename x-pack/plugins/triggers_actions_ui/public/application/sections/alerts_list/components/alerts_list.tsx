@@ -33,7 +33,14 @@ import {
 import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
-import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
+import {
+  ActionType,
+  Alert,
+  AlertTableItem,
+  AlertType,
+  AlertTypeIndex,
+  Pagination,
+} from '../../../../types';
 import { AlertAdd, AlertEdit } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
@@ -895,7 +902,7 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
-          alertTypesIndex={alertTypesState.data}
+          alertTypeIndex={alertTypesState.data}
           onSave={loadAlertsData}
         />
       )}
@@ -907,7 +914,9 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
-          alertTypesIndex={alertTypesState.data}
+          alertType={
+            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as AlertType<string, string>
+          }
           onSave={loadAlertsData}
         />
       )}
@@ -946,17 +955,17 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
 
 function convertAlertsToTableItems(
   alerts: Alert[],
-  alertTypesIndex: AlertTypeIndex,
+  alertTypeIndex: AlertTypeIndex,
   canExecuteActions: boolean
 ) {
   return alerts.map((alert) => ({
     ...alert,
     actionsCount: alert.actions.length,
     tagsText: alert.tags.join(', '),
-    alertType: alertTypesIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
+    alertType: alertTypeIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
     isEditable:
-      hasAllPrivilege(alert, alertTypesIndex.get(alert.alertTypeId)) &&
+      hasAllPrivilege(alert, alertTypeIndex.get(alert.alertTypeId)) &&
       (canExecuteActions || (!canExecuteActions && !alert.actions.length)),
-    enabledInLicense: !!alertTypesIndex.get(alert.alertTypeId)?.enabledInLicense,
+    enabledInLicense: !!alertTypeIndex.get(alert.alertTypeId)?.enabledInLicense,
   }));
 }

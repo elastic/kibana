@@ -171,7 +171,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               }}
               actionTypeRegistry={actionTypeRegistry}
               ruleTypeRegistry={ruleTypeRegistry}
-              alertType={alertType}
+              // alertType={alertType}
               onSave={setAlert}
             />
           )}
