@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import SimpleGit from 'simple-git/promise';
-
-import { REPO_ROOT } from '@kbn/utils';
 import { run, combineErrors, createFlagError, createFailError } from '@kbn/dev-utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
@@ -51,11 +48,6 @@ run(
           await Linter.lintFiles(log, filesToLint, {
             fix: flags.fix,
           });
-
-          if (flags.fix) {
-            const simpleGit = new SimpleGit(REPO_ROOT);
-            await simpleGit.add(filesToLint);
-          }
         } catch (error) {
           errors.push(error);
         }

@@ -7,18 +7,12 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.12/ecs-service.html
+ * https://www.elastic.co/guide/en/ecs/1.12/ecs-data_stream.html
  *
  * @internal
  */
-export interface EcsService {
-  address?: string;
-  environment?: string;
-  ephemeral_id?: string;
-  id?: string;
-  name?: string;
-  node?: { name: string };
-  state?: string;
-  type?: string;
-  version?: string;
+export interface EcsDataStream {
+  dataset?: string;
+  namespace?: string;
+  type?: 'logs' | 'metrics';
 }

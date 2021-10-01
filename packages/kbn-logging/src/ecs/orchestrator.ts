@@ -7,18 +7,26 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.12/ecs-service.html
+ * https://www.elastic.co/guide/en/ecs/1.12/ecs-orchestrator.html
  *
  * @internal
  */
-export interface EcsService {
-  address?: string;
-  environment?: string;
-  ephemeral_id?: string;
-  id?: string;
-  name?: string;
-  node?: { name: string };
-  state?: string;
+export interface EcsOrchestrator {
+  api_version?: string;
+  cluster?: Cluster;
+  namespace?: string;
+  organization?: string;
+  resource?: Resource;
   type?: string;
+}
+
+interface Cluster {
+  name?: string;
+  url?: string;
   version?: string;
+}
+
+interface Resource {
+  name?: string;
+  type?: string;
 }
