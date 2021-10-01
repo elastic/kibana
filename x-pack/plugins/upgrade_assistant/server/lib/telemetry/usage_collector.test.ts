@@ -47,6 +47,26 @@ describe('Upgrade Assistant Usage Collector', () => {
     };
     dependencies = {
       usageCollection,
+      savedObjects: {
+        createInternalRepository: jest.fn().mockImplementation(() => {
+          return {
+            get: () => {
+              return {
+                attributes: {
+                  'ui_open.overview': 10,
+                  'ui_open.elasticsearch': 20,
+                  'ui_open.kibana': 15,
+                  'ui_reindex.close': 1,
+                  'ui_reindex.open': 4,
+                  'ui_reindex.start': 2,
+                  'ui_reindex.stop': 1,
+                  'ui_reindex.not_defined': 1,
+                },
+              };
+            },
+          };
+        }),
+      },
       elasticsearch: {
         client: clusterClient,
       },
@@ -71,6 +91,17 @@ describe('Upgrade Assistant Usage Collector', () => {
         callClusterStub
       );
       expect(upgradeAssistantStats).toEqual({
+        ui_open: {
+          overview: 10,
+          elasticsearch: 20,
+          kibana: 15,
+        },
+        ui_reindex: {
+          close: 1,
+          open: 4,
+          start: 2,
+          stop: 1,
+        },
         features: {
           deprecation_logging: {
             enabled: true,

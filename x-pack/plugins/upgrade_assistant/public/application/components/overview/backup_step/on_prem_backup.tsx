@@ -8,11 +8,9 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { useAppContext } from '../../../app_context';
-import { uiMetricService, UIM_BACKUP_DATA_ON_PREM_CLICK } from '../../../lib/ui_metric';
 
 const SnapshotRestoreAppLink: React.FunctionComponent = () => {
   const {
@@ -24,14 +22,7 @@ const SnapshotRestoreAppLink: React.FunctionComponent = () => {
     ?.useUrl({ page: 'snapshots' });
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiButton
-      href={snapshotRestoreUrl}
-      onClick={() => {
-        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_BACKUP_DATA_ON_PREM_CLICK);
-      }}
-      data-test-subj="snapshotRestoreLink"
-    >
+    <EuiButton href={snapshotRestoreUrl} data-test-subj="snapshotRestoreLink">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.snapshotRestoreLink"
         defaultMessage="Create snapshot"
